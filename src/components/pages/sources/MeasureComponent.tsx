@@ -10,6 +10,9 @@ import { DataSourceMeasure, DataSource } from "../../../measure/source/DataSourc
 import Colors from "../../../style/Colors";
 import { PropsWithNavigation } from "../../../PropsWithNavigation";
 import { ServiceSelectionScreenParameters } from "./service-wizard/ServiceSelectionScreen";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { useActionSheet, connectActionSheet } from "@expo/react-native-action-sheet";
 
 interface Prop extends PropsWithNavigation {
     measureSpec: MeasureSpec
@@ -17,29 +20,52 @@ interface Prop extends PropsWithNavigation {
 
 interface State {
     availableMeasures: Array<DataSourceMeasure>
-    activatedMeasures: Array<DataSourceMeasure>
+    connectedMeasures: Array<DataSourceMeasure>
+    mainMeasureIndex: number
 }
 
-export class MeasureComponent extends React.Component<Prop, State>{
+class MeasureComponent extends React.Component<Prop, State>{
+
+    showActionSheetWithOptions
 
     constructor(props) {
         super(props)
 
         this.state = {
             availableMeasures: null,
-            activatedMeasures: null,
+            connectedMeasures: null,
+            mainMeasureIndex: 0
         }
+
+        this.refreshInformation.bind(this)
     }
 
-    componentDidMount() {
+    async componentDidMount() {
         const serviceMeasures = sourceManager.installedServices
             .map(service => service.getMeasureOfSpec(this.props.measureSpec))
             .filter(s => s != null)
 
-        this.setState({
+        const newState = {
             ...this.state,
             availableMeasures: serviceMeasures
-        })
+        }
+
+        await this.refreshInformation(serviceMeasures, newState)
+    }
+
+    async refreshInformation(serviceMeasures: Array<DataSourceMeasure>, newState: State = {...this.state}){
+        if (serviceMeasures.length > 0) {
+            const selectionInfo = await sourceManager.getSourceSelectionInfo(this.props.measureSpec)
+            if (selectionInfo) {
+                newState.connectedMeasures = selectionInfo.connectedMeasureCodes.map(code => sourceManager.findMeasureByCode(code))
+                newState.mainMeasureIndex = selectionInfo.mainIndex
+            }else{
+                newState.connectedMeasures = null
+                newState.mainMeasureIndex = -1
+            }
+        }
+
+        this.setState(newState)
     }
 
     render = () => {
@@ -59,10 +85,15 @@ export class MeasureComponent extends React.Component<Prop, State>{
                 }}>{this.props.measureSpec.description}</Text>
                 {
                     (this.state.availableMeasures != null && this.state.availableMeasures.length > 0) ? (
-                        (this.state.activatedMeasures != null && this.state.activatedMeasures.length > 0) ? (
+                        (this.state.connectedMeasures != null && this.state.connectedMeasures.length > 0) ? (
                             <View style={{ flexDirection: "row" }}>
                                 {
-                                    this.state.activatedMeasures.map(measure => <SourceBadge key={measure.spec.nameKey} measure={measure} />)
+                                    this.state.connectedMeasures.map(measure => <SourceBadge
+                                        key={measure.spec.nameKey}
+                                        measure={measure}
+                                        refreshFunc = {()=>this.refreshInformation(this.state.availableMeasures)}
+                                        showActionSheetWithOptions={(this.props as any).showActionSheetWithOptions}
+                                        isMain={this.state.connectedMeasures.indexOf(measure) === this.state.mainMeasureIndex} />)
                                 }
                             </View>
                         ) : (
@@ -75,11 +106,14 @@ export class MeasureComponent extends React.Component<Prop, State>{
                                         marginLeft: 3,
                                         paddingBottom: 3
                                     }}
-                                    icon={{ name: 'pluscircle', type: 'antdesign', color: Colors.link, size: 20}}
+                                    icon={{ name: 'pluscircle', type: 'antdesign', color: Colors.link, size: 20 }}
                                     title="Connect My Service"
-                                    onPress={()=>{
+                                    onPress={() => {
                                         this.props.navigation.navigate('ServiceWizardModal', {
-                                            measureSpec: this.props.measureSpec
+                                            measureSpec: this.props.measureSpec,
+                                            onServiceSelected: async (selectedSourceMeasure: DataSourceMeasure) => {
+                                                await this.refreshInformation(this.state.availableMeasures)
+                                            }
                                         } as ServiceSelectionScreenParameters)
                                     }
                                     } />
@@ -93,9 +127,51 @@ export class MeasureComponent extends React.Component<Prop, State>{
     }
 }
 
+const connectedMeasureComponent = connectActionSheet(MeasureComponent)
+export { connectedMeasureComponent as MeasureComponent }
 
-const SourceBadge = (props) => {
+interface SourceBadgeProps {
+    measure: DataSourceMeasure,
+    isMain: boolean,
+    showActionSheetWithOptions,
+    refreshFunc: Function
+}
+
+const SourceBadge = (props: SourceBadgeProps) => {
     return (
-        <Badge value={props.measure.source.name} />
+        <TouchableOpacity activeOpacity={0.7} onPress={() => {
+            const options = ['Set as Default', 'Exclude this service', 'Cancel'];
+            let setAsDefaultIndex = 0;
+            let destructiveButtonIndex = 1;
+            let cancelButtonIndex = 2;
+            
+            if(props.isMain===true){
+                setAsDefaultIndex = -1;
+                options.splice(0,1)
+                destructiveButtonIndex = 0;
+                cancelButtonIndex = 1;
+            }
+            
+            props.showActionSheetWithOptions(
+                {
+                  options,
+                  cancelButtonIndex,
+                  destructiveButtonIndex,
+                },
+                async (buttonIndex) => {
+                    if(buttonIndex === destructiveButtonIndex){
+                        //remove this measure service
+                        await sourceManager.deselectSourceMeasure(props.measure)
+                        await props.refreshFunc()
+                    }
+                },
+              );
+        }}>
+            <View style={{ borderRadius: 6, flexDirection: "row", alignItems: "center", backgroundColor: Colors.accent, padding: 4, paddingLeft: 8, paddingRight: props.isMain === true ? 4 : 8 }}>
+                <Text style={{ fontSize: 16, color: 'white', fontWeight: 'bold' }}>{props.measure.source.name}</Text>
+                {
+                    props.isMain === true ? (<Icon name='star' color="yellow" size={16} style={{ paddingLeft: 4 }} />) : (<></>)
+                }
+            </View></TouchableOpacity>
     )
 }

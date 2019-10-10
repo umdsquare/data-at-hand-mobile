@@ -1,4 +1,5 @@
 import { MeasureSpec, MeasureType } from "../measure/MeasureSpec";
+import { DataSourceMeasure } from "../measure/source/DataSource";
 
 const MeasureSpecKey = {
     step: "step",

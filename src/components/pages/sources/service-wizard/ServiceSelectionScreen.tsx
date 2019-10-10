@@ -5,11 +5,9 @@ import { PropsWithNavigation } from "../../../../PropsWithNavigation";
 import { Sizes } from "../../../../style/Sizes";
 import { StyleTemplates } from "../../../../style/Styles";
 import { createStackNavigator } from "react-navigation-stack";
-import { Card } from "react-native-elements";
-import FastImage from 'react-native-fast-image';
-import { DataSource } from "../../../../measure/source/DataSource";
+import { DataSource, DataSourceMeasure } from "../../../../measure/source/DataSource";
 import { sourceManager } from "../../../../system/SourceManager";
-import { TouchableOpacity, TouchableHighlight } from "react-native-gesture-handler";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 interface Prop extends PropsWithNavigation {
 
@@ -21,6 +19,7 @@ interface State {
 
 export interface ServiceSelectionScreenParameters {
     measureSpec: MeasureSpec
+    onServiceSelected: (selectedServiceMeasure: DataSourceMeasure) => void
 }
 
 export class ServiceSelectionScreen extends React.Component<Prop, State>{
@@ -52,8 +51,30 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
                             .map(service => <ServiceElement
                                 key={service.name}
                                 source={service}
-                                onClick={() => {
-                                    
+                                onClick={async () => {
+                                    const serviceMeasure = service.getMeasureOfSpec(this.state.measureSpec)
+
+                                    if (serviceMeasure.dependencies.length > 0) {
+                                        let dependencyResult: boolean = await serviceMeasure.dependencies[0].tryResolve()
+                                        for (let i = 0; i < serviceMeasure.dependencies.length; i++) {
+                                            if (dependencyResult === true) {
+                                                dependencyResult = await serviceMeasure.dependencies[i].tryResolve()
+                                            } else {
+                                                break;
+                                            }
+                                        }
+                                        if (dependencyResult === true) {
+                                            await sourceManager.selectSourceMeasure(serviceMeasure, false)
+                                            this.props.navigation.dismiss()
+                                            this.props.navigation.state.params.onServiceSelected(serviceMeasure)
+                                        } else {
+
+                                        }
+                                    } else {
+                                        await sourceManager.selectSourceMeasure(serviceMeasure, false)
+                                        this.props.navigation.dismiss()
+                                        this.props.navigation.state.params.onServiceSelected(serviceMeasure)
+                                    }
                                 }} />)
                     }
                 </ScrollView>

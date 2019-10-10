@@ -1,6 +1,9 @@
 import {MeasureSpec} from '../MeasureSpec';
+import { SourceDependency } from './SourceDependency';
 
 export abstract class DataSource {
+  static readonly STORAGE_PREFIX = "@source_service:"
+
   abstract readonly name: string;
   abstract readonly description: string;
 
@@ -40,11 +43,15 @@ export abstract class DataSource {
 export abstract class DataSourceMeasure {
   abstract readonly spec: MeasureSpec;
 
+  get code(): string{ return this.source.name + ":" + this.spec.nameKey}
+
   protected castedSource<T extends DataSource>(): T {
     return this.source as T;
   }
 
   constructor(readonly source: DataSource) {}
+
+  abstract readonly dependencies: ReadonlyArray<SourceDependency>
 }
 
 export enum UnSupportedReason {

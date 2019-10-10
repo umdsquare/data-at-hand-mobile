@@ -9,6 +9,7 @@ import { MeasureComponent } from "./MeasureComponent";
 import { sourceManager } from "../../../system/SourceManager";
 import { NavigationScreenProp, NavigationState, NavigationParams } from "react-navigation";
 import { PropsWithNavigation } from "../../../PropsWithNavigation";
+import { useActionSheet, ActionSheetProvider } from '@expo/react-native-action-sheet'
 
 enum Mode {
     Measure = 0,
@@ -57,16 +58,10 @@ export class MeasureSettingsScreen extends React.Component<Prop, State>{
     }
 
     render() {
-
-        let content
-
-        if (this.state.isLoading === true) {
-            content = (
-                <View style={{ flex: 1, flexDirection: 'column' }}>
+        return (<ActionSheetProvider>{
+        this.state.isLoading === true? (<View style={{ flex: 1, flexDirection: 'column' }}>
                     <Text>Loading...</Text>
-                </View>)
-        } else {
-            content = (<FlatList style={{ flex: 1, alignSelf: 'stretch', backgroundColor: Colors.lightBackground }}
+                </View>):(<FlatList style={{ flex: 1, alignSelf: 'stretch', backgroundColor: Colors.lightBackground }}
             data={measureService.supportedMeasureSpecs}
             keyExtractor={(item, index) => item.nameKey}
             renderItem={
@@ -76,10 +71,7 @@ export class MeasureSettingsScreen extends React.Component<Prop, State>{
             }
         />)
         }
-
-        return (
-            content
-        );
+        </ActionSheetProvider>)
     }
 
     updateMode(modeIndex: Mode) {
