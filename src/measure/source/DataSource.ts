@@ -4,8 +4,10 @@ import { SourceDependency } from './SourceDependency';
 export abstract class DataSource {
   static readonly STORAGE_PREFIX = "@source_service:"
 
+  abstract readonly key: string;
   abstract readonly name: string;
   abstract readonly description: string;
+  abstract readonly thumbnail: any;
 
   private supportCheckResult: {
     supported: boolean;
@@ -43,7 +45,7 @@ export abstract class DataSource {
 export abstract class DataSourceMeasure {
   abstract readonly spec: MeasureSpec;
 
-  get code(): string{ return this.source.name + ":" + this.spec.nameKey}
+  get code(): string{ return this.source.key + ":" + this.spec.nameKey}
 
   protected castedSource<T extends DataSource>(): T {
     return this.source as T;

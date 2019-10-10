@@ -12,39 +12,52 @@ interface FitbitCredential {
 }
 
 const STORAGE_KEY_AUTH_STATE = DataSource.STORAGE_PREFIX + 'fitbit:state';
-const STORAGE_KEY_AUTH_CURRENT_SCOPES = DataSource.STORAGE_PREFIX + 'fitbit:scopes';
+const STORAGE_KEY_AUTH_CURRENT_SCOPES =
+  DataSource.STORAGE_PREFIX + 'fitbit:scopes';
 
-async function registerScopeAndGet(scope: string): Promise<Array<string>>{
-    const currentScopes = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_CURRENT_SCOPES)
-    if(currentScopes){
-        if(currentScopes.indexOf(scope) >= 0){
-            return currentScopes
-        }else{
-            currentScopes.push(scope)
-            await AsyncStorageHelper.set(STORAGE_KEY_AUTH_CURRENT_SCOPES, currentScopes)
-        return currentScopes
-        }
-    }else{
-        const newScopes = [scope]
-        await AsyncStorageHelper.set(STORAGE_KEY_AUTH_CURRENT_SCOPES, newScopes)
-        return newScopes
+async function registerScopeAndGet(scope: string): Promise<Array<string>> {
+  const currentScopes = await AsyncStorageHelper.getObject(
+    STORAGE_KEY_AUTH_CURRENT_SCOPES,
+  );
+  if (currentScopes) {
+    if (currentScopes.indexOf(scope) >= 0) {
+      return currentScopes;
+    } else {
+      currentScopes.push(scope);
+      await AsyncStorageHelper.set(
+        STORAGE_KEY_AUTH_CURRENT_SCOPES,
+        currentScopes,
+      );
+      return currentScopes;
     }
+  } else {
+    const newScopes = [scope];
+    await AsyncStorageHelper.set(STORAGE_KEY_AUTH_CURRENT_SCOPES, newScopes);
+    return newScopes;
+  }
 }
 
-async function revokeScopeAndGet(scope: string): Promise<{removed: boolean, result: Array<string>}>{
-    const currentScopes = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_CURRENT_SCOPES) as Array<string>
-    if(currentScopes){
-        const scopeIndex = currentScopes.indexOf(scope)
-        if(scopeIndex >= 0){
-            currentScopes.splice(scopeIndex, 1)
-            await AsyncStorageHelper.set(STORAGE_KEY_AUTH_CURRENT_SCOPES, currentScopes)
-            return {removed: true, result: currentScopes}
-        }else{
-            return {removed: false, result: currentScopes}
-        }
-    }else{
-        return {removed: false, result: []}
+async function revokeScopeAndGet(
+  scope: string,
+): Promise<{removed: boolean; result: Array<string>}> {
+  const currentScopes = (await AsyncStorageHelper.getObject(
+    STORAGE_KEY_AUTH_CURRENT_SCOPES,
+  )) as Array<string>;
+  if (currentScopes) {
+    const scopeIndex = currentScopes.indexOf(scope);
+    if (scopeIndex >= 0) {
+      currentScopes.splice(scopeIndex, 1);
+      await AsyncStorageHelper.set(
+        STORAGE_KEY_AUTH_CURRENT_SCOPES,
+        currentScopes,
+      );
+      return {removed: true, result: currentScopes};
+    } else {
+      return {removed: false, result: currentScopes};
     }
+  } else {
+    return {removed: false, result: []};
+  }
 }
 
 class FitbitCredentialDependency extends SourceDependency {
@@ -65,19 +78,18 @@ class FitbitCredentialDependency extends SourceDependency {
     };
   }
 
-  private async makeConfig(): Promise<any>{
-      const appendedScopes = await registerScopeAndGet(this.scope)
-      const copiedConfig = JSON.parse(JSON.stringify(this.configBase))
-      copiedConfig.scopes = appendedScopes
-      return copiedConfig
+  private async makeConfig(): Promise<any> {
+    const appendedScopes = await registerScopeAndGet(this.scope);
+    const copiedConfig = JSON.parse(JSON.stringify(this.configBase));
+    copiedConfig.scopes = appendedScopes;
+    return copiedConfig;
   }
 
   async resolved(): Promise<boolean> {
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
     return (
       state != null &&
-      new Date(state.accessTokenExpirationDate).getTime() >
-        Date.now()
+      new Date(state.accessTokenExpirationDate).getTime() > Date.now()
     );
   }
 
@@ -89,24 +101,18 @@ class FitbitCredentialDependency extends SourceDependency {
           refreshToken: state.refreshToken,
         });
         if (newState) {
-          await AsyncStorageHelper.set(
-            STORAGE_KEY_AUTH_STATE,
-            newState,
-          );
+          await AsyncStorageHelper.set(STORAGE_KEY_AUTH_STATE, newState);
           return true;
         }
       } catch (e) {
-          console.log(e)
+        console.log(e);
       }
     }
 
     try {
       const newState = await authorize(await this.makeConfig());
       if (newState) {
-        await AsyncStorageHelper.set(
-          STORAGE_KEY_AUTH_STATE,
-          newState,
-        );
+        await AsyncStorageHelper.set(STORAGE_KEY_AUTH_STATE, newState);
         return true;
       } else {
         return false;
@@ -118,8 +124,10 @@ class FitbitCredentialDependency extends SourceDependency {
 }
 
 export class FitbitSource extends DataSource {
+  key: string = 'fitbit';
   name: string = 'Fitbit';
   description: string = 'Fitbit Fitness Tracker';
+  thumbnail = require("../../../../assets/images/services/service_fitbit.jpg")
 
   private _credential: FitbitCredential = null;
   get credential(): FitbitCredential {

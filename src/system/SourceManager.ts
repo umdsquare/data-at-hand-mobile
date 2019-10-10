@@ -2,15 +2,15 @@ import {DataSource, DataSourceMeasure} from '../measure/source/DataSource';
 import {FitbitSource} from '../measure/source/fitbit/FitbitSource';
 import {AsyncStorageHelper} from './AsyncStorageHelper';
 import {MeasureSpec} from '../measure/MeasureSpec';
+import { AppleHealthSource } from '../measure/source/healthkit/AppleHealthSource';
 
-interface SourceSelectionInfo {
+export interface SourceSelectionInfo {
   connectedMeasureCodes: Array<string>;
   mainIndex: number;
 }
 
 class SourceManager {
-  installedServices: ReadonlyArray<DataSource> = [new FitbitSource()];
-
+  installedServices: ReadonlyArray<DataSource> = [new FitbitSource(), new AppleHealthSource()];
   async selectSourceMeasure(
     measure: DataSourceMeasure,
     setMainIfNot: boolean,
@@ -77,7 +77,7 @@ class SourceManager {
   findMeasureByCode(code: string): DataSourceMeasure {
     const split = code.split(':');
     if (split.length >= 2) {
-      const service = this.installedServices.find(s => s.name === split[0]);
+      const service = this.installedServices.find(s => s.key === split[0]);
       if (service) {
         return service.supportedMeasures.find(m => m.code === code);
       } else return null;
