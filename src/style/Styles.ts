@@ -36,7 +36,11 @@ const StyleTemplates = {
   descriptionTextStyle: {
     fontSize: Sizes.descriptionFontSize,
     color: Colors.textColorLight
-  }as StyleProp<TextStyle>
+  }as StyleProp<TextStyle>,
+
+  headerRightTextButtonStyle: {
+    
+  }
 
 };
 
