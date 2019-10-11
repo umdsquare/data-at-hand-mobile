@@ -4,9 +4,9 @@ const Sizes = {
     horizontalPadding: 20,
     verticalPadding: 12,
 
-    BigFontSize: 20,
-    titleFontSize: 18,
-    subtitleFontSize: 16,
+    BigFontSize: 22,
+    titleFontSize: 20,
+    subtitleFontSize: 18,
     descriptionFontSize: 14,
 };
 

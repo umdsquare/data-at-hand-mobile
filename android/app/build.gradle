@@ -1,5 +1,10 @@
 apply plugin: "com.android.application"
 
+project.ext.vectoricons = [
+        iconFontNames: [ 'MaterialIcons.ttf', 'AntDesign.ttf' ] // Name of the font files you want to copy
+]
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+
 import com.android.build.OutputFile
 
 /**
@@ -134,7 +139,9 @@ android {
         versionCode 1
         versionName "1.0"
 
-        manifestPlaceholders = [appAuthRedirectScheme: 'edu.umd.hcil.data_at_hand']
+        manifestPlaceholders = [
+                appAuthRedirectScheme: 'edu.umd.hcil.data_at_hand'
+        ]
     }
     splits {
         abi {

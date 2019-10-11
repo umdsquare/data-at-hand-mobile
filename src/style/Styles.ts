@@ -24,6 +24,7 @@ const StyleTemplates = {
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.07,
     shadowRadius: 8,
+    elevation: 2
   },
 
   titleTextStyle: {

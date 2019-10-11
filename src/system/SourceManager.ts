@@ -80,23 +80,27 @@ class SourceManager {
     if (selectionInfo) {
       const index = selectionInfo.connectedMeasureCodes.indexOf(measure.code);
       if (index >= 0) {
-        selectionInfo.connectedMeasureCodes.splice(index, 1);
-        if (selectionInfo.connectedMeasureCodes.length === 0) {
-          return AsyncStorageHelper.remove(measure.spec.nameKey).then(() => {
-            this._onSelectedSourceChanged.next();
-          });
-        } else {
-          if (selectionInfo.mainIndex === index) {
-            //set another one as main
-            if (selectionInfo.connectedMeasureCodes.length > index) {
-              selectionInfo.mainIndex = index;
-            } else selectionInfo.mainIndex = index - 1;
-          } else if (selectionInfo.mainIndex > index) {
-            selectionInfo.mainIndex--;
-          }
+        const deactivated = await measure.deactivatedInSystem();
+        if (deactivated === true) {
+        
+          selectionInfo.connectedMeasureCodes.splice(index, 1);
+          if (selectionInfo.connectedMeasureCodes.length === 0) {
+            return AsyncStorageHelper.remove(measure.spec.nameKey).then(() => {
+              this._onSelectedSourceChanged.next();
+            });
+          } else {
+            if (selectionInfo.mainIndex === index) {
+              //set another one as main
+              if (selectionInfo.connectedMeasureCodes.length > index) {
+                selectionInfo.mainIndex = index;
+              } else selectionInfo.mainIndex = index - 1;
+            } else if (selectionInfo.mainIndex > index) {
+              selectionInfo.mainIndex--;
+            }
 
-          await AsyncStorageHelper.set(measure.spec.nameKey, selectionInfo);
-          this._onSelectedSourceChanged.next();
+            await AsyncStorageHelper.set(measure.spec.nameKey, selectionInfo);
+            this._onSelectedSourceChanged.next();
+          }
         }
       }
     } else return;

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Button, Text, ImageBackground, ScrollView, SafeAreaView } from "react-native";
+import { View, Text, ImageBackground, ScrollView, SafeAreaView } from "react-native";
 import { MeasureSpec } from "../../../../measure/MeasureSpec";
 import { PropsWithNavigation } from "../../../../PropsWithNavigation";
 import { Sizes } from "../../../../style/Sizes";
@@ -9,6 +9,7 @@ import { DataSource, DataSourceMeasure } from "../../../../measure/source/DataSo
 import { sourceManager, SourceSelectionInfo } from "../../../../system/SourceManager";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Colors from "../../../../style/Colors";
+import { Button } from "react-native-elements";
 
 interface Prop extends PropsWithNavigation {
 
@@ -74,7 +75,13 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
                                 source={service}
                                 onClick={async () => {
                                     const serviceMeasure = service.getMeasureOfSpec(this.state.measureSpec)
-
+                                    const activated = await serviceMeasure.activateInSystem()
+                                    if (activated === true) {
+                                        await sourceManager.selectSourceMeasure(serviceMeasure, false)
+                                        this.props.navigation.dismiss()
+                                        this.props.navigation.state.params.onServiceSelected(serviceMeasure)
+                                    }
+/*
                                     if (serviceMeasure.dependencies.length > 0) {
                                         let dependencyResult: boolean = await serviceMeasure.dependencies[0].tryResolve()
                                         for (let i = 0; i < serviceMeasure.dependencies.length; i++) {
@@ -95,7 +102,7 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
                                         await sourceManager.selectSourceMeasure(serviceMeasure, false)
                                         this.props.navigation.dismiss()
                                         this.props.navigation.state.params.onServiceSelected(serviceMeasure)
-                                    }
+                                    }*/
                                 }} />)
                     }
                 </ScrollView>
@@ -153,7 +160,7 @@ export const ServiceSelectionWizardStack = createStackNavigator(
         headerTransparent: true,
         headerLeftContainerStyle: { paddingLeft: 12 },
         headerLeft: (
-            <Button title="Cancel" onPress={() => navigationProp.navigation.dismiss()} />
+            <Button title="Cancel" type="clear" onPress={() => navigationProp.navigation.dismiss()} />
         )
     })
 }

@@ -1,5 +1,4 @@
 import {MeasureSpec} from '../MeasureSpec';
-import { SourceDependency } from './SourceDependency';
 
 export abstract class DataSource {
   static readonly STORAGE_PREFIX = "@source_service:"
@@ -53,7 +52,9 @@ export abstract class DataSourceMeasure {
 
   constructor(readonly source: DataSource) {}
 
-  abstract readonly dependencies: ReadonlyArray<SourceDependency>
+  abstract async activateInSystem(): Promise<boolean>
+  abstract async deactivatedInSystem(): Promise<boolean>
+  
 }
 
 export enum UnSupportedReason {

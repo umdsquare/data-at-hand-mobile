@@ -1,9 +1,8 @@
 import {DataSource, UnSupportedReason} from '../DataSource';
 import {FitbitStepMeasure} from './FitbitStepMeasure';
 import {FitbitHeartRateMeasure} from './FitbitHeartRateMeasure';
-import {SourceDependency} from '../SourceDependency';
 import {AsyncStorageHelper} from '../../../system/AsyncStorageHelper';
-import {refresh, authorize} from 'react-native-app-auth';
+import {refresh, authorize, revoke} from 'react-native-app-auth';
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -37,55 +36,32 @@ async function registerScopeAndGet(scope: string): Promise<Array<string>> {
   }
 }
 
-async function revokeScopeAndGet(
-  scope: string,
-): Promise<{removed: boolean; result: Array<string>}> {
-  const currentScopes = (await AsyncStorageHelper.getObject(
-    STORAGE_KEY_AUTH_CURRENT_SCOPES,
-  )) as Array<string>;
-  if (currentScopes) {
-    const scopeIndex = currentScopes.indexOf(scope);
-    if (scopeIndex >= 0) {
-      currentScopes.splice(scopeIndex, 1);
-      await AsyncStorageHelper.set(
-        STORAGE_KEY_AUTH_CURRENT_SCOPES,
-        currentScopes,
-      );
-      return {removed: true, result: currentScopes};
-    } else {
-      return {removed: false, result: currentScopes};
-    }
-  } else {
-    return {removed: false, result: []};
-  }
-}
+export class FitbitSource extends DataSource {
+  key: string = 'fitbit';
+  name: string = 'Fitbit';
+  description: string = 'Fitbit Fitness Tracker';
+  thumbnail = require('../../../../assets/images/services/service_fitbit.jpg');
 
-class FitbitCredentialDependency extends SourceDependency {
-  private configBase;
+  supportedMeasures = [
+    new FitbitStepMeasure(this),
+    new FitbitHeartRateMeasure(this),
+  ];
 
-  constructor(credential: FitbitCredential, private scope: string) {
-    super();
 
-    this.configBase = {
-      clientId: credential.client_id,
-      clientSecret: credential.client_secret,
-      redirectUrl: credential.redirect_uri,
-      serviceConfiguration: {
-        authorizationEndpoint: 'https://www.fitbit.com/oauth2/authorize',
-        tokenEndpoint: 'https://api.fitbit.com/oauth2/token',
-        revocationEndpoint: 'https://api.fitbit.com/oauth2/revoke',
-      },
-    };
+  private _credential: FitbitCredential = null;
+  private _authConfigBase = null;
+  get credential(): FitbitCredential {
+    return this._credential;
   }
 
-  private async makeConfig(): Promise<any> {
-    const appendedScopes = await registerScopeAndGet(this.scope);
-    const copiedConfig = JSON.parse(JSON.stringify(this.configBase));
-    copiedConfig.scopes = appendedScopes;
-    return copiedConfig;
+  private async makeConfig(scope: string): Promise<any> {
+    const appendedScopes = await registerScopeAndGet(scope);
+    const copiedConfig = JSON.parse(JSON.stringify(this._authConfigBase))
+    copiedConfig.scopes = appendedScopes
+    return copiedConfig
   }
-
-  async resolved(): Promise<boolean> {
+  
+  async checkTokenValid(): Promise<boolean> {
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
     return (
       state != null &&
@@ -93,11 +69,11 @@ class FitbitCredentialDependency extends SourceDependency {
     );
   }
 
-  async tryResolve(): Promise<boolean> {
+  async authenticate(scope: string): Promise<boolean> {
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
     if (state) {
       try {
-        const newState = await refresh(await this.makeConfig(), {
+        const newState = await refresh(await this.makeConfig(scope), {
           refreshToken: state.refreshToken,
         });
         if (newState) {
@@ -110,7 +86,7 @@ class FitbitCredentialDependency extends SourceDependency {
     }
 
     try {
-      const newState = await authorize(await this.makeConfig());
+      const newState = await authorize(await this.makeConfig(scope));
       if (newState) {
         await AsyncStorageHelper.set(STORAGE_KEY_AUTH_STATE, newState);
         return true;
@@ -121,29 +97,53 @@ class FitbitCredentialDependency extends SourceDependency {
       return false;
     }
   }
-}
 
-export class FitbitSource extends DataSource {
-  key: string = 'fitbit';
-  name: string = 'Fitbit';
-  description: string = 'Fitbit Fitness Tracker';
-  thumbnail = require("../../../../assets/images/services/service_fitbit.jpg")
-
-  private _credential: FitbitCredential = null;
-  get credential(): FitbitCredential {
-    return this._credential;
+  async signOut(): Promise<void>{
+    const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
+    if (state) {
+        await revoke(this._authConfigBase, { tokenToRevoke:  state.refreshToken})
+        AsyncStorageHelper.remove(STORAGE_KEY_AUTH_STATE)
+    }
   }
 
-  makeCredentialDependency(scope: string): FitbitCredentialDependency {
-    if (this._credential) {
-      return new FitbitCredentialDependency(this.credential, scope);
-    } else throw Error('Fitbit credential is not loaded.');
+  private async revokeScopeAndGet(
+    scope: string,
+  ): Promise<{removed: boolean; result: Array<string>}> {
+    const currentScopes = (await AsyncStorageHelper.getObject(
+      STORAGE_KEY_AUTH_CURRENT_SCOPES,
+    )) as Array<string>;
+    if (currentScopes) {
+      const scopeIndex = currentScopes.indexOf(scope);
+      if (scopeIndex >= 0) {
+        currentScopes.splice(scopeIndex, 1);
+        await AsyncStorageHelper.set(
+          STORAGE_KEY_AUTH_CURRENT_SCOPES,
+          currentScopes,
+        );
+        return {removed: true, result: currentScopes};
+      } else {
+        return {removed: false, result: currentScopes};
+      }
+    } else {
+      return {removed: false, result: []};
+    }
   }
 
-  supportedMeasures = [
-    new FitbitStepMeasure(this),
-    new FitbitHeartRateMeasure(this),
-  ];
+  async revokeScope(scope: string): Promise<boolean>{
+    const scopes = await this.revokeScopeAndGet(scope);
+      if (scopes.removed === true && scopes.result.length === 0) {
+        try {
+            console.log("sign out from Fitbit")
+          await this.signOut();
+          return true;
+        } catch (e) {
+          console.log(e);
+          return false;
+        }
+      } else {
+        return true;
+      } 
+  }
 
   protected onCheckSupportedInSystem(): Promise<{
     supported: boolean;
@@ -151,6 +151,16 @@ export class FitbitSource extends DataSource {
   }> {
     try {
       this._credential = require('../../../../credentials/fitbit.json');
+      this._authConfigBase = {
+        clientId: this._credential.client_id,
+        clientSecret: this._credential.client_secret,
+        redirectUrl: this._credential.redirect_uri,
+        serviceConfiguration: {
+          authorizationEndpoint: 'https://www.fitbit.com/oauth2/authorize',
+          tokenEndpoint: 'https://api.fitbit.com/oauth2/token',
+          revocationEndpoint: 'https://api.fitbit.com/oauth2/revoke',
+        },
+      };
       return Promise.resolve({supported: true});
     } catch (e) {
       console.log(e);

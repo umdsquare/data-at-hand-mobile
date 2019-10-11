@@ -64,7 +64,9 @@ export class MeasureSettingsScreen extends React.Component<Prop, State>{
                 keyExtractor={(item, index) => item.nameKey}
                 renderItem={
                     (({ item, index, separators }) => (
-                        <MeasureComponent measureSpec={item} navigation={this.props.navigation} />
+                        <View style={{ marginBottom: index === measureService.supportedMeasureSpecs.length -1? 12 : 0 }}>
+                            <MeasureComponent measureSpec={item} navigation={this.props.navigation} />
+                        </View>
                     ))
                 }
             />)

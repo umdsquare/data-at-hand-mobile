@@ -1,7 +1,7 @@
 'use strict';
 
 export default {
-  lightBackground: "#F8FaFb",
+  lightBackground: "#F5F9F8",
   accent: "#ED5F88",
   link: "#14acc4",
   textColorDark: "#252525",
