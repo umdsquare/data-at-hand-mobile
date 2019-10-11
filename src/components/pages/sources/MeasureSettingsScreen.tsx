@@ -47,29 +47,27 @@ export class MeasureSettingsScreen extends React.Component<Prop, State>{
     }
 
     componentDidMount() {
-        Promise.all(sourceManager.installedServices.map(service => service.checkSupportedInSystem())).then(
-            result => {
-                this.setState({
-                    ...this.state,
-                    isLoading: false
-                })
-            }
-        )
+        sourceManager.getServicesSupportedInThisSystem().then(services => {
+            this.setState({
+                ...this.state,
+                isLoading: false
+            })
+        })
     }
 
     render() {
         return (<ActionSheetProvider>{
-        this.state.isLoading === true? (<View style={{ flex: 1, flexDirection: 'column' }}>
-                    <Text>Loading...</Text>
-                </View>):(<FlatList style={{ flex: 1, alignSelf: 'stretch', backgroundColor: Colors.lightBackground }}
-            data={measureService.supportedMeasureSpecs}
-            keyExtractor={(item, index) => item.nameKey}
-            renderItem={
-                (({ item, index, separators }) => (
-                    <MeasureComponent measureSpec={item} navigation={this.props.navigation} />
-                ))
-            }
-        />)
+            this.state.isLoading === true ? (<View style={{ flex: 1, flexDirection: 'column' }}>
+                <Text>Loading...</Text>
+            </View>) : (<FlatList style={{ flex: 1, alignSelf: 'stretch', backgroundColor: Colors.lightBackground }}
+                data={measureService.supportedMeasureSpecs}
+                keyExtractor={(item, index) => item.nameKey}
+                renderItem={
+                    (({ item, index, separators }) => (
+                        <MeasureComponent measureSpec={item} navigation={this.props.navigation} />
+                    ))
+                }
+            />)
         }
         </ActionSheetProvider>)
     }

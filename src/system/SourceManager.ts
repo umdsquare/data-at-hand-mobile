@@ -2,7 +2,8 @@ import {DataSource, DataSourceMeasure} from '../measure/source/DataSource';
 import {FitbitSource} from '../measure/source/fitbit/FitbitSource';
 import {AsyncStorageHelper} from './AsyncStorageHelper';
 import {MeasureSpec} from '../measure/MeasureSpec';
-import { AppleHealthSource } from '../measure/source/healthkit/AppleHealthSource';
+import {AppleHealthSource} from '../measure/source/healthkit/AppleHealthSource';
+import {Subject, Observable} from 'rxjs';
 
 export interface SourceSelectionInfo {
   connectedMeasureCodes: Array<string>;
@@ -10,7 +11,33 @@ export interface SourceSelectionInfo {
 }
 
 class SourceManager {
-  installedServices: ReadonlyArray<DataSource> = [new FitbitSource(), new AppleHealthSource()];
+  installedServices: ReadonlyArray<DataSource> = [
+    new FitbitSource(),
+    new AppleHealthSource(),
+  ];
+
+  private _supportedServices: ReadonlyArray<DataSource> = null;
+
+  async getServicesSupportedInThisSystem(): Promise<ReadonlyArray<DataSource>> {
+    if (this._supportedServices == null) {
+      const list = [];
+      for (let i = 0; i < this.installedServices.length; i++) {
+        const result = await this.installedServices[i].checkSupportedInSystem();
+        if (result.supported === true) {
+          list.push(this.installedServices[i]);
+        }
+      }
+
+      this._supportedServices = list;
+    }
+    return this._supportedServices;
+  }
+
+  readonly _onSelectedSourceChanged = new Subject<void>();
+  get onSelectedSourceChanged(): Observable<void> {
+    return this._onSelectedSourceChanged;
+  }
+
   async selectSourceMeasure(
     measure: DataSourceMeasure,
     setMainIfNot: boolean,
@@ -39,7 +66,11 @@ class SourceManager {
         mainIndex: 0,
       };
     }
-    return AsyncStorageHelper.set(measure.spec.nameKey, selectionInfo);
+    return AsyncStorageHelper.set(measure.spec.nameKey, selectionInfo).then(
+      () => {
+        this._onSelectedSourceChanged.next();
+      },
+    );
   }
 
   async deselectSourceMeasure(measure: DataSourceMeasure): Promise<void> {
@@ -51,18 +82,21 @@ class SourceManager {
       if (index >= 0) {
         selectionInfo.connectedMeasureCodes.splice(index, 1);
         if (selectionInfo.connectedMeasureCodes.length === 0) {
-            return AsyncStorageHelper.remove(measure.spec.nameKey)
+          return AsyncStorageHelper.remove(measure.spec.nameKey).then(() => {
+            this._onSelectedSourceChanged.next();
+          });
         } else {
           if (selectionInfo.mainIndex === index) {
             //set another one as main
-            if(selectionInfo.connectedMeasureCodes.length > index){
-                selectionInfo.mainIndex = index
-            }else selectionInfo.mainIndex = index - 1
-          }else if(selectionInfo.mainIndex > index){
-            selectionInfo.mainIndex--
+            if (selectionInfo.connectedMeasureCodes.length > index) {
+              selectionInfo.mainIndex = index;
+            } else selectionInfo.mainIndex = index - 1;
+          } else if (selectionInfo.mainIndex > index) {
+            selectionInfo.mainIndex--;
           }
 
-          await AsyncStorageHelper.set(measure.spec.nameKey, selectionInfo)
+          await AsyncStorageHelper.set(measure.spec.nameKey, selectionInfo);
+          this._onSelectedSourceChanged.next();
         }
       }
     } else return;

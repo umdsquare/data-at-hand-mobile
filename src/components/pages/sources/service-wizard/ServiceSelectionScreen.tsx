@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Button, Text, Image, ImageBackground, ScrollView, SafeAreaView } from "react-native";
+import { View, Button, Text, ImageBackground, ScrollView, SafeAreaView } from "react-native";
 import { MeasureSpec } from "../../../../measure/MeasureSpec";
 import { PropsWithNavigation } from "../../../../PropsWithNavigation";
 import { Sizes } from "../../../../style/Sizes";
@@ -9,8 +9,6 @@ import { DataSource, DataSourceMeasure } from "../../../../measure/source/DataSo
 import { sourceManager, SourceSelectionInfo } from "../../../../system/SourceManager";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Colors from "../../../../style/Colors";
-import { Badge } from "react-native-elements";
-import { measureService } from "../../../../system/MeasureService";
 
 interface Prop extends PropsWithNavigation {
 
@@ -18,7 +16,8 @@ interface Prop extends PropsWithNavigation {
 
 interface State {
     measureSpec: MeasureSpec,
-    selectionInfo: SourceSelectionInfo
+    selectionInfo: SourceSelectionInfo,
+    services: ReadonlyArray<DataSource>
 }
 
 export interface ServiceSelectionScreenParameters {
@@ -33,18 +32,19 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
 
         this.state = {
             measureSpec: this.props.navigation.getParam("measureSpec"),
-            selectionInfo: null
+            selectionInfo: null,
+            services: []
         }
     }
 
     async componentDidMount() {
         const selectionInfo = await sourceManager.getSourceSelectionInfo(this.state.measureSpec)
-        if (selectionInfo) {
-            this.setState({
-                ...this.state,
-                selectionInfo: selectionInfo
-            })
-        }
+        const supportedServices = await sourceManager.getServicesSupportedInThisSystem()
+        this.setState({
+            ...this.state,
+            selectionInfo: selectionInfo,
+            services: supportedServices
+        })
     }
 
     render() {
@@ -61,7 +61,7 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
                 }}>Select a Source for {this.state.measureSpec.name}</Text>
                 <ScrollView style={{ flex: 1 }}>
                     {
-                        sourceManager.installedServices
+                        this.state.services
                             .filter(s => s.getMeasureOfSpec(this.state.measureSpec))
                             .map((service, index) => <ServiceElement
                                 key={service.key}
@@ -134,10 +134,10 @@ const ServiceElement = (props: { onClick: () => void, source: DataSource, index:
             {props.selectedAlready === true ?
                 (<View
                     style={{ position: 'absolute', right: 12, top: 8, backgroundColor: Colors.accent, borderRadius: 12, padding: 4, paddingLeft: 8, paddingRight: 8 }}>
-                        <Text style={{ fontSize: Sizes.descriptionFontSize, fontWeight: 'bold', color: 'white' }}>
+                    <Text style={{ fontSize: Sizes.descriptionFontSize, fontWeight: 'bold', color: 'white' }}>
                         Already Selected
                         </Text>
-                    </View>) : (<></>)}
+                </View>) : (<></>)}
         </View>
     </TouchableOpacity>
 }

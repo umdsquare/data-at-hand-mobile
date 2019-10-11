@@ -47,7 +47,7 @@ class MeasureComponent extends React.Component<Prop, State>{
     }
 
     async componentDidMount() {
-        const serviceMeasures = sourceManager.installedServices
+        const serviceMeasures = (await sourceManager.getServicesSupportedInThisSystem())
             .map(service => service.getMeasureOfSpec(this.props.measureSpec))
             .filter(s => s != null)
 

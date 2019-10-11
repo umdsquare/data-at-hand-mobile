@@ -1,4 +1,4 @@
-import { DataSource, UnSupportedReason, DataSourceMeasure } from "../DataSource";
+import { DataSource, UnSupportedReason } from "../DataSource";
 import { Platform } from "react-native";
 import { AppleHealthStepMeasure } from "./AppleHealthStepMeasure";
 
