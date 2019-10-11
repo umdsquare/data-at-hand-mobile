@@ -7,9 +7,9 @@ import { FlatList } from "react-native-gesture-handler";
 import { measureService } from "../../../system/MeasureService";
 import { MeasureComponent } from "./MeasureComponent";
 import { sourceManager } from "../../../system/SourceManager";
-import { NavigationScreenProp, NavigationState, NavigationParams } from "react-navigation";
 import { PropsWithNavigation } from "../../../PropsWithNavigation";
 import { useActionSheet, ActionSheetProvider } from '@expo/react-native-action-sheet'
+import LinearGradient from 'react-native-linear-gradient';
 
 enum Mode {
     Measure = 0,
@@ -25,16 +25,6 @@ interface State {
 }
 
 export class MeasureSettingsScreen extends React.Component<Prop, State>{
-
-    private buttons = ["View by Measure", "View by Source"]
-
-    private styles = StyleSheet.create({
-        upperContainer: {
-            ...StyleTemplates.styleWithVerticalPadding,
-            ...StyleTemplates.styleWithHorizontalPadding,
-            alignItems: 'center', justifyContent: 'center'
-        }
-    })
 
     constructor(props: Prop) {
         super(props);
@@ -56,21 +46,27 @@ export class MeasureSettingsScreen extends React.Component<Prop, State>{
     }
 
     render() {
-        return (<ActionSheetProvider>{
-            this.state.isLoading === true ? (<View style={{ flex: 1, flexDirection: 'column' }}>
-                <Text>Loading...</Text>
-            </View>) : (<FlatList style={{ flex: 1, alignSelf: 'stretch', backgroundColor: Colors.lightBackground }}
-                data={measureService.supportedMeasureSpecs}
-                keyExtractor={(item, index) => item.nameKey}
-                renderItem={
-                    (({ item, index, separators }) => (
-                        <View style={{ marginBottom: index === measureService.supportedMeasureSpecs.length -1? 12 : 0 }}>
-                            <MeasureComponent measureSpec={item} navigation={this.props.navigation} />
-                        </View>
-                    ))
-                }
-            />)
-        }
+        return (<ActionSheetProvider>
+            <LinearGradient 
+                style={{ flex: 1, alignSelf: 'stretch' }} 
+                start={{x: 0, y: 0}} end={{x: 1, y: 1}} 
+                colors={Colors.lightBackgroundGradient}>
+                {
+                    this.state.isLoading === true ? (
+                        <Text>Loading...</Text>
+                        ) :
+                        (<FlatList style={{ flex: 1, alignSelf: 'stretch' }}
+                            data={measureService.supportedMeasureSpecs}
+                            keyExtractor={(item, index) => item.nameKey}
+                            renderItem={
+                                (({ item, index, separators }) => (
+                                    <View style={{ marginBottom: index === measureService.supportedMeasureSpecs.length - 1 ? 12 : 0 }}>
+                                        <MeasureComponent measureSpec={item} navigation={this.props.navigation} />
+                                    </View>
+                                ))
+                            }
+                        />)
+                }</LinearGradient>
         </ActionSheetProvider>)
     }
 

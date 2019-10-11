@@ -1,18 +1,16 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { MeasureSpec } from "../../../measure/MeasureSpec";
-import { Card, Badge, Button } from "react-native-elements";
-import { tsNonNullExpression } from "@babel/types";
+import { Card, Button } from "react-native-elements";
 import { StyleTemplates } from "../../../style/Styles";
-import { Sizes } from "../../../style/Sizes";
 import { sourceManager } from "../../../system/SourceManager";
-import { DataSourceMeasure, DataSource } from "../../../measure/source/DataSource";
+import { DataSourceMeasure } from "../../../measure/source/DataSource";
 import Colors from "../../../style/Colors";
 import { PropsWithNavigation } from "../../../PropsWithNavigation";
 import { ServiceSelectionScreenParameters } from "./service-wizard/ServiceSelectionScreen";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { useActionSheet, connectActionSheet } from "@expo/react-native-action-sheet";
+import { connectActionSheet } from "@expo/react-native-action-sheet";
 
 interface Prop extends PropsWithNavigation {
     measureSpec: MeasureSpec
@@ -77,7 +75,7 @@ class MeasureComponent extends React.Component<Prop, State>{
     private callNewServiceSelectionDialog() {
         this.props.navigation.navigate('ServiceWizardModal', {
             measureSpec: this.props.measureSpec,
-            onServiceSelected: async (selectedSourceMeasure: DataSourceMeasure) => {
+            onServiceSelected: async () => {
                 await this.refreshInformation(this.state.availableMeasures)
             }
         } as ServiceSelectionScreenParameters)
