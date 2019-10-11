@@ -11,8 +11,8 @@ export class FitbitStepMeasure extends DataSourceMeasure{
     async activateInSystem(): Promise<boolean> {
         return this.castedSource<FitbitSource>().authenticate("activity")
     }
-    
+
     async deactivatedInSystem(): Promise<boolean> {
-      return this.castedSource<FitbitSource>().revokeScope("heartrate")
+      return this.castedSource<FitbitSource>().revokeScope("activity")
     }
 }

@@ -47,7 +47,6 @@ export class FitbitSource extends DataSource {
     new FitbitHeartRateMeasure(this),
   ];
 
-
   private _credential: FitbitCredential = null;
   private _authConfigBase = null;
   get credential(): FitbitCredential {
@@ -56,11 +55,11 @@ export class FitbitSource extends DataSource {
 
   private async makeConfig(scope: string): Promise<any> {
     const appendedScopes = await registerScopeAndGet(scope);
-    const copiedConfig = JSON.parse(JSON.stringify(this._authConfigBase))
-    copiedConfig.scopes = appendedScopes
-    return copiedConfig
+    const copiedConfig = JSON.parse(JSON.stringify(this._authConfigBase));
+    copiedConfig.scopes = appendedScopes;
+    return copiedConfig;
   }
-  
+
   async checkTokenValid(): Promise<boolean> {
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
     return (
@@ -98,11 +97,11 @@ export class FitbitSource extends DataSource {
     }
   }
 
-  async signOut(): Promise<void>{
+  async signOut(): Promise<void> {
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
     if (state) {
-        await revoke(this._authConfigBase, { tokenToRevoke:  state.refreshToken})
-        AsyncStorageHelper.remove(STORAGE_KEY_AUTH_STATE)
+      await revoke(this._authConfigBase, {tokenToRevoke: state.refreshToken});
+      AsyncStorageHelper.remove(STORAGE_KEY_AUTH_STATE);
     }
   }
 
@@ -129,11 +128,13 @@ export class FitbitSource extends DataSource {
     }
   }
 
-  async revokeScope(scope: string): Promise<boolean>{
-    const scopes = await this.revokeScopeAndGet(scope);
-      if (scopes.removed === true && scopes.result.length === 0) {
+  async revokeScope(scope: string): Promise<boolean> {
+    const scopeRevokeResult = await this.revokeScopeAndGet(scope);
+    console.log('new scopes:');
+    console.log(scopeRevokeResult);
+    if (scopeRevokeResult.removed === true) {
+      if (scopeRevokeResult.result.length === 0) {
         try {
-            console.log("sign out from Fitbit")
           await this.signOut();
           return true;
         } catch (e) {
@@ -141,8 +142,27 @@ export class FitbitSource extends DataSource {
           return false;
         }
       } else {
-        return true;
-      } 
+        try {
+          const state = await AsyncStorageHelper.getObject(
+            STORAGE_KEY_AUTH_STATE,
+          );
+          const newState = await refresh(
+            {...this._authConfigBase, scopes: scopeRevokeResult.result},
+            {
+              refreshToken: state.refreshToken,
+            },
+          );
+          if (newState) {
+            await AsyncStorageHelper.set(STORAGE_KEY_AUTH_STATE, newState);
+            return true;
+          }
+        } catch (e) {
+          console.log(e);
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   protected onCheckSupportedInSystem(): Promise<{
