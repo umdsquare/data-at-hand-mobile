@@ -89,11 +89,16 @@ class MeasureComponent extends React.Component<Prop, State>{
             <Card
                 containerStyle={StyleTemplates.backgroundCardStyle}
             >
-                <Text style={{
-                    ...StyleTemplates.titleTextStyle as any,
-                    marginBottom: 4
-                }
-                }>{this.props.measureSpec.name}</Text>
+                <View style={{ marginBottom: 4, flexDirection: 'row', alignItems: 'center' }}>
+                    <View style={{
+                        marginRight: 8, width: 10, height: 10, borderRadius: 5,
+                        backgroundColor: this.state.connectedMeasures && this.state.connectedMeasures.length > 0 ? Colors.green : 'lightgray' }} />
+                    <Text style={{
+                        ...StyleTemplates.titleTextStyle as any,
+                    }
+                    }>{this.props.measureSpec.name}</Text>
+                </View>
+
                 <Text style={{
                     ...StyleTemplates.descriptionTextStyle as any,
                     marginBottom: 12
@@ -120,13 +125,13 @@ class MeasureComponent extends React.Component<Prop, State>{
                                 <Button
                                     type="clear"
                                     titleStyle={{
-                                        fontSize: Sizes.subtitleFontSize,
+                                        fontSize: 16,
                                         fontWeight: 'bold',
                                         color: Colors.link,
                                         marginLeft: 3,
                                         paddingBottom: 3
                                     }}
-                                    icon={{ name: 'pluscircle', type: 'antdesign', color: Colors.link, size: 20 }}
+                                    icon={{ name: 'pluscircle', type: 'antdesign', color: Colors.link, size: 18 }}
                                     title="Connect My Service"
                                     onPress={() => {
                                         this.callNewServiceSelectionDialog()

@@ -6,5 +6,7 @@ export default {
   link: "#14acc4",
   textColorDark: "#252525",
   textColorLight: "#575757",
-  colorWarnLight: "#e37f78"
+  colorWarnLight: "#e37f78",
+  green: "#88db5e",
+  red: "#f05e48"
 };

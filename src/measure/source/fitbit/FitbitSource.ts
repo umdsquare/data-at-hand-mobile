@@ -3,6 +3,9 @@ import {FitbitStepMeasure} from './FitbitStepMeasure';
 import {FitbitHeartRateMeasure} from './FitbitHeartRateMeasure';
 import {AsyncStorageHelper} from '../../../system/AsyncStorageHelper';
 import {refresh, authorize, revoke} from 'react-native-app-auth';
+import { FitbitSleepMeasure } from './FitbitSleepMeasure';
+import { FitbitWeightMeasure } from './FitbitWeightMeasure';
+import { FitbitWorkoutMeasure } from './FitbitWorkoutMeasure';
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -45,6 +48,9 @@ export class FitbitSource extends DataSource {
   supportedMeasures = [
     new FitbitStepMeasure(this),
     new FitbitHeartRateMeasure(this),
+    new FitbitSleepMeasure(this),
+    new FitbitWeightMeasure(this),
+    new FitbitWorkoutMeasure(this)
   ];
 
   private _credential: FitbitCredential = null;

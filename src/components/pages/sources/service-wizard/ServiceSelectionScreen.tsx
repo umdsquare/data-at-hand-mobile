@@ -81,28 +81,6 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
                                         this.props.navigation.dismiss()
                                         this.props.navigation.state.params.onServiceSelected(serviceMeasure)
                                     }
-/*
-                                    if (serviceMeasure.dependencies.length > 0) {
-                                        let dependencyResult: boolean = await serviceMeasure.dependencies[0].tryResolve()
-                                        for (let i = 0; i < serviceMeasure.dependencies.length; i++) {
-                                            if (dependencyResult === true) {
-                                                dependencyResult = await serviceMeasure.dependencies[i].tryResolve()
-                                            } else {
-                                                break;
-                                            }
-                                        }
-                                        if (dependencyResult === true) {
-                                            await sourceManager.selectSourceMeasure(serviceMeasure, false)
-                                            this.props.navigation.dismiss()
-                                            this.props.navigation.state.params.onServiceSelected(serviceMeasure)
-                                        } else {
-
-                                        }
-                                    } else {
-                                        await sourceManager.selectSourceMeasure(serviceMeasure, false)
-                                        this.props.navigation.dismiss()
-                                        this.props.navigation.state.params.onServiceSelected(serviceMeasure)
-                                    }*/
                                 }} />)
                     }
                 </ScrollView>

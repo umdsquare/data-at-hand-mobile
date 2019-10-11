@@ -33,7 +33,7 @@ class SourceManager {
     return this._supportedServices;
   }
 
-  readonly _onSelectedSourceChanged = new Subject<void>();
+  private readonly _onSelectedSourceChanged = new Subject<void>();
   get onSelectedSourceChanged(): Observable<void> {
     return this._onSelectedSourceChanged;
   }

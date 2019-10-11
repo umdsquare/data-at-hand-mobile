@@ -4,14 +4,13 @@ import {createAppContainer} from 'react-navigation';
 import { MeasureSettingsScreen } from './pages/sources/MeasureSettingsScreen';
 import Colors from '../style/Colors';
 import { ServiceSelectionWizardStack } from './pages/sources/service-wizard/ServiceSelectionScreen';
+import { Button } from 'react-native-elements';
 
 const MainStack = createStackNavigator(
   {
     Home: {
       screen: HomeScreen,
-      navigationOptions: ({navigation}) => ({
-          title: "Data@Hand",
-      })
+      navigationOptions: HomeScreen.navigationOptions
     },
     MeasureSettings: {
         screen: MeasureSettingsScreen,
@@ -32,14 +31,14 @@ const MainStack = createStackNavigator(
 
 const RootStack = createStackNavigator({
     Main: {
-        screen: MainStack
+        screen: MainStack,
     },
     ServiceWizardModal: {
         screen: ServiceSelectionWizardStack
     }
 }, {
     mode: 'modal',
-    headerMode: "none"
+    headerMode: 'none'
 })
 
 export default createAppContainer(RootStack);
