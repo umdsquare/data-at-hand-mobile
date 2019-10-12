@@ -3,8 +3,6 @@ import { View, Text } from 'react-native';
 import { Button } from 'react-native-elements';
 import Colors from '../../style/Colors';
 import { StyleTemplates } from '../../style/Styles';
-import { Subscription } from 'rxjs';
-import { sourceManager } from '../../system/SourceManager';
 import LinearGradient from 'react-native-linear-gradient';
 import { NavigationStackOptions } from 'react-navigation-stack';
 
@@ -19,19 +17,6 @@ export class HomeScreen extends React.Component {
             navigation.navigate("MeasureSettings")
         }} />)
     } as NavigationStackOptions)
-
-    private readonly _subscriptions = new Subscription()
-
-    componentDidMount(){
-        this._subscriptions.add(
-            sourceManager.onSelectedSourceChanged.subscribe(()=>{
-            })
-        )
-    }
-
-    componentWillUnmount(){
-        this._subscriptions.unsubscribe()
-    }
 
     render() {
         return (

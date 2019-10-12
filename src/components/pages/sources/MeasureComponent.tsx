@@ -11,15 +11,22 @@ import { ServiceSelectionScreenParameters } from "./service-wizard/ServiceSelect
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { connectActionSheet } from "@expo/react-native-action-sheet";
+import { connect } from "react-redux";
+import { Dispatch } from "redux";
+import { AppState } from "../../../state/types";
+import { getSourceSelectionInfo } from "../../../state/measure-settings/reducer";
+import { selectSourceForMeasure, deselectSourceForMeasure } from "../../../state/measure-settings/actions";
 
 interface Prop extends PropsWithNavigation {
     measureSpec: MeasureSpec
+    connectedMeasures: Array<DataSourceMeasure>
+    mainMeasureIndex: number
+    selectMeasure: () => void,
+    deselectMeasure: () => void
 }
 
 interface State {
     availableMeasures: Array<DataSourceMeasure>
-    connectedMeasures: Array<DataSourceMeasure>
-    mainMeasureIndex: number
 }
 
 const badgeSpacing = 8
@@ -35,12 +42,9 @@ class MeasureComponent extends React.Component<Prop, State>{
         super(props)
 
         this.state = {
-            availableMeasures: null,
-            connectedMeasures: null,
-            mainMeasureIndex: 0
+            availableMeasures: null
         }
 
-        this.refreshInformation.bind(this)
         this.callNewServiceSelectionDialog.bind(this)
     }
 
@@ -53,31 +57,13 @@ class MeasureComponent extends React.Component<Prop, State>{
             ...this.state,
             availableMeasures: serviceMeasures
         }
-
-        await this.refreshInformation(serviceMeasures, newState)
-    }
-
-    async refreshInformation(serviceMeasures: Array<DataSourceMeasure>, newState: State = { ...this.state }) {
-        if (serviceMeasures.length > 0) {
-            const selectionInfo = await sourceManager.getSourceSelectionInfo(this.props.measureSpec)
-            if (selectionInfo) {
-                newState.connectedMeasures = selectionInfo.connectedMeasureCodes.map(code => sourceManager.findMeasureByCode(code))
-                newState.mainMeasureIndex = selectionInfo.mainIndex
-            } else {
-                newState.connectedMeasures = null
-                newState.mainMeasureIndex = -1
-            }
-        }
-
         this.setState(newState)
+
     }
 
     private callNewServiceSelectionDialog() {
         this.props.navigation.navigate('ServiceWizardModal', {
-            measureSpec: this.props.measureSpec,
-            onServiceSelected: async () => {
-                await this.refreshInformation(this.state.availableMeasures)
-            }
+            measureSpec: this.props.measureSpec
         } as ServiceSelectionScreenParameters)
     }
 
@@ -90,7 +76,7 @@ class MeasureComponent extends React.Component<Prop, State>{
                 <View style={{ marginBottom: 4, flexDirection: 'row', alignItems: 'center' }}>
                     <View style={{
                         marginRight: 8, width: 10, height: 10, borderRadius: 5,
-                        backgroundColor: this.state.connectedMeasures && this.state.connectedMeasures.length > 0 ? Colors.green : 'lightgray' }} />
+                        backgroundColor: this.props.connectedMeasures && this.props.connectedMeasures.length > 0 ? Colors.green : 'lightgray' }} />
                     <Text style={{
                         ...StyleTemplates.titleTextStyle as any,
                     }
@@ -103,18 +89,17 @@ class MeasureComponent extends React.Component<Prop, State>{
                 }}>{this.props.measureSpec.description}</Text>
                 {
                     (this.state.availableMeasures != null && this.state.availableMeasures.length > 0) ? (
-                        (this.state.connectedMeasures != null && this.state.connectedMeasures.length > 0) ? (
+                        (this.props.connectedMeasures != null && this.props.connectedMeasures.length > 0) ? (
                             <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
                                 {
-                                    this.state.connectedMeasures.map((measure, index) => <SourceBadge
+                                    this.props.connectedMeasures.map((measure, index) => <SourceBadge
                                         style={{ marginLeft: index === 0 ? 0 : badgeSpacing }}
                                         key={measure.code}
                                         measure={measure}
-                                        refreshFunc={() => this.refreshInformation(this.state.availableMeasures)}
                                         showActionSheetWithOptions={(this.props as any).showActionSheetWithOptions}
-                                        isMain={this.state.connectedMeasures.indexOf(measure) === this.state.mainMeasureIndex} />)
+                                        isMain={this.props.connectedMeasures.indexOf(measure) === this.props.mainMeasureIndex} />)
                                 }
-                                {this.state.availableMeasures.length === this.state.connectedMeasures.length ?
+                                {this.state.availableMeasures.length === this.props.connectedMeasures.length ?
                                     (<></>) : (<AddNewBadge onPress={() => {
                                         this.callNewServiceSelectionDialog()
                                     }} />)}
@@ -145,7 +130,24 @@ class MeasureComponent extends React.Component<Prop, State>{
     }
 }
 
-const connectedMeasureComponent = connectActionSheet(MeasureComponent)
+const connectedMeasureComponent = connect(mapStateToProps)(connectActionSheet(MeasureComponent))
+
+function mapStateToProps(appState: AppState, ownProps: Prop): Prop{
+    const { measureSettingsState } = appState
+    const selectionInfo = getSourceSelectionInfo(ownProps.measureSpec, measureSettingsState)
+    if (selectionInfo) {
+        return {
+            ...ownProps,
+            connectedMeasures: selectionInfo.connectedMeasureCodes.map(code => sourceManager.findMeasureByCode(code)),
+            mainMeasureIndex: selectionInfo.mainIndex
+        }
+    } else return {
+        ...ownProps,
+        connectedMeasures: null,
+        mainMeasureIndex: -1
+    }
+}
+
 export { connectedMeasureComponent as MeasureComponent }
 
 
@@ -159,10 +161,19 @@ interface SourceBadgeProps {
     measure: DataSourceMeasure,
     isMain: boolean,
     showActionSheetWithOptions,
-    refreshFunc: Function
+    setMeasureAsMain: ()=>void,
+    deselectMeasure: ()=>void
 }
 
-const SourceBadge = (props: SourceBadgeProps) => {
+function mapDispatchToPropsSourceBadge(dispatch: Dispatch, ownProps: SourceBadgeProps): SourceBadgeProps{
+    return {
+        setMeasureAsMain: () => dispatch(selectSourceForMeasure(ownProps.measure, true)),
+        deselectMeasure: () => dispatch(deselectSourceForMeasure(ownProps.measure)),
+        ...ownProps
+    }
+}
+
+const SourceBadge = connect(null, mapDispatchToPropsSourceBadge)((props: SourceBadgeProps) => {
     return (
         <TouchableOpacity activeOpacity={0.7} style={props.style} onPress={() => {
             const options = ['Set as Default', 'Exclude this service', 'Cancel'];
@@ -186,12 +197,10 @@ const SourceBadge = (props: SourceBadgeProps) => {
                 async (buttonIndex) => {
                     switch (buttonIndex) {
                         case destructiveButtonIndex:
-                            await sourceManager.deselectSourceMeasure(props.measure)
-                            await props.refreshFunc()
+                            props.deselectMeasure()
                             break;
                         case setAsDefaultIndex:
-                            await sourceManager.selectSourceMeasure(props.measure, true)
-                            await props.refreshFunc()
+                            props.setMeasureAsMain()
                             break;
                     }
                 },
@@ -205,7 +214,7 @@ const SourceBadge = (props: SourceBadgeProps) => {
             </View>
         </TouchableOpacity>
     )
-}
+})
 
 interface AddNewBadgeProps {
     onPress: () => void

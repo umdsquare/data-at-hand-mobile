@@ -9,22 +9,16 @@
  */
 
 import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
-
-import Colors from './src/style/Colors';
 import AppNavigator from './src/components/Routes';
+import {makeStore } from './src/state/store';
+import { connect, Provider } from 'react-redux';
+
+const store = makeStore()
 
 const App = () => {
   const usingHermes = typeof HermesInternal === 'object' && HermesInternal !== null;
   console.log("Using Hermes engine.")
-  return <AppNavigator/>
+  return <Provider store = {store}><AppNavigator/></Provider>
 };
 
 export default App;

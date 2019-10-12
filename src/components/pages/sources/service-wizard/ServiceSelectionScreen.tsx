@@ -5,25 +5,27 @@ import { PropsWithNavigation } from "../../../../PropsWithNavigation";
 import { Sizes } from "../../../../style/Sizes";
 import { StyleTemplates } from "../../../../style/Styles";
 import { createStackNavigator } from "react-navigation-stack";
-import { DataSource, DataSourceMeasure } from "../../../../measure/source/DataSource";
+import { DataSource } from "../../../../measure/source/DataSource";
 import { sourceManager, SourceSelectionInfo } from "../../../../system/SourceManager";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Colors from "../../../../style/Colors";
 import { Button } from "react-native-elements";
+import { Dispatch } from "redux";
+import { connect } from "react-redux";
+import { selectSourceForMeasure } from "../../../../state/measure-settings/actions";
 
 interface Prop extends PropsWithNavigation {
-
+    selectionInfo: SourceSelectionInfo,
+    selectSource: () => void
 }
 
 interface State {
     measureSpec: MeasureSpec,
-    selectionInfo: SourceSelectionInfo,
     services: ReadonlyArray<DataSource>
 }
 
 export interface ServiceSelectionScreenParameters {
     measureSpec: MeasureSpec
-    onServiceSelected: (selectedServiceMeasure: DataSourceMeasure) => void
 }
 
 export class ServiceSelectionScreen extends React.Component<Prop, State>{
@@ -33,17 +35,14 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
 
         this.state = {
             measureSpec: this.props.navigation.getParam("measureSpec"),
-            selectionInfo: null,
             services: []
         }
     }
 
     async componentDidMount() {
-        const selectionInfo = await sourceManager.getSourceSelectionInfo(this.state.measureSpec)
         const supportedServices = await sourceManager.getServicesSupportedInThisSystem()
         this.setState({
             ...this.state,
-            selectionInfo: selectionInfo,
             services: supportedServices
         })
     }
@@ -68,19 +67,14 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
                                 key={service.key}
                                 index={index}
                                 selectedAlready={
-                                    this.state.selectionInfo &&
-                                    this.state.selectionInfo.connectedMeasureCodes
+                                    this.props.selectionInfo &&
+                                    this.props.selectionInfo.connectedMeasureCodes
                                         .indexOf(service.getMeasureOfSpec(this.state.measureSpec).code) != -1
                                 }
                                 source={service}
-                                onClick={async () => {
-                                    const serviceMeasure = service.getMeasureOfSpec(this.state.measureSpec)
-                                    const activated = await serviceMeasure.activateInSystem()
-                                    if (activated === true) {
-                                        await sourceManager.selectSourceMeasure(serviceMeasure, false)
-                                        this.props.navigation.dismiss()
-                                        this.props.navigation.state.params.onServiceSelected(serviceMeasure)
-                                    }
+                                measureSpec={this.state.measureSpec}
+                                onSelected={() => {
+                                    this.props.navigation.dismiss()
                                 }} />)
                     }
                 </ScrollView>
@@ -89,13 +83,42 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
     }
 }
 
-const ServiceElement = (props: { onClick: () => void, source: DataSource, index: number, selectedAlready: boolean }) => {
+interface ServiceElementProps {
+    measureSpec: MeasureSpec,
+    source: DataSource,
+    index: number,
+    selectedAlready: boolean,
+    select(): void,
+    onSelected(): void
+}
+
+function mapStateToProps(ownProps: ServiceElementProps): ServiceElementProps {
+    return ownProps
+}
+
+function mapDispatchToPropsForServiceElement(dispatch: Dispatch, ownProps: ServiceElementProps) {
+    return {
+        ...ownProps,
+        select: () => {
+            dispatch(selectSourceForMeasure(ownProps.source.getMeasureOfSpec(ownProps.measureSpec), false))
+        }
+    }
+}
+
+const ServiceElement = connect(mapStateToProps, mapDispatchToPropsForServiceElement)((props: ServiceElementProps) => {
     return <TouchableOpacity disabled={props.selectedAlready}
         style={{
             marginTop: props.index === 0 ? 0 : 24,
             marginRight: 20,
             marginLeft: 20,
-        }} activeOpacity={0.3} onPress={() => { props.onClick() }}>
+        }} activeOpacity={0.3} onPress={async () => {
+            const serviceMeasure = props.source.getMeasureOfSpec(props.measureSpec)
+            const activated = await serviceMeasure.activateInSystem()
+            if (activated === true) {
+                props.select()
+                props.onSelected()
+            }
+        }}>
         <View>
             <ImageBackground
                 style={{
@@ -125,7 +148,7 @@ const ServiceElement = (props: { onClick: () => void, source: DataSource, index:
                 </View>) : (<></>)}
         </View>
     </TouchableOpacity>
-}
+})
 
 export const ServiceSelectionWizardStack = createStackNavigator(
     {

@@ -26,6 +26,10 @@
     "react-native-vector-icons": "^6.6.0",
     "react-navigation": "^4.0.10",
     "react-navigation-stack": "^1.9.4",
+    "react-redux": "^7.1.1",
+    "redux": "^4.0.4",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.3.0",
     "rxjs": "^6.5.3",
     "ws": "^7.1.2"
   },
@@ -36,6 +40,7 @@
     "@types/jest": "^24.0.18",
     "@types/react": "16.9.5",
     "@types/react-native": "^0.60.19",
+    "@types/react-redux": "^7.1.4",
     "@types/react-test-renderer": "16.9.0",
     "babel-jest": "^24.9.0",
     "jest": "^24.9.0",
