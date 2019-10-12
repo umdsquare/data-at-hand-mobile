@@ -49,7 +49,6 @@ export class MeasureSettingsScreen extends React.Component<Prop, State>{
         return (<ActionSheetProvider>
             <LinearGradient 
                 style={{ flex: 1, alignSelf: 'stretch' }} 
-                start={{x: 0, y: 0}} end={{x: 1, y: 1}} 
                 colors={Colors.lightBackgroundGradient}>
                 {
                     this.state.isLoading === true ? (

@@ -19,6 +19,9 @@
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2DCD954D1E0B4F2C00145EB5 /* DataAtHandTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* DataAtHandTests.m */; };
 		30304E40924079FB43AC80A3 /* libPods-DataAtHand-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A55804B2A896815525E8CDC /* libPods-DataAtHand-tvOSTests.a */; };
+		3BDD1F2C2350DA7200528D3C /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BDD1F2B2350DA7200528D3C /* HealthKitManager.swift */; };
+		3BDD1F2E2350DAE700528D3C /* Bridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BDD1F2D2350DAE700528D3C /* Bridge.m */; };
+		3BDD1F312350DE7800528D3C /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BDD1F302350DE7800528D3C /* HealthKit.framework */; };
 		B0DE4E1776300128DA788C0F /* libPods-DataAtHand-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A9E65777EB6A16CECF452D2E /* libPods-DataAtHand-tvOS.a */; };
 /* End PBXBuildFile section */
 
@@ -56,6 +59,11 @@
 		2CBB9FABFB94D9A58DA0288D /* Pods-DataAtHand-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataAtHand-tvOS.release.xcconfig"; path = "Target Support Files/Pods-DataAtHand-tvOS/Pods-DataAtHand-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		2D02E47B1E0B4A5D006451C7 /* DataAtHand-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "DataAtHand-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E4901E0B4A5D006451C7 /* DataAtHand-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "DataAtHand-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3BDD1F2A2350DA7100528D3C /* DataAtHand-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DataAtHand-Bridging-Header.h"; sourceTree = "<group>"; };
+		3BDD1F2B2350DA7200528D3C /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HealthKitManager.swift; path = DataAtHand/HealthKitManager.swift; sourceTree = "<group>"; };
+		3BDD1F2D2350DAE700528D3C /* Bridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = Bridge.m; path = DataAtHand/Bridge.m; sourceTree = "<group>"; };
+		3BDD1F2F2350DE7800528D3C /* DataAtHand.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = DataAtHand.entitlements; path = DataAtHand/DataAtHand.entitlements; sourceTree = "<group>"; };
+		3BDD1F302350DE7800528D3C /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		3C8B292103AC3C5F3A067D5C /* Pods-DataAtHand-tvOSTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataAtHand-tvOSTests.release.xcconfig"; path = "Target Support Files/Pods-DataAtHand-tvOSTests/Pods-DataAtHand-tvOSTests.release.xcconfig"; sourceTree = "<group>"; };
 		42B567786757ADBB1A057948 /* Pods-DataAtHandTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataAtHandTests.release.xcconfig"; path = "Target Support Files/Pods-DataAtHandTests/Pods-DataAtHandTests.release.xcconfig"; sourceTree = "<group>"; };
 		4E98AF1302798D2D4EF21ADF /* Pods-DataAtHand-tvOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataAtHand-tvOS.debug.xcconfig"; path = "Target Support Files/Pods-DataAtHand-tvOS/Pods-DataAtHand-tvOS.debug.xcconfig"; sourceTree = "<group>"; };
@@ -83,6 +91,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2ABFBB09EB148E3014F5C070 /* libPods-DataAtHand.a in Frameworks */,
+				3BDD1F312350DE7800528D3C /* HealthKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +134,7 @@
 		13B07FAE1A68108700A75B9A /* DataAtHand */ = {
 			isa = PBXGroup;
 			children = (
+				3BDD1F2F2350DE7800528D3C /* DataAtHand.entitlements */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
@@ -132,6 +142,9 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				3BDD1F2B2350DA7200528D3C /* HealthKitManager.swift */,
+				3BDD1F2A2350DA7100528D3C /* DataAtHand-Bridging-Header.h */,
+				3BDD1F2D2350DAE700528D3C /* Bridge.m */,
 			);
 			name = DataAtHand;
 			sourceTree = "<group>";
@@ -139,6 +152,7 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3BDD1F302350DE7800528D3C /* HealthKit.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
 				187A3076B2F10FE6B9B735A5 /* libPods-DataAtHand.a */,
@@ -194,7 +208,6 @@
 				0BEB7110BA7F63F676D4C417 /* Pods-DataAtHandTests.debug.xcconfig */,
 				42B567786757ADBB1A057948 /* Pods-DataAtHandTests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -293,6 +306,9 @@
 						CreatedOnToolsVersion = 6.2;
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
+					13B07F861A680F5B00A75B9A = {
+						LastSwiftMigration = 1100;
+					};
 					2D02E47A1E0B4A5D006451C7 = {
 						CreatedOnToolsVersion = 8.2.1;
 						ProvisioningStyle = Automatic;
@@ -309,6 +325,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -579,6 +596,8 @@
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				3BDD1F2E2350DAE700528D3C /* Bridge.m in Sources */,
+				3BDD1F2C2350DA7200528D3C /* HealthKitManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -631,6 +650,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 0BEB7110BA7F63F676D4C417 /* Pods-DataAtHandTests.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -654,6 +674,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 42B567786757ADBB1A057948 /* Pods-DataAtHandTests.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				COPY_PHASE_STRIP = NO;
 				INFOPLIST_FILE = DataAtHandTests/Info.plist;
@@ -675,6 +696,8 @@
 			baseConfigurationReference = 89DAE6A2B5CBC67608559CC5 /* Pods-DataAtHand.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = DataAtHand/DataAtHand.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
 				INFOPLIST_FILE = DataAtHand/Info.plist;
@@ -686,6 +709,9 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = DataAtHand;
+				SWIFT_OBJC_BRIDGING_HEADER = "DataAtHand-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -695,6 +721,8 @@
 			baseConfigurationReference = 76AF03C9DC810CB6F8DAE5D3 /* Pods-DataAtHand.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = DataAtHand/DataAtHand.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				INFOPLIST_FILE = DataAtHand/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -705,6 +733,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = DataAtHand;
+				SWIFT_OBJC_BRIDGING_HEADER = "DataAtHand-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;

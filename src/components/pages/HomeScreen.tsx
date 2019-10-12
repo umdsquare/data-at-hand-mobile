@@ -25,7 +25,6 @@ export class HomeScreen extends React.Component {
     componentDidMount(){
         this._subscriptions.add(
             sourceManager.onSelectedSourceChanged.subscribe(()=>{
-                console.log("changed")
             })
         )
     }

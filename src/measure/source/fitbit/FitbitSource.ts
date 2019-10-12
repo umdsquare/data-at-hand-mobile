@@ -136,8 +136,6 @@ export class FitbitSource extends DataSource {
 
   async revokeScope(scope: string): Promise<boolean> {
     const scopeRevokeResult = await this.revokeScopeAndGet(scope);
-    console.log('new scopes:');
-    console.log(scopeRevokeResult);
     if (scopeRevokeResult.removed === true) {
       if (scopeRevokeResult.result.length === 0) {
         try {

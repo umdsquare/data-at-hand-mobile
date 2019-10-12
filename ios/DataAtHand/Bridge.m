@@ -10,4 +10,8 @@
 #import <React/RCTBridgeModule.h>
 
 @interface RCT_EXTERN_MODULE(HealthKitManager, NSObject)
+
+RCT_EXTERN_METHOD(isAvailableInSystem:(RCTResponseSenderBlock*)callback)
+RCT_EXTERN_METHOD(requestPermissions:(NSArray)permissions completion:(RCTResponseSenderBlock*)callback)
+
 @end

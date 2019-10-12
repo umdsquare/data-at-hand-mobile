@@ -4,6 +4,8 @@ import {AsyncStorageHelper} from './AsyncStorageHelper';
 import {MeasureSpec} from '../measure/MeasureSpec';
 import {AppleHealthSource} from '../measure/source/healthkit/AppleHealthSource';
 import {Subject, Observable} from 'rxjs';
+import {measureService} from './MeasureService';
+import {MeasureSettingsScreen} from '../components/pages/sources/MeasureSettingsScreen';
 
 export interface SourceSelectionInfo {
   connectedMeasureCodes: Array<string>;
@@ -82,7 +84,6 @@ class SourceManager {
       if (index >= 0) {
         const deactivated = await measure.deactivatedInSystem();
         if (deactivated === true) {
-        
           selectionInfo.connectedMeasureCodes.splice(index, 1);
           if (selectionInfo.connectedMeasureCodes.length === 0) {
             return AsyncStorageHelper.remove(measure.spec.nameKey).then(() => {
@@ -110,6 +111,30 @@ class SourceManager {
     measureSpec: MeasureSpec,
   ): Promise<SourceSelectionInfo> {
     return await AsyncStorageHelper.getObject(measureSpec.nameKey);
+  }
+
+  getSelectedMeasuresOfSource(
+    source: DataSource,
+  ): Promise<Array<DataSourceMeasure>> {
+    return Promise.all(
+      measureService.supportedMeasureSpecs.map(spec =>
+        this.getSourceSelectionInfo(spec).then(info => {
+          if (info != null && info.connectedMeasureCodes) {
+            return info.connectedMeasureCodes
+              .map(code => this.findMeasureByCode(code))
+              .filter(measure => measure.source.key === source.key);
+          } else return [];
+        })
+      )
+    ).then(resultMatrix => {
+        const result = []
+        resultMatrix.forEach(r => {
+            r.forEach(m => {
+                result.push(m)
+            })
+        })
+        return result
+    })
   }
 
   findMeasureByCode(code: string): DataSourceMeasure {
