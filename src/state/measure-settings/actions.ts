@@ -1,11 +1,11 @@
 import { DataSourceMeasure } from "../../measure/source/DataSource";
-import { ActionTypeBase, AsyncActionStatus } from "../types";
+import { ActionTypeBase } from "../types";
 
 //========================================
 
 export enum MeasureSettingsActionTypes {
-    SelectSourceForMeasure = "SELECT_SOURCE_FOR_MEASURE",
-    DeselectSourceForMeasure = "DESELECT_SOURCE_FOR_MEASURE",
+    SelectSourceForMeasure = "measureSettings/SELECT_SOURCE_FOR_MEASURE",
+    DeselectSourceForMeasure = "measureSettings/DESELECT_SOURCE_FOR_MEASURE",
 }
 
 

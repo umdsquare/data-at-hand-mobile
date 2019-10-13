@@ -5,7 +5,7 @@ import { PropsWithNavigation } from "../../../../PropsWithNavigation";
 import { Sizes } from "../../../../style/Sizes";
 import { StyleTemplates } from "../../../../style/Styles";
 import { createStackNavigator } from "react-navigation-stack";
-import { DataSource } from "../../../../measure/source/DataSource";
+import { DataSource, DataSourceMeasure } from "../../../../measure/source/DataSource";
 import { sourceManager, SourceSelectionInfo } from "../../../../system/SourceManager";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Colors from "../../../../style/Colors";
@@ -15,17 +15,18 @@ import { connect } from "react-redux";
 import { selectSourceForMeasure } from "../../../../state/measure-settings/actions";
 
 interface Prop extends PropsWithNavigation {
-    selectionInfo: SourceSelectionInfo,
-    selectSource: () => void
+    selectSource: () => void,
 }
 
 interface State {
     measureSpec: MeasureSpec,
+    selectedMeasureCodes: Array<string>,
     services: ReadonlyArray<DataSource>
 }
 
 export interface ServiceSelectionScreenParameters {
-    measureSpec: MeasureSpec
+    measureSpec: MeasureSpec,
+    selectedMeasureCodes: Array<string>,
 }
 
 export class ServiceSelectionScreen extends React.Component<Prop, State>{
@@ -35,6 +36,7 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
 
         this.state = {
             measureSpec: this.props.navigation.getParam("measureSpec"),
+            selectedMeasureCodes: this.props.navigation.getParam("selectedMeasureCodes"),
             services: []
         }
     }
@@ -67,8 +69,8 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
                                 key={service.key}
                                 index={index}
                                 selectedAlready={
-                                    this.props.selectionInfo &&
-                                    this.props.selectionInfo.connectedMeasureCodes
+                                    this.state.selectedMeasureCodes &&
+                                    this.state.selectedMeasureCodes
                                         .indexOf(service.getMeasureOfSpec(this.state.measureSpec).code) != -1
                                 }
                                 source={service}

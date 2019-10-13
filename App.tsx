@@ -10,15 +10,21 @@
 
 import React from 'react';
 import AppNavigator from './src/components/Routes';
-import {makeStore } from './src/state/store';
+import CreateStore from './src/state/store';
 import { connect, Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react'
 
-const store = makeStore()
+const { store, persistor } = CreateStore()
 
 const App = () => {
   const usingHermes = typeof HermesInternal === 'object' && HermesInternal !== null;
-  console.log("Using Hermes engine.")
-  return <Provider store = {store}><AppNavigator/></Provider>
+  if(usingHermes === true ) console.log("Using Hermes engine.")
+  
+  return <Provider store={store}>
+    <PersistGate loading={null} persistor={persistor}>
+      <AppNavigator />
+    </PersistGate>
+  </Provider>
 };
 
 export default App;

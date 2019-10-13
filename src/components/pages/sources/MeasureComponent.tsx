@@ -63,7 +63,8 @@ class MeasureComponent extends React.Component<Prop, State>{
 
     private callNewServiceSelectionDialog() {
         this.props.navigation.navigate('ServiceWizardModal', {
-            measureSpec: this.props.measureSpec
+            measureSpec: this.props.measureSpec,
+            selectedMeasureCodes: (this.props.connectedMeasures || []).map(m => m.code)
         } as ServiceSelectionScreenParameters)
     }
 
@@ -197,7 +198,10 @@ const SourceBadge = connect(null, mapDispatchToPropsSourceBadge)((props: SourceB
                 async (buttonIndex) => {
                     switch (buttonIndex) {
                         case destructiveButtonIndex:
-                            props.deselectMeasure()
+                            const deactivatedResult = await props.measure.deactivatedInSystem()
+                            if(deactivatedResult == true){
+                                props.deselectMeasure()
+                            }
                             break;
                         case setAsDefaultIndex:
                             props.setMeasureAsMain()

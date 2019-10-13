@@ -14,19 +14,15 @@ export interface MeasureSettingsState {
   }>;
 }
 
+const INITIAL_STATE = {
+  selectionInfoList: [],
+};
+
 export const measureSettingsStateReducer = (
-  state: MeasureSettingsState,
+  state: MeasureSettingsState = INITIAL_STATE,
   action: MeasureSettingsAction,
 ): MeasureSettingsState => {
-
-    var newState: MeasureSettingsState
-    if(state){
-        newState = JSON.parse(JSON.stringify(state));
-    }else{
-        newState = {
-            selectionInfoList: []
-        }
-    }
+  const newState: MeasureSettingsState = JSON.parse(JSON.stringify(state));
 
   switch (action.type) {
     case MeasureSettingsActionTypes.SelectSourceForMeasure:
@@ -41,9 +37,10 @@ export const measureSettingsStateReducer = (
         action as DeselectSourceForMeasureAction,
       );
       return newState;
-    default: return newState
+    default:
+      return INITIAL_STATE;
   }
-}
+};
 
 export function getSourceSelectionInfo(
   measureSpec: MeasureSpec,
@@ -125,8 +122,6 @@ function deselectSourceForMeasureImpl(
       action.measure.code,
     );
     if (index >= 0) {
-      //const deactivated = await measure.deactivatedInSystem();
-      //TODO change this into async function
       const deactivated = true;
       if (deactivated === true) {
         selectionInfo.connectedMeasureCodes.splice(index, 1);
