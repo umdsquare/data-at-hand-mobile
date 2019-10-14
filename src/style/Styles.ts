@@ -33,6 +33,19 @@ const StyleTemplates = {
     color: Colors.textColorDark
   }as StyleProp<TextStyle>,
 
+  subTitleTextStyle: {
+    fontSize: Sizes.subtitleFontSize,
+    fontWeight: "bold",
+    color: Colors.textColorDark
+  }as StyleProp<TextStyle>,
+
+
+  hugeTitleTextStyle: {
+    fontSize: Sizes.hugeTitleFontSize,
+    fontWeight: "bold",
+    color: Colors.textColorDark
+  }as StyleProp<TextStyle>,
+
   descriptionTextStyle: {
     fontSize: Sizes.descriptionFontSize,
     color: Colors.textColorLight

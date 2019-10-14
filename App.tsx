@@ -11,7 +11,7 @@
 import React from 'react';
 import AppNavigator from './src/components/Routes';
 import CreateStore from './src/state/store';
-import { connect, Provider } from 'react-redux';
+import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react'
 
 const { store, persistor } = CreateStore()

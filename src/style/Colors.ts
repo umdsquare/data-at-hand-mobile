@@ -5,6 +5,7 @@ export default {
   lightBackgroundGradient: ["#e0e8ee", "#eeeaec"],
   accent: "#ED5F88",
   link: "#14acc4",
+  lightFormBackground: "#d0d0d0",
   textColorDark: "#252525",
   textColorLight: "#575757",
   colorWarnLight: "#e37f78",

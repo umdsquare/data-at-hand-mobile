@@ -3,27 +3,29 @@ import {
   MeasureSettingsActionTypes,
   SelectSourceForMeasureAction,
   DeselectSourceForMeasureAction,
+  SetUnitTypeAction,
 } from './actions';
-import {MeasureSpec} from '../../measure/MeasureSpec';
+import {MeasureSpec, MeasureUnitType} from '../../measure/MeasureSpec';
 import {SourceSelectionInfo} from '../../system/SourceManager';
 
 export interface MeasureSettingsState {
   selectionInfoList: Array<{
     measureSpecKey: string;
     sourceSelectionInfo: SourceSelectionInfo;
-  }>;
+  }>,
+  unit: MeasureUnitType
 }
 
 const INITIAL_STATE = {
   selectionInfoList: [],
-};
+  unit: MeasureUnitType.Metric
+} as MeasureSettingsState;
 
 export const measureSettingsStateReducer = (
   state: MeasureSettingsState = INITIAL_STATE,
   action: MeasureSettingsAction,
 ): MeasureSettingsState => {
   const newState: MeasureSettingsState = JSON.parse(JSON.stringify(state));
-
   switch (action.type) {
     case MeasureSettingsActionTypes.SelectSourceForMeasure:
       selectSourceForMeasureImpl(
@@ -36,6 +38,9 @@ export const measureSettingsStateReducer = (
         newState,
         action as DeselectSourceForMeasureAction,
       );
+      return newState;
+    case MeasureSettingsActionTypes.SetUnitType:
+      setUnitTypeImpl(newState, action as SetUnitTypeAction)
       return newState;
     default:
       return INITIAL_STATE;
@@ -145,4 +150,11 @@ function deselectSourceForMeasureImpl(
       }
     }
   } else return;
+}
+
+function setUnitTypeImpl(
+  state: MeasureSettingsState,
+  action: SetUnitTypeAction
+){
+  state.unit = action.unitType
 }

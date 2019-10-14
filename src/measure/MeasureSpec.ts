@@ -10,3 +10,8 @@ export interface MeasureSpec {
     readonly name: string
     readonly description: string
 }
+
+export enum MeasureUnitType{
+  Metric = "metric",
+  US = "us"
+}

@@ -6,6 +6,7 @@ import {AppleHealthSource} from '../measure/source/healthkit/AppleHealthSource';
 import {Subject, Observable} from 'rxjs';
 import {measureService} from './MeasureService';
 import {MeasureSettingsScreen} from '../components/pages/sources/MeasureSettingsScreen';
+import { MeasureSettingsState } from '../state/measure-settings/reducer';
 
 export interface SourceSelectionInfo {
   connectedMeasureCodes: Array<string>;
@@ -73,6 +74,16 @@ class SourceManager {
         return service.supportedMeasures.find(m => m.code === code);
       } else return null;
     } else return null;
+  }
+
+  getMainSourceMeasure(spec: MeasureSpec, state: MeasureSettingsState): DataSourceMeasure{
+    const info = state.selectionInfoList.find(info => info.measureSpecKey === spec.nameKey)
+    if(info){
+      const {connectedMeasureCodes, mainIndex} = info.sourceSelectionInfo
+      if(connectedMeasureCodes && mainIndex >= 0){
+        return this.findMeasureByCode(connectedMeasureCodes[mainIndex])
+      }else return null
+    }else return null
   }
 }
 

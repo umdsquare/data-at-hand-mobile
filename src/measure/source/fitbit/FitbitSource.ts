@@ -13,6 +13,61 @@ interface FitbitCredential {
   readonly redirect_uri: string;
 }
 
+const FITBIT_DATE_FORMAT = "yyyy-MM-dd"
+const FITBIT_TIME_FORMAT = "HH:mm"
+
+const FITBIT_INTRADAY_ACTIVITY_API_URL = `https://api.fitbit.com/1/user/-/{resourcePath}/date/{date}/1d/1min/time/{startTime}/{endTime}.json`
+const FITBIT_SLEEP_LOGS_URL = "https://api.fitbit.com/1.2/user/-/sleep/date/{startDate}/{endDate}.json"
+const FITBIT_WEIGHT_LOGS_URL = "https://api.fitbit.com/1/user/-/body/weight/date/[startDate]/[endDate].json"
+const FITBIT_HEARTRATE_LOGS_URL = "https://api.fitbit.com/1/user/-/activities/heart/date/{date}/{endDate}/1sec/time/{startTime}/{endTime}.json"
+
+/**
+ * 
+ * 
+ * @param config start and end time must be within the same date
+ */
+function makeFitbitIntradayActivityApiUrl(resourcePath: string, start: Date, end: Date): string{
+  const moment = require('moment');
+  const stringFormat = require('string-format');
+  const startMoment = moment(start)
+  const endMoment = moment(end)
+  return stringFormat(FITBIT_INTRADAY_ACTIVITY_API_URL, {
+    resourcePath: resourcePath,
+    date: startMoment.format(FITBIT_DATE_FORMAT),
+    startTime: startMoment.format(FITBIT_TIME_FORMAT),
+    endTime: endMoment.format(FITBIT_TIME_FORMAT)
+  })
+}
+
+function makeFitbitSleepApiUrl(startDate: Date, endDate: Date): string{
+  const moment = require('moment');
+  const stringFormat = require('string-format');
+  return stringFormat(FITBIT_SLEEP_LOGS_URL, {
+    startDate: moment(startDate).format(FITBIT_DATE_FORMAT),
+    endDate: moment(endDate).format(FITBIT_DATE_FORMAT)
+  })
+}
+
+function makeFitbitWeightApiUrl(startDate: Date, endDate: Date): string{
+  const moment = require('moment');
+  const stringFormat = require('string-format');
+  return stringFormat(FITBIT_WEIGHT_LOGS_URL, {
+    startDate: moment(startDate).format(FITBIT_DATE_FORMAT),
+    endDate: moment(endDate).format(FITBIT_DATE_FORMAT)
+  })
+}
+
+function makeFitbitHeartRateApiUrl(startDate: Date, endDate: Date, startTime?: string, endTime?: string): string{
+  const moment = require('moment');
+  const stringFormat = require('string-format');
+  return stringFormat(FITBIT_HEARTRATE_LOGS_URL, {
+    startDate: moment(startDate).format(FITBIT_DATE_FORMAT),
+    endDate: moment(endDate).format(FITBIT_DATE_FORMAT),
+    startTime: startTime,
+    endTime: endTime
+  })
+}
+
 const STORAGE_KEY_AUTH_STATE = DataSource.STORAGE_PREFIX + 'fitbit:state';
 const STORAGE_KEY_AUTH_CURRENT_SCOPES =
   DataSource.STORAGE_PREFIX + 'fitbit:scopes';
@@ -167,6 +222,18 @@ export class FitbitSource extends DataSource {
       }
     }
     return true;
+  }
+
+  async fetchFitbitQuery<T>(url: string): Promise<T>{
+    const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
+    return fetch(url, {
+      method: 'GET',
+      headers: {
+        "Accept-Language": 'en_US',
+        "Authorization": "Bearer " + state.accessToken,
+        'Content-Type': 'application/json'
+      }
+    }).then(result => result.json())
   }
 
   protected onCheckSupportedInSystem(): Promise<{
