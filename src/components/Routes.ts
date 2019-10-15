@@ -5,6 +5,7 @@ import { MeasureSettingsScreen } from './pages/sources/MeasureSettingsScreen';
 import Colors from '../style/Colors';
 import { ServiceSelectionWizardStack } from './pages/sources/service-wizard/ServiceSelectionScreen';
 import { Button } from 'react-native-elements';
+import { Sizes } from '../style/Sizes';
 
 const MainStack = createStackNavigator(
   {
@@ -23,8 +24,14 @@ const MainStack = createStackNavigator(
     initialRouteName: 'Home',
     defaultNavigationOptions: {
         headerTintColor: Colors.accent,
-        headerTitleStyle: {color: Colors.textColorDark},
-        headerBackTitle: 'Back'
+        headerTitleStyle: {
+          color: Colors.textColorDark,
+          fontSize: Sizes.titleFontSize
+        },
+        headerBackTitle: 'Back',
+        headerStyle: {
+          height: 60
+        }
     }
   },
 );

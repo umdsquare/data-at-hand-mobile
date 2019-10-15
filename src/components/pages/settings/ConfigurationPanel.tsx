@@ -37,11 +37,14 @@ class ConfigurationPanel extends React.Component<Props>{
                     borderColor: Colors.accent,
                     borderWidth: 2,
                 }}
+                buttonStyle = {{
+                    backgroundColor: 'transparent',
+                }}
                 selectedButtonStyle={{
                     backgroundColor: Colors.accent
                 }}
                 textStyle={{
-                    color: Colors.accent
+                    color: Colors.lightFormBackground
                 }}
                 onPress={(index)=>{this.props.setUnitType(index)}}></ButtonGroup>
         </View>)
