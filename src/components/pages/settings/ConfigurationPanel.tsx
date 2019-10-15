@@ -28,7 +28,8 @@ class ConfigurationPanel extends React.Component<Props>{
     render(){
         return (
         <View style={{paddingLeft: Sizes.horizontalPadding, paddingRight: Sizes.horizontalPadding}}>
-            <Text style={StyleTemplates.subTitleTextStyle}>Units</Text>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Text style={{marginRight: 8, fontSize: Sizes.subtitleFontSize}}>Units</Text>
             <ButtonGroup 
                 buttons={ConfigurationPanel.UnitTypes.map(tu => tu.label)} 
                 selectedIndex={ConfigurationPanel.UnitTypes.findIndex(tu => tu.key === this.props.selectedUnitType)}
@@ -36,6 +37,7 @@ class ConfigurationPanel extends React.Component<Props>{
                     borderRadius: 8,
                     borderColor: Colors.accent,
                     borderWidth: 2,
+                    flex: 1
                 }}
                 buttonStyle = {{
                     backgroundColor: 'transparent',
@@ -50,6 +52,7 @@ class ConfigurationPanel extends React.Component<Props>{
                     fontWeight: 'bold'
                 }}
                 onPress={(index)=>{this.props.setUnitType(index)}}></ButtonGroup>
+            </View>
         </View>)
     }
 }

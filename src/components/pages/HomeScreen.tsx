@@ -33,7 +33,8 @@ const appBarIconStyles = {
 export class HomeScreen extends React.Component<PropsWithNavigation> {
 
     static navigationOptions = ({ navigation }) => ({
-        headerTitle: (<Logo />),
+        headerLeft: (<Logo />),
+        headerLeftContainerStyle: {paddingLeft: Sizes.horizontalPadding},
         headerRight: (
             <View style={{
                 flexDirection: 'row', alignItems: 'center',
@@ -111,7 +112,7 @@ export class HomeScreen extends React.Component<PropsWithNavigation> {
                         justifyContent: 'space-between',
                         alignItems: 'center'
                     }}>
-                        <Text style={StyleTemplates.hugeTitleTextStyle}>Settings</Text>
+                        <Text style={StyleTemplates.titleTextStyle}>Settings</Text>
                         <Button buttonStyle={{
                             backgroundColor: 'transparent'
                         }}
