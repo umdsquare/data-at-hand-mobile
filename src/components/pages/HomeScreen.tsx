@@ -11,8 +11,7 @@ import { Sizes } from '../../style/Sizes';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { Logo } from '../Logo';
-
-let configSheetRef: RBSheet
+import { PropsWithNavigation } from '../../PropsWithNavigation';
 
 const appBarIconStyles = {
     buttonStyle: {
@@ -31,7 +30,7 @@ const appBarIconStyles = {
 }
 
 
-export class HomeScreen extends React.Component {
+export class HomeScreen extends React.Component<PropsWithNavigation> {
 
     static navigationOptions = ({ navigation }) => ({
         headerTitle: (<Logo />),
@@ -47,7 +46,7 @@ export class HomeScreen extends React.Component {
                         <AntDesignIcon name="setting" size={appBarIconStyles.iconSize} color={appBarIconStyles.iconColor} />
                     }
                     onPress={() => {
-                        configSheetRef.open()
+                        navigation.getParam('openConfigSheet')()
                     }} />
 
                 <Button
@@ -62,6 +61,25 @@ export class HomeScreen extends React.Component {
         )
     } as NavigationStackOptions)
 
+    private _configSheetRef: RBSheet = null
+
+    componentDidMount() {
+        this.props.navigation.setParams({openConfigSheet: this._openConfigSheet})
+    }
+
+    _closeConfigSheet = () => {
+        if (this._configSheetRef) {
+            this._configSheetRef.close()
+        }
+    }
+
+
+    _openConfigSheet = () => {
+        if (this._configSheetRef) {
+            this._configSheetRef.open()
+        }
+    }
+
     render() {
         return (
             <LinearGradient
@@ -70,7 +88,7 @@ export class HomeScreen extends React.Component {
 
                 <RBSheet ref={
                     ref => {
-                        configSheetRef = ref
+                        this._configSheetRef = ref
                     }}
                     duration={240}
                     animationType="fade"
@@ -98,7 +116,7 @@ export class HomeScreen extends React.Component {
                             backgroundColor: 'transparent'
                         }}
                             icon={<AntDesignIcon name="closecircle" size={26} color={Colors.lightFormBackground} />}
-                            onPress={() => configSheetRef.close()}
+                            onPress={() => this._closeConfigSheet()}
                         />
                     </View>
                     <ConfigurationPanel />

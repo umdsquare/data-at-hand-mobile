@@ -46,6 +46,9 @@ class ConfigurationPanel extends React.Component<Props>{
                 textStyle={{
                     color: Colors.lightFormBackground
                 }}
+                selectedTextStyle={{
+                    fontWeight: 'bold'
+                }}
                 onPress={(index)=>{this.props.setUnitType(index)}}></ButtonGroup>
         </View>)
     }
