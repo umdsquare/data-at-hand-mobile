@@ -12,6 +12,7 @@ import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { Logo } from '../Logo';
 import { PropsWithNavigation } from '../../PropsWithNavigation';
+import { sourceManager } from '../../system/SourceManager';
 
 const appBarIconStyles = {
     buttonStyle: {
@@ -28,7 +29,6 @@ const appBarIconStyles = {
     iconSize: 20,
     iconColor: Colors.textColorLight
 }
-
 
 export class HomeScreen extends React.Component<PropsWithNavigation> {
 
@@ -64,8 +64,17 @@ export class HomeScreen extends React.Component<PropsWithNavigation> {
 
     private _configSheetRef: RBSheet = null
 
+    constructor(props){
+        super(props)
+        this.state = {
+            isLoading: true
+        }
+    }
+
     componentDidMount() {
-        this.props.navigation.setParams({openConfigSheet: this._openConfigSheet})
+        this.props.navigation.setParams({
+            openConfigSheet: this._openConfigSheet,
+        })
     }
 
     _closeConfigSheet = () => {
@@ -86,7 +95,7 @@ export class HomeScreen extends React.Component<PropsWithNavigation> {
             <LinearGradient
                 style={{ flex: 1, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' }}
                 colors={Colors.lightBackgroundGradient}>
-
+                
                 <RBSheet ref={
                     ref => {
                         this._configSheetRef = ref
