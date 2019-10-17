@@ -4,7 +4,7 @@ import { Animated } from 'react-native';
 interface Props {
     visible: boolean,
     fadeDuration: number,
-    style: any
+    style?: any
 }
 
 interface State{

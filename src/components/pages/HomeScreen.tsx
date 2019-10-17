@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, SafeAreaView } from 'react-native';
 import { Button } from 'react-native-elements';
 import Colors from '../../style/Colors';
 import { StyleTemplates } from '../../style/Styles';
@@ -12,7 +12,10 @@ import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { Logo } from '../Logo';
 import { PropsWithNavigation } from '../../PropsWithNavigation';
-import { sourceManager } from '../../system/SourceManager';
+import { speechRecognizer, DictationResult } from '../../speech/SpeechRecognizer';
+import { VoiceInputButton } from '../speech/VoiceInputButton';
+import { SpeechInputPopup } from '../speech/SpeechInputPopup';
+import { SpeechCommandSession, SessionStatus, TerminationPayload, TerminationReason } from '../../speech/SpeechCommandSession';
 
 const appBarIconStyles = {
     buttonStyle: {
@@ -30,11 +33,17 @@ const appBarIconStyles = {
     iconColor: Colors.textColorLight
 }
 
-export class HomeScreen extends React.Component<PropsWithNavigation> {
+interface State{
+    isLoading: boolean,
+    dictationResult: DictationResult,
+    speechCommandSessionStatus: SessionStatus
+}
+
+export class HomeScreen extends React.Component<PropsWithNavigation, State> {
 
     static navigationOptions = ({ navigation }) => ({
         headerLeft: (<Logo />),
-        headerLeftContainerStyle: {paddingLeft: Sizes.horizontalPadding},
+        headerLeftContainerStyle: { paddingLeft: Sizes.horizontalPadding },
         headerRight: (
             <View style={{
                 flexDirection: 'row', alignItems: 'center',
@@ -64,10 +73,16 @@ export class HomeScreen extends React.Component<PropsWithNavigation> {
 
     private _configSheetRef: RBSheet = null
 
-    constructor(props){
+    private _speechPopupRef: SpeechInputPopup = null
+
+    private _currentSpeechCommandSession: SpeechCommandSession = null
+
+    constructor(props) {
         super(props)
         this.state = {
-            isLoading: true
+            isLoading: true,
+            dictationResult: null,
+            speechCommandSessionStatus: SessionStatus.Idle
         }
     }
 
@@ -75,6 +90,60 @@ export class HomeScreen extends React.Component<PropsWithNavigation> {
         this.props.navigation.setParams({
             openConfigSheet: this._openConfigSheet,
         })
+    }
+
+    async componentWillUnmount() {
+        await speechRecognizer.uninstall()
+
+        if (this._currentSpeechCommandSession) {
+            this._currentSpeechCommandSession.dispose()
+        }
+    }
+
+    private async startNewSpeechCommandSession() {
+        if (this._currentSpeechCommandSession == null) {
+            this._currentSpeechCommandSession = new SpeechCommandSession(
+                (status, payload) => {
+                    console.log("status:", status)
+                    this.setState({...this.state, speechCommandSessionStatus: status})
+                    switch (status) {
+                        case SessionStatus.Starting:
+                            this._speechPopupRef.show()
+                            break;
+                        case SessionStatus.Analyzing:
+                            this._speechPopupRef.hide()
+                            break;
+                        case SessionStatus.Terminated:
+                            const terminationPayload: TerminationPayload = payload as TerminationPayload
+                            console.log("termination reason:", terminationPayload.reason)
+                            if(terminationPayload.reason === TerminationReason.Success){
+
+                            }else{
+                            }
+                            this.setState({...this.state, 
+                                dictationResult: null,
+                                speechCommandSessionStatus: null
+                            })
+                            this._currentSpeechCommandSession.dispose()
+                            this._currentSpeechCommandSession = null
+                            break;
+                    }
+                },
+                (output: DictationResult) => {
+                    this.setState({
+                        ...this.state,
+                        dictationResult: output
+                    })
+                }
+            )
+            await this._currentSpeechCommandSession.requestStart()
+        }
+    }
+
+    private async stopSpeechInput() {
+        if (this._currentSpeechCommandSession) {
+            await this._currentSpeechCommandSession.requestStopListening()
+        }
     }
 
     _closeConfigSheet = () => {
@@ -95,7 +164,33 @@ export class HomeScreen extends React.Component<PropsWithNavigation> {
             <LinearGradient
                 style={{ flex: 1, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' }}
                 colors={Colors.lightBackgroundGradient}>
-                
+
+                <View
+                    style={{ flex: 1, alignSelf: 'stretch' }}
+                >
+
+                    <SpeechInputPopup ref={ref => this._speechPopupRef = ref} dictationResult={this.state.dictationResult} />
+
+                </View>
+
+                <SafeAreaView style={{
+                    alignSelf: 'stretch', /*backgroundColor: 'white',
+                    shadowColor: 'black',
+                    shadowOffset: { width: 0, height: -1 },
+                    shadowRadius: 2,
+                    shadowOpacity: 0.07*/
+                }}>
+                    <VoiceInputButton containerStyle={{ alignSelf: 'center' }}
+                        isBusy={this.state.speechCommandSessionStatus != SessionStatus.Terminated && this.state.speechCommandSessionStatus >= SessionStatus.Analyzing}
+                        onTouchDown={async () => {
+                            await this.startNewSpeechCommandSession()
+                        }}
+                        onTouchUp={async () => {
+                            this._speechPopupRef.hide()
+                            await this.stopSpeechInput()
+                        }} />
+                </SafeAreaView>
+
                 <RBSheet ref={
                     ref => {
                         this._configSheetRef = ref

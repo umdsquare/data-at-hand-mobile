@@ -20,6 +20,7 @@
 		2D02E4BF1E0B4AB3006451C7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		2DCD954D1E0B4F2C00145EB5 /* DataAtHandTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* DataAtHandTests.m */; };
 		30304E40924079FB43AC80A3 /* libPods-DataAtHand-tvOSTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 9A55804B2A896815525E8CDC /* libPods-DataAtHand-tvOSTests.a */; };
+		3B8582BB2356BA9C0028E901 /* SpeechRecognitionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8582BA2356BA9C0028E901 /* SpeechRecognitionManager.swift */; };
 		3BDD1F2C2350DA7200528D3C /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BDD1F2B2350DA7200528D3C /* HealthKitManager.swift */; };
 		3BDD1F2E2350DAE700528D3C /* Bridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BDD1F2D2350DAE700528D3C /* Bridge.m */; };
 		3BDD1F312350DE7800528D3C /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BDD1F302350DE7800528D3C /* HealthKit.framework */; };
@@ -67,6 +68,7 @@
 		2CBB9FABFB94D9A58DA0288D /* Pods-DataAtHand-tvOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-DataAtHand-tvOS.release.xcconfig"; path = "Target Support Files/Pods-DataAtHand-tvOS/Pods-DataAtHand-tvOS.release.xcconfig"; sourceTree = "<group>"; };
 		2D02E47B1E0B4A5D006451C7 /* DataAtHand-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "DataAtHand-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E4901E0B4A5D006451C7 /* DataAtHand-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "DataAtHand-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		3B8582BA2356BA9C0028E901 /* SpeechRecognitionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpeechRecognitionManager.swift; path = DataAtHand/SpeechRecognitionManager.swift; sourceTree = "<group>"; };
 		3BDD1F2A2350DA7100528D3C /* DataAtHand-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DataAtHand-Bridging-Header.h"; sourceTree = "<group>"; };
 		3BDD1F2B2350DA7200528D3C /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HealthKitManager.swift; path = DataAtHand/HealthKitManager.swift; sourceTree = "<group>"; };
 		3BDD1F2D2350DAE700528D3C /* Bridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = Bridge.m; path = DataAtHand/Bridge.m; sourceTree = "<group>"; };
@@ -153,9 +155,10 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
 				13B07FB71A68108700A75B9A /* main.m */,
-				3BDD1F2B2350DA7200528D3C /* HealthKitManager.swift */,
 				3BDD1F2A2350DA7100528D3C /* DataAtHand-Bridging-Header.h */,
 				3BDD1F2D2350DAE700528D3C /* Bridge.m */,
+				3BDD1F2B2350DA7200528D3C /* HealthKitManager.swift */,
+				3B8582BA2356BA9C0028E901 /* SpeechRecognitionManager.swift */,
 			);
 			name = DataAtHand;
 			sourceTree = "<group>";
@@ -336,6 +339,7 @@
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
 					13B07F861A680F5B00A75B9A = {
+						DevelopmentTeam = Z2V4PCY78C;
 						LastSwiftMigration = 1100;
 					};
 					2D02E47A1E0B4A5D006451C7 = {
@@ -643,6 +647,7 @@
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				3BDD1F2E2350DAE700528D3C /* Bridge.m in Sources */,
 				3BDD1F2C2350DA7200528D3C /* HealthKitManager.swift in Sources */,
+				3B8582BB2356BA9C0028E901 /* SpeechRecognitionManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -761,11 +766,13 @@
 				CODE_SIGN_ENTITLEMENTS = DataAtHand/DataAtHand.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
+				DEVELOPMENT_TEAM = Z2V4PCY78C;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/SupportingFiles/**",
 				);
 				INFOPLIST_FILE = DataAtHand/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -789,11 +796,13 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = DataAtHand/DataAtHand.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z2V4PCY78C;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../node_modules/@nozbe/watermelondb/native/ios/WatermelonDB/SupportingFiles/**",
 				);
 				INFOPLIST_FILE = DataAtHand/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = (
 					"$(inherited)",

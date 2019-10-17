@@ -2,8 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone is used to hear your voice input.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Data@Hand requires your permission to leverage the speech interaction feature.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>Data@Hands needs your permission to get access to your HealthKit data.</string>
+	<string>Data@Hand needs your permission to get access to your HealthKit data.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
@@ -66,6 +70,7 @@
 	</array>
 	<key>UIAppFonts</key>
 	<array>
+		<string>FontAwesome.ttf</string>
 		<string>AntDesign.ttf</string>
 		<string>MaterialIcons.ttf</string>
 	</array>

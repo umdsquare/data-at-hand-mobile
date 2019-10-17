@@ -16,6 +16,8 @@ import { PersistGate } from 'redux-persist/integration/react'
 import LottieView from 'lottie-react-native';
 import { sourceManager } from './src/system/SourceManager';
 import { FadeView } from './src/components/common/FadeView';
+import { speechRecognizer } from './src/speech/SpeechRecognizer';
+import { sleep } from './src/utils';
 
 const { store, persistor } = CreateStore()
 
@@ -38,10 +40,21 @@ class App extends React.Component<any, State> {
     const loadingStartTime = Date.now()
     //loading initial things
     const services = await sourceManager.getServicesSupportedInThisSystem()
-    const sleep = await new Promise(resolve => setTimeout(resolve, 1000)); //test sleep
+    const speechInstalled = await speechRecognizer.install()
+    if(speechInstalled === true){
+      const isAvailableInSystem = await speechRecognizer.isAvailableInSystem()
+      if(isAvailableInSystem === true){
+        console.log("Speech recognition is available on this system.")
+      }
+    }
+    await sleep(1000); //test sleep
     this.setState({isLoading: false})
 
     console.log("initial loading finished in ", Date.now() - loadingStartTime, "milis.")
+  }
+
+  async componentWillUnmount(){
+    await speechRecognizer.uninstall()
   }
 
   render() {
