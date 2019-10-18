@@ -96,14 +96,13 @@ export class SpeechInputPopup extends React.Component<Props, State> {
                     left: 40,
                     right: 40,
                     bottom: this.interpolate("bottom"),
-                    backgroundColor: Colors.lightBackground,
+                    backgroundColor: 'white',
                     borderRadius: 8,
-
                     opacity: this.interpolate("opacity"),
-                    shadowColor: 'black',
+                    shadowColor: '#324749',
                     shadowOffset: { width: 0, height: this.interpolate("shadowOffsetHeight") },
-                    shadowRadius: 12,
-                    shadowOpacity: 0.1,
+                    shadowRadius: 8,
+                    shadowOpacity: 0.3,
                     padding: 24,
                     paddingTop: 16
                 }}>

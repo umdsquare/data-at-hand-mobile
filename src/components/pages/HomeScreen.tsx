@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, SafeAreaView } from 'react-native';
+import { View, Text, SafeAreaView, Animated } from 'react-native';
 import { Button } from 'react-native-elements';
 import Colors from '../../style/Colors';
 import { StyleTemplates } from '../../style/Styles';
@@ -18,6 +18,7 @@ import { VoiceInputButton } from '../speech/VoiceInputButton';
 import { SpeechInputPopup } from '../speech/SpeechInputPopup';
 import { SpeechCommandSession, SessionStatus, TerminationPayload, TerminationReason } from '../../speech/SpeechCommandSession';
 import { NLUResultPanel } from '../speech/NLUResultPanel';
+import { DarkOverlay } from '../common/DarkOverlay';
 
 const appBarIconStyles = {
     buttonStyle: {
@@ -75,6 +76,8 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
     } as NavigationStackOptions)
 
     private _configSheetRef: RBSheet = null
+    
+    private _darkOverlayRef: DarkOverlay = null
 
     private _speechPopupRef: SpeechInputPopup = null
 
@@ -117,9 +120,11 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                                 nluResult: null
                             })
                             this._speechPopupRef.show()
+                            this._darkOverlayRef.show()
                             break;
                         case SessionStatus.Analyzing:
                             this._speechPopupRef.hide()
+                            this._darkOverlayRef.hide()
                             break;
                         case SessionStatus.Terminated:
                             const terminationPayload: TerminationPayload = payload as TerminationPayload
@@ -139,6 +144,7 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                             })
                             this._currentSpeechCommandSession.dispose()
                             this._currentSpeechCommandSession = null
+                            this._darkOverlayRef.hide()
                             break;
                     }
                 },
@@ -178,14 +184,27 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                 style={{ flex: 1, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' }}
                 colors={Colors.lightBackgroundGradient}>
 
-                <View style={{ flex: 1, alignSelf: 'stretch', }}></View>
+                
+                <View style={{ flex: 1, alignSelf: 'stretch', }}>
+                    <View style={{
+                        position: 'absolute',
+                        left: Sizes.horizontalPadding,
+                        right: Sizes.horizontalPadding,
+                        top: Sizes.verticalPadding,
+                        bottom: Sizes.verticalPadding,
+                        ...StyleTemplates.backgroundCardStyle,
+                        backgroundColor: Colors.lightBackground,
+                        shadowRadius: 2,
+                        borderRadius: 16
+                    }}>
+                    <Text>Haha</Text>
+                    </View>
+                </View>
 
-                <View
-                    style={{ alignSelf: 'stretch', flexDirection: 'column', alignItems: 'center' }}
-                >
+                <DarkOverlay ref={ref => this._darkOverlayRef = ref}/>
 
+                <View style={{ alignSelf: 'stretch', flexDirection: 'column', alignItems: 'center' }}>
                     <NLUResultPanel status={this.state.speechCommandSessionStatus} nluResult={this.state.nluResult} />
-                    
                     <SpeechInputPopup ref={ref => this._speechPopupRef = ref} dictationResult={this.state.dictationResult} />
                 </View>
 

@@ -9,7 +9,7 @@ const InterpolationConfigBase = { inputRange: [0, 1] }
 
 const EmergenceAnimatedValues = {
     opacity: [0, 1],
-    marginBottom: [32, 32 + Sizes.verticalPadding],
+    marginBottom: [12, 36],
     scale: [0.4, 1]
 }
 
@@ -106,8 +106,7 @@ export class NLUResultPanel extends React.Component<Props, State> {
         return (
             <Animated.View style={{
                 alignSelf: 'stretch',
-                height: 80,
-                marginBottom: this.interpEmergence("marginBottom"),
+                height: 130,
                 opacity: this.interpEmergence("opacity"),
                 transform: [{
                     scale: this.interpEmergence("scale")
@@ -122,7 +121,7 @@ export class NLUResultPanel extends React.Component<Props, State> {
                         left: 0,
                         right: 0,
                         top: 0,
-                        bottom: 0,
+                        bottom: this.interpEmergence("marginBottom"),
                         opacity: this.interpTransition("progressViewOpacity")
                     }}
                 >
@@ -139,12 +138,12 @@ export class NLUResultPanel extends React.Component<Props, State> {
                     left: 0,
                     right: 0,
                     top: 0,
-                    bottom: 0,
+                    bottom: this.interpEmergence("marginBottom"),
                     alignItems: 'center',
                     justifyContent: 'center',
                     opacity: this.interpTransition("resultViewOpacity")
                 }}>
-                    <Text style={{ fontSize: Sizes.BigFontSize, fontWeight: '400', color: Colors.accent }}>Intent: {this.props.nluResult.intent} ({Math.round(this.props.nluResult.confidence * 100)}%)</Text>
+                    <Text style={{ fontSize: Sizes.BigFontSize, fontWeight: '400', color: Colors.accent }}>{this.props.nluResult.intent} ({Math.round(this.props.nluResult.confidence * 100)}%)</Text>
                     {
                         Object.keys(this.props.nluResult.parameters).filter(key => this.props.nluResult.parameters[key] !== "").map((key, i) => {
                             return <Text key={i}>{key}: {JSON.stringify(this.props.nluResult.parameters[key])}</Text>
