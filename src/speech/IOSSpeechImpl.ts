@@ -1,11 +1,11 @@
-import {ISpeechRecognizer, SpeechRecognitionEventType, DictationResult} from './SpeechRecognizer';
 import {
   NativeModules,
   NativeEventEmitter,
   EventSubscription,
 } from 'react-native';
+import { IVoiceDictator, DictationResult, SpeechRecognitionEventType } from './types';
 
-export class IOSSpeechImpl implements ISpeechRecognizer {
+export class IOSDictatorImpl implements IVoiceDictator {
   private iosBridge = NativeModules.SpeechRecognitionManager;
   private iosEventEmitter = new NativeEventEmitter(this.iosBridge);
 

@@ -1,9 +1,9 @@
 import {
-  speechRecognizer,
-  ISpeechRecognizer,
-  DictationResult,
-} from './SpeechRecognizer';
+  voiceDictator
+} from './VoiceDictator';
 import {sleep} from '../utils';
+import { DictationResult } from './types';
+import { naturalLanguageRecognizer } from './NaturalLanguageRecognizer';
 
 const MIN_STATUS_DURATION = 500;
 
@@ -28,7 +28,6 @@ export enum SessionStatus {
 }
 
 export class SpeechCommandSession {
-  private speechToText: ISpeechRecognizer = speechRecognizer;
 
   private _status: SessionStatus = SessionStatus.Idle;
   public get status(): SessionStatus {
@@ -41,26 +40,32 @@ export class SpeechCommandSession {
   private lastDictationResult: DictationResult = null;
 
   constructor(
-    private statusChangeListener = (status: SessionStatus, payload: any) => {},
-    private dictationOutputListener = (output: DictationResult) => {},
+    private statusChangeListener: (status: SessionStatus, payload: any) => void,
+    private dictationOutputListener: (output: DictationResult) => void,
   ) {
-    this.speechToText.registerStartEventListener(() => {
+    voiceDictator.registerStartEventListener(() => {
       this.changeStatus(SessionStatus.Listening);
     });
 
-    this.speechToText.registerReceivedEventListener(result => {
+    voiceDictator.registerReceivedEventListener(result => {
       this.previousDictationResult = this.lastDictationResult;
       this.lastDictationResult = result;
 
-      //calculate diff 
-      if(this.previousDictationResult){
+      //calculate diff
+      if (this.previousDictationResult) {
         const Diff = require('diff');
-        result = {...result, diffResult: Diff.diffWords(this.previousDictationResult.text, this.lastDictationResult.text)}
+        result = {
+          ...result,
+          diffResult: Diff.diffWords(
+            this.previousDictationResult.text,
+            this.lastDictationResult.text,
+          ),
+        };
       }
       this.dictationOutputListener(result);
     });
 
-    this.speechToText.registerStopEventListener(async error => {
+    voiceDictator.registerStopEventListener(async error => {
       if (error) {
         await this.waitForMinDuration();
         this.changeStatus(SessionStatus.Terminated, {
@@ -70,7 +75,8 @@ export class SpeechCommandSession {
         //TODO go to Analyzing session.
         //TODO for now, we don't have an analzer. Just sleep and finish.
         this.changeStatus(SessionStatus.Analyzing);
-        await sleep(4000);
+        const analyzed = await naturalLanguageRecognizer.process(this.lastDictationResult.text)
+        console.log("analyzed:", JSON.stringify(analyzed))
         this.changeStatus(SessionStatus.Exiting);
         await sleep(1000);
         this.changeStatus(SessionStatus.Terminated, {
@@ -82,7 +88,7 @@ export class SpeechCommandSession {
 
   async requestStart() {
     this.changeStatus(SessionStatus.Starting);
-    const success = await this.speechToText.start();
+    const success = await voiceDictator.start();
     if (success === true) {
     } else {
       await this.waitForMinDuration();
@@ -100,7 +106,6 @@ export class SpeechCommandSession {
         break;
       case SessionStatus.Starting:
       case SessionStatus.Listening:
-        const stopped = await this.speechToText.stop();
         break;
       case SessionStatus.Analyzing:
       case SessionStatus.Exiting:
@@ -116,7 +121,7 @@ export class SpeechCommandSession {
 
   async requestStopListening() {
     if (this.status === SessionStatus.Listening) {
-      await this.speechToText.stop();
+      await voiceDictator.stop();
     }
   }
 
@@ -136,6 +141,6 @@ export class SpeechCommandSession {
    * Don't forget to call it after use. It is automatically called when the session is finished.
    */
   dispose() {
-    this.speechToText.uninstall();
+    voiceDictator.uninstall();
   }
 }

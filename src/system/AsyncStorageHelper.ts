@@ -19,6 +19,14 @@ export class AsyncStorageHelper {
     } else return null;
   }
 
+
+  static async getLong(key: string): Promise<number> {
+    const str = await AsyncStorage.getItem(key);
+    if (str) {
+      return Number.parseInt(str);
+    } else return null;
+  }
+
   static async getString(key: string): Promise<string> {
     return AsyncStorage.getItem(key);
   }

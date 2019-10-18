@@ -3,9 +3,7 @@ import {FitbitSource} from '../measure/source/fitbit/FitbitSource';
 import {AsyncStorageHelper} from './AsyncStorageHelper';
 import {MeasureSpec} from '../measure/MeasureSpec';
 import {AppleHealthSource} from '../measure/source/healthkit/AppleHealthSource';
-import {Subject, Observable} from 'rxjs';
 import {measureService} from './MeasureService';
-import {MeasureSettingsScreen} from '../components/pages/sources/MeasureSettingsScreen';
 import { MeasureSettingsState } from '../state/measure-settings/reducer';
 
 export interface SourceSelectionInfo {

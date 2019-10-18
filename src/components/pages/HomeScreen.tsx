@@ -12,7 +12,8 @@ import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { Logo } from '../Logo';
 import { PropsWithNavigation } from '../../PropsWithNavigation';
-import { speechRecognizer, DictationResult } from '../../speech/SpeechRecognizer';
+import { voiceDictator } from '../../speech/VoiceDictator';
+import { DictationResult } from '../../speech/types';
 import { VoiceInputButton } from '../speech/VoiceInputButton';
 import { SpeechInputPopup } from '../speech/SpeechInputPopup';
 import { SpeechCommandSession, SessionStatus, TerminationPayload, TerminationReason } from '../../speech/SpeechCommandSession';
@@ -93,7 +94,7 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
     }
 
     async componentWillUnmount() {
-        await speechRecognizer.uninstall()
+        await voiceDictator.uninstall()
 
         if (this._currentSpeechCommandSession) {
             this._currentSpeechCommandSession.dispose()

@@ -16,6 +16,7 @@
     "convert-units": "^2.3.4",
     "diff": "^4.0.1",
     "eslint": "^6.5.1",
+    "jsrsasign": "^8.0.12",
     "lottie-ios": "^3.1.3",
     "lottie-react-native": "^3.2.1",
     "moment": "^2.24.0",
@@ -43,6 +44,7 @@
     "redux-thunk": "^2.3.0",
     "rxjs": "^6.5.3",
     "string-format": "^2.0.0",
+    "uuid": "^3.3.3",
     "ws": "^7.1.2"
   },
   "devDependencies": {

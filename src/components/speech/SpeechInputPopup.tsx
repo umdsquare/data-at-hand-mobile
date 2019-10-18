@@ -3,7 +3,7 @@ import { Text, View, Animated, Easing } from 'react-native';
 import { Sizes } from '../../style/Sizes';
 import LottieView from 'lottie-react-native';
 import Colors from '../../style/Colors';
-import { DictationResult } from '../../speech/SpeechRecognizer';
+import { DictationResult } from '../../speech/types';
 
 enum AnimationType {
     Show, Hide
