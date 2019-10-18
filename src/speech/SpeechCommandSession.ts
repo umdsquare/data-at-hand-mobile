@@ -2,7 +2,7 @@ import {
   voiceDictator
 } from './VoiceDictator';
 import {sleep} from '../utils';
-import { DictationResult } from './types';
+import { DictationResult, NLUResult } from './types';
 import { naturalLanguageRecognizer } from './NaturalLanguageRecognizer';
 
 const MIN_STATUS_DURATION = 500;
@@ -15,7 +15,7 @@ export enum TerminationReason {
 
 export interface TerminationPayload {
   reason: TerminationReason;
-  data: any;
+  data: NLUResult;
 }
 
 export enum SessionStatus {
@@ -76,11 +76,16 @@ export class SpeechCommandSession {
         //TODO for now, we don't have an analzer. Just sleep and finish.
         this.changeStatus(SessionStatus.Analyzing);
         const analyzed = await naturalLanguageRecognizer.process(this.lastDictationResult.text)
+        if(analyzed.error){
+
+        }else{
+
+        }
         console.log("analyzed:", JSON.stringify(analyzed))
         this.changeStatus(SessionStatus.Exiting);
-        await sleep(1000);
         this.changeStatus(SessionStatus.Terminated, {
           reason: TerminationReason.Success,
+          data: analyzed.result
         } as TerminationPayload);
       }
     });

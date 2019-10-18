@@ -13,10 +13,11 @@ import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { Logo } from '../Logo';
 import { PropsWithNavigation } from '../../PropsWithNavigation';
 import { voiceDictator } from '../../speech/VoiceDictator';
-import { DictationResult } from '../../speech/types';
+import { DictationResult, NLUResult } from '../../speech/types';
 import { VoiceInputButton } from '../speech/VoiceInputButton';
 import { SpeechInputPopup } from '../speech/SpeechInputPopup';
 import { SpeechCommandSession, SessionStatus, TerminationPayload, TerminationReason } from '../../speech/SpeechCommandSession';
+import { NLUResultPanel } from '../speech/NLUResultPanel';
 
 const appBarIconStyles = {
     buttonStyle: {
@@ -34,9 +35,10 @@ const appBarIconStyles = {
     iconColor: Colors.textColorLight
 }
 
-interface State{
+interface State {
     isLoading: boolean,
     dictationResult: DictationResult,
+    nluResult: NLUResult,
     speechCommandSessionStatus: SessionStatus
 }
 
@@ -83,6 +85,7 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
         this.state = {
             isLoading: true,
             dictationResult: null,
+            nluResult: null,
             speechCommandSessionStatus: SessionStatus.Idle
         }
     }
@@ -106,9 +109,13 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
             this._currentSpeechCommandSession = new SpeechCommandSession(
                 (status, payload) => {
                     console.log("status:", status)
-                    this.setState({...this.state, speechCommandSessionStatus: status})
+                    this.setState({ ...this.state, speechCommandSessionStatus: status })
                     switch (status) {
                         case SessionStatus.Starting:
+                            this.setState({
+                                ...this.state,
+                                nluResult: null
+                            })
                             this._speechPopupRef.show()
                             break;
                         case SessionStatus.Analyzing:
@@ -117,11 +124,16 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                         case SessionStatus.Terminated:
                             const terminationPayload: TerminationPayload = payload as TerminationPayload
                             console.log("termination reason:", terminationPayload.reason)
-                            if(terminationPayload.reason === TerminationReason.Success){
-
-                            }else{
+                            if (terminationPayload.reason === TerminationReason.Success) {
+                                const data: NLUResult = terminationPayload.data
+                                this.setState({
+                                    ...this.state,
+                                    nluResult: data
+                                })
+                            } else {
                             }
-                            this.setState({...this.state, 
+                            this.setState({
+                                ...this.state,
                                 dictationResult: null,
                                 speechCommandSessionStatus: null
                             })
@@ -166,12 +178,15 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                 style={{ flex: 1, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' }}
                 colors={Colors.lightBackgroundGradient}>
 
+                <View style={{ flex: 1, alignSelf: 'stretch', }}></View>
+
                 <View
-                    style={{ flex: 1, alignSelf: 'stretch' }}
+                    style={{ alignSelf: 'stretch', flexDirection: 'column', alignItems: 'center' }}
                 >
 
+                    <NLUResultPanel status={this.state.speechCommandSessionStatus} nluResult={this.state.nluResult} />
+                    
                     <SpeechInputPopup ref={ref => this._speechPopupRef = ref} dictationResult={this.state.dictationResult} />
-
                 </View>
 
                 <SafeAreaView style={{

@@ -1,3 +1,6 @@
+export enum Command{
+    DEFAULT_FALLBACK = "Default Fallback Intent"
+}
 
 export interface DictationResult{
     text: string,
@@ -20,10 +23,7 @@ export interface NLUResult{
     utterance: string,
     intent: string,
     confidence: number,
-    entities: Array<{
-        value: string,
-        type: string
-    }>
+    parameters: any
 }
 
 export interface INaturalLanguageAnalyzer{

@@ -51,13 +51,13 @@ export class SpeechInputPopup extends React.Component<Props, State> {
             this.currentAnimation.start(finished => {
                 this.currentAnimation = null
                 this.currentAnimType = null
-                if(this.queuedAnimType === AnimationType.Hide){
+                if (this.queuedAnimType === AnimationType.Hide) {
                     this.queuedAnimType = null
                     this.hide()
-                }else{
+                } else {
                     this.queuedAnimType = null
                 }
-            })    
+            })
         }
     }
 
@@ -73,18 +73,19 @@ export class SpeechInputPopup extends React.Component<Props, State> {
             this.currentAnimation.start(finished => {
                 this.currentAnimation = null
                 this.currentAnimType = null
-                if(this.queuedAnimType === AnimationType.Show){
+                if (this.queuedAnimType === AnimationType.Show) {
                     this.queuedAnimType = null
                     this.show()
-                }else{
+                } else {
                     this.queuedAnimType = null
                 }
-            })    
+            })
         }
     }
 
     private interpolate(name: string): any {
-        return this.state.interpolation.interpolate({ ...InterpolationConfigBase, outputRange: AnimatedValues[name] })
+        return this.state.interpolation
+            .interpolate({ ...InterpolationConfigBase, outputRange: AnimatedValues[name] })
     }
 
     render() {
@@ -117,7 +118,7 @@ export class SpeechInputPopup extends React.Component<Props, State> {
                         color: Colors.textColorDark,
                         fontSize: Sizes.titleFontSize,
                         fontWeight: '200'
-                    }}>Listening...</Text>
+                    }}>I'm Listening...</Text>
                 </View>
 
                 <Text style={{
@@ -127,14 +128,14 @@ export class SpeechInputPopup extends React.Component<Props, State> {
                     fontSize: Sizes.subtitleFontSize
                 }}>
                     {
-                        this.props.dictationResult? (this.props.dictationResult.diffResult? 
+                        this.props.dictationResult ? (this.props.dictationResult.diffResult ?
                             this.props.dictationResult.diffResult.map((diffElm, i) => {
-                                if(diffElm.added == null && diffElm.removed == null){
+                                if (diffElm.added == null && diffElm.removed == null) {
                                     return <Text key={i} >{diffElm.value}</Text>
-                                }else if(diffElm.added === true){
-                                    return <Text key={i} style={{color: Colors.accent}}>{diffElm.value}</Text>
+                                } else if (diffElm.added === true) {
+                                    return <Text key={i} style={{ color: Colors.accent }}>{diffElm.value}</Text>
                                 }
-                            }) : this.props.dictationResult.text ) : null
+                            }) : this.props.dictationResult.text) : null
                     }
                     _</Text>
             </Animated.View>

@@ -3,6 +3,21 @@ import {AsyncStorageHelper} from '../../system/AsyncStorageHelper';
 
 const DEFAULT_BASE_URL = 'https://dialogflow.googleapis.com/v2/projects/';
 
+interface GoogleRecognitionResult {
+  responseId: string;
+  queryResult: {
+    queryText: string;
+    parameters: any;
+    allRequiredParamsPresent: boolean;
+    intent: {
+      name: string;
+      displayName: string;
+    };
+    intentDetectionConfidence: number;
+    languageCode: string;
+  };
+}
+
 //from https://github.com/innFactory/react-native-dialogflow/blob/master/js/googleAuth/GoogleAuth.js
 const encodeJWT = function(options) {
   if (!options) {
@@ -63,11 +78,13 @@ class GoogleDialogFlow implements INaturalLanguageAnalyzer {
     this.projectId = this.credentials.project_id;
 
     const accessToken = await this.retrieveAccessToken();
-    console.log('Installed DialogFlow.');
+    console.log('Installed DialogFlow. Access token: ', accessToken);
   }
 
-  dispose(): Promise<void> {
-    return Promise.resolve();
+  async dispose(): Promise<void> {
+    await AsyncStorageHelper.remove(STORAGE_KEY_ACCESS_TOKEN);
+    await AsyncStorageHelper.remove(STORAGE_KEY_EXPIRE_TIME);
+    return;
   }
 
   async process(text: any): Promise<{result: NLUResult; error: any}> {
@@ -96,7 +113,26 @@ class GoogleDialogFlow implements INaturalLanguageAnalyzer {
       body: JSON.stringify(requestBody),
     });
 
-    return response.json();
+    console.log('recognition result. status: ', response.status);
+    if (response.status === 200) {
+      const rawResult: GoogleRecognitionResult = await response.json();
+      console.log(rawResult);
+      const result = {
+        intent: rawResult.queryResult.intent.displayName,
+        confidence: rawResult.queryResult.intentDetectionConfidence,
+        parameters: rawResult.queryResult.parameters,
+      } as NLUResult;
+
+      return {result: result, error: null};
+    } else {
+      return {
+        result: null,
+        error: {
+          status: response.status,
+          statusText: response.statusText,
+        },
+      };
+    }
   }
 
   private async retrieveAccessToken(): Promise<string> {
@@ -107,7 +143,7 @@ class GoogleDialogFlow implements INaturalLanguageAnalyzer {
       const expireTime = await AsyncStorageHelper.getLong(
         STORAGE_KEY_EXPIRE_TIME,
       );
-      if (Date.now() < expireTime * 1000 + 5000) {
+      if (Date.now() < expireTime) {
         return cachedToken;
       }
     }
@@ -130,7 +166,7 @@ class GoogleDialogFlow implements INaturalLanguageAnalyzer {
       assertion: encodeJWT({
         email: this.credentials.client_email,
         key: this.credentials.private_key,
-        scopes: ['https://www.googleapis.com/auth/dialogflow'],
+        scopes: ['https://www.googleapis.com/auth/cloud-platform'],
       }),
     };
     const formBody = [];
@@ -153,7 +189,7 @@ class GoogleDialogFlow implements INaturalLanguageAnalyzer {
       },
     );
     if (authResponse.status != 200) {
-      console.log(authResponse.statusText);
+      console.log(authResponse)
       throw {error: 'GoogleAuthFail'};
     } else {
       const json = await authResponse.json();

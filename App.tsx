@@ -22,13 +22,13 @@ import { naturalLanguageRecognizer } from './src/speech/NaturalLanguageRecognize
 
 const { store, persistor } = CreateStore()
 
-interface State{
+interface State {
   isLoading: boolean
 }
 
 class App extends React.Component<any, State> {
 
-  constructor(props){
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -36,22 +36,27 @@ class App extends React.Component<any, State> {
     }
   }
 
-  async componentDidMount(){
+  async componentDidMount() {
 
     const loadingStartTime = Date.now()
     //loading initial things
     const services = await sourceManager.getServicesSupportedInThisSystem()
     const speechInstalled = await voiceDictator.install()
-    if(speechInstalled === true){
+    if (speechInstalled === true) {
       const isAvailableInSystem = await voiceDictator.isAvailableInSystem()
-      if(isAvailableInSystem === true){
+      if (isAvailableInSystem === true) {
         console.log("Speech recognition is available on this system.")
       }
     }
-    await naturalLanguageRecognizer.initialize()
-    this.setState({isLoading: false})
 
-    console.log("initial loading finished in ", Date.now() - loadingStartTime, "milis.")
+    try {
+      await naturalLanguageRecognizer.initialize()
+
+      this.setState({ isLoading: false })
+      console.log("initial loading finished in ", Date.now() - loadingStartTime, "milis.")
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   render() {
@@ -61,15 +66,15 @@ class App extends React.Component<any, State> {
     return <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <AppNavigator />
-        {<FadeView 
+        {<FadeView
           visible={this.state.isLoading}
           fadeDuration={500}
           style={{
-          position: 'absolute',
-          left: 0, right: 0, top: 0, bottom: 0,
-          backgroundColor: 'rgba(255,255,255, 0.4)',
-          justifyContent: 'center', alignItems: 'center'
-        }}>
+            position: 'absolute',
+            left: 0, right: 0, top: 0, bottom: 0,
+            backgroundColor: 'rgba(255,255,255, 0.4)',
+            justifyContent: 'center', alignItems: 'center'
+          }}>
           <LottieView
             source={require("./assets/lottie/109-bouncy-loader.json")} autoPlay loop
           />
