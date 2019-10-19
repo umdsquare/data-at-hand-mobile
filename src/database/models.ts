@@ -1,12 +1,12 @@
 import {field, date, readonly} from '@nozbe/watermelondb/decorators';
 import {Model} from '@nozbe/watermelondb';
+import { IHourlyStepBin } from './types';
 
-export class StepBin extends Model {
+export class StepBin extends Model implements IHourlyStepBin {
   static table = 'data_step';
 
-  @field('count') count;
+  @field('value') value;
   @date('started_at') startedAt;
-  @field('bin_unit') binUnit;
   @field('measure_code') measureCode;
 
   @readonly @date('created_at') createdAt;
@@ -16,7 +16,7 @@ export class StepBin extends Model {
 export class HeartRatePoint extends Model {
   static table = 'data_heartrate';
 
-  @field('bpm') bpm;
+  @field('value') value;
   @date('measured_at') measuredAt;
 
   @field('measure_code') measureCode;
@@ -28,7 +28,7 @@ export class HeartRatePoint extends Model {
 export class WeightPoint extends Model {
   static table = 'data_weight';
 
-  @field('weight_kg') weightKg;
+  @field('value') value;
   @date('measured_at') measuredAt;
 
   @field('measure_code') measureCode;

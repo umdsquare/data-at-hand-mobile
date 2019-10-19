@@ -3,9 +3,13 @@ import {FitbitStepMeasure} from './FitbitStepMeasure';
 import {FitbitHeartRateMeasure} from './FitbitHeartRateMeasure';
 import {AsyncStorageHelper} from '../../../system/AsyncStorageHelper';
 import {refresh, authorize, revoke} from 'react-native-app-auth';
-import { FitbitSleepMeasure } from './FitbitSleepMeasure';
-import { FitbitWeightMeasure } from './FitbitWeightMeasure';
-import { FitbitWorkoutMeasure } from './FitbitWorkoutMeasure';
+import {FitbitSleepMeasure} from './FitbitSleepMeasure';
+import {FitbitWeightMeasure} from './FitbitWeightMeasure';
+import {FitbitWorkoutMeasure} from './FitbitWorkoutMeasure';
+import { sequenceDays } from '../../../utils';
+import { Moment } from 'moment';
+
+type TimeLike = Date|number|string|Moment
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -13,58 +17,74 @@ interface FitbitCredential {
   readonly redirect_uri: string;
 }
 
-const FITBIT_DATE_FORMAT = "yyyy-MM-dd"
-const FITBIT_TIME_FORMAT = "HH:mm"
+const FITBIT_DATE_FORMAT = 'YYYY-MM-DD';
 
-const FITBIT_INTRADAY_ACTIVITY_API_URL = `https://api.fitbit.com/1/user/-/{resourcePath}/date/{date}/1d/1min/time/{startTime}/{endTime}.json`
-const FITBIT_SLEEP_LOGS_URL = "https://api.fitbit.com/1.2/user/-/sleep/date/{startDate}/{endDate}.json"
-const FITBIT_WEIGHT_LOGS_URL = "https://api.fitbit.com/1/user/-/body/weight/date/[startDate]/[endDate].json"
-const FITBIT_HEARTRATE_LOGS_URL = "https://api.fitbit.com/1/user/-/activities/heart/date/{date}/{endDate}/1sec/time/{startTime}/{endTime}.json"
+const FITBIT_ACTIVITY_SUMMARY_URL = "https://api.fitbit.com/1/user/-/activities/date/{date}.json"
+const FITBIT_INTRADAY_ACTIVITY_API_URL = `https://api.fitbit.com/1/user/-/{resourcePath}/date/{date}/1d/15min/time/{startTime}/{endTime}.json`;
+const FITBIT_SLEEP_LOGS_URL =
+  'https://api.fitbit.com/1.2/user/-/sleep/date/{startDate}/{endDate}.json';
+const FITBIT_WEIGHT_LOGS_URL =
+  'https://api.fitbit.com/1/user/-/body/weight/date/[startDate]/[endDate].json';
+
+const FITBIT_HEARTRATE_LOGS_URL =
+  'https://api.fitbit.com/1/user/-/activities/heart/date/{date}/1d/1min/time/{startTime}/{endTime}.json';
+
 
 /**
- * 
- * 
+ *
+ *
  * @param config start and end time must be within the same date
  */
-function makeFitbitIntradayActivityApiUrl(resourcePath: string, start: Date, end: Date): string{
+export function makeFitbitIntradayActivityApiUrl(
+  resourcePath: string,
+  date: Date,
+): string {
   const moment = require('moment');
   const stringFormat = require('string-format');
-  const startMoment = moment(start)
-  const endMoment = moment(end)
+  const dateFormat = moment(date);
   return stringFormat(FITBIT_INTRADAY_ACTIVITY_API_URL, {
     resourcePath: resourcePath,
-    date: startMoment.format(FITBIT_DATE_FORMAT),
-    startTime: startMoment.format(FITBIT_TIME_FORMAT),
-    endTime: endMoment.format(FITBIT_TIME_FORMAT)
-  })
+    date: dateFormat.format(FITBIT_DATE_FORMAT),
+    startTime: '00:00',
+    endTime: '23:59',
+  });
 }
 
-function makeFitbitSleepApiUrl(startDate: Date, endDate: Date): string{
+export function makeFitbitSleepApiUrl(startDate: TimeLike, endDate: TimeLike): string {
   const moment = require('moment');
   const stringFormat = require('string-format');
   return stringFormat(FITBIT_SLEEP_LOGS_URL, {
     startDate: moment(startDate).format(FITBIT_DATE_FORMAT),
-    endDate: moment(endDate).format(FITBIT_DATE_FORMAT)
-  })
+    endDate: moment(endDate).format(FITBIT_DATE_FORMAT),
+  });
 }
 
-function makeFitbitWeightApiUrl(startDate: Date, endDate: Date): string{
+export function makeFitbitWeightApiUrl(startDate: TimeLike, endDate: TimeLike): string {
   const moment = require('moment');
   const stringFormat = require('string-format');
   return stringFormat(FITBIT_WEIGHT_LOGS_URL, {
     startDate: moment(startDate).format(FITBIT_DATE_FORMAT),
-    endDate: moment(endDate).format(FITBIT_DATE_FORMAT)
-  })
+    endDate: moment(endDate).format(FITBIT_DATE_FORMAT),
+  });
 }
 
-function makeFitbitHeartRateApiUrl(startDate: Date, endDate: Date, startTime?: string, endTime?: string): string{
+export function makeFitbitHeartRateIntradayUrl(
+  date: TimeLike
+): string {
   const moment = require('moment');
   const stringFormat = require('string-format');
   return stringFormat(FITBIT_HEARTRATE_LOGS_URL, {
-    startDate: moment(startDate).format(FITBIT_DATE_FORMAT),
-    endDate: moment(endDate).format(FITBIT_DATE_FORMAT),
-    startTime: startTime,
-    endTime: endTime
+    date: moment(date).format(FITBIT_DATE_FORMAT),
+    startTime: "00:00",
+    endTime: "23:59",
+  });
+}
+
+export function makeFitbitDailyActivitySummaryUrl(date: TimeLike): string{
+  const moment = require('moment');
+  const stringFormat = require('string-format');
+  return stringFormat(FITBIT_ACTIVITY_SUMMARY_URL, {
+    date: moment(date).format(FITBIT_DATE_FORMAT)
   })
 }
 
@@ -105,7 +125,7 @@ export class FitbitSource extends DataSource {
     new FitbitHeartRateMeasure(this),
     new FitbitSleepMeasure(this),
     new FitbitWeightMeasure(this),
-    new FitbitWorkoutMeasure(this)
+    new FitbitWorkoutMeasure(this),
   ];
 
   private _credential: FitbitCredential = null;
@@ -131,6 +151,7 @@ export class FitbitSource extends DataSource {
 
   async authenticate(scope: string): Promise<boolean> {
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
+    console.log(state)
     if (state) {
       try {
         const newState = await refresh(await this.makeConfig(scope), {
@@ -224,16 +245,17 @@ export class FitbitSource extends DataSource {
     return true;
   }
 
-  async fetchFitbitQuery<T>(url: string): Promise<T>{
+  async fetchFitbitQuery(url: string): Promise<any> {
+    console.log('fetch query for ', url);
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
     return fetch(url, {
       method: 'GET',
       headers: {
-        "Accept-Language": 'en_US',
-        "Authorization": "Bearer " + state.accessToken,
-        'Content-Type': 'application/json'
-      }
-    }).then(result => result.json())
+        'Accept-Language': 'en_US',
+        Authorization: 'Bearer ' + state.accessToken,
+        'Content-Type': 'application/json',
+      },
+    }).then(result => result.json());
   }
 
   protected onCheckSupportedInSystem(): Promise<{

@@ -4,7 +4,6 @@ import { stepCollection, sleepCollection, weightCollection, workoutCollection, h
 
 export abstract class MeasureModule<T extends Model>{
     protected abstract readonly dbCollection: Collection<T>
-    
 }
 
 export class StepMeasureModule extends MeasureModule<StepBin>{

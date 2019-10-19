@@ -58,7 +58,7 @@ export class DarkOverlay extends React.Component<Props, State>{
                 inputRange: [0, 1], outputRange: [0,this.props.fadeAlpha || 0.25]
             }),
             ...this.props.style
-        }}/>
+        }} pointerEvents="none"/>
         )
     }
 }

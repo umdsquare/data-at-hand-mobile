@@ -1,5 +1,6 @@
 import {DataSourceMeasure} from '../DataSource';
 import { FitbitSource } from './FitbitSource';
+import { Model } from '@nozbe/watermelondb';
 
 export abstract class FitbitMeasureBase extends DataSourceMeasure {
   protected abstract readonly scope: string;

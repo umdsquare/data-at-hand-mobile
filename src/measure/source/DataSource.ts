@@ -1,4 +1,5 @@
 import {MeasureSpec} from '../MeasureSpec';
+import { IDatumBase } from '../../database/types';
 
 export abstract class DataSource {
   static readonly STORAGE_PREFIX = "@source_service:"
@@ -55,6 +56,7 @@ export abstract class DataSourceMeasure {
   abstract async activateInSystem(): Promise<boolean>
   abstract async deactivatedInSystem(): Promise<boolean>
   
+  abstract fetchData(start: number, end: number): Promise<Array<IDatumBase>>
 }
 
 export enum UnSupportedReason {

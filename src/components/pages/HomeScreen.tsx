@@ -19,6 +19,7 @@ import { SpeechInputPopup } from '../speech/SpeechInputPopup';
 import { SpeechCommandSession, SessionStatus, TerminationPayload, TerminationReason } from '../../speech/SpeechCommandSession';
 import { NLUResultPanel } from '../speech/NLUResultPanel';
 import { DarkOverlay } from '../common/DarkOverlay';
+import { ReportCard } from '../report/ReportCard';
 
 const appBarIconStyles = {
     buttonStyle: {
@@ -186,19 +187,7 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
 
                 
                 <View style={{ flex: 1, alignSelf: 'stretch', }}>
-                    <View style={{
-                        position: 'absolute',
-                        left: Sizes.horizontalPadding,
-                        right: Sizes.horizontalPadding,
-                        top: Sizes.verticalPadding,
-                        bottom: Sizes.verticalPadding,
-                        ...StyleTemplates.backgroundCardStyle,
-                        backgroundColor: Colors.lightBackground,
-                        shadowRadius: 2,
-                        borderRadius: 16
-                    }}>
-                    <Text>Haha</Text>
-                    </View>
+                    <ReportCard/>
                 </View>
 
                 <DarkOverlay ref={ref => this._darkOverlayRef = ref}/>
