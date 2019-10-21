@@ -3,9 +3,11 @@ import {MeasureSpec} from '../../MeasureSpec';
 import {FitbitMeasureBase} from './FitbitMeasureBase';
 import {FitbitSource, makeFitbitIntradayActivityApiUrl} from './FitbitSource';
 import { IntradayStepDay } from "./types";
-import moment from 'moment';
 import { IHourlyStepBin, IDatumBase } from '../../../database/types';
 import { sequenceDays } from '../../../utils';
+import { startOfHour } from 'date-fns/fp';
+import { toDate } from 'date-fns-tz';
+
 
 export class FitbitStepMeasure extends FitbitMeasureBase {
   protected scope: string = 'activity';
@@ -16,11 +18,13 @@ export class FitbitStepMeasure extends FitbitMeasureBase {
       .all(sequenceDays(start, end)
       .map(day => this.castedSource<FitbitSource>().fetchFitbitQuery(makeFitbitIntradayActivityApiUrl("activities/steps", day))))
     
+    const timeZone = await this.castedSource<FitbitSource>().getUserTimezone()
+
     const dataPoints: Array<IHourlyStepBin> = [];
     result.forEach(dayData => {
       const dateString = dayData["activities-steps"][0].dateTime;
       dayData["activities-steps-intraday"].dataset.forEach(datum => {
-        const date = moment(dateString + "T" + datum.time).startOf("hour").toDate();
+        const date = startOfHour(toDate(dateString + "T" + datum.time, {timeZone: timeZone}));
         if (dataPoints.length === 0 || dataPoints[dataPoints.length - 1].startedAt.getTime() != date.getTime()) {
           dataPoints.push({
             value: datum.value,

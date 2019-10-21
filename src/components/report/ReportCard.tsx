@@ -1,11 +1,10 @@
 import React from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { Sizes } from "../../style/Sizes";
 import { StyleTemplates } from "../../style/Styles";
 import Colors from "../../style/Colors";
 import { Button } from "react-native-elements";
 import { sourceManager } from "../../system/SourceManager";
-import { FitbitStepMeasure } from "../../measure/source/fitbit/FitbitStepMeasure";
 import moment from 'moment';
 
 export class ReportCard extends React.Component {
@@ -21,9 +20,9 @@ export class ReportCard extends React.Component {
             shadowRadius: 2,
             borderRadius: 16
         }}>
-            <Button title="Load data" onPress={
+           {true && <Button title="Load data" onPress={
                 () => {
-                    const measure = sourceManager.findMeasureByCode("fitbit:heart_rate")
+                    const measure = sourceManager.findMeasureByCode("fitbit:workout")
                     measure.fetchData(
                         moment().subtract(7, "days").toDate().getTime(),
                         moment().endOf('day').toDate().getTime())
@@ -31,7 +30,7 @@ export class ReportCard extends React.Component {
                             console.log(result)
                         })
                 }
-            }></Button>
+            }></Button>}
         </View>)
     }
 }

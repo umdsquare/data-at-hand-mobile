@@ -1,3 +1,12 @@
+export interface FitbitUserProfile{
+  user: {
+    age: number,
+    fullName: string,
+    dateOfBirth: string,
+    timezone: string
+  }
+}
+
 export interface IntradayStepDay {
   'activities-steps': [{dateTime: string; value: string}];
   'activities-steps-intraday': {

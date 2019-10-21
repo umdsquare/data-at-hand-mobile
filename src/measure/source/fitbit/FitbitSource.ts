@@ -6,8 +6,8 @@ import {refresh, authorize, revoke} from 'react-native-app-auth';
 import {FitbitSleepMeasure} from './FitbitSleepMeasure';
 import {FitbitWeightMeasure} from './FitbitWeightMeasure';
 import {FitbitWorkoutMeasure} from './FitbitWorkoutMeasure';
-import { sequenceDays } from '../../../utils';
 import { Moment } from 'moment';
+import { FitbitUserProfile } from './types';
 
 type TimeLike = Date|number|string|Moment
 
@@ -29,6 +29,8 @@ const FITBIT_WEIGHT_LOGS_URL =
 const FITBIT_HEARTRATE_LOGS_URL =
   'https://api.fitbit.com/1/user/-/activities/heart/date/{date}/1d/1min/time/{startTime}/{endTime}.json';
 
+
+const FITBIT_PROFILE_URL = "https://api.fitbit.com/1/user/-/profile.json"
 
 /**
  *
@@ -89,6 +91,7 @@ export function makeFitbitDailyActivitySummaryUrl(date: TimeLike): string{
 }
 
 const STORAGE_KEY_AUTH_STATE = DataSource.STORAGE_PREFIX + 'fitbit:state';
+const STORAGE_KEY_USER_TIMEZONE = DataSource.STORAGE_PREFIX + "fitbit:user_timezone"
 const STORAGE_KEY_AUTH_CURRENT_SCOPES =
   DataSource.STORAGE_PREFIX + 'fitbit:scopes';
 
@@ -114,6 +117,31 @@ async function registerScopeAndGet(scope: string): Promise<Array<string>> {
   }
 }
 
+
+
+async function revokeScopeAndGet(
+  scope: string,
+): Promise<{removed: boolean; result: Array<string>}> {
+  const currentScopes = (await AsyncStorageHelper.getObject(
+    STORAGE_KEY_AUTH_CURRENT_SCOPES,
+  )) as Array<string>;
+  if (currentScopes) {
+    const scopeIndex = currentScopes.indexOf(scope);
+    if (scopeIndex >= 0) {
+      currentScopes.splice(scopeIndex, 1);
+      await AsyncStorageHelper.set(
+        STORAGE_KEY_AUTH_CURRENT_SCOPES,
+        currentScopes,
+      );
+      return {removed: true, result: currentScopes};
+    } else {
+      return {removed: false, result: currentScopes};
+    }
+  } else {
+    return {removed: false, result: []};
+  }
+}
+
 export class FitbitSource extends DataSource {
   key: string = 'fitbit';
   name: string = 'Fitbit';
@@ -134,10 +162,15 @@ export class FitbitSource extends DataSource {
     return this._credential;
   }
 
-  private async makeConfig(scope: string): Promise<any> {
-    const appendedScopes = await registerScopeAndGet(scope);
+  private async makeConfig(scope: string=null): Promise<any> {
+    const scopes = scope? await registerScopeAndGet(scope) : (await AsyncStorageHelper.getObject(
+      STORAGE_KEY_AUTH_CURRENT_SCOPES,
+    )) as Array<string>;
+    if(scopes.indexOf("profile") === -1){
+      scopes.push("profile")
+    }
     const copiedConfig = JSON.parse(JSON.stringify(this._authConfigBase));
-    copiedConfig.scopes = appendedScopes;
+    copiedConfig.scopes = scopes;
     return copiedConfig;
   }
 
@@ -149,9 +182,8 @@ export class FitbitSource extends DataSource {
     );
   }
 
-  async authenticate(scope: string): Promise<boolean> {
+  async authenticate(scope: string=null): Promise<string> {
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
-    console.log(state)
     if (state) {
       try {
         const newState = await refresh(await this.makeConfig(scope), {
@@ -159,7 +191,7 @@ export class FitbitSource extends DataSource {
         });
         if (newState) {
           await AsyncStorageHelper.set(STORAGE_KEY_AUTH_STATE, newState);
-          return true;
+          return newState.accessToken;
         }
       } catch (e) {
         console.log(e);
@@ -170,12 +202,12 @@ export class FitbitSource extends DataSource {
       const newState = await authorize(await this.makeConfig(scope));
       if (newState) {
         await AsyncStorageHelper.set(STORAGE_KEY_AUTH_STATE, newState);
-        return true;
+        return newState.accessToken;
       } else {
-        return false;
+        return null;
       }
     } catch (e) {
-      return false;
+      return null;
     }
   }
 
@@ -183,37 +215,15 @@ export class FitbitSource extends DataSource {
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
     if (state) {
       await revoke(this._authConfigBase, {tokenToRevoke: state.refreshToken});
-      AsyncStorageHelper.remove(STORAGE_KEY_AUTH_STATE);
-    }
-  }
-
-  private async revokeScopeAndGet(
-    scope: string,
-  ): Promise<{removed: boolean; result: Array<string>}> {
-    const currentScopes = (await AsyncStorageHelper.getObject(
-      STORAGE_KEY_AUTH_CURRENT_SCOPES,
-    )) as Array<string>;
-    if (currentScopes) {
-      const scopeIndex = currentScopes.indexOf(scope);
-      if (scopeIndex >= 0) {
-        currentScopes.splice(scopeIndex, 1);
-        await AsyncStorageHelper.set(
-          STORAGE_KEY_AUTH_CURRENT_SCOPES,
-          currentScopes,
-        );
-        return {removed: true, result: currentScopes};
-      } else {
-        return {removed: false, result: currentScopes};
-      }
-    } else {
-      return {removed: false, result: []};
+      await AsyncStorageHelper.remove(STORAGE_KEY_AUTH_STATE);
+      await AsyncStorageHelper.remove(STORAGE_KEY_USER_TIMEZONE)
     }
   }
 
   async revokeScope(scope: string): Promise<boolean> {
-    const scopeRevokeResult = await this.revokeScopeAndGet(scope);
+    const scopeRevokeResult = await revokeScopeAndGet(scope);
     if (scopeRevokeResult.removed === true) {
-      if (scopeRevokeResult.result.length === 0) {
+      if (scopeRevokeResult.result.length === 1) {
         try {
           await this.signOut();
           return true;
@@ -245,6 +255,26 @@ export class FitbitSource extends DataSource {
     return true;
   }
 
+  async updateUserProfile(): Promise<boolean>{
+    return this.fetchFitbitQuery(FITBIT_PROFILE_URL).then((profile: FitbitUserProfile) => {
+      if(profile != null){
+        return AsyncStorageHelper.set(STORAGE_KEY_USER_TIMEZONE, profile.user.timezone).then(()=>true)
+      }else return false
+    })
+  }
+
+  async getUserTimezone(): Promise<string>{
+    const cached = await AsyncStorageHelper.getString(STORAGE_KEY_USER_TIMEZONE)
+    if(cached){
+      return cached
+    }else{
+      const updated = await this.updateUserProfile()
+      if(updated===true){
+        return this.getUserTimezone()
+      }else return null
+    }
+  }
+
   async fetchFitbitQuery(url: string): Promise<any> {
     console.log('fetch query for ', url);
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
@@ -255,7 +285,17 @@ export class FitbitSource extends DataSource {
         Authorization: 'Bearer ' + state.accessToken,
         'Content-Type': 'application/json',
       },
-    }).then(result => result.json());
+    }).then(async (result) => {
+      if(result.ok === false){
+        if(result.status === 401){
+          const json = await result.json()
+          if(json.errors[0].errorType === 'expired_token'){
+            console.log("Fitbit token is expired. refresh token and try once again.")
+            return this.authenticate().then(token => this.fetchFitbitQuery(url))
+          }else throw {error: "Access token invalid."}
+        }else throw {error: result.status}          
+      }else return result.json()
+    })
   }
 
   protected onCheckSupportedInSystem(): Promise<{

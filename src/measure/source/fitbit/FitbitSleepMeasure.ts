@@ -4,7 +4,7 @@ import {FitbitMeasureBase} from './FitbitMeasureBase';
 import { IDatumBase, ISleepSession } from '../../../database/types';
 import { FitbitSource, makeFitbitSleepApiUrl } from './FitbitSource';
 import { FitbitSleepQueryResult } from './types';
-import moment from 'moment';
+import { toDate } from 'date-fns-tz'
 
 export class FitbitSleepMeasure extends FitbitMeasureBase {
   protected scope: string = 'sleep';
@@ -12,10 +12,13 @@ export class FitbitSleepMeasure extends FitbitMeasureBase {
 
   async fetchData(start: number, end: number): Promise<IDatumBase[]> {
     const result: FitbitSleepQueryResult = await this.castedSource<FitbitSource>().fetchFitbitQuery(makeFitbitSleepApiUrl(start, end))
+    const fitbitTimezone = await this.castedSource<FitbitSource>().getUserTimezone()
     return result.sleep.map(log => {
       return {
-        startedAt: moment(log.startTime).toDate(),
-        endedAt: moment(log.endTime).toDate(),
+        startedAt: toDate(log.startTime,{timeZone: fitbitTimezone}),
+        endedAt: toDate(log.endTime, {timeZone: fitbitTimezone}),
+        duration: log.duration,
+        value: log.efficiency/100,
         measureCode: this.code
       } as ISleepSession
     })

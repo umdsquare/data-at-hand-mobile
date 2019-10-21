@@ -4,7 +4,7 @@ import {measureService, MeasureSpecKey} from '../../../system/MeasureService';
 import {IDatumBase, IWeightPoint} from '../../../database/types';
 import { FitbitSource, makeFitbitWeightApiUrl } from './FitbitSource';
 import { FitbitWeightQueryResult } from './types';
-import moment from 'moment';
+import { toDate } from 'date-fns-tz';
 
 export class FitbitWeightMeasure extends FitbitMeasureBase {
   protected scope: string = 'weight';
@@ -12,10 +12,11 @@ export class FitbitWeightMeasure extends FitbitMeasureBase {
 
   async fetchData(start: number, end: number): Promise<Array<IDatumBase>> {
     const result: FitbitWeightQueryResult = await this.castedSource<FitbitSource>().fetchFitbitQuery(makeFitbitWeightApiUrl(start, end))
+    const timeZone = await this.castedSource<FitbitSource>().getUserTimezone()
     return result.weight.map(weightLog => ({
       measureCode: this.code,
       value: weightLog.weight,
-      measuredAt: moment(weightLog.date + "T" + weightLog.time).toDate()
+      measuredAt: toDate(weightLog.date + "T" + weightLog.time, {timeZone: timeZone})
     } as IWeightPoint))
   }
 }
