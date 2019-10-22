@@ -2,12 +2,12 @@ import {DataSource, UnSupportedReason} from '../DataSource';
 import {Platform} from 'react-native';
 import {AppleHealthStepMeasure} from './AppleHealthStepMeasure';
 import * as HK from './HealthKitManager';
-import { sourceManager } from '../../../system/SourceManager';
-import { AppleHealthMeasureBase } from './AppleHealthMeasureBase';
-import { AppleHealthHeartRateMeasure } from './AppleHealthHeartRateMeasure';
-import { AppleHealthSleepMeasure } from './AppleHealthSleepMeasure';
-import { AppleHealthWorkoutMeasure } from './AppleHealthWorkoutMeasure';
-import { AppleHealthWeightMeasure } from './AppleHealthWeightMeasure';
+import {sourceManager} from '../../../system/SourceManager';
+import {AppleHealthMeasureBase} from './AppleHealthMeasureBase';
+import {AppleHealthHeartRateMeasure} from './AppleHealthHeartRateMeasure';
+import {AppleHealthSleepMeasure} from './AppleHealthSleepMeasure';
+import {AppleHealthWorkoutMeasure} from './AppleHealthWorkoutMeasure';
+import {AppleHealthWeightMeasure} from './AppleHealthWeightMeasure';
 
 export class AppleHealthSource extends DataSource {
   key: string = 'healthkit';
@@ -31,17 +31,16 @@ export class AppleHealthSource extends DataSource {
   }
 
   supportedMeasures = [
-      new AppleHealthStepMeasure(this),
-      new AppleHealthWeightMeasure(this),
-      new AppleHealthHeartRateMeasure(this),
-      new AppleHealthSleepMeasure(this),
-      new AppleHealthWorkoutMeasure(this)
-    ];
+    new AppleHealthStepMeasure(this),
+    new AppleHealthWeightMeasure(this),
+    new AppleHealthHeartRateMeasure(this),
+    new AppleHealthSleepMeasure(this),
+    new AppleHealthWorkoutMeasure(this),
+  ];
 
-  async getSelectedDataTypes(): Promise<Array<HK.HealthDataType>>
-  {
-    return (await sourceManager.getSelectedMeasuresOfSource(this))
-        .map(measure => (measure as AppleHealthMeasureBase).healthKitDataType)
-
-}
+  async getSelectedDataTypes(): Promise<Array<HK.HealthDataType>> {
+    return (await sourceManager.getSelectedMeasuresOfSource(this)).map(
+      measure => (measure as AppleHealthMeasureBase<any>).healthKitDataType,
+    );
+  }
 }

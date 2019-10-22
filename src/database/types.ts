@@ -30,5 +30,6 @@ export interface IWorkoutSession extends ISessionDatum{
     activityType: string
 }
 
-export interface ISleepSession extends ISessionDatum{
+export interface ISleepSession extends ISessionDatum{ 
+    //value: sleep efficiency
 }

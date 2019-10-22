@@ -28,7 +28,7 @@ class SpeechRecognitionManager: RCTEventEmitter{
   private let audioEngine = AVAudioEngine()
   private var currentRecognitionTask: SFSpeechRecognitionTask?
   private var currentRecognitionRequest: SFSpeechAudioBufferRecognitionRequest?
-
+  
   private var _speechRecognizer: SFSpeechRecognizer? = nil
   func getSpeechRecognizer() -> SFSpeechRecognizer{
     if(_speechRecognizer != nil){
@@ -123,11 +123,11 @@ class SpeechRecognitionManager: RCTEventEmitter{
       }
       
     }
-
+    
     // Configure the microphone input.
     let recordingFormat = inputNode.outputFormat(forBus: 0)
     inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { (buffer: AVAudioPCMBuffer, when: AVAudioTime) in
-        self.currentRecognitionRequest?.append(buffer)
+      self.currentRecognitionRequest?.append(buffer)
     }
     
     audioEngine.prepare()

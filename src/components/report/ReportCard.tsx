@@ -6,6 +6,7 @@ import Colors from "../../style/Colors";
 import { Button } from "react-native-elements";
 import { sourceManager } from "../../system/SourceManager";
 import moment from 'moment';
+import { queryHealthData, HealthDataType } from "../../measure/source/healthkit/HealthKitManager";
 
 export class ReportCard extends React.Component {
     render() {
@@ -22,13 +23,22 @@ export class ReportCard extends React.Component {
         }}>
            {true && <Button title="Load data" onPress={
                 () => {
+                    /*
                     const measure = sourceManager.findMeasureByCode("fitbit:workout")
                     measure.fetchData(
                         moment().subtract(7, "days").toDate().getTime(),
                         moment().endOf('day').toDate().getTime())
                         .then(result => {
                             console.log(result)
-                        })
+                        })*/
+
+                    queryHealthData(moment().subtract(7, "days").toDate(),moment().endOf('day').toDate(), HealthDataType.Sleep).then(
+                        result => {
+                            console.log(result)
+                        }
+                    ).catch(err => {
+                        console.error(err)
+                    })
                 }
             }></Button>}
         </View>)

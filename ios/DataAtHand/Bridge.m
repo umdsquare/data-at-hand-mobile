@@ -9,11 +9,13 @@
 #import <Foundation/Foundation.h>
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
+#import <React/RCTConvert.h>
 
 @interface RCT_EXTERN_MODULE(HealthKitManager, NSObject)
 
   RCT_EXTERN_METHOD(isAvailableInSystem:(RCTResponseSenderBlock*)callback)
   RCT_EXTERN_METHOD(requestPermissions:(NSArray)permissions completion:(RCTResponseSenderBlock*)callback)
+  RCT_EXTERN_METHOD(queryHealthData: (NSDictionary*)params completion:(RCTResponseSenderBlock*)callback)
 
 @end
 

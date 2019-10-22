@@ -34,3 +34,22 @@ export function requestPermissions(
       })
   });
 }
+
+export function queryHealthData(
+  from: Date,
+  to: Date,
+  dataType: HealthDataType
+): Promise<Array<any>>{
+  return new Promise((resolve, reject)=>{
+    NativeModules.HealthKitManager.queryHealthData({
+      from: from.getTime(), to: to.getTime(),
+      dataType: dataType
+    }, (error, result)=>{
+      if(error){
+        reject(error)
+      }else{
+        resolve(result)
+      }
+    })
+  })
+}
