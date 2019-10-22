@@ -16,7 +16,7 @@ interface State {
     isLoading: boolean
 }
 
-export class MeasureSettingsScreen extends React.Component<Prop, State>{
+export class MeasureSettingsScreen extends React.PureComponent<Prop, State>{
 
     constructor(props: Prop) {
         super(props);

@@ -45,7 +45,6 @@ class MeasureComponent extends React.Component<Prop, State>{
             availableMeasures: null
         }
 
-        this.callNewServiceSelectionDialog.bind(this)
     }
 
     async componentDidMount() {
@@ -61,7 +60,7 @@ class MeasureComponent extends React.Component<Prop, State>{
 
     }
 
-    private callNewServiceSelectionDialog() {
+    private callNewServiceSelectionDialog = () => {
         this.props.navigation.navigate('ServiceWizardModal', {
             measureSpec: this.props.measureSpec,
             selectedMeasureCodes: (this.props.connectedMeasures || []).map(m => m.code)
