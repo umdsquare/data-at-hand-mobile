@@ -101,9 +101,7 @@ class MeasureComponent extends React.Component<Prop, State>{
                                         isMain={this.props.connectedMeasures.indexOf(measure) === this.props.mainMeasureIndex} />)
                                 }
                                 {this.state.availableMeasures.length === this.props.connectedMeasures.length ?
-                                    (<></>) : (<AddNewBadge onPress={() => {
-                                        this.callNewServiceSelectionDialog()
-                                    }} />)}
+                                    (<></>) : (<AddNewBadge onPress={this.callNewServiceSelectionDialog} />)}
                             </View>
                         ) : (
                                 <Button
@@ -117,10 +115,7 @@ class MeasureComponent extends React.Component<Prop, State>{
                                     }}
                                     icon={{ name: 'pluscircle', type: 'antdesign', color: Colors.link, size: 18 }}
                                     title="Connect My Service"
-                                    onPress={() => {
-                                        this.callNewServiceSelectionDialog()
-                                    }
-                                    } />
+                                    onPress={this.callNewServiceSelectionDialog} />
                             )
 
 

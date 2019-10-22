@@ -25,6 +25,8 @@ class ConfigurationPanel extends React.Component<Props>{
         label: "US Standard"
     }]
 
+    onPressUnitConfigButton = (index)=>{this.props.setUnitType(index)}
+
     render(){
         return (
         <View style={{paddingLeft: Sizes.horizontalPadding, paddingRight: Sizes.horizontalPadding}}>
@@ -51,7 +53,7 @@ class ConfigurationPanel extends React.Component<Props>{
                 selectedTextStyle={{
                     fontWeight: 'bold'
                 }}
-                onPress={(index)=>{this.props.setUnitType(index)}}></ButtonGroup>
+                onPress={this.onPressUnitConfigButton}></ButtonGroup>
             </View>
         </View>)
     }

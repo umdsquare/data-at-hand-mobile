@@ -179,6 +179,15 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
         }
     }
 
+    private onVoiceInputButtonPressed = async () => {
+        await this.startNewSpeechCommandSession()
+    }
+
+    private onVoiceInputButtonUp = async () => {
+        this._speechPopupRef.hide()
+        await this.stopSpeechInput()
+    }
+
     render() {
         return (
             <LinearGradient
@@ -206,13 +215,8 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                 }}>
                     <VoiceInputButton containerStyle={{ alignSelf: 'center' }}
                         isBusy={this.state.speechCommandSessionStatus != SessionStatus.Terminated && this.state.speechCommandSessionStatus >= SessionStatus.Analyzing}
-                        onTouchDown={async () => {
-                            await this.startNewSpeechCommandSession()
-                        }}
-                        onTouchUp={async () => {
-                            this._speechPopupRef.hide()
-                            await this.stopSpeechInput()
-                        }} />
+                        onTouchDown={this.onVoiceInputButtonPressed}
+                        onTouchUp={this.onVoiceInputButtonUp} />
                 </SafeAreaView>
 
                 <RBSheet ref={
@@ -245,7 +249,7 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                             backgroundColor: 'transparent'
                         }}
                             icon={<AntDesignIcon name="closecircle" size={26} color={Colors.lightFormBackground} />}
-                            onPress={() => this._closeConfigSheet()}
+                            onPress={this._closeConfigSheet}
                         />
                     </View>
                     <ConfigurationPanel />

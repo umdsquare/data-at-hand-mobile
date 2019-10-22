@@ -75,9 +75,7 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
                                 }
                                 source={service}
                                 measureSpec={this.state.measureSpec}
-                                onSelected={() => {
-                                    this.props.navigation.dismiss()
-                                }} />)
+                                onSelected={this.props.navigation.dismiss} />)
                     }
                 </ScrollView>
             </SafeAreaView>

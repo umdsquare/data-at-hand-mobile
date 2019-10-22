@@ -29,7 +29,8 @@ export class DarkOverlay extends React.Component<Props, State>{
         this.anim = Animated.timing(this.state.alphaInterpolation, {
             toValue: 1,
             duration: 400,
-            easing: Easing.inOut(Easing.cubic)
+            easing: Easing.inOut(Easing.cubic),
+            useNativeDriver: true
         })
         this.anim.start(()=>{
             this.anim = null
@@ -44,7 +45,8 @@ export class DarkOverlay extends React.Component<Props, State>{
         this.anim = Animated.timing(this.state.alphaInterpolation, {
             toValue: 0,
             duration: 700,
-            easing: Easing.inOut(Easing.cubic)
+            easing: Easing.inOut(Easing.cubic),
+            useNativeDriver: true
         })
         this.anim.start(()=>{
             this.anim = null
