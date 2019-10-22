@@ -10,11 +10,10 @@
   },
   "dependencies": {
     "@expo/react-native-action-sheet": "^3.2.0",
-    "@nozbe/watermelondb": "^0.14.1",
     "@nozbe/with-observables": "^1.0.5",
     "@react-native-community/async-storage": "^1.6.2",
     "convert-units": "^2.3.4",
-    "date-fns": "^2.5.1",
+    "date-fns": "^2.6.0",
     "date-fns-tz": "^1.0.8",
     "diff": "^4.0.1",
     "eslint": "^6.5.1",

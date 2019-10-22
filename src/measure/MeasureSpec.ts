@@ -1,5 +1,3 @@
-import { Model } from "@nozbe/watermelondb";
-
 export enum MeasureType {
   Point = 'point',
   Session = 'session',

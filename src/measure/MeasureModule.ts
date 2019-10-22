@@ -1,27 +1,19 @@
-import { Collection, Model } from "@nozbe/watermelondb";
-import { StepBin, SleepSession, WeightPoint, WorkoutSession, HeartRatePoint } from "../database/models";
-import { stepCollection, sleepCollection, weightCollection, workoutCollection, heartrateCollection } from "../system/Database";
+import { IDatumBase, IHourlyStepBin, ISleepSession, IWeightPoint, IWorkoutSession, IHeartRatePoint } from "../database/types";
 
-export abstract class MeasureModule<T extends Model>{
-    protected abstract readonly dbCollection: Collection<T>
+export abstract class MeasureModule<T extends IDatumBase>{
 }
 
-export class StepMeasureModule extends MeasureModule<StepBin>{
-    dbCollection = stepCollection
+export class StepMeasureModule extends MeasureModule<IHourlyStepBin>{
 }
 
-export class SleepMeasureModule extends MeasureModule<SleepSession>{
-    dbCollection = sleepCollection
+export class SleepMeasureModule extends MeasureModule<ISleepSession>{
 }
 
-export class WeightMeasureModule extends MeasureModule<WeightPoint>{
-    dbCollection = weightCollection
+export class WeightMeasureModule extends MeasureModule<IWeightPoint>{
 }
 
-export class WorkoutMeasureModule extends MeasureModule<WorkoutSession>{
-    dbCollection = workoutCollection
+export class WorkoutMeasureModule extends MeasureModule<IWorkoutSession>{
 }
 
-export class HeartRateMeasureModule extends MeasureModule<HeartRatePoint>{
-    dbCollection = heartrateCollection
+export class HeartRateMeasureModule extends MeasureModule<IHeartRatePoint>{
 }

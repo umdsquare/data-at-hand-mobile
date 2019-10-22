@@ -87,7 +87,6 @@ export class NLUResultPanel extends React.Component<Props, State> {
     }
 
     componentDidUpdate(prevProps: Props) {
-        console.log(prevProps.status, this.props.status)
         if (prevProps.status !== this.props.status) {
             if (prevProps.status < SessionStatus.Analyzing && this.props.status === SessionStatus.Analyzing) {
                 console.log("started analyzing")
