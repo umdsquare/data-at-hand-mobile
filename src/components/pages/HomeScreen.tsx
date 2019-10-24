@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, SafeAreaView, Animated, Platform } from 'react-native';
+import { View, Text, SafeAreaView, Animated, Platform, StatusBar } from 'react-native';
 import { Button } from 'react-native-elements';
 import Colors from '../../style/Colors';
 import { StyleTemplates } from '../../style/Styles';
@@ -77,7 +77,7 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
     } as NavigationStackOptions)
 
     private _configSheetRef: RBSheet = null
-    
+
     private _darkOverlayRef: DarkOverlay = null
 
     private _speechPopupRef: SpeechInputPopup = null
@@ -191,32 +191,39 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
     render() {
         return (
             <LinearGradient
-                style={{ flex: 1, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' }}
+                style={{ flex: 1, alignSelf: 'stretch' }}
                 colors={Colors.lightBackgroundGradient}>
+                <SafeAreaView style={{ flex: 1, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' }}>
+                    {Platform.OS === 'android' && 
+                    <StatusBar barStyle="dark-content" backgroundColor='white'  />}
 
-                
-                <View style={{ zIndex: Platform.OS === 'android'? 100 : undefined, flex: 1, alignSelf: 'stretch', }}>
-                    <ReportCard/>
-                </View>
+                    <View style={{ zIndex: Platform.OS === 'android' ? 100 : undefined, flex: 1, alignSelf: 'stretch', }}>
+                        <ReportCard />
+                    </View>
 
-                <DarkOverlay style={{zIndex: Platform.OS === 'android'? 1000 : undefined}} ref={ref => this._darkOverlayRef = ref}/>
+                    <DarkOverlay style={{ zIndex: Platform.OS === 'android' ? 1000 : undefined }} ref={ref => this._darkOverlayRef = ref} />
 
-                <View style={{ alignSelf: 'stretch', flexDirection: 'column', alignItems: 'center' }}>
-                    <NLUResultPanel status={this.state.speechCommandSessionStatus} nluResult={this.state.nluResult} />
-                    <SpeechInputPopup ref={ref => this._speechPopupRef = ref} dictationResult={this.state.dictationResult} />
-                </View>
+                    <View style={{ alignSelf: 'stretch', flexDirection: 'column', alignItems: 'center' }}>
+                        <NLUResultPanel status={this.state.speechCommandSessionStatus} nluResult={this.state.nluResult} />
+                        <SpeechInputPopup ref={ref => this._speechPopupRef = ref} dictationResult={this.state.dictationResult} />
+                    </View>
 
-                <SafeAreaView style={{
-                    alignSelf: 'stretch', /*backgroundColor: 'white',
+                    <View style={{
+                        alignSelf: 'stretch', /*backgroundColor: 'white',
                     shadowColor: 'black',
                     shadowOffset: { width: 0, height: -1 },
                     shadowRadius: 2,
                     shadowOpacity: 0.07*/
-                }}>
-                    <VoiceInputButton containerStyle={{ alignSelf: 'center', marginBottom: 18 }}
-                        isBusy={this.state.speechCommandSessionStatus != SessionStatus.Terminated && this.state.speechCommandSessionStatus >= SessionStatus.Analyzing}
-                        onTouchDown={this.onVoiceInputButtonPressed}
-                        onTouchUp={this.onVoiceInputButtonUp} />
+                    }}>
+                        <VoiceInputButton containerStyle={{ alignSelf: 'center', marginBottom: 18 }}
+                            isBusy={this.state.speechCommandSessionStatus != SessionStatus.Terminated && this.state.speechCommandSessionStatus >= SessionStatus.Analyzing}
+                            onTouchDown={this.onVoiceInputButtonPressed}
+                            onTouchUp={this.onVoiceInputButtonUp} />
+                    </View>
+
+
+
+
                 </SafeAreaView>
 
                 <RBSheet ref={
@@ -228,8 +235,8 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                     customStyles={
                         {
                             container: {
-                                borderTopStartRadius: 8,
-                                borderTopEndRadius: 8,
+                                borderTopStartRadius: Platform.OS === 'ios' ? 8 : 0,
+                                borderTopEndRadius: Platform.OS === 'ios' ? 8 : 0,
                                 backgroundColor: Colors.lightBackground
                             }
                         }
@@ -245,12 +252,14 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                         alignItems: 'center'
                     }}>
                         <Text style={StyleTemplates.titleTextStyle}>Settings</Text>
-                        <Button buttonStyle={{
-                            backgroundColor: 'transparent'
-                        }}
-                            icon={<AntDesignIcon name="closecircle" size={26} color={Colors.lightFormBackground} />}
-                            onPress={this._closeConfigSheet}
-                        />
+                        {Platform.OS === 'ios' &&
+                            <Button buttonStyle={{
+                                backgroundColor: 'transparent'
+                            }}
+                                icon={<AntDesignIcon name="closecircle" size={26} color={Colors.lightFormBackground} />}
+                                onPress={this._closeConfigSheet}
+                            />
+                        }
                     </View>
                     <ConfigurationPanel />
                 </RBSheet>

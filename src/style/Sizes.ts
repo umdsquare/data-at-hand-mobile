@@ -1,6 +1,10 @@
 'use strict';
 
+import { Platform } from "react-native";
+
 const Sizes = {
+    navHeaderSize: Platform.OS ==='ios'? 60 : 64,
+
     horizontalPadding: 20,
     verticalPadding: 12,
 

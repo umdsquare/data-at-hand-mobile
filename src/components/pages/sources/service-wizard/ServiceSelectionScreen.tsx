@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, ImageBackground, ScrollView, SafeAreaView } from "react-native";
+import { View, Text, ImageBackground, ScrollView, SafeAreaView, Platform } from "react-native";
 import { MeasureSpec } from "../../../../measure/MeasureSpec";
 import { PropsWithNavigation } from "../../../../PropsWithNavigation";
 import { Sizes } from "../../../../style/Sizes";
@@ -52,14 +52,15 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
     render() {
         return (
             <SafeAreaView style={{
-                flex: 1, flexDirection: 'column', alignItems: 'stretch', marginTop: 120,
+                flex: 1, flexDirection: 'column', alignItems: 'stretch', marginTop: Sizes.navHeaderSize + Sizes.verticalPadding,
             }}>
                 <Text style={{
                     ...StyleTemplates.titleTextStyle as any,
-                    fontSize: Sizes.BigFontSize,
+                    fontSize: Sizes.titleFontSize,
                     marginBottom: 24,
                     marginLeft: Sizes.horizontalPadding,
-                    marginRight: Sizes.horizontalPadding
+                    marginRight: Sizes.horizontalPadding,
+                    textAlign: 'center'
                 }}>Select a Source for {this.state.measureSpec.name}</Text>
                 <ScrollView style={{ flex: 1 }}>
                     {
