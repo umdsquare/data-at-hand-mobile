@@ -72,6 +72,7 @@ export class SpeechCommandSession {
           reason: TerminationReason.Fail,
         } as TerminationPayload);
       } else {
+        console.log("speech dictated. start analyzing...")
         //TODO go to Analyzing session.
         //TODO for now, we don't have an analzer. Just sleep and finish.
         this.changeStatus(SessionStatus.Analyzing);

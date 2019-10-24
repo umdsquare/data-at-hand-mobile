@@ -4,9 +4,10 @@ import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import { TouchableHighlight } from "react-native-gesture-handler";
 import * as Animatable from 'react-native-animatable';
 import LottieView from 'lottie-react-native';
+import { Platform } from "react-native";
 
-const microphoneButtonWidth = 84
-const microphoneButtonIconSize = 42
+const microphoneButtonWidth = 72
+const microphoneButtonIconSize = 36
 
 const idleColor = ["#5ed5c0", "#2b8fec"]
 const busyColor = ["rgba(0,0,0,0)", "rgba(0,0,0,0.1)"]
@@ -37,6 +38,7 @@ class VoiceInputButton extends React.Component<Props, State> {
                 shadowOffset: { width: 0, height: 8 },
                 shadowRadius: 6,
                 shadowOpacity: 0.3,
+                elevation: 3,
                 width: microphoneButtonWidth,
                 height: microphoneButtonWidth,
                 borderRadius: 100,
@@ -71,7 +73,7 @@ class VoiceInputButton extends React.Component<Props, State> {
                         width: microphoneButtonWidth,
                         height: microphoneButtonWidth,
                         borderRadius: 100,
-                        borderWidth: this.props.isBusy === true ? 0 : 1.5,
+                        borderWidth: Platform.OS == "android"? 0 : (this.props.isBusy === true ? 0 : 1.5),
                         borderColor: "rgba(255,255,255,0.3)",
                         alignItems: 'center',
                         alignSelf: 'center',

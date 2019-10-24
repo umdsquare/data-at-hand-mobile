@@ -1,12 +1,13 @@
-import { IOSDictatorImpl } from "./IOSSpeechImpl";
+import { IOSDictatorImpl } from "./IOSDictatorImpl";
 import { Platform } from "react-native";
 import { IVoiceDictator, DictationResult } from "./types";
+import { AndroidDictatorImpl } from "./AndroidDictatorImpl";
 
 class VoiceDictator implements IVoiceDictator{
 
     private impl = {
         'ios': new IOSDictatorImpl(),
-        'android': null
+        'android': new AndroidDictatorImpl()
     }
 
     install(): Promise<boolean> {

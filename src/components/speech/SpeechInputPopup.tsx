@@ -104,7 +104,8 @@ export class SpeechInputPopup extends React.Component<Props, State> {
                     shadowRadius: 8,
                     shadowOpacity: 0.3,
                     padding: 24,
-                    paddingTop: 16
+                    paddingTop: 16,
+                    zIndex: 2000
                 }}>
                 <View style={{
                     flexDirection: 'row', alignSelf: 'center',
