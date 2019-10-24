@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, Platform } from "react-native";
 import { MeasureSpec } from "../../../measure/MeasureSpec";
 import { Card, Button } from "react-native-elements";
 import { StyleTemplates } from "../../../style/Styles";
@@ -71,7 +71,10 @@ class MeasureComponent extends React.Component<Prop, State>{
 
         return (
             <Card
-                containerStyle={StyleTemplates.backgroundCardStyle}
+                containerStyle={{
+                    ...(Platform.OS === "ios"?  StyleTemplates.backgroundCardStyle : StyleTemplates.androidCardPanelStyle),
+                    backgroundColor: Colors.lightBackground
+            }}
             >
                 <View style={{ marginBottom: 4, flexDirection: 'row', alignItems: 'center' }}>
                     <View style={{
@@ -107,7 +110,7 @@ class MeasureComponent extends React.Component<Prop, State>{
                                     type="clear"
                                     titleStyle={{
                                         fontSize: 16,
-                                        fontWeight: 'bold',
+                                        fontWeight: Platform.OS ==='ios'? 'bold': 'normal',
                                         color: Colors.link,
                                         marginLeft: 3,
                                         paddingBottom: 3

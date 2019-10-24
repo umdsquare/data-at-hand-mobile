@@ -27,6 +27,14 @@ const StyleTemplates = {
     elevation: 2
   },
 
+  androidCardPanelStyle: {
+    margin: 0,
+    marginTop: 2,
+    marginBottom: 8,
+    borderWidth: 0,
+    elevation: 2
+  },
+
   titleTextStyle: {
     fontSize: Sizes.titleFontSize,
     fontWeight: "bold",

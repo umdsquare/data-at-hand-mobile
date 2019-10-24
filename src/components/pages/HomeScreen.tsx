@@ -9,7 +9,6 @@ import RBSheet from "react-native-raw-bottom-sheet";
 import { ConfigurationPanel } from './settings/ConfigurationPanel';
 import { Sizes } from '../../style/Sizes';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { Logo } from '../Logo';
 import { PropsWithNavigation } from '../../PropsWithNavigation';
 import { voiceDictator } from '../../speech/VoiceDictator';
@@ -23,18 +22,13 @@ import { ReportCard } from '../report/ReportCard';
 
 const appBarIconStyles = {
     buttonStyle: {
-        width: 36,
-        height: 36,
-        padding: 0,
-        paddingTop: 2,
-        paddingLeft: 1,
-        borderRadius: 60,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: Colors.lightFormBackground
+        width: Sizes.navHeaderSize,
+        height: Sizes.navHeaderSize,
+        backgroundColor: 'transparent',
+        margin: 0
     } as any,
-    iconSize: 20,
-    iconColor: Colors.textColorLight
+    iconSize: Sizes.navHeaderSize / 2.2,
+    iconColor: Colors.accent,
 }
 
 interface State {
@@ -52,23 +46,27 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
         headerRight: (
             <View style={{
                 flexDirection: 'row', alignItems: 'center',
-                paddingRight: 12
             }}>
                 <Button
+                    icon={{
+                        name: "ios-switch",
+                        type: "ionicon",
+                        size: appBarIconStyles.iconSize,
+                        color: appBarIconStyles.iconColor
+                    }}
                     buttonStyle={appBarIconStyles.buttonStyle}
-                    containerStyle={{ marginRight: 8 }}
-                    icon={
-                        <AntDesignIcon name="setting" size={appBarIconStyles.iconSize} color={appBarIconStyles.iconColor} />
-                    }
                     onPress={() => {
                         navigation.getParam('openConfigSheet')()
                     }} />
 
                 <Button
-                    buttonStyle={{ ...appBarIconStyles.buttonStyle, backgroundColor: Colors.accent }}
-                    icon={
-                        <MaterialIcon name="more-horiz" size={appBarIconStyles.iconSize} color="white" />
-                    }
+                    icon={{
+                        name: "md-git-network",
+                        type: "ionicon",
+                        size: appBarIconStyles.iconSize,
+                        color: appBarIconStyles.iconColor
+                    }}
+                    buttonStyle={{ ...appBarIconStyles.buttonStyle }}
                     onPress={() => {
                         navigation.navigate("MeasureSettings")
                     }} />
@@ -194,8 +192,8 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                 style={{ flex: 1, alignSelf: 'stretch' }}
                 colors={Colors.lightBackgroundGradient}>
                 <SafeAreaView style={{ flex: 1, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' }}>
-                    {Platform.OS === 'android' && 
-                    <StatusBar barStyle="dark-content" backgroundColor='white'  />}
+                    {Platform.OS === 'android' &&
+                        <StatusBar barStyle="dark-content" backgroundColor='white' />}
 
                     <View style={{ zIndex: Platform.OS === 'android' ? 100 : undefined, flex: 1, alignSelf: 'stretch', }}>
                         <ReportCard />
