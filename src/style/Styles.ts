@@ -1,8 +1,8 @@
 import {Sizes} from './Sizes';
-import { StyleProp, TextStyle } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Colors from './Colors';
 
-const StyleTemplates = {
+const StyleTemplates = StyleSheet.create({
   styleWithHorizontalPadding: {
     paddingLeft: Sizes.horizontalPadding,
     paddingRight: Sizes.horizontalPadding,
@@ -39,30 +39,30 @@ const StyleTemplates = {
     fontSize: Sizes.titleFontSize,
     fontWeight: "bold",
     color: Colors.textColorDark
-  }as StyleProp<TextStyle>,
+  },
 
   subTitleTextStyle: {
     fontSize: Sizes.subtitleFontSize,
     fontWeight: "bold",
     color: Colors.textColorDark
-  }as StyleProp<TextStyle>,
+  },
 
 
   hugeTitleTextStyle: {
     fontSize: Sizes.hugeTitleFontSize,
     fontWeight: "bold",
     color: Colors.textColorDark
-  }as StyleProp<TextStyle>,
+  },
 
   descriptionTextStyle: {
     fontSize: Sizes.descriptionFontSize,
     color: Colors.textColorLight
-  }as StyleProp<TextStyle>,
+  },
 
   headerRightTextButtonStyle: {
     
   }
 
-};
+})
 
 export {StyleTemplates};

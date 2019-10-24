@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, Animated, Easing } from 'react-native';
+import { Text, View, Animated, Easing, StyleSheet, } from 'react-native';
 import { Sizes } from '../../style/Sizes';
 import LottieView from 'lottie-react-native';
 import Colors from '../../style/Colors';
@@ -16,6 +16,28 @@ const AnimatedValues = {
 }
 
 const InterpolationConfigBase = { inputRange: [0, 1] }
+
+const Styles = StyleSheet.create({
+    listeningTextStyle: {
+        color: Colors.textColorDark,
+        fontSize: Sizes.titleFontSize,
+        fontWeight: '200'
+    },
+    messageContainerStyle: {
+        flexDirection: 'row', alignSelf: 'center',
+        alignItems: 'center',
+        marginBottom: 12
+    },
+    dictatedMessageStyle: {
+        textAlign: 'center',
+        fontWeight: 'bold',
+        color: Colors.link,
+        fontSize: Sizes.subtitleFontSize
+    },
+    loadingIconStyle: {
+        width: 36, height: 36, transform: [{ translateY: 0.5 }, { scale: 2 }], opacity: 0.8
+    }
+})
 
 interface Props {
     containerStyle?: any,
@@ -46,7 +68,7 @@ export class SpeechInputPopup extends React.Component<Props, State> {
                 this.queuedAnimType = AnimationType.Show
             }
         } else {
-            this.currentAnimation = Animated.timing(this.state.interpolation, { toValue: 1, duration: 500, easing: Easing.inOut(Easing.cubic) })
+            this.currentAnimation = Animated.timing(this.state.interpolation, { toValue: 1, duration: 300, easing: Easing.inOut(Easing.cubic) })
             this.currentAnimType = AnimationType.Show
             this.currentAnimation.start(finished => {
                 this.currentAnimation = null
@@ -68,7 +90,7 @@ export class SpeechInputPopup extends React.Component<Props, State> {
                 this.queuedAnimType = AnimationType.Hide
             }
         } else {
-            this.currentAnimation = Animated.timing(this.state.interpolation, { toValue: 0, duration: 800, easing: Easing.inOut(Easing.cubic) })
+            this.currentAnimation = Animated.timing(this.state.interpolation, { toValue: 0, duration: 600, easing: Easing.inOut(Easing.cubic) })
             this.currentAnimType = AnimationType.Hide
             this.currentAnimation.start(finished => {
                 this.currentAnimation = null
@@ -107,26 +129,13 @@ export class SpeechInputPopup extends React.Component<Props, State> {
                     paddingTop: 16,
                     zIndex: 2000
                 }}>
-                <View style={{
-                    flexDirection: 'row', alignSelf: 'center',
-                    alignItems: 'center',
-                    marginBottom: 12
-                }}>
+                <View style={Styles.messageContainerStyle}>
                     <LottieView source={require("../../../assets/lottie/5257-loading.json")} autoPlay loop
-                        style={{ width: 36, height: 36, transform: [{ translateY: 0.5 }, { scale: 2 }], opacity: 0.8 }} />
-                    <Text style={{
-                        color: Colors.textColorDark,
-                        fontSize: Sizes.titleFontSize,
-                        fontWeight: '200'
-                    }}>I'm Listening...</Text>
+                        style={Styles.loadingIconStyle} />
+                    <Text style={Styles.listeningTextStyle}>I'm Listening...</Text>
                 </View>
 
-                <Text style={{
-                    textAlign: 'center',
-                    fontWeight: 'bold',
-                    color: Colors.link,
-                    fontSize: Sizes.subtitleFontSize
-                }}>
+                <Text style={Styles.dictatedMessageStyle}>
                     {
                         this.props.dictationResult ? (this.props.dictationResult.diffResult ?
                             this.props.dictationResult.diffResult.map((diffElm, i) => {

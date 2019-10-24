@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Platform } from "react-native";
+import { View, Text, Platform, StyleSheet } from "react-native";
 import { MeasureSpec } from "../../../measure/MeasureSpec";
 import { Card, Button } from "react-native-elements";
 import { StyleTemplates } from "../../../style/Styles";
@@ -33,6 +33,24 @@ const badgeSpacing = 8
 const badgeTextStyle = {
     fontSize: 16, fontWeight: 'bold'
 } as any
+
+const Styles = StyleSheet.create({
+    cardStyle: {
+        ...(Platform.OS === "ios" ? StyleTemplates.backgroundCardStyle : StyleTemplates.androidCardPanelStyle),
+        backgroundColor: Colors.lightBackground
+    },
+    connectServiceButtonStyle: {
+        fontSize: 16,
+        fontWeight: Platform.OS === 'ios' ? 'bold' : 'normal',
+        color: Colors.link,
+        marginLeft: 3,
+        paddingBottom: 3
+    },
+    measureDescriptionStyle: {
+                    ...StyleTemplates.descriptionTextStyle,
+                    marginBottom: 12
+                }
+})
 
 class MeasureComponent extends React.Component<Prop, State>{
 
@@ -71,25 +89,17 @@ class MeasureComponent extends React.Component<Prop, State>{
 
         return (
             <Card
-                containerStyle={{
-                    ...(Platform.OS === "ios"?  StyleTemplates.backgroundCardStyle : StyleTemplates.androidCardPanelStyle),
-                    backgroundColor: Colors.lightBackground
-            }}
+                containerStyle={Styles.cardStyle}
             >
                 <View style={{ marginBottom: 4, flexDirection: 'row', alignItems: 'center' }}>
                     <View style={{
                         marginRight: 8, width: 10, height: 10, borderRadius: 5,
-                        backgroundColor: this.props.connectedMeasures && this.props.connectedMeasures.length > 0 ? Colors.green : 'lightgray' }} />
-                    <Text style={{
-                        ...StyleTemplates.titleTextStyle as any,
-                    }
-                    }>{this.props.measureSpec.name}</Text>
+                        backgroundColor: this.props.connectedMeasures && this.props.connectedMeasures.length > 0 ? Colors.green : 'lightgray'
+                    }} />
+                    <Text style={StyleTemplates.titleTextStyle}>{this.props.measureSpec.name}</Text>
                 </View>
 
-                <Text style={{
-                    ...StyleTemplates.descriptionTextStyle as any,
-                    marginBottom: 12
-                }}>{this.props.measureSpec.description}</Text>
+                <Text style={Styles.measureDescriptionStyle}>{this.props.measureSpec.description}</Text>
                 {
                     (this.state.availableMeasures != null && this.state.availableMeasures.length > 0) ? (
                         (this.props.connectedMeasures != null && this.props.connectedMeasures.length > 0) ? (
@@ -108,13 +118,7 @@ class MeasureComponent extends React.Component<Prop, State>{
                         ) : (
                                 <Button
                                     type="clear"
-                                    titleStyle={{
-                                        fontSize: 16,
-                                        fontWeight: Platform.OS ==='ios'? 'bold': 'normal',
-                                        color: Colors.link,
-                                        marginLeft: 3,
-                                        paddingBottom: 3
-                                    }}
+                                    titleStyle={Styles.connectServiceButtonStyle as any}
                                     icon={{ name: 'pluscircle', type: 'antdesign', color: Colors.link, size: 18 }}
                                     title="Connect My Service"
                                     onPress={this.callNewServiceSelectionDialog} />
@@ -130,7 +134,7 @@ class MeasureComponent extends React.Component<Prop, State>{
 
 const connectedMeasureComponent = connect(mapStateToProps)(connectActionSheet(MeasureComponent))
 
-function mapStateToProps(appState: AppState, ownProps: Prop): Prop{
+function mapStateToProps(appState: AppState, ownProps: Prop): Prop {
     const { measureSettingsState } = appState
     const selectionInfo = getSourceSelectionInfo(ownProps.measureSpec, measureSettingsState)
     if (selectionInfo) {
@@ -159,11 +163,11 @@ interface SourceBadgeProps {
     measure: DataSourceMeasure,
     isMain: boolean,
     showActionSheetWithOptions,
-    setMeasureAsMain: ()=>void,
-    deselectMeasure: ()=>void
+    setMeasureAsMain: () => void,
+    deselectMeasure: () => void
 }
 
-function mapDispatchToPropsSourceBadge(dispatch: Dispatch, ownProps: SourceBadgeProps): SourceBadgeProps{
+function mapDispatchToPropsSourceBadge(dispatch: Dispatch, ownProps: SourceBadgeProps): SourceBadgeProps {
     return {
         setMeasureAsMain: () => dispatch(selectSourceForMeasure(ownProps.measure, true)),
         deselectMeasure: () => dispatch(deselectSourceForMeasure(ownProps.measure)),
@@ -196,7 +200,7 @@ const SourceBadge = connect(null, mapDispatchToPropsSourceBadge)((props: SourceB
                     switch (buttonIndex) {
                         case destructiveButtonIndex:
                             const deactivatedResult = await props.measure.deactivatedInSystem()
-                            if(deactivatedResult == true){
+                            if (deactivatedResult == true) {
                                 props.deselectMeasure()
                             }
                             break;
