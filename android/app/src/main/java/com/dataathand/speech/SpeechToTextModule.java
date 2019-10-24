@@ -93,6 +93,11 @@ public class SpeechToTextModule extends ReactContextBaseJavaModule implements Pe
                 intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
                 intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "en");
+
+                intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 100000);
+                intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 100000);
+                intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 200000);
+
                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
                 /*
@@ -118,36 +123,35 @@ public class SpeechToTextModule extends ReactContextBaseJavaModule implements Pe
             @Override
             public void run() {
                 try {
-
                     if (recognizer != null) {
                         recognizer.destroy();
                         recognizer = null;
 
                         Log.d("Speech", "Stop Requested.");
+
+                        if (pendingError != null) {
+
+                            WritableMap params = Arguments.createMap();
+
+                            switch (pendingError) {
+                                case SpeechRecognizer.ERROR_SPEECH_TIMEOUT: {
+                                    params.putString("error", "SpeechTimeout");
+                                }
+                                default: {
+                                    params.putInt("error", pendingError);
+                                }
+                            }
+                            getDeviceEmitter().emit(EVENT_STOPPED, params);
+                        } else if(hasResultReceived) {
+                            getDeviceEmitter().emit(EVENT_STOPPED, null);
+                        }else {
+                            WritableMap params = Arguments.createMap();
+                            params.putString("error", "Retry");
+                            getDeviceEmitter().emit(EVENT_STOPPED, params);
+                        }
+
                         if (promise != null) {
                             promise.resolve(true);
-
-                            if (pendingError != null) {
-
-                                WritableMap params = Arguments.createMap();
-
-                                switch (pendingError) {
-                                    case SpeechRecognizer.ERROR_SPEECH_TIMEOUT: {
-                                        params.putString("error", "SpeechTimeout");
-                                    }
-                                    default: {
-                                        params.putInt("error", pendingError);
-                                    }
-                                }
-                                getDeviceEmitter().emit(EVENT_STOPPED, params);
-                            } else if(hasResultReceived) {
-                                getDeviceEmitter().emit(EVENT_STOPPED, null);
-                            }else {
-                                WritableMap params = Arguments.createMap();
-                                params.putString("error", "Retry");
-                                getDeviceEmitter().emit(EVENT_STOPPED, params);
-                            }
-
                         }
                     }
                 } catch (Exception e) {
@@ -232,8 +236,8 @@ public class SpeechToTextModule extends ReactContextBaseJavaModule implements Pe
 
     @Override
     public void onEndOfSpeech() {
-
         Log.d("Speech", "on End of Speech");
+        stop(null);
     }
 
     @Override
