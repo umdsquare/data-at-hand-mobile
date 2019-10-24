@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, SafeAreaView, Animated } from 'react-native';
+import { View, Text, SafeAreaView, Animated, Platform } from 'react-native';
 import { Button } from 'react-native-elements';
 import Colors from '../../style/Colors';
 import { StyleTemplates } from '../../style/Styles';
@@ -195,11 +195,11 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                 colors={Colors.lightBackgroundGradient}>
 
                 
-                <View style={{ zIndex: 100, flex: 1, alignSelf: 'stretch', }}>
+                <View style={{ zIndex: Platform.OS === 'android'? 100 : undefined, flex: 1, alignSelf: 'stretch', }}>
                     <ReportCard/>
                 </View>
 
-                <DarkOverlay style={{zIndex: 1000}} ref={ref => this._darkOverlayRef = ref}/>
+                <DarkOverlay style={{zIndex: Platform.OS === 'android'? 1000 : undefined}} ref={ref => this._darkOverlayRef = ref}/>
 
                 <View style={{ alignSelf: 'stretch', flexDirection: 'column', alignItems: 'center' }}>
                     <NLUResultPanel status={this.state.speechCommandSessionStatus} nluResult={this.state.nluResult} />
@@ -213,7 +213,7 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                     shadowRadius: 2,
                     shadowOpacity: 0.07*/
                 }}>
-                    <VoiceInputButton containerStyle={{ alignSelf: 'center', marginBottom: 12 }}
+                    <VoiceInputButton containerStyle={{ alignSelf: 'center', marginBottom: 18 }}
                         isBusy={this.state.speechCommandSessionStatus != SessionStatus.Terminated && this.state.speechCommandSessionStatus >= SessionStatus.Analyzing}
                         onTouchDown={this.onVoiceInputButtonPressed}
                         onTouchUp={this.onVoiceInputButtonUp} />

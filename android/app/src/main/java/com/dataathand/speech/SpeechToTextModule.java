@@ -26,8 +26,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.modules.core.PermissionAwareActivity;
 import com.facebook.react.modules.core.PermissionListener;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayList;;
 import java.util.Objects;
 
 public class SpeechToTextModule extends ReactContextBaseJavaModule implements PermissionListener, RecognitionListener {
