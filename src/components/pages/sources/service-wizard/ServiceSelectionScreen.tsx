@@ -4,7 +4,7 @@ import { MeasureSpec } from "../../../../measure/MeasureSpec";
 import { PropsWithNavigation } from "../../../../PropsWithNavigation";
 import { Sizes } from "../../../../style/Sizes";
 import { StyleTemplates } from "../../../../style/Styles";
-import { createStackNavigator } from "react-navigation-stack";
+import { createStackNavigator, Header } from "react-navigation-stack";
 import { DataSource, DataSourceMeasure } from "../../../../measure/source/DataSource";
 import { sourceManager, SourceSelectionInfo } from "../../../../system/SourceManager";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -52,16 +52,7 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
     render() {
         return (
             <SafeAreaView style={{
-                flex: 1, flexDirection: 'column', alignItems: 'stretch', marginTop: Sizes.navHeaderSize + Sizes.verticalPadding,
-            }}>
-                <Text style={{
-                    ...StyleTemplates.titleTextStyle as any,
-                    fontSize: Sizes.titleFontSize,
-                    marginBottom: 24,
-                    marginLeft: Sizes.horizontalPadding,
-                    marginRight: Sizes.horizontalPadding,
-                    textAlign: 'center'
-                }}>Select a Source for {this.state.measureSpec.name}</Text>
+                flex: 1, flexDirection: 'column', alignItems: 'stretch'}}>
                 <ScrollView style={{ flex: 1 }}>
                     {
                         this.state.services
@@ -109,7 +100,7 @@ function mapDispatchToPropsForServiceElement(dispatch: Dispatch, ownProps: Servi
 const ServiceElement = connect(mapStateToProps, mapDispatchToPropsForServiceElement)((props: ServiceElementProps) => {
     return <TouchableOpacity disabled={props.selectedAlready}
         style={{
-            marginTop: props.index === 0 ? 0 : 24,
+            marginTop: 24,
             marginRight: 20,
             marginLeft: 20,
         }} activeOpacity={0.3} onPress={async () => {
@@ -159,10 +150,13 @@ export const ServiceSelectionWizardStack = createStackNavigator(
     }, {
     initialRouteName: "ServiceSelection",
     defaultNavigationOptions: (navigationProp) => ({
-        headerTransparent: true,
         headerLeftContainerStyle: { paddingLeft: 12 },
+        title: "Select Source",
+        headerStyle: {
+            height: Sizes.navHeaderSize
+        },
         headerLeft: (
-            <Button title="Cancel" type="clear" onPress={() => navigationProp.navigation.dismiss()} />
+            <Button type="clear" icon={{name: 'close', type: 'ionicons', color: Colors.accent}} onPress={() => navigationProp.navigation.dismiss()} />
         )
     })
 }

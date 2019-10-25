@@ -2,9 +2,8 @@ import React from "react";
 import LinearGradient from "react-native-linear-gradient";
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import { TouchableHighlight } from "react-native-gesture-handler";
-import * as Animatable from 'react-native-animatable';
 import LottieView from 'lottie-react-native';
-import { Platform, StyleSheet } from "react-native";
+import { Platform, StyleSheet, Animated, View, Easing } from "react-native";
 
 const microphoneButtonWidth = 72
 const microphoneButtonIconSize = 36
@@ -31,30 +30,48 @@ interface Props {
 }
 
 interface State {
+    interpolation: Animated.Value
 }
 
-class VoiceInputButton extends React.PureComponent<Props, State> {
+export class VoiceInputButton extends React.PureComponent<Props, State> {
 
     private iconContainerRef
 
+    private currentAnimation: Animated.CompositeAnimation
+
     constructor(props) {
         super(props)
+
+        this.state = {
+            interpolation: new Animated.Value(0)
+        }
     }
 
     readonly onPressIn = () => {
-        this.iconContainerRef.transitionTo({ marginTop: 8 }, 200)
-        //this.containerRef.transitionTo({shadowRadius: 2}, 200)
+        if(this.currentAnimation){
+            this.currentAnimation.stop()
+        }
+        this.currentAnimation = Animated.timing(this.state.interpolation, { toValue: 1, duration: 300, easing: Easing.inOut(Easing.cubic) })
+        this.currentAnimation.start(() => {
+            this.currentAnimation = null
+        })
+
         this.props.onTouchDown()
     }
 
     readonly onPressOut = () => {
-        this.iconContainerRef.transitionTo({ marginTop: 0 })
-        //this.containerRef.transitionTo({shadowRadius: 8})
+        if(this.currentAnimation){
+            this.currentAnimation.stop()
+        }
+        this.currentAnimation = Animated.timing(this.state.interpolation, { toValue: 0, duration: 400, easing: Easing.inOut(Easing.cubic) })
+        this.currentAnimation.start(() => {
+            this.currentAnimation = null
+        })
         this.props.onTouchUp()
     }
 
     render() {
-        return (<Animatable.View
+        return (<View
             style={{
                 ...this.props.containerStyle,
                 shadowColor: 'black',
@@ -96,21 +113,20 @@ class VoiceInputButton extends React.PureComponent<Props, State> {
                             (<LottieView source={require("../../../assets/lottie/5257-loading.json")} autoPlay loop
                                 style={Styles.loadingIconStyle} />)
                             : (
-                                <Animatable.View
-                                    ref={ref => { this.iconContainerRef = ref }}
-                                    style={{ marginTop: 0 }}
+                                <Animated.View
+                                    style={{ marginTop: this.state.interpolation.interpolate({
+                                        inputRange: [0,1],
+                                        outputRange: [0, 8]
+                                    }) }}
                                 >
                                     <FontAwesomeIcon name="microphone" size={microphoneButtonIconSize} color="rgba(255,255,255,0.95)"></FontAwesomeIcon>
-                                </Animatable.View>
+                                </Animated.View>
                             )
                     }
 
                 </LinearGradient>
             </TouchableHighlight>
-        </Animatable.View>
+        </View>
         )
     }
 }
-
-const a = Animatable.createAnimatableComponent(VoiceInputButton)
-export { a as VoiceInputButton }

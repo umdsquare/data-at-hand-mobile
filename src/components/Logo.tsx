@@ -4,7 +4,7 @@ import Svg, { G, Path } from "react-native-svg";
 export class Logo extends React.Component {
     render(){
         return (
-            <Svg width={150} height={30}
+            <Svg width={125} height={25}
                  viewBox="0 0 375.49 70.59" enable-background="new 0 0 375.49 70.59">
             <G>
                 <Path fill="#F06794" d="M176.5,66.55c-8.85,0-16.52-2.95-22.81-8.76c-6.25-5.77-9.42-12.89-9.42-21.14c0-8.91,3.19-16.62,9.47-22.9

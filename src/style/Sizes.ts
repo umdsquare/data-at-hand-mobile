@@ -3,7 +3,7 @@
 import { Platform } from "react-native";
 
 const Sizes = {
-    navHeaderSize: Platform.OS ==='ios'? 60 : 64,
+    navHeaderSize: Platform.OS ==='ios'? 56 : 60,
 
     horizontalPadding: 20,
     verticalPadding: 12,

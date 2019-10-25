@@ -17,8 +17,10 @@ import LottieView from 'lottie-react-native';
 import { sourceManager } from './src/system/SourceManager';
 import { FadeView } from './src/components/common/FadeView';
 import { voiceDictator } from './src/speech/VoiceDictator';
-import { sleep } from './src/utils';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { naturalLanguageRecognizer } from './src/speech/NaturalLanguageRecognizer';
+import { ThemeProvider } from 'react-native-elements';
+import { theme } from './src/style/Theme';
 
 const { store, persistor } = CreateStore()
 
@@ -65,7 +67,11 @@ class App extends React.Component<any, State> {
 
     return <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <AppNavigator />
+        <SafeAreaProvider>
+          <ThemeProvider theme={theme}>
+            <AppNavigator />
+          </ThemeProvider>
+        </SafeAreaProvider>
         {<FadeView
           visible={this.state.isLoading}
           fadeDuration={500}

@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { View, Text, SafeAreaView, Animated, Platform, StatusBar } from 'react-native';
+import React from 'react';
+import { View, Text, SafeAreaView, Platform, StatusBar, StyleSheet, TouchableOpacity } from 'react-native';
 import { Button } from 'react-native-elements';
 import Colors from '../../style/Colors';
 import { StyleTemplates } from '../../style/Styles';
@@ -19,6 +19,8 @@ import { SpeechCommandSession, SessionStatus, TerminationPayload, TerminationRea
 import { NLUResultPanel } from '../speech/NLUResultPanel';
 import { DarkOverlay } from '../common/DarkOverlay';
 import { ReportCard } from '../report/ReportCard';
+import { SafeAreaConsumer } from 'react-native-safe-area-context';
+import { TouchableHighlight } from 'react-native-gesture-handler';
 
 const appBarIconStyles = {
     buttonStyle: {
@@ -31,12 +33,29 @@ const appBarIconStyles = {
     iconColor: Colors.accent,
 }
 
+const homeScreenButtonStyle = StyleSheet.create({
+    buttonStyle: {
+        width: 54,
+        height: 54,
+        padding: 0,
+        borderRadius: 50
+    },
+    buttonContainerStyle: {
+        borderRadius: 50,
+        backgroundColor: "rgba(0,0,50,0.05)"
+    }
+})
+
+const homeScreenButtonIconColor = "#757575"
+
 interface State {
     isLoading: boolean,
     dictationResult: DictationResult,
     nluResult: NLUResult,
     speechCommandSessionStatus: SessionStatus
 }
+
+
 
 export class HomeScreen extends React.Component<PropsWithNavigation, State> {
 
@@ -48,6 +67,7 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                 flexDirection: 'row', alignItems: 'center',
             }}>
                 <Button
+                    type="clear"
                     icon={{
                         name: "ios-switch",
                         type: "ionicon",
@@ -60,6 +80,7 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                     }} />
 
                 <Button
+                    type="clear"
                     icon={{
                         name: "md-git-network",
                         type: "ionicon",
@@ -75,6 +96,8 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
     } as NavigationStackOptions)
 
     private _configSheetRef: RBSheet = null
+
+    private _voiceInputButtonRef = null
 
     private _darkOverlayRef: DarkOverlay = null
 
@@ -124,6 +147,7 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                         case SessionStatus.Analyzing:
                             this._speechPopupRef.hide()
                             this._darkOverlayRef.hide()
+                            this._voiceInputButtonRef.onPressOut()
                             break;
                         case SessionStatus.Terminated:
                             const terminationPayload: TerminationPayload = payload as TerminationPayload
@@ -206,19 +230,42 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                         <SpeechInputPopup ref={ref => this._speechPopupRef = ref} dictationResult={this.state.dictationResult} />
                     </View>
 
-                    <View style={{
-                        alignSelf: 'stretch', /*backgroundColor: 'white',
-                    shadowColor: 'black',
-                    shadowOffset: { width: 0, height: -1 },
-                    shadowRadius: 2,
-                    shadowOpacity: 0.07*/
-                    }}>
-                        <VoiceInputButton containerStyle={{ alignSelf: 'center', marginBottom: 18 }}
-                            isBusy={this.state.speechCommandSessionStatus != SessionStatus.Terminated && this.state.speechCommandSessionStatus >= SessionStatus.Analyzing}
-                            onTouchDown={this.onVoiceInputButtonPressed}
-                            onTouchUp={this.onVoiceInputButtonUp} />
-                    </View>
+                    <SafeAreaConsumer>
+                        {
+                            insets => <View style={{
+                                alignSelf: 'stretch',
+                                paddingBottom: insets.bottom > 0 ? 4 : 18,
+                                justifyContent: 'space-evenly',
+                                flexDirection: 'row',
+                                alignItems: 'center'
+                                /*backgroundColor: 'white',
+                            shadowColor: 'black',
+                            shadowOffset: { width: 0, height: -1 },
+                            shadowRadius: 2,
+                            shadowOpacity: 0.07*/
+                            }}>
 
+                                <Button
+                                    icon={{ name: 'apps', type: 'materialicons', size: 32, color: homeScreenButtonIconColor }}
+                                    type="clear"
+                                    buttonStyle={homeScreenButtonStyle.buttonStyle}
+                                    containerStyle={homeScreenButtonStyle.buttonContainerStyle}
+                                />
+
+                                <VoiceInputButton
+                                    ref={ref => this._voiceInputButtonRef = ref}
+                                    isBusy={this.state.speechCommandSessionStatus != SessionStatus.Terminated && this.state.speechCommandSessionStatus >= SessionStatus.Analyzing}
+                                    onTouchDown={this.onVoiceInputButtonPressed}
+                                    onTouchUp={this.onVoiceInputButtonUp} />
+
+
+                                <Button icon={{ name: 'account-box', type: 'materialicons', size: 32, color: homeScreenButtonIconColor }}
+                                    type="clear"
+                                    buttonStyle={homeScreenButtonStyle.buttonStyle}
+                                    containerStyle={homeScreenButtonStyle.buttonContainerStyle} />
+                            </View>
+                        }
+                    </SafeAreaConsumer>
 
 
 
