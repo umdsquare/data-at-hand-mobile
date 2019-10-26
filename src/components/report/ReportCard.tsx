@@ -6,6 +6,7 @@ import Colors from "../../style/Colors";
 import { Button, Icon } from "react-native-elements";
 import { LikeHeart, Valence } from "../common/LikeHeart";
 import { PaginationBar } from "../common/PaginationBar";
+import { BookmarkToggle } from "../common/BookmarkToggle";
 
 const cardHeaderHeight = 60
 const cardFooterHeight = 48
@@ -93,9 +94,9 @@ export class ReportCard extends React.Component {
                 <Icon iconStyle={Styles.cardTitleIconStyle} name="ios-pricetag" type="ionicon" color={Colors.textColorLight} size={20} />
                 <Text style={Styles.cardTitleStyle}>Card Title</Text>
 
-                <Button buttonStyle={Styles.headerButtonStyle}
-                    type="clear"
-                    icon={{ name: "bookmark-border", type: 'materialicon', color: 'gray', size: 26 }} />
+                <BookmarkToggle buttonStyle={Styles.headerButtonStyle}
+                    isBookmarked={true}
+                    onToggle={()=>{}} />
                 <Button buttonStyle={Styles.headerButtonStyle}
                     type="clear"
                     icon={{ name: "md-trash", type: 'ionicon', color: 'gray' }} />
