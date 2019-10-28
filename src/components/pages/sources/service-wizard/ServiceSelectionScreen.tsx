@@ -80,8 +80,9 @@ interface ServiceElementProps {
     source: DataSource,
     index: number,
     selectedAlready: boolean,
-    select(): void,
-    onSelected(): void
+    onSelected(): void,
+    select?(): void
+    
 }
 
 function mapStateToProps(ownProps: ServiceElementProps): ServiceElementProps {

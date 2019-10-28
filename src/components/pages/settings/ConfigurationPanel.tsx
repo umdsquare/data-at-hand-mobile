@@ -11,8 +11,8 @@ import { StyleTemplates } from '../../../style/Styles';
 import { setUnit } from '../../../state/measure-settings/actions';
 
 interface Props{
-    selectedUnitType: MeasureUnitType,
-    setUnitType: (index)=>{}
+    selectedUnitType?: MeasureUnitType,
+    setUnitType?: (index)=>void
 }
 
 class ConfigurationPanel extends React.Component<Props>{

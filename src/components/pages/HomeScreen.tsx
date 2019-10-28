@@ -20,7 +20,7 @@ import { NLUResultPanel } from '../speech/NLUResultPanel';
 import { DarkOverlay } from '../common/DarkOverlay';
 import { ReportCard } from '../report/ReportCard';
 import { SafeAreaConsumer } from 'react-native-safe-area-context';
-import { TouchableHighlight } from 'react-native-gesture-handler';
+import { ScreenSessionLogger } from '../common/ScreenSessionLogger';
 
 const appBarIconStyles = {
     buttonStyle: {
@@ -60,7 +60,7 @@ interface State {
 export class HomeScreen extends React.Component<PropsWithNavigation, State> {
 
     static navigationOptions = ({ navigation }) => ({
-        headerLeft: (<Logo simple={true}/>),
+        headerLeft: (<Logo simple={true} />),
         headerLeftContainerStyle: { paddingLeft: Sizes.horizontalPadding },
         headerRight: (
             <View style={{
@@ -215,6 +215,8 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
             <LinearGradient
                 style={{ flex: 1, alignSelf: 'stretch' }}
                 colors={Colors.lightBackgroundGradient}>
+
+                <ScreenSessionLogger />
                 <SafeAreaView style={{ flex: 1, alignSelf: 'stretch', alignItems: 'center', justifyContent: 'center' }}>
                     {Platform.OS === 'android' &&
                         <StatusBar barStyle="dark-content" backgroundColor='white' />}

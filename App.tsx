@@ -67,6 +67,7 @@ class App extends React.Component<any, State> {
 
     return <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
+
         <SafeAreaProvider>
           <ThemeProvider theme={theme}>
             <AppNavigator />

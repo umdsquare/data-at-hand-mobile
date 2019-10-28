@@ -39,6 +39,7 @@
     "react-navigation-stack": "^1.10.3",
     "react-navigation-transitions": "^1.0.12",
     "react-redux": "^7.1.1",
+    "realm": "^3.3.0",
     "redux": "^4.0.4",
     "redux-logger": "^3.0.6",
     "redux-persist": "^6.0.0",

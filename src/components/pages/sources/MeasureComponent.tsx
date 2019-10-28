@@ -19,10 +19,10 @@ import { selectSourceForMeasure, deselectSourceForMeasure } from "../../../state
 
 interface Prop extends PropsWithNavigation {
     measureSpec: MeasureSpec
-    connectedMeasures: Array<DataSourceMeasure>
-    mainMeasureIndex: number
-    selectMeasure: () => void,
-    deselectMeasure: () => void
+    connectedMeasures?: Array<DataSourceMeasure>
+    mainMeasureIndex?: number
+    selectMeasure?: () => void,
+    deselectMeasure?: () => void
 }
 
 interface State {
@@ -167,8 +167,8 @@ interface SourceBadgeProps {
     measure: DataSourceMeasure,
     isMain: boolean,
     showActionSheetWithOptions,
-    setMeasureAsMain: () => void,
-    deselectMeasure: () => void
+    setMeasureAsMain?: () => void,
+    deselectMeasure?: () => void
 }
 
 function mapDispatchToPropsSourceBadge(dispatch: Dispatch, ownProps: SourceBadgeProps): SourceBadgeProps {

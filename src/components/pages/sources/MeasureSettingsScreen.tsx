@@ -8,6 +8,7 @@ import { sourceManager } from "../../../system/SourceManager";
 import { PropsWithNavigation } from "../../../PropsWithNavigation";
 import { ActionSheetProvider } from '@expo/react-native-action-sheet'
 import LinearGradient from 'react-native-linear-gradient';
+import { ScreenSessionLogger } from "../../common/ScreenSessionLogger";
 
 interface Prop extends PropsWithNavigation {
 }
@@ -36,13 +37,15 @@ export class MeasureSettingsScreen extends React.PureComponent<Prop, State>{
 
     render() {
         return (<ActionSheetProvider>
-            <LinearGradient 
-                style={{ flex: 1, alignSelf: 'stretch' }} 
+            <LinearGradient
+                style={{ flex: 1, alignSelf: 'stretch' }}
                 colors={Colors.lightBackgroundGradient}>
+
+                <ScreenSessionLogger />
                 {
                     this.state.isLoading === true ? (
                         <Text>Loading...</Text>
-                        ) :
+                    ) :
                         (<FlatList style={{ flex: 1, alignSelf: 'stretch' }}
                             data={measureService.supportedMeasureSpecs}
                             keyExtractor={(item) => item.nameKey}
