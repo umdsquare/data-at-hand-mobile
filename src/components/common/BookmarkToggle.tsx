@@ -57,7 +57,7 @@ export class BookmarkToggle extends React.PureComponent<Props, State> {
                 >
                     <Icon {...{
                         name: this.state.isBookmarked === true ? "bookmark" : "bookmark-border",
-                        type: 'materialicon', color: this.state.isBookmarked === true ? Colors.accent : 'gray', size: 26
+                        type: 'materialicon', color: this.state.isBookmarked === true ? Colors.primary : 'gray', size: 26
                     }} />
                 </Animated.View>
 

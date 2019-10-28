@@ -60,7 +60,7 @@ interface State {
 export class HomeScreen extends React.Component<PropsWithNavigation, State> {
 
     static navigationOptions = ({ navigation }) => ({
-        headerLeft: (<Logo />),
+        headerLeft: (<Logo simple={true}/>),
         headerLeftContainerStyle: { paddingLeft: Sizes.horizontalPadding },
         headerRight: (
             <View style={{

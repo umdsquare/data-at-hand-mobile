@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Platform, StyleSheet } from "react-native";
+import { View, Text, Platform, StyleSheet, LayoutAnimation } from "react-native";
 import { MeasureSpec } from "../../../measure/MeasureSpec";
 import { Card, Button } from "react-native-elements";
 import { StyleTemplates } from "../../../style/Styles";
@@ -76,6 +76,10 @@ class MeasureComponent extends React.Component<Prop, State>{
         }
         this.setState(newState)
 
+    }
+
+    componentDidUpdate(){
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
     }
 
     private callNewServiceSelectionDialog = () => {

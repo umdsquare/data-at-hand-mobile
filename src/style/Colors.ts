@@ -3,7 +3,8 @@
 export default {
   lightBackground: "#F5F9F8",
   lightBackgroundGradient: ["#e0e8ee", "#eeeaec"],
-  accent: "#ED5F88",
+  accent: "#F58674",
+  primary: "#ef6a79",
   link: "#14acc4",
   lightFormBackground: "#d0d0d0",
   textColorDark: "#252525",
