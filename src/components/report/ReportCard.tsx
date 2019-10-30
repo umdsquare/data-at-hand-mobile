@@ -95,8 +95,7 @@ export class ReportCard extends React.Component {
                 <Text style={Styles.cardTitleStyle}>Card Title</Text>
 
                 <BookmarkToggle buttonStyle={Styles.headerButtonStyle}
-                    isBookmarked={true}
-                    onToggle={()=>{}} />
+                    isBookmarked={true} />
                 <Button buttonStyle={Styles.headerButtonStyle}
                     type="clear"
                     icon={{ name: "md-trash", type: 'ionicon', color: 'gray' }} />

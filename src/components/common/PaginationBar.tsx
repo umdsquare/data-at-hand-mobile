@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Animated, Easing, Platform, UIManager, LayoutAnimation } from 'react-native';
+import { StyleSheet, View, Platform, UIManager, LayoutAnimation } from 'react-native';
 import { Button } from 'react-native-elements';
 import Colors from '../../style/Colors';
 
@@ -30,36 +30,48 @@ interface Props {
     windowSize: number,
     orientedAtEnd?: boolean,
     containerStyle?: any,
-    buttonStyle?: any
+    buttonStyle?: any,
+    index?: number
 }
 
 interface State {
     relativeWindowPointer: number // index of leftmost point of the window relative to currentIndex. Always -(windowSize-1) <= value <= 0
     currentIndex: number
-    ballInformations: Array<BallInfo>
 }
 
 interface BallInfo {
     itemIndex: number
-    isOutsideWindow: boolean
+    isOutsideWindow: boolean,
     itemExists: boolean
 }
 
 export class PaginationBar extends React.PureComponent<Props, State>{
 
-    private transitionAnim: Animated.CompositeAnimation
-
     constructor(props: Props) {
         super(props)
 
         const relativeWindowPointer = props.orientedAtEnd === true ? -(props.windowSize - 1) : 0
-        const currentIndex = props.orientedAtEnd === true ? props.numItems - 1 : 0
+        const currentIndex = props.index? props.index : (props.orientedAtEnd === true ? props.numItems - 1 : 0)
 
         this.state = {
             relativeWindowPointer: relativeWindowPointer,
-            currentIndex: currentIndex,
-            ballInformations: this.generateBallInfoList(currentIndex, relativeWindowPointer)
+            currentIndex: currentIndex
         }
+    }
+
+    componentDidUpdate(prevProps: Props){
+        if(this.props.numItems != prevProps.numItems || this.props.index != prevProps.index){
+            let windowRelPointer = this.state.relativeWindowPointer
+            let newIndex = this.props.index
+
+            this.setState({
+                ...this.state,
+                currentIndex: newIndex, 
+                relativeWindowPointer: windowRelPointer - (newIndex + windowRelPointer + this.props.windowSize - this.props.numItems)
+            })
+        }
+
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     }
 
     private onPrevClicked = () => {
@@ -67,12 +79,10 @@ export class PaginationBar extends React.PureComponent<Props, State>{
             const newIndex = this.state.currentIndex - 1
             const newWindowRelPointer = Math.min(0, (this.state.relativeWindowPointer + 1))
 
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
             this.setState({
                 ...this.state,
                 relativeWindowPointer: newWindowRelPointer,
                 currentIndex: newIndex,
-                ballInformations: this.generateBallInfoList(newIndex, newWindowRelPointer)
             })
         }
     }
@@ -82,13 +92,10 @@ export class PaginationBar extends React.PureComponent<Props, State>{
             const newIndex = this.state.currentIndex + 1
             const newWindowRelPointer = Math.max(-(this.props.windowSize - 1), (this.state.relativeWindowPointer - 1))
 
-            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-
             this.setState({
                 ...this.state,
                 relativeWindowPointer: newWindowRelPointer,
                 currentIndex: newIndex,
-                ballInformations: this.generateBallInfoList(newIndex, newWindowRelPointer)
             })
         }
     }
@@ -119,21 +126,9 @@ export class PaginationBar extends React.PureComponent<Props, State>{
         return ballInformations
     }
 
-    private getXOfBall(ballInformations: Array<BallInfo>, infoIndex: number): number {
-
-        const cellWidth = Sizes.ballMargin * 2 + Sizes.ballNormalSize
-
-        const totalWidth = (this.props.windowSize + 2) * cellWidth
-
-        const needLeftSmallDot = ballInformations[0].itemExists === true
-        const needRightSmallDot = ballInformations[ballInformations.length - 1].itemExists === true
-        const numBallsToShow = ballInformations.length - (needLeftSmallDot ? 0 : 1) - (needRightSmallDot ? 0 : 1)
-
-
-        return ((totalWidth - numBallsToShow * cellWidth) / 2) + ((infoIndex - (needLeftSmallDot ? 0 : 1)) * cellWidth)
-    }
-
     render() {
+        const ballInformations = this.generateBallInfoList(this.state.currentIndex, this.state.relativeWindowPointer)
+
         return (<View style={{ ...Styles.containerStyle, ...this.props.containerStyle }}>
 
             <Button
@@ -146,28 +141,22 @@ export class PaginationBar extends React.PureComponent<Props, State>{
             />
 
             <View style={{
+                flexDirection: 'row',
                 width: (this.props.windowSize + 2) * (2 * Sizes.ballMargin + Sizes.ballNormalSize),
                 height: 40,
                 alignItems: "center",
                 justifyContent: 'center'
-            }}>{this.state.ballInformations.map((info, i) =><Animated.View
+            }}>{ballInformations.map((info, i) =><View
                     key={info.itemIndex} style={{
-                        position: 'absolute',
-                        left: this.getXOfBall(this.state.ballInformations, i),
-                        width: Sizes.ballMargin * 2 + Sizes.ballNormalSize,
-                        height: Sizes.ballMargin * 2 + Sizes.ballNormalSize,
+                        width: Sizes.ballNormalSize * (info.isOutsideWindow===true ? 0.5 : 1 ),
+                        height: Sizes.ballNormalSize * (info.isOutsideWindow===true ? 0.5 : 1 ),
+                        margin: Sizes.ballMargin,
+                        borderRadius: Sizes.ballNormalSize * (info.isOutsideWindow===true ? 0.5 : 1 )*.5,
+                        backgroundColor: info.itemIndex === this.state.currentIndex ? Colors.accent : "gray",
                         alignItems: 'center',
                         opacity: info.itemExists ? 1 : 0,
                         justifyContent: 'center'
-                    }}>
-                    <Animated.View
-                        style={{
-                            width: Sizes.ballNormalSize * (info.isOutsideWindow===true ? 0.5 : 1 ),
-                            height: Sizes.ballNormalSize * (info.isOutsideWindow===true ? 0.5 : 1 ),
-                            borderRadius: Sizes.ballNormalSize * (info.isOutsideWindow===true ? 0.5 : 1 )*.5,
-                            backgroundColor: info.itemIndex === this.state.currentIndex ? Colors.accent : "gray"
-                        }} />
-                </Animated.View>
+                    }}/>
             )}</View>
 
             <Button

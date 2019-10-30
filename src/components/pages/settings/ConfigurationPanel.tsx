@@ -7,7 +7,6 @@ import { Dispatch } from 'redux';
 import { AppState } from '../../../state/types';
 import { connect } from 'react-redux';
 import Colors from '../../../style/Colors';
-import { StyleTemplates } from '../../../style/Styles';
 import { setUnit } from '../../../state/measure-settings/actions';
 
 interface Props{

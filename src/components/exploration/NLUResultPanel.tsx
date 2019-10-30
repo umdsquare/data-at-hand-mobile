@@ -105,7 +105,7 @@ export class NLUResultPanel extends React.Component<Props, State> {
         return (
             <Animated.View style={{
                 alignSelf: 'stretch',
-                height: 100,
+                height: 120,
                 opacity: this.interpEmergence("opacity"),
                 transform: [{
                     scale: this.interpEmergence("scale")

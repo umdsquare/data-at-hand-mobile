@@ -13,14 +13,15 @@ import { Logo } from '../Logo';
 import { PropsWithNavigation } from '../../PropsWithNavigation';
 import { voiceDictator } from '../../speech/VoiceDictator';
 import { DictationResult, NLUResult } from '../../speech/types';
-import { VoiceInputButton } from '../speech/VoiceInputButton';
-import { SpeechInputPopup } from '../speech/SpeechInputPopup';
+import { VoiceInputButton } from '../exploration/VoiceInputButton';
+import { SpeechInputPopup } from '../exploration/SpeechInputPopup';
 import { SpeechCommandSession, SessionStatus, TerminationPayload, TerminationReason } from '../../speech/SpeechCommandSession';
-import { NLUResultPanel } from '../speech/NLUResultPanel';
+import { NLUResultPanel } from '../exploration/NLUResultPanel';
 import { DarkOverlay } from '../common/DarkOverlay';
 import { ReportCard } from '../report/ReportCard';
 import { SafeAreaConsumer } from 'react-native-safe-area-context';
 import { ScreenSessionLogger } from '../common/ScreenSessionLogger';
+import { ExplorationPanel } from '../exploration/ExplorationPanel';
 
 const appBarIconStyles = {
     buttonStyle: {
@@ -222,7 +223,7 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                         <StatusBar barStyle="dark-content" backgroundColor='white' />}
 
                     <View style={{ zIndex: Platform.OS === 'android' ? 100 : undefined, flex: 1, alignSelf: 'stretch', }}>
-                        <ReportCard />
+                        <ExplorationPanel />
                     </View>
 
                     <DarkOverlay style={{ zIndex: Platform.OS === 'android' ? 1000 : undefined }} ref={ref => this._darkOverlayRef = ref} />
@@ -248,7 +249,7 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                             }}>
 
                                 <Button
-                                    icon={{ name: 'apps', type: 'materialicons', size: 32, color: homeScreenButtonIconColor }}
+                                    icon={{ name: 'ios-archive', type: 'ionicon', size: 32, color: homeScreenButtonIconColor }}
                                     type="clear"
                                     buttonStyle={homeScreenButtonStyle.buttonStyle}
                                     containerStyle={homeScreenButtonStyle.buttonContainerStyle}
