@@ -1,5 +1,6 @@
 import { IDatumBase } from "../../database/types";
 import { VisualizationSchema } from "../visualization/types";
+import { DurationSemantic } from "./time";
 
 export enum ExplorationStateType{
     Initial=0,
@@ -19,6 +20,7 @@ export enum ExplorationCommandType{
 
 export interface ExplorationStateInfo{
     stateType: ExplorationStateType
+    command?: ExplorationCommand
     payload: any
 }
 
@@ -41,5 +43,5 @@ export function isVisualizationPayload(obj: any): boolean{
 
 export interface DefaultChartPayload extends VisualizationPayload{
     measureCode: string,
-    queriedDuration: {start: number, end: number},
+    queriedDuration: DurationSemantic,
 }

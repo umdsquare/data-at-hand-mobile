@@ -26,7 +26,7 @@ const Styles = StyleSheet.create({
         top: 0,
         bottom: 0,
         ...StyleTemplates.backgroundCardStyle,
-        backgroundColor: Colors.lightBackground,
+        backgroundColor: "white",
         shadowRadius: 2,
         borderRadius: 0,
         flexDirection: 'column',

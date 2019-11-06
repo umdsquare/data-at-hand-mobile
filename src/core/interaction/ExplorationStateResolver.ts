@@ -1,13 +1,9 @@
 import { ExplorationStateInfo, ExplorationCommand, ExplorationCommandType, SelectMeasureCommand, ExplorationStateType, DefaultChartPayload } from "../../core/interaction/types";
-import { sourceManager } from "../../system/SourceManager";
 import { databaseManager } from "../../system/DatabaseManager";
-import { startOfDay, endOfDay } from 'date-fns';
-import { toDate } from 'date-fns-tz';
 
-import { number } from "prop-types";
-import { IDatumBase } from "../../database/types";
-import { VisualizationSchema } from "../visualization/types";
 import * as visResolver from '../visualization/visualization-resolver';
+import { Presets, semanticToDuration } from "./time";
+import { toDate, parse } from "date-fns";
 
 
 
@@ -18,18 +14,16 @@ class ExplorationStateResolver{
         switch(command.type){
             case ExplorationCommandType.SelectMeasure:
                 const castedCommand = command as SelectMeasureCommand
-                const start = startOfDay(toDate(command.invokedAt)).getTime()
-                const end = endOfDay(toDate(command.invokedAt)).getTime()
-                const data = await databaseManager.queryData(castedCommand.measureCode, start, end)
+                const durationSemantic = Presets.TODAY
+                const duration = semanticToDuration(durationSemantic, command.invokedAt)
+                const data = await databaseManager.queryData(castedCommand.measureCode, duration.from, duration.to)
                 const newStateInfo = {
                     stateType: ExplorationStateType.DefaultChart,
+                    command: command,
                     payload: {
                         measureCode: castedCommand.measureCode,
-                        queriedDuration: {
-                            start,
-                            end
-                        },
-                        visualizationSchema: visResolver.makeDefaultChart(castedCommand.measureCode, data, {start, end})
+                        queriedDuration: durationSemantic,
+                        visualizationSchema: visResolver.makeDefaultChart(castedCommand.measureCode, data, {start: duration.from, end: duration.to})
                     } as DefaultChartPayload
                 } as ExplorationStateInfo
                 return newStateInfo
