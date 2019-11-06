@@ -39,6 +39,7 @@ export class FitbitWorkoutMeasure extends FitbitMeasureBase {
             duration: activity.duration,
             measureCode: this.code,
             value: null,
+            subjectToChange: false
           });
         }
       });

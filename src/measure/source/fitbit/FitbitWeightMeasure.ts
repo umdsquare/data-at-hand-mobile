@@ -16,7 +16,8 @@ export class FitbitWeightMeasure extends FitbitMeasureBase {
     return result.weight.map(weightLog => ({
       measureCode: this.code,
       value: weightLog.weight,
-      measuredAt: toDate(weightLog.date + "T" + weightLog.time, {timeZone: timeZone})
+      measuredAt: toDate(weightLog.date + "T" + weightLog.time, {timeZone: timeZone}),
+      subjectToChange: false
     } as IWeightPoint))
   }
 }

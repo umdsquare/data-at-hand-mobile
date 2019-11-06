@@ -23,7 +23,8 @@ export class FitbitHeartRateMeasure extends FitbitMeasureBase {
         convertedResult.push({
           measureCode: this.code,
           measuredAt: toDate(dateString + "T" + rawDatum.time, {timeZone: timeZone}),
-          value: rawDatum.value
+          value: rawDatum.value,
+          subjectToChange: false
         })
       })
     })

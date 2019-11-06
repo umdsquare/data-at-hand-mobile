@@ -7,7 +7,6 @@ import Colors from '../../style/Colors';
 import { format } from 'date-fns-tz';
 import { getHours } from 'date-fns';
 
-
 const xAxisHeight = 50
 const yAxisWidth = 64
 const rightPadding = 18
@@ -40,6 +39,7 @@ export class TimelineBarChartComponent extends React.PureComponent<Props>{
         }
     }
 
+
     render() {
         const chartArea = {
             x: yAxisWidth,
@@ -68,7 +68,7 @@ export class TimelineBarChartComponent extends React.PureComponent<Props>{
                     scaleX.ticks().map(tick => {
                         return <G key={tick.getTime()} x={scaleX(tick)}>
                             <Circle fill="rgba(0,0,0,0.3)" r={2.5} cy={12} />
-                            <Text textAnchor="end" y={12} transform="rotate(-45)translate(-16)" >{this.formatTimeTick(tick)}</Text>
+                            <Text textAnchor="end" y={12} transform="rotate(-45)translate(-16)" fill={Colors.textColorLight}>{this.formatTimeTick(tick)}</Text>
                         </G>
                     })
                 }
@@ -79,7 +79,7 @@ export class TimelineBarChartComponent extends React.PureComponent<Props>{
                     scaleY.ticks().map(tick => {
                         return <G key={tick} y={scaleY(tick)}>
                             <Line x1={chartArea.x - yAxisTickSize} x2={chartArea.x + chartArea.w} stroke="rgba(0,0,0,0.07)" />
-                            <Text alignmentBaseline="central" textAnchor="end" x={chartArea.x - yAxisTickSize - 8} fill={Colors.textColorLight}>{tick}</Text>
+                            <Text alignmentBaseline="central" fontWeight={500} textAnchor="end" x={chartArea.x - yAxisTickSize - 8} fill={Colors.textColorLight}>{tick}</Text>
                         </G>
 
                     })

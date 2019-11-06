@@ -19,7 +19,8 @@ export class FitbitSleepMeasure extends FitbitMeasureBase {
         endedAt: toDate(log.endTime, {timeZone: fitbitTimezone}),
         duration: log.duration,
         value: log.efficiency/100,
-        measureCode: this.code
+        measureCode: this.code,
+        subjectToChange: false
       } as ISleepSession
     })
   }
