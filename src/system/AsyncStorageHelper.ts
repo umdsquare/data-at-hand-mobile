@@ -1,8 +1,11 @@
 import AsyncStorage from '@react-native-community/async-storage';
+import { isString } from 'util';
 
 export class AsyncStorageHelper {
   static async set(key: string, value: any): Promise<void> {
-    return AsyncStorage.setItem(key, JSON.stringify(value));
+    if(typeof value === 'string'){
+      return AsyncStorage.setItem(key, value)
+    }else return AsyncStorage.setItem(key, JSON.stringify(value));
   }
 
   static async get(key: string): Promise<number> {

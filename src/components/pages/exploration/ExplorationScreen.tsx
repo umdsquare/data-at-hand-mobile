@@ -1,27 +1,35 @@
 import React from 'react';
-import { View, Text, SafeAreaView, Platform, StatusBar, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, SafeAreaView, Platform, StatusBar, StyleSheet } from 'react-native';
 import { Button } from 'react-native-elements';
-import Colors from '../../style/Colors';
-import { StyleTemplates } from '../../style/Styles';
+import Colors from '../../../style/Colors';
+import { StyleTemplates } from '../../../style/Styles';
 import LinearGradient from 'react-native-linear-gradient';
 import { NavigationStackOptions } from 'react-navigation-stack';
 import RBSheet from "react-native-raw-bottom-sheet";
-import { ConfigurationPanel } from './settings/ConfigurationPanel';
-import { Sizes } from '../../style/Sizes';
+import { ConfigurationPanel } from '../settings/ConfigurationPanel';
+import { Sizes } from '../../../style/Sizes';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
-import { Logo } from '../Logo';
-import { PropsWithNavigation } from '../../PropsWithNavigation';
-import { voiceDictator } from '../../speech/VoiceDictator';
-import { DictationResult, NLUResult } from '../../speech/types';
-import { VoiceInputButton } from '../exploration/VoiceInputButton';
-import { SpeechInputPopup } from '../exploration/SpeechInputPopup';
-import { SpeechCommandSession, SessionStatus, TerminationPayload, TerminationReason } from '../../speech/SpeechCommandSession';
-import { NLUResultPanel } from '../exploration/NLUResultPanel';
-import { DarkOverlay } from '../common/DarkOverlay';
-import { ReportCard } from '../report/ReportCard';
+import { Logo } from '../../Logo';
+import { PropsWithNavigation } from '../../../PropsWithNavigation';
+import { voiceDictator } from '../../../core/speech/VoiceDictator';
+import { DictationResult, NLUResult } from '../../../core/speech/types';
+import { VoiceInputButton } from '../../exploration/VoiceInputButton';
+import { SpeechInputPopup } from '../../exploration/SpeechInputPopup';
+import { SpeechCommandSession, SessionStatus, TerminationPayload, TerminationReason } from '../../../core/speech/SpeechCommandSession';
+import { NLUResultPanel } from '../../exploration/NLUResultPanel';
+import { DarkOverlay } from '../../common/DarkOverlay';
 import { SafeAreaConsumer } from 'react-native-safe-area-context';
-import { ScreenSessionLogger } from '../common/ScreenSessionLogger';
-import { ExplorationPanel } from '../exploration/ExplorationPanel';
+import { ScreenSessionLogger } from '../../common/ScreenSessionLogger';
+import { ExplorationPanel } from '../../exploration/ExplorationPanel';
+import { ExplorationState, resolveExplorationCommand } from '../../../state/exploration/reducers';
+import { ReduxAppState } from '../../../state/types';
+import { ExplorationCommand, ExplorationStateType, SelectMeasureCommand, ExplorationCommandType } from '../../../core/interaction/types';
+import { ThunkDispatch } from 'redux-thunk';
+import { connect } from 'react-redux';
+import { MeasureSettingsState } from '../../../state/measure-settings/reducer';
+import { SelectMeasureComponent } from './components';
+import { MeasureSpec } from '../../../measure/MeasureSpec';
+import { sourceManager } from '../../../system/SourceManager';
 
 const appBarIconStyles = {
     buttonStyle: {
@@ -49,6 +57,12 @@ const homeScreenButtonStyle = StyleSheet.create({
 
 const homeScreenButtonIconColor = "#757575"
 
+interface Props extends PropsWithNavigation{
+    dispatchCommand: (command: ExplorationCommand)=>void,
+    explorationState: ExplorationState,
+    measureSettingsState: MeasureSettingsState
+}
+
 interface State {
     isLoading: boolean,
     dictationResult: DictationResult,
@@ -57,8 +71,7 @@ interface State {
 }
 
 
-
-export class HomeScreen extends React.Component<PropsWithNavigation, State> {
+class ExplorationScreen extends React.Component<Props, State> {
 
     static navigationOptions = ({ navigation }) => ({
         headerLeft: (<Logo simple={true} />),
@@ -211,7 +224,23 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
         await this.stopSpeechInput()
     }
 
+    private onMeasureSpecSelected = (spec: MeasureSpec) => {
+        const sourceMeasure = sourceManager.getMainSourceMeasure(spec, this.props.measureSettingsState)
+        this.props.dispatchCommand({type: ExplorationCommandType.SelectMeasure, measureCode: sourceMeasure.code, invokedAt: Date.now()} as SelectMeasureCommand)
+    }
+
     render() {
+
+        let mainContent
+        if(this.props.explorationState.info.stateType === ExplorationStateType.Initial){
+            mainContent = <SelectMeasureComponent key = "selectMeasure" 
+            selectableMeasureSpecKeys={this.props.measureSettingsState.selectionInfoList.map(entry => entry.measureSpecKey) }
+            onMeasureSpecSelected={this.onMeasureSpecSelected}
+            />
+        }else{
+            mainContent = <ExplorationPanel/> 
+        }
+
         return (
             <LinearGradient
                 style={{ flex: 1, alignSelf: 'stretch' }}
@@ -223,7 +252,7 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
                         <StatusBar barStyle="dark-content" backgroundColor='white' />}
 
                     <View style={{ zIndex: Platform.OS === 'android' ? 100 : undefined, flex: 1, alignSelf: 'stretch', }}>
-                        <ExplorationPanel />
+                        {mainContent}
                     </View>
 
                     <DarkOverlay style={{ zIndex: Platform.OS === 'android' ? 1000 : undefined }} ref={ref => this._darkOverlayRef = ref} />
@@ -315,3 +344,22 @@ export class HomeScreen extends React.Component<PropsWithNavigation, State> {
         );
     }
 }
+
+
+function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props{
+    return {
+        ...ownProps,
+        explorationState: appState.explorationState,
+        measureSettingsState: appState.measureSettingsState
+    }
+}
+
+function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Props): Props {
+    return {
+        dispatchCommand: (command: ExplorationCommand) => dispatch(resolveExplorationCommand(command)),
+        ...ownProps
+    }
+}
+
+const explorationScreen = connect(mapStateToProps, mapDispatchToProps)(ExplorationScreen)
+export { explorationScreen as ExplorationScreen }

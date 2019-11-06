@@ -4,7 +4,7 @@ import { Sizes } from '../../../style/Sizes';
 import { ButtonGroup } from 'react-native-elements';
 import { MeasureUnitType } from '../../../measure/MeasureSpec';
 import { Dispatch } from 'redux';
-import { AppState } from '../../../state/types';
+import { ReduxAppState } from '../../../state/types';
 import { connect } from 'react-redux';
 import Colors from '../../../style/Colors';
 import { setUnit } from '../../../state/measure-settings/actions';
@@ -64,7 +64,7 @@ function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props{
     }
 }
 
-function mapStateToProps(appState: AppState, ownProps: Props): Props{
+function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props{
     return {
         ...ownProps,
         selectedUnitType: appState.measureSettingsState.unit

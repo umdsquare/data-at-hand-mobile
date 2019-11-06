@@ -29,7 +29,8 @@ export class FitbitStepMeasure extends FitbitMeasureBase {
           dataPoints.push({
             value: datum.value,
             startedAt: date,
-            measureCode: this.code
+            measureCode: this.code,
+            subjectToChange: false
           });
         }
         else {

@@ -1,5 +1,5 @@
 import {INaturalLanguageAnalyzer, NLUResult} from '../types';
-import {AsyncStorageHelper} from '../../system/AsyncStorageHelper';
+import {AsyncStorageHelper} from '../../../system/AsyncStorageHelper';
 
 const DEFAULT_BASE_URL = 'https://dialogflow.googleapis.com/v2/projects/';
 
@@ -70,7 +70,7 @@ class GoogleDialogFlow implements INaturalLanguageAnalyzer {
 
   async initialize(): Promise<void> {
     try {
-      this.credentials = require('../../../credentials/credential_google_dialogflow.json');
+      this.credentials = require('../../../../credentials/credential_google_dialogflow.json');
     } catch (ex) {
       throw {error: 'InvalidCredentialFile'};
     }

@@ -7,6 +7,11 @@ import { PaginationBar } from '../common/PaginationBar';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Dialog from "react-native-dialog";
 import { Button } from 'react-native-elements';
+import { ExplorationStateInfo, isVisualizationPayload, VisualizationPayload } from '../../core/interaction/types';
+import { ReduxAppState } from '../../state/types';
+import { Dispatch } from 'redux';
+import { connect } from 'react-redux';
+import { ChartView } from '../visualization/ChartView';
 
 
 const headerHeight = 52
@@ -98,7 +103,7 @@ const Styles = StyleSheet.create({
 })
 
 interface Props {
-
+    explorationStateInfo?: ExplorationStateInfo
 }
 
 interface State {
@@ -106,7 +111,7 @@ interface State {
     numItems: number
 }
 
-export class ExplorationPanel extends React.Component<Props, State> {
+class ExplorationPanel extends React.Component<Props, State> {
 
 
     constructor(props) {
@@ -122,17 +127,20 @@ export class ExplorationPanel extends React.Component<Props, State> {
             <View style={Styles.headerStyle}>
 
                 <BookmarkButton bookmarkInfo={this.state.bookmarkInfo} onBookmarkRequested={(name) => {
-                    this.setState({...this.state, bookmarkInfo: { name: name } })
+                    this.setState({ ...this.state, bookmarkInfo: { name: name } })
                 }}
 
                     onDiscardBookmarkRequested={() => {
-                        this.setState({...this.state, bookmarkInfo: null})
+                        this.setState({ ...this.state, bookmarkInfo: null })
                     }} />
 
             </View>
 
             <View style={Styles.bodyStyle}>
-                    <Button type="clear" onPress={() => this.setState({...this.state, numItems: this.state.numItems + 1})} title="haha"/>
+                {
+                    isVisualizationPayload(this.props.explorationStateInfo.payload)==true? 
+                    <ChartView schema={(this.props.explorationStateInfo.payload as VisualizationPayload).visualizationSchema}/> : <></>
+                }
             </View>
 
             <Text style={Styles.cardMessageStyle}>Your average step count is 10,000.</Text>
@@ -140,12 +148,29 @@ export class ExplorationPanel extends React.Component<Props, State> {
             <View style={Styles.hrStyle} />
 
             <View style={Styles.footerStyle}>
-            </View>
 
-            <PaginationBar buttonStyle={Styles.footerButtonStyle} orientedAtEnd={true} numItems={this.state.numItems} index={this.state.numItems-1} windowSize={5} />
+                <PaginationBar buttonStyle={Styles.footerButtonStyle} orientedAtEnd={true} numItems={this.state.numItems} index={this.state.numItems - 1} windowSize={5} />
+
+            </View>
         </View>)
     }
 }
+
+function mapStateToProps(state: ReduxAppState, ownProps: Props): Props {
+
+    return {
+        ...ownProps,
+        explorationStateInfo: state.explorationState.info
+    }
+}
+
+function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props {
+    return { ...ownProps }
+}
+
+const explorationPanel = connect(mapStateToProps, mapDispatchToProps)(ExplorationPanel)
+export { explorationPanel as ExplorationPanel }
+
 
 interface BookmarkButtonProps {
     bookmarkInfo: { name: string },

@@ -1,7 +1,7 @@
 import {
   voiceDictator
 } from './VoiceDictator';
-import {sleep} from '../utils';
+import {sleep} from '../../utils';
 import { DictationResult, NLUResult } from './types';
 import { naturalLanguageRecognizer } from './NaturalLanguageRecognizer';
 

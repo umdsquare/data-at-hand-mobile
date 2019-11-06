@@ -3,7 +3,7 @@ import { Text, View, Animated, Easing, StyleSheet, } from 'react-native';
 import { Sizes } from '../../style/Sizes';
 import LottieView from 'lottie-react-native';
 import Colors from '../../style/Colors';
-import { DictationResult } from '../../speech/types';
+import { DictationResult } from '../../core/speech/types';
 
 enum AnimationType {
     Show, Hide
@@ -70,7 +70,7 @@ export class SpeechInputPopup extends React.Component<Props, State> {
         } else {
             this.currentAnimation = Animated.timing(this.state.interpolation, { toValue: 1, duration: 300, easing: Easing.inOut(Easing.cubic) })
             this.currentAnimType = AnimationType.Show
-            this.currentAnimation.start(finished => {
+            this.currentAnimation.start(() => {
                 this.currentAnimation = null
                 this.currentAnimType = null
                 if (this.queuedAnimType === AnimationType.Hide) {
@@ -92,7 +92,7 @@ export class SpeechInputPopup extends React.Component<Props, State> {
         } else {
             this.currentAnimation = Animated.timing(this.state.interpolation, { toValue: 0, duration: 600, easing: Easing.inOut(Easing.cubic) })
             this.currentAnimType = AnimationType.Hide
-            this.currentAnimation.start(finished => {
+            this.currentAnimation.start(() => {
                 this.currentAnimation = null
                 this.currentAnimType = null
                 if (this.queuedAnimType === AnimationType.Show) {

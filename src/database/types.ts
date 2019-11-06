@@ -1,6 +1,7 @@
 export interface IDatumBase{
     value: number,
-    measureCode: string
+    measureCode: string,
+    subjectToChange: boolean,
 }
 
 export interface IPointDatum extends IDatumBase{
@@ -28,8 +29,21 @@ export interface IWeightPoint extends IPointDatum{
 
 export interface IWorkoutSession extends ISessionDatum{
     activityType: string
+    //value: intensity
 }
 
 export interface ISleepSession extends ISessionDatum{ 
     //value: sleep efficiency
+}
+
+export interface ICachedRegion{
+    startedAt: Date,
+    endedAt: Date,
+    measureCode: string
+}
+
+export interface IUserDatabaseManager{
+    queryData<T extends IDatumBase>(measureCode: string, from: number, to: number): Promise<Array<T>>
+    clearCache(measureCode: string)
+
 }

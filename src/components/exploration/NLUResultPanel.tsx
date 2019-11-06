@@ -1,8 +1,8 @@
 import React from "react";
-import { NLUResult } from "../../speech/types";
+import { NLUResult } from "../../core/speech/types";
 import { Animated, Text, Easing } from "react-native";
 import { Sizes } from "../../style/Sizes";
-import { SessionStatus } from "../../speech/SpeechCommandSession";
+import { SessionStatus } from "../../core/speech/SpeechCommandSession";
 import Colors from "../../style/Colors";
 
 const InterpolationConfigBase = { inputRange: [0, 1] }

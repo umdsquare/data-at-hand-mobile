@@ -43,7 +43,7 @@ export const measureSettingsStateReducer = (
       setUnitTypeImpl(newState, action as SetUnitTypeAction)
       return newState;
     default:
-      return INITIAL_STATE;
+      return state;
   }
 };
 

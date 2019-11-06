@@ -16,9 +16,9 @@ import { PersistGate } from 'redux-persist/integration/react'
 import LottieView from 'lottie-react-native';
 import { sourceManager } from './src/system/SourceManager';
 import { FadeView } from './src/components/common/FadeView';
-import { voiceDictator } from './src/speech/VoiceDictator';
+import { voiceDictator } from './src/core/speech/VoiceDictator';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { naturalLanguageRecognizer } from './src/speech/NaturalLanguageRecognizer';
+import { naturalLanguageRecognizer } from './src/core/speech/NaturalLanguageRecognizer';
 import { ThemeProvider } from 'react-native-elements';
 import { theme } from './src/style/Theme';
 

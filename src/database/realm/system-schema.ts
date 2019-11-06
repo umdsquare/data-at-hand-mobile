@@ -9,6 +9,7 @@ date properties map to Date
 */
 
 export class UsageLog {
+  id: string;
   category: string;
   action: string;
   serializedMetadata: string;
@@ -22,7 +23,9 @@ export class UsageLog {
 
   static schema = {
     name: 'UsageLog',
+    primaryKey: 'id',
     properties: {
+      id: 'string',
       category: 'string',
       action: 'string',
       serializedMetadata: 'string?',

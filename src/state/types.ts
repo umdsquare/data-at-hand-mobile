@@ -1,8 +1,10 @@
 import { MeasureSettingsState } from "./measure-settings/reducer";
 import { Dispatch } from "redux";
+import { ExplorationState } from "./exploration/reducers";
 
-export type AppState = {
-    measureSettingsState: MeasureSettingsState
+export type ReduxAppState = {
+    measureSettingsState: MeasureSettingsState,
+    explorationState: ExplorationState
 }
 
 export interface ActionTypeBase{

@@ -13,7 +13,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { connectActionSheet } from "@expo/react-native-action-sheet";
 import { connect } from "react-redux";
 import { Dispatch } from "redux";
-import { AppState } from "../../../state/types";
+import { ReduxAppState } from "../../../state/types";
 import { getSourceSelectionInfo } from "../../../state/measure-settings/reducer";
 import { selectSourceForMeasure, deselectSourceForMeasure } from "../../../state/measure-settings/actions";
 
@@ -138,7 +138,7 @@ class MeasureComponent extends React.Component<Prop, State>{
 
 const connectedMeasureComponent = connect(mapStateToProps)(connectActionSheet(MeasureComponent))
 
-function mapStateToProps(appState: AppState, ownProps: Prop): Prop {
+function mapStateToProps(appState: ReduxAppState, ownProps: Prop): Prop {
     const { measureSettingsState } = appState
     const selectionInfo = getSourceSelectionInfo(ownProps.measureSpec, measureSettingsState)
     if (selectionInfo) {

@@ -1,15 +1,13 @@
 import Realm from 'realm';
+import uuid from 'uuid/v4';
 
-import {systemRealmConfig, UsageLog} from '../database/system-schema';
+import {systemRealmConfig, UsageLog} from '../database/realm/system-schema';
+import { RealmHandlerBase } from '../database/realm/RealmHandlerBase';
 
-class UsageLogger {
-  private _realm: Realm;
+class UsageLogger extends RealmHandlerBase {
 
-  private getRealm(): Promise<Realm> {
-    if (this._realm) {
-      return Promise.resolve(this._realm);
-    }
-    return Realm.open(systemRealmConfig);
+  constructor(){
+    super(systemRealmConfig)
   }
 
   async writeLog(category: string, action: string, metadata: any=null, timestamp: Date = new Date()): Promise<UsageLog> {
@@ -18,6 +16,7 @@ class UsageLogger {
       try {
         realm.write(() => {
           const newLog = realm.create(UsageLog, {
+            id: uuid(),
             category: category,
             action: action,
             serializedMetadata: metadata ? JSON.stringify(metadata) : null,
