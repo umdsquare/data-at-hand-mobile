@@ -3,7 +3,6 @@ import { databaseManager } from "../../system/DatabaseManager";
 
 import * as visResolver from '../visualization/visualization-resolver';
 import { Presets, semanticToDuration } from "./time";
-import { toDate, parse } from "date-fns";
 
 
 
@@ -14,7 +13,7 @@ class ExplorationStateResolver{
         switch(command.type){
             case ExplorationCommandType.SelectMeasure:
                 const castedCommand = command as SelectMeasureCommand
-                const durationSemantic = Presets.TODAY
+                const durationSemantic = Presets.LAST_WEEKEND
                 const duration = semanticToDuration(durationSemantic, command.invokedAt)
                 const data = await databaseManager.queryData(castedCommand.measureCode, duration.from, duration.to)
                 const newStateInfo = {
