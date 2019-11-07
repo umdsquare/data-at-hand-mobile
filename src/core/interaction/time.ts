@@ -7,11 +7,6 @@ import {
   endOfMonth,
   startOfYear,
   endOfYear,
-  subDays,
-  subWeeks,
-  subMonths,
-  subYears,
-  subHours,
   getDayOfYear,
   getYear,
   setDayOfYear,
@@ -20,8 +15,11 @@ import {
   addWeeks,
   setMonth,
   addYears,
+  addHours,
+  addMonths,
+  startOfHour,
+  endOfHour,
 } from 'date-fns';
-import {startOfHour, endOfHour, toDate} from 'date-fns/esm';
 
 enum SemanticType {
   Absolute = 'abs',
@@ -140,19 +138,19 @@ function extractDurationFromAnchor(
   } else {
     switch (anchor.unit) {
       case AnchorUnit.Hour:
-        anchorPosition = subHours(pivot, -anchor.count);
+        anchorPosition = addHours(pivot, anchor.count);
         break;
       case AnchorUnit.Day:
-        anchorPosition = subDays(pivot, -anchor.count);
+        anchorPosition = addDays(pivot, anchor.count);
         break;
       case AnchorUnit.Week:
-        anchorPosition = subWeeks(pivot, -anchor.count);
+        anchorPosition = addWeeks(pivot, anchor.count);
         break;
       case AnchorUnit.Month:
-        anchorPosition = subMonths(pivot, -anchor.count);
+        anchorPosition = addMonths(pivot, anchor.count);
         break;
       case AnchorUnit.Year:
-        anchorPosition = subYears(pivot, -anchor.count);
+        anchorPosition = addYears(pivot, anchor.count);
         break;
     }
   }
@@ -299,20 +297,11 @@ export const Presets = {
   THIS_WEEK: makeRelativeDuration(AnchorUnit.Week, 0),
   LAST_WEEK: makeRelativeDuration(AnchorUnit.Week, -1),
   LAST_WEEKEND: makeRelativeDuration(CyclicPeriod.Weekend, -1),
-  THIS_OCTOBER: makeRelativeDuration(CyclicPeriod.October, 0)
+  THIS_OCTOBER: makeRelativeDuration(CyclicPeriod.October, 0),
 };
 
 function getTypeCodeOfCyclickPeriod(period: CyclicPeriod): number {
   return (0xf00000 & period) >> 20;
-}
-
-function getIntsinticUnitOfCyclicPeriod(period: CyclicPeriod): AnchorUnit {
-  const periodTypeCode = getTypeCodeOfCyclickPeriod(period);
-  switch (periodTypeCode) {
-    case PERIOD_TYPE_DAY_OF_WEEK:
-    case PERIOD_TYPE_DAY_OF_WEEK:
-  }
-  return AnchorUnit.Day;
 }
 
 console.log(CyclicPeriod.November & 0x00000f); //0 = sunday
