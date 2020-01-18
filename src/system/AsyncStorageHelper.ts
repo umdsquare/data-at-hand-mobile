@@ -1,5 +1,4 @@
 import AsyncStorage from '@react-native-community/async-storage';
-import { isString } from 'util';
 
 export class AsyncStorageHelper {
   static async set(key: string, value: any): Promise<void> {

@@ -1,5 +1,4 @@
 import { MeasureSpec, MeasureType } from "../measure/MeasureSpec";
-import { DataSourceMeasure } from "../measure/source/DataSource";
 import { MeasureModule, StepMeasureModule, WeightMeasureModule, HeartRateMeasureModule, SleepMeasureModule, WorkoutMeasureModule } from "../measure/MeasureModule";
 
 const MeasureSpecKey = {

@@ -61,7 +61,32 @@ const StyleTemplates = StyleSheet.create({
 
   headerRightTextButtonStyle: {
     
+  },
+
+  dataSourceCardHeaderTitleStyle: {
+    fontSize: Sizes.normalFontSize,
+    fontWeight: "bold",
+    color: Colors.textColorLight
+  },
+
+  dataSourceChartDefaultTextStyle: {
+    fontSize: Sizes.tinyFontSize,
+    fontWeight: "normal",
+    color: Colors.chartElementDefault
+  },
+
+  dataSourceChartSummaryTitleStyle: {
+    color: Colors.chartLightText,
+    fontSize: Sizes.tinyFontSize
+  },
+
+  dataSourceChartSummaryValueStyle: {
+    color: Colors.chartDimmedText,
+    fontSize: Sizes.smallFontSize,
+    fontWeight: "600",
   }
+
+  
 
 })
 

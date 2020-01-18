@@ -13,6 +13,10 @@ const Sizes = {
     titleFontSize: 20,
     subtitleFontSize: 18,
     descriptionFontSize: 14,
+
+    normalFontSize: 16,
+    smallFontSize: 14,
+    tinyFontSize: 12
 };
 
 export { Sizes }

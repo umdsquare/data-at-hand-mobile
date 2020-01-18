@@ -4,7 +4,7 @@ export default {
   lightBackground: "#F5F9F8",
   lightBackgroundGradient: ["#e0e8ee", "#eeeaec"],
   accent: "#F58674",
-  primary: "#ef6a79",
+  primary: "#EF579D",
   link: "#14acc4",
   lightFormBackground: "#d0d0d0",
   textColorDark: "#252525",
@@ -12,4 +12,21 @@ export default {
   colorWarnLight: "#e37f78",
   green: "#88db5e",
   red: "#f05e48",
+  
+  //From new design
+  today: "#3AD0E0",
+  headerBackground: "#4F566A",
+  headerBackgroundDarker: "#52586b",
+  speechAffordanceColor: "#42D1CC",
+  speechAffordanceGradient: ["#FFC608", "#42D1CC"],
+
+  chartElementDefault: "#A7A7A7",
+
+  chartDimmedText: "#8B8B8B",
+  chartLightText: "#BABABA",
+
+  stepCountColor: "#EA87C8",
+  heartRateColor: "#F88569",
+  sleepColor: "#D08E65",
+  weightColor: "#72A5D1"
 };

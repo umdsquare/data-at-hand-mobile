@@ -1,4 +1,3 @@
-import Realm from 'realm';
 import uuid from 'uuid/v4';
 
 import {systemRealmConfig, UsageLog} from '../database/realm/system-schema';
