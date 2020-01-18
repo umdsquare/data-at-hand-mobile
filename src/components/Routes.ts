@@ -11,7 +11,6 @@ const MainStack = createStackNavigator(
   {
     Home: {
       screen: ExplorationScreen,
-      navigationOptions: ExplorationScreen.navigationOptions
     },
     MeasureSettings: {
         screen: MeasureSettingsScreen,
@@ -22,18 +21,7 @@ const MainStack = createStackNavigator(
   },
   {
     initialRouteName: 'Home',
-    defaultNavigationOptions: {
-        headerTintColor: Colors.accent,
-        headerTitleStyle: {
-          color: Colors.textColorDark,
-          fontSize: Sizes.titleFontSize
-        },
-        headerBackTitle: 'Back',
-        headerStyle: {
-          height: Sizes.navHeaderSize
-        }
-    },
-    transitionConfig: () => fromRight(400)
+    headerMode: 'none'
   },
 );
 
@@ -46,8 +34,7 @@ const RootStack = createStackNavigator({
     }
 }, {
     mode: 'modal',
-    headerMode: 'none',
-    transitionConfig: () => fromBottom(500) // between modal
+    headerMode: 'none'
 })
 
 export default createAppContainer(RootStack);

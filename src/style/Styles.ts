@@ -3,6 +3,11 @@ import { StyleSheet } from 'react-native';
 import Colors from './Colors';
 
 const StyleTemplates = StyleSheet.create({
+  screenDefaultStyle: {
+    flex: 1,
+    alignSelf: 'stretch'
+  },
+  
   styleWithHorizontalPadding: {
     paddingLeft: Sizes.horizontalPadding,
     paddingRight: Sizes.horizontalPadding,

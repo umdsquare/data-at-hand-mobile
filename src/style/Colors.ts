@@ -17,8 +17,8 @@ export default {
   today: "#3AD0E0",
   headerBackground: "#4F566A",
   headerBackgroundDarker: "#52586b",
-  speechAffordanceColor: "#42D1CC",
-  speechAffordanceGradient: ["#FFC608", "#42D1CC"],
+  speechAffordanceColor: "#FFA01F",
+  speechAffordanceGradient: ["#FFCD0A", "#FFA01F"],
 
   chartElementDefault: "#A7A7A7",
 

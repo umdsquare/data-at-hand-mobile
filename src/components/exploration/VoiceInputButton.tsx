@@ -4,17 +4,17 @@ import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import { TouchableHighlight } from "react-native-gesture-handler";
 import LottieView from 'lottie-react-native';
 import { Platform, StyleSheet, Animated, View, Easing } from "react-native";
+import Colors from "../../style/Colors";
+import { Sizes } from "../../style/Sizes";
 
-const microphoneButtonWidth = 72
-const microphoneButtonIconSize = 36
+const microphoneButtonIconSize = 26
 
-const idleColor = ["#5ed5c0", "#2b8fec"]
 const busyColor = ["rgba(0,0,0,0)", "rgba(0,0,0,0.1)"]
 
 const Styles = StyleSheet.create({
     buttonContainerStyle: {
-        width: microphoneButtonWidth,
-        height: microphoneButtonWidth,
+        width: Sizes.speechInputButtonSize,
+        height: Sizes.speechInputButtonSize,
         borderRadius: 100
     },
     loadingIconStyle: {
@@ -75,13 +75,10 @@ export class VoiceInputButton extends React.PureComponent<Props, State> {
             style={{
                 ...this.props.containerStyle,
                 shadowColor: 'black',
-                shadowOffset: { width: 0, height: 8 },
-                shadowRadius: 6,
+                shadowOffset: { width: 0, height: 5 },
+                shadowRadius: 4,
                 shadowOpacity: 0.3,
                 elevation: 3,
-                width: microphoneButtonWidth,
-                height: microphoneButtonWidth,
-                borderRadius: 100,
                 opacity: this.props.isBusy === true ? 0.8 : 1
             }}>
             <TouchableHighlight
@@ -94,13 +91,12 @@ export class VoiceInputButton extends React.PureComponent<Props, State> {
                 disabled={this.props.isBusy}
             >
                 <LinearGradient
-                    colors={this.props.isBusy === true ? busyColor : idleColor}
+                    colors={this.props.isBusy === true ? busyColor : Colors.speechAffordanceGradient}
                     start={{ x: 0.0, y: 0.0 }} end={{ x: 1, y: 1 }}
                     style={{
-                        width: microphoneButtonWidth,
-                        height: microphoneButtonWidth,
+                        width: Sizes.speechInputButtonSize,
+                        height: Sizes.speechInputButtonSize,
                         borderRadius: 100,
-                        borderWidth: Platform.OS == "android" ? 0 : (this.props.isBusy === true ? 0 : 1.5),
                         borderColor: "rgba(255,255,255,0.3)",
                         alignItems: 'center',
                         alignSelf: 'center',

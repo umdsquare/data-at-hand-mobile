@@ -16,7 +16,9 @@ const Sizes = {
 
     normalFontSize: 16,
     smallFontSize: 14,
-    tinyFontSize: 12
+    tinyFontSize: 12,
+
+    speechInputButtonSize: 58
 };
 
 export { Sizes }
