@@ -6,7 +6,7 @@ import { StyleTemplates } from "../../../style/Styles";
 import { BottomBar } from "./components";
 import { Button } from "react-native-elements";
 import { DateRangeBar } from "../../exploration/DateRangeBar";
-import { subDays, startOfMonth, endOfMonth } from "date-fns";
+import { startOfMonth, endOfMonth } from "date-fns";
 
 const styles = StyleSheet.create({
 
@@ -43,7 +43,9 @@ export class ExplorationScreen extends React.Component<Props, State> {
                         }}></Button>
                     </View>
 
-                    <DateRangeBar from={startOfMonth(new Date())} to={endOfMonth(new Date())}/>
+                    <DateRangeBar from={startOfMonth(new Date())} to={endOfMonth(new Date())} onRangeChanged={(from, to)=>{
+                        console.log("set to ", from, to)
+                    }}/>
                 </SafeAreaView>
             </View>
             <View style={styles.mainContainerStyle}></View>

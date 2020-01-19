@@ -5,7 +5,7 @@ import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
 import { Sizes } from "../../style/Sizes";
 import Dash from 'react-native-dash';
 import { Button } from "react-native-elements";
-import { format, isToday, isYesterday, differenceInCalendarDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, isMonday, isSunday, addDays, subDays, startOfMonth, endOfMonth, subMonths, addMonths } from "date-fns";
+import { format, isToday, isYesterday, differenceInCalendarDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, isMonday, isSunday, addDays, subDays, startOfMonth, endOfMonth, subMonths, addMonths, startOfDay, endOfDay } from "date-fns";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import GestureRecognizer from 'react-native-swipe-gestures';
 import Modal from "react-native-modal";
@@ -174,39 +174,33 @@ export class DateRangeBar extends React.Component<Props, State> {
     }
 
     onSwipeLeft = () => {
+        var from: Date
+        var to: Date
         if (this.state.level !== 'month') {
-            this.setState(DateRangeBar.deriveState(
-                addDays(this.state.from, this.state.numDays),
-                addDays(this.state.to, this.state.numDays),
-                this.state
-            ))
+            from = addDays(this.state.from, this.state.numDays)
+            to = addDays(this.state.to, this.state.numDays)
         } else {
             const lastMonthFirst = addMonths(this.state.from, 1)
             const lastMonthLast = endOfMonth(lastMonthFirst)
-            this.setState(DateRangeBar.deriveState(
-                lastMonthFirst,
-                lastMonthLast,
-                this.state
-            ))
+            from = lastMonthFirst
+            to = lastMonthLast
         }
+        this.setRange(from, to)
     }
 
     onSwipeRight = () => {
+        var from: Date
+        var to: Date
         if (this.state.level !== 'month') {
-            this.setState(DateRangeBar.deriveState(
-                subDays(this.state.from, this.state.numDays),
-                subDays(this.state.to, this.state.numDays),
-                this.state
-            ))
+            from = subDays(this.state.from, this.state.numDays)
+            to = subDays(this.state.to, this.state.numDays)
         }else {
             const lastMonthFirst = subMonths(this.state.from, 1)
             const lastMonthLast = endOfMonth(lastMonthFirst)
-            this.setState(DateRangeBar.deriveState(
-                lastMonthFirst,
-                lastMonthLast,
-                this.state
-            ))
+            from = lastMonthFirst
+            to = lastMonthLast
         }
+        this.setRange(from, to)
     }
 
     closeBottomSheet = () => {
@@ -217,6 +211,18 @@ export class DateRangeBar extends React.Component<Props, State> {
         })
     }
 
+    setRange = (from: Date, to: Date) => {
+        this.setState(DateRangeBar.deriveState(
+            from,
+            to,
+            { ...this.state, isBottomSheetOpen: false, clickedElementType: null }
+        ))
+
+        if(this.props.onRangeChanged){
+            this.props.onRangeChanged(startOfDay(from), endOfDay(to))
+        }
+    }
+
     setFromDate = (from: Date) => {
         this.setRange(from, this.state.to)
     }
@@ -224,14 +230,6 @@ export class DateRangeBar extends React.Component<Props, State> {
     setToDate = (to: Date) => {
         this.setRange(
             this.state.from, to)
-    }
-
-    setRange = (from: Date, to: Date) => {
-        this.setState(DateRangeBar.deriveState(
-            from,
-            to,
-            { ...this.state, isBottomSheetOpen: false, clickedElementType: null }
-        ))
     }
 
     setMonth = (monthDate: Date) => {

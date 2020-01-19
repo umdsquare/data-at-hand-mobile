@@ -1,7 +1,7 @@
 import React from 'react';
-import { Calendar, CalendarList, Agenda } from 'react-native-calendars';
+import { Calendar } from 'react-native-calendars';
 import Colors from '../../style/Colors';
-import { format, parseISO, parse, setDate, set, addDays, getDay, startOfWeek, endOfWeek, getMonth, getYear } from 'date-fns';
+import { format, set, addDays, getDay, startOfWeek, endOfWeek, getMonth, getYear } from 'date-fns';
 import { View, StyleSheet, Text } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Sizes } from '../../style/Sizes';
@@ -84,6 +84,7 @@ export const WeekPicker = (props: { selectedWeekFirstDay?: Date, onWeekSelected?
 
     return <Calendar
         theme={calendarTheme}
+        current={props.selectedWeekFirstDay || new Date()}
         markedDates={markedDates}
         markingType={'period'}
         onDayPress={(d) => {
