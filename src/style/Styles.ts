@@ -1,13 +1,13 @@
 import {Sizes} from './Sizes';
-import { StyleSheet } from 'react-native';
+import {StyleSheet} from 'react-native';
 import Colors from './Colors';
 
 const StyleTemplates = StyleSheet.create({
   screenDefaultStyle: {
     flex: 1,
-    alignSelf: 'stretch'
+    alignSelf: 'stretch',
   },
-  
+
   styleWithHorizontalPadding: {
     paddingLeft: Sizes.horizontalPadding,
     paddingRight: Sizes.horizontalPadding,
@@ -29,7 +29,7 @@ const StyleTemplates = StyleSheet.create({
     shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.07,
     shadowRadius: 8,
-    elevation: 2
+    elevation: 2,
   },
 
   androidCardPanelStyle: {
@@ -37,62 +37,67 @@ const StyleTemplates = StyleSheet.create({
     marginTop: 2,
     marginBottom: 8,
     borderWidth: 0,
-    elevation: 2
+    elevation: 2,
   },
 
   titleTextStyle: {
     fontSize: Sizes.titleFontSize,
-    fontWeight: "bold",
-    color: Colors.textColorDark
+    fontWeight: 'bold',
+    color: Colors.textColorDark,
   },
 
   subTitleTextStyle: {
     fontSize: Sizes.subtitleFontSize,
-    fontWeight: "bold",
-    color: Colors.textColorDark
+    fontWeight: 'bold',
+    color: Colors.textColorDark,
   },
-
 
   hugeTitleTextStyle: {
     fontSize: Sizes.hugeTitleFontSize,
-    fontWeight: "bold",
-    color: Colors.textColorDark
+    fontWeight: 'bold',
+    color: Colors.textColorDark,
   },
 
   descriptionTextStyle: {
     fontSize: Sizes.descriptionFontSize,
-    color: Colors.textColorLight
+    color: Colors.textColorLight,
   },
 
-  headerRightTextButtonStyle: {
-    
-  },
+  headerRightTextButtonStyle: {},
 
   dataSourceCardHeaderTitleStyle: {
     fontSize: Sizes.normalFontSize,
-    fontWeight: "bold",
-    color: Colors.textColorLight
+    fontWeight: 'bold',
+    color: Colors.textColorLight,
   },
 
   dataSourceChartDefaultTextStyle: {
     fontSize: Sizes.tinyFontSize,
-    fontWeight: "normal",
-    color: Colors.chartElementDefault
+    fontWeight: 'normal',
+    color: Colors.chartElementDefault,
   },
 
   dataSourceChartSummaryTitleStyle: {
     color: Colors.chartLightText,
-    fontSize: Sizes.tinyFontSize
+    fontSize: Sizes.tinyFontSize,
   },
 
   dataSourceChartSummaryValueStyle: {
     color: Colors.chartDimmedText,
     fontSize: Sizes.smallFontSize,
-    fontWeight: "600",
-  }
+    fontWeight: '600',
+  },
 
-  
+  bottomSheetModalContainerStyle: {flexDirection: 'row', margin: 0},
 
-})
+  bottomSheetModalViewStyle: {
+    alignSelf: 'flex-end',
+    backgroundColor: 'white',
+    flex: 1,
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    paddingTop: 12,
+  },
+});
 
 export {StyleTemplates};
