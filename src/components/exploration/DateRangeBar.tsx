@@ -5,12 +5,12 @@ import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
 import { Sizes } from "../../style/Sizes";
 import Dash from 'react-native-dash';
 import { Button } from "react-native-elements";
-import { format, isToday, isYesterday, differenceInCalendarDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, isMonday, isSunday, addDays, subDays } from "date-fns";
+import { format, isToday, isYesterday, differenceInCalendarDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, isMonday, isSunday, addDays, subDays, startOfMonth, endOfMonth, subMonths, addMonths } from "date-fns";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import GestureRecognizer from 'react-native-swipe-gestures';
 import Modal from "react-native-modal";
 import { StyleTemplates } from "../../style/Styles";
-import { DatePicker, WeekPicker } from "../common/CalendarPickers";
+import { DatePicker, WeekPicker, MonthPicker } from "../common/CalendarPickers";
 
 const dateButtonWidth = 140
 const barHeight = 60
@@ -92,10 +92,6 @@ const styles = StyleSheet.create({
 
 })
 
-enum PeriodLevel {
-    Day, Week, Month
-}
-
 interface Props {
     from: Date,
     to: Date,
@@ -107,7 +103,7 @@ interface State {
     to: Date,
     semanticPeriodCaptured: boolean,
     numDays: number,
-    level?: PeriodLevel,
+    level?: "day" | "week" | "month",
     periodName?: string,
     clickedElementType?: 'from' | 'to' | 'period',
     isBottomSheetOpen?: boolean
@@ -126,7 +122,7 @@ export class DateRangeBar extends React.Component<Props, State> {
                 to: to,
                 semanticPeriodCaptured: true,
                 numDays: numDays,
-                level: PeriodLevel.Month,
+                level: "month",
                 periodName: format(from, "MMM yyyy")
             }
         } else if (numDays === 7 && (isMonday(from) || isSunday(from))) {
@@ -136,7 +132,7 @@ export class DateRangeBar extends React.Component<Props, State> {
                 to: to,
                 semanticPeriodCaptured: true,
                 numDays: numDays,
-                level: PeriodLevel.Week,
+                level: "week",
                 periodName: "Week of " + format(from, "MMM dd")
             }
         } else {
@@ -146,7 +142,7 @@ export class DateRangeBar extends React.Component<Props, State> {
                 to: to,
                 semanticPeriodCaptured: false,
                 numDays: numDays,
-                level: null,
+                level: "day",
                 periodName: null
             }
         }
@@ -178,19 +174,39 @@ export class DateRangeBar extends React.Component<Props, State> {
     }
 
     onSwipeLeft = () => {
-        this.setState(DateRangeBar.deriveState(
-            addDays(this.state.from, this.state.numDays),
-            addDays(this.state.to, this.state.numDays),
-            this.state
-        ))
+        if (this.state.level !== 'month') {
+            this.setState(DateRangeBar.deriveState(
+                addDays(this.state.from, this.state.numDays),
+                addDays(this.state.to, this.state.numDays),
+                this.state
+            ))
+        } else {
+            const lastMonthFirst = addMonths(this.state.from, 1)
+            const lastMonthLast = endOfMonth(lastMonthFirst)
+            this.setState(DateRangeBar.deriveState(
+                lastMonthFirst,
+                lastMonthLast,
+                this.state
+            ))
+        }
     }
 
     onSwipeRight = () => {
-        this.setState(DateRangeBar.deriveState(
-            subDays(this.state.from, this.state.numDays),
-            subDays(this.state.to, this.state.numDays),
-            this.state
-        ))
+        if (this.state.level !== 'month') {
+            this.setState(DateRangeBar.deriveState(
+                subDays(this.state.from, this.state.numDays),
+                subDays(this.state.to, this.state.numDays),
+                this.state
+            ))
+        }else {
+            const lastMonthFirst = subMonths(this.state.from, 1)
+            const lastMonthLast = endOfMonth(lastMonthFirst)
+            this.setState(DateRangeBar.deriveState(
+                lastMonthFirst,
+                lastMonthLast,
+                this.state
+            ))
+        }
     }
 
     closeBottomSheet = () => {
@@ -202,19 +218,12 @@ export class DateRangeBar extends React.Component<Props, State> {
     }
 
     setFromDate = (from: Date) => {
-        this.setState(DateRangeBar.deriveState(
-            from,
-            this.state.to,
-            { ...this.state, isBottomSheetOpen: false, clickedElementType: null }
-        ))
+        this.setRange(from, this.state.to)
     }
 
     setToDate = (to: Date) => {
-        this.setState(DateRangeBar.deriveState(
-            this.state.from,
-            to,
-            { ...this.state, isBottomSheetOpen: false, clickedElementType: null }
-        ))
+        this.setRange(
+            this.state.from, to)
     }
 
     setRange = (from: Date, to: Date) => {
@@ -225,6 +234,10 @@ export class DateRangeBar extends React.Component<Props, State> {
         ))
     }
 
+    setMonth = (monthDate: Date) => {
+        this.setRange(startOfMonth(monthDate), endOfMonth(monthDate))
+    }
+
 
     render() {
 
@@ -233,7 +246,14 @@ export class DateRangeBar extends React.Component<Props, State> {
 
             switch (this.state.clickedElementType) {
                 case 'period':
-                    modalPickerView = <WeekPicker selectedWeekFirstDay={this.state.from} onWeekSelected={this.setRange} />
+                    switch (this.state.level) {
+                        case 'week':
+                            modalPickerView = <WeekPicker selectedWeekFirstDay={this.state.from} onWeekSelected={this.setRange} />
+                            break;
+                        case 'month':
+                            modalPickerView = <MonthPicker selectedMonth={this.state.from} onMonthSelected={this.setMonth} />
+                            break;
+                    }
                     break;
                 case 'from':
                     modalPickerView = <DatePicker selectedDay={this.state.from} earliedPossibleDay={undefined} latestPossibleDay={this.state.to} onDayPress={this.setFromDate} ghostRange={[this.state.from, this.state.to]} />
