@@ -6,7 +6,6 @@ import { StyleTemplates } from '../../../style/Styles';
 import LinearGradient from 'react-native-linear-gradient';
 import { NavigationStackOptions } from 'react-navigation-stack';
 import RBSheet from "react-native-raw-bottom-sheet";
-import { ConfigurationPanel } from '../settings/ConfigurationPanel';
 import { Sizes } from '../../../style/Sizes';
 import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 import { Logo } from '../../Logo';

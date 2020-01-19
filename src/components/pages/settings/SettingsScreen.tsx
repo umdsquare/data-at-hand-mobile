@@ -88,14 +88,14 @@ class SettingsScreen extends React.PureComponent<Props, State>{
             }
         })
      }
-    onPressServiceButton = () => { this.props.navigation.navigate("") }
+    onPressServiceButton = () => { this.props.navigation.navigate("ServiceWizardModal") }
 
     render() {
         return <View>
             <StatusBar barStyle="dark-content" />
             
             <SettingsRow title="Service" value={sourceManager.getServiceByKey(this.props.selectedServiceKey).name} 
-                onClick={()=>{}}/>
+                onClick={this.onPressServiceButton}/>
             <SettingsRow title="Unit" value={SettingsScreen.UnitTypes.find(t => t.key === this.props.selectedUnitType).label} 
                 onClick={this.onPressUnitRow}/>
         </View>

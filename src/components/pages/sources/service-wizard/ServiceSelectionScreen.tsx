@@ -1,40 +1,32 @@
 import React from "react";
-import { View, Text, ImageBackground, ScrollView, SafeAreaView, Platform } from "react-native";
-import { MeasureSpec } from "../../../../measure/MeasureSpec";
+import { View, Text, ImageBackground, ScrollView, SafeAreaView } from "react-native";
 import { PropsWithNavigation } from "../../../../PropsWithNavigation";
 import { Sizes } from "../../../../style/Sizes";
 import { StyleTemplates } from "../../../../style/Styles";
-import { createStackNavigator, Header } from "react-navigation-stack";
 import { DataService } from "../../../../measure/source/DataService";
 import { sourceManager } from "../../../../system/SourceManager";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Colors from "../../../../style/Colors";
 import { Dispatch } from "redux";
 import { connect } from "react-redux";
+import { ReduxAppState } from "../../../../state/types";
+import { setService } from "../../../../state/settings/actions";
 
 interface Prop extends PropsWithNavigation {
-    selectSource: () => void,
+    selectService: (key: string) => void,
+    selectedServiceKey: string,
 }
 
 interface State {
-    measureSpec: MeasureSpec,
-    selectedMeasureCodes: Array<string>,
     services: ReadonlyArray<DataService>
 }
 
-export interface ServiceSelectionScreenParameters {
-    measureSpec: MeasureSpec,
-    selectedMeasureCodes: Array<string>,
-}
-
-export class ServiceSelectionScreen extends React.Component<Prop, State>{
+class ServiceSelectionScreen extends React.Component<Prop, State>{
 
     constructor(props) {
         super(props)
 
         this.state = {
-            measureSpec: this.props.navigation.getParam("measureSpec"),
-            selectedMeasureCodes: this.props.navigation.getParam("selectedMeasureCodes"),
             services: []
         }
     }
@@ -47,25 +39,28 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
         })
     }
 
+
     render() {
         return (
             <SafeAreaView style={{
-                flex: 1, flexDirection: 'column', alignItems: 'stretch'}}>
+                flex: 1, flexDirection: 'column', alignItems: 'stretch'
+            }}>
                 <ScrollView style={{ flex: 1 }}>
                     {
                         this.state.services
-                            .filter(s => s.getMeasureOfSpec(this.state.measureSpec))
                             .map((service, index) => <ServiceElement
                                 key={service.key}
                                 index={index}
                                 selectedAlready={
-                                    this.state.selectedMeasureCodes &&
-                                    this.state.selectedMeasureCodes
-                                        .indexOf(service.getMeasureOfSpec(this.state.measureSpec).code) != -1
+                                    this.props.selectedServiceKey === service.key
                                 }
                                 source={service}
-                                measureSpec={this.state.measureSpec}
-                                onSelected={this.props.navigation.dismiss} />)
+                                onSelected={
+                                    ()=>{   
+                                        this.props.selectService(service.key)
+                                        this.props.navigation.goBack()
+                                    }
+                                } />)
                     }
                 </ScrollView>
             </SafeAreaView>
@@ -73,42 +68,40 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
     }
 }
 
+function mapStateToPropsScreen(appState: ReduxAppState, ownProps: Prop): Prop {
+    return {
+        ...ownProps,
+        selectedServiceKey: appState.settingsState.serviceKey
+    }
+}
+
+function mapDispatchToPropsScreen(dispatch: Dispatch, ownProps: Prop): Prop {
+    return {
+        ...ownProps,
+        selectService: (key: string) => dispatch(setService(key))
+    }
+}
+
+const connectedServiceSelectionScreen = connect(mapStateToPropsScreen, mapDispatchToPropsScreen)(ServiceSelectionScreen)
+export { connectedServiceSelectionScreen as ServiceSelectionScreen }
+
+
 interface ServiceElementProps {
-    measureSpec: MeasureSpec,
     source: DataService,
     index: number,
     selectedAlready: boolean,
     onSelected(): void,
-    select?(): void
-    
+
 }
 
-function mapStateToProps(ownProps: ServiceElementProps): ServiceElementProps {
-    return ownProps
-}
-
-function mapDispatchToPropsForServiceElement(dispatch: Dispatch, ownProps: ServiceElementProps) {
-    return {
-        ...ownProps,
-        select: () => {
-            //dispatch(selectSourceForMeasure(ownProps.source.getMeasureOfSpec(ownProps.measureSpec), false))
-        }
-    }
-}
-
-const ServiceElement = connect(mapStateToProps, mapDispatchToPropsForServiceElement)((props: ServiceElementProps) => {
+const ServiceElement = (props: ServiceElementProps) => {
     return <TouchableOpacity disabled={props.selectedAlready}
         style={{
             marginTop: 24,
             marginRight: 20,
             marginLeft: 20,
         }} activeOpacity={0.3} onPress={async () => {
-            const serviceMeasure = props.source.getMeasureOfSpec(props.measureSpec)
-            const activated = await serviceMeasure.activateInSystem()
-            if (activated === true) {
-                props.select()
-                props.onSelected()
-            }
+            props.onSelected()
         }}>
         <View>
             <ImageBackground
@@ -139,25 +132,4 @@ const ServiceElement = connect(mapStateToProps, mapDispatchToPropsForServiceElem
                 </View>) : (<></>)}
         </View>
     </TouchableOpacity>
-})
-
-export const ServiceSelectionWizardStack = createStackNavigator(
-    {
-        ServiceSelection: {
-            screen: ServiceSelectionScreen
-        }
-    }, {
-    initialRouteName: "ServiceSelection",
-    /*
-    defaultNavigationOptions: (navigationProp) => ({
-        headerLeftContainerStyle: { paddingLeft: 12 },
-        title: "Select Source",
-        headerStyle: {
-            height: Sizes.navHeaderSize
-        },
-        headerLeft: (
-            <Button type="clear" icon={{name: 'close', type: 'ionicons', color: Colors.accent}} onPress={() => navigationProp.navigation.dismiss()} />
-        )
-    })*/
 }
-)
