@@ -1,13 +1,10 @@
 import {
-  ExplorationStateInfo,
-  ExplorationStateType,
-  ExplorationCommand,
+  ExplorationStateInfo, makeInitialStateInfo,
 } from '../../core/interaction/types';
 import {ActionTypeBase} from '../types';
 import {Dispatch} from 'redux';
 import {ExplorationStateActionTypes, FinishStateTransition} from './actions';
 import {sleep} from '../../utils';
-import {explorationStateResolver} from '../../core/interaction/ExplorationStateResolver';
 
 export interface ExplorationState {
   info: ExplorationStateInfo;
@@ -16,10 +13,7 @@ export interface ExplorationState {
 }
 
 const INITIAL_STATE = {
-  info: {
-    stateType: ExplorationStateType.Initial,
-    payload: null,
-  },
+  info: makeInitialStateInfo(),
   isProcessing: false,
   error: null,
 } as ExplorationState;

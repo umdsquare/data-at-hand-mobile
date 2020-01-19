@@ -1,36 +1,40 @@
 import { IDatumBase } from "../../database/types";
 import { VisualizationSchema } from "../visualization/types";
-import { DurationSemantic } from "./time";
+import { DurationSemantic, Presets } from "./time";
 
-export enum ExplorationStateType{
-    Initial=0,
-    DefaultChart,
-    AggregatedChart,
-    MultipleMeasuresDefault,
-    MulfipleMEasuresAggregated,
-    TimeFrameComparison,
-    DateHighlightedCalendar,
-    AggregationValueQueryResult
+
+export enum ExplorationType{
+    B_Ovrvw,
+    B_Range,
+    B_Day,
+    C_Cyclic,
+    C_CyclicDetail,
+    C_TwoRanges
 }
 
-export enum ExplorationCommandType{
-    SelectMeasure = "SelectMeasure",
-    SetTimeFrame = "SetTimeFrame",
+export enum ParameterType{
+    DataSource,
+    Date,
+    Range,
+    CycleType,
+    CycleDimension,
 }
+
 
 export interface ExplorationStateInfo{
-    stateType: ExplorationStateType
-    command?: ExplorationCommand
+    type: ExplorationType
+    pointing: boolean
+    values: Array<{parameter: ParameterType, value: any}>
     payload: any
 }
 
-export interface ExplorationCommand{
-    type: ExplorationCommandType | string,
-    invokedAt: number
-}
-
-export interface SelectMeasureCommand extends ExplorationCommand{
-    measureCode: string
+export function makeInitialStateInfo(): ExplorationStateInfo{
+    return{
+        type: ExplorationType.B_Ovrvw,
+        pointing: false,
+        values: [{parameter: ParameterType.Range, value: Presets.THIS_WEEK}],
+        payload: null
+    }
 }
 
 export interface VisualizationPayload{

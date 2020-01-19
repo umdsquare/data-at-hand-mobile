@@ -5,12 +5,13 @@ import Colors from "../../../style/Colors";
 import { StyleTemplates } from "../../../style/Styles";
 import { BottomBar } from "./components";
 import { Button } from "react-native-elements";
+import { DateRangeBar } from "../../exploration/DateRangeBar";
+import { subDays } from "date-fns";
 
 const styles = StyleSheet.create({
 
     headerContainerStyle: {
         backgroundColor: Colors.headerBackground,
-        
     },
 
     mainContainerStyle: {
@@ -41,6 +42,8 @@ export class ExplorationScreen extends React.Component<Props, State> {
                             this.props.navigation.navigate("Settings")
                         }}></Button>
                     </View>
+
+                    <DateRangeBar from={subDays(new Date(), 6)} to={new Date()}/>
                 </SafeAreaView>
             </View>
             <View style={styles.mainContainerStyle}></View>
