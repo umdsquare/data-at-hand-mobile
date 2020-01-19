@@ -1,14 +1,7 @@
 import React from 'react';
-import { StyleSheet, View, Platform, UIManager, LayoutAnimation } from 'react-native';
+import { StyleSheet, View, LayoutAnimation } from 'react-native';
 import { Button } from 'react-native-elements';
 import Colors from '../../style/Colors';
-
-if (
-    Platform.OS === 'android' &&
-    UIManager.setLayoutAnimationEnabledExperimental
-) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 const Sizes = {
     ballNormalSize: 8,

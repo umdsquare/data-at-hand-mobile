@@ -3,7 +3,7 @@ import LinearGradient from "react-native-linear-gradient";
 import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import { TouchableHighlight } from "react-native-gesture-handler";
 import LottieView from 'lottie-react-native';
-import { Platform, StyleSheet, Animated, View, Easing } from "react-native";
+import { StyleSheet, View, LayoutAnimation } from "react-native";
 import Colors from "../../style/Colors";
 import { Sizes } from "../../style/Sizes";
 
@@ -22,6 +22,18 @@ const Styles = StyleSheet.create({
     }
 })
 
+const pressAnimConfig = {
+    ...LayoutAnimation.Presets.easeInEaseOut,
+    duration: 150
+}
+
+const unPressAnimConfig = {
+    ...LayoutAnimation.Presets.easeInEaseOut,
+    duration: 250
+}
+
+
+
 interface Props {
     isBusy: boolean,
     containerStyle?: any,
@@ -30,43 +42,28 @@ interface Props {
 }
 
 interface State {
-    interpolation: Animated.Value
+    isPressed: boolean
 }
 
 export class VoiceInputButton extends React.PureComponent<Props, State> {
-
-    private iconContainerRef
-
-    private currentAnimation: Animated.CompositeAnimation
 
     constructor(props) {
         super(props)
 
         this.state = {
-            interpolation: new Animated.Value(0)
+            isPressed: false
         }
     }
 
     readonly onPressIn = () => {
-        if(this.currentAnimation){
-            this.currentAnimation.stop()
-        }
-        this.currentAnimation = Animated.timing(this.state.interpolation, { toValue: 1, duration: 300, easing: Easing.inOut(Easing.cubic) })
-        this.currentAnimation.start(() => {
-            this.currentAnimation = null
-        })
-
+        this.setState({...this.state, isPressed: true})
+        LayoutAnimation.configureNext(pressAnimConfig)
         this.props.onTouchDown()
     }
 
     readonly onPressOut = () => {
-        if(this.currentAnimation){
-            this.currentAnimation.stop()
-        }
-        this.currentAnimation = Animated.timing(this.state.interpolation, { toValue: 0, duration: 400, easing: Easing.inOut(Easing.cubic) })
-        this.currentAnimation.start(() => {
-            this.currentAnimation = null
-        })
+        this.setState({...this.state, isPressed: false})
+        LayoutAnimation.configureNext(unPressAnimConfig)
         this.props.onTouchUp()
     }
 
@@ -79,11 +76,12 @@ export class VoiceInputButton extends React.PureComponent<Props, State> {
                 shadowRadius: 4,
                 shadowOpacity: 0.3,
                 elevation: 3,
-                opacity: this.props.isBusy === true ? 0.8 : 1
+                opacity: this.props.isBusy === true ? 0.8 : 1,
+                marginTop: this.state.isPressed === true? 5: 0
             }}>
             <TouchableHighlight
                 style={Styles.buttonContainerStyle}
-
+                activeOpacity={0.9}
                 onPress={() => {
                 }}
                 onPressIn={this.onPressIn}
@@ -109,14 +107,11 @@ export class VoiceInputButton extends React.PureComponent<Props, State> {
                             (<LottieView source={require("../../../assets/lottie/5257-loading.json")} autoPlay loop
                                 style={Styles.loadingIconStyle} />)
                             : (
-                                <Animated.View
-                                    style={{ marginTop: this.state.interpolation.interpolate({
-                                        inputRange: [0,1],
-                                        outputRange: [0, 8]
-                                    }) }}
+                                <View
+                                    style={{ marginTop: this.state.isPressed === true? 8 : 0}}
                                 >
                                     <FontAwesomeIcon name="microphone" size={microphoneButtonIconSize} color="rgba(255,255,255,0.95)"></FontAwesomeIcon>
-                                </Animated.View>
+                                </View>
                             )
                     }
 
