@@ -1,13 +1,13 @@
 import {createStore, applyMiddleware} from 'redux';
 import {persistStore, persistCombineReducers} from 'redux-persist';
-import {measureSettingsStateReducer} from './measure-settings/reducer';
+import {settingsStateReducer} from './settings/reducer';
 import AsyncStorage from '@react-native-community/async-storage';
 import { explorationStateReducer } from './exploration/reducers';
 import thunk from 'redux-thunk';
 
 const persistConfig = {
   key: 'root',
-  whitelist: ['measureSettingsState'],
+  whitelist: ['settingsState'],
   storage: AsyncStorage,
   debug: true
 };
@@ -15,7 +15,7 @@ const persistConfig = {
 export default () => {
   let store = createStore(
     persistCombineReducers(persistConfig, {
-      measureSettingsState: measureSettingsStateReducer,
+      settingsState: settingsStateReducer,
       explorationState: explorationStateReducer
     }),
     applyMiddleware(thunk)

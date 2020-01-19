@@ -5,14 +5,12 @@ import { PropsWithNavigation } from "../../../../PropsWithNavigation";
 import { Sizes } from "../../../../style/Sizes";
 import { StyleTemplates } from "../../../../style/Styles";
 import { createStackNavigator, Header } from "react-navigation-stack";
-import { DataSource, DataSourceMeasure } from "../../../../measure/source/DataSource";
-import { sourceManager, SourceSelectionInfo } from "../../../../system/SourceManager";
+import { DataService } from "../../../../measure/source/DataService";
+import { sourceManager } from "../../../../system/SourceManager";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Colors from "../../../../style/Colors";
-import { Button } from "react-native-elements";
 import { Dispatch } from "redux";
 import { connect } from "react-redux";
-import { selectSourceForMeasure } from "../../../../state/measure-settings/actions";
 
 interface Prop extends PropsWithNavigation {
     selectSource: () => void,
@@ -21,7 +19,7 @@ interface Prop extends PropsWithNavigation {
 interface State {
     measureSpec: MeasureSpec,
     selectedMeasureCodes: Array<string>,
-    services: ReadonlyArray<DataSource>
+    services: ReadonlyArray<DataService>
 }
 
 export interface ServiceSelectionScreenParameters {
@@ -77,7 +75,7 @@ export class ServiceSelectionScreen extends React.Component<Prop, State>{
 
 interface ServiceElementProps {
     measureSpec: MeasureSpec,
-    source: DataSource,
+    source: DataService,
     index: number,
     selectedAlready: boolean,
     onSelected(): void,
@@ -93,7 +91,7 @@ function mapDispatchToPropsForServiceElement(dispatch: Dispatch, ownProps: Servi
     return {
         ...ownProps,
         select: () => {
-            dispatch(selectSourceForMeasure(ownProps.source.getMeasureOfSpec(ownProps.measureSpec), false))
+            //dispatch(selectSourceForMeasure(ownProps.source.getMeasureOfSpec(ownProps.measureSpec), false))
         }
     }
 }
@@ -150,6 +148,7 @@ export const ServiceSelectionWizardStack = createStackNavigator(
         }
     }, {
     initialRouteName: "ServiceSelection",
+    /*
     defaultNavigationOptions: (navigationProp) => ({
         headerLeftContainerStyle: { paddingLeft: 12 },
         title: "Select Source",
@@ -159,6 +158,6 @@ export const ServiceSelectionWizardStack = createStackNavigator(
         headerLeft: (
             <Button type="clear" icon={{name: 'close', type: 'ionicons', color: Colors.accent}} onPress={() => navigationProp.navigation.dismiss()} />
         )
-    })
+    })*/
 }
 )

@@ -1,4 +1,4 @@
-import {DataSource, UnSupportedReason} from '../DataSource';
+import {DataService, UnSupportedReason} from '../DataService';
 import {FitbitStepMeasure} from './FitbitStepMeasure';
 import {FitbitHeartRateMeasure} from './FitbitHeartRateMeasure';
 import {AsyncStorageHelper} from '../../../system/AsyncStorageHelper';
@@ -90,10 +90,10 @@ export function makeFitbitDailyActivitySummaryUrl(date: TimeLike): string{
   })
 }
 
-const STORAGE_KEY_AUTH_STATE = DataSource.STORAGE_PREFIX + 'fitbit:state';
-const STORAGE_KEY_USER_TIMEZONE = DataSource.STORAGE_PREFIX + "fitbit:user_timezone"
+const STORAGE_KEY_AUTH_STATE = DataService.STORAGE_PREFIX + 'fitbit:state';
+const STORAGE_KEY_USER_TIMEZONE = DataService.STORAGE_PREFIX + "fitbit:user_timezone"
 const STORAGE_KEY_AUTH_CURRENT_SCOPES =
-  DataSource.STORAGE_PREFIX + 'fitbit:scopes';
+  DataService.STORAGE_PREFIX + 'fitbit:scopes';
 
 async function registerScopeAndGet(scope: string): Promise<Array<string>> {
   const currentScopes = await AsyncStorageHelper.getObject(
@@ -142,7 +142,7 @@ async function revokeScopeAndGet(
   }
 }
 
-export class FitbitSource extends DataSource {
+export class FitbitSource extends DataService {
   key: string = 'fitbit';
   name: string = 'Fitbit';
   description: string = 'Fitbit Fitness Tracker';

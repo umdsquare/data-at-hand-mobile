@@ -11,8 +11,8 @@ export class FitbitWeightMeasure extends FitbitMeasureBase {
   spec: MeasureSpec = measureService.getSpec(MeasureSpecKey.weight);
 
   async fetchData(start: number, end: number): Promise<Array<IDatumBase>> {
-    const result: FitbitWeightQueryResult = await this.castedSource<FitbitSource>().fetchFitbitQuery(makeFitbitWeightApiUrl(start, end))
-    const timeZone = await this.castedSource<FitbitSource>().getUserTimezone()
+    const result: FitbitWeightQueryResult = await this.castedService<FitbitSource>().fetchFitbitQuery(makeFitbitWeightApiUrl(start, end))
+    const timeZone = await this.castedService<FitbitSource>().getUserTimezone()
     return result.weight.map(weightLog => ({
       measureCode: this.code,
       value: weightLog.weight,

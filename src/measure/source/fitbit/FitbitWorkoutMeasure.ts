@@ -15,13 +15,13 @@ export class FitbitWorkoutMeasure extends FitbitMeasureBase {
   async fetchData(start: number, end: number): Promise<Array<IDatumBase>> {
     const result: Array<FitbitActivitySummaryDay> = await Promise.all(
       sequenceDays(start, end).map(day =>
-        this.castedSource<FitbitSource>().fetchFitbitQuery(
+        this.castedService<FitbitSource>().fetchFitbitQuery(
           makeFitbitDailyActivitySummaryUrl(day),
         ),
       ),
     );
 
-    const timeZone = await this.castedSource<FitbitSource>().getUserTimezone();
+    const timeZone = await this.castedService<FitbitSource>().getUserTimezone();
 
     const convertedList: Array<IWorkoutSession> = [];
 

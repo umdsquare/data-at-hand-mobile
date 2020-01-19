@@ -1,4 +1,4 @@
-import {DataSourceMeasure} from '../DataSource';
+import {DataSourceMeasure} from '../DataService';
 import {FitbitSource} from './FitbitSource';
 
 export abstract class FitbitMeasureBase extends DataSourceMeasure {
@@ -6,7 +6,7 @@ export abstract class FitbitMeasureBase extends DataSourceMeasure {
 
   async activateInSystem(): Promise<boolean> {
     try {
-      const accessToken = await this.castedSource<FitbitSource>().authenticate(
+      const accessToken = await this.castedService<FitbitSource>().authenticate(
         this.scope,
       );
       if(accessToken!=null){
@@ -19,6 +19,6 @@ export abstract class FitbitMeasureBase extends DataSourceMeasure {
   }
 
   async deactivatedInSystem(): Promise<boolean> {
-    return this.castedSource<FitbitSource>().revokeScope(this.scope);
+    return this.castedService<FitbitSource>().revokeScope(this.scope);
   }
 }

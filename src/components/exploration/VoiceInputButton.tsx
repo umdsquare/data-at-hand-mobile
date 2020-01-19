@@ -108,7 +108,7 @@ export class VoiceInputButton extends React.PureComponent<Props, State> {
                                 style={Styles.loadingIconStyle} />)
                             : (
                                 <View
-                                    style={{ marginTop: this.state.isPressed === true? 8 : 0}}
+                                    style={{ marginTop: this.state.isPressed === true? 5 : 0}}
                                 >
                                     <FontAwesomeIcon name="microphone" size={microphoneButtonIconSize} color="rgba(255,255,255,0.95)"></FontAwesomeIcon>
                                 </View>

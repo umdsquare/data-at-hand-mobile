@@ -1,9 +1,9 @@
-import { MeasureSettingsState } from "./measure-settings/reducer";
+import { SettingsState } from "./settings/reducer";
 import { Dispatch } from "redux";
 import { ExplorationState } from "./exploration/reducers";
 
 export type ReduxAppState = {
-    measureSettingsState: MeasureSettingsState,
+    settingsState: SettingsState,
     explorationState: ExplorationState
 }
 

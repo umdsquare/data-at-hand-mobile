@@ -11,8 +11,8 @@ export class FitbitSleepMeasure extends FitbitMeasureBase {
   spec: MeasureSpec = measureService.getSpec(MeasureSpecKey.sleep);
 
   async fetchData(start: number, end: number): Promise<IDatumBase[]> {
-    const result: FitbitSleepQueryResult = await this.castedSource<FitbitSource>().fetchFitbitQuery(makeFitbitSleepApiUrl(start, end))
-    const fitbitTimezone = await this.castedSource<FitbitSource>().getUserTimezone()
+    const result: FitbitSleepQueryResult = await this.castedService<FitbitSource>().fetchFitbitQuery(makeFitbitSleepApiUrl(start, end))
+    const fitbitTimezone = await this.castedService<FitbitSource>().getUserTimezone()
     return result.sleep.map(log => {
       return {
         startedAt: toDate(log.startTime,{timeZone: fitbitTimezone}),

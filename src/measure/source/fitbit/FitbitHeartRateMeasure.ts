@@ -12,8 +12,8 @@ export class FitbitHeartRateMeasure extends FitbitMeasureBase {
   spec: MeasureSpec = measureService.getSpec(MeasureSpecKey.heart);
 
   async fetchData(start: number, end: number): Promise<Array<IHeartRatePoint>> {
-    const result: Array<FitbitIntradayHeartRateResult> = await Promise.all(sequenceDays(start, end).map(day => this.castedSource<FitbitSource>().fetchFitbitQuery(makeFitbitHeartRateIntradayUrl(day))))
-    const timeZone = await this.castedSource<FitbitSource>().getUserTimezone()
+    const result: Array<FitbitIntradayHeartRateResult> = await Promise.all(sequenceDays(start, end).map(day => this.castedService<FitbitSource>().fetchFitbitQuery(makeFitbitHeartRateIntradayUrl(day))))
+    const timeZone = await this.castedService<FitbitSource>().getUserTimezone()
 
     const convertedResult: Array<IHeartRatePoint> = []
 

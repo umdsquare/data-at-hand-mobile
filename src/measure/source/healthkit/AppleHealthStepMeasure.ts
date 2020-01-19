@@ -1,4 +1,4 @@
-import { DataSourceMeasure } from "../DataSource";
+import { DataSourceMeasure } from "../DataService";
 import { MeasureSpec } from "../../MeasureSpec";
 import { measureService, MeasureSpecKey } from "../../../system/MeasureService";
 import * as HealthKitManager from './HealthKitManager';
@@ -16,7 +16,8 @@ export class AppleHealthStepMeasure extends AppleHealthMeasureBase<HKStepDatum>{
         return {
             value: hkDatum.value,
             startedAt: new Date(hkDatum.startedAt),
-            measureCode: this.code
+            measureCode: this.code,
+            subjectToChange: false
         }
     }
 }

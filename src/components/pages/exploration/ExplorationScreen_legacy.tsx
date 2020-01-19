@@ -26,7 +26,7 @@ import { ReduxAppState } from '../../../state/types';
 import { ExplorationCommand, ExplorationStateType, SelectMeasureCommand, ExplorationCommandType } from '../../../core/interaction/types';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { MeasureSettingsState } from '../../../state/measure-settings/reducer';
+import { SettingsState } from '../../../state/settings/reducer';
 import { SelectMeasureComponent } from './components';
 import { MeasureSpec } from '../../../measure/MeasureSpec';
 import { sourceManager } from '../../../system/SourceManager';
@@ -60,7 +60,7 @@ const homeScreenButtonIconColor = "#757575"
 interface Props extends PropsWithNavigation{
     dispatchCommand: (command: ExplorationCommand)=>void,
     explorationState: ExplorationState,
-    measureSettingsState: MeasureSettingsState
+    measureSettingsState: SettingsState
 }
 
 interface State {
@@ -232,15 +232,8 @@ class ExplorationScreen extends React.Component<Props, State> {
     render() {
 
         let mainContent
-        if(this.props.explorationState.info.stateType === ExplorationStateType.Initial){
-            mainContent = <SelectMeasureComponent key = "selectMeasure" 
-            selectableMeasureSpecKeys={this.props.measureSettingsState.selectionInfoList.map(entry => entry.measureSpecKey) }
-            onMeasureSpecSelected={this.onMeasureSpecSelected}
-            />
-        }else{
             mainContent = <ExplorationPanel/> 
-        }
-
+        
         return (
             <LinearGradient
                 style={{ flex: 1, alignSelf: 'stretch' }}
@@ -350,7 +343,7 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props{
     return {
         ...ownProps,
         explorationState: appState.explorationState,
-        measureSettingsState: appState.measureSettingsState
+        measureSettingsState: appState.settingsState
     }
 }
 

@@ -4,6 +4,7 @@ import { StatusBar, View, StyleSheet, Text, Platform, SafeAreaView } from "react
 import Colors from "../../../style/Colors";
 import { StyleTemplates } from "../../../style/Styles";
 import { BottomBar } from "./components";
+import { Button } from "react-native-elements";
 
 const styles = StyleSheet.create({
 
@@ -34,7 +35,12 @@ export class ExplorationScreen extends React.Component<Props, State> {
             <StatusBar barStyle="light-content" backgroundColor={Colors.headerBackground} />
             <View style={styles.headerContainerStyle}>
                 <SafeAreaView>
-                    <Text style={{alignSelf: 'center'}}>Header Content</Text>
+                    <View style={{padding: 12, flexDirection: 'row'}}>
+                        <Text style={{flex: 1}}>Browse</Text>
+                        <Button onPress={()=>{
+                            this.props.navigation.navigate("Settings")
+                        }}></Button>
+                    </View>
                 </SafeAreaView>
             </View>
             <View style={styles.mainContainerStyle}></View>

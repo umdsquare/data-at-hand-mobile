@@ -36,13 +36,13 @@ class MeasureService {
       nameKey: MeasureSpecKey.sleep,
       name: 'Sleep',
       description: 'A sleep session',
-    },
+    },/*
     {
       type: MeasureType.Session,
       nameKey: MeasureSpecKey.workout,
       name: 'Workout',
       description: 'A workout session',
-    },
+    },*/
   ];
 
   private measureSpecMap: Map<string, MeasureSpec>;
@@ -59,7 +59,7 @@ class MeasureService {
     this.measureModuleMap.set(MeasureSpecKey.weight, new WeightMeasureModule())
     this.measureModuleMap.set(MeasureSpecKey.heart, new HeartRateMeasureModule())
     this.measureModuleMap.set(MeasureSpecKey.sleep, new SleepMeasureModule())
-    this.measureModuleMap.set(MeasureSpecKey.workout, new WorkoutMeasureModule())
+    //this.measureModuleMap.set(MeasureSpecKey.workout, new WorkoutMeasureModule())
   }
 
   getSpec(key: string): MeasureSpec {

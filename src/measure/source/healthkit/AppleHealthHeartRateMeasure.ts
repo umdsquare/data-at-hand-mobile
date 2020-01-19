@@ -15,6 +15,7 @@ export class AppleHealthHeartRateMeasure extends AppleHealthMeasureBase<HKPointM
             value: hkDatum.value,
             measuredAt: new Date(hkDatum.measuredAt),
             measureCode: this.code,
+            subjectToChange: false
         }
     }
 }

@@ -1,25 +1,19 @@
-import {DataSource, DataSourceMeasure} from '../measure/source/DataSource';
+import {DataService, DataSourceMeasure} from '../measure/source/DataService';
 import {FitbitSource} from '../measure/source/fitbit/FitbitSource';
-import {AsyncStorageHelper} from './AsyncStorageHelper';
 import {MeasureSpec} from '../measure/MeasureSpec';
 import {AppleHealthSource} from '../measure/source/healthkit/AppleHealthSource';
 import {measureService} from './MeasureService';
-import { MeasureSettingsState } from '../state/measure-settings/reducer';
-
-export interface SourceSelectionInfo {
-  connectedMeasureCodes: Array<string>;
-  mainIndex: number;
-}
+import { SettingsState } from '../state/settings/reducer';
 
 class SourceManager {
-  installedServices: ReadonlyArray<DataSource> = [
+  installedServices: ReadonlyArray<DataService> = [
     new FitbitSource(),
     new AppleHealthSource(),
   ];
 
-  private _supportedServices: ReadonlyArray<DataSource> = null;
+  private _supportedServices: ReadonlyArray<DataService> = null;
 
-  async getServicesSupportedInThisSystem(): Promise<ReadonlyArray<DataSource>> {
+  async getServicesSupportedInThisSystem(): Promise<ReadonlyArray<DataService>> {
     if (this._supportedServices == null) {
       const list = [];
       for (let i = 0; i < this.installedServices.length; i++) {
@@ -33,38 +27,20 @@ class SourceManager {
     }
     return this._supportedServices;
   }
-  
-  async getSourceSelectionInfo(
-    measureSpec: MeasureSpec,
-  ): Promise<SourceSelectionInfo> {
-    return await AsyncStorageHelper.getObject(measureSpec.nameKey);
+
+  getSourcesOfService(
+    service: DataService,
+  ): Array<DataSourceMeasure> {
+    return measureService.supportedMeasureSpecs.map(spec =>
+      service.getMeasureOfSpec(spec)
+    )
   }
 
-  getSelectedMeasuresOfSource(
-    source: DataSource,
-  ): Promise<Array<DataSourceMeasure>> {
-    return Promise.all(
-      measureService.supportedMeasureSpecs.map(spec =>
-        this.getSourceSelectionInfo(spec).then(info => {
-          if (info != null && info.connectedMeasureCodes) {
-            return info.connectedMeasureCodes
-              .map(code => this.findMeasureByCode(code))
-              .filter(measure => measure.source.key === source.key);
-          } else return [];
-        })
-      )
-    ).then(resultMatrix => {
-        const result = []
-        resultMatrix.forEach(r => {
-            r.forEach(m => {
-                result.push(m)
-            })
-        })
-        return result
-    })
+  getServiceByKey(serviceKey: string): DataService{
+    return this.installedServices.find(s => s.key === serviceKey)
   }
 
-  findMeasureByCode(code: string): DataSourceMeasure {
+  findSourceByCode(code: string): DataSourceMeasure {
     const split = code.split(':');
     if (split.length >= 2) {
       const service = this.installedServices.find(s => s.key === split[0]);
@@ -74,7 +50,11 @@ class SourceManager {
     } else return null;
   }
 
-  getMainSourceMeasure(spec: MeasureSpec, state: MeasureSettingsState): DataSourceMeasure{
+  getDataSourceOfSpec(spec: MeasureSpec, state: SettingsState): DataSourceMeasure{
+    return this.findSourceByCode(state.serviceKey + ":" + spec.nameKey)
+  }
+/*
+  getMainSourceMeasure(spec: MeasureSpec, state: SettingsState): DataSourceMeasure{
     const info = state.selectionInfoList.find(info => info.measureSpecKey === spec.nameKey)
     if(info){
       const {connectedMeasureCodes, mainIndex} = info.sourceSelectionInfo
@@ -82,7 +62,7 @@ class SourceManager {
         return this.findMeasureByCode(connectedMeasureCodes[mainIndex])
       }else return null
     }else return null
-  }
+  }*/
 }
 
 const sourceManager = new SourceManager();

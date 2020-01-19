@@ -16,9 +16,9 @@ export class FitbitStepMeasure extends FitbitMeasureBase {
   async fetchData(start: number, end: number): Promise<Array<IDatumBase>> {
     const result = await Promise
       .all(sequenceDays(start, end)
-      .map(day => this.castedSource<FitbitSource>().fetchFitbitQuery(makeFitbitIntradayActivityApiUrl("activities/steps", day))))
+      .map(day => this.castedService<FitbitSource>().fetchFitbitQuery(makeFitbitIntradayActivityApiUrl("activities/steps", day))))
     
-    const timeZone = await this.castedSource<FitbitSource>().getUserTimezone()
+    const timeZone = await this.castedService<FitbitSource>().getUserTimezone()
 
     const dataPoints: Array<IHourlyStepBin> = [];
     result.forEach(dayData => {

@@ -21,7 +21,7 @@ export function makeDefaultChart(
   data: Array<IDatumBase>,
   queriedDuration: {start: number, end: number}
 ): VisualizationSchema {
-  const measure = sourceManager.findMeasureByCode(measureCode);
+  const measure = sourceManager.findSourceByCode(measureCode);
   const chartType = getDefaultChartType(measure.spec);
   switch(measure.spec.nameKey){
       case MeasureSpecKey.step:

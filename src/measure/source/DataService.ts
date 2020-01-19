@@ -1,7 +1,7 @@
 import {MeasureSpec} from '../MeasureSpec';
 import { IDatumBase } from '../../database/types';
 
-export abstract class DataSource {
+export abstract class DataService {
   static readonly STORAGE_PREFIX = "@source_service:"
 
   abstract readonly key: string;
@@ -47,11 +47,11 @@ export abstract class DataSourceMeasure {
 
   get code(): string{ return this.source.key + ":" + this.spec.nameKey}
 
-  protected castedSource<T extends DataSource>(): T {
+  protected castedService<T extends DataService>(): T {
     return this.source as T;
   }
 
-  constructor(readonly source: DataSource) {}
+  constructor(readonly source: DataService) {}
 
   abstract async activateInSystem(): Promise<boolean>
   abstract async deactivatedInSystem(): Promise<boolean>

@@ -1,4 +1,4 @@
-import {DataSource, UnSupportedReason} from '../DataSource';
+import {DataService, UnSupportedReason} from '../DataService';
 import {Platform} from 'react-native';
 import {AppleHealthStepMeasure} from './AppleHealthStepMeasure';
 import * as HK from './HealthKitManager';
@@ -9,7 +9,7 @@ import {AppleHealthSleepMeasure} from './AppleHealthSleepMeasure';
 import {AppleHealthWorkoutMeasure} from './AppleHealthWorkoutMeasure';
 import {AppleHealthWeightMeasure} from './AppleHealthWeightMeasure';
 
-export class AppleHealthSource extends DataSource {
+export class AppleHealthSource extends DataService {
   key: string = 'healthkit';
   name: string = 'Apple Health';
   description: string = 'Apple Health and HealthKit Data';
@@ -39,7 +39,7 @@ export class AppleHealthSource extends DataSource {
   ];
 
   async getSelectedDataTypes(): Promise<Array<HK.HealthDataType>> {
-    return (await sourceManager.getSelectedMeasuresOfSource(this)).map(
+    return (await sourceManager.getSourcesOfService(this)).map(
       measure => (measure as AppleHealthMeasureBase<any>).healthKitDataType,
     );
   }

@@ -1,27 +1,27 @@
 import {createStackNavigator} from 'react-navigation-stack';
 import {ExplorationScreen} from './pages/exploration/ExplorationScreen';
 import {createAppContainer} from 'react-navigation';
-import { MeasureSettingsScreen } from './pages/sources/MeasureSettingsScreen';
-import Colors from '../style/Colors';
+import { SettingsScreen } from './pages/settings/SettingsScreen';
 import { ServiceSelectionWizardStack } from './pages/sources/service-wizard/ServiceSelectionScreen';
-import { Sizes } from '../style/Sizes';
-import { fromRight, fromBottom } from 'react-navigation-transitions';
 
 const MainStack = createStackNavigator(
   {
     Home: {
       screen: ExplorationScreen,
+      navigationOptions: ({navigation}) => ({
+        headerShown: false,
+      }),
     },
-    MeasureSettings: {
-        screen: MeasureSettingsScreen,
+    Settings: {
+        screen: SettingsScreen,
         navigationOptions: () => ({
-            title: "Data Sources"
+            title: "Settings",
+            headerBackTitle: "Back"
         })
     }
   },
   {
-    initialRouteName: 'Home',
-    headerMode: 'none'
+    initialRouteName: 'Home'
   },
 );
 

@@ -19,7 +19,7 @@ export class RealmUserDatabaseManager extends RealmHandlerBase implements IUserD
     }
 
     async queryData<T extends IDatumBase>(measureCode: string, from: number, to: number): Promise<T[]> {
-        const measure = sourceManager.findMeasureByCode(measureCode)
+        const measure = sourceManager.findSourceByCode(measureCode)
         if(measure){
             const dataset = await measure.fetchData(from , to)
             return dataset as T[]

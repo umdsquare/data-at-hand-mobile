@@ -17,7 +17,8 @@ export class AppleHealthSleepMeasure extends AppleHealthMeasureBase<
         endedAt: new Date(hkDatum.endedAt),
         duration: hkDatum.endedAt - hkDatum.startedAt,
         value: hkDatum.effciency,
-        measureCode: this.code
+        measureCode: this.code,
+        subjectToChange: false
     }
   }
 }

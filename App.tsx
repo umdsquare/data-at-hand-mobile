@@ -22,6 +22,7 @@ import { naturalLanguageRecognizer } from './src/core/speech/NaturalLanguageReco
 import { ThemeProvider } from 'react-native-elements';
 import { theme } from './src/style/Theme';
 import { Platform, UIManager } from 'react-native';
+import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 
 
 if (
@@ -81,7 +82,9 @@ class App extends React.Component<any, State> {
 
         <SafeAreaProvider>
           <ThemeProvider theme={theme}>
-            <AppNavigator />
+            <ActionSheetProvider>
+              <AppNavigator />
+            </ActionSheetProvider>
           </ThemeProvider>
         </SafeAreaProvider>
         {<FadeView
