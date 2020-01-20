@@ -1,13 +1,13 @@
 import { DataSourceMeasure } from "../DataService";
 import * as HK from './HealthKitManager';
-import { AppleHealthSource } from "./AppleHealthSource";
+import { AppleHealthService } from "./AppleHealthService";
 import { IDatumBase } from "../../../database/types";
 
 export abstract class AppleHealthMeasureBase<HKDatumType> extends DataSourceMeasure{
     abstract readonly healthKitDataType : HK.HealthDataType
 
     async activateInSystem(): Promise<boolean> {
-        const dataTypes = await this.castedService<AppleHealthSource>().getSelectedDataTypes()
+        const dataTypes = await this.castedService<AppleHealthService>().getSelectedDataTypes()
         
         if(dataTypes.indexOf(this.healthKitDataType) < 0){
             dataTypes.push(this.healthKitDataType)

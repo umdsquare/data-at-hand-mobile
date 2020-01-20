@@ -7,8 +7,6 @@ import { BottomBar } from "./components";
 import { Button } from "react-native-elements";
 import { DateRangeBar } from "../../exploration/DateRangeBar";
 import { startOfMonth, endOfMonth } from "date-fns";
-import { DataSourceIcon } from "../../common/DataSourceIcon";
-import { DataSourceChartFrame } from "../../exploration/DataSourceChartFrame";
 
 const styles = StyleSheet.create({
 
@@ -18,6 +16,7 @@ const styles = StyleSheet.create({
 
     mainContainerStyle: {
         ...StyleTemplates.screenDefaultStyle,
+        backgroundColor: "#EFEFF4",
         zIndex: Platform.OS === 'android' ? 100 : undefined,
     }
 })

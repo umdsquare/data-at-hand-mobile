@@ -2,7 +2,7 @@ import {FitbitMeasureBase} from './FitbitMeasureBase';
 import {MeasureSpec} from '../../MeasureSpec';
 import {measureService, MeasureSpecKey} from '../../../system/MeasureService';
 import {IWorkoutSession, IDatumBase} from '../../../database/types';
-import {FitbitSource, makeFitbitDailyActivitySummaryUrl} from './FitbitSource';
+import {FitbitService, makeFitbitDailyActivitySummaryUrl} from './FitbitService';
 import {sequenceDays} from '../../../utils';
 import {FitbitActivitySummaryDay} from './types';
 import {toDate} from 'date-fns-tz';
@@ -15,13 +15,13 @@ export class FitbitWorkoutMeasure extends FitbitMeasureBase {
   async fetchData(start: number, end: number): Promise<Array<IDatumBase>> {
     const result: Array<FitbitActivitySummaryDay> = await Promise.all(
       sequenceDays(start, end).map(day =>
-        this.castedService<FitbitSource>().fetchFitbitQuery(
+        this.castedService<FitbitService>().fetchFitbitQuery(
           makeFitbitDailyActivitySummaryUrl(day),
         ),
       ),
     );
 
-    const timeZone = await this.castedService<FitbitSource>().getUserTimezone();
+    const timeZone = await this.castedService<FitbitService>().getUserTimezone();
 
     const convertedList: Array<IWorkoutSession> = [];
 

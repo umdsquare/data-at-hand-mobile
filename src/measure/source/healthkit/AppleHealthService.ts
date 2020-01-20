@@ -9,7 +9,7 @@ import {AppleHealthSleepMeasure} from './AppleHealthSleepMeasure';
 import {AppleHealthWorkoutMeasure} from './AppleHealthWorkoutMeasure';
 import {AppleHealthWeightMeasure} from './AppleHealthWeightMeasure';
 
-export class AppleHealthSource extends DataService {
+export class AppleHealthService extends DataService {
   key: string = 'healthkit';
   name: string = 'Apple Health';
   description: string = 'Apple Health and HealthKit Data';

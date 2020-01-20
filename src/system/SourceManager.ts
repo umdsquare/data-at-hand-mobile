@@ -1,14 +1,14 @@
 import {DataService, DataSourceMeasure} from '../measure/source/DataService';
-import {FitbitSource} from '../measure/source/fitbit/FitbitSource';
+import {FitbitService} from '../measure/source/fitbit/FitbitService';
 import {MeasureSpec} from '../measure/MeasureSpec';
-import {AppleHealthSource} from '../measure/source/healthkit/AppleHealthSource';
+import {AppleHealthService} from '../measure/source/healthkit/AppleHealthService';
 import {measureService} from './MeasureService';
 import { SettingsState } from '../state/settings/reducer';
 
 class SourceManager {
   installedServices: ReadonlyArray<DataService> = [
-    new FitbitSource(),
-    new AppleHealthSource(),
+    new FitbitService(),
+    new AppleHealthService(),
   ];
 
   private _supportedServices: ReadonlyArray<DataService> = null;

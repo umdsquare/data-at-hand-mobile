@@ -142,7 +142,7 @@ async function revokeScopeAndGet(
   }
 }
 
-export class FitbitSource extends DataService {
+export class FitbitService extends DataService {
   key: string = 'fitbit';
   name: string = 'Fitbit';
   description: string = 'Fitbit Fitness Tracker';
