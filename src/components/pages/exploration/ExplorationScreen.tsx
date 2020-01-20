@@ -7,6 +7,8 @@ import { BottomBar } from "./components";
 import { Button } from "react-native-elements";
 import { DateRangeBar } from "../../exploration/DateRangeBar";
 import { startOfMonth, endOfMonth } from "date-fns";
+import { DataSourceIcon } from "../../common/DataSourceIcon";
+import { DataSourceChartFrame } from "../../exploration/DataSourceChartFrame";
 
 const styles = StyleSheet.create({
 
@@ -16,11 +18,11 @@ const styles = StyleSheet.create({
 
     mainContainerStyle: {
         ...StyleTemplates.screenDefaultStyle,
-        zIndex: Platform.OS === 'android' ? 100 : undefined, 
+        zIndex: Platform.OS === 'android' ? 100 : undefined,
     }
 })
 
-interface Props extends PropsWithNavigation{
+interface Props extends PropsWithNavigation {
 }
 
 interface State {
@@ -31,26 +33,28 @@ export class ExplorationScreen extends React.Component<Props, State> {
 
 
 
-    render(){
+    render() {
         return <View style={StyleTemplates.screenDefaultStyle}>
             <StatusBar barStyle="light-content" backgroundColor={Colors.headerBackground} />
             <View style={styles.headerContainerStyle}>
                 <SafeAreaView>
-                    <View style={{padding: 12, flexDirection: 'row'}}>
-                        <Text style={{flex: 1}}>Browse</Text>
-                        <Button onPress={()=>{
+                    <View style={{ padding: 12, flexDirection: 'row' }}>
+                        <Text style={{ flex: 1 }}>Browse</Text>
+                        <Button onPress={() => {
                             this.props.navigation.navigate("Settings")
                         }}></Button>
                     </View>
 
-                    <DateRangeBar from={startOfMonth(new Date())} to={endOfMonth(new Date())} onRangeChanged={(from, to)=>{
+                    <DateRangeBar from={startOfMonth(new Date())} to={endOfMonth(new Date())} onRangeChanged={(from, to) => {
                         console.log("set to ", from, to)
-                    }}/>
+                    }} />
                 </SafeAreaView>
             </View>
-            <View style={styles.mainContainerStyle}></View>
+            <View style={styles.mainContainerStyle}>
 
-            <BottomBar/>
+            </View>
+
+            <BottomBar />
 
         </View>
     }
