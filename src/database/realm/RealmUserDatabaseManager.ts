@@ -2,7 +2,7 @@ import { RealmHandlerBase } from "./RealmHandlerBase";
 import { userRealmConfig } from './userdata-schema';
 import { IUserDatabaseManager, IDatumBase } from "../types";
 import { MeasureSpecKey, measureService } from "../../system/MeasureService";
-import { sourceManager } from "../../system/SourceManager";
+import { DataServiceManager } from "../../system/DataServiceManager";
 
 export class RealmUserDatabaseManager extends RealmHandlerBase implements IUserDatabaseManager {
     
@@ -19,7 +19,7 @@ export class RealmUserDatabaseManager extends RealmHandlerBase implements IUserD
     }
 
     async queryData<T extends IDatumBase>(measureCode: string, from: number, to: number): Promise<T[]> {
-        const measure = sourceManager.findSourceByCode(measureCode)
+        const measure = DataServiceManager.findMeasureByCode(measureCode)
         if(measure){
             const dataset = await measure.fetchData(from , to)
             return dataset as T[]

@@ -1,7 +1,7 @@
-import {DataSourceMeasure} from '../DataService';
+import {DataMeasure} from '../DataService';
 import {FitbitService} from './FitbitService';
 
-export abstract class FitbitMeasureBase extends DataSourceMeasure {
+export abstract class FitbitMeasureBase extends DataMeasure {
   protected abstract readonly scope: string;
 
   async activateInSystem(): Promise<boolean> {

@@ -31,18 +31,18 @@ export abstract class DataService {
     reason?: UnSupportedReason;
   }>;
 
-  abstract readonly supportedMeasures: ReadonlyArray<DataSourceMeasure>;
+  abstract readonly supportedMeasures: ReadonlyArray<DataMeasure>;
 
-  getMeasureOfType(typeKey: string): DataSourceMeasure {
+  getMeasureOfType(typeKey: string): DataMeasure {
     return this.supportedMeasures.find(m => m.spec.type == typeKey);
   }
 
-  getMeasureOfSpec(spec: MeasureSpec): DataSourceMeasure {
+  getMeasureOfSpec(spec: MeasureSpec): DataMeasure {
     return this.supportedMeasures.find(m => m.spec.nameKey === spec.nameKey);
   }
 }
 
-export abstract class DataSourceMeasure {
+export abstract class DataMeasure {
   abstract readonly spec: MeasureSpec;
 
   get code(): string{ return this.source.key + ":" + this.spec.nameKey}

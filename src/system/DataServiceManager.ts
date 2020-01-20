@@ -1,11 +1,11 @@
-import {DataService, DataSourceMeasure} from '../measure/source/DataService';
-import {FitbitService} from '../measure/source/fitbit/FitbitService';
+import {DataService, DataMeasure} from '../measure/service/DataService';
+import {FitbitService} from '../measure/service/fitbit/FitbitService';
 import {MeasureSpec} from '../measure/MeasureSpec';
-import {AppleHealthService} from '../measure/source/healthkit/AppleHealthService';
+import {AppleHealthService} from '../measure/service/healthkit/AppleHealthService';
 import {measureService} from './MeasureService';
 import { SettingsState } from '../state/settings/reducer';
 
-class SourceManager {
+class DataServiceManager {
   installedServices: ReadonlyArray<DataService> = [
     new FitbitService(),
     new AppleHealthService(),
@@ -28,9 +28,9 @@ class SourceManager {
     return this._supportedServices;
   }
 
-  getSourcesOfService(
+  getMeasuresOfService(
     service: DataService,
-  ): Array<DataSourceMeasure> {
+  ): Array<DataMeasure> {
     return measureService.supportedMeasureSpecs.map(spec =>
       service.getMeasureOfSpec(spec)
     )
@@ -40,7 +40,7 @@ class SourceManager {
     return this.installedServices.find(s => s.key === serviceKey)
   }
 
-  findSourceByCode(code: string): DataSourceMeasure {
+  findMeasureByCode(code: string): DataMeasure {
     const split = code.split(':');
     if (split.length >= 2) {
       const service = this.installedServices.find(s => s.key === split[0]);
@@ -50,11 +50,11 @@ class SourceManager {
     } else return null;
   }
 
-  getDataSourceOfSpec(spec: MeasureSpec, state: SettingsState): DataSourceMeasure{
-    return this.findSourceByCode(state.serviceKey + ":" + spec.nameKey)
+  getDataMeasureOfSpec(spec: MeasureSpec, state: SettingsState): DataMeasure{
+    return this.findMeasureByCode(state.serviceKey + ":" + spec.nameKey)
   }
 /*
-  getMainSourceMeasure(spec: MeasureSpec, state: SettingsState): DataSourceMeasure{
+  getMainSourceMeasure(spec: MeasureSpec, state: SettingsState): DataMeasure{
     const info = state.selectionInfoList.find(info => info.measureSpecKey === spec.nameKey)
     if(info){
       const {connectedMeasureCodes, mainIndex} = info.sourceSelectionInfo
@@ -65,5 +65,5 @@ class SourceManager {
   }*/
 }
 
-const sourceManager = new SourceManager();
-export {sourceManager};
+const dataServiceManager = new DataServiceManager();
+export {dataServiceManager as DataServiceManager};

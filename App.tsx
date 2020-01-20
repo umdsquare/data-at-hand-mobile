@@ -14,7 +14,7 @@ import CreateStore from './src/state/store';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react'
 import LottieView from 'lottie-react-native';
-import { sourceManager } from './src/system/SourceManager';
+import { DataServiceManager } from './src/system/DataServiceManager';
 import { FadeView } from './src/components/common/FadeView';
 import { voiceDictator } from './src/core/speech/VoiceDictator';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -54,7 +54,7 @@ class App extends React.Component<any, State> {
 
     const loadingStartTime = Date.now()
     //loading initial things
-    const services = await sourceManager.getServicesSupportedInThisSystem()
+    const services = await DataServiceManager.getServicesSupportedInThisSystem()
     const speechInstalled = await voiceDictator.install()
     if (speechInstalled === true) {
       const isAvailableInSystem = await voiceDictator.isAvailableInSystem()

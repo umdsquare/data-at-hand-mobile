@@ -1,6 +1,6 @@
 import {IDatumBase, IHourlyStepBin} from '../../database/types';
 import {VisualizationSchema, ChartType, DataElement} from './types';
-import {sourceManager} from '../../system/SourceManager';
+import {DataServiceManager} from '../../system/DataServiceManager';
 import {MeasureType, MeasureSpec} from '../../measure/MeasureSpec';
 import {addHours} from 'date-fns';
 import { MeasureSpecKey } from '../../system/MeasureService';
@@ -21,7 +21,7 @@ export function makeDefaultChart(
   data: Array<IDatumBase>,
   queriedDuration: {start: number, end: number}
 ): VisualizationSchema {
-  const measure = sourceManager.findSourceByCode(measureCode);
+  const measure = DataServiceManager.findMeasureByCode(measureCode);
   const chartType = getDefaultChartType(measure.spec);
   switch(measure.spec.nameKey){
       case MeasureSpecKey.step:

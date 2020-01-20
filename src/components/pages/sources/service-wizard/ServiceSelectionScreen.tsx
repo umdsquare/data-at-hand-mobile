@@ -3,8 +3,8 @@ import { View, Text, ImageBackground, ScrollView, SafeAreaView } from "react-nat
 import { PropsWithNavigation } from "../../../../PropsWithNavigation";
 import { Sizes } from "../../../../style/Sizes";
 import { StyleTemplates } from "../../../../style/Styles";
-import { DataService } from "../../../../measure/source/DataService";
-import { sourceManager } from "../../../../system/SourceManager";
+import { DataService } from "../../../../measure/service/DataService";
+import { DataServiceManager } from "../../../../system/DataServiceManager";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Colors from "../../../../style/Colors";
 import { Dispatch } from "redux";
@@ -32,7 +32,7 @@ class ServiceSelectionScreen extends React.Component<Prop, State>{
     }
 
     async componentDidMount() {
-        const supportedServices = await sourceManager.getServicesSupportedInThisSystem()
+        const supportedServices = await DataServiceManager.getServicesSupportedInThisSystem()
         this.setState({
             ...this.state,
             services: supportedServices

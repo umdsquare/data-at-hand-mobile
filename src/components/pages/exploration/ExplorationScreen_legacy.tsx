@@ -28,7 +28,7 @@ import { connect } from 'react-redux';
 import { SettingsState } from '../../../state/settings/reducer';
 import { SelectMeasureComponent } from './components';
 import { MeasureSpec } from '../../../measure/MeasureSpec';
-import { sourceManager } from '../../../system/SourceManager';
+import { DataServiceManager } from '../../../system/DataServiceManager';
 
 const appBarIconStyles = {
     buttonStyle: {
@@ -224,7 +224,7 @@ class ExplorationScreen extends React.Component<Props, State> {
     }
 
     private onMeasureSpecSelected = (spec: MeasureSpec) => {
-        const sourceMeasure = sourceManager.getMainSourceMeasure(spec, this.props.measureSettingsState)
+        const sourceMeasure = DataServiceManager.getMainSourceMeasure(spec, this.props.measureSettingsState)
         this.props.dispatchCommand({type: ExplorationCommandType.SelectMeasure, measureCode: sourceMeasure.code, invokedAt: Date.now()} as SelectMeasureCommand)
     }
 

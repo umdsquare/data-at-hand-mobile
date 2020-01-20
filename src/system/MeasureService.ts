@@ -1,7 +1,7 @@
 import { MeasureSpec, MeasureType } from "../measure/MeasureSpec";
 import { MeasureModule, StepMeasureModule, WeightMeasureModule, HeartRateMeasureModule, SleepMeasureModule, WorkoutMeasureModule } from "../measure/MeasureModule";
 
-const MeasureSpecKey = {
+export const MeasureSpecKey = {
     step: "step",
     weight: "weight",
     sleep: "sleep",
@@ -72,4 +72,4 @@ class MeasureService {
 }
 
 const measureService = new MeasureService()
-export { measureService, MeasureSpecKey}
+export { measureService }

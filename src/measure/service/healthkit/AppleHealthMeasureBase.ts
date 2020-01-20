@@ -1,9 +1,9 @@
-import { DataSourceMeasure } from "../DataService";
+import { DataMeasure } from "../DataService";
 import * as HK from './HealthKitManager';
 import { AppleHealthService } from "./AppleHealthService";
 import { IDatumBase } from "../../../database/types";
 
-export abstract class AppleHealthMeasureBase<HKDatumType> extends DataSourceMeasure{
+export abstract class AppleHealthMeasureBase<HKDatumType> extends DataMeasure{
     abstract readonly healthKitDataType : HK.HealthDataType
 
     async activateInSystem(): Promise<boolean> {

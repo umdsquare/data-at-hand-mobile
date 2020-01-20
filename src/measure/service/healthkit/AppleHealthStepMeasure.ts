@@ -1,4 +1,4 @@
-import { DataSourceMeasure } from "../DataService";
+import { DataMeasure } from "../DataService";
 import { MeasureSpec } from "../../MeasureSpec";
 import { measureService, MeasureSpecKey } from "../../../system/MeasureService";
 import * as HealthKitManager from './HealthKitManager';

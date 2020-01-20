@@ -9,7 +9,7 @@ import { setUnit } from '../../../state/settings/actions';
 import { Sizes } from "../../../style/Sizes";
 import { Icon } from "react-native-elements";
 import Colors from "../../../style/Colors";
-import { sourceManager } from "../../../system/SourceManager";
+import { DataServiceManager } from "../../../system/DataServiceManager";
 import { connectActionSheet } from '@expo/react-native-action-sheet'
 
 const styles = StyleSheet.create({
@@ -94,7 +94,7 @@ class SettingsScreen extends React.PureComponent<Props, State>{
         return <View>
             <StatusBar barStyle="dark-content" />
             
-            <SettingsRow title="Service" value={sourceManager.getServiceByKey(this.props.selectedServiceKey).name} 
+            <SettingsRow title="Service" value={DataServiceManager.getServiceByKey(this.props.selectedServiceKey).name} 
                 onClick={this.onPressServiceButton}/>
             <SettingsRow title="Unit" value={SettingsScreen.UnitTypes.find(t => t.key === this.props.selectedUnitType).label} 
                 onClick={this.onPressUnitRow}/>
