@@ -1,14 +1,13 @@
-import React, { Component, ComponentClass } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, Dimensions } from "react-native"
-import { Sizes } from '../../../style/Sizes';
-import { StyleTemplates } from '../../../style/Styles';
-import Colors from '../../../style/Colors';
-import { measureService } from '../../../system/MeasureService';
-import { Button } from 'react-native-elements';
-import { MeasureSpec } from '../../../measure/MeasureSpec';
-import { Svg, Defs, Path } from 'react-native-svg';
+import React from 'react';
+import { View, SafeAreaView, StyleSheet, Dimensions, TouchableOpacity, Text } from 'react-native';
+import Colors from '../../style/Colors';
+import { Sizes } from '../../style/Sizes';
+import { StyleTemplates } from '../../style/Styles';
 import { SafeAreaConsumer } from 'react-native-safe-area-context';
-import { VoiceInputButton } from '../../exploration/VoiceInputButton';
+import Svg, { Path } from 'react-native-svg';
+import { VoiceInputButton } from './VoiceInputButton';
+import { ExplorationMode } from '../../core/interaction/types';
+
 
 const bottomBarIconSize = 21
 
@@ -70,23 +69,29 @@ const Styles = StyleSheet.create({
     }
 })
 
-export const SelectMeasureComponent = (props: {
-    selectableMeasureSpecKeys: Array<string>,
-    onMeasureSpecSelected: (spec: MeasureSpec) => void
-}) => {
-    const measureSpecs = props.selectableMeasureSpecKeys.map(key => measureService.getSpec(key))
-    return <View style={Styles.selectMeasureContainerStyle}>
-        <Text style={Styles.selectMeasureMainMessageStyle}>Select Measure</Text>
-
-        {
-            measureSpecs.map(spec => <Button key={spec.nameKey} type="clear" title={spec.name} onPress={() => {
-                props.onMeasureSpecSelected(spec)
-            }} />)
-        }
-    </View>
+interface Props{
+    mode: ExplorationMode,
+    onModePressIn?: (mode: ExplorationMode)=>void,
+    onModePressOut?: (mode: ExplorationMode)=>void,
+    onModePress?: (mode: ExplorationMode)=>void
 }
 
-const BottomBarButton = (prop: { isOn: boolean, icon: string, title: string }) => {
+export class BottomBar extends React.Component<Props> {
+    render() {
+        return <View style={Styles.bottomBarContainerStyle}>
+            <SafeAreaView style={Styles.bottomBarInnerListStyle}>
+                <BottomBarButton isOn={this.props.mode === 'browse'} title="Browse" icon={ExplorationMode.Browse} />
+                <BottomBarButton isOn={this.props.mode === 'compare'} title="Compare" icon={ExplorationMode.Compare} />
+                <View style={Styles.bottomBarVoiceButtonContainerStyle}>
+                    <VoiceInputButton isBusy={false} onTouchDown={() => { return null }} onTouchUp={() => { return null }} />
+                </View>
+            </SafeAreaView>
+        </View>
+    }
+}
+
+
+const BottomBarButton = (prop: { isOn: boolean, icon: ExplorationMode, title: string }) => {
     const color = prop.isOn === true ? Colors.primary : Colors.chartLightText
     return <SafeAreaConsumer>
         {
@@ -128,16 +133,4 @@ const BottomBarButton = (prop: { isOn: boolean, icon: string, title: string }) =
             
         }
     </SafeAreaConsumer >
-}
-
-export const BottomBar = (prop: any) => {
-    return <View style={Styles.bottomBarContainerStyle}>
-        <SafeAreaView style={Styles.bottomBarInnerListStyle}>
-            <BottomBarButton isOn={false} title="Browse" icon="browse" />
-            <BottomBarButton isOn={true} title="Compare" icon="compare" />
-            <View style={Styles.bottomBarVoiceButtonContainerStyle}>
-                <VoiceInputButton isBusy={false} onTouchDown={()=>{return null}} onTouchUp={()=>{return null}} />
-            </View>
-        </SafeAreaView>
-    </View>
 }

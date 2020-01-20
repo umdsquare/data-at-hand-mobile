@@ -1,10 +1,12 @@
 import {
-  ExplorationStateInfo, makeInitialStateInfo,
+  ExplorationStateInfo,
+  makeInitialStateInfo,
 } from '../../core/interaction/types';
-import {ActionTypeBase} from '../types';
+import {ActionTypeBase, ReduxAppState} from '../types';
 import {Dispatch} from 'redux';
 import {ExplorationStateActionTypes, FinishStateTransition} from './actions';
-import {sleep} from '../../utils';
+import {explorationCommandResolver} from '../../core/interaction/ExplorationCommandResolver';
+import {ExplorationCommand} from '../../core/interaction/commands';
 
 export interface ExplorationState {
   info: ExplorationStateInfo;
@@ -22,7 +24,6 @@ export const explorationStateReducer = (
   state: ExplorationState = INITIAL_STATE,
   action: ActionTypeBase,
 ): ExplorationState => {
-
   const newState: ExplorationState = JSON.parse(JSON.stringify(state));
 
   switch (action.type) {
@@ -45,27 +46,30 @@ export const explorationStateReducer = (
 };
 
 export function resolveExplorationCommand(command: ExplorationCommand) {
-  return runAsyncStateUpdateTask((stateInfo: ExplorationStateInfo) =>
-    explorationStateResolver.getNewStateInfo(stateInfo, command),
-  );
+  return runAsyncStateUpdateTask((stateInfo: ExplorationStateInfo) => {
+    return explorationCommandResolver.getNewStateInfo(stateInfo, command);
+  });
 }
 
 function runAsyncStateUpdateTask(
   getNewStateFunc: (ExplorationStateInfo) => Promise<ExplorationStateInfo>,
 ) {
-  return async (dispatch: Dispatch, getState: () => ExplorationState) => {
+  return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
     dispatch({
       type: ExplorationStateActionTypes.StartStateTransition,
     });
     try {
-      const newStateInfo = await getNewStateFunc(getState().info);
+      const state = getState();
+      const newStateInfo = await getNewStateFunc(state.explorationState.info);
       dispatch({
         type: ExplorationStateActionTypes.FinishStateTransition,
         newStateInfo: newStateInfo,
         error: null,
       } as FinishStateTransition);
     } catch (error) {
+      console.error(error);
       dispatch({
+        type: ExplorationStateActionTypes.FinishStateTransition,
         newStateInfo: null,
         error: error,
       } as FinishStateTransition);

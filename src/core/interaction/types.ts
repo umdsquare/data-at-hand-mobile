@@ -1,6 +1,6 @@
 import { IDatumBase } from "../../database/types";
 import { VisualizationSchema } from "../visualization/types";
-import { DurationSemantic, Presets } from "./time";
+import { startOfDay, subDays, endOfDay } from "date-fns";
 
 
 export enum ExplorationType{
@@ -12,6 +12,11 @@ export enum ExplorationType{
     C_TwoRanges
 }
 
+export enum ExplorationMode{
+    Browse="browse",
+    Compare="compare"
+}
+
 export enum ParameterType{
     DataSource,
     Date,
@@ -20,19 +25,21 @@ export enum ParameterType{
     CycleDimension,
 }
 
+export type ParameterKey = "range1"|"range2"|"pivot"
 
 export interface ExplorationStateInfo{
     type: ExplorationType
     pointing: boolean
-    values: Array<{parameter: ParameterType, value: any}>
+    values: Array<{parameter: ParameterType, key?: ParameterKey, value: any}>
     payload: any
 }
 
 export function makeInitialStateInfo(): ExplorationStateInfo{
+    const now = startOfDay(new Date())
     return{
         type: ExplorationType.B_Ovrvw,
         pointing: false,
-        values: [{parameter: ParameterType.Range, value: Presets.THIS_WEEK}],
+        values: [{parameter: ParameterType.Range, value: [subDays(now, 7).toString(), endOfDay(now).toString()]}],
         payload: null
     }
 }
@@ -47,5 +54,4 @@ export function isVisualizationPayload(obj: any): boolean{
 
 export interface DefaultChartPayload extends VisualizationPayload{
     measureCode: string,
-    queriedDuration: DurationSemantic,
 }

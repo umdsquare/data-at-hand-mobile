@@ -65,6 +65,12 @@ const StyleTemplates = StyleSheet.create({
 
   headerRightTextButtonStyle: {},
 
+  headerTitleStyle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'white'
+  },
+
   dataSourceCardHeaderTitleStyle: {
     fontSize: Sizes.normalFontSize,
     fontWeight: 'bold',

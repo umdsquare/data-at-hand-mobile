@@ -284,7 +284,7 @@ export class DateRangeBar extends React.Component<Props, State> {
                 isVisible={this.state.isBottomSheetOpen === true}
                 onBackdropPress={this.closeBottomSheet}
                 style={StyleTemplates.bottomSheetModalContainerStyle}
-                backdropOpacity={0.6}
+                backdropOpacity={0.3}
             >
                 <View style={StyleTemplates.bottomSheetModalViewStyle}>
                     <SafeAreaView>

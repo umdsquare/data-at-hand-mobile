@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ViewStyle } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Colors from '../../style/Colors';
 import React from "react";
@@ -19,6 +19,6 @@ const end = {
     y: 1
 }
 
-export const SpeechAffordanceIndicator = ()=>{
-    return <LinearGradient style={style} colors={Colors.speechAffordanceGradient} start={start} end={end}  />
+export const SpeechAffordanceIndicator = (prop: {overrideStyle?: ViewStyle})=>{
+    return <LinearGradient style={prop.overrideStyle? {...style, ...prop.overrideStyle} : style } colors={Colors.speechAffordanceGradient} start={start} end={end}  />
 }
