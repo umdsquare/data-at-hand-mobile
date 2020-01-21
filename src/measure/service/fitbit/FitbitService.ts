@@ -7,6 +7,7 @@ import {DataSourceType} from '../../DataSourceSpec';
 import {DataLevel, IDatumBase} from '../../../database/types';
 import { format } from 'date-fns';
 import { FitbitDailyStepMeasure } from './FitbitDailyStepMeasure';
+import { FitbitDailyHeartRateMeasure } from './FitbitDailyHeartRateMeasure';
 
 type TimeLike = Date | number | string | Moment;
 
@@ -108,53 +109,6 @@ const STORAGE_KEY_AUTH_STATE = DataService.STORAGE_PREFIX + 'fitbit:state';
 const STORAGE_KEY_USER_TIMEZONE =
   DataService.STORAGE_PREFIX + 'fitbit:user_timezone';
 
-/*
-async function registerScopeAndGet(scope: string): Promise<Array<string>> {
-  const currentScopes = await AsyncStorageHelper.getObject(
-    STORAGE_KEY_AUTH_CURRENT_SCOPES,
-  );
-  if (currentScopes) {
-    if (currentScopes.indexOf(scope) >= 0) {
-      return currentScopes;
-    } else {
-      currentScopes.push(scope);
-      await AsyncStorageHelper.set(
-        STORAGE_KEY_AUTH_CURRENT_SCOPES,
-        currentScopes,
-      );
-      return currentScopes;
-    }
-  } else {
-    const newScopes = [scope];
-    await AsyncStorageHelper.set(STORAGE_KEY_AUTH_CURRENT_SCOPES, newScopes);
-    return newScopes;
-  }
-}
-
-
-
-async function revokeScopeAndGet(
-  scope: string,
-): Promise<{removed: boolean; result: Array<string>}> {
-  const currentScopes = (await AsyncStorageHelper.getObject(
-    STORAGE_KEY_AUTH_CURRENT_SCOPES,
-  )) as Array<string>;
-  if (currentScopes) {
-    const scopeIndex = currentScopes.indexOf(scope);
-    if (scopeIndex >= 0) {
-      currentScopes.splice(scopeIndex, 1);
-      await AsyncStorageHelper.set(
-        STORAGE_KEY_AUTH_CURRENT_SCOPES,
-        currentScopes,
-      );
-      return {removed: true, result: currentScopes};
-    } else {
-      return {removed: false, result: currentScopes};
-    }
-  } else {
-    return {removed: false, result: []};
-  }
-}*/
 
 export class FitbitService extends DataService {
   key: string = 'fitbit';
@@ -173,6 +127,9 @@ export class FitbitService extends DataService {
     return true;
   }
 
+  private dailyStepMeasure = new FitbitDailyStepMeasure(this)
+  private dailyHeartRateMeasure = new FitbitDailyHeartRateMeasure(this)
+
   protected fetchDataImpl(
     dataSource: DataSourceType,
     level: DataLevel,
@@ -182,13 +139,15 @@ export class FitbitService extends DataService {
     switch (dataSource) {
       case DataSourceType.StepCount:
         if(level === DataLevel.DailyActivity){
-          const measure = new FitbitDailyStepMeasure(this)
-          return measure.fetchData(from, to)
+          return this.dailyStepMeasure.fetchData(from, to)
         }else{
 
         }
         break;
       case DataSourceType.HeartRate:
+        if(level === DataLevel.DailyActivity){
+          return this.dailyHeartRateMeasure.fetchData(from, to)
+        }
         break;
       case DataSourceType.HoursSlept:
         break;

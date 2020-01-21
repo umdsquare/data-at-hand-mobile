@@ -1,5 +1,5 @@
 import {
-  ExplorationStateInfo,
+  ExplorationInfo,
   makeInitialStateInfo,
 } from '../../core/interaction/types';
 import {ActionTypeBase, ReduxAppState} from '../types';
@@ -9,7 +9,7 @@ import {explorationCommandResolver} from '../../core/interaction/ExplorationComm
 import {ExplorationCommand} from '../../core/interaction/commands';
 
 export interface ExplorationState {
-  info: ExplorationStateInfo;
+  info: ExplorationInfo;
   isProcessing: boolean;
   error: any;
 }
@@ -46,13 +46,13 @@ export const explorationStateReducer = (
 };
 
 export function resolveExplorationCommand(command: ExplorationCommand) {
-  return runAsyncStateUpdateTask((stateInfo: ExplorationStateInfo) => {
+  return runAsyncStateUpdateTask((stateInfo: ExplorationInfo) => {
     return explorationCommandResolver.getNewStateInfo(stateInfo, command);
   });
 }
 
 function runAsyncStateUpdateTask(
-  getNewStateFunc: (ExplorationStateInfo) => Promise<ExplorationStateInfo>,
+  getNewStateFunc: (ExplorationInfo) => Promise<ExplorationInfo>,
 ) {
   return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
     dispatch({

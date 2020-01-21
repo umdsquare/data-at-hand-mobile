@@ -23,8 +23,6 @@ import { ThemeProvider } from 'react-native-elements';
 import { theme } from './src/style/Theme';
 import { Platform, UIManager } from 'react-native';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
-import { getHours } from 'date-fns';
-import { FitbitDailyStepMeasure } from './src/measure/service/fitbit/FitbitDailyStepMeasure';
 
 
 if (
@@ -33,12 +31,6 @@ if (
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-
-const now = new Date()
-console.log("now: ", now.getTimezoneOffset())
-console.log("offset:", now.getTimezoneOffset())
-console.log("hour:", getHours(now) )
-
 
 const { store, persistor } = CreateStore()
 

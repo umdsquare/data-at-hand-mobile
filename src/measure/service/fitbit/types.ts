@@ -32,25 +32,22 @@ export interface FitbitDailyActivityStepsQueryResult{
   }>
 }
 
-/*
-{
-      "dateOfSleep": "2019-10-18",
-      "duration": 26220000,
-      "efficiency": 93,
-      "endTime": "2019-10-18T08:07:30.000",
-      "infoCode": 0,
-      "isMainSleep": true,
-      "levels": [Object],
-      "logId": 24307047175,
-      "minutesAfterWakeup": 24,
-      "minutesAsleep": 370,
-      "minutesAwake": 67,
-      "minutesToFallAsleep": 0,
-      "startTime": "2019-10-18T00:50:30.000",
-      "timeInBed": 437,
-      "type": "stages"
-    },
-*/
+export interface FitbitDailyActivityHeartRateQueryResult{
+  "activities-heart": Array<{
+    dateTime: string,
+    value: {
+      restingHeartRate: number,
+      customHeartRateZones: Array<any>,
+      heartRateZones: Array<{
+        caloriesOut: number,
+        max: number,
+        min: number,
+        minutes: 1090,
+        name: string
+      }>
+    }
+  }>
+}
 
 export interface FitbitActivitySummaryDay {
   activities: Array<{

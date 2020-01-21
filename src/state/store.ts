@@ -2,7 +2,7 @@ import {createStore, applyMiddleware} from 'redux';
 import {persistStore, persistCombineReducers} from 'redux-persist';
 import {settingsStateReducer} from './settings/reducer';
 import AsyncStorage from '@react-native-community/async-storage';
-import { explorationStateReducer } from './exploration/reducers';
+import { explorationStateReducer } from './exploration-interaction/reducers';
 import thunk from 'redux-thunk';
 
 const persistConfig = {

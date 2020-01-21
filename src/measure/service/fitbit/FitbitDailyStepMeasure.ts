@@ -6,6 +6,7 @@ import { startOfHour } from 'date-fns/fp';
 import { toDate } from 'date-fns-tz';
 import { DataServiceMeasure } from '../DataService';
 import { parse, isSameDay, isAfter } from 'date-fns';
+import { DateTimeHelper } from '../../../time';
 
 
 export class FitbitDailyStepMeasure extends DataServiceMeasure {
@@ -16,17 +17,15 @@ export class FitbitDailyStepMeasure extends DataServiceMeasure {
     const timeZone = await this.castedService<FitbitService>().getUserTimezone()
     
     const data = result["activities-steps"].map(entry => {
-      
+
       const date = toDate(entry.dateTime, { timeZone })
       const now = new Date()
       return {
         value: Number.parseInt(entry.value),
-        date,
+        numberedDate: DateTimeHelper.fromFormattedString(entry.dateTime),
         subjectToChange: isSameDay(now, date) || isAfter(date, now)
       } as DailySummaryDatum
     })
-
-    console.log(data)
 
     return data
   }

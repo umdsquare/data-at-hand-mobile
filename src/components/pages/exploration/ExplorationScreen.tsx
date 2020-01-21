@@ -3,7 +3,7 @@ import React from "react";
 import { StatusBar, View, StyleSheet, Text, Platform, SafeAreaView } from "react-native";
 import Colors from "../../../style/Colors";
 import { StyleTemplates } from "../../../style/Styles";
-import { ExplorationState, resolveExplorationCommand } from "../../../state/exploration/reducers";
+import { ExplorationState, resolveExplorationCommand } from "../../../state/exploration-interaction/reducers";
 import { Dispatch } from "redux";
 import { ThunkDispatch } from "redux-thunk";
 import { ReduxAppState } from "../../../state/types";
@@ -58,18 +58,24 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                         }} />
     */
 
-    componentDidMount(){
-        if(this.props.selectedServiceKey){
+    componentDidMount() {
+        if (this.props.selectedServiceKey) {
             DataServiceManager.getServiceByKey(this.props.selectedServiceKey).activateInSystem().then(success => {
                 console.log("activated ", this.props.selectedServiceKey, "successfully.")
+
             }).catch(error => {
                 console.log("service activation error: ", this.props.selectedServiceKey, error)
             })
         }
     }
-    componentDidUpdate() {
-       // const range = explorationCommandResolver.getParameterValue(this.props.explorationState.info, ParameterType.Range)
-       // DataServiceManager.getServiceByKey('fitbit').fetchData(DataSourceType.StepCount, DataLevel.DailyActivity, new Date(range[0]), new Date(range[1]))
+
+    async componentDidUpdate() {
+        if (this.props.selectedServiceKey === 'fitbit') {
+
+            const range = explorationCommandResolver.getParameterValue(this.props.explorationState.info, ParameterType.Range)
+            const data = await DataServiceManager.getServiceByKey('fitbit').fetchData(DataSourceType.HeartRate, DataLevel.DailyActivity, new Date(range[0]), new Date(range[1]))
+            console.log(data)
+        }
     }
 
     render() {

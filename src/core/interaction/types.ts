@@ -26,14 +26,14 @@ export enum ParameterType{
 
 export type ParameterKey = "range1"|"range2"|"pivot"
 
-export interface ExplorationStateInfo{
+export interface ExplorationInfo{
     type: ExplorationType
     pointing: boolean
     values: Array<{parameter: ParameterType, key?: ParameterKey, value: any}>
     payload: any
 }
 
-export function makeInitialStateInfo(): ExplorationStateInfo{
+export function makeInitialStateInfo(): ExplorationInfo{
     const now = startOfDay(new Date())
     return{
         type: ExplorationType.B_Ovrvw,

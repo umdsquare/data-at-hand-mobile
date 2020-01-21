@@ -12,6 +12,7 @@ class ExplorationCommandResolver {
     prevStateInfo: ExplorationStateInfo,
     command: ExplorationCommand,
   ): Promise<ExplorationStateInfo> {
+    console.log("initialize")
     const newStateInfo = JSON.parse(JSON.stringify(prevStateInfo));
     switch (command.type) {
       case ExplorationCommandType.SetRange:

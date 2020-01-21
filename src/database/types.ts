@@ -9,8 +9,7 @@ export interface IDatumBase{
 }
 
 export interface DailySummaryDatum extends IDatumBase{
-    date: Date,
-    timeZone?: string
+    numberedDate: number
 }
 
 export interface IPointDatum extends IDatumBase{

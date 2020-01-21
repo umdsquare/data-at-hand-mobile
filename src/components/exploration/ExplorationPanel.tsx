@@ -7,7 +7,7 @@ import { PaginationBar } from '../common/PaginationBar';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Dialog from "react-native-dialog";
 import { Button } from 'react-native-elements';
-import { ExplorationStateInfo, isVisualizationPayload, VisualizationPayload } from '../../core/interaction/types';
+import { ExplorationInfo, isVisualizationPayload, VisualizationPayload } from '../../core/interaction/types';
 import { ReduxAppState } from '../../state/types';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
@@ -103,7 +103,7 @@ const Styles = StyleSheet.create({
 })
 
 interface Props {
-    explorationStateInfo?: ExplorationStateInfo
+    ExplorationInfo?: ExplorationInfo
 }
 
 interface State {
@@ -138,8 +138,8 @@ class ExplorationPanel extends React.Component<Props, State> {
 
             <View style={Styles.bodyStyle}>
                 {
-                    isVisualizationPayload(this.props.explorationStateInfo.payload)==true? 
-                    <ChartView schema={(this.props.explorationStateInfo.payload as VisualizationPayload).visualizationSchema}/> : <></>
+                    isVisualizationPayload(this.props.ExplorationInfo.payload)==true? 
+                    <ChartView schema={(this.props.ExplorationInfo.payload as VisualizationPayload).visualizationSchema}/> : <></>
                 }
             </View>
 
@@ -160,7 +160,7 @@ function mapStateToProps(state: ReduxAppState, ownProps: Props): Props {
 
     return {
         ...ownProps,
-        explorationStateInfo: state.explorationState.info
+        ExplorationInfo: state.explorationState.info
     }
 }
 

@@ -1,6 +1,6 @@
 import { SettingsState } from "./settings/reducer";
 import { Dispatch } from "redux";
-import { ExplorationState } from "./exploration/reducers";
+import { ExplorationState } from "./exploration-interaction/reducers";
 
 export type ReduxAppState = {
     settingsState: SettingsState,
