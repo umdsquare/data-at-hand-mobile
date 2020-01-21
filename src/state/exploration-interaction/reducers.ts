@@ -46,21 +46,14 @@ export const explorationStateReducer = (
 };
 
 export function resolveExplorationCommand(command: ExplorationCommand) {
-  return runAsyncStateUpdateTask((stateInfo: ExplorationInfo) => {
-    return explorationCommandResolver.getNewStateInfo(stateInfo, command);
-  });
-}
-
-function runAsyncStateUpdateTask(
-  getNewStateFunc: (ExplorationInfo) => Promise<ExplorationInfo>,
-) {
   return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
     dispatch({
       type: ExplorationStateActionTypes.StartStateTransition,
+      command: command
     });
     try {
       const state = getState();
-      const newStateInfo = await getNewStateFunc(state.explorationState.info);
+      const newStateInfo = await explorationCommandResolver.getNewStateInfo(state.explorationState.info, command);
       dispatch({
         type: ExplorationStateActionTypes.FinishStateTransition,
         newStateInfo: newStateInfo,

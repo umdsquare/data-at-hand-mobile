@@ -30,7 +30,7 @@ export interface ExplorationInfo{
     type: ExplorationType
     pointing: boolean
     values: Array<{parameter: ParameterType, key?: ParameterKey, value: any}>
-    payload: any
+    pointingInfo: any
 }
 
 export function makeInitialStateInfo(): ExplorationInfo{
@@ -39,6 +39,6 @@ export function makeInitialStateInfo(): ExplorationInfo{
         type: ExplorationType.B_Ovrvw,
         pointing: false,
         values: [{parameter: ParameterType.Range, value: [subDays(now, 7).toString(), endOfDay(now).toString()]}],
-        payload: null
+        pointingInfo: null
     }
 }

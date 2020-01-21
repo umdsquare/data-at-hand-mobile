@@ -1,5 +1,5 @@
 import {
-  ExplorationStateInfo,
+  ExplorationInfo,
   ParameterType,
   ParameterKey,
   ExplorationType,
@@ -9,9 +9,9 @@ import {ExplorationCommand, ExplorationCommandType} from './commands';
 
 class ExplorationCommandResolver {
   getNewStateInfo(
-    prevStateInfo: ExplorationStateInfo,
+    prevStateInfo: ExplorationInfo,
     command: ExplorationCommand,
-  ): Promise<ExplorationStateInfo> {
+  ): Promise<ExplorationInfo> {
     console.log("initialize")
     const newStateInfo = JSON.parse(JSON.stringify(prevStateInfo));
     switch (command.type) {
@@ -33,7 +33,7 @@ class ExplorationCommandResolver {
   }
 
   getParameterValue<T>(
-    stateInfo: ExplorationStateInfo,
+    stateInfo: ExplorationInfo,
     parameter: ParameterType,
     key?: ParameterKey,
   ): T {
@@ -46,7 +46,7 @@ class ExplorationCommandResolver {
   }
 
   setParameterValue(
-    stateInfo: ExplorationStateInfo,
+    stateInfo: ExplorationInfo,
     value: any,
     parameter: ParameterType,
     key?: ParameterKey,
@@ -66,7 +66,7 @@ class ExplorationCommandResolver {
     }
   }
 
-  getMode(stateInfo: ExplorationStateInfo): ExplorationMode {
+  getMode(stateInfo: ExplorationInfo): ExplorationMode {
     switch (stateInfo.type) {
       case ExplorationType.B_Day:
       case ExplorationType.B_Ovrvw:
