@@ -25,6 +25,13 @@ export interface FitbitSleepQueryResult {
   }>;
 }
 
+export interface FitbitDailyActivityStepsQueryResult{
+  "activities-steps": Array<{
+    dateTime: string,
+    value: string
+  }>
+}
+
 /*
 {
       "dateOfSleep": "2019-10-18",

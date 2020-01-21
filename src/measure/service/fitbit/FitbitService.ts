@@ -1,15 +1,14 @@
 import {DataService, UnSupportedReason} from '../DataService';
-import {FitbitStepMeasure} from './FitbitStepMeasure';
-import {FitbitHeartRateMeasure} from './FitbitHeartRateMeasure';
 import {AsyncStorageHelper} from '../../../system/AsyncStorageHelper';
 import {refresh, authorize, revoke} from 'react-native-app-auth';
-import {FitbitSleepMeasure} from './FitbitSleepMeasure';
-import {FitbitWeightMeasure} from './FitbitWeightMeasure';
-import {FitbitWorkoutMeasure} from './FitbitWorkoutMeasure';
-import { Moment } from 'moment';
-import { FitbitUserProfile } from './types';
+import {Moment} from 'moment';
+import {FitbitUserProfile} from './types';
+import {DataSourceType} from '../../DataSourceSpec';
+import {DataLevel, IDatumBase} from '../../../database/types';
+import { format } from 'date-fns';
+import { FitbitDailyStepMeasure } from './FitbitDailyStepMeasure';
 
-type TimeLike = Date|number|string|Moment
+type TimeLike = Date | number | string | Moment;
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -17,10 +16,13 @@ interface FitbitCredential {
   readonly redirect_uri: string;
 }
 
-const FITBIT_DATE_FORMAT = 'YYYY-MM-DD';
+export const FITBIT_DATE_FORMAT = 'yyyy-MM-dd';
 
-const FITBIT_ACTIVITY_SUMMARY_URL = "https://api.fitbit.com/1/user/-/activities/date/{date}.json"
+const FITBIT_ACTIVITY_SUMMARY_URL =
+  'https://api.fitbit.com/1/user/-/activities/date/{date}.json';
 const FITBIT_INTRADAY_ACTIVITY_API_URL = `https://api.fitbit.com/1/user/-/{resourcePath}/date/{date}/1d/15min/time/{startTime}/{endTime}.json`;
+const FITBIT_DAY_LEVEL_ACTIVITY_API_URL = `https://api.fitbit.com/1/user/-/{resourcePath}/date/{startDate}/{endDate}.json`;
+
 const FITBIT_SLEEP_LOGS_URL =
   'https://api.fitbit.com/1.2/user/-/sleep/date/{startDate}/{endDate}.json';
 const FITBIT_WEIGHT_LOGS_URL =
@@ -29,8 +31,7 @@ const FITBIT_WEIGHT_LOGS_URL =
 const FITBIT_HEARTRATE_LOGS_URL =
   'https://api.fitbit.com/1/user/-/activities/heart/date/{date}/1d/1min/time/{startTime}/{endTime}.json';
 
-
-const FITBIT_PROFILE_URL = "https://api.fitbit.com/1/user/-/profile.json"
+const FITBIT_PROFILE_URL = 'https://api.fitbit.com/1/user/-/profile.json';
 
 /**
  *
@@ -52,7 +53,10 @@ export function makeFitbitIntradayActivityApiUrl(
   });
 }
 
-export function makeFitbitSleepApiUrl(startDate: TimeLike, endDate: TimeLike): string {
+export function makeFitbitSleepApiUrl(
+  startDate: TimeLike,
+  endDate: TimeLike,
+): string {
   const moment = require('moment');
   const stringFormat = require('string-format');
   return stringFormat(FITBIT_SLEEP_LOGS_URL, {
@@ -61,7 +65,10 @@ export function makeFitbitSleepApiUrl(startDate: TimeLike, endDate: TimeLike): s
   });
 }
 
-export function makeFitbitWeightApiUrl(startDate: TimeLike, endDate: TimeLike): string {
+export function makeFitbitWeightApiUrl(
+  startDate: TimeLike,
+  endDate: TimeLike,
+): string {
   const moment = require('moment');
   const stringFormat = require('string-format');
   return stringFormat(FITBIT_WEIGHT_LOGS_URL, {
@@ -70,31 +77,38 @@ export function makeFitbitWeightApiUrl(startDate: TimeLike, endDate: TimeLike): 
   });
 }
 
-export function makeFitbitHeartRateIntradayUrl(
-  date: TimeLike
-): string {
+export function makeFitbitHeartRateIntradayUrl(date: TimeLike): string {
   const moment = require('moment');
   const stringFormat = require('string-format');
   return stringFormat(FITBIT_HEARTRATE_LOGS_URL, {
     date: moment(date).format(FITBIT_DATE_FORMAT),
-    startTime: "00:00",
-    endTime: "23:59",
+    startTime: '00:00',
+    endTime: '23:59',
   });
 }
 
-export function makeFitbitDailyActivitySummaryUrl(date: TimeLike): string{
+export function makeFitbitDailyActivitySummaryUrl(date: TimeLike): string {
   const moment = require('moment');
   const stringFormat = require('string-format');
   return stringFormat(FITBIT_ACTIVITY_SUMMARY_URL, {
-    date: moment(date).format(FITBIT_DATE_FORMAT)
+    date: moment(date).format(FITBIT_DATE_FORMAT),
+  });
+}
+
+export function makeFitbitDayLevelActivityLogsUrl(resourcePath: string, startDate: Date, endDate: Date): string {
+  const stringFormat = require('string-format');
+  return stringFormat(FITBIT_DAY_LEVEL_ACTIVITY_API_URL, {
+    resourcePath,
+    startDate: format(startDate, FITBIT_DATE_FORMAT),
+    endDate: format(endDate, FITBIT_DATE_FORMAT)
   })
 }
 
 const STORAGE_KEY_AUTH_STATE = DataService.STORAGE_PREFIX + 'fitbit:state';
-const STORAGE_KEY_USER_TIMEZONE = DataService.STORAGE_PREFIX + "fitbit:user_timezone"
-const STORAGE_KEY_AUTH_CURRENT_SCOPES =
-  DataService.STORAGE_PREFIX + 'fitbit:scopes';
+const STORAGE_KEY_USER_TIMEZONE =
+  DataService.STORAGE_PREFIX + 'fitbit:user_timezone';
 
+/*
 async function registerScopeAndGet(scope: string): Promise<Array<string>> {
   const currentScopes = await AsyncStorageHelper.getObject(
     STORAGE_KEY_AUTH_CURRENT_SCOPES,
@@ -140,7 +154,7 @@ async function revokeScopeAndGet(
   } else {
     return {removed: false, result: []};
   }
-}
+}*/
 
 export class FitbitService extends DataService {
   key: string = 'fitbit';
@@ -148,30 +162,43 @@ export class FitbitService extends DataService {
   description: string = 'Fitbit Fitness Tracker';
   thumbnail = require('../../../../assets/images/services/service_fitbit.jpg');
 
-  supportedMeasures = [
-    new FitbitStepMeasure(this),
-    new FitbitHeartRateMeasure(this),
-    new FitbitSleepMeasure(this),
-    new FitbitWeightMeasure(this),
-    new FitbitWorkoutMeasure(this),
-  ];
-
   private _credential: FitbitCredential = null;
-  private _authConfigBase = null;
+  private _authConfig = null;
+
   get credential(): FitbitCredential {
     return this._credential;
   }
 
-  private async makeConfig(scope: string=null): Promise<any> {
-    const scopes = scope? await registerScopeAndGet(scope) : (await AsyncStorageHelper.getObject(
-      STORAGE_KEY_AUTH_CURRENT_SCOPES,
-    )) as Array<string>;
-    if(scopes.indexOf("profile") === -1){
-      scopes.push("profile")
+  isDataSourceSupported(dataSource: DataSourceType): boolean {
+    return true;
+  }
+
+  protected fetchDataImpl(
+    dataSource: DataSourceType,
+    level: DataLevel,
+    from: Date,
+    to: Date,
+  ): Promise<IDatumBase[]> {
+    switch (dataSource) {
+      case DataSourceType.StepCount:
+        if(level === DataLevel.DailyActivity){
+          const measure = new FitbitDailyStepMeasure(this)
+          return measure.fetchData(from, to)
+        }else{
+
+        }
+        break;
+      case DataSourceType.HeartRate:
+        break;
+      case DataSourceType.HoursSlept:
+        break;
+      case DataSourceType.SleepRange:
+        break;
+      case DataSourceType.Weight:
+        break;
     }
-    const copiedConfig = JSON.parse(JSON.stringify(this._authConfigBase));
-    copiedConfig.scopes = scopes;
-    return copiedConfig;
+
+    return null;
   }
 
   async checkTokenValid(): Promise<boolean> {
@@ -182,11 +209,11 @@ export class FitbitService extends DataService {
     );
   }
 
-  async authenticate(scope: string=null): Promise<string> {
+  async authenticate(): Promise<string> {
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
     if (state) {
       try {
-        const newState = await refresh(await this.makeConfig(scope), {
+        const newState = await refresh(this._authConfig, {
           refreshToken: state.refreshToken,
         });
         if (newState) {
@@ -199,7 +226,7 @@ export class FitbitService extends DataService {
     }
 
     try {
-      const newState = await authorize(await this.makeConfig(scope));
+      const newState = await authorize(this._authConfig);
       if (newState) {
         await AsyncStorageHelper.set(STORAGE_KEY_AUTH_STATE, newState);
         return newState.accessToken;
@@ -212,14 +239,38 @@ export class FitbitService extends DataService {
   }
 
   async signOut(): Promise<void> {
+    console.log("try fitbit sign out")
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
     if (state) {
-      await revoke(this._authConfigBase, {tokenToRevoke: state.refreshToken});
+      await revoke(this._authConfig, {tokenToRevoke: state.refreshToken, includeBasicAuth: true} as any);
       await AsyncStorageHelper.remove(STORAGE_KEY_AUTH_STATE);
-      await AsyncStorageHelper.remove(STORAGE_KEY_USER_TIMEZONE)
+      await AsyncStorageHelper.remove(STORAGE_KEY_USER_TIMEZONE);
     }
   }
 
+  async activateInSystem(): Promise<boolean> {
+    try {
+      const accessToken = await this.authenticate();
+      if (accessToken != null) {
+        return true;
+      } else return false;
+    } catch (ex) {
+      console.log(ex);
+      return false;
+    }
+  }
+
+  async deactivatedInSystem(): Promise<boolean> {
+    try {
+      await this.signOut();
+      return true;
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
+  }
+
+  /*
   async revokeScope(scope: string): Promise<boolean> {
     const scopeRevokeResult = await revokeScopeAndGet(scope);
     if (scopeRevokeResult.removed === true) {
@@ -253,49 +304,67 @@ export class FitbitService extends DataService {
       }
     }
     return true;
+  }*/
+
+  async updateUserProfile(): Promise<boolean> {
+    return this.fetchFitbitQuery(FITBIT_PROFILE_URL).then(
+      (profile: FitbitUserProfile) => {
+        if (profile != null) {
+          return AsyncStorageHelper.set(
+            STORAGE_KEY_USER_TIMEZONE,
+            profile.user.timezone,
+          ).then(() => true);
+        } else return false;
+      },
+    );
   }
 
-  async updateUserProfile(): Promise<boolean>{
-    return this.fetchFitbitQuery(FITBIT_PROFILE_URL).then((profile: FitbitUserProfile) => {
-      if(profile != null){
-        return AsyncStorageHelper.set(STORAGE_KEY_USER_TIMEZONE, profile.user.timezone).then(()=>true)
-      }else return false
-    })
-  }
-
-  async getUserTimezone(): Promise<string>{
-    const cached = await AsyncStorageHelper.getString(STORAGE_KEY_USER_TIMEZONE)
-    if(cached){
-      return cached
-    }else{
-      const updated = await this.updateUserProfile()
-      if(updated===true){
-        return this.getUserTimezone()
-      }else return null
+  async getUserTimezone(): Promise<string> {
+    const cached = await AsyncStorageHelper.getString(
+      STORAGE_KEY_USER_TIMEZONE,
+    );
+    if (cached) {
+      return cached;
+    } else {
+      const updated = await this.updateUserProfile();
+      if (updated === true) {
+        return this.getUserTimezone();
+      } else return null;
     }
   }
 
   async fetchFitbitQuery(url: string): Promise<any> {
     console.log('fetch query for ', url);
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
+    var accessToken
+    if(state==null || state.accessToken == null){
+        accessToken = await this.authenticate()
+    }else accessToken = state.accessToken
+
+    console.log("accessToken: ", accessToken)
+
     return fetch(url, {
       method: 'GET',
       headers: {
         'Accept-Language': 'en_US',
-        Authorization: 'Bearer ' + state.accessToken,
+        Authorization: 'Bearer ' + accessToken,
         'Content-Type': 'application/json',
       },
-    }).then(async (result) => {
-      if(result.ok === false){
-        if(result.status === 401){
-          const json = await result.json()
-          if(json.errors[0].errorType === 'expired_token'){
-            console.log("Fitbit token is expired. refresh token and try once again.")
-            return this.authenticate().then(token => this.fetchFitbitQuery(url))
-          }else throw {error: "Access token invalid."}
-        }else throw {error: result.status}          
-      }else return result.json()
-    })
+    }).then(async result => {
+      if (result.ok === false) {
+        if (result.status === 401) {
+          const json = await result.json();
+          if (json.errors[0].errorType === 'expired_token') {
+            console.log(
+              'Fitbit token is expired. refresh token and try once again.',
+            );
+            return this.authenticate().then(token =>
+              this.fetchFitbitQuery(url),
+            );
+          } else throw {error: 'Access token invalid.'};
+        } else throw {error: result.status};
+      } else return result.json();
+    });
   }
 
   protected onCheckSupportedInSystem(): Promise<{
@@ -304,7 +373,8 @@ export class FitbitService extends DataService {
   }> {
     try {
       this._credential = require('../../../../credentials/fitbit.json');
-      this._authConfigBase = {
+      this._authConfig = {
+        scopes: ['profile', 'activity', 'weight', 'sleep', 'heartrate'],
         clientId: this._credential.client_id,
         clientSecret: this._credential.client_secret,
         redirectUrl: this._credential.redirect_uri,

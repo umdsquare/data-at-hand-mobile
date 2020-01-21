@@ -1,16 +1,15 @@
-import {measureService, MeasureSpecKey} from '../../../system/MeasureService';
-import {MeasureSpec} from '../../MeasureSpec';
 import {FitbitService, makeFitbitHeartRateIntradayUrl} from './FitbitService';
-import {FitbitMeasureBase} from './FitbitMeasureBase';
 import { IHeartRatePoint } from '../../../database/types';
 import { sequenceDays } from '../../../utils';
 import { FitbitIntradayHeartRateResult } from './types';
 import { toDate } from 'date-fns-tz';
+import { DataServiceMeasure } from '../DataService';
 
-export class FitbitHeartRateMeasure extends FitbitMeasureBase {
-  protected scope: string = 'heartrate';
-  spec: MeasureSpec = measureService.getSpec(MeasureSpecKey.heart);
-
+export class FitbitHeartRateMeasure extends DataServiceMeasure {
+  fetchData(startDate: Date, endDate: Date): Promise<import("../../../database/types").IDatumBase[]> {
+    throw new Error("Method not implemented.");
+  }
+  /*
   async fetchData(start: number, end: number): Promise<Array<IHeartRatePoint>> {
     const result: Array<FitbitIntradayHeartRateResult> = await Promise.all(sequenceDays(start, end).map(day => this.castedService<FitbitService>().fetchFitbitQuery(makeFitbitHeartRateIntradayUrl(day))))
     const timeZone = await this.castedService<FitbitService>().getUserTimezone()
@@ -30,5 +29,5 @@ export class FitbitHeartRateMeasure extends FitbitMeasureBase {
     })
 
     return convertedResult
-  }
+  }*/
 }

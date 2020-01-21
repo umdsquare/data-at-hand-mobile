@@ -24,6 +24,7 @@ import { theme } from './src/style/Theme';
 import { Platform, UIManager } from 'react-native';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { getHours } from 'date-fns';
+import { FitbitDailyStepMeasure } from './src/measure/service/fitbit/FitbitDailyStepMeasure';
 
 
 if (
@@ -60,6 +61,7 @@ class App extends React.Component<any, State> {
     const loadingStartTime = Date.now()
     //loading initial things
     const services = await DataServiceManager.getServicesSupportedInThisSystem()
+    
     const speechInstalled = await voiceDictator.install()
     if (speechInstalled === true) {
       const isAvailableInSystem = await voiceDictator.isAvailableInSystem()

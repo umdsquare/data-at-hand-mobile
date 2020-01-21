@@ -1,5 +1,5 @@
-import { MeasureSpec, MeasureType } from "../measure/MeasureSpec";
 import { MeasureModule, StepMeasureModule, WeightMeasureModule, HeartRateMeasureModule, SleepMeasureModule, WorkoutMeasureModule } from "../measure/MeasureModule";
+import { DataSourceSpec, DataSourceType, DataSourceCategory } from "../measure/DataSourceSpec";
 
 export const MeasureSpecKey = {
     step: "step",
@@ -9,67 +9,64 @@ export const MeasureSpecKey = {
     heart: "heart_rate"
 }
 
-class MeasureService {
+class DataSourceManager {
 
-  readonly supportedMeasureSpecs: ReadonlyArray<MeasureSpec> = [
+  readonly supportedDataSources: ReadonlyArray<DataSourceSpec> = [
     {
-      type: MeasureType.Bin,
-      nameKey: MeasureSpecKey.step,
-      name: 'Step Count',
-      description: 'The number of steps walked during a specific period',
+      type: DataSourceType.StepCount,
+      category: DataSourceCategory.Step,
+      name: "Step Count",
+      description: 'Step Count Walked',
+      icon: 'step'
     },
     {
-      type: MeasureType.Point,
-      nameKey: MeasureSpecKey.heart,
+      type: DataSourceType.HeartRate,
+      category: DataSourceCategory.HeartRate,
       name: 'Heart Rate',
       description:
         'Heart Rate BPM (Beats per Minute) measured at a specific moment',
+      icon: 'heartrate'
     },
     {
-      type: MeasureType.Point,
-      nameKey: MeasureSpecKey.weight,
+      type: DataSourceType.Weight,
+      category: DataSourceCategory.Weight,
       name: 'Weight',
       description: 'Body weight measured at a specific moment',
+      icon: 'weight'
     },
     {
-      type: MeasureType.Session,
-      nameKey: MeasureSpecKey.sleep,
-      name: 'Sleep',
-      description: 'A sleep session',
-    },/*
+      type: DataSourceType.HoursSlept,
+      category: DataSourceCategory.Sleep,
+      name: 'Hours Slept',
+      description: 'A length of sleep of the day',
+      icon: 'sleep'
+    },
+
     {
-      type: MeasureType.Session,
-      nameKey: MeasureSpecKey.workout,
-      name: 'Workout',
-      description: 'A workout session',
-    },*/
+      type: DataSourceType.SleepRange,
+      category: DataSourceCategory.Sleep,
+      name: 'Sleep Range',
+      description: "Bedtime and Wake time of the day\'s sleep",
+      icon: 'sleep'
+    }
   ];
 
-  private measureSpecMap: Map<string, MeasureSpec>;
+  private specMap: Map<string, DataSourceSpec>;
 
-  private measureModuleMap = new Map<string, MeasureModule<any>>();
+  private moduleMap = new Map<string, MeasureModule<any>>();
 
   constructor() {
-    this.measureSpecMap = new Map<string, MeasureSpec>();
-    this.supportedMeasureSpecs.forEach(spec => {
-      this.measureSpecMap[spec.nameKey] = spec;
+    this.specMap = new Map<string, DataSourceSpec>();
+    this.supportedDataSources.forEach(spec => {
+      this.specMap[spec.type] = spec;
     });
 
-    this.measureModuleMap.set(MeasureSpecKey.step, new StepMeasureModule())
-    this.measureModuleMap.set(MeasureSpecKey.weight, new WeightMeasureModule())
-    this.measureModuleMap.set(MeasureSpecKey.heart, new HeartRateMeasureModule())
-    this.measureModuleMap.set(MeasureSpecKey.sleep, new SleepMeasureModule())
-    //this.measureModuleMap.set(MeasureSpecKey.workout, new WorkoutMeasureModule())
   }
 
-  getSpec(key: string): MeasureSpec {
-    return this.measureSpecMap[key];
-  }
-
-  getMeasureModule(spec: MeasureSpec): MeasureModule<any> {
-    return this.measureModuleMap[spec.nameKey]
+  getSpec(key: string): DataSourceSpec {
+    return this.specMap[key];
   }
 }
 
-const measureService = new MeasureService()
-export { measureService }
+const dataSourceManager = new DataSourceManager()
+export { dataSourceManager }

@@ -1,5 +1,6 @@
-import {MeasureSpec} from '../MeasureSpec';
-import { IDatumBase } from '../../database/types';
+import { IDatumBase, DataLevel } from '../../database/types';
+import { DataSourceSpec, DataSourceType } from '../DataSourceSpec';
+import { isAfter, endOfDay, differenceInDays } from 'date-fns';
 
 export abstract class DataService {
   static readonly STORAGE_PREFIX = "@source_service:"
@@ -31,32 +32,32 @@ export abstract class DataService {
     reason?: UnSupportedReason;
   }>;
 
-  abstract readonly supportedMeasures: ReadonlyArray<DataMeasure>;
+  abstract isDataSourceSupported(dataSource: DataSourceType): boolean
 
-  getMeasureOfType(typeKey: string): DataMeasure {
-    return this.supportedMeasures.find(m => m.spec.type == typeKey);
+  fetchData(dataSource: DataSourceType, level: DataLevel, from: Date, to: Date): Promise<Array<IDatumBase>>{
+    const endOfToday = endOfDay(new Date())
+    if(differenceInDays(endOfToday, from) < 0){
+      return Promise.resolve([])
+    }else{
+      const clampedTo = differenceInDays(endOfToday, to) > 0? to : endOfToday
+      return this.fetchDataImpl(dataSource, level, from, clampedTo)
+    }
   }
 
-  getMeasureOfSpec(spec: MeasureSpec): DataMeasure {
-    return this.supportedMeasures.find(m => m.spec.nameKey === spec.nameKey);
-  }
-}
-
-export abstract class DataMeasure {
-  abstract readonly spec: MeasureSpec;
-
-  get code(): string{ return this.source.key + ":" + this.spec.nameKey}
-
-  protected castedService<T extends DataService>(): T {
-    return this.source as T;
-  }
-
-  constructor(readonly source: DataService) {}
+  protected abstract fetchDataImpl(dataSource: DataSourceType, level: DataLevel, from: Date, to: Date): Promise<Array<IDatumBase>>
 
   abstract async activateInSystem(): Promise<boolean>
   abstract async deactivatedInSystem(): Promise<boolean>
+
+}
+
+export abstract class DataServiceMeasure{
+
+  constructor(readonly source: DataService) {}
+
+  castedService<T extends DataService>(): T{ return this.source as T}
   
-  abstract fetchData(start: number, end: number): Promise<Array<IDatumBase>>
+  abstract fetchData(startDate: Date, endDate: Date): Promise<Array<IDatumBase>>
 }
 
 export enum UnSupportedReason {

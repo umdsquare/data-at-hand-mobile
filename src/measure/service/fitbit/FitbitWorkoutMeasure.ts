@@ -1,6 +1,3 @@
-import {FitbitMeasureBase} from './FitbitMeasureBase';
-import {MeasureSpec} from '../../MeasureSpec';
-import {measureService, MeasureSpecKey} from '../../../system/MeasureService';
 import {IWorkoutSession, IDatumBase} from '../../../database/types';
 import {FitbitService, makeFitbitDailyActivitySummaryUrl} from './FitbitService';
 import {sequenceDays} from '../../../utils';

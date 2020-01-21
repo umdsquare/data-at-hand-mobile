@@ -1,6 +1,3 @@
-import {FitbitMeasureBase} from './FitbitMeasureBase';
-import {MeasureSpec} from '../../MeasureSpec';
-import {measureService, MeasureSpecKey} from '../../../system/MeasureService';
 import {IDatumBase, IWeightPoint} from '../../../database/types';
 import { FitbitService, makeFitbitWeightApiUrl } from './FitbitService';
 import { FitbitWeightQueryResult } from './types';

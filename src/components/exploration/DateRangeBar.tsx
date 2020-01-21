@@ -254,10 +254,10 @@ export class DateRangeBar extends React.Component<Props, State> {
                     }
                     break;
                 case 'from':
-                    modalPickerView = <DatePicker selectedDay={this.state.from} earliedPossibleDay={undefined} latestPossibleDay={this.state.to} onDayPress={this.setFromDate} ghostRange={[this.state.from, this.state.to]} />
+                    modalPickerView = <DatePicker selectedDay={this.state.from} earliedPossibleDay={undefined} latestPossibleDay={subDays(this.state.to, 1)} onDayPress={this.setFromDate} ghostRange={[this.state.from, this.state.to]} />
                     break;
                 case 'to':
-                    modalPickerView = <DatePicker selectedDay={this.state.to} earliedPossibleDay={this.state.from} latestPossibleDay={undefined} onDayPress={this.setToDate} ghostRange={[this.state.from, this.state.to]} />
+                    modalPickerView = <DatePicker selectedDay={this.state.to} earliedPossibleDay={addDays(this.state.from, 1)} latestPossibleDay={undefined} onDayPress={this.setToDate} ghostRange={[this.state.from, this.state.to]} />
                     break;
             }
         }

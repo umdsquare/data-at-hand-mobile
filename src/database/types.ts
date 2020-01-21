@@ -1,7 +1,16 @@
+export enum DataLevel{
+    IntraDay="intra",
+    DailyActivity = "dailyActivity"
+}
+
 export interface IDatumBase{
     value: number,
-    measureCode: string,
     subjectToChange: boolean,
+}
+
+export interface DailySummaryDatum extends IDatumBase{
+    date: Date,
+    timeZone?: string
 }
 
 export interface IPointDatum extends IDatumBase{

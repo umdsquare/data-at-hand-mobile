@@ -1,7 +1,7 @@
 import React from "react";
 import { PropsWithNavigation } from "../../../PropsWithNavigation";
 import { View, Text, StyleSheet, StatusBar, TouchableHighlight } from "react-native";
-import { MeasureUnitType } from "../../../measure/MeasureSpec";
+import { MeasureUnitType } from "../../../measure/DataSourceSpec";
 import { Dispatch } from "redux";
 import { ReduxAppState } from "../../../state/types";
 import { connect } from "react-redux";

@@ -1,5 +1,4 @@
 import { IDatumBase } from "../../database/types";
-import { VisualizationSchema } from "../visualization/types";
 import { startOfDay, subDays, endOfDay } from "date-fns";
 
 
@@ -42,16 +41,4 @@ export function makeInitialStateInfo(): ExplorationStateInfo{
         values: [{parameter: ParameterType.Range, value: [subDays(now, 7).toString(), endOfDay(now).toString()]}],
         payload: null
     }
-}
-
-export interface VisualizationPayload{
-    visualizationSchema: VisualizationSchema
-}
-
-export function isVisualizationPayload(obj: any): boolean{
-    return 'visualizationSchema' in obj
-}
-
-export interface DefaultChartPayload extends VisualizationPayload{
-    measureCode: string,
 }

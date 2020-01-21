@@ -12,6 +12,10 @@ import { generateHeaderView } from "./parts/header";
 import { ExplorationCommand } from "../../../core/interaction/commands";
 import { BottomBar } from "../../exploration/BottomBar";
 import { explorationCommandResolver } from "../../../core/interaction/ExplorationCommandResolver";
+import { DataServiceManager } from "../../../system/DataServiceManager";
+import { DataSourceType } from "../../../measure/DataSourceSpec";
+import { ParameterType } from "../../../core/interaction/types";
+import { DataLevel } from "../../../database/types";
 
 const styles = StyleSheet.create({
 
@@ -28,7 +32,8 @@ const styles = StyleSheet.create({
 
 export interface ExplorationProps extends PropsWithNavigation {
     explorationState: ExplorationState,
-    dispatchCommand: (command: ExplorationCommand)=>void
+    selectedServiceKey: string,
+    dispatchCommand: (command: ExplorationCommand) => void
 }
 
 interface State {
@@ -37,23 +42,38 @@ interface State {
 
 class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
-/*
- <View style={{ padding: 12, flexDirection: 'row' }}>
-                        <Text style={{ flex: 1 }}>Browse</Text>
-                        <Button onPress={() => {
-                            this.props.navigation.navigate("Settings")
-                        }}></Button>
-                    </View>
+    /*
+     <View style={{ padding: 12, flexDirection: 'row' }}>
+                            <Text style={{ flex: 1 }}>Browse</Text>
+                            <Button onPress={() => {
+                                this.props.navigation.navigate("Settings")
+                            }}></Button>
+                        </View>
+    
+                        <CategoricalRow title="DataSource" showBorder = {true} value="Step Count" icon={<DataSourceIcon type="step" color="white" size={20}/>}/>
+                        <CategoricalRow title="Comparison Type" showBorder = {false} value="Two Date Ranges"/>
+    
+                        <DateRangeBar from={startOfMonth(new Date())} to={endOfMonth(new Date())} onRangeChanged={(from, to) => {
+                            console.log("set to ", from, to)
+                        }} />
+    */
 
-                    <CategoricalRow title="DataSource" showBorder = {true} value="Step Count" icon={<DataSourceIcon type="step" color="white" size={20}/>}/>
-                    <CategoricalRow title="Comparison Type" showBorder = {false} value="Two Date Ranges"/>
-
-                    <DateRangeBar from={startOfMonth(new Date())} to={endOfMonth(new Date())} onRangeChanged={(from, to) => {
-                        console.log("set to ", from, to)
-                    }} />
-*/
+    componentDidMount(){
+        if(this.props.selectedServiceKey){
+            DataServiceManager.getServiceByKey(this.props.selectedServiceKey).activateInSystem().then(success => {
+                console.log("activated ", this.props.selectedServiceKey, "successfully.")
+            }).catch(error => {
+                console.log("service activation error: ", this.props.selectedServiceKey, error)
+            })
+        }
+    }
+    componentDidUpdate() {
+       // const range = explorationCommandResolver.getParameterValue(this.props.explorationState.info, ParameterType.Range)
+       // DataServiceManager.getServiceByKey('fitbit').fetchData(DataSourceType.StepCount, DataLevel.DailyActivity, new Date(range[0]), new Date(range[1]))
+    }
 
     render() {
+
         return <View style={StyleTemplates.screenDefaultStyle}>
             <StatusBar barStyle="light-content" backgroundColor={Colors.headerBackground} />
             <View style={styles.headerContainerStyle}>
@@ -65,7 +85,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
             </View>
 
-            <BottomBar mode={explorationCommandResolver.getMode(this.props.explorationState.info)}/>
+            <BottomBar mode={explorationCommandResolver.getMode(this.props.explorationState.info)} />
 
         </View>
     }
@@ -83,9 +103,10 @@ function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Expl
 function mapStateToProps(appState: ReduxAppState, ownProps: ExplorationProps): ExplorationProps {
     return {
         ...ownProps,
-        explorationState: appState.explorationState
+        explorationState: appState.explorationState,
+        selectedServiceKey: appState.settingsState.serviceKey
     }
 }
 
 const explorationScreen = connect(mapStateToProps, mapDispatchToProps)(ExplorationScreen)
-export {explorationScreen as ExplorationScreen}
+export { explorationScreen as ExplorationScreen }

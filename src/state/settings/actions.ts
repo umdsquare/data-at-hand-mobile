@@ -1,5 +1,5 @@
 import { ActionTypeBase } from "../types";
-import { MeasureUnitType } from "../../measure/MeasureSpec";
+import { MeasureUnitType } from "../../measure/DataSourceSpec";
 
 //========================================
 

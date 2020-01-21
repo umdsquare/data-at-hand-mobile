@@ -56,9 +56,23 @@ class ServiceSelectionScreen extends React.Component<Prop, State>{
                                 }
                                 source={service}
                                 onSelected={
-                                    ()=>{   
-                                        this.props.selectService(service.key)
-                                        this.props.navigation.goBack()
+                                    () => {
+                                        if (this.props.selectedServiceKey != service.key) {
+                                            DataServiceManager.getServiceByKey(service.key).activateInSystem().then(success => {
+                                                if (success === true) {
+                                                    return DataServiceManager.getServiceByKey(this.props.selectedServiceKey)
+                                                        .deactivatedInSystem().then(deactivated => {
+                                                            this.props.selectService(service.key)
+                                                            this.props.navigation.goBack()
+                                                        }).catch(err => {
+                                                            this.props.selectService(service.key)
+                                                            this.props.navigation.goBack()
+                                                        })
+                                                }
+                                            }).catch(err => {
+                                                console.error("Failed to sign in to ", service.key, err)
+                                            })
+                                        }
                                     }
                                 } />)
                     }

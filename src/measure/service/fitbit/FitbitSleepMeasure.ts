@@ -1,15 +1,11 @@
-import {MeasureSpec} from '../../MeasureSpec';
-import {measureService, MeasureSpecKey} from '../../../system/MeasureService';
-import {FitbitMeasureBase} from './FitbitMeasureBase';
 import { IDatumBase, ISleepSession } from '../../../database/types';
 import { FitbitService, makeFitbitSleepApiUrl } from './FitbitService';
 import { FitbitSleepQueryResult } from './types';
 import { toDate } from 'date-fns-tz'
+import { DataServiceMeasure } from '../DataService';
 
-export class FitbitSleepMeasure extends FitbitMeasureBase {
-  protected scope: string = 'sleep';
-  spec: MeasureSpec = measureService.getSpec(MeasureSpecKey.sleep);
-
+export class FitbitSleepMeasure extends DataServiceMeasure {
+/*
   async fetchData(start: number, end: number): Promise<IDatumBase[]> {
     const result: FitbitSleepQueryResult = await this.castedService<FitbitService>().fetchFitbitQuery(makeFitbitSleepApiUrl(start, end))
     const fitbitTimezone = await this.castedService<FitbitService>().getUserTimezone()
@@ -23,5 +19,5 @@ export class FitbitSleepMeasure extends FitbitMeasureBase {
         subjectToChange: false
       } as ISleepSession
     })
-  }
+  }*/
 }

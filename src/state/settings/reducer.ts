@@ -4,7 +4,7 @@ import {
   SetServiceAction,
   SetUnitTypeAction,
 } from './actions';
-import {MeasureUnitType} from '../../measure/MeasureSpec';
+import {MeasureUnitType} from '../../measure/DataSourceSpec';
 
 export interface SettingsState {
   serviceKey: string,
