@@ -1,16 +1,17 @@
 import React from 'react';
-import { ExplorationType, ParameterKey, ParameterType } from "../../../../core/interaction/types";
+import { ExplorationType, ParameterKey, ParameterType } from "../../../../core/exploration/types";
 import { SafeAreaView, View, Text, StyleSheet } from 'react-native';
 import { CategoricalRow } from '../../../exploration/CategoricalRow';
 import { DataSourceIcon } from '../../../common/DataSourceIcon';
 import { ExplorationProps } from '../ExplorationScreen';
 import { DateRangeBar } from '../../../exploration/DateRangeBar';
-import { explorationCommandResolver } from '../../../../core/interaction/ExplorationCommandResolver';
+import { explorationCommandResolver } from '../../../../core/exploration/ExplorationCommandResolver';
 import { startOfDay, endOfDay } from 'date-fns';
-import { createSetRangeCommand } from '../../../../core/interaction/commands';
+import { createSetRangeCommand } from '../../../../core/exploration/commands';
 import { Button } from 'react-native-elements';
 import { Sizes } from '../../../../style/Sizes';
 import { StyleTemplates } from '../../../../style/Styles';
+import { DateTimeHelper } from '../../../../time';
 
 const titleBarOptionButtonIconInfo = {
     name: "ios-settings",
@@ -79,8 +80,8 @@ export function generateHeaderView(props: ExplorationProps): any {
 
 function generateRangeBar(props: ExplorationProps, key?: ParameterKey): any {
     const range = explorationCommandResolver.getParameterValue(props.explorationState.info, ParameterType.Range, key)
-    return <DateRangeBar from={range && startOfDay(new Date(range[0]))} to={range && endOfDay(new Date(range[1]))} onRangeChanged={(from, to) => {
-        props.dispatchCommand(createSetRangeCommand([from, to], key))
+    return <DateRangeBar from={range && startOfDay(DateTimeHelper.toDate(range[0]))} to={range && endOfDay(DateTimeHelper.toDate(range[1]))} onRangeChanged={(from, to) => {
+        props.dispatchCommand(createSetRangeCommand([DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to)], key))
     }} />
 }
 

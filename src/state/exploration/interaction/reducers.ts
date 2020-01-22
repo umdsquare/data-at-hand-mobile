@@ -1,12 +1,12 @@
 import {
   ExplorationInfo,
   makeInitialStateInfo,
-} from '../../core/interaction/types';
-import {ActionTypeBase, ReduxAppState} from '../types';
+} from '../../../core/exploration/types';
+import {ActionTypeBase, ReduxAppState} from '../../types';
 import {Dispatch} from 'redux';
 import {ExplorationStateActionTypes, FinishStateTransition} from './actions';
-import {explorationCommandResolver} from '../../core/interaction/ExplorationCommandResolver';
-import {ExplorationCommand} from '../../core/interaction/commands';
+import {explorationCommandResolver} from '../../../core/exploration/ExplorationCommandResolver';
+import {ExplorationCommand} from '../../../core/exploration/commands';
 
 export interface ExplorationState {
   info: ExplorationInfo;

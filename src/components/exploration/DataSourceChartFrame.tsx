@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import Colors from '../../style/Colors';
 import { Sizes } from '../../style/Sizes';
 import { DataSourceIcon } from '../common/DataSourceIcon';
+import { DataSourceType } from '../../measure/DataSourceSpec';
+import { dataSourceManager } from '../../system/DataSourceManager';
 
 const lightTextColor = "#8b8b8b"
 
@@ -10,7 +12,7 @@ const styles = StyleSheet.create({
     containerStyle: {
         backgroundColor: 'white',
         marginBottom: 12,
-        shadowOffset: {width: 0, height: 2},
+        shadowOffset: { width: 0, height: 2 },
         shadowRadius: 8,
         shadowColor: 'black',
         shadowOpacity: 0.07
@@ -75,25 +77,20 @@ const styles = StyleSheet.create({
 })
 
 export const DataSourceChartFrame = (props: {
-    iconType: 'step' | 'sleep' | 'weight' | 'heartrate',
-    iconColor: string,
-    title: string,
-    loadingTodayMeasure: boolean,
+    sourceType: DataSourceType,
     todayMeasureTitle?: string,
     todayMeasureValue?: Array<{ text: string, type: "unit" | "value" }>,
-    loadingStatistics: boolean,
-    statistics?: Array<{ label: string, value: string }>
+    statistics?: Array<{ label: string, valueText: string }>
 }) => {
+    const spec = dataSourceManager.getSpec(props.sourceType)
     return <View style={styles.containerStyle}>
         <View style={styles.headerStyle}>
             <View style={styles.iconContainerStyle}>
-                <DataSourceIcon size={18} type={props.iconType} color={props.iconColor} />
+                <DataSourceIcon size={18} type={props.sourceType} color={Colors.accent} />
             </View>
-            <Text style={styles.headerTitleStyle}>{props.title}</Text>
+            <Text style={styles.headerTitleStyle}>{spec.name}</Text>
             {
-                props.loadingTodayMeasure===true? 
-                <ActivityIndicator size="small" color={Colors.accent} /> :
-                <Text style={styles.headerDescriptionTextStyle}>
+                props.todayMeasureValue && <Text style={styles.headerDescriptionTextStyle}>
                     <Text>{(props.todayMeasureTitle || "Today") + ": "}</Text>
                     {
                         props.todayMeasureValue && props.todayMeasureValue.map(chunk => <Text style={chunk.type === 'unit' ? styles.todayUnitStyle : styles.todayValueStyle}>{chunk.text}</Text>)
@@ -105,17 +102,14 @@ export const DataSourceChartFrame = (props: {
             <Text>Chart Area</Text>
         </View>
 
-        <View style={styles.footerStyle}>
-            {
-                props.loadingStatistics ===true?
-                <ActivityIndicator size="small" color={Colors.accent} /> : (
-                props.statistics && props.statistics.map(stat => {
-                    <Text style={styles.statValueStyle}>
-                        <Text style={styles.statLabelStyle}>{stat.label + " "}</Text>
-                        <Text>{stat.value}</Text>
-                    </Text>
-                }))
-            }
+        <View style={styles.footerStyle}>{
+            props.statistics && props.statistics.map(stat => {
+                return <Text key={stat.label} style={styles.statValueStyle}>
+                    <Text style={styles.statLabelStyle}>{stat.label + " "}</Text>
+                    <Text>{stat.valueText}</Text>
+                </Text>
+            })
+        }
         </View>
 
     </View >

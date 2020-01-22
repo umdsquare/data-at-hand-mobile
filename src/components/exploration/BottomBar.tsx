@@ -6,7 +6,7 @@ import { StyleTemplates } from '../../style/Styles';
 import { SafeAreaConsumer } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { VoiceInputButton } from './VoiceInputButton';
-import { ExplorationMode } from '../../core/interaction/types';
+import { ExplorationMode } from '../../core/exploration/types';
 
 
 const bottomBarIconSize = 21
@@ -34,7 +34,8 @@ const Styles = StyleSheet.create({
         shadowColor: "#000",
         shadowOpacity: 0.1,
         textShadowOffset: { width: 0, height: -0.5 },
-        shadowRadius: 3
+        shadowRadius: 3,
+        overflow: "visible"
     },
 
     bottomBarInnerListStyle: {
@@ -65,7 +66,8 @@ const Styles = StyleSheet.create({
     bottomBarVoiceButtonContainerStyle: {
         position: 'absolute',
         top: -14,
-        left: Math.round((Dimensions.get('window').width- Sizes.speechInputButtonSize)/2)
+        left: Math.round((Dimensions.get('window').width- Sizes.speechInputButtonSize)/2),
+        zIndex: 80
     }
 })
 
@@ -78,7 +80,7 @@ interface Props{
 
 export class BottomBar extends React.Component<Props> {
     render() {
-        return <View style={Styles.bottomBarContainerStyle}>
+        return <View style={Styles.bottomBarContainerStyle} removeClippedSubviews={false}>
             <SafeAreaView style={Styles.bottomBarInnerListStyle}>
                 <BottomBarButton isOn={this.props.mode === 'browse'} title="Browse" icon={ExplorationMode.Browse} />
                 <BottomBarButton isOn={this.props.mode === 'compare'} title="Compare" icon={ExplorationMode.Compare} />
@@ -103,7 +105,7 @@ const BottomBarButton = (prop: { isOn: boolean, icon: ExplorationMode, title: st
                     left: 0,
                     right: 0,
                     top: 0
-                }}/>}<TouchableOpacity style={Styles.bottomBarButtonContainerStyle} onPress={()=>{console.log("haha")}}>
+                }}/>}<TouchableOpacity style={Styles.bottomBarButtonContainerStyle} onPress={()=>{}}>
                 
                 {
                     prop.icon == 'compare' && <Svg width={bottomBarIconSize} height={bottomBarIconSize} viewBox="0 0 153.04 193.85">

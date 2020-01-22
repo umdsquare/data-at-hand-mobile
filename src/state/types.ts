@@ -1,10 +1,13 @@
 import { SettingsState } from "./settings/reducer";
 import { Dispatch } from "redux";
-import { ExplorationState } from "./exploration-interaction/reducers";
+import { ExplorationState } from "./exploration/interaction/reducers";
+import { ExplorationDataState } from "./exploration/data/reducers";
+
 
 export type ReduxAppState = {
     settingsState: SettingsState,
-    explorationState: ExplorationState
+    explorationState: ExplorationState,
+    explorationDataState: ExplorationDataState
 }
 
 export interface ActionTypeBase{

@@ -8,16 +8,16 @@ export enum ExplorationCommandType{
 }
 
 export interface SetRangeCommand extends ActionTypeBase{
-    range: [String, String],
+    range: [number, number],
     key?: string
 }
 
 export type ExplorationCommand = SetRangeCommand
 
-export function createSetRangeCommand(range: [Date, Date], key?: string): SetRangeCommand{
+export function createSetRangeCommand(numberedDateRange: [number, number], key?: string): SetRangeCommand{
     return {
         type: ExplorationCommandType.SetRange,
-        range: [range[0].toString(), range[1].toString()],
+        range: numberedDateRange,
         key
     }
 }

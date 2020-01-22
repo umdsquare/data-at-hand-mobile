@@ -1,5 +1,5 @@
-import { ActionTypeBase } from "../types";
-import { ExplorationInfo } from "../../core/interaction/types";
+import { ActionTypeBase } from "../../types";
+import { ExplorationInfo } from "../../../core/exploration/types";
 
 export enum ExplorationStateActionTypes {
     StartStateTransition="exploration:interaction:start_state_transition",

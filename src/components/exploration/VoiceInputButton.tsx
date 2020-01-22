@@ -75,7 +75,7 @@ export class VoiceInputButton extends React.PureComponent<Props, State> {
                 shadowOffset: { width: 0, height: 5 },
                 shadowRadius: 4,
                 shadowOpacity: 0.3,
-                elevation: 3,
+                elevation: 5,
                 opacity: this.props.isBusy === true ? 0.8 : 1,
                 marginTop: this.state.isPressed === true? 5: 0
             }}>

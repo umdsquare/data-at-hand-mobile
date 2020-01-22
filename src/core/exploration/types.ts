@@ -1,5 +1,6 @@
 import { IDatumBase } from "../../database/types";
 import { startOfDay, subDays, endOfDay } from "date-fns";
+import { DateTimeHelper } from "../../time";
 
 
 export enum ExplorationType{
@@ -28,7 +29,6 @@ export type ParameterKey = "range1"|"range2"|"pivot"
 
 export interface ExplorationInfo{
     type: ExplorationType
-    pointing: boolean
     values: Array<{parameter: ParameterType, key?: ParameterKey, value: any}>
     pointingInfo: any
 }
@@ -37,8 +37,7 @@ export function makeInitialStateInfo(): ExplorationInfo{
     const now = startOfDay(new Date())
     return{
         type: ExplorationType.B_Ovrvw,
-        pointing: false,
-        values: [{parameter: ParameterType.Range, value: [subDays(now, 7).toString(), endOfDay(now).toString()]}],
+        values: [{parameter: ParameterType.Range, value: [DateTimeHelper.toNumberedDateFromDate(subDays(now, 7)), DateTimeHelper.toNumberedDateFromDate(endOfDay(now))]}],
         pointingInfo: null
     }
 }

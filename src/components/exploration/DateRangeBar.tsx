@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Text, SafeAreaView } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import Colors from "../../style/Colors";
 import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
 import { Sizes } from "../../style/Sizes";
@@ -11,6 +11,7 @@ import GestureRecognizer from 'react-native-swipe-gestures';
 import Modal from "react-native-modal";
 import { StyleTemplates } from "../../style/Styles";
 import { DatePicker, WeekPicker, MonthPicker } from "../common/CalendarPickers";
+import { SafeAreaConsumer } from "react-native-safe-area-context";
 
 const dateButtonWidth = 140
 const barHeight = 60
@@ -109,7 +110,7 @@ interface State {
     isBottomSheetOpen?: boolean
 }
 
-export class DateRangeBar extends React.Component<Props, State> {
+export class DateRangeBar extends React.PureComponent<Props, State> {
 
     static deriveState(from: Date, to: Date, prevState: State): State {
         const numDays = -differenceInCalendarDays(from, to) + 1
@@ -194,7 +195,7 @@ export class DateRangeBar extends React.Component<Props, State> {
         if (this.state.level !== 'month') {
             from = subDays(this.state.from, this.state.numDays)
             to = subDays(this.state.to, this.state.numDays)
-        }else {
+        } else {
             const lastMonthFirst = subMonths(this.state.from, 1)
             const lastMonthLast = endOfMonth(lastMonthFirst)
             from = lastMonthFirst
@@ -218,7 +219,7 @@ export class DateRangeBar extends React.Component<Props, State> {
             { ...this.state, isBottomSheetOpen: false, clickedElementType: null }
         ))
 
-        if(this.props.onRangeChanged){
+        if (this.props.onRangeChanged) {
             this.props.onRangeChanged(startOfDay(from), endOfDay(to))
         }
     }
@@ -236,8 +237,13 @@ export class DateRangeBar extends React.Component<Props, State> {
         this.setRange(startOfMonth(monthDate), endOfMonth(monthDate))
     }
 
+    componentDidUpdate() {
+    }
 
     render() {
+
+
+        console.log("Range bar rendered")
 
         var modalPickerView
         if (this.state.clickedElementType) {
@@ -286,13 +292,14 @@ export class DateRangeBar extends React.Component<Props, State> {
                 style={StyleTemplates.bottomSheetModalContainerStyle}
                 backdropOpacity={0.3}
             >
-                <View style={StyleTemplates.bottomSheetModalViewStyle}>
-                    <SafeAreaView>
-                        {
-                            modalPickerView
-                        }
-                    </SafeAreaView>
-                </View>
+                <SafeAreaConsumer>{
+                    inset =>
+                        <View style={{...StyleTemplates.bottomSheetModalViewStyle, paddingBottom: Math.max(20, inset.bottom)}}>
+                            {
+                                modalPickerView
+                            }
+                        </View>
+                }</SafeAreaConsumer>
             </Modal>
 
         </GestureRecognizer>

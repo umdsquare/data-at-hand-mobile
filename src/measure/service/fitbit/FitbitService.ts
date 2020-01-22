@@ -300,8 +300,6 @@ export class FitbitService extends DataService {
         accessToken = await this.authenticate()
     }else accessToken = state.accessToken
 
-    console.log("accessToken: ", accessToken)
-
     return fetch(url, {
       method: 'GET',
       headers: {

@@ -1,13 +1,6 @@
 import { MeasureModule, StepMeasureModule, WeightMeasureModule, HeartRateMeasureModule, SleepMeasureModule, WorkoutMeasureModule } from "../measure/MeasureModule";
 import { DataSourceSpec, DataSourceType, DataSourceCategory } from "../measure/DataSourceSpec";
 
-export const MeasureSpecKey = {
-    step: "step",
-    weight: "weight",
-    sleep: "sleep",
-    workout: "workout",
-    heart: "heart_rate"
-}
 
 class DataSourceManager {
 
@@ -22,11 +15,11 @@ class DataSourceManager {
     {
       type: DataSourceType.HeartRate,
       category: DataSourceCategory.HeartRate,
-      name: 'Heart Rate',
+      name: 'Resting Heart Rate',
       description:
         'Heart Rate BPM (Beats per Minute) measured at a specific moment',
       icon: 'heartrate'
-    },
+    },/*
     {
       type: DataSourceType.Weight,
       category: DataSourceCategory.Weight,
@@ -48,22 +41,22 @@ class DataSourceManager {
       name: 'Sleep Range',
       description: "Bedtime and Wake time of the day\'s sleep",
       icon: 'sleep'
-    }
+    }*/
   ];
 
-  private specMap: Map<string, DataSourceSpec>;
+  private specMap: Map<DataSourceType, DataSourceSpec>;
 
   private moduleMap = new Map<string, MeasureModule<any>>();
 
   constructor() {
-    this.specMap = new Map<string, DataSourceSpec>();
+    this.specMap = new Map<DataSourceType, DataSourceSpec>();
     this.supportedDataSources.forEach(spec => {
       this.specMap[spec.type] = spec;
     });
 
   }
 
-  getSpec(key: string): DataSourceSpec {
+  getSpec(key: DataSourceType): DataSourceSpec {
     return this.specMap[key];
   }
 }

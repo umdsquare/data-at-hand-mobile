@@ -1,6 +1,6 @@
 import { DataMeasure } from "../DataService";
 import { MeasureSpec } from "../../MeasureSpec";
-import { measureService, MeasureSpecKey } from "../../../system/MeasureService";
+import { measureService, MeasureSpecKey } from "../../../system/DataSourceManager";
 import * as HealthKitManager from './HealthKitManager';
 import { AppleHealthMeasureBase } from "./AppleHealthMeasureBase";
 import { HKStepDatum } from "./types";

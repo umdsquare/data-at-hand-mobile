@@ -102,7 +102,7 @@ const StyleTemplates = StyleSheet.create({
     flex: 1,
     borderTopLeftRadius: 18,
     borderTopRightRadius: 18,
-    paddingTop: 12,
+    paddingTop: 12
   },
 });
 

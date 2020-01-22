@@ -7,7 +7,7 @@ import { PaginationBar } from '../common/PaginationBar';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Dialog from "react-native-dialog";
 import { Button } from 'react-native-elements';
-import { ExplorationInfo, isVisualizationPayload, VisualizationPayload } from '../../core/interaction/types';
+import { ExplorationInfo } from '../../core/exploration/types';
 import { ReduxAppState } from '../../state/types';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
