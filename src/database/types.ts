@@ -1,11 +1,7 @@
-export enum DataLevel{
-    IntraDay="intra",
-    DailyActivity = "dailyActivity"
-}
+
 
 export interface IDatumBase{
     value: number,
-    subjectToChange: boolean,
 }
 
 export interface DailySummaryDatum extends IDatumBase{
@@ -19,7 +15,7 @@ export interface IPointDatum extends IDatumBase{
 export interface ISessionDatum extends IDatumBase{
     duration: number
     numberedDate: number
-    
+
 }
 
 export interface IHourlyStepBin extends IDatumBase{

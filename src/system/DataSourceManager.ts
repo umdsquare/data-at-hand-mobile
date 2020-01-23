@@ -6,12 +6,12 @@ class DataSourceManager {
 
   readonly supportedDataSources: ReadonlyArray<DataSourceSpec> = [
     
-    /*{
+    {
       type: DataSourceType.StepCount,
       category: DataSourceCategory.Step,
       name: "Step Count",
       description: 'Step Count Walked',
-    },
+    },/*
     {
       type: DataSourceType.HeartRate,
       category: DataSourceCategory.HeartRate,
@@ -30,14 +30,14 @@ class DataSourceManager {
       category: DataSourceCategory.Sleep,
       name: 'Hours Slept',
       description: 'A length of sleep of the day',
-    },*/
+    },
 
     {
       type: DataSourceType.SleepRange,
       category: DataSourceCategory.Sleep,
       name: 'Sleep Range',
       description: "Bedtime and Wake time of the day\'s sleep",
-    }
+    }*/
   ];
 
   private specMap: Map<DataSourceType, DataSourceSpec>;

@@ -1,10 +1,9 @@
-import {ExplorationInfo, ExplorationType, ParameterType} from '../types';
+import {ExplorationInfo, ExplorationType, ParameterType, DataLevel} from '../types';
 import {OverviewData, OverviewSourceRow} from './types';
 import {explorationCommandResolver} from '../ExplorationCommandResolver';
 import {DateTimeHelper} from '../../../time';
 import {dataSourceManager} from '../../../system/DataSourceManager';
 import {DataServiceManager} from '../../../system/DataServiceManager';
-import {DataLevel, DailySummaryDatum} from '../../../database/types';
 import {DataSourceType} from '../../../measure/DataSourceSpec';
 import * as d3 from 'd3-array';
 import commaNumber from 'comma-number';
@@ -64,7 +63,7 @@ class ExplorationDataResolver {
 
                 if (todayData.length > 0) {
                     const todayValue = todayData[0].value
-                    const values = list.map(elm => elm.value).filter(v => Number.isNaN(v) !== true)
+                    const values = list.map(elm => elm.value).filter(v => Number.isNaN(v) !== true && v > 25)
                   switch (source.type) {
                     case DataSourceType.StepCount:
                       base.today = {

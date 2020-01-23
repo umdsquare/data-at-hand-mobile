@@ -25,6 +25,11 @@ export enum ParameterType{
     CycleDimension,
 }
 
+export enum DataLevel{
+    IntraDay="intra",
+    DailyActivity = "dailyActivity"
+}
+
 export type ParameterKey = "range1"|"range2"|"pivot"
 
 export interface ExplorationInfo{

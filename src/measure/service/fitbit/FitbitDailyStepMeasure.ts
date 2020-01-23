@@ -1,60 +1,63 @@
-import {FitbitService, makeFitbitDayLevelActivityLogsUrl} from './FitbitService';
 import { FitbitDailyActivityStepsQueryResult } from "./types";
-import { IDatumBase, DailySummaryDatum } from '../../../database/types';
-import { toDate } from 'date-fns-tz';
-import { DataServiceMeasure } from '../DataService';
-import { isSameDay, isAfter } from 'date-fns';
+import { IDatumBase } from '../../../database/types';
 import { DateTimeHelper } from '../../../time';
+import { DailyStepCountEntry } from './realm/schema';
+import { FitbitServiceMeasure } from './FitbitServiceMeasure';
+import { toDate, parse, getDay } from 'date-fns';
+import { makeFitbitDayLevelActivityLogsUrl, FITBIT_DATE_FORMAT } from "./api";
 
 
-export class FitbitDailyStepMeasure extends DataServiceMeasure {
-  
-  async fetchData(startDate: Date, endDate: Date): Promise<IDatumBase[]> {
-    
-    const result: FitbitDailyActivityStepsQueryResult = await this.castedService<FitbitService>().fetchFitbitQuery(makeFitbitDayLevelActivityLogsUrl("activities/steps", startDate, endDate))
-    const timeZone = await this.castedService<FitbitService>().getUserTimezone()
-    
-    const data = result["activities-steps"].map(entry => {
+export class FitbitDailyStepMeasure extends FitbitServiceMeasure {
 
-      const date = toDate(entry.dateTime, { timeZone })
-      const now = new Date()
-      return {
-        value: Number.parseInt(entry.value),
-        numberedDate: DateTimeHelper.fromFormattedString(entry.dateTime),
-        subjectToChange: isSameDay(now, date) || isAfter(date, now)
-      } as DailySummaryDatum
+
+  async cacheServerData(startDate: number, endDate: number): Promise<{ success: boolean; }> {
+    console.log("Load Fitbit Step data from ", startDate, "to", endDate)
+    const benchMarkStart = Date.now()
+    const chunks = DateTimeHelper.splitRange(startDate, endDate, 1095)
+
+    const queryResult: Array<FitbitDailyActivityStepsQueryResult> = await Promise.all(
+      chunks.map(chunk => this.service.fetchFitbitQuery(makeFitbitDayLevelActivityLogsUrl("activities/steps", chunk[0], chunk[1])))) 
+
+    const result = {"activities-steps":[].concat.apply([], queryResult.map(r => r["activities-steps"]))}
+
+    console.log("Finished Loading Step data - ", result["activities-steps"].length, 'rows. Took', Date.now() - benchMarkStart, 'millis.')
+
+    const now = new Date()
+    const today = DateTimeHelper.toNumberedDateFromDate(now)
+
+    await this.useRealm((realm) => {
+      realm.write(()=>{
+        result["activities-steps"].forEach(entry => {
+          const numberedDate = DateTimeHelper.fromFormattedString(entry.dateTime)
+          const date = parse(entry.dateTime, FITBIT_DATE_FORMAT, now)
+
+          realm.create(DailyStepCountEntry, {
+            value: Number.parseInt(entry.value),
+            numberedDate,
+            year: DateTimeHelper.getYear(numberedDate),
+            month: DateTimeHelper.getMonth(numberedDate),
+            dayOfWeek: getDay(date)
+          } as DailyStepCountEntry, true)
+        })
+      })
     })
 
-    return data
+    console.log("Finish storing data into Realm.")
+
+    return {success: true}
   }
+  
+  async fetchData(startDate: Date, endDate: Date): Promise<IDatumBase[]> {
 
+    const result = await this.useRealmAndGet<IDatumBase[]>((realm)=>{
+      const steps = realm.objects<DailyStepCountEntry>(DailyStepCountEntry)
+      const filtered = steps.filtered("numberedDate >= " + DateTimeHelper.toNumberedDateFromDate(startDate) + " AND numberedDate <= " + DateTimeHelper.toNumberedDateFromDate(endDate))
+      return filtered.snapshot().map(v => ({
+        value: v.value,
+        numberedDate: v.numberedDate
+      })) as any
+    })
 
-  /*
-  async fetchData(start: number, end: number): Promise<Array<IDatumBase>> {
-    const result = await Promise
-      .all(sequenceDays(start, end)
-      .map(day => this.castedService<FitbitService>().fetchFitbitQuery(makeFitbitIntradayActivityApiUrl("activities/steps", day))))
-    
-    const timeZone = await this.castedService<FitbitService>().getUserTimezone()
-
-    const dataPoints: Array<IHourlyStepBin> = [];
-    result.forEach(dayData => {
-      const dateString = dayData["activities-steps"][0].dateTime;
-      dayData["activities-steps-intraday"].dataset.forEach(datum => {
-        const date = startOfHour(toDate(dateString + "T" + datum.time, {timeZone: timeZone}));
-        if (dataPoints.length === 0 || dataPoints[dataPoints.length - 1].startedAt.getTime() != date.getTime()) {
-          dataPoints.push({
-            value: datum.value,
-            startedAt: date,
-            measureCode: this.code,
-            subjectToChange: false
-          });
-        }
-        else {
-          dataPoints[dataPoints.length - 1].value += datum.value;
-        }
-      });
-    });
-    return dataPoints;
-  }*/
+    return result
+  }
 }

@@ -1,4 +1,4 @@
-import { getYear, getMonth, getDate } from "date-fns"
+import { getYear, getMonth, getDate, differenceInDays, subDays } from "date-fns"
 import { toDate } from "date-fns-tz"
 
 /**
@@ -38,6 +38,33 @@ export class DateTimeHelper{
     static fromFormattedString(str: string): number{
         const split = str.split('-')
         return this.toNumberedDateFromValues(Number.parseInt(split[0]), Number.parseInt(split[1]), Number.parseInt(split[2]))
+    }
+
+    static splitRange(start: number, end: number, maxNumDays: number): Array<[number, number]>{
+        
+        const startDate = this.toDate(start)
+        const endDate = this.toDate(end)
+        const wholeDiff = differenceInDays(endDate, startDate) + 1
+        if(wholeDiff <= maxNumDays){
+            return [[start, end]]
+        }else{
+            var chunks = []
+            var pointer: Date = endDate
+            var leftDays = wholeDiff
+            while(leftDays >= maxNumDays){
+
+                const newStart = subDays(pointer, maxNumDays-1)
+                chunks.push([this.toNumberedDateFromDate(newStart), this.toNumberedDateFromDate(pointer)])
+                pointer = subDays(newStart, 1)
+                leftDays -= maxNumDays
+            }
+
+            if(leftDays > 0){
+                chunks.push([this.toNumberedDateFromDate(subDays(pointer, leftDays-1)), this.toNumberedDateFromDate(pointer)])
+            }
+
+            return chunks
+        }
     }
 }
 

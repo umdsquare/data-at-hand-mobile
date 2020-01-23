@@ -1,6 +1,7 @@
-import { IDatumBase, DataLevel } from '../../database/types';
+import { IDatumBase } from '../../database/types';
 import { DataSourceType } from '../DataSourceSpec';
 import { endOfDay, differenceInDays } from 'date-fns';
+import { DataLevel } from '../../core/exploration/types';
 
 export interface ServiceActivationResult{
   success: boolean,

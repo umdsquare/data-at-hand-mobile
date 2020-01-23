@@ -124,3 +124,5 @@ export interface FitbitWeightQueryResult {
         dataset: Array<{time: string /* carries only time of the day */, value: number}>
     }
   }
+
+  
