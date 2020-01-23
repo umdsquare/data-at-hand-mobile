@@ -10,6 +10,7 @@ export enum SettingsActionTypes {
 
 export interface SetServiceAction extends ActionTypeBase {
     serviceKey: string,
+    serviceInitialDate?: number
 }
 
 export interface SetUnitTypeAction extends ActionTypeBase {
@@ -20,9 +21,10 @@ export type MeasureSettingsAction = SetServiceAction | SetUnitTypeAction
 
 
 //======================================
-export const setService = (serviceKey: string): SetServiceAction => ({
+export const setService = (serviceKey: string, serviceInitialDate?: number): SetServiceAction => ({
     type: SettingsActionTypes.SetService,
-    serviceKey: serviceKey
+    serviceKey,
+    serviceInitialDate
 })
 
 export const setUnit = (unit: MeasureUnitType): SetUnitTypeAction => ({

@@ -8,11 +8,13 @@ import {MeasureUnitType} from '../../measure/DataSourceSpec';
 
 export interface SettingsState {
   serviceKey: string,
+  serviceInitialDate: number,
   unit: MeasureUnitType
 }
 
 const INITIAL_STATE = {
   serviceKey: 'fitbit',
+  serviceInitialDate: null,
   unit: MeasureUnitType.Metric
 } as SettingsState;
 
@@ -41,6 +43,7 @@ function setServiceImpl(
   action: SetServiceAction
 ){
   state.serviceKey = action.serviceKey
+  state.serviceInitialDate = action.serviceInitialDate
 }
 
 function setUnitTypeImpl(

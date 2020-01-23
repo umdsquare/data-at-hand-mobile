@@ -1,6 +1,12 @@
 import { IDatumBase, DataLevel } from '../../database/types';
-import { DataSourceSpec, DataSourceType } from '../DataSourceSpec';
-import { isAfter, endOfDay, differenceInDays } from 'date-fns';
+import { DataSourceType } from '../DataSourceSpec';
+import { endOfDay, differenceInDays } from 'date-fns';
+
+export interface ServiceActivationResult{
+  success: boolean,
+  serviceInitialDate?: number // numbered date. The date when the user first started using the service.
+  error?: any
+}
 
 export abstract class DataService {
   static readonly STORAGE_PREFIX = "@source_service:"
@@ -46,7 +52,7 @@ export abstract class DataService {
 
   protected abstract fetchDataImpl(dataSource: DataSourceType, level: DataLevel, from: Date, to: Date): Promise<Array<IDatumBase>>
 
-  abstract async activateInSystem(): Promise<boolean>
+  abstract async activateInSystem(): Promise<ServiceActivationResult>
   abstract async deactivatedInSystem(): Promise<boolean>
 
 }

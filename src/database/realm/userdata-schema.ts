@@ -1,11 +1,4 @@
-import {
-  IHourlyStepBin,
-  IHeartRatePoint,
-  IWeightPoint,
-  ISleepSession,
-  IWorkoutSession,
-} from '../types';
-import { RealmHandlerBase } from './RealmHandlerBase';
+
 
 const commonSchema = {
   id: 'string',
@@ -33,7 +26,7 @@ const HourlyStepBinSchema = {
       value: 'int',
       ...commonSchema,
     },
-  } as Realm.ObjectSchema
+  }
 
 const HeartRatePointSchema = {
     name: 'HeartRatePoint',
@@ -42,7 +35,7 @@ const HeartRatePointSchema = {
       value: 'double',
       ...pointCommonSchema,
     },
-  } as Realm.ObjectSchema
+  }
 
 const WeightPointSchema = {
     name: 'WeightPoint',
@@ -52,7 +45,7 @@ const WeightPointSchema = {
       value: 'double',
       ...pointCommonSchema,
     },
-  } as Realm.ObjectSchema
+  }
 
 
 const SleepSessionSchema = {
@@ -62,7 +55,7 @@ const SleepSessionSchema = {
       ...sessionCommonSchema,
       value: 'float',
     },
-  } as Realm.ObjectSchema
+  }
 
 const WorkoutSessionSchema = {
     name: 'WorkoutSession',
@@ -72,8 +65,7 @@ const WorkoutSessionSchema = {
       value: 'float',
       activityType: {type: 'string', indexed: true},
     },
-  } as Realm.ObjectSchema
-
+  }
 
 export const userRealmConfig = {
   path: 'user.realm',
@@ -85,4 +77,4 @@ export const userRealmConfig = {
     SleepSessionSchema,
     WorkoutSessionSchema,
   ],
-} as Realm.Configuration;
+}

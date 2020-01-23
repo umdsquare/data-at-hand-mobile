@@ -93,7 +93,8 @@ export const DataSourceChartFrame = (props: {
                 props.todayMeasureValue && <Text style={styles.headerDescriptionTextStyle}>
                     <Text>{(props.todayMeasureTitle || "Today") + ": "}</Text>
                     {
-                        props.todayMeasureValue && props.todayMeasureValue.map(chunk => <Text style={chunk.type === 'unit' ? styles.todayUnitStyle : styles.todayValueStyle}>{chunk.text}</Text>)
+                        props.todayMeasureValue && props.todayMeasureValue.map((chunk, index) =>
+                            <Text key={index} style={chunk.type === 'unit' ? styles.todayUnitStyle : styles.todayValueStyle}>{chunk.text}</Text>)
                     }
                 </Text>
             }

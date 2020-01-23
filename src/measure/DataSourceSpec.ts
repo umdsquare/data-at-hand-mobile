@@ -18,7 +18,6 @@ export interface DataSourceSpec{
   type: DataSourceType,
   name: string,
   description: string,
-  icon: string
 }
 
 export enum MeasureUnitType{

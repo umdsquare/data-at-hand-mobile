@@ -38,4 +38,4 @@ export const systemRealmConfig = {
   path: 'system.realm',
   deleteRealmIfMigrationNeeded: __DEV__!=null,
   schema: [UsageLog],
-} as Realm.Configuration
+}

@@ -3,7 +3,9 @@ export interface FitbitUserProfile{
     age: number,
     fullName: string,
     dateOfBirth: string,
-    timezone: string
+    timezone: string,
+    memberSince: any,
+    weightUnit: any
   }
 }
 
@@ -16,12 +18,47 @@ export interface IntradayStepDay {
 
 export interface FitbitSleepQueryResult {
   sleep: Array<{
-    dateOfSleep: string;
-    endTime: string;
+    isMainSleep: boolean // false => nap
+    dateOfSleep: string; // yyyy-MM-dd
+    endTime: string; // yyyy-MM-ddThh:mm:ss.sss
     startTime: string;
-    efficiency: number;
-    duration: number;
+    efficiency: number; // sleep score
+    duration: number; // millisecond
     logId: number;
+    type: "stages" | "classic",
+    levels: Array<{
+      dateTime: string,
+      level: "wake"|"light"|"rem"|"deep"|"asleep"|"restless"|"awake",
+      seconds: number
+    }>
+    summary: any;
+    /*
+    "summary": {
+          "deep": {
+            "count": 4,
+            "minutes": 69,
+            "thirtyDayAvgMinutes": 0
+          },
+          "light": {
+            "count": 32,
+            "minutes": 216,
+            "thirtyDayAvgMinutes": 0
+          },
+          "rem": {
+            "count": 7,
+            "minutes": 75,
+            "thirtyDayAvgMinutes": 0
+          },
+          "wake": {
+            "count": 31,
+            "minutes": 68,
+            "thirtyDayAvgMinutes": 0
+          }
+        }
+      },
+    */
+
+
   }>;
 }
 

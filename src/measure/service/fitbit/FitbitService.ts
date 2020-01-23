@@ -1,4 +1,4 @@
-import {DataService, UnSupportedReason} from '../DataService';
+import {DataService, UnSupportedReason, ServiceActivationResult} from '../DataService';
 import {AsyncStorageHelper} from '../../../system/AsyncStorageHelper';
 import {refresh, authorize, revoke} from 'react-native-app-auth';
 import {Moment} from 'moment';
@@ -8,6 +8,9 @@ import {DataLevel, IDatumBase} from '../../../database/types';
 import { format } from 'date-fns';
 import { FitbitDailyStepMeasure } from './FitbitDailyStepMeasure';
 import { FitbitDailyHeartRateMeasure } from './FitbitDailyHeartRateMeasure';
+import { FitbitWeightLogMeasure } from './FitbitWeightLogMeasure';
+import { FitbitSleepMeasure } from './FitbitSleepMeasure';
+import { DateTimeHelper } from '../../../time';
 
 type TimeLike = Date | number | string | Moment;
 
@@ -26,8 +29,13 @@ const FITBIT_DAY_LEVEL_ACTIVITY_API_URL = `https://api.fitbit.com/1/user/-/{reso
 
 const FITBIT_SLEEP_LOGS_URL =
   'https://api.fitbit.com/1.2/user/-/sleep/date/{startDate}/{endDate}.json';
+
+const FITBIT_WEIGHT_TREND_URL =
+  'https://api.fitbit.com/1/user/-/body/weight/date/{startDate}/{endDate}.json';
+  
+
 const FITBIT_WEIGHT_LOGS_URL =
-  'https://api.fitbit.com/1/user/-/body/weight/date/[startDate]/[endDate].json';
+  'https://api.fitbit.com/1/user/-/body/log/weight/date/{startDate}/{endDate}.json';
 
 const FITBIT_HEARTRATE_LOGS_URL =
   'https://api.fitbit.com/1/user/-/activities/heart/date/{date}/1d/1min/time/{startTime}/{endTime}.json';
@@ -55,28 +63,39 @@ export function makeFitbitIntradayActivityApiUrl(
 }
 
 export function makeFitbitSleepApiUrl(
-  startDate: TimeLike,
-  endDate: TimeLike,
+  startDate: Date,
+  endDate: Date,
 ): string {
-  const moment = require('moment');
   const stringFormat = require('string-format');
   return stringFormat(FITBIT_SLEEP_LOGS_URL, {
-    startDate: moment(startDate).format(FITBIT_DATE_FORMAT),
-    endDate: moment(endDate).format(FITBIT_DATE_FORMAT),
+    startDate: format(startDate, FITBIT_DATE_FORMAT),
+    endDate: format(endDate, FITBIT_DATE_FORMAT),
   });
 }
 
-export function makeFitbitWeightApiUrl(
-  startDate: TimeLike,
-  endDate: TimeLike,
+export function makeFitbitWeightLogApiUrl(
+  startDate: Date,
+  endDate: Date,
 ): string {
-  const moment = require('moment');
   const stringFormat = require('string-format');
   return stringFormat(FITBIT_WEIGHT_LOGS_URL, {
-    startDate: moment(startDate).format(FITBIT_DATE_FORMAT),
-    endDate: moment(endDate).format(FITBIT_DATE_FORMAT),
+    startDate: format(startDate, FITBIT_DATE_FORMAT),
+    endDate: format(endDate, FITBIT_DATE_FORMAT),
   });
 }
+
+export function makeFitbitWeightTrendApiUrl(
+  startDate: Date,
+  endDate: Date,
+): string {
+  const stringFormat = require('string-format');
+  return stringFormat(FITBIT_WEIGHT_TREND_URL, {
+    startDate: format(startDate, FITBIT_DATE_FORMAT),
+    endDate: format(endDate, FITBIT_DATE_FORMAT),
+  });
+}
+
+
 
 export function makeFitbitHeartRateIntradayUrl(date: TimeLike): string {
   const moment = require('moment');
@@ -109,6 +128,8 @@ const STORAGE_KEY_AUTH_STATE = DataService.STORAGE_PREFIX + 'fitbit:state';
 const STORAGE_KEY_USER_TIMEZONE =
   DataService.STORAGE_PREFIX + 'fitbit:user_timezone';
 
+const STORAGE_KEY_USER_MEMBER_SINCE = DataService.STORAGE_PREFIX + 'fitbit:user_memberSince';
+
 
 export class FitbitService extends DataService {
   key: string = 'fitbit';
@@ -129,6 +150,9 @@ export class FitbitService extends DataService {
 
   private dailyStepMeasure = new FitbitDailyStepMeasure(this)
   private dailyHeartRateMeasure = new FitbitDailyHeartRateMeasure(this)
+  private weightLogMeasure = new FitbitWeightLogMeasure(this)
+  private sleepMeasure = new FitbitSleepMeasure(this)
+
 
   protected fetchDataImpl(
     dataSource: DataSourceType,
@@ -152,8 +176,12 @@ export class FitbitService extends DataService {
       case DataSourceType.HoursSlept:
         break;
       case DataSourceType.SleepRange:
+        if(level === DataLevel.DailyActivity){
+          return this.sleepMeasure.fetchData(from, to)
+        }
         break;
       case DataSourceType.Weight:
+        return this.weightLogMeasure.fetchData(from, to)
         break;
     }
 
@@ -168,6 +196,9 @@ export class FitbitService extends DataService {
     );
   }
 
+  /***
+   * return: Access token
+   */
   async authenticate(): Promise<string> {
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
     if (state) {
@@ -204,18 +235,25 @@ export class FitbitService extends DataService {
       await revoke(this._authConfig, {tokenToRevoke: state.refreshToken, includeBasicAuth: true} as any);
       await AsyncStorageHelper.remove(STORAGE_KEY_AUTH_STATE);
       await AsyncStorageHelper.remove(STORAGE_KEY_USER_TIMEZONE);
+      await AsyncStorageHelper.remove(STORAGE_KEY_USER_MEMBER_SINCE);
     }
   }
 
-  async activateInSystem(): Promise<boolean> {
+  async activateInSystem(): Promise<ServiceActivationResult> {
     try {
       const accessToken = await this.authenticate();
       if (accessToken != null) {
-        return true;
-      } else return false;
+        const initialDate = await this.getMembershipStartDate();
+        return {
+          success: true,
+          serviceInitialDate: initialDate
+        }
+      } else return {
+        success: false 
+      };
     } catch (ex) {
       console.log(ex);
-      return false;
+      return {success: false, error: ex};
     }
   }
 
@@ -266,16 +304,28 @@ export class FitbitService extends DataService {
   }*/
 
   async updateUserProfile(): Promise<boolean> {
-    return this.fetchFitbitQuery(FITBIT_PROFILE_URL).then(
-      (profile: FitbitUserProfile) => {
-        if (profile != null) {
-          return AsyncStorageHelper.set(
-            STORAGE_KEY_USER_TIMEZONE,
-            profile.user.timezone,
-          ).then(() => true);
-        } else return false;
-      },
+    const profile: FitbitUserProfile = await this.fetchFitbitQuery(FITBIT_PROFILE_URL)
+    console.log(profile)
+    if (profile != null) {
+      await AsyncStorageHelper.set(STORAGE_KEY_USER_TIMEZONE, profile.user.timezone)
+      await AsyncStorageHelper.set(STORAGE_KEY_USER_MEMBER_SINCE, DateTimeHelper.fromFormattedString(profile.user.memberSince))
+      return true
+    } else return false;
+  }
+
+  async getMembershipStartDate(): Promise<number>{
+    console.log("get membership start date")
+    const cached = await AsyncStorageHelper.getLong(
+      STORAGE_KEY_USER_MEMBER_SINCE,
     );
+    if (cached) {
+      return cached;
+    } else {
+      const updated = await this.updateUserProfile();
+      if (updated === true) {
+        return this.getMembershipStartDate();
+      } else return null;
+    }
   }
 
   async getUserTimezone(): Promise<string> {
@@ -303,24 +353,38 @@ export class FitbitService extends DataService {
     return fetch(url, {
       method: 'GET',
       headers: {
-        'Accept-Language': 'en_US',
+        'Accept-Language': null, // METRIC
         Authorization: 'Bearer ' + accessToken,
         'Content-Type': 'application/json',
       },
     }).then(async result => {
+
+      const quota = result.headers.get("Fitbit-Rate-Limit-Limit")
+      const remainedCalls = result.headers.get("Fitbit-Rate-Limit-Remaining")
+      const secondsLeftToNextReset = result.headers.get("Fitbit-Rate-Limit-Reset")
+
       if (result.ok === false) {
-        if (result.status === 401) {
-          const json = await result.json();
-          if (json.errors[0].errorType === 'expired_token') {
-            console.log(
-              'Fitbit token is expired. refresh token and try once again.',
-            );
-            return this.authenticate().then(token =>
-              this.fetchFitbitQuery(url),
-            );
-          } else throw {error: 'Access token invalid.'};
-        } else throw {error: result.status};
-      } else return result.json();
+        const json = await result.json();
+        switch(result.status){
+          case 401:
+            if (json.errors[0].errorType === 'expired_token') {
+              console.log(
+                'Fitbit token is expired. refresh token and try once again.',
+              );
+              return this.authenticate().then(token =>
+                this.fetchFitbitQuery(url),
+              );
+            } else throw {error: 'Access token invalid.'};
+
+          case 429:
+            throw {error: "Fitbit quota limit reached. Next reset: " + secondsLeftToNextReset + " secs."}
+          default:
+            throw {error: result.status};
+        }
+      } else {
+        console.log("Fitbit API call succeeded. Remaining quota:", remainedCalls+"/"+quota, "next reset:", secondsLeftToNextReset + " secs.")
+        return result.json()
+      }
     });
   }
 

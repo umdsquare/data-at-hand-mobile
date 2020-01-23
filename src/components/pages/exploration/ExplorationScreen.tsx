@@ -18,6 +18,7 @@ import { ParameterType, ExplorationInfo } from "../../../core/exploration/types"
 import { DataLevel } from "../../../database/types";
 import { ExplorationDataState, startLoadingForInfo } from "../../../state/exploration/data/reducers";
 import { ExplorationMainPanel } from "./parts/main";
+import { FitbitService } from "../../../measure/service/fitbit/FitbitService";
 var deepEqual = require('deep-equal');
 
 const styles = StyleSheet.create({
@@ -64,6 +65,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
     */
 
     componentDidMount() {
+
         if (this.props.selectedServiceKey) {
             DataServiceManager.getServiceByKey(this.props.selectedServiceKey).activateInSystem().then(success => {
                 console.log("activated ", this.props.selectedServiceKey, "successfully.")
@@ -82,14 +84,6 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
             }
         }
     }
-
-    /*
-            if (this.props.selectedServiceKey === 'fitbit') {
-    
-                const range = explorationCommandResolver.getParameterValue(this.props.explorationState.info, ParameterType.Range)
-                const data = await DataServiceManager.getServiceByKey('fitbit').fetchData(DataSourceType.HeartRate, DataLevel.DailyActivity, new Date(range[0]), new Date(range[1]))
-                console.log(data)
-            }*/
 
     render() {
 

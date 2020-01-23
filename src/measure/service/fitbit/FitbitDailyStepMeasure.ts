@@ -1,11 +1,9 @@
-import {FitbitService, makeFitbitIntradayActivityApiUrl, makeFitbitDayLevelActivityLogsUrl, FITBIT_DATE_FORMAT} from './FitbitService';
-import { IntradayStepDay, FitbitDailyActivityStepsQueryResult } from "./types";
-import { IHourlyStepBin, IDatumBase, DailySummaryDatum } from '../../../database/types';
-import { sequenceDays } from '../../../utils';
-import { startOfHour } from 'date-fns/fp';
+import {FitbitService, makeFitbitDayLevelActivityLogsUrl} from './FitbitService';
+import { FitbitDailyActivityStepsQueryResult } from "./types";
+import { IDatumBase, DailySummaryDatum } from '../../../database/types';
 import { toDate } from 'date-fns-tz';
 import { DataServiceMeasure } from '../DataService';
-import { parse, isSameDay, isAfter } from 'date-fns';
+import { isSameDay, isAfter } from 'date-fns';
 import { DateTimeHelper } from '../../../time';
 
 

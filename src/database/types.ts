@@ -18,8 +18,8 @@ export interface IPointDatum extends IDatumBase{
 
 export interface ISessionDatum extends IDatumBase{
     duration: number
-    startedAt: Date
-    endedAt: Date
+    numberedDate: number
+    
 }
 
 export interface IHourlyStepBin extends IDatumBase{

@@ -13,7 +13,7 @@ import { ReduxAppState } from "../../../../state/types";
 import { setService } from "../../../../state/settings/actions";
 
 interface Prop extends PropsWithNavigation {
-    selectService: (key: string) => void,
+    selectService: (key: string, initialDate: number) => void,
     selectedServiceKey: string,
 }
 
@@ -58,20 +58,21 @@ class ServiceSelectionScreen extends React.Component<Prop, State>{
                                 onSelected={
                                     () => {
                                         if (this.props.selectedServiceKey != service.key) {
-                                            DataServiceManager.getServiceByKey(service.key).activateInSystem().then(success => {
-                                                if (success === true) {
-                                                    return DataServiceManager.getServiceByKey(this.props.selectedServiceKey)
-                                                        .deactivatedInSystem().then(deactivated => {
-                                                            this.props.selectService(service.key)
-                                                            this.props.navigation.goBack()
-                                                        }).catch(err => {
-                                                            this.props.selectService(service.key)
-                                                            this.props.navigation.goBack()
-                                                        })
-                                                }
-                                            }).catch(err => {
-                                                console.error("Failed to sign in to ", service.key, err)
-                                            })
+                                            DataServiceManager.getServiceByKey(service.key).activateInSystem()
+                                                .then(result => {
+                                                    if (result.success === true) {
+                                                        return DataServiceManager.getServiceByKey(this.props.selectedServiceKey)
+                                                            .deactivatedInSystem().then(deactivated => {
+                                                                this.props.selectService(service.key, result.serviceInitialDate)
+                                                                this.props.navigation.goBack()
+                                                            }).catch(err => {
+                                                                this.props.selectService(service.key, result.serviceInitialDate)
+                                                                this.props.navigation.goBack()
+                                                            })
+                                                    }
+                                                }).catch(err => {
+                                                    console.error("Failed to sign in to ", service.key, err)
+                                                })
                                         }
                                     }
                                 } />)
@@ -92,7 +93,7 @@ function mapStateToPropsScreen(appState: ReduxAppState, ownProps: Prop): Prop {
 function mapDispatchToPropsScreen(dispatch: Dispatch, ownProps: Prop): Prop {
     return {
         ...ownProps,
-        selectService: (key: string) => dispatch(setService(key))
+        selectService: (key: string, initialDate: number) => dispatch(setService(key, initialDate))
     }
 }
 
