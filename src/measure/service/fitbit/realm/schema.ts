@@ -28,27 +28,36 @@ export class DailyStepCountEntry extends DailySummaryEntry {
   };
 
   public value: number;
-
 }
 
-export class CachedRangeEntry {
+export interface ICachedRangeEntry{
+  measureKey: string;
+  endDate?: number;
+  queriedAt?: Date;
+}
+
+export class CachedRangeEntry implements ICachedRangeEntry {
   public static schema = {
     name: FitbitRealmSchemaNames.CachedRange,
-    primaryKey: 'id',
+    primaryKey: 'measureKey',
     properties: {
-      id: 'string',
-      measureKey: {type: 'string', indexed: true},
-      startDate: 'int',
+      measureKey: 'string',
       endDate: 'int',
       queriedAt: 'date',
     },
   };
 
-  public id: string;
   public measureKey: string;
-  public startDate: number;
   public endDate: number;
   public queriedAt: Date;
+
+  toJson(): ICachedRangeEntry {
+    return {
+      measureKey: this.measureKey,
+      endDate: this.endDate,
+      queriedAt: this.queriedAt,
+    };
+  }
 }
 
 export const FitbitLocalCacheConfig = {

@@ -144,7 +144,7 @@ export class FitbitService extends DataService {
       const accessToken = await this.authenticate();
       if (accessToken != null) {
         const initialDate = await this.getMembershipStartDate();
-        this.dailyStepMeasure.cacheServerData(initialDate, DateTimeHelper.toNumberedDateFromDate(new Date))
+        this.dailyStepMeasure.cacheServerData(DateTimeHelper.toNumberedDateFromDate(new Date))
         return {
           success: true,
           serviceInitialDate: initialDate
