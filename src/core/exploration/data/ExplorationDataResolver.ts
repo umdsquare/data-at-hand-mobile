@@ -48,18 +48,18 @@ class ExplorationDataResolver {
       dataSourceManager.supportedDataSources.map(source =>
         selectedService
           .fetchData(source.type, DataLevel.DailyActivity, rangeStartDate, rangeEndDate)
-          .then(list =>
+          .then(data =>
             selectedService
               .fetchData(source.type, DataLevel.DailyActivity, today, today)
               .then(todayData => {
                 const base = {
                   source: source.type,
-                  list: list,
+                  data: data,
                 } as OverviewSourceRow;
 
                 if (todayData.length > 0) {
                     const todayValue = todayData[0].value
-                    const values = list.map(elm => elm.value).filter(v => Number.isNaN(v) !== true && v > 25)
+                    const values = data.map(elm => elm.value).filter(v => Number.isNaN(v) !== true && v > 25)
                   switch (source.type) {
                     case DataSourceType.StepCount:
                       base.today = {

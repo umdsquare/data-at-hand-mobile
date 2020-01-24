@@ -1,3 +1,5 @@
+import { IDailySummaryEntry, IIntraDayLogEntry } from "../../../../core/exploration/data/types";
+
 const dailySummaryProperties = {
   numberedDate: {type: 'int'},
   year: {type: 'int', indexed: true},
@@ -5,23 +7,12 @@ const dailySummaryProperties = {
   dayOfWeek: {type: 'int', indexed: true},
 };
 
-interface IDailySummaryEntry {
-  numberedDate: number;
-  year: number;
-  month: number;
-  dayOfWeek: number;
-}
-
 export interface IDataEntry<T> {
   toJson(): T;
 }
 
 interface IDailyNumericSummaryEntry extends IDailySummaryEntry {
   value: number;
-}
-
-interface IIntraDayLogEntry extends IDailySummaryEntry {
-  secondsOfDay: number;
 }
 
 const intraDayLogProperties = {
