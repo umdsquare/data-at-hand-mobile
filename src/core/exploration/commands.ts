@@ -7,16 +7,26 @@ export enum ExplorationCommandType{
     SelectElementOfRange="selectElmRange"
 }
 
-export interface SetRangeCommand extends ActionTypeBase{
+export enum CommandInteractionType{
+    TouchOnly="touchonly",
+    Multimodal="multimodal"
+}
+
+interface ExplorationCommandBase extends ActionTypeBase{
+    interactionType: CommandInteractionType
+}
+
+export interface SetRangeCommand extends ExplorationCommandBase{
     range: [number, number],
     key?: string
 }
 
 export type ExplorationCommand = SetRangeCommand
 
-export function createSetRangeCommand(numberedDateRange: [number, number], key?: string): SetRangeCommand{
+export function createSetRangeCommand(interactionType: CommandInteractionType, numberedDateRange: [number, number], key?: string): SetRangeCommand{
     return {
         type: ExplorationCommandType.SetRange,
+        interactionType: interactionType,
         range: numberedDateRange,
         key
     }

@@ -9,9 +9,12 @@ import { OverviewSourceRow, StatisticsType } from '../../core/exploration/data/t
 import commaNumber from 'comma-number';
 import { formatDuration } from '../../time';
 import { startOfDay, addSeconds, format } from 'date-fns';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 
 const lightTextColor = "#8b8b8b"
+
+const headerHeight = 60
 
 const styles = StyleSheet.create({
     containerStyle: {
@@ -24,7 +27,7 @@ const styles = StyleSheet.create({
     },
 
     headerStyle: {
-        height: 60,
+        height: headerHeight,
         flexDirection: "row",
         alignItems: 'center',
         paddingRight: Sizes.horizontalPadding,
@@ -36,6 +39,10 @@ const styles = StyleSheet.create({
         fontSize: Sizes.normalFontSize,
         flex: 1
     },
+
+    headerClickRegionWrapperStyle: { flex: 1, marginRight: 15 },
+
+    headerClickRegionStyle: { flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch', height: headerHeight },
 
     headerDescriptionTextStyle: {
         fontWeight: '500',
@@ -103,79 +110,79 @@ function formatTodayValue(data: OverviewSourceRow, unitType: MeasureUnitType): T
             break;
     }
 
-    switch(data.source){
+    switch (data.source) {
         case DataSourceType.StepCount:
             info.formatted = data.today && [
                 {
-                  text: commaNumber(data.today),
-                  type: 'value',
+                    text: commaNumber(data.today),
+                    type: 'value',
                 },
-                {text: ' steps', type: 'unit'},
-              ]
+                { text: ' steps', type: 'unit' },
+            ]
             break;
         case DataSourceType.HeartRate:
             info.formatted = data.today && [
                 {
-                  text: data.today.toString(),
-                  type: 'value',
+                    text: data.today.toString(),
+                    type: 'value',
                 },
                 {
-                  text: ' bpm',
-                  type: 'unit',
+                    text: ' bpm',
+                    type: 'unit',
                 },
-              ];
+            ];
             break;
         case DataSourceType.Weight:
-            if(data.today){
-                switch(unitType){
+            if (data.today) {
+                switch (unitType) {
                     case MeasureUnitType.Metric:
-                        info.formatted = [{type: 'value', text: data.today.toFixed(1)}, {type: 'unit', text: ' kg'}]
+                        info.formatted = [{ type: 'value', text: data.today.toFixed(1) }, { type: 'unit', text: ' kg' }]
                         break;
                     case MeasureUnitType.US:
                         const convert = require('convert-units')
-                        info.formatted = [{type: 'value', text: convert(data.today).from('kg').to('lb').toFixed(1)}, {type: 'unit', text: ' lb'}]
+                        info.formatted = [{ type: 'value', text: convert(data.today).from('kg').to('lb').toFixed(1) }, { type: 'unit', text: ' lb' }]
                         break;
                 }
-            }else{
+            } else {
                 info.formatted = null
             }
             break;
         case DataSourceType.HoursSlept:
-            if(data.today){
+            if (data.today) {
                 var roundedSecs = data.today
                 info.formatted = []
-                if(data.today % 60 >= 30){
-                   roundedSecs = data.today - (data.today % 60) + 60
+                if (data.today % 60 >= 30) {
+                    roundedSecs = data.today - (data.today % 60) + 60
                 }
                 const hours = Math.floor(roundedSecs / 3600)
-                const minutes = Math.floor((roundedSecs%3600)/60)
-                if(hours > 0){
-                    info.formatted.push({type: 'value', text: hours + " "})
-                    info.formatted.push({type: 'unit', text: "hr" + (minutes > 0? " ":"")})
+                const minutes = Math.floor((roundedSecs % 3600) / 60)
+                if (hours > 0) {
+                    info.formatted.push({ type: 'value', text: hours + " " })
+                    info.formatted.push({ type: 'unit', text: "hr" + (minutes > 0 ? " " : "") })
                 }
 
-                if(hours > 0 && minutes > 0 || hours === 0){
-                    info.formatted.push({type: 'value', text: minutes + " "})
-                    info.formatted.push({type: 'unit', text: 'min'})
+                if (hours > 0 && minutes > 0 || hours === 0) {
+                    info.formatted.push({ type: 'value', text: minutes + " " })
+                    info.formatted.push({ type: 'unit', text: 'min' })
                 }
-            }else{
+            } else {
                 info.formatted = null
             }
             break;
         case DataSourceType.SleepRange:
-            if(data.today){
+            if (data.today) {
                 const pivot = startOfDay(new Date())
                 const actualBedTime = addSeconds(pivot, Math.round(data.today[0]))
                 const actualWakeTime = addSeconds(pivot, Math.round(data.today[1]))
 
                 info.formatted = [
-                    {type: 'value', text: format(actualBedTime, 'hh:mm ')},
-                    {type: 'unit', text: format(actualBedTime, 'a').toLowerCase()},
-                    {type: 'unit', text: ' - '},
-                    {type: 'value', text: format(actualWakeTime, 'hh:mm ')},
-                    {type: 'unit', text: format(actualWakeTime, 'a').toLowerCase()},
+                    { type: 'value', text: format(actualBedTime, 'hh:mm ') },
+                    { type: 'unit', text: format(actualBedTime, 'a').toLowerCase() },
+                    { type: 'unit', text: ' - ' },
+                    { type: 'value', text: format(actualWakeTime, 'hh:mm ') },
+                    { type: 'unit', text: format(actualWakeTime, 'a').toLowerCase() },
                 ]
-            }else{
+            } else {
                 info.formatted = null
             }
             break;
@@ -184,8 +191,8 @@ function formatTodayValue(data: OverviewSourceRow, unitType: MeasureUnitType): T
     return info
 }
 
-function getStatisticsLabel(type: StatisticsType): string{
-    switch(type){
+function getStatisticsLabel(type: StatisticsType): string {
+    switch (type) {
         case 'avg': return "Avg."
         case 'range': return 'Range'
         case 'total': return 'Total'
@@ -195,40 +202,39 @@ function getStatisticsLabel(type: StatisticsType): string{
     }
 }
 
-function formatStatistics(sourceType: DataSourceType, statisticsType: StatisticsType, measureUnitType: MeasureUnitType, value: any): string
-{
-    switch(sourceType){
+function formatStatistics(sourceType: DataSourceType, statisticsType: StatisticsType, measureUnitType: MeasureUnitType, value: any): string {
+    switch (sourceType) {
         case DataSourceType.StepCount:
-            switch(statisticsType){
+            switch (statisticsType) {
                 case "avg": return commaNumber(Math.round(value));
                 case "range": return commaNumber(value[0]) + " - " + commaNumber(value[1])
                 case "total": return commaNumber(value)
             }
         case DataSourceType.HeartRate:
-            switch(statisticsType){
+            switch (statisticsType) {
                 case 'avg': return Math.round(value).toString()
                 case 'range': return value[0] + " - " + value[1]
             }
         case DataSourceType.Weight:
-            switch(measureUnitType){
+            switch (measureUnitType) {
                 case MeasureUnitType.Metric:
-                break;
+                    break;
                 case MeasureUnitType.US:
                     const convert = require('convert-units')
-                    if(statisticsType == 'range'){
+                    if (statisticsType == 'range') {
                         value = [convert(value[0]).from('kg').to('lb'), convert(value[1]).from('kg').to('lb')]
-                    }else{
+                    } else {
                         value = convert(value).from('kg').to('lb')
                     }
-                break;        
+                    break;
             }
-            switch(statisticsType){
+            switch (statisticsType) {
                 case 'avg': return value.toFixed(1)
                 case 'range': return value[0].toFixed(1) + " - " + value[1].toFixed(1)
             }
 
         case DataSourceType.HoursSlept:
-            switch(statisticsType){
+            switch (statisticsType) {
                 case 'avg': return formatDuration(Math.round(value), true)
                 case 'range': return formatDuration(value[0], true) + " - " + formatDuration(value[1], true)
             }
@@ -244,6 +250,7 @@ function formatStatistics(sourceType: DataSourceType, statisticsType: Statistics
 export const DataSourceChartFrame = (props: {
     data: OverviewSourceRow
     measureUnitType: MeasureUnitType
+    onHeaderPressed?: ()=>void
 }) => {
 
     const spec = dataSourceManager.getSpec(props.data.source)
@@ -251,15 +258,20 @@ export const DataSourceChartFrame = (props: {
 
     return <View style={styles.containerStyle}>
         <View style={styles.headerStyle}>
-            <View style={styles.iconContainerStyle}>
-                <DataSourceIcon size={18} type={props.data.source} color={Colors.accent} />
+            <View style={styles.headerClickRegionWrapperStyle}>
+                <TouchableOpacity onPress={props.onHeaderPressed} disabled={props.onHeaderPressed == null} activeOpacity={0.7} style={styles.headerClickRegionStyle}>
+                    <View style={styles.iconContainerStyle}>
+                        <DataSourceIcon size={18} type={props.data.source} color={Colors.accent} />
+                    </View>
+                    <Text style={styles.headerTitleStyle}>{spec.name}</Text>
+                </TouchableOpacity>
             </View>
-            <Text style={styles.headerTitleStyle}>{spec.name}</Text>
+
             {
                 props.data.today && <Text style={styles.headerDescriptionTextStyle}>
                     <Text>{todayInfo.label + ": "}</Text>
                     {
-                        todayInfo.formatted != null? todayInfo.formatted.map((chunk, index) =>
+                        todayInfo.formatted != null ? todayInfo.formatted.map((chunk, index) =>
                             <Text key={index} style={chunk.type === 'unit' ? styles.todayUnitStyle : styles.todayValueStyle}>{chunk.text}</Text>)
                             :
                             <Text style={styles.todayValueStyle}>no value</Text>
@@ -275,7 +287,7 @@ export const DataSourceChartFrame = (props: {
             props.data.statistics && props.data.statistics.map(stat => {
                 return <Text key={stat.type} style={styles.statValueStyle}>
                     <Text style={styles.statLabelStyle}>{getStatisticsLabel(stat.type) + " "}</Text>
-                    <Text>{stat.value != null && (typeof stat.value == "number" || (stat.value[0]!=null && stat.value[1] != null))? formatStatistics(props.data.source, stat.type, props.measureUnitType, stat.value) : "no value"}</Text>
+                    <Text>{stat.value != null && (typeof stat.value == "number" || (stat.value[0] != null && stat.value[1] != null)) ? formatStatistics(props.data.source, stat.type, props.measureUnitType, stat.value) : "no value"}</Text>
                 </Text>
             })
         }

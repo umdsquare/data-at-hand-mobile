@@ -16,6 +16,7 @@ interface Props {
     dataState?: ExplorationDataState,
     explorationState?: ExplorationState
     measureUnitType?: MeasureUnitType
+    
 }
 
 interface State {
@@ -37,6 +38,7 @@ class ExplorationMainPanel extends React.Component<Props>{
                                 return <DataSourceChartFrame key={sourceEntry.source.toString()}
                                     data={sourceEntry}
                                     measureUnitType={this.props.measureUnitType}
+                                    onHeaderPressed={()=>{}}
                                 />
                             })
                         }

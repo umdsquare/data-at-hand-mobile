@@ -12,6 +12,7 @@ import Modal from "react-native-modal";
 import { StyleTemplates } from "../../style/Styles";
 import { DatePicker, WeekPicker, MonthPicker } from "../common/CalendarPickers";
 import { SafeAreaConsumer } from "react-native-safe-area-context";
+import { CommandInteractionType } from "../../core/exploration/commands";
 
 const dateButtonWidth = 140
 const barHeight = 60
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
 interface Props {
     from: Date,
     to: Date,
-    onRangeChanged?: (from: Date, to: Date) => void
+    onRangeChanged?: (from: Date, to: Date, interactionType?: CommandInteractionType) => void
 }
 
 interface State {
@@ -186,7 +187,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             from = lastMonthFirst
             to = lastMonthLast
         }
-        this.setRange(from, to)
+        this.setRange(from, to, CommandInteractionType.TouchOnly)
     }
 
     onSwipeRight = () => {
@@ -201,7 +202,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             from = lastMonthFirst
             to = lastMonthLast
         }
-        this.setRange(from, to)
+        this.setRange(from, to, CommandInteractionType.TouchOnly)
     }
 
     closeBottomSheet = () => {
@@ -212,7 +213,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         })
     }
 
-    setRange = (from: Date, to: Date) => {
+    setRange = (from: Date, to: Date, interactionType: CommandInteractionType=CommandInteractionType.TouchOnly) => {
         this.setState(DateRangeBar.deriveState(
             from,
             to,
@@ -220,30 +221,31 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         ))
 
         if (this.props.onRangeChanged) {
-            this.props.onRangeChanged(startOfDay(from), endOfDay(to))
+            this.props.onRangeChanged(startOfDay(from), endOfDay(to), interactionType)
         }
     }
 
-    setFromDate = (from: Date) => {
-        this.setRange(from, this.state.to)
+    setFromDate = (from: Date, interactionType: CommandInteractionType=CommandInteractionType.TouchOnly) => {
+        this.setRange(from, this.state.to, interactionType)
     }
 
-    setToDate = (to: Date) => {
+    setToDate = (to: Date, interactionType: CommandInteractionType=CommandInteractionType.TouchOnly) => {
         this.setRange(
-            this.state.from, to)
+            this.state.from, to, interactionType)
     }
 
-    setMonth = (monthDate: Date) => {
-        this.setRange(startOfMonth(monthDate), endOfMonth(monthDate))
+    setMonth = (monthDate: Date, interactionType: CommandInteractionType) => {
+        this.setRange(startOfMonth(monthDate), endOfMonth(monthDate), interactionType)
+    }
+
+    setMonthByCalendar = (monthDate: Date) => {
+        this.setMonth(monthDate, CommandInteractionType.TouchOnly)
     }
 
     componentDidUpdate() {
     }
 
     render() {
-
-
-        console.log("Range bar rendered")
 
         var modalPickerView
         if (this.state.clickedElementType) {
@@ -255,7 +257,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                             modalPickerView = <WeekPicker selectedWeekFirstDay={this.state.from} onWeekSelected={this.setRange} />
                             break;
                         case 'month':
-                            modalPickerView = <MonthPicker selectedMonth={this.state.from} onMonthSelected={this.setMonth} />
+                            modalPickerView = <MonthPicker selectedMonth={this.state.from} onMonthSelected={this.setMonthByCalendar} />
                             break;
                     }
                     break;

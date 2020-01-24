@@ -12,6 +12,8 @@ import { Button } from 'react-native-elements';
 import { Sizes } from '../../../../style/Sizes';
 import { StyleTemplates } from '../../../../style/Styles';
 import { DateTimeHelper } from '../../../../time';
+import { dataSourceManager } from '../../../../system/DataSourceManager';
+import { DataSourceType } from '../../../../measure/DataSourceSpec';
 
 const titleBarOptionButtonIconInfo = {
     name: "ios-settings",
@@ -66,7 +68,10 @@ export function generateHeaderView(props: ExplorationProps): any {
                 {generateRangeBar(props)}
             </SafeAreaView>
         case ExplorationType.B_Range:
-            break;
+            return <SafeAreaView>
+                {generateDataSourceRow(props)}
+                {generateRangeBar(props)}
+            </SafeAreaView>
         case ExplorationType.B_Day:
             break;
         case ExplorationType.C_Cyclic:
@@ -80,13 +85,15 @@ export function generateHeaderView(props: ExplorationProps): any {
 
 function generateRangeBar(props: ExplorationProps, key?: ParameterKey): any {
     const range = explorationCommandResolver.getParameterValue(props.explorationState.info, ParameterType.Range, key)
-    return <DateRangeBar from={range && startOfDay(DateTimeHelper.toDate(range[0]))} to={range && endOfDay(DateTimeHelper.toDate(range[1]))} onRangeChanged={(from, to) => {
-        props.dispatchCommand(createSetRangeCommand([DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to)], key))
+    return <DateRangeBar from={range && startOfDay(DateTimeHelper.toDate(range[0]))} to={range && endOfDay(DateTimeHelper.toDate(range[1]))} onRangeChanged={(from, to, xType) => {
+        props.dispatchCommand(createSetRangeCommand(xType, [DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to)], key))
     }} />
 }
 
 function generateDataSourceRow(props: ExplorationProps): any {
-    return <CategoricalRow title="DataSource" showBorder={true} value="Step Count" icon={<DataSourceIcon type="step" color="white" size={20} />} />
+    const sourceType = explorationCommandResolver.getParameterValue(props.explorationState.info, ParameterType.DataSource) as DataSourceType
+    const sourceSpec = dataSourceManager.getSpec(sourceType)
+    return <CategoricalRow title="Data Source" showBorder={true} value={sourceSpec.name} icon={<DataSourceIcon type={sourceType} color="white" size={20} />} />
 }
 
 function generateComparisonTypeRow(props: ExplorationProps): any {
