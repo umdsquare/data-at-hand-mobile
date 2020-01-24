@@ -7,6 +7,8 @@ import { DataSourceType, MeasureUnitType } from '../../measure/DataSourceSpec';
 import { dataSourceManager } from '../../system/DataSourceManager';
 import { OverviewSourceRow, StatisticsType } from '../../core/exploration/data/types';
 import commaNumber from 'comma-number';
+import { formatDuration } from '../../time';
+import { startOfDay, addSeconds, format } from 'date-fns';
 
 
 const lightTextColor = "#8b8b8b"
@@ -138,6 +140,45 @@ function formatTodayValue(data: OverviewSourceRow, unitType: MeasureUnitType): T
                 info.formatted = null
             }
             break;
+        case DataSourceType.HoursSlept:
+            if(data.today){
+                var roundedSecs = data.today
+                info.formatted = []
+                if(data.today % 60 >= 30){
+                   roundedSecs = data.today - (data.today % 60) + 60
+                }
+                const hours = Math.floor(roundedSecs / 3600)
+                const minutes = Math.floor((roundedSecs%3600)/60)
+                if(hours > 0){
+                    info.formatted.push({type: 'value', text: hours + " "})
+                    info.formatted.push({type: 'unit', text: "hr" + (minutes > 0? " ":"")})
+                }
+
+                if(hours > 0 && minutes > 0 || hours === 0){
+                    info.formatted.push({type: 'value', text: minutes + " "})
+                    info.formatted.push({type: 'unit', text: 'min'})
+                }
+            }else{
+                info.formatted = null
+            }
+            break;
+        case DataSourceType.SleepRange:
+            if(data.today){
+                const pivot = startOfDay(new Date())
+                const actualBedTime = addSeconds(pivot, Math.round(data.today[0]))
+                const actualWakeTime = addSeconds(pivot, Math.round(data.today[1]))
+
+                info.formatted = [
+                    {type: 'value', text: format(actualBedTime, 'hh:mm ')},
+                    {type: 'unit', text: format(actualBedTime, 'a').toLowerCase()},
+                    {type: 'unit', text: ' - '},
+                    {type: 'value', text: format(actualWakeTime, 'hh:mm ')},
+                    {type: 'unit', text: format(actualWakeTime, 'a').toLowerCase()},
+                ]
+            }else{
+                info.formatted = null
+            }
+            break;
     }
 
     return info
@@ -148,6 +189,9 @@ function getStatisticsLabel(type: StatisticsType): string{
         case 'avg': return "Avg."
         case 'range': return 'Range'
         case 'total': return 'Total'
+        case 'bedtime': return 'Avg. Bedtime'
+        case 'waketime': return 'Avg. Wake Time'
+
     }
 }
 
@@ -182,6 +226,17 @@ function formatStatistics(sourceType: DataSourceType, statisticsType: Statistics
                 case 'avg': return value.toFixed(1)
                 case 'range': return value[0].toFixed(1) + " - " + value[1].toFixed(1)
             }
+
+        case DataSourceType.HoursSlept:
+            switch(statisticsType){
+                case 'avg': return formatDuration(Math.round(value), true)
+                case 'range': return formatDuration(value[0], true) + " - " + formatDuration(value[1], true)
+            }
+
+        case DataSourceType.SleepRange:
+            const pivot = startOfDay(new Date())
+            const actualTime = addSeconds(pivot, Math.round(value))
+            return format(actualTime, 'hh:mm a').toLowerCase()
     }
 }
 

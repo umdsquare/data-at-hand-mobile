@@ -26,7 +26,7 @@ export interface FitbitSleepQueryResult {
     duration: number; // millisecond
     logId: number;
     type: 'stages' | 'classic';
-    levels: Array<{
+    levels: {data: Array<{
       dateTime: string;
       level:
         | 'wake'
@@ -37,7 +37,7 @@ export interface FitbitSleepQueryResult {
         | 'restless'
         | 'awake';
       seconds: number;
-    }>;
+    }>};
     summary: any;
     /*
     "summary": {

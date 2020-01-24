@@ -79,3 +79,19 @@ function pad(n, len) {
     return s;
    
   }
+
+export function formatDuration(durationInSeconds: number, roundToMins: boolean = false): string{
+    var usedDuration = durationInSeconds
+    if(roundToMins===true){
+        if(durationInSeconds%60 >= 30)
+            usedDuration = durationInSeconds - (durationInSeconds%60) + 60
+        else usedDuration = durationInSeconds - (durationInSeconds%60)
+    }
+
+    const hours = Math.floor(usedDuration / 3600)
+    const minutes = Math.floor((usedDuration%3600)/60)
+    const seconds = usedDuration%60
+
+
+    return ((hours>0? (hours + "h ") :"") + (minutes>0? (minutes + "m "):"") + (seconds>0? (seconds + "s "):"")).trim()
+}

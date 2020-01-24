@@ -1,4 +1,4 @@
-import { IDailySummaryEntry, IIntraDayLogEntry } from "../../../../core/exploration/data/types";
+import { IDailySummaryEntry, IIntraDayLogEntry, IDailyNumericSummaryEntry, IDailySleepSummaryEntry } from "../../../../core/exploration/data/types";
 
 const dailySummaryProperties = {
   numberedDate: {type: 'int'},
@@ -9,10 +9,6 @@ const dailySummaryProperties = {
 
 export interface IDataEntry<T> {
   toJson(): T;
-}
-
-interface IDailyNumericSummaryEntry extends IDailySummaryEntry {
-  value: number;
 }
 
 const intraDayLogProperties = {
@@ -144,6 +140,47 @@ export class WeightIntraDayLogEntry
   }
 }
 
+export class DailyMainSleepEntry implements IDailySleepSummaryEntry{
+
+    public static schema = {
+        name: "DailyMainSleepEntry",
+        primaryKey: "numberedDate",
+        properties: {
+            ...dailySummaryProperties,
+            quality: 'int',
+            lengthInSeconds: 'int',
+            bedTimeDiffSeconds: 'int',
+            wakeTimeDiffSeconds: 'int',
+            listOfLevels: 'string[]'
+        }
+    }
+
+    quality: number;
+    lengthInSeconds: number;
+    bedTimeDiffSeconds: number;
+    wakeTimeDiffSeconds: number;
+    numberedDate: number;
+    year: number;
+    month: number;
+    dayOfWeek: number;
+    listOfLevels: string[];
+
+    toJson(includeLevels: boolean): IDailySleepSummaryEntry{
+        return {
+            quality: this.quality,
+            lengthInSeconds: this.lengthInSeconds,
+            bedTimeDiffSeconds: this.bedTimeDiffSeconds,
+            wakeTimeDiffSeconds: this.wakeTimeDiffSeconds,
+            numberedDate: this.numberedDate,
+            year: this.year,
+            month: this.month,
+            dayOfWeek: this.dayOfWeek,
+        }
+
+        //TODO consider levels for the day-level view
+    }
+}
+
 //==========================================================
 
 export interface ICachedRangeEntry {
@@ -187,6 +224,7 @@ export const FitbitLocalCacheConfig = {
     DailyStepCountEntry,
     RestingHeartRateEntry,
     DailyWeightTrendEntry,
-    WeightIntraDayLogEntry
+    WeightIntraDayLogEntry,
+    DailyMainSleepEntry
   ],
 };

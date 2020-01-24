@@ -16,7 +16,7 @@ import {DataLevel} from '../../../core/exploration/types';
 import {FITBIT_PROFILE_URL} from './api';
 import {FitbitServiceMeasure} from './FitbitServiceMeasure';
 import {FitbitWeightMeasure} from './FitbitWeightMeasure';
-import { OverviewSourceRow } from '../../../core/exploration/data/types';
+import { FitbitSleepMeasure } from './FitbitSleepMeasure';
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -57,12 +57,13 @@ export class FitbitService extends DataService {
   private dailyStepMeasure = new FitbitDailyStepMeasure(this);
   private dailyHeartRateMeasure = new FitbitDailyHeartRateMeasure(this);
   private weightLogMeasure = new FitbitWeightMeasure(this);
-  //private sleepMeasure = new FitbitSleepMeasure(this)
+  private sleepMeasure = new FitbitSleepMeasure(this)
 
   private measures: Array<FitbitServiceMeasure> = [
     this.dailyStepMeasure,
     this.dailyHeartRateMeasure,
     this.weightLogMeasure,
+    this.sleepMeasure
   ];
 
   protected async fetchDataImpl(
@@ -84,10 +85,9 @@ export class FitbitService extends DataService {
           }
           break;
         case DataSourceType.HoursSlept:
-          break;
         case DataSourceType.SleepRange:
           if (level === DataLevel.DailyActivity) {
-            //return this.sleepMeasure.fetchData(from, to)
+            return await this.sleepMeasure.fetchData(dataSource, from, to)
           }
           break;
         case DataSourceType.Weight:

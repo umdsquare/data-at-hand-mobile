@@ -10,8 +10,6 @@ export abstract class FitbitServiceMeasure {
 
   constructor(protected readonly service: FitbitService) {}
 
-  abstract fetchData(startDate: Date, endDate: Date): Promise<any>
-
   protected abstract fetchAndCacheFitbitData(
     startDate: number,
     endDate: number,

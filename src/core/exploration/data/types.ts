@@ -1,12 +1,24 @@
 import {DataSourceType} from '../../../measure/DataSourceSpec';
 
-export type StatisticsType = "avg"|"range"|"total"
+export type StatisticsType = 'avg' | 'range' | 'total' | 'bedtime' | 'waketime';
 
 export interface IDailySummaryEntry {
   numberedDate: number;
   year: number;
   month: number;
   dayOfWeek: number;
+}
+
+export interface IDailyNumericSummaryEntry extends IDailySummaryEntry {
+  value: number;
+}
+
+export interface IDailySleepSummaryEntry extends IDailySummaryEntry {
+    quality: number;
+    lengthInSeconds: number;
+    bedTimeDiffSeconds: number;
+    wakeTimeDiffSeconds: number;
+    levels?: Array<any>
 }
 
 export interface IIntraDayLogEntry extends IDailySummaryEntry {
@@ -37,6 +49,10 @@ export interface WeightRangedData extends OverviewSourceRow {
     trend: Array<IDailySummaryEntry>;
     logs: Array<IIntraDayLogEntry>;
   };
+}
+
+export interface SleepRangedData extends OverviewSourceRow {
+    data: Array<IDailySleepSummaryEntry>
 }
 
 export const STATISTICS_LABEL_AVERAGE = 'Avg.';

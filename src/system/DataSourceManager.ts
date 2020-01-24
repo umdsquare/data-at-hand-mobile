@@ -23,7 +23,7 @@ class DataSourceManager {
       category: DataSourceCategory.Weight,
       name: 'Weight',
       description: 'Body weight measured at a specific moment',
-    },/*
+    },
     {
       type: DataSourceType.HoursSlept,
       category: DataSourceCategory.Sleep,
@@ -36,7 +36,7 @@ class DataSourceManager {
       category: DataSourceCategory.Sleep,
       name: 'Sleep Range',
       description: "Bedtime and Wake time of the day\'s sleep",
-    }*/
+    }
   ];
 
   private specMap: Map<DataSourceType, DataSourceSpec>;
