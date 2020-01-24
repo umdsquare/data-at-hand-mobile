@@ -11,8 +11,11 @@ import {
 import {FitbitRangeMeasure} from './FitbitRangeMeasure';
 import {DateTimeHelper} from '../../../time';
 import {parse, getDay} from 'date-fns';
+import { TodayInfo, WeightRangedData, STATISTICS_LABEL_RANGE, STATISTICS_LABEL_AVERAGE } from '../../../core/exploration/data/types';
+import { DataSourceType } from '../../DataSourceSpec';
 
 export class FitbitWeightMeasure extends FitbitServiceMeasure {
+  
   key: string = 'weight';
 
   private trendMeasure: FitbitWeightTrendMeasure;
@@ -40,15 +43,30 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
     startDate: number,
     endDate: number,
   ): Promise<void> {
-    return;
+    return; // noop
   }
 
-  async fetchData(startDate: Date, endDate: Date): Promise<any> {
-    const trendData = await this.trendMeasure.fetchData(startDate, endDate)
-    const logData = await this.trendMeasure.fetchData(startDate, endDate)
+  async fetchData(startDate: Date, endDate: Date): Promise<WeightRangedData> {
+    const trendData = await this.trendMeasure.fetchPreliminaryData(startDate, endDate)
+    const logData = await this.logMeasure.fetchData(startDate, endDate)
     return {
-      trend: trendData,
-      logData: logData
+      source: DataSourceType.Weight,
+      data: {
+        trend: trendData.list,
+        logs: logData
+      },
+      today: this.fetchTodayInfo(),
+      statistics: [
+        {label: STATISTICS_LABEL_AVERAGE + " ", valueText: trendData.avg.toFixed(1) + " kg"},
+        {label: STATISTICS_LABEL_RANGE + " ", valueText: trendData.min.toFixed(1) + " - " + trendData.max.toFixed(1)}
+      ]
+    }
+  }
+
+  fetchTodayInfo(): TodayInfo {
+    const sorted = this.service.realm.objects<WeightIntraDayLogEntry>(WeightIntraDayLogEntry).sorted([["numberedDate", true], ["secondsOfDay", true]])
+    if(sorted.length > 0){
+      return {label: 'Recently', value: sorted[0].value, formatted: [{type: 'value', text: sorted[0].value.toFixed(1)}, {type: 'unit', text: ' kg'}]}
     }
   }
 }
@@ -57,6 +75,7 @@ class FitbitWeightTrendMeasure extends FitbitSummaryLogMeasure<
   FitbitWeightTrendQueryResult,
   DailyWeightTrendEntry
 > {
+
   key: string = 'weight_trend';
 
   protected realmEntryClassType: any = DailyWeightTrendEntry;
@@ -69,11 +88,24 @@ class FitbitWeightTrendMeasure extends FitbitSummaryLogMeasure<
   protected getQueryResultEntryValue(queryResultEntry: any) {
     return Number.parseFloat(queryResultEntry.value);
   }
+
+  fetchTodayInfo(): TodayInfo {
+    return null //noop
+  }
+  
+  formatTodayValue(value: number): { text: string; type: "unit" | "value"; }[] {
+    return null //noop
+  }
+  fetchData(startDate: Date, endDate: Date): Promise<any> {
+    return null //noop
+  }
+  
 }
 
 class FitbitWeightLogMeasure extends FitbitRangeMeasure<
   FitbitWeightQueryResult
 > {
+
   key: string = 'weight_log';
 
   protected resourcePropertyKey: string = 'weight';
@@ -120,5 +152,9 @@ class FitbitWeightLogMeasure extends FitbitRangeMeasure<
           DateTimeHelper.toNumberedDateFromDate(endDate),
       );
     return filtered.snapshot().map(v => v.toJson()) as any;
+  }
+
+  fetchTodayInfo(): TodayInfo {
+    throw new Error("Method not implemented.");
   }
 }

@@ -3,6 +3,7 @@ import {IDataEntry} from './realm/schema';
 import {parse, getDay} from 'date-fns';
 import {FITBIT_DATE_FORMAT} from './api';
 import {FitbitRangeMeasure} from './FitbitRangeMeasure';
+import { TodayInfo } from '../../../core/exploration/data/types';
 
 export abstract class FitbitSummaryLogMeasure<
   QueryResultType,
@@ -11,19 +12,58 @@ export abstract class FitbitSummaryLogMeasure<
 
   protected abstract realmEntryClassType;
   protected maxQueryRangeLength: number = 1095;
+  protected todayLabel = "Today"
   protected abstract getQueryResultEntryValue(queryResultEntry: any): any;
 
-  fetchData(startDate: Date, endDate: Date): Promise<any> {
+  protected getLocalRangeQueryCondition(startDate: Date, endDate: Date): string{
+    return 'numberedDate >= ' +
+    DateTimeHelper.toNumberedDateFromDate(startDate) +
+    ' AND numberedDate <= ' +
+    DateTimeHelper.toNumberedDateFromDate(endDate)
+  }
+
+  fetchPreliminaryData(startDate: Date, endDate: Date): Promise<{list: Array<any>, avg: number, min: number, max: number, sum: number }> {
     const filtered = this.service.realm
       .objects<RealmEntryClassType>(this.realmEntryClassType)
-      .filtered(
-        'numberedDate >= ' +
-          DateTimeHelper.toNumberedDateFromDate(startDate) +
-          ' AND numberedDate <= ' +
-          DateTimeHelper.toNumberedDateFromDate(endDate),
-      );
-    return filtered.snapshot().map(v => v.toJson()) as any;
+      .filtered(this.getLocalRangeQueryCondition(startDate, endDate));
+    const avg = filtered.avg('value') as number
+    const min = filtered.min('value') as number
+    const max = filtered.max('value') as number
+    const sum = filtered.sum('value') as number
+    
+    return Promise.resolve({
+        list: filtered.snapshot().map(v => v.toJson()),
+        avg,
+        min,
+        max,
+        sum
+    })
   }
+
+  fetchTodayInfo(): TodayInfo{
+    const today = new Date()
+    const filtered = this.service.realm
+      .objects<RealmEntryClassType>(this.realmEntryClassType)
+      .filtered(this.getLocalRangeQueryCondition(today, today));
+    
+    const value = filtered.length > 0? filtered[0]["value"] : null
+
+    if(value){
+        return {
+            label: this.todayLabel,
+            value: value,
+            formatted: this.formatTodayValue(value)
+        }
+    }else{
+        return {
+            label: this.todayLabel,
+            value: null,
+            formatted: [{text: "No value", type:'value'}]
+        }
+    }
+  }
+
+  abstract formatTodayValue(value: number): Array<{text: string, type: 'unit'|'value'}>
 
   protected handleQueryResultEntry(realm: Realm, entry: any, now: Date) {
     const numberedDate = DateTimeHelper.fromFormattedString(entry.dateTime);

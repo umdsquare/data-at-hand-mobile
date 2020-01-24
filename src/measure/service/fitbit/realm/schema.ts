@@ -119,7 +119,7 @@ export class WeightIntraDayLogEntry
     properties: {
       ...intraDayLogProperties,
       value: 'float',
-      source: 'string',
+      source: 'string?',
     },
   };
 

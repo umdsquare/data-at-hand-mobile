@@ -1,4 +1,3 @@
-import { MeasureModule, StepMeasureModule, WeightMeasureModule, HeartRateMeasureModule, SleepMeasureModule, WorkoutMeasureModule } from "../measure/MeasureModule";
 import { DataSourceSpec, DataSourceType, DataSourceCategory } from "../measure/DataSourceSpec";
 
 
@@ -41,8 +40,6 @@ class DataSourceManager {
   ];
 
   private specMap: Map<DataSourceType, DataSourceSpec>;
-
-  private moduleMap = new Map<string, MeasureModule<any>>();
 
   constructor() {
     this.specMap = new Map<DataSourceType, DataSourceSpec>();

@@ -1,17 +1,22 @@
-import {DataService, UnSupportedReason, ServiceActivationResult} from '../DataService';
+import {
+  DataService,
+  UnSupportedReason,
+  ServiceActivationResult,
+} from '../DataService';
 import {AsyncStorageHelper} from '../../../system/AsyncStorageHelper';
 import {refresh, authorize, revoke} from 'react-native-app-auth';
 import {FitbitUserProfile} from './types';
 import {DataSourceType} from '../../DataSourceSpec';
-import { FitbitDailyStepMeasure } from './FitbitDailyStepMeasure';
-import { FitbitDailyHeartRateMeasure } from './FitbitDailyHeartRateMeasure';
-import { DateTimeHelper } from '../../../time';
-import { FitbitLocalCacheConfig } from './realm/schema';
+import {FitbitDailyStepMeasure} from './FitbitDailyStepMeasure';
+import {FitbitDailyHeartRateMeasure} from './FitbitDailyHeartRateMeasure';
+import {DateTimeHelper} from '../../../time';
+import {FitbitLocalCacheConfig} from './realm/schema';
 import * as Realm from 'realm';
-import { DataLevel } from '../../../core/exploration/types';
-import { FITBIT_PROFILE_URL } from './api';
-import { FitbitServiceMeasure } from './FitbitServiceMeasure';
-import { FitbitWeightMeasure } from './FitbitWeightMeasure';
+import {DataLevel} from '../../../core/exploration/types';
+import {FITBIT_PROFILE_URL} from './api';
+import {FitbitServiceMeasure} from './FitbitServiceMeasure';
+import {FitbitWeightMeasure} from './FitbitWeightMeasure';
+import { OverviewSourceRow } from '../../../core/exploration/data/types';
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -23,8 +28,8 @@ const STORAGE_KEY_AUTH_STATE = DataService.STORAGE_PREFIX + 'fitbit:state';
 const STORAGE_KEY_USER_TIMEZONE =
   DataService.STORAGE_PREFIX + 'fitbit:user_timezone';
 
-const STORAGE_KEY_USER_MEMBER_SINCE = DataService.STORAGE_PREFIX + 'fitbit:user_memberSince';
-
+const STORAGE_KEY_USER_MEMBER_SINCE =
+  DataService.STORAGE_PREFIX + 'fitbit:user_memberSince';
 
 export class FitbitService extends DataService {
   key: string = 'fitbit';
@@ -37,8 +42,8 @@ export class FitbitService extends DataService {
 
   private _realm: Realm;
 
-  get realm(): Realm{
-    return this._realm
+  get realm(): Realm {
+    return this._realm;
   }
 
   get credential(): FitbitCredential {
@@ -49,14 +54,16 @@ export class FitbitService extends DataService {
     return true;
   }
 
-
-  private dailyStepMeasure = new FitbitDailyStepMeasure(this)
-  private dailyHeartRateMeasure = new FitbitDailyHeartRateMeasure(this)
-  private weightLogMeasure = new FitbitWeightMeasure(this)
+  private dailyStepMeasure = new FitbitDailyStepMeasure(this);
+  private dailyHeartRateMeasure = new FitbitDailyHeartRateMeasure(this);
+  private weightLogMeasure = new FitbitWeightMeasure(this);
   //private sleepMeasure = new FitbitSleepMeasure(this)
 
-
-  private measures: Array<FitbitServiceMeasure> = [this.dailyStepMeasure, this.dailyHeartRateMeasure, this.weightLogMeasure]
+  private measures: Array<FitbitServiceMeasure> = [
+    this.dailyStepMeasure,
+    this.dailyHeartRateMeasure,
+    this.weightLogMeasure,
+  ];
 
   protected async fetchDataImpl(
     dataSource: DataSourceType,
@@ -64,33 +71,33 @@ export class FitbitService extends DataService {
     from: Date,
     to: Date,
   ): Promise<any> {
-    switch (dataSource) {
-      case DataSourceType.StepCount:
-        if(level === DataLevel.DailyActivity){
-          console.log("try get fitbit step data from db")
-          return await this.dailyStepMeasure.fetchData(from, to)
-        }else{
+    if (level === DataLevel.DailyActivity) {
+      switch (dataSource) {
+        case DataSourceType.StepCount:
+          console.log('try get fitbit step data from db');
+          return await this.dailyStepMeasure.fetchData(from, to);
 
-        }
-        break;
-      case DataSourceType.HeartRate:
-        if(level === DataLevel.DailyActivity){
-          console.log("try get fitbit HR data from db")
-          return await this.dailyHeartRateMeasure.fetchData(from, to)
-        }
-        break;
-      case DataSourceType.HoursSlept:
-        break;
-      case DataSourceType.SleepRange:
-        if(level === DataLevel.DailyActivity){
-          //return this.sleepMeasure.fetchData(from, to)
-        }
-        break;
-      case DataSourceType.Weight:
-        return await this.weightLogMeasure.fetchData(from, to)
+        case DataSourceType.HeartRate:
+          if (level === DataLevel.DailyActivity) {
+            console.log('try get fitbit HR data from db');
+            return await this.dailyHeartRateMeasure.fetchData(from, to);
+          }
+          break;
+        case DataSourceType.HoursSlept:
+          break;
+        case DataSourceType.SleepRange:
+          if (level === DataLevel.DailyActivity) {
+            //return this.sleepMeasure.fetchData(from, to)
+          }
+          break;
+        case DataSourceType.Weight:
+          return await this.weightLogMeasure.fetchData(from, to);
+      }
+
+      return null;
+    } else {
+      return null;
     }
-
-    return null;
   }
 
   async checkTokenValid(): Promise<boolean> {
@@ -134,14 +141,17 @@ export class FitbitService extends DataService {
   }
 
   async signOut(): Promise<void> {
-    console.log("try fitbit sign out")
+    console.log('try fitbit sign out');
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
     if (state) {
-      await revoke(this._authConfig, {tokenToRevoke: state.refreshToken, includeBasicAuth: true} as any);
+      await revoke(this._authConfig, {
+        tokenToRevoke: state.refreshToken,
+        includeBasicAuth: true,
+      } as any);
       await AsyncStorageHelper.remove(STORAGE_KEY_AUTH_STATE);
       await AsyncStorageHelper.remove(STORAGE_KEY_USER_TIMEZONE);
       await AsyncStorageHelper.remove(STORAGE_KEY_USER_MEMBER_SINCE);
-      Realm.deleteFile(FitbitLocalCacheConfig)
+      Realm.deleteFile(FitbitLocalCacheConfig);
     }
   }
 
@@ -150,22 +160,23 @@ export class FitbitService extends DataService {
       const accessToken = await this.authenticate();
       if (accessToken != null) {
         const initialDate = await this.getMembershipStartDate();
-        const now = DateTimeHelper.toNumberedDateFromDate(new Date)
+        const now = DateTimeHelper.toNumberedDateFromDate(new Date());
 
-        console.log("initialize new realm.")
-        this._realm = await Realm.open(FitbitLocalCacheConfig)
+        console.log('initialize new realm.');
+        this._realm = await Realm.open(FitbitLocalCacheConfig);
 
-        for(const measure of this.measures){
-          await measure.cacheServerData(now)
+        for (const measure of this.measures) {
+          await measure.cacheServerData(now);
         }
-        
+
         return {
           success: true,
-          serviceInitialDate: initialDate
-        }
-      } else return {
-        success: false 
-      };
+          serviceInitialDate: initialDate,
+        };
+      } else
+        return {
+          success: false,
+        };
     } catch (ex) {
       console.log(ex);
       return {success: false, error: ex};
@@ -182,22 +193,30 @@ export class FitbitService extends DataService {
     }
   }
 
-  onSystemExit(){
-    this._realm.close()
+  onSystemExit() {
+    this._realm.close();
   }
 
   async updateUserProfile(): Promise<boolean> {
-    const profile: FitbitUserProfile = await this.fetchFitbitQuery(FITBIT_PROFILE_URL)
-    console.log(profile)
+    const profile: FitbitUserProfile = await this.fetchFitbitQuery(
+      FITBIT_PROFILE_URL,
+    );
+    console.log(profile);
     if (profile != null) {
-      await AsyncStorageHelper.set(STORAGE_KEY_USER_TIMEZONE, profile.user.timezone)
-      await AsyncStorageHelper.set(STORAGE_KEY_USER_MEMBER_SINCE, DateTimeHelper.fromFormattedString(profile.user.memberSince))
-      return true
+      await AsyncStorageHelper.set(
+        STORAGE_KEY_USER_TIMEZONE,
+        profile.user.timezone,
+      );
+      await AsyncStorageHelper.set(
+        STORAGE_KEY_USER_MEMBER_SINCE,
+        DateTimeHelper.fromFormattedString(profile.user.memberSince),
+      );
+      return true;
     } else return false;
   }
 
-  async getMembershipStartDate(): Promise<number>{
-    console.log("get membership start date")
+  async getMembershipStartDate(): Promise<number> {
+    console.log('get membership start date');
     const cached = await AsyncStorageHelper.getLong(
       STORAGE_KEY_USER_MEMBER_SINCE,
     );
@@ -228,10 +247,10 @@ export class FitbitService extends DataService {
   async fetchFitbitQuery(url: string): Promise<any> {
     console.log('fetch query for ', url);
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
-    var accessToken
-    if(state==null || state.accessToken == null){
-        accessToken = await this.authenticate()
-    }else accessToken = state.accessToken
+    var accessToken;
+    if (state == null || state.accessToken == null) {
+      accessToken = await this.authenticate();
+    } else accessToken = state.accessToken;
 
     return fetch(url, {
       method: 'GET',
@@ -241,32 +260,41 @@ export class FitbitService extends DataService {
         'Content-Type': 'application/json',
       },
     }).then(async result => {
-
-      const quota = result.headers.get("Fitbit-Rate-Limit-Limit")
-      const remainedCalls = result.headers.get("Fitbit-Rate-Limit-Remaining")
-      const secondsLeftToNextReset = result.headers.get("Fitbit-Rate-Limit-Reset")
+      const quota = result.headers.get('Fitbit-Rate-Limit-Limit');
+      const remainedCalls = result.headers.get('Fitbit-Rate-Limit-Remaining');
+      const secondsLeftToNextReset = result.headers.get(
+        'Fitbit-Rate-Limit-Reset',
+      );
 
       if (result.ok === false) {
         const json = await result.json();
-        switch(result.status){
+        switch (result.status) {
           case 401:
             if (json.errors[0].errorType === 'expired_token') {
               console.log(
                 'Fitbit token is expired. refresh token and try once again.',
               );
-              return this.authenticate().then(() =>
-                this.fetchFitbitQuery(url),
-              );
+              return this.authenticate().then(() => this.fetchFitbitQuery(url));
             } else throw {error: 'Access token invalid.'};
 
           case 429:
-            throw {error: "Fitbit quota limit reached. Next reset: " + secondsLeftToNextReset + " secs."}
+            throw {
+              error:
+                'Fitbit quota limit reached. Next reset: ' +
+                secondsLeftToNextReset +
+                ' secs.',
+            };
           default:
             throw {error: result.status};
         }
       } else {
-        console.log("Fitbit API call succeeded. Remaining quota:", remainedCalls+"/"+quota, "next reset:", secondsLeftToNextReset + " secs.")
-        return result.json()
+        console.log(
+          'Fitbit API call succeeded. Remaining quota:',
+          remainedCalls + '/' + quota,
+          'next reset:',
+          secondsLeftToNextReset + ' secs.',
+        );
+        return result.json();
       }
     });
   }
@@ -297,5 +325,4 @@ export class FitbitService extends DataService {
       });
     }
   }
-
 }

@@ -4,6 +4,7 @@ import {
   ICachedRangeEntry,
 } from './realm/schema';
 import {differenceInMinutes} from 'date-fns';
+import { TodayInfo } from '../../../core/exploration/data/types';
 
 export abstract class FitbitServiceMeasure {
   abstract key: string;
@@ -11,6 +12,7 @@ export abstract class FitbitServiceMeasure {
   constructor(protected readonly service: FitbitService) {}
 
   abstract fetchData(startDate: Date, endDate: Date): Promise<any>
+  abstract fetchTodayInfo(): TodayInfo
 
   protected abstract fetchAndCacheFitbitData(
     startDate: number,
