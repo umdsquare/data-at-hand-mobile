@@ -1,21 +1,17 @@
 import {DataService, UnSupportedReason, ServiceActivationResult} from '../DataService';
 import {AsyncStorageHelper} from '../../../system/AsyncStorageHelper';
 import {refresh, authorize, revoke} from 'react-native-app-auth';
-import {Moment} from 'moment';
 import {FitbitUserProfile} from './types';
 import {DataSourceType} from '../../DataSourceSpec';
 import {IDatumBase} from '../../../database/types';
 import { FitbitDailyStepMeasure } from './FitbitDailyStepMeasure';
 import { FitbitDailyHeartRateMeasure } from './FitbitDailyHeartRateMeasure';
-import { FitbitWeightLogMeasure } from './FitbitWeightLogMeasure';
-import { FitbitSleepMeasure } from './FitbitSleepMeasure';
 import { DateTimeHelper } from '../../../time';
 import { FitbitLocalCacheConfig } from './realm/schema';
 import * as Realm from 'realm';
 import { DataLevel } from '../../../core/exploration/types';
 import { FITBIT_PROFILE_URL } from './api';
-
-type TimeLike = Date | number | string | Moment;
+import { FitbitServiceMeasure } from './FitbitServiceMeasure';
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -39,6 +35,12 @@ export class FitbitService extends DataService {
   private _credential: FitbitCredential = null;
   private _authConfig = null;
 
+  private _realm: Realm;
+
+  get realm(): Realm{
+    return this._realm
+  }
+
   get credential(): FitbitCredential {
     return this._credential;
   }
@@ -47,13 +49,16 @@ export class FitbitService extends DataService {
     return true;
   }
 
+
   private dailyStepMeasure = new FitbitDailyStepMeasure(this)
   private dailyHeartRateMeasure = new FitbitDailyHeartRateMeasure(this)
-  private weightLogMeasure = new FitbitWeightLogMeasure(this)
-  private sleepMeasure = new FitbitSleepMeasure(this)
+  //private weightLogMeasure = new FitbitWeightLogMeasure(this)
+  //private sleepMeasure = new FitbitSleepMeasure(this)
 
 
-  protected fetchDataImpl(
+  private measures: Array<FitbitServiceMeasure> = [this.dailyStepMeasure, this.dailyHeartRateMeasure]
+
+  protected async fetchDataImpl(
     dataSource: DataSourceType,
     level: DataLevel,
     from: Date,
@@ -62,25 +67,27 @@ export class FitbitService extends DataService {
     switch (dataSource) {
       case DataSourceType.StepCount:
         if(level === DataLevel.DailyActivity){
-          return this.dailyStepMeasure.fetchData(from, to)
+          console.log("try get fitbit step data from db")
+          return await this.dailyStepMeasure.fetchData(from, to)
         }else{
 
         }
         break;
       case DataSourceType.HeartRate:
         if(level === DataLevel.DailyActivity){
-          return this.dailyHeartRateMeasure.fetchData(from, to)
+          console.log("try get fitbit HR data from db")
+          return await this.dailyHeartRateMeasure.fetchData(from, to)
         }
         break;
       case DataSourceType.HoursSlept:
         break;
       case DataSourceType.SleepRange:
         if(level === DataLevel.DailyActivity){
-          return this.sleepMeasure.fetchData(from, to)
+          //return this.sleepMeasure.fetchData(from, to)
         }
         break;
       case DataSourceType.Weight:
-        return this.weightLogMeasure.fetchData(from, to)
+        //return this.weightLogMeasure.fetchData(from, to)
         break;
     }
 
@@ -144,7 +151,14 @@ export class FitbitService extends DataService {
       const accessToken = await this.authenticate();
       if (accessToken != null) {
         const initialDate = await this.getMembershipStartDate();
-        this.dailyStepMeasure.cacheServerData(DateTimeHelper.toNumberedDateFromDate(new Date))
+        const now = DateTimeHelper.toNumberedDateFromDate(new Date)
+
+        console.log("initialize new realm.")
+        this._realm = await Realm.open(FitbitLocalCacheConfig)
+
+        await this.measures[0].cacheServerData(now)
+        await this.measures[1].cacheServerData(now)
+        
         return {
           success: true,
           serviceInitialDate: initialDate
@@ -166,6 +180,10 @@ export class FitbitService extends DataService {
       console.log(e);
       return false;
     }
+  }
+
+  onSystemExit(){
+    this._realm.close()
   }
 
   /*
@@ -272,7 +290,7 @@ export class FitbitService extends DataService {
               console.log(
                 'Fitbit token is expired. refresh token and try once again.',
               );
-              return this.authenticate().then(token =>
+              return this.authenticate().then(() =>
                 this.fetchFitbitQuery(url),
               );
             } else throw {error: 'Access token invalid.'};

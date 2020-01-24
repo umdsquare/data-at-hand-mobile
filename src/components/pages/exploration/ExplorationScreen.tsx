@@ -1,10 +1,9 @@
 import { PropsWithNavigation } from "../../../PropsWithNavigation";
-import React, { Props } from "react";
-import { StatusBar, View, StyleSheet, Text, Platform, SafeAreaView } from "react-native";
+import React from "react";
+import { StatusBar, View, StyleSheet, Platform } from "react-native";
 import Colors from "../../../style/Colors";
 import { StyleTemplates } from "../../../style/Styles";
 import { ExplorationState, resolveExplorationCommand } from "../../../state/exploration/interaction/reducers";
-import { Dispatch } from "redux";
 import { ThunkDispatch } from "redux-thunk";
 import { ReduxAppState } from "../../../state/types";
 import { connect } from "react-redux";
@@ -13,12 +12,9 @@ import { ExplorationCommand } from "../../../core/exploration/commands";
 import { BottomBar } from "../../exploration/BottomBar";
 import { explorationCommandResolver } from "../../../core/exploration/ExplorationCommandResolver";
 import { DataServiceManager } from "../../../system/DataServiceManager";
-import { DataSourceType } from "../../../measure/DataSourceSpec";
-import { ParameterType, ExplorationInfo } from "../../../core/exploration/types";
-import { DataLevel } from "../../../database/types";
+import { ExplorationInfo } from "../../../core/exploration/types";
 import { ExplorationDataState, startLoadingForInfo } from "../../../state/exploration/data/reducers";
 import { ExplorationMainPanel } from "./parts/main";
-import { FitbitService } from "../../../measure/service/fitbit/FitbitService";
 var deepEqual = require('deep-equal');
 
 const styles = StyleSheet.create({
@@ -67,7 +63,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
     componentDidMount() {
 
         if (this.props.selectedServiceKey) {
-            DataServiceManager.getServiceByKey(this.props.selectedServiceKey).activateInSystem().then(success => {
+            DataServiceManager.getServiceByKey(this.props.selectedServiceKey).activateInSystem().then(() => {
                 console.log("activated ", this.props.selectedServiceKey, "successfully.")
                 this.props.dispatchDataReload(this.props.explorationState.info)
             }).catch(error => {

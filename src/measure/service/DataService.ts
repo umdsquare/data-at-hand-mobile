@@ -56,15 +56,8 @@ export abstract class DataService {
   abstract async activateInSystem(): Promise<ServiceActivationResult>
   abstract async deactivatedInSystem(): Promise<boolean>
 
-}
+  abstract onSystemExit()
 
-export abstract class DataServiceMeasure{
-
-  constructor(readonly source: DataService) {}
-
-  castedService<T extends DataService>(): T{ return this.source as T}
-  
-  abstract fetchData(startDate: Date, endDate: Date): Promise<Array<IDatumBase>>
 }
 
 export enum UnSupportedReason {

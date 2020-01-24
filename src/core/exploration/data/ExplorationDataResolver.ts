@@ -41,17 +41,13 @@ class ExplorationDataResolver {
     const selectedService = DataServiceManager.getServiceByKey(
       selectedServiceKey,
     );
-
+    
     const today = new Date();
+    
     return Promise.all(
       dataSourceManager.supportedDataSources.map(source =>
         selectedService
-          .fetchData(
-            source.type,
-            DataLevel.DailyActivity,
-            rangeStartDate,
-            rangeEndDate,
-          )
+          .fetchData(source.type, DataLevel.DailyActivity, rangeStartDate, rangeEndDate)
           .then(list =>
             selectedService
               .fetchData(source.type, DataLevel.DailyActivity, today, today)

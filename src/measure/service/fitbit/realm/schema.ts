@@ -1,8 +1,3 @@
-enum FitbitRealmSchemaNames {
-  CachedRange = 'CachedRange',
-  DailyStepCount = 'DailyStepCount',
-}
-
 const dailySummaryProperties = {
   numberedDate: {type: 'int'},
   year: {type: 'int'},
@@ -10,16 +5,26 @@ const dailySummaryProperties = {
   dayOfWeek: {type: 'int'},
 };
 
-class DailySummaryEntry {
+interface IDailySummaryEntry<T> {
   numberedDate: number;
   year: number;
   month: number;
   dayOfWeek: number;
 }
 
-export class DailyStepCountEntry extends DailySummaryEntry {
+export interface IDataEntry<T> {
+  toJson(): T;
+}
+
+interface IDailyNumericSummaryEntry
+  extends IDailySummaryEntry<IDailyNumericSummaryEntry> {
+  value: number;
+}
+
+export class DailyStepCountEntry
+  implements IDailyNumericSummaryEntry, IDataEntry<IDailyNumericSummaryEntry> {
   public static schema = {
-    name: FitbitRealmSchemaNames.DailyStepCount,
+    name: 'DailyStepCount',
     primaryKey: 'numberedDate',
     properties: {
       ...dailySummaryProperties,
@@ -27,18 +32,63 @@ export class DailyStepCountEntry extends DailySummaryEntry {
     },
   };
 
-  public value: number;
+  value: number;
+  numberedDate: number;
+  year: number;
+  month: number;
+  dayOfWeek: number;
+
+  toJson(): IDailyNumericSummaryEntry {
+    return {
+      value: this.value,
+      numberedDate: this.numberedDate,
+      year: this.year,
+      month: this.month,
+      dayOfWeek: this.dayOfWeek,
+    };
+  }
 }
 
-export interface ICachedRangeEntry{
+export class RestingHeartRateEntry
+  implements IDailyNumericSummaryEntry, IDataEntry<IDailyNumericSummaryEntry> {
+  public static schema = {
+    name: 'RestingHeartRate',
+    primaryKey: 'numberedDate',
+    properties: {
+      ...dailySummaryProperties,
+      value: {type: 'int', indexed: true},
+    },
+  };
+
+  value: number;
+  numberedDate: number;
+  year: number;
+  month: number;
+  dayOfWeek: number;
+
+  toJson(): IDailyNumericSummaryEntry {
+    return {
+      value: this.value,
+      numberedDate: this.numberedDate,
+      year: this.year,
+      month: this.month,
+      dayOfWeek: this.dayOfWeek,
+    };
+  }
+}
+
+//==========================================================
+
+export interface ICachedRangeEntry {
   measureKey: string;
   endDate?: number;
   queriedAt?: Date;
 }
 
-export class CachedRangeEntry implements ICachedRangeEntry {
+export class CachedRangeEntry
+  implements ICachedRangeEntry, IDataEntry<ICachedRangeEntry> {
   public static schema = {
-    name: FitbitRealmSchemaNames.CachedRange,
+    name: 'CachedRange',
     primaryKey: 'measureKey',
     properties: {
       measureKey: 'string',
@@ -60,8 +110,10 @@ export class CachedRangeEntry implements ICachedRangeEntry {
   }
 }
 
+//=======================================================
+
 export const FitbitLocalCacheConfig = {
   path: 'fitbit.realm',
   deleteRealmIfMigrationNeeded: __DEV__ != null,
-  schema: [CachedRangeEntry, DailyStepCountEntry],
+  schema: [CachedRangeEntry, DailyStepCountEntry, RestingHeartRateEntry],
 };

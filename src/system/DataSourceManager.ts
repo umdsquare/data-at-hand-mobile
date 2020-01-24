@@ -11,14 +11,14 @@ class DataSourceManager {
       category: DataSourceCategory.Step,
       name: "Step Count",
       description: 'Step Count Walked',
-    },/*
+    },
     {
       type: DataSourceType.HeartRate,
       category: DataSourceCategory.HeartRate,
       name: 'Resting Heart Rate',
       description:
         'Heart Rate BPM (Beats per Minute) measured at a specific moment',
-    },
+    },/*
     {
       type: DataSourceType.Weight,
       category: DataSourceCategory.Weight,

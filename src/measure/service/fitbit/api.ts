@@ -78,7 +78,7 @@ export function makeFitbitWeightTrendApiUrl(
 
 
 
-export function makeFitbitHeartRateIntradayUrl(date: TimeLike): string {
+export function makeFitbitHeartRateIntradayUrl(date: Date): string {
   const moment = require('moment');
   const stringFormat = require('string-format');
   return stringFormat(FITBIT_HEARTRATE_LOGS_URL, {
@@ -88,7 +88,7 @@ export function makeFitbitHeartRateIntradayUrl(date: TimeLike): string {
   });
 }
 
-export function makeFitbitDailyActivitySummaryUrl(date: TimeLike): string {
+export function makeFitbitDailyActivitySummaryUrl(date: Date): string {
   const moment = require('moment');
   const stringFormat = require('string-format');
   return stringFormat(FITBIT_ACTIVITY_SUMMARY_URL, {
