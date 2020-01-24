@@ -1,5 +1,7 @@
 import {DataSourceType} from '../../../measure/DataSourceSpec';
 
+export type StatisticsType = "avg"|"range"|"total"
+
 export interface IDailySummaryEntry {
   numberedDate: number;
   year: number;
@@ -15,17 +17,11 @@ export interface OverviewData {
   sourceDataList: Array<OverviewSourceRow>;
 }
 
-export interface TodayInfo {
-  label: string;
-  value: number;
-  formatted: Array<{text: string; type: 'unit' | 'value'}>;
-}
-
 export interface OverviewSourceRow {
   source: DataSourceType;
-  today: TodayInfo,
   data: any;
-  statistics: Array<{label: string; valueText: string}>;
+  today: number;
+  statistics: Array<{type: StatisticsType; value: any}>;
 }
 
 export interface StepCountRangedData extends OverviewSourceRow {
@@ -43,6 +39,6 @@ export interface WeightRangedData extends OverviewSourceRow {
   };
 }
 
-export const STATISTICS_LABEL_AVERAGE = "Avg."
-export const STATISTICS_LABEL_TOTAL = "Total"
-export const STATISTICS_LABEL_RANGE = "Range"
+export const STATISTICS_LABEL_AVERAGE = 'Avg.';
+export const STATISTICS_LABEL_TOTAL = 'Total';
+export const STATISTICS_LABEL_RANGE = 'Range';

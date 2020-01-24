@@ -11,7 +11,7 @@ import {
 import {FitbitRangeMeasure} from './FitbitRangeMeasure';
 import {DateTimeHelper} from '../../../time';
 import {parse, getDay} from 'date-fns';
-import { TodayInfo, WeightRangedData, STATISTICS_LABEL_RANGE, STATISTICS_LABEL_AVERAGE } from '../../../core/exploration/data/types';
+import { WeightRangedData } from '../../../core/exploration/data/types';
 import { DataSourceType } from '../../DataSourceSpec';
 
 export class FitbitWeightMeasure extends FitbitServiceMeasure {
@@ -55,19 +55,24 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
         trend: trendData.list,
         logs: logData
       },
-      today: this.fetchTodayInfo(),
+      today: this.fetchTodayValue(),
       statistics: [
+        {type : "avg", value: trendData.avg},
+        {type: "range", value: [trendData.min, trendData.max]}
+        /*
         {label: STATISTICS_LABEL_AVERAGE + " ", valueText: trendData.avg.toFixed(1) + " kg"},
-        {label: STATISTICS_LABEL_RANGE + " ", valueText: trendData.min.toFixed(1) + " - " + trendData.max.toFixed(1)}
+        {label: STATISTICS_LABEL_RANGE + " ", valueText: trendData.min.toFixed(1) + " - " + trendData.max.toFixed(1)}*/
       ]
     }
   }
 
-  fetchTodayInfo(): TodayInfo {
+  private fetchTodayValue(): number {
     const sorted = this.service.realm.objects<WeightIntraDayLogEntry>(WeightIntraDayLogEntry).sorted([["numberedDate", true], ["secondsOfDay", true]])
+    return sorted.length > 0 ? sorted[0].value : null
+    /*
     if(sorted.length > 0){
       return {label: 'Recently', value: sorted[0].value, formatted: [{type: 'value', text: sorted[0].value.toFixed(1)}, {type: 'unit', text: ' kg'}]}
-    }
+    }*/
   }
 }
 
@@ -88,14 +93,7 @@ class FitbitWeightTrendMeasure extends FitbitSummaryLogMeasure<
   protected getQueryResultEntryValue(queryResultEntry: any) {
     return Number.parseFloat(queryResultEntry.value);
   }
-
-  fetchTodayInfo(): TodayInfo {
-    return null //noop
-  }
   
-  formatTodayValue(value: number): { text: string; type: "unit" | "value"; }[] {
-    return null //noop
-  }
   fetchData(startDate: Date, endDate: Date): Promise<any> {
     return null //noop
   }
@@ -152,9 +150,5 @@ class FitbitWeightLogMeasure extends FitbitRangeMeasure<
           DateTimeHelper.toNumberedDateFromDate(endDate),
       );
     return filtered.snapshot().map(v => v.toJson()) as any;
-  }
-
-  fetchTodayInfo(): TodayInfo {
-    throw new Error("Method not implemented.");
   }
 }

@@ -2,8 +2,7 @@ import { FitbitDailyActivityStepsQueryResult } from "./types";
 import { DailyStepCountEntry } from './realm/schema';
 import { makeFitbitDayLevelActivityLogsUrl } from "./api";
 import { FitbitSummaryLogMeasure } from "./FitbitSummaryLogMeasure";
-import { StepCountRangedData, STATISTICS_LABEL_AVERAGE, STATISTICS_LABEL_TOTAL, STATISTICS_LABEL_RANGE } from "../../../core/exploration/data/types";
-import commaNumber from 'comma-number';
+import { StepCountRangedData } from "../../../core/exploration/data/types";
 import { DataSourceType } from "../../DataSourceSpec";
 
 export class FitbitDailyStepMeasure extends FitbitSummaryLogMeasure<FitbitDailyActivityStepsQueryResult, DailyStepCountEntry> {
@@ -29,24 +28,18 @@ export class FitbitDailyStepMeasure extends FitbitSummaryLogMeasure<FitbitDailyA
     const base = {
       source: DataSourceType.StepCount,
       data: rangedData.list,
-      today: this.fetchTodayInfo(),
+      today: this.fetchTodayValue(),
       statistics: [
+        {type: 'avg', value: rangedData.avg},
+        {type: 'total', value: rangedData.sum},
+        {type: 'range', value: [rangedData.min, rangedData.max]}
+        /*
         {label: STATISTICS_LABEL_AVERAGE + " ", valueText: commaNumber(Math.round(rangedData.avg))},
         {label: STATISTICS_LABEL_TOTAL + " ", valueText: commaNumber(rangedData.sum)},
-        {label: STATISTICS_LABEL_RANGE+ " ", valueText: commaNumber(rangedData.min) + " - " + commaNumber(rangedData.max)}
+        {label: STATISTICS_LABEL_RANGE+ " ", valueText: commaNumber(rangedData.min) + " - " + commaNumber(rangedData.max)}*/
       ]
     } as StepCountRangedData
 
     return base
-  }
-
-  formatTodayValue(value: number): { text: string; type: "unit" | "value"; }[] {
-    return [
-      {
-        text: commaNumber(value),
-        type: 'value',
-      },
-      {text: ' steps', type: 'unit'},
-    ]
   }
 }

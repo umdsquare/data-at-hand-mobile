@@ -9,11 +9,13 @@ import { OverviewData } from '../../../../core/exploration/data/types';
 import { DataSourceChartFrame } from '../../../exploration/DataSourceChartFrame';
 import { dataSourceManager } from '../../../../system/DataSourceManager';
 import { ExplorationState } from '../../../../state/exploration/interaction/reducers';
+import { MeasureUnitType } from '../../../../measure/DataSourceSpec';
 
 
 interface Props {
     dataState?: ExplorationDataState,
     explorationState?: ExplorationState
+    measureUnitType?: MeasureUnitType
 }
 
 interface State {
@@ -32,10 +34,9 @@ class ExplorationMainPanel extends React.Component<Props>{
                     return <ScrollView>
                         {
                             overviewData.sourceDataList.map(sourceEntry => {
-                                return <DataSourceChartFrame key={sourceEntry.source.toString()} sourceType={sourceEntry.source} 
-                                todayMeasureTitle={sourceEntry.today && sourceEntry.today.label} 
-                                todayMeasureValue={sourceEntry.today && sourceEntry.today.formatted}
-                                statistics={sourceEntry.statistics}
+                                return <DataSourceChartFrame key={sourceEntry.source.toString()}
+                                    data={sourceEntry}
+                                    measureUnitType={this.props.measureUnitType}
                                 />
                             })
                         }
@@ -58,7 +59,8 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
     return {
         ...ownProps,
         dataState: appState.explorationDataState,
-        explorationState: appState.explorationState
+        explorationState: appState.explorationState,
+        measureUnitType: appState.settingsState.unit
     }
 }
 

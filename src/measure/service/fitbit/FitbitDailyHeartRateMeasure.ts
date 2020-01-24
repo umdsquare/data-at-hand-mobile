@@ -2,7 +2,7 @@ import {FitbitDailyActivityHeartRateQueryResult} from './types';
 import {FitbitSummaryLogMeasure} from './FitbitSummaryLogMeasure';
 import {RestingHeartRateEntry} from './realm/schema';
 import {makeFitbitDayLevelActivityLogsUrl} from './api';
-import { STATISTICS_LABEL_AVERAGE, RestingHeartRateRangedData, STATISTICS_LABEL_RANGE } from '../../../core/exploration/data/types';
+import { RestingHeartRateRangedData, STATISTICS_LABEL_RANGE } from '../../../core/exploration/data/types';
 import { DataSourceType } from '../../DataSourceSpec';
 
 export class FitbitDailyHeartRateMeasure extends FitbitSummaryLogMeasure<
@@ -23,27 +23,14 @@ export class FitbitDailyHeartRateMeasure extends FitbitSummaryLogMeasure<
     return queryResultEntry.value.restingHeartRate;
   }
 
-  formatTodayValue(value: number): {text: string; type: 'unit' | 'value'}[] {
-    return [
-      {
-        text: value.toString(),
-        type: 'value',
-      },
-      {
-        text: ' bpm',
-        type: 'unit',
-      },
-    ];
-  }
-
   async fetchData(startDate: Date, endDate: Date): Promise<any> {
     const rangedData = await super.fetchPreliminaryData(startDate, endDate);
     const base = {
       source: DataSourceType.HeartRate,
       data: rangedData.list,
-      today: this.fetchTodayInfo(),
+      today: this.fetchTodayValue(),
       statistics:
-        [
+        [/*
           {
             label: STATISTICS_LABEL_AVERAGE + " ",
             valueText: Math.round(
@@ -53,6 +40,14 @@ export class FitbitDailyHeartRateMeasure extends FitbitSummaryLogMeasure<
           {
               label: STATISTICS_LABEL_RANGE + " ",
               valueText: rangedData.min + " - " + rangedData.max
+          }*/
+          {
+            type: 'avg',
+            value: rangedData.avg
+          },
+          {
+            type: 'range',
+            value: [rangedData.min, rangedData.max]
           }
         ]
     } as RestingHeartRateRangedData;

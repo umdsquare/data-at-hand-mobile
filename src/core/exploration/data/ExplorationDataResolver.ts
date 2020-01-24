@@ -42,6 +42,7 @@ class ExplorationDataResolver {
     return Promise.all(
       dataSourceManager.supportedDataSources.map(source =>
         selectedService.fetchData(source.type, DataLevel.DailyActivity, rangeStartDate, rangeEndDate)
+            .then(result => result != null? result : {source: source.type})
     )).then(dataPerSource => ({sourceDataList: dataPerSource}));
   }
 }
