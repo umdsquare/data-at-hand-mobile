@@ -3,7 +3,6 @@ import {AsyncStorageHelper} from '../../../system/AsyncStorageHelper';
 import {refresh, authorize, revoke} from 'react-native-app-auth';
 import {FitbitUserProfile} from './types';
 import {DataSourceType} from '../../DataSourceSpec';
-import {IDatumBase} from '../../../database/types';
 import { FitbitDailyStepMeasure } from './FitbitDailyStepMeasure';
 import { FitbitDailyHeartRateMeasure } from './FitbitDailyHeartRateMeasure';
 import { DateTimeHelper } from '../../../time';
@@ -12,6 +11,7 @@ import * as Realm from 'realm';
 import { DataLevel } from '../../../core/exploration/types';
 import { FITBIT_PROFILE_URL } from './api';
 import { FitbitServiceMeasure } from './FitbitServiceMeasure';
+import { FitbitWeightMeasure } from './FitbitWeightMeasure';
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -52,18 +52,18 @@ export class FitbitService extends DataService {
 
   private dailyStepMeasure = new FitbitDailyStepMeasure(this)
   private dailyHeartRateMeasure = new FitbitDailyHeartRateMeasure(this)
-  //private weightLogMeasure = new FitbitWeightLogMeasure(this)
+  private weightLogMeasure = new FitbitWeightMeasure(this)
   //private sleepMeasure = new FitbitSleepMeasure(this)
 
 
-  private measures: Array<FitbitServiceMeasure> = [this.dailyStepMeasure, this.dailyHeartRateMeasure]
+  private measures: Array<FitbitServiceMeasure> = [this.dailyStepMeasure, this.dailyHeartRateMeasure, this.weightLogMeasure]
 
   protected async fetchDataImpl(
     dataSource: DataSourceType,
     level: DataLevel,
     from: Date,
     to: Date,
-  ): Promise<IDatumBase[]> {
+  ): Promise<any> {
     switch (dataSource) {
       case DataSourceType.StepCount:
         if(level === DataLevel.DailyActivity){
@@ -87,8 +87,7 @@ export class FitbitService extends DataService {
         }
         break;
       case DataSourceType.Weight:
-        //return this.weightLogMeasure.fetchData(from, to)
-        break;
+        return await this.weightLogMeasure.fetchData(from, to)
     }
 
     return null;
@@ -156,8 +155,9 @@ export class FitbitService extends DataService {
         console.log("initialize new realm.")
         this._realm = await Realm.open(FitbitLocalCacheConfig)
 
-        await this.measures[0].cacheServerData(now)
-        await this.measures[1].cacheServerData(now)
+        for(const measure of this.measures){
+          await measure.cacheServerData(now)
+        }
         
         return {
           success: true,
@@ -185,42 +185,6 @@ export class FitbitService extends DataService {
   onSystemExit(){
     this._realm.close()
   }
-
-  /*
-  async revokeScope(scope: string): Promise<boolean> {
-    const scopeRevokeResult = await revokeScopeAndGet(scope);
-    if (scopeRevokeResult.removed === true) {
-      if (scopeRevokeResult.result.length === 1) {
-        try {
-          await this.signOut();
-          return true;
-        } catch (e) {
-          console.log(e);
-          return false;
-        }
-      } else {
-        try {
-          const state = await AsyncStorageHelper.getObject(
-            STORAGE_KEY_AUTH_STATE,
-          );
-          const newState = await refresh(
-            {...this._authConfigBase, scopes: scopeRevokeResult.result},
-            {
-              refreshToken: state.refreshToken,
-            },
-          );
-          if (newState) {
-            await AsyncStorageHelper.set(STORAGE_KEY_AUTH_STATE, newState);
-            return true;
-          }
-        } catch (e) {
-          console.log(e);
-          return false;
-        }
-      }
-    }
-    return true;
-  }*/
 
   async updateUserProfile(): Promise<boolean> {
     const profile: FitbitUserProfile = await this.fetchFitbitQuery(FITBIT_PROFILE_URL)

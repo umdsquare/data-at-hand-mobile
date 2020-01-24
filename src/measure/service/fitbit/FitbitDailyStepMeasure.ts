@@ -5,7 +5,6 @@ import { FitbitSummaryLogMeasure } from "./FitbitSummaryLogMeasure";
 
 
 export class FitbitDailyStepMeasure extends FitbitSummaryLogMeasure<FitbitDailyActivityStepsQueryResult, DailyStepCountEntry> {
-  
   protected realmEntryClassType: any = DailyStepCountEntry
   protected resourcePropertyKey: string = "activities-steps"
   protected makeQueryUrl(startDate: number, endDate: number): string {

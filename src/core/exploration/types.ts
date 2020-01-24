@@ -1,4 +1,3 @@
-import { IDatumBase } from "../../database/types";
 import { startOfDay, subDays, endOfDay } from "date-fns";
 import { DateTimeHelper } from "../../time";
 

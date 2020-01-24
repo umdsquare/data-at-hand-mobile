@@ -1,11 +1,11 @@
 const dailySummaryProperties = {
   numberedDate: {type: 'int'},
-  year: {type: 'int'},
-  month: {type: 'int'},
-  dayOfWeek: {type: 'int'},
+  year: {type: 'int', indexed: true},
+  month: {type: 'int', indexed: true},
+  dayOfWeek: {type: 'int', indexed: true},
 };
 
-interface IDailySummaryEntry<T> {
+interface IDailySummaryEntry {
   numberedDate: number;
   year: number;
   month: number;
@@ -16,9 +16,24 @@ export interface IDataEntry<T> {
   toJson(): T;
 }
 
-interface IDailyNumericSummaryEntry
-  extends IDailySummaryEntry<IDailyNumericSummaryEntry> {
+interface IDailyNumericSummaryEntry extends IDailySummaryEntry {
   value: number;
+}
+
+interface IIntraDayLogEntry extends IDailySummaryEntry {
+  secondsOfDay: number;
+}
+
+const intraDayLogProperties = {
+  ...dailySummaryProperties,
+  numberedDate: {type: 'int', indexed: true},
+  secondsOfDay: {type: 'int', indexed: true},
+  id: 'string',
+};
+
+interface IWeightIntraDayLogEntry extends IIntraDayLogEntry {
+  value: number;
+  source: string;
 }
 
 export class DailyStepCountEntry
@@ -77,6 +92,67 @@ export class RestingHeartRateEntry
   }
 }
 
+export class DailyWeightTrendEntry
+  implements IDailyNumericSummaryEntry, IDataEntry<IDailyNumericSummaryEntry> {
+  public static schema = {
+    name: 'DailyWeightTrendEntry',
+    primaryKey: 'numberedDate',
+    properties: {
+      ...dailySummaryProperties,
+      value: {type: 'float'}, // float cannot be indexed
+    },
+  };
+
+  value: number;
+  numberedDate: number;
+  year: number;
+  month: number;
+  dayOfWeek: number;
+
+  toJson(): IDailyNumericSummaryEntry {
+    return {
+      value: this.value,
+      numberedDate: this.numberedDate,
+      year: this.year,
+      month: this.month,
+      dayOfWeek: this.dayOfWeek,
+    };
+  }
+}
+
+export class WeightIntraDayLogEntry
+  implements IWeightIntraDayLogEntry, IDataEntry<IWeightIntraDayLogEntry> {
+  public static schema = {
+    name: 'WeightIntraDayLogEntry',
+    primaryKey: 'id',
+    properties: {
+      ...intraDayLogProperties,
+      value: 'float',
+      source: 'string',
+    },
+  };
+
+  value: number;
+  source: string;
+  secondsOfDay: number;
+  numberedDate: number;
+  year: number;
+  month: number;
+  dayOfWeek: number;
+
+  toJson(): IWeightIntraDayLogEntry {
+    return {
+      value: this.value,
+      source: this.source,
+      secondsOfDay: this.secondsOfDay,
+      numberedDate: this.numberedDate,
+      year: this.year,
+      month: this.month,
+      dayOfWeek: this.dayOfWeek,
+    };
+  }
+}
+
 //==========================================================
 
 export interface ICachedRangeEntry {
@@ -115,5 +191,11 @@ export class CachedRangeEntry
 export const FitbitLocalCacheConfig = {
   path: 'fitbit.realm',
   deleteRealmIfMigrationNeeded: __DEV__ != null,
-  schema: [CachedRangeEntry, DailyStepCountEntry, RestingHeartRateEntry],
+  schema: [
+    CachedRangeEntry,
+    DailyStepCountEntry,
+    RestingHeartRateEntry,
+    DailyWeightTrendEntry,
+    WeightIntraDayLogEntry
+  ],
 };

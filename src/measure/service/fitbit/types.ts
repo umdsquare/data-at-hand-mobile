@@ -1,12 +1,12 @@
-export interface FitbitUserProfile{
+export interface FitbitUserProfile {
   user: {
-    age: number,
-    fullName: string,
-    dateOfBirth: string,
-    timezone: string,
-    memberSince: any,
-    weightUnit: any
-  }
+    age: number;
+    fullName: string;
+    dateOfBirth: string;
+    timezone: string;
+    memberSince: any;
+    weightUnit: any;
+  };
 }
 
 export interface IntradayStepDay {
@@ -18,19 +18,26 @@ export interface IntradayStepDay {
 
 export interface FitbitSleepQueryResult {
   sleep: Array<{
-    isMainSleep: boolean // false => nap
+    isMainSleep: boolean; // false => nap
     dateOfSleep: string; // yyyy-MM-dd
     endTime: string; // yyyy-MM-ddThh:mm:ss.sss
     startTime: string;
     efficiency: number; // sleep score
     duration: number; // millisecond
     logId: number;
-    type: "stages" | "classic",
+    type: 'stages' | 'classic';
     levels: Array<{
-      dateTime: string,
-      level: "wake"|"light"|"rem"|"deep"|"asleep"|"restless"|"awake",
-      seconds: number
-    }>
+      dateTime: string;
+      level:
+        | 'wake'
+        | 'light'
+        | 'rem'
+        | 'deep'
+        | 'asleep'
+        | 'restless'
+        | 'awake';
+      seconds: number;
+    }>;
     summary: any;
     /*
     "summary": {
@@ -57,33 +64,31 @@ export interface FitbitSleepQueryResult {
         }
       },
     */
-
-
   }>;
 }
 
-export interface FitbitDailyActivityStepsQueryResult{
-  "activities-steps": Array<{
-    dateTime: string,
-    value: string
-  }>
+export interface FitbitDailyActivityStepsQueryResult {
+  'activities-steps': Array<{
+    dateTime: string;
+    value: string;
+  }>;
 }
 
-export interface FitbitDailyActivityHeartRateQueryResult{
-  "activities-heart": Array<{
-    dateTime: string,
+export interface FitbitDailyActivityHeartRateQueryResult {
+  'activities-heart': Array<{
+    dateTime: string;
     value: {
-      restingHeartRate: number,
-      customHeartRateZones: Array<any>,
+      restingHeartRate: number;
+      customHeartRateZones: Array<any>;
       heartRateZones: Array<{
-        caloriesOut: number,
-        max: number,
-        min: number,
-        minutes: 1090,
-        name: string
-      }>
-    }
-  }>
+        caloriesOut: number;
+        max: number;
+        min: number;
+        minutes: 1090;
+        name: string;
+      }>;
+    };
+  }>;
 }
 
 export interface FitbitActivitySummaryDay {
@@ -106,23 +111,30 @@ export interface FitbitActivitySummaryDay {
 }
 
 export interface FitbitWeightQueryResult {
-    weight: Array<{
-      logId: number;
-      date: string,
-      time: string,
-      source: string,
-      weight: number,
-      bmi: number
-    }>;
-  }
+  weight: Array<{
+    logId: number;
+    date: string;
+    time: string;
+    source: string;
+    weight: number;
+    bmi: number;
+  }>;
+}
 
-  export interface FitbitIntradayHeartRateResult{
-    "activities-heart": [{
-        dateTime: string // carries date string
-    }],
-    "activities-heart-intraday": {
-        dataset: Array<{time: string /* carries only time of the day */, value: number}>
-    }
-  }
-
+export interface FitbitWeightTrendQueryResult {
   
+}
+
+export interface FitbitIntradayHeartRateResult {
+  'activities-heart': [
+    {
+      dateTime: string; // carries date string
+    },
+  ];
+  'activities-heart-intraday': {
+    dataset: Array<{
+      time: string /* carries only time of the day */;
+      value: number;
+    }>;
+  };
+}

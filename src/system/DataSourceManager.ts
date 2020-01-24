@@ -18,13 +18,13 @@ class DataSourceManager {
       name: 'Resting Heart Rate',
       description:
         'Heart Rate BPM (Beats per Minute) measured at a specific moment',
-    },/*
+    },
     {
       type: DataSourceType.Weight,
       category: DataSourceCategory.Weight,
       name: 'Weight',
       description: 'Body weight measured at a specific moment',
-    },
+    },/*
     {
       type: DataSourceType.HoursSlept,
       category: DataSourceCategory.Sleep,

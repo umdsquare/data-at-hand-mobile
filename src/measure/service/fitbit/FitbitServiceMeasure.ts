@@ -1,6 +1,5 @@
 import {FitbitService} from './FitbitService';
 import {
-  FitbitLocalCacheConfig,
   CachedRangeEntry,
   ICachedRangeEntry,
 } from './realm/schema';
@@ -10,6 +9,8 @@ export abstract class FitbitServiceMeasure {
   abstract key: string;
 
   constructor(protected readonly service: FitbitService) {}
+
+  abstract fetchData(startDate: Date, endDate: Date): Promise<any>
 
   protected abstract fetchAndCacheFitbitData(
     startDate: number,

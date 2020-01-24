@@ -55,24 +55,24 @@ export function makeFitbitSleepApiUrl(
 }
 
 export function makeFitbitWeightLogApiUrl(
-  startDate: Date,
-  endDate: Date,
+  startDate: number,
+  endDate: number,
 ): string {
   const stringFormat = require('string-format');
   return stringFormat(FITBIT_WEIGHT_LOGS_URL, {
-    startDate: format(startDate, FITBIT_DATE_FORMAT),
-    endDate: format(endDate, FITBIT_DATE_FORMAT),
+    startDate: DateTimeHelper.toFormattedString(startDate),
+    endDate: DateTimeHelper.toFormattedString(endDate),
   });
 }
 
 export function makeFitbitWeightTrendApiUrl(
-  startDate: Date,
-  endDate: Date,
+  startDate: number,
+  endDate: number,
 ): string {
   const stringFormat = require('string-format');
   return stringFormat(FITBIT_WEIGHT_TREND_URL, {
-    startDate: format(startDate, FITBIT_DATE_FORMAT),
-    endDate: format(endDate, FITBIT_DATE_FORMAT),
+    startDate: DateTimeHelper.toFormattedString(startDate),
+    endDate: DateTimeHelper.toFormattedString(endDate),
   });
 }
 

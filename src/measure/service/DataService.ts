@@ -1,4 +1,3 @@
-import { IDatumBase } from '../../database/types';
 import { DataSourceType } from '../DataSourceSpec';
 import { endOfDay, differenceInDays } from 'date-fns';
 import { DataLevel } from '../../core/exploration/types';
@@ -41,17 +40,17 @@ export abstract class DataService {
 
   abstract isDataSourceSupported(dataSource: DataSourceType): boolean
 
-  fetchData(dataSource: DataSourceType, level: DataLevel, from: Date, to: Date): Promise<Array<IDatumBase>>{
+  fetchData(dataSource: DataSourceType, level: DataLevel, from: Date, to: Date): Promise<any>{
     const endOfToday = endOfDay(new Date())
     if(differenceInDays(endOfToday, from) < 0){
-      return Promise.resolve([])
+      return Promise.resolve(null)
     }else{
       const clampedTo = differenceInDays(endOfToday, to) > 0? to : endOfToday
       return this.fetchDataImpl(dataSource, level, from, clampedTo)
     }
   }
 
-  protected abstract fetchDataImpl(dataSource: DataSourceType, level: DataLevel, from: Date, to: Date): Promise<Array<IDatumBase>>
+  protected abstract fetchDataImpl(dataSource: DataSourceType, level: DataLevel, from: Date, to: Date): Promise<any>
 
   abstract async activateInSystem(): Promise<ServiceActivationResult>
   abstract async deactivatedInSystem(): Promise<boolean>
