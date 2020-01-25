@@ -1,10 +1,12 @@
 import { ActionTypeBase } from "../../state/types";
+import { DataSourceType } from "../../measure/DataSourceSpec";
 
 export enum ExplorationCommandType{
     SetRange="setR",
     SetDataSource="setDS",
     SelectElementOfDay="selectElmDay",
-    SelectElementOfRange="selectElmRange"
+    SelectElementOfRange="selectElmRange",
+    GoToBrowseRange="goToBrowseRange"
 }
 
 export enum CommandInteractionType{
@@ -21,13 +23,26 @@ export interface SetRangeCommand extends ExplorationCommandBase{
     key?: string
 }
 
-export type ExplorationCommand = SetRangeCommand
+export interface GoToBrowseRangeCommand extends ExplorationCommandBase{
+    dataSource?: DataSourceType,
+    range?:[number, number]
+}
 
-export function createSetRangeCommand(interactionType: CommandInteractionType, numberedDateRange: [number, number], key?: string): SetRangeCommand{
+export type ExplorationCommand = SetRangeCommand | GoToBrowseRangeCommand
+
+export function createSetRangeCommand(interactionType: CommandInteractionType, range: [number, number], key?: string): SetRangeCommand{
     return {
         type: ExplorationCommandType.SetRange,
-        interactionType: interactionType,
-        range: numberedDateRange,
+        interactionType,
+        range,
         key
+    }
+}
+
+export function goToBrowseRange(interactionType: CommandInteractionType, dataSource?: DataSourceType, range?: [number,number]): GoToBrowseRangeCommand{
+    return {
+        type: ExplorationCommandType.GoToBrowseRange,
+        interactionType,
+        range
     }
 }

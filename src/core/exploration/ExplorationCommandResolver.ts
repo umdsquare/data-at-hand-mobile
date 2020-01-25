@@ -5,25 +5,38 @@ import {
   ExplorationType,
   ExplorationMode,
 } from './types';
-import {ExplorationCommand, ExplorationCommandType} from './commands';
+import {ExplorationCommand, ExplorationCommandType, GoToBrowseRangeCommand, SetRangeCommand} from './commands';
 
 class ExplorationCommandResolver {
   getNewStateInfo(
     prevStateInfo: ExplorationInfo,
     command: ExplorationCommand,
   ): Promise<ExplorationInfo> {
-    const newStateInfo = JSON.parse(JSON.stringify(prevStateInfo));
+    const newStateInfo: ExplorationInfo = JSON.parse(JSON.stringify(prevStateInfo));
     switch (command.type) {
       case ExplorationCommandType.SetRange:
+        const setRangeAction = command as SetRangeCommand
         if (prevStateInfo.type === ExplorationType.B_Day) {
           //noop
         } else {
           explorationCommandResolver.setParameterValue(
             newStateInfo,
-            command.range,
+            setRangeAction.range,
             ParameterType.Range,
-            command.key as any,
+            setRangeAction.key as any,
           );
+        }
+        break;
+      case ExplorationCommandType.GoToBrowseRange:
+        //check parameters
+        const goToBrowseRangeAction = command as GoToBrowseRangeCommand
+        const dataSource = goToBrowseRangeAction.dataSource || this.getParameterValue(prevStateInfo, ParameterType.DataSource)
+        const range = goToBrowseRangeAction.range || this.getParameterValue(prevStateInfo, ParameterType.Range)
+        if(dataSource != null && range != null){
+          newStateInfo.type = ExplorationType.B_Range
+          newStateInfo.values = []
+          this.setParameterValue(newStateInfo, range, ParameterType.Range)
+          this.setParameterValue(newStateInfo, dataSource, ParameterType.DataSource)
         }
         break;
     }
