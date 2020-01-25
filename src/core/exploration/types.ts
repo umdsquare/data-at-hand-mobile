@@ -34,7 +34,6 @@ export type ParameterKey = "range1"|"range2"|"pivot"
 export interface ExplorationInfo{
     type: ExplorationType
     values: Array<{parameter: ParameterType, key?: ParameterKey, value: any}>
-    pointingInfo: any
 }
 
 export function makeInitialStateInfo(): ExplorationInfo{
@@ -42,6 +41,5 @@ export function makeInitialStateInfo(): ExplorationInfo{
     return{
         type: ExplorationType.B_Ovrvw,
         values: [{parameter: ParameterType.Range, value: [DateTimeHelper.toNumberedDateFromDate(subDays(now, 7)), DateTimeHelper.toNumberedDateFromDate(endOfDay(now))]}],
-        pointingInfo: null
     }
 }

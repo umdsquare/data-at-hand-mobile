@@ -113,7 +113,7 @@ export function startLoadingForInfo(explorationInfo: ExplorationInfo) {
       });
       try {
         const state = getState();
-        const newStateInfo = await explorationCommandResolver.getNewStateInfo(state.explorationState.info, command);
+        const newStateInfo = await explorationInfoHelper.getNewStateInfo(state.explorationState.info, command);
         dispatch({
           type: ExplorationStateActionTypes.FinishStateTransition,
           newStateInfo: newStateInfo,

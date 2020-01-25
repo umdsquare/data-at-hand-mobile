@@ -1,6 +1,6 @@
 import {ExplorationInfo, ExplorationType, ParameterType, DataLevel} from '../types';
 import {OverviewData} from './types';
-import {explorationCommandResolver} from '../ExplorationCommandResolver';
+import {explorationInfoHelper} from '../ExplorationInfoHelper';
 import {DateTimeHelper} from '../../../time';
 import {dataSourceManager} from '../../../system/DataSourceManager';
 import {DataServiceManager} from '../../../system/DataServiceManager';
@@ -28,7 +28,7 @@ class ExplorationDataResolver {
     info: ExplorationInfo,
     selectedServiceKey: string,
   ): Promise<OverviewData> {
-    const range = explorationCommandResolver.getParameterValue(
+    const range = explorationInfoHelper.getParameterValue(
       info,
       ParameterType.Range,
     );

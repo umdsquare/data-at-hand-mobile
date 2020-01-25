@@ -5,15 +5,15 @@ import { CategoricalRow } from '../../../exploration/CategoricalRow';
 import { DataSourceIcon } from '../../../common/DataSourceIcon';
 import { ExplorationProps } from '../ExplorationScreen';
 import { DateRangeBar } from '../../../exploration/DateRangeBar';
-import { explorationCommandResolver } from '../../../../core/exploration/ExplorationCommandResolver';
+import { explorationInfoHelper } from '../../../../core/exploration/ExplorationInfoHelper';
 import { startOfDay, endOfDay } from 'date-fns';
-import { createSetRangeCommand } from '../../../../core/exploration/commands';
 import { Button } from 'react-native-elements';
 import { Sizes } from '../../../../style/Sizes';
 import { StyleTemplates } from '../../../../style/Styles';
 import { DateTimeHelper } from '../../../../time';
 import { dataSourceManager } from '../../../../system/DataSourceManager';
 import { DataSourceType } from '../../../../measure/DataSourceSpec';
+import {createSetRangeAction} from '../../../../state/exploration/interaction/actions';
 
 const titleBarOptionButtonIconInfo = {
     name: "ios-settings",
@@ -84,14 +84,14 @@ export function generateHeaderView(props: ExplorationProps): any {
 }
 
 function generateRangeBar(props: ExplorationProps, key?: ParameterKey): any {
-    const range = explorationCommandResolver.getParameterValue(props.explorationState.info, ParameterType.Range, key)
+    const range = explorationInfoHelper.getParameterValue(props.explorationState.info, ParameterType.Range, key)
     return <DateRangeBar from={range && startOfDay(DateTimeHelper.toDate(range[0]))} to={range && endOfDay(DateTimeHelper.toDate(range[1]))} onRangeChanged={(from, to, xType) => {
-        props.dispatchCommand(createSetRangeCommand(xType, [DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to)], key))
+        props.dispatchCommand(createSetRangeAction(xType, [DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to)], key))
     }} />
 }
 
 function generateDataSourceRow(props: ExplorationProps): any {
-    const sourceType = explorationCommandResolver.getParameterValue(props.explorationState.info, ParameterType.DataSource) as DataSourceType
+    const sourceType = explorationInfoHelper.getParameterValue(props.explorationState.info, ParameterType.DataSource) as DataSourceType
     const sourceSpec = dataSourceManager.getSpec(sourceType)
     return <CategoricalRow title="Data Source" showBorder={true} value={sourceSpec.name} icon={<DataSourceIcon type={sourceType} color="white" size={20} />} />
 }

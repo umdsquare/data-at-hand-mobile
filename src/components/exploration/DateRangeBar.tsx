@@ -12,7 +12,7 @@ import Modal from "react-native-modal";
 import { StyleTemplates } from "../../style/Styles";
 import { DatePicker, WeekPicker, MonthPicker } from "../common/CalendarPickers";
 import { SafeAreaConsumer } from "react-native-safe-area-context";
-import { CommandInteractionType } from "../../core/exploration/commands";
+import { InteractionType } from "../../state/exploration/interaction/actions";
 
 const dateButtonWidth = 140
 const barHeight = 60
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
 interface Props {
     from: Date,
     to: Date,
-    onRangeChanged?: (from: Date, to: Date, interactionType?: CommandInteractionType) => void
+    onRangeChanged?: (from: Date, to: Date, interactionType?: InteractionType) => void
 }
 
 interface State {
@@ -187,7 +187,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             from = lastMonthFirst
             to = lastMonthLast
         }
-        this.setRange(from, to, CommandInteractionType.TouchOnly)
+        this.setRange(from, to, InteractionType.TouchOnly)
     }
 
     onSwipeRight = () => {
@@ -202,7 +202,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             from = lastMonthFirst
             to = lastMonthLast
         }
-        this.setRange(from, to, CommandInteractionType.TouchOnly)
+        this.setRange(from, to, InteractionType.TouchOnly)
     }
 
     closeBottomSheet = () => {
@@ -213,7 +213,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         })
     }
 
-    setRange = (from: Date, to: Date, interactionType: CommandInteractionType=CommandInteractionType.TouchOnly) => {
+    setRange = (from: Date, to: Date, interactionType: InteractionType=InteractionType.TouchOnly) => {
         this.setState(DateRangeBar.deriveState(
             from,
             to,
@@ -225,21 +225,21 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         }
     }
 
-    setFromDate = (from: Date, interactionType: CommandInteractionType=CommandInteractionType.TouchOnly) => {
+    setFromDate = (from: Date, interactionType: InteractionType=InteractionType.TouchOnly) => {
         this.setRange(from, this.state.to, interactionType)
     }
 
-    setToDate = (to: Date, interactionType: CommandInteractionType=CommandInteractionType.TouchOnly) => {
+    setToDate = (to: Date, interactionType: InteractionType=InteractionType.TouchOnly) => {
         this.setRange(
             this.state.from, to, interactionType)
     }
 
-    setMonth = (monthDate: Date, interactionType: CommandInteractionType) => {
+    setMonth = (monthDate: Date, interactionType: InteractionType) => {
         this.setRange(startOfMonth(monthDate), endOfMonth(monthDate), interactionType)
     }
 
     setMonthByCalendar = (monthDate: Date) => {
-        this.setMonth(monthDate, CommandInteractionType.TouchOnly)
+        this.setMonth(monthDate, InteractionType.TouchOnly)
     }
 
     componentDidUpdate() {

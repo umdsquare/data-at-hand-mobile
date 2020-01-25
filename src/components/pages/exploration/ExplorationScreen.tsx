@@ -3,18 +3,18 @@ import React from "react";
 import { StatusBar, View, StyleSheet, Platform } from "react-native";
 import Colors from "../../../style/Colors";
 import { StyleTemplates } from "../../../style/Styles";
-import { ExplorationState, resolveExplorationCommand } from "../../../state/exploration/interaction/reducers";
+import { ExplorationState } from "../../../state/exploration/interaction/reducers";
 import { ThunkDispatch } from "redux-thunk";
 import { ReduxAppState } from "../../../state/types";
 import { connect } from "react-redux";
 import { generateHeaderView } from "./parts/header";
-import { ExplorationCommand } from "../../../core/exploration/commands";
 import { BottomBar } from "../../exploration/BottomBar";
-import { explorationCommandResolver } from "../../../core/exploration/ExplorationCommandResolver";
+import { explorationInfoHelper } from "../../../core/exploration/ExplorationInfoHelper";
 import { DataServiceManager } from "../../../system/DataServiceManager";
 import { ExplorationInfo } from "../../../core/exploration/types";
 import { ExplorationDataState, startLoadingForInfo } from "../../../state/exploration/data/reducers";
 import { ExplorationMainPanel } from "./parts/main";
+import { ExplorationAction } from "../../../state/exploration/interaction/actions";
 var deepEqual = require('deep-equal');
 
 const styles = StyleSheet.create({
@@ -34,7 +34,7 @@ export interface ExplorationProps extends PropsWithNavigation {
     explorationState: ExplorationState,
     explorationDataState: ExplorationDataState,
     selectedServiceKey: string,
-    dispatchCommand: (command: ExplorationCommand) => void,
+    dispatchCommand: (command: ExplorationAction) => void,
     dispatchDataReload: (info: ExplorationInfo) => void
 }
 
@@ -73,11 +73,9 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
     }
 
     async componentDidUpdate(prevProps: ExplorationProps) {
-        if (this.props.explorationState.isProcessing === false && this.props.explorationState.error == null) {
-            if (this.props.explorationState.info.type !== prevProps.explorationState.info.type || deepEqual(prevProps.explorationState.info.values, this.props.explorationState.info.values) === false) {
-                console.log("should reload data")
-                this.props.dispatchDataReload(this.props.explorationState.info)
-            }
+        if (this.props.explorationState.info.type !== prevProps.explorationState.info.type || deepEqual(prevProps.explorationState.info.values, this.props.explorationState.info.values) === false) {
+            console.log("should reload data")
+            this.props.dispatchDataReload(this.props.explorationState.info)
         }
     }
 
@@ -91,10 +89,10 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 }
             </View>
             <View style={styles.mainContainerStyle}>
-                <ExplorationMainPanel/>
+                <ExplorationMainPanel />
             </View>
 
-            <BottomBar mode={explorationCommandResolver.getMode(this.props.explorationState.info)} />
+            <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationState.info)} />
 
         </View>
     }
@@ -105,7 +103,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
 function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: ExplorationProps): ExplorationProps {
     return {
         ...ownProps,
-        dispatchCommand: (command: ExplorationCommand) => dispatch(resolveExplorationCommand(command)),
+        dispatchCommand: (command: ExplorationAction) => dispatch(command),
         dispatchDataReload: (info: ExplorationInfo) => dispatch(startLoadingForInfo(info))
     }
 }

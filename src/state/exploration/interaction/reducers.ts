@@ -1,71 +1,53 @@
 import {
   ExplorationInfo,
   makeInitialStateInfo,
+  ExplorationType,
+  ParameterType,
 } from '../../../core/exploration/types';
-import {ActionTypeBase, ReduxAppState} from '../../types';
-import {Dispatch} from 'redux';
-import {ExplorationStateActionTypes, FinishStateTransition} from './actions';
-import {explorationCommandResolver} from '../../../core/exploration/ExplorationCommandResolver';
-import {ExplorationCommand} from '../../../core/exploration/commands';
+import { ExplorationAction, ExplorationActionType, SetRangeAction, GoToBrowseRangeAction } from './actions';
+import { explorationInfoHelper } from '../../../core/exploration/ExplorationInfoHelper';
 
 export interface ExplorationState {
   info: ExplorationInfo;
-  isProcessing: boolean;
-  error: any;
 }
 
 const INITIAL_STATE = {
-  info: makeInitialStateInfo(),
-  isProcessing: false,
-  error: null,
+  info: makeInitialStateInfo()
 } as ExplorationState;
 
 export const explorationStateReducer = (
   state: ExplorationState = INITIAL_STATE,
-  action: ActionTypeBase,
+  action: ExplorationAction,
 ): ExplorationState => {
   const newState: ExplorationState = JSON.parse(JSON.stringify(state));
 
   switch (action.type) {
-    case ExplorationStateActionTypes.FinishStateTransition:
-      const castedAction = action as FinishStateTransition;
-      newState.isProcessing = false;
-      if (castedAction.error) {
-        newState.error = castedAction.error;
+    case ExplorationActionType.SetRange:
+      const setRangeAction = action as SetRangeAction
+      if (state.info.type === ExplorationType.B_Day) {
+        //noop
       } else {
-        newState.error = null;
-        newState.info = castedAction.newStateInfo;
+        explorationInfoHelper.setParameterValue(
+          newState.info,
+          setRangeAction.range,
+          ParameterType.Range,
+          setRangeAction.key as any,
+        );
       }
-      return newState;
-    case ExplorationStateActionTypes.StartStateTransition:
-      newState.isProcessing = true;
-      return newState;
+      return newState
+    case ExplorationActionType.GoToBrowseRange:
+      //check parameters
+      const goToBrowseRangeAction = action as GoToBrowseRangeAction
+      const dataSource = goToBrowseRangeAction.dataSource || this.getParameterValue(state.info, ParameterType.DataSource)
+      const range = goToBrowseRangeAction.range || this.getParameterValue(state.info, ParameterType.Range)
+      if(dataSource != null && range != null){
+        newState.info.type = ExplorationType.B_Range
+        newState.info.values = []
+        this.setParameterValue(newState.info, range, ParameterType.Range)
+        this.setParameterValue(newState.info, dataSource, ParameterType.DataSource)
+      }
+      return newState
     default:
       return state;
   }
 };
-
-export function resolveExplorationCommand(command: ExplorationCommand) {
-  return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
-    dispatch({
-      type: ExplorationStateActionTypes.StartStateTransition,
-      command: command
-    });
-    try {
-      const state = getState();
-      const newStateInfo = await explorationCommandResolver.getNewStateInfo(state.explorationState.info, command);
-      dispatch({
-        type: ExplorationStateActionTypes.FinishStateTransition,
-        newStateInfo: newStateInfo,
-        error: null,
-      } as FinishStateTransition);
-    } catch (error) {
-      console.error(error);
-      dispatch({
-        type: ExplorationStateActionTypes.FinishStateTransition,
-        newStateInfo: null,
-        error: error,
-      } as FinishStateTransition);
-    }
-  };
-}
