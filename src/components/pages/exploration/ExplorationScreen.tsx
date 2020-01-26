@@ -1,6 +1,6 @@
 import { PropsWithNavigation } from "../../../PropsWithNavigation";
 import React from "react";
-import { StatusBar, View, StyleSheet, Platform } from "react-native";
+import { StatusBar, View, StyleSheet, Platform, LayoutAnimation } from "react-native";
 import Colors from "../../../style/Colors";
 import { StyleTemplates } from "../../../style/Styles";
 import { ExplorationState } from "../../../state/exploration/interaction/reducers";
@@ -14,7 +14,9 @@ import { DataServiceManager } from "../../../system/DataServiceManager";
 import { ExplorationInfo } from "../../../core/exploration/types";
 import { ExplorationDataState, startLoadingForInfo } from "../../../state/exploration/data/reducers";
 import { ExplorationMainPanel } from "./parts/main";
-import { ExplorationAction } from "../../../state/exploration/interaction/actions";
+import { ExplorationAction, createUndoAction, InteractionType, createRedoAction } from "../../../state/exploration/interaction/actions";
+import { Button } from "react-native-elements";
+import { Sizes } from "../../../style/Sizes";
 var deepEqual = require('deep-equal');
 
 const styles = StyleSheet.create({
@@ -27,8 +29,41 @@ const styles = StyleSheet.create({
         ...StyleTemplates.screenDefaultStyle,
         backgroundColor: "#EFEFF4",
         zIndex: Platform.OS === 'android' ? 100 : undefined,
+    },
+
+    historyPanelStyle: {
+        position: 'absolute',
+        right: Sizes.horizontalPadding - 4,
+        bottom: Sizes.horizontalPadding,
+        flexDirection: 'row', alignItems: 'center',
+        justifyContent: 'flex-end'
+    },
+
+    historyButtonStyle: {
+        borderRadius: 50, width: 38, height: 38, padding: 0, 
+        backgroundColor: Colors.primary,
+        shadowColor: 'black',
+        shadowOpacity: 0.2,
+        shadowOffset: { width: 0, height: 4 },
+        shadowRadius: 3
+    },
+
+    historyButtonContainerStyle: {
+        paddingLeft: 4,
+        paddingRight: 4
+    },
+
+    historyButtonDisabledStyle: {
+        backgroundColor: '#00000020',
+        shadowOpacity: null,
+        shadowColor: null,
     }
 })
+
+const historyIconStyle = { type: 'ionicon', name: "ios-undo", color: 'white', size: 20 }
+const undoIconStyle = { ...historyIconStyle, name: "ios-undo" }
+const redoIconStyle = { ...historyIconStyle, name: "ios-redo" }
+
 
 export interface ExplorationProps extends PropsWithNavigation {
     explorationState: ExplorationState,
@@ -79,6 +114,14 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
         }
     }
 
+    undo = () => {
+        this.props.dispatchCommand(createUndoAction(InteractionType.TouchOnly))
+    }
+
+    redo = () => {
+        this.props.dispatchCommand(createRedoAction(InteractionType.TouchOnly))
+    }
+
     render() {
 
         return <View style={StyleTemplates.screenDefaultStyle}>
@@ -90,6 +133,19 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
             </View>
             <View style={styles.mainContainerStyle}>
                 <ExplorationMainPanel />
+
+                <View style={styles.historyPanelStyle}>
+                    <Button disabled={this.props.explorationState.past.length === 0}
+                        containerStyle={styles.historyButtonContainerStyle}
+                        buttonStyle={styles.historyButtonStyle}
+                        disabledStyle={styles.historyButtonDisabledStyle}
+                        icon={undoIconStyle} onPress={this.undo} />
+                    <Button disabled={this.props.explorationState.future.length === 0}
+                        containerStyle={styles.historyButtonContainerStyle}
+                        buttonStyle={styles.historyButtonStyle}
+                        disabledStyle={styles.historyButtonDisabledStyle}
+                        icon={redoIconStyle} onPress={this.redo} />
+                </View>
             </View>
 
             <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationState.info)} />
@@ -104,7 +160,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Expl
     return {
         ...ownProps,
         dispatchCommand: (command: ExplorationAction) => dispatch(command),
-        dispatchDataReload: (info: ExplorationInfo) => dispatch(startLoadingForInfo(info))
+        dispatchDataReload: (info: ExplorationInfo) => dispatch(startLoadingForInfo(info)),
     }
 }
 

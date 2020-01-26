@@ -7,6 +7,7 @@ import { SafeAreaConsumer } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { VoiceInputButton } from './VoiceInputButton';
 import { ExplorationMode } from '../../core/exploration/types';
+import { Button } from 'react-native-elements';
 
 
 const bottomBarIconSize = 21

@@ -1,13 +1,16 @@
 import { ActionTypeBase } from "../../types"
 import { DataSourceType } from "../../../measure/DataSourceSpec"
 
+const ACTION_PREFIX = "exploration:interaction:"
 
 export enum ExplorationActionType{
-    SetRange="setR",
-    SetDataSource="setDS",
-    SelectElementOfDay="selectElmDay",
-    SelectElementOfRange="selectElmRange",
-    GoToBrowseRange="goToBrowseRange"
+    SetRange="exploration:interaction:setR",
+    SetDataSource="exploration:interaction:setDS",
+    SelectElementOfDay="exploration:interaction:selectElmDay",
+    SelectElementOfRange="exploration:interaction:selectElmRange",
+    GoToBrowseRange="exploration:interaction:goToBrowseRange",
+    Redo="exploration:interaction:redo",
+    Undo="exploration:interaction:undo"
 }
 
 export enum InteractionType{
@@ -29,7 +32,7 @@ export interface GoToBrowseRangeAction extends ExplorationActionBase{
     range?:[number, number]
 }
 
-export type ExplorationAction = SetRangeAction | GoToBrowseRangeAction
+export type ExplorationAction = ExplorationActionBase | SetRangeAction | GoToBrowseRangeAction
 
 export function createSetRangeAction(interactionType: InteractionType, range: [number, number], key?: string): SetRangeAction{
     return {
@@ -44,8 +47,25 @@ export function createGoToBrowseRangeAction(interactionType: InteractionType, da
     return {
         type: ExplorationActionType.GoToBrowseRange,
         interactionType,
-        range
+        range,
+        dataSource
     }
 }
+
+export function createUndoAction(interactionType: InteractionType): ExplorationActionBase{
+    return {
+        type: ExplorationActionType.Undo,
+        interactionType
+    }
+}
+
+export function createRedoAction(interactionType: InteractionType): ExplorationActionBase{
+    return {
+        type: ExplorationActionType.Redo,
+        interactionType
+    }
+}
+
+
 
 //===================================================

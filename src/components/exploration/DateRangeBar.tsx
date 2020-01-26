@@ -5,7 +5,7 @@ import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
 import { Sizes } from "../../style/Sizes";
 import Dash from 'react-native-dash';
 import { Button } from "react-native-elements";
-import { format, isToday, isYesterday, differenceInCalendarDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, isMonday, isSunday, addDays, subDays, startOfMonth, endOfMonth, subMonths, addMonths, startOfDay, endOfDay } from "date-fns";
+import { format, isToday, isYesterday, differenceInCalendarDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, isMonday, isSunday, addDays, subDays, startOfMonth, endOfMonth, subMonths, addMonths, startOfDay, endOfDay, isSameDay } from "date-fns";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import GestureRecognizer from 'react-native-swipe-gestures';
 import Modal from "react-native-modal";
@@ -148,6 +148,14 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                 periodName: null
             }
         }
+    }
+
+    static getDerivedStateFromProps(nextProps: Props, currentState: State): State{
+        if(isSameDay(currentState.from, nextProps.from) === false || 
+            isSameDay(currentState.to, nextProps.to) === false){
+            return DateRangeBar.deriveState(nextProps.from, nextProps.to, currentState)
+        }
+        return null
     }
 
     constructor(props: Props) {

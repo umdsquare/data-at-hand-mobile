@@ -16,7 +16,7 @@ interface Props {
     dataState?: ExplorationDataState,
     explorationState?: ExplorationState
     measureUnitType?: MeasureUnitType
-    
+
 }
 
 interface State {

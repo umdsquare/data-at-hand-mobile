@@ -85,6 +85,7 @@ export function generateHeaderView(props: ExplorationProps): any {
 
 function generateRangeBar(props: ExplorationProps, key?: ParameterKey): any {
     const range = explorationInfoHelper.getParameterValue(props.explorationState.info, ParameterType.Range, key)
+    console.log(range)
     return <DateRangeBar from={range && startOfDay(DateTimeHelper.toDate(range[0]))} to={range && endOfDay(DateTimeHelper.toDate(range[1]))} onRangeChanged={(from, to, xType) => {
         props.dispatchCommand(createSetRangeAction(xType, [DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to)], key))
     }} />
