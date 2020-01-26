@@ -42,12 +42,14 @@ export abstract class DataService {
   abstract isDataSourceSupported(dataSource: DataSourceType): boolean
 
   fetchData(dataSource: DataSourceType, level: DataLevel, start: number, end: number): Promise<any>{
+    /*
     const today = DateTimeHelper.toNumberedDateFromDate(new Date())
     if(start > today) {
       return Promise.resolve(null)
     }else{
       return this.fetchDataImpl(dataSource, level, start, Math.min(end, today))
-    }
+    }*/
+    return this.fetchDataImpl(dataSource, level, start, end)
   }
 
   protected abstract fetchDataImpl(dataSource: DataSourceType, level: DataLevel, start: number, end: number): Promise<any>
