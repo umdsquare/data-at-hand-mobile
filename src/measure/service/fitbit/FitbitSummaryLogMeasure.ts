@@ -22,7 +22,9 @@ export abstract class FitbitSummaryLogMeasure<
   fetchPreliminaryData(startDate: number, endDate: number): Promise<{list: Array<any>, avg: number, min: number, max: number, sum: number }> {
     const filtered = this.service.realm
       .objects<RealmEntryClassType>(this.realmEntryClassType)
-      .filtered(this.getLocalRangeQueryCondition(startDate, endDate));
+      .filtered(this.getLocalRangeQueryCondition(startDate, endDate))
+      .sorted("numberedDate")
+      
     const avg = filtered.avg('value') as number
     const min = filtered.min('value') as number
     const max = filtered.max('value') as number

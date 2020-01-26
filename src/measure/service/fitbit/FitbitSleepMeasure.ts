@@ -76,7 +76,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
       .filtered(
         'numberedDate >= ' + startDate +
           ' AND numberedDate <= ' + endDate,
-      );
+      ).sorted("numberedDate")
 
     const logs = filtered.snapshot().map(v => v.toJson(false));
 

@@ -146,7 +146,7 @@ class FitbitWeightLogMeasure extends FitbitRangeMeasure<
       .filtered(
         'numberedDate >= ' + startDate +
           ' AND numberedDate <= ' + endDate,
-      );
+      ).sorted([["numberedDate", false], ["secondsOfDay", false]])
     return filtered.snapshot().map(v => v.toJson()) as any;
   }
 }
