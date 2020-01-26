@@ -5,7 +5,6 @@ import { scaleTime, scaleLinear } from 'd3-scale';
 import * as d3Array from 'd3-array';
 import { Rectangle, Padding } from './types';
 import { AxisSvg, formatTimeTick } from './axis';
-import { ChartColors } from './Style';
 import { PanResponder, Animated, View, Text } from 'react-native';
 import { startOfHour } from 'date-fns';
 import Colors from '../../style/Colors';
@@ -83,6 +82,7 @@ export class TimelineBarChartComponent extends React.PureComponent<ChartComponen
         const unitWidth = scaleX(3600000) - scaleX(0)
         const barWidth = Math.max(1, unitWidth - 2 * maxBarSpacing)
         const barSpacing = (unitWidth - barWidth) / 2
+
 
         const scaleY = scaleLinear()
             .domain([0, d3Array.max(dataElements, (d) => d.value)]).nice()

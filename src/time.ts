@@ -1,4 +1,4 @@
-import { getYear, getMonth, getDate, differenceInDays, subDays } from "date-fns"
+import { getYear, getMonth, getDate, differenceInDays, subDays, addDays } from "date-fns"
 import { toDate } from "date-fns-tz"
 
 /**
@@ -66,6 +66,38 @@ export class DateTimeHelper{
             return chunks
         }
     }
+
+    static rangeToSequence(start: number, end: number): Array<number>{
+        const startDate = this.toDate(start)
+        const endDate = this.toDate(end)
+        const diff = differenceInDays(endDate, startDate) + 1
+
+        const seq = [start]
+
+        for(let i = 1; i < diff; i++){
+            seq.push(this.toNumberedDateFromDate(addDays(startDate, i)))
+        }
+
+        return seq
+    }
+
+    static formatDuration(durationInSeconds: number, roundToMins: boolean = false): string{
+        var usedDuration = durationInSeconds
+        if(usedDuration === 0){
+            return "0"
+        }
+
+        if(roundToMins===true){
+            if(durationInSeconds%60 >= 30)
+                usedDuration = durationInSeconds - (durationInSeconds%60) + 60
+            else usedDuration = durationInSeconds - (durationInSeconds%60)
+        }
+    
+        const hours = Math.floor(usedDuration / 3600)
+        const minutes = Math.floor((usedDuration%3600)/60)
+        const seconds = usedDuration%60
+        return ((hours>0? (hours + "h ") :"") + (minutes>0? (minutes + "m "):"") + (seconds>0? (seconds + "s "):"")).trim()
+    }
 }
 
 
@@ -79,19 +111,3 @@ function pad(n, len) {
     return s;
    
   }
-
-export function formatDuration(durationInSeconds: number, roundToMins: boolean = false): string{
-    var usedDuration = durationInSeconds
-    if(roundToMins===true){
-        if(durationInSeconds%60 >= 30)
-            usedDuration = durationInSeconds - (durationInSeconds%60) + 60
-        else usedDuration = durationInSeconds - (durationInSeconds%60)
-    }
-
-    const hours = Math.floor(usedDuration / 3600)
-    const minutes = Math.floor((usedDuration%3600)/60)
-    const seconds = usedDuration%60
-
-
-    return ((hours>0? (hours + "h ") :"") + (minutes>0? (minutes + "m "):"") + (seconds>0? (seconds + "s "):"")).trim()
-}

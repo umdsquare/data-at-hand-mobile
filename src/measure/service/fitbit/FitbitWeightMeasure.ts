@@ -51,6 +51,7 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
     const logData = await this.logMeasure.fetchData(startDate, endDate)
     return {
       source: DataSourceType.Weight,
+      range: [startDate, endDate],
       data: {
         trend: trendData.list,
         logs: logData

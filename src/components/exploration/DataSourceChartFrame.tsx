@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import Colors from '../../style/Colors';
 import { Sizes } from '../../style/Sizes';
@@ -7,9 +7,12 @@ import { DataSourceType, MeasureUnitType } from '../../measure/DataSourceSpec';
 import { dataSourceManager } from '../../system/DataSourceManager';
 import { OverviewSourceRow, StatisticsType } from '../../core/exploration/data/types';
 import commaNumber from 'comma-number';
-import { formatDuration } from '../../time';
+import { DateTimeHelper } from '../../time';
 import { startOfDay, addSeconds, format } from 'date-fns';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import { SizeWatcher } from '../visualization/SizeWatcher';
+import { DailyBarChart } from './visualization/browse/DailyBarChart';
+import { scaleLinear } from 'd3-scale';
 
 
 const lightTextColor = "#8b8b8b"
@@ -36,7 +39,8 @@ const styles = StyleSheet.create({
         shadowOpacity: null,
         borderBottomColor: 'gray',
         borderBottomWidth: 1,
-        paddingBottom: 6
+        paddingBottom: 6,
+        paddingTop: 16
     },
 
     headerStyle: {
@@ -79,9 +83,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center'
     },
+
     chartAreaStyle: {
-        padding: Sizes.horizontalPadding,
+        padding: 0,
     },
+
     footerStyle: {
         padding: Sizes.horizontalPadding,
         flexDirection: 'row',
@@ -248,8 +254,8 @@ function formatStatistics(sourceType: DataSourceType, statisticsType: Statistics
 
         case DataSourceType.HoursSlept:
             switch (statisticsType) {
-                case 'avg': return formatDuration(Math.round(value), true)
-                case 'range': return formatDuration(value[0], true) + " - " + formatDuration(value[1], true)
+                case 'avg': return DateTimeHelper.formatDuration(Math.round(value), true)
+                case 'range': return DateTimeHelper.formatDuration(value[0], true) + " - " + DateTimeHelper.formatDuration(value[1], true)
             }
 
         case DataSourceType.SleepRange:
@@ -259,6 +265,23 @@ function formatStatistics(sourceType: DataSourceType, statisticsType: Statistics
     }
 }
 
+function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, width: number, height: number): any {
+    switch (sourceType) {
+        case DataSourceType.StepCount:
+            return <DailyBarChart dateRange={data.range} data={data.data} containerHeight={height} containerWidth={width} valueTickFormat={(tick: number) => { return (tick % 1000 === 0 && tick != 0) ? tick / 1000 + "k" : commaNumber(tick) }} />
+        case DataSourceType.HoursSlept:
+            return <DailyBarChart dateRange={data.range}
+                data={data.data.map(d => ({ numberedDate: d.numberedDate, value: d.lengthInSeconds }))}
+                containerHeight={height} containerWidth={width}
+                valueTickFormat={(tick: number) => { return DateTimeHelper.formatDuration(tick, true) }}
+                valueTicksOverride={(maxValue: number) => {
+                    const scale = scaleLinear().domain([0, Math.ceil(maxValue/3600)]).nice()
+                    console.log(maxValue, scale.ticks())
+                    return scale.ticks(5).map(t => t*3600)
+                }}
+            />
+    }
+}
 
 export const DataSourceChartFrame = (props: {
     data: OverviewSourceRow
@@ -266,13 +289,16 @@ export const DataSourceChartFrame = (props: {
     showToday?: boolean
     flat?: boolean
     showHeader?: boolean
-    onHeaderPressed?: ()=>void
+    onHeaderPressed?: () => void
 }) => {
+
+    const [chartContainerWidth, setChartContainerWidth] = useState(-1)
+    const [chartContainerHeight, setChartContainerHeight] = useState(-1)
 
     const spec = dataSourceManager.getSpec(props.data.source)
     const todayInfo = formatTodayValue(props.data, props.measureUnitType)
 
-    return <View style={props.flat === true? styles.containerStyleFlat : styles.containerStyle}>
+    return <View style={props.flat === true ? styles.containerStyleFlat : styles.containerStyle}>
         {props.showHeader !== false && <View style={styles.headerStyle}>
             <View style={styles.headerClickRegionWrapperStyle}>
                 <TouchableOpacity onPress={props.onHeaderPressed} disabled={props.onHeaderPressed == null} activeOpacity={0.7} style={styles.headerClickRegionStyle}>
@@ -284,7 +310,7 @@ export const DataSourceChartFrame = (props: {
             </View>
 
             {
-                props.showToday !==false && props.data.today && <Text style={styles.headerDescriptionTextStyle}>
+                props.showToday !== false && props.data.today && <Text style={styles.headerDescriptionTextStyle}>
                     <Text>{todayInfo.label + ": "}</Text>
                     {
                         todayInfo.formatted != null ? todayInfo.formatted.map((chunk, index) =>
@@ -296,7 +322,11 @@ export const DataSourceChartFrame = (props: {
             }
         </View>}
         <View style={styles.chartAreaStyle}>
-            <Text>Chart Area</Text>
+            <SizeWatcher containerStyle={{ aspectRatio: 3 }} onSizeChange={(width, height) => { setChartContainerWidth(width); setChartContainerHeight(height) }}>
+                {
+                    getChartView(spec.type, props.data, chartContainerWidth, chartContainerHeight)
+                }
+            </SizeWatcher>
         </View>
 
         <View style={styles.footerStyle}>{

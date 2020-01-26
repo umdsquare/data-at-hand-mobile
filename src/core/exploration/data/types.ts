@@ -31,6 +31,7 @@ export interface OverviewData {
 
 export interface OverviewSourceRow {
   source: DataSourceType;
+  range: number[],
   data: any;
   today: number;
   statistics: Array<{type: StatisticsType; value: any}>;

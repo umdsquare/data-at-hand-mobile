@@ -82,6 +82,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
 
     const base = {
       source: sourceType,
+      range: [startDate, endDate],
       data: logs,
       today: null,
       statistics: null,

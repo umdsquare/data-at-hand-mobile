@@ -28,6 +28,7 @@ export class FitbitDailyHeartRateMeasure extends FitbitSummaryLogMeasure<
     const base = {
       source: DataSourceType.HeartRate,
       data: rangedData.list,
+      range: [startDate, endDate],
       today: this.fetchTodayValue(),
       statistics:
         [/*

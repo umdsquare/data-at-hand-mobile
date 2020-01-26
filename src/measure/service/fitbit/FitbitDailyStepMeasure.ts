@@ -28,6 +28,7 @@ export class FitbitDailyStepMeasure extends FitbitSummaryLogMeasure<FitbitDailyA
     const base = {
       source: DataSourceType.StepCount,
       data: rangedData.list,
+      range: [startDate, endDate],
       today: this.fetchTodayValue(),
       statistics: [
         {type: 'avg', value: rangedData.avg},
