@@ -46,7 +46,7 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
     return; // noop
   }
 
-  async fetchData(startDate: Date, endDate: Date): Promise<WeightRangedData> {
+  async fetchData(startDate: number, endDate: number): Promise<WeightRangedData> {
     const trendData = await this.trendMeasure.fetchPreliminaryData(startDate, endDate)
     const logData = await this.logMeasure.fetchData(startDate, endDate)
     return {
@@ -140,14 +140,12 @@ class FitbitWeightLogMeasure extends FitbitRangeMeasure<
     }
   }
 
-  fetchData(startDate: Date, endDate: Date): Promise<any> {
+  fetchData(startDate: number, endDate: number): Promise<any> {
     const filtered = this.service.realm
       .objects<WeightIntraDayLogEntry>(WeightIntraDayLogEntry)
       .filtered(
-        'numberedDate >= ' +
-          DateTimeHelper.toNumberedDateFromDate(startDate) +
-          ' AND numberedDate <= ' +
-          DateTimeHelper.toNumberedDateFromDate(endDate),
+        'numberedDate >= ' + startDate +
+          ' AND numberedDate <= ' + endDate,
       );
     return filtered.snapshot().map(v => v.toJson()) as any;
   }

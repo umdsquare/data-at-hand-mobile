@@ -68,7 +68,7 @@ const StyleTemplates = StyleSheet.create({
   headerTitleStyle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: 'white'
+    color: 'white',
   },
 
   dataSourceCardHeaderTitleStyle: {
@@ -102,8 +102,17 @@ const StyleTemplates = StyleSheet.create({
     flex: 1,
     borderTopLeftRadius: 18,
     borderTopRightRadius: 18,
-    paddingTop: 12
+    paddingTop: 12,
   },
+
+  fillFlex: {
+    flex: 1,
+  },
+
+  flexHorizontalCenteredListContainer: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  }
 });
 
 export {StyleTemplates};

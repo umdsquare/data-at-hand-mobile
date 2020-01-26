@@ -14,14 +14,12 @@ export abstract class FitbitSummaryLogMeasure<
 
   protected abstract getQueryResultEntryValue(queryResultEntry: any): any;
 
-  protected getLocalRangeQueryCondition(startDate: Date, endDate: Date): string{
-    return 'numberedDate >= ' +
-    DateTimeHelper.toNumberedDateFromDate(startDate) +
-    ' AND numberedDate <= ' +
-    DateTimeHelper.toNumberedDateFromDate(endDate)
+  protected getLocalRangeQueryCondition(startDate: number, endDate: number): string{
+    return 'numberedDate >= ' + startDate +
+    ' AND numberedDate <= ' + endDate
   }
 
-  fetchPreliminaryData(startDate: Date, endDate: Date): Promise<{list: Array<any>, avg: number, min: number, max: number, sum: number }> {
+  fetchPreliminaryData(startDate: number, endDate: number): Promise<{list: Array<any>, avg: number, min: number, max: number, sum: number }> {
     const filtered = this.service.realm
       .objects<RealmEntryClassType>(this.realmEntryClassType)
       .filtered(this.getLocalRangeQueryCondition(startDate, endDate));
@@ -40,27 +38,12 @@ export abstract class FitbitSummaryLogMeasure<
   }
 
   fetchTodayValue(): number{
-    const today = new Date()
+    const today = DateTimeHelper.toNumberedDateFromDate(new Date())
     const filtered = this.service.realm
       .objects<RealmEntryClassType>(this.realmEntryClassType)
       .filtered(this.getLocalRangeQueryCondition(today, today));
     
     return filtered.length > 0? filtered[0]["value"] : null
-
-    /*
-    if(value){
-        return {
-            label: this.todayLabel,
-            value: value,
-            formatted: this.formatTodayValue(value)
-        }
-    }else{
-        return {
-            label: this.todayLabel,
-            value: null,
-            formatted: [{text: "No value", type:'value'}]
-        }
-    }*/
   }
 
   //abstract formatTodayValue(value: number): Array<{text: string, type: 'unit'|'value'}>

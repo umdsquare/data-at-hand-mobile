@@ -69,29 +69,29 @@ export class FitbitService extends DataService {
   protected async fetchDataImpl(
     dataSource: DataSourceType,
     level: DataLevel,
-    from: Date,
-    to: Date,
+    start: number,
+    end: number,
   ): Promise<any> {
     if (level === DataLevel.DailyActivity) {
       switch (dataSource) {
         case DataSourceType.StepCount:
           console.log('try get fitbit step data from db');
-          return await this.dailyStepMeasure.fetchData(from, to);
+          return await this.dailyStepMeasure.fetchData(start, end);
 
         case DataSourceType.HeartRate:
           if (level === DataLevel.DailyActivity) {
             console.log('try get fitbit HR data from db');
-            return await this.dailyHeartRateMeasure.fetchData(from, to);
+            return await this.dailyHeartRateMeasure.fetchData(start, end);
           }
           break;
         case DataSourceType.HoursSlept:
         case DataSourceType.SleepRange:
           if (level === DataLevel.DailyActivity) {
-            return await this.sleepMeasure.fetchData(dataSource, from, to)
+            return await this.sleepMeasure.fetchData(dataSource, start, end)
           }
           break;
         case DataSourceType.Weight:
-          return await this.weightLogMeasure.fetchData(from, to);
+          return await this.weightLogMeasure.fetchData(start, end);
       }
 
       return null;

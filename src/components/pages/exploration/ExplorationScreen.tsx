@@ -11,12 +11,13 @@ import { generateHeaderView } from "./parts/header";
 import { BottomBar } from "../../exploration/BottomBar";
 import { explorationInfoHelper } from "../../../core/exploration/ExplorationInfoHelper";
 import { DataServiceManager } from "../../../system/DataServiceManager";
-import { ExplorationInfo } from "../../../core/exploration/types";
+import { ExplorationInfo, ExplorationType } from "../../../core/exploration/types";
 import { ExplorationDataState, startLoadingForInfo } from "../../../state/exploration/data/reducers";
-import { ExplorationMainPanel } from "./parts/main";
 import { ExplorationAction, createUndoAction, InteractionType, createRedoAction } from "../../../state/exploration/interaction/actions";
 import { Button } from "react-native-elements";
 import { Sizes } from "../../../style/Sizes";
+import { OverviewMainPanel } from "./parts/main/OverviewMainPanel";
+import { BrowseRangeMainPanel } from "./parts/main/BrowseRangeMainPanel";
 var deepEqual = require('deep-equal');
 
 const styles = StyleSheet.create({
@@ -132,8 +133,14 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 }
             </View>
             <View style={styles.mainContainerStyle}>
-                <ExplorationMainPanel />
+                {/* main data panel ===================================================================*/}
 
+                {
+                    this.props.explorationDataState.isBusy === false && this.props.explorationDataState.info != null ?
+                        this.makeMainPanel(this.props.explorationDataState.info.type) : <></>
+                }
+
+                {/* history panel ===================================================================*/}
                 <View style={styles.historyPanelStyle}>
                     <Button disabled={this.props.explorationState.past.length === 0}
                         containerStyle={styles.historyButtonContainerStyle}
@@ -151,6 +158,15 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
             <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationState.info)} />
 
         </View>
+    }
+
+    makeMainPanel(type: ExplorationType): any{
+        switch(type){
+            case ExplorationType.B_Ovrvw:
+                return <OverviewMainPanel/>
+            case ExplorationType.B_Range:
+                return <BrowseRangeMainPanel/>
+        }
     }
 }
 

@@ -70,15 +70,15 @@ export const explorationStateReducer = (
         const goToBrowseRangeAction = action as GoToBrowseRangeAction;
         const dataSource =
           goToBrowseRangeAction.dataSource ||
-          this.getParameterValue(state.info, ParameterType.DataSource);
+          explorationInfoHelper.getParameterValue(state.info, ParameterType.DataSource);
         const range =
           goToBrowseRangeAction.range ||
-          this.getParameterValue(state.info, ParameterType.Range);
+          explorationInfoHelper.getParameterValue(state.info, ParameterType.Range);
         if (dataSource != null && range != null) {
           newState.info.type = ExplorationType.B_Range;
           newState.info.values = [];
-          this.setParameterValue(newState.info, range, ParameterType.Range);
-          this.setParameterValue(
+          explorationInfoHelper.setParameterValue(newState.info, range, ParameterType.Range);
+          explorationInfoHelper.setParameterValue(
             newState.info,
             dataSource,
             ParameterType.DataSource,

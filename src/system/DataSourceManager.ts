@@ -1,5 +1,5 @@
 import { DataSourceSpec, DataSourceType, DataSourceCategory } from "../measure/DataSourceSpec";
-
+import commaNumber from 'comma-number';
 
 class DataSourceManager {
 
@@ -51,6 +51,15 @@ class DataSourceManager {
 
   getSpec(key: DataSourceType): DataSourceSpec {
     return this.specMap[key];
+  }
+
+  formatValue(value: any, type: DataSourceType): string{
+    switch(type){
+      case DataSourceType.StepCount:
+        return commaNumber(Math.round(value))
+      default:
+        return value.toString()
+    }
   }
 }
 

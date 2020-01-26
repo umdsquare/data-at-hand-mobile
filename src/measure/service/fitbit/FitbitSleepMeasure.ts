@@ -68,16 +68,14 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
 
   async fetchData(
     sourceType: DataSourceType.SleepRange | DataSourceType.HoursSlept,
-    startDate: Date,
-    endDate: Date,
+    startDate: number,
+    endDate: number,
   ): Promise<SleepRangedData> {
     const filtered = this.service.realm
       .objects<DailyMainSleepEntry>(DailyMainSleepEntry)
       .filtered(
-        'numberedDate >= ' +
-          DateTimeHelper.toNumberedDateFromDate(startDate) +
-          ' AND numberedDate <= ' +
-          DateTimeHelper.toNumberedDateFromDate(endDate),
+        'numberedDate >= ' + startDate +
+          ' AND numberedDate <= ' + endDate,
       );
 
     const logs = filtered.snapshot().map(v => v.toJson(false));

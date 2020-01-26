@@ -23,7 +23,7 @@ export class FitbitDailyHeartRateMeasure extends FitbitSummaryLogMeasure<
     return queryResultEntry.value.restingHeartRate;
   }
 
-  async fetchData(startDate: Date, endDate: Date): Promise<any> {
+  async fetchData(startDate: number, endDate: number): Promise<any> {
     const rangedData = await super.fetchPreliminaryData(startDate, endDate);
     const base = {
       source: DataSourceType.HeartRate,

@@ -1,9 +1,10 @@
 import {ExplorationInfo, ExplorationType, ParameterType, DataLevel} from '../types';
-import {OverviewData} from './types';
+import {OverviewData, OverviewSourceRow} from './types';
 import {explorationInfoHelper} from '../ExplorationInfoHelper';
 import {DateTimeHelper} from '../../../time';
 import {dataSourceManager} from '../../../system/DataSourceManager';
 import {DataServiceManager} from '../../../system/DataServiceManager';
+import { DataSourceType } from '../../../measure/DataSourceSpec';
 
 class ExplorationDataResolver {
   loadData(
@@ -16,12 +17,26 @@ class ExplorationDataResolver {
       case ExplorationType.B_Ovrvw:
         return this.loadOverviewData(explorationInfo, selectedServiceKey);
       case ExplorationType.B_Range:
-        break;
+        return this.loadBrowseRangeData(explorationInfo, selectedServiceKey)
       case ExplorationType.B_Day:
         break;
       default:
         Promise.reject({error: 'Unsupported exploration type.'});
     }
+  }
+
+  private loadBrowseRangeData(info: ExplorationInfo, selectedServiceKey: string): Promise<OverviewSourceRow>{
+    const range = explorationInfoHelper.getParameterValue(
+      info,
+      ParameterType.Range,
+    );
+    const source = explorationInfoHelper.getParameterValue<DataSourceType>(info, ParameterType.DataSource)
+
+    const selectedService = DataServiceManager.getServiceByKey(
+      selectedServiceKey,
+    );
+    
+    return selectedService.fetchData(source, DataLevel.DailyActivity, range[0], range[1])
   }
 
   private loadOverviewData(
@@ -32,8 +47,6 @@ class ExplorationDataResolver {
       info,
       ParameterType.Range,
     );
-    const rangeStartDate = DateTimeHelper.toDate(range[0]);
-    const rangeEndDate = DateTimeHelper.toDate(range[1]);
 
     const selectedService = DataServiceManager.getServiceByKey(
       selectedServiceKey,
@@ -41,7 +54,7 @@ class ExplorationDataResolver {
     
     return Promise.all(
       dataSourceManager.supportedDataSources.map(source =>
-        selectedService.fetchData(source.type, DataLevel.DailyActivity, rangeStartDate, rangeEndDate)
+        selectedService.fetchData(source.type, DataLevel.DailyActivity, range[0], range[1])
             .then(result => result != null? result : {source: source.type})
     )).then(dataPerSource => ({sourceDataList: dataPerSource}));
   }

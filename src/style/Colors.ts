@@ -9,6 +9,7 @@ export default {
   lightFormBackground: "#d0d0d0",
   textColorDark: "#252525",
   textColorLight: "#575757",
+  textGray: '#A7A7A7',
   colorWarnLight: "#e37f78",
   green: "#88db5e",
   red: "#f05e48",

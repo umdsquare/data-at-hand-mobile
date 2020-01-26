@@ -1,6 +1,7 @@
 import { DataSourceType } from '../DataSourceSpec';
 import { endOfDay, differenceInDays } from 'date-fns';
 import { DataLevel } from '../../core/exploration/types';
+import { DateTimeHelper } from '../../time';
 
 export interface ServiceActivationResult{
   success: boolean,
@@ -40,17 +41,16 @@ export abstract class DataService {
 
   abstract isDataSourceSupported(dataSource: DataSourceType): boolean
 
-  fetchData(dataSource: DataSourceType, level: DataLevel, from: Date, to: Date): Promise<any>{
-    const endOfToday = endOfDay(new Date())
-    if(differenceInDays(endOfToday, from) < 0){
+  fetchData(dataSource: DataSourceType, level: DataLevel, start: number, end: number): Promise<any>{
+    const today = DateTimeHelper.toNumberedDateFromDate(new Date())
+    if(start > today) {
       return Promise.resolve(null)
     }else{
-      const clampedTo = differenceInDays(endOfToday, to) > 0? to : endOfToday
-      return this.fetchDataImpl(dataSource, level, from, clampedTo)
+      return this.fetchDataImpl(dataSource, level, start, Math.min(end, today))
     }
   }
 
-  protected abstract fetchDataImpl(dataSource: DataSourceType, level: DataLevel, from: Date, to: Date): Promise<any>
+  protected abstract fetchDataImpl(dataSource: DataSourceType, level: DataLevel, start: number, end: number): Promise<any>
 
   abstract async activateInSystem(): Promise<ServiceActivationResult>
   abstract async deactivatedInSystem(): Promise<boolean>

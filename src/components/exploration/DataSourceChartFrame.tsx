@@ -16,14 +16,27 @@ const lightTextColor = "#8b8b8b"
 
 const headerHeight = 60
 
+const containerStyle = {
+    backgroundColor: 'white',
+    marginBottom: 12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    shadowColor: 'black',
+    shadowOpacity: 0.07
+}
+
 const styles = StyleSheet.create({
-    containerStyle: {
-        backgroundColor: 'white',
-        marginBottom: 12,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 8,
-        shadowColor: 'black',
-        shadowOpacity: 0.07
+    containerStyle: containerStyle,
+    containerStyleFlat: {
+        ...containerStyle,
+        marginBottom: 0,
+        shadowOffset: null,
+        shadowColor: null,
+        shadowRadius: null,
+        shadowOpacity: null,
+        borderBottomColor: 'gray',
+        borderBottomWidth: 1,
+        paddingBottom: 6
     },
 
     headerStyle: {
@@ -250,14 +263,17 @@ function formatStatistics(sourceType: DataSourceType, statisticsType: Statistics
 export const DataSourceChartFrame = (props: {
     data: OverviewSourceRow
     measureUnitType: MeasureUnitType
+    showToday?: boolean
+    flat?: boolean
+    showHeader?: boolean
     onHeaderPressed?: ()=>void
 }) => {
 
     const spec = dataSourceManager.getSpec(props.data.source)
     const todayInfo = formatTodayValue(props.data, props.measureUnitType)
 
-    return <View style={styles.containerStyle}>
-        <View style={styles.headerStyle}>
+    return <View style={props.flat === true? styles.containerStyleFlat : styles.containerStyle}>
+        {props.showHeader !== false && <View style={styles.headerStyle}>
             <View style={styles.headerClickRegionWrapperStyle}>
                 <TouchableOpacity onPress={props.onHeaderPressed} disabled={props.onHeaderPressed == null} activeOpacity={0.7} style={styles.headerClickRegionStyle}>
                     <View style={styles.iconContainerStyle}>
@@ -268,7 +284,7 @@ export const DataSourceChartFrame = (props: {
             </View>
 
             {
-                props.data.today && <Text style={styles.headerDescriptionTextStyle}>
+                props.showToday !==false && props.data.today && <Text style={styles.headerDescriptionTextStyle}>
                     <Text>{todayInfo.label + ": "}</Text>
                     {
                         todayInfo.formatted != null ? todayInfo.formatted.map((chunk, index) =>
@@ -278,7 +294,7 @@ export const DataSourceChartFrame = (props: {
                     }
                 </Text>
             }
-        </View>
+        </View>}
         <View style={styles.chartAreaStyle}>
             <Text>Chart Area</Text>
         </View>
