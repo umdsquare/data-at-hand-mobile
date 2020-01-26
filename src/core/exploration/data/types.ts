@@ -1,4 +1,5 @@
 import {DataSourceType} from '../../../measure/DataSourceSpec';
+import { IWeightIntraDayLogEntry } from '../../../measure/service/fitbit/realm/schema';
 
 export type StatisticsType = 'avg' | 'range' | 'total' | 'bedtime' | 'waketime';
 
@@ -48,8 +49,10 @@ export interface RestingHeartRateRangedData extends OverviewSourceRow {
 export interface WeightRangedData extends OverviewSourceRow {
   data: {
     trend: Array<IDailySummaryEntry>;
-    logs: Array<IIntraDayLogEntry>;
+    logs: Array<IWeightIntraDayLogEntry>;
   };
+  pastNearestLog: IWeightIntraDayLogEntry;
+  futureNearestLog: IWeightIntraDayLogEntry;
 }
 
 export interface SleepRangedData extends OverviewSourceRow {

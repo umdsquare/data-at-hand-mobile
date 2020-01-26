@@ -8,7 +8,7 @@ import { Sizes } from '../../../../style/Sizes'
 
 export const DateBandAxis = (props: { scale: ScaleBand<number>, chartArea: Rectangle, dateSequence: number[], today: number, tickFormat: (date: number) => string }) => {
 
-    const divider = Math.ceil(props.dateSequence.length / 7)
+    const divider = Math.ceil(props.dateSequence.length / 8)
 
     return <G x={props.chartArea.x} y={props.chartArea.y + props.chartArea.h}>
         <Line x1={0} x2={props.chartArea.w} y1={0} y2={0} stroke={Colors.textColorLight} strokeWidth={0.5} />

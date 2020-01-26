@@ -19,12 +19,6 @@ class DataSourceManager {
         'Heart Rate BPM (Beats per Minute) measured at a specific moment',
     },
     {
-      type: DataSourceType.Weight,
-      category: DataSourceCategory.Weight,
-      name: 'Weight',
-      description: 'Body weight measured at a specific moment',
-    },
-    {
       type: DataSourceType.HoursSlept,
       category: DataSourceCategory.Sleep,
       name: 'Hours Slept',
@@ -36,7 +30,13 @@ class DataSourceManager {
       category: DataSourceCategory.Sleep,
       name: 'Sleep Range',
       description: "Bedtime and Wake time of the day\'s sleep",
-    }
+    },
+    {
+      type: DataSourceType.Weight,
+      category: DataSourceCategory.Weight,
+      name: 'Weight',
+      description: 'Body weight measured at a specific moment',
+    },
   ];
 
   private specMap: Map<DataSourceType, DataSourceSpec>;

@@ -5,7 +5,7 @@ import { Sizes } from '../../style/Sizes';
 import { DataSourceIcon } from '../common/DataSourceIcon';
 import { DataSourceType, MeasureUnitType } from '../../measure/DataSourceSpec';
 import { dataSourceManager } from '../../system/DataSourceManager';
-import { OverviewSourceRow, StatisticsType } from '../../core/exploration/data/types';
+import { OverviewSourceRow, StatisticsType, WeightRangedData } from '../../core/exploration/data/types';
 import commaNumber from 'comma-number';
 import { DateTimeHelper } from '../../time';
 import { startOfDay, addSeconds, format } from 'date-fns';
@@ -13,6 +13,9 @@ import { TouchableOpacity } from 'react-native-gesture-handler';
 import { SizeWatcher } from '../visualization/SizeWatcher';
 import { DailyBarChart } from './visualization/browse/DailyBarChart';
 import { scaleLinear } from 'd3-scale';
+import { DailyHeartRateChart } from './visualization/browse/DailyHeartRateChart';
+import { DailySleepRangeChart } from './visualization/browse/DailySleepRangeChart';
+import { DailyWeightChart } from './visualization/browse/DailyWeightChart';
 
 
 const lightTextColor = "#8b8b8b"
@@ -275,11 +278,24 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, width
                 containerHeight={height} containerWidth={width}
                 valueTickFormat={(tick: number) => { return DateTimeHelper.formatDuration(tick, true) }}
                 valueTicksOverride={(maxValue: number) => {
-                    const scale = scaleLinear().domain([0, Math.ceil(maxValue/3600)]).nice()
-                    console.log(maxValue, scale.ticks())
-                    return scale.ticks(5).map(t => t*3600)
+                    const scale = scaleLinear().domain([0, Math.ceil(maxValue / 3600)]).nice()
+                    return scale.ticks(5).map(t => t * 3600)
                 }}
             />
+        case DataSourceType.HeartRate:
+            return <DailyHeartRateChart
+                dateRange={data.range} data={data.data} containerWidth={width} containerHeight={height}
+            />
+        case DataSourceType.SleepRange:
+            return <DailySleepRangeChart dateRange={data.range} data={data.data}
+                containerHeight={height} containerWidth={width}
+            />
+        case DataSourceType.Weight:
+            const weightData = data as WeightRangedData
+            return <DailyWeightChart dateRange={data.range} data={data.data}
+                pastNearestLog={weightData.pastNearestLog}
+                futureNearestLog={weightData.futureNearestLog}
+                containerWidth={width} containerHeight={height} />
     }
 }
 

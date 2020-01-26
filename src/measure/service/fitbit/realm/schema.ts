@@ -18,7 +18,7 @@ const intraDayLogProperties = {
   id: 'string',
 };
 
-interface IWeightIntraDayLogEntry extends IIntraDayLogEntry {
+export interface IWeightIntraDayLogEntry extends IIntraDayLogEntry {
   value: number;
   source: string;
 }
