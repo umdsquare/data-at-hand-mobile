@@ -1,5 +1,5 @@
 import React from "react";
-import { View, FlatList, Text, StyleSheet } from 'react-native';
+import { View, FlatList, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { MeasureUnitType, DataSourceType } from "../../../../../measure/DataSourceSpec";
 import { ExplorationAction } from "../../../../../state/exploration/interaction/actions";
 import { connect } from "react-redux";
@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
 })
 
 interface Props {
+    isLoadingData?: boolean,
     source?: DataSourceType,
     data?: any,
     measureUnitType?: MeasureUnitType,
@@ -70,7 +71,7 @@ interface Props {
 class BrowseRangeMainPanel extends React.Component<Props>{
 
     render() {
-        if (this.props.data != null) {
+        if (this.props.data != null && this.props.isLoadingData === false) {
             const today = DateTimeHelper.toNumberedDateFromDate(new Date())
             const sourceRangedData = this.props.data as OverviewSourceRow
             const dataList: Array<any> = (this.props.source === DataSourceType.Weight ? sourceRangedData.data.logs : sourceRangedData.data).slice(0)
@@ -94,7 +95,9 @@ class BrowseRangeMainPanel extends React.Component<Props>{
                     </View>
                 }
             </View>
-        }
+        }else return <View style={StyleTemplates.fillFlex}>
+            <ActivityIndicator/>
+        </View>
     }
 }
 
@@ -111,7 +114,8 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
         ...ownProps,
         source: explorationInfoHelper.getParameterValue(appState.explorationDataState.info, ParameterType.DataSource),
         data: appState.explorationDataState.data,
-        measureUnitType: appState.settingsState.unit
+        measureUnitType: appState.settingsState.unit,
+        isLoadingData: appState.explorationDataState.isBusy
     }
 }
 

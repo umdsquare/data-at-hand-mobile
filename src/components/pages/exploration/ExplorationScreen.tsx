@@ -136,7 +136,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 {/* main data panel ===================================================================*/}
 
                 {
-                    this.props.explorationDataState.isBusy === false && this.props.explorationDataState.info != null ?
+                    this.props.explorationDataState.info != null ?
                         this.makeMainPanel(this.props.explorationDataState.info.type) : <></>
                 }
 

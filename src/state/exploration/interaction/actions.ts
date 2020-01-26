@@ -4,6 +4,7 @@ import { DataSourceType } from "../../../measure/DataSourceSpec"
 const ACTION_PREFIX = "exploration:interaction:"
 
 export enum ExplorationActionType{
+    MemoUiStatus="exploration:interaction:memoUIStatus",
     SetRange="exploration:interaction:setR",
     SetDataSource="exploration:interaction:setDS",
     SelectElementOfDay="exploration:interaction:selectElmDay",
@@ -22,6 +23,11 @@ interface ExplorationActionBase extends ActionTypeBase{
     interactionType: InteractionType
 }
 
+export interface MemoUIStatusAction extends ActionTypeBase{
+    key: string,
+    value: any
+}
+
 export interface SetRangeAction extends ExplorationActionBase{
     range: [number, number],
     key?: string
@@ -32,7 +38,7 @@ export interface GoToBrowseRangeAction extends ExplorationActionBase{
     range?:[number, number]
 }
 
-export type ExplorationAction = ExplorationActionBase | SetRangeAction | GoToBrowseRangeAction
+export type ExplorationAction = ExplorationActionBase | SetRangeAction | GoToBrowseRangeAction | MemoUIStatusAction
 
 export function createSetRangeAction(interactionType: InteractionType, range: [number, number], key?: string): SetRangeAction{
     return {
@@ -66,6 +72,12 @@ export function createRedoAction(interactionType: InteractionType): ExplorationA
     }
 }
 
-
+export function memoUIStatus(key: string, value: any): MemoUIStatusAction{
+    return {
+        type: ExplorationActionType.MemoUiStatus,
+        key,
+        value
+    }
+}
 
 //===================================================
