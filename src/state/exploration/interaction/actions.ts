@@ -34,12 +34,16 @@ export interface SetRangeAction extends ExplorationActionBase{
     key?: string
 }
 
+export interface SetDataSourceAction extends ExplorationActionBase{
+    dataSource: DataSourceType
+}
+
 export interface GoToBrowseRangeAction extends ExplorationActionBase{
     dataSource?: DataSourceType,
     range?:[number, number]
 }
 
-export type ExplorationAction = ExplorationActionBase | SetRangeAction | GoToBrowseRangeAction | MemoUIStatusAction
+export type ExplorationAction = ExplorationActionBase | SetRangeAction | GoToBrowseRangeAction | MemoUIStatusAction | SetDataSourceAction
 
 export function createSetRangeAction(interactionType: InteractionType, range: [number, number], key?: string): SetRangeAction{
     return {
@@ -85,6 +89,14 @@ export function memoUIStatus(key: string, value: any): MemoUIStatusAction{
         type: ExplorationActionType.MemoUiStatus,
         key,
         value
+    }
+}
+
+export function setDataSourceAction(interactionType: InteractionType, dataSource: DataSourceType): SetDataSourceAction{
+    return {
+        type: ExplorationActionType.SetDataSource,
+        interactionType,
+        dataSource
     }
 }
 

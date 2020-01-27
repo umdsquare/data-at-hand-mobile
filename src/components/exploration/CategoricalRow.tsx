@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Sizes } from '../../style/Sizes';
 import { SpeechAffordanceIndicator } from './SpeechAffordanceIndicator';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import GestureRecognizer from 'react-native-swipe-gestures';
 const height = 50
 const containerStyleBase = {
     flexDirection: 'row',
@@ -29,7 +30,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         height,
         paddingRight: Sizes.horizontalPadding,
-        paddingLeft: Sizes.horizontalPadding,  
+        paddingLeft: Sizes.horizontalPadding,
     },
 
     valueStyle: {
@@ -52,14 +53,16 @@ export const CategoricalRow = (prop: {
     icon?: any,
     showBorder?: boolean,
     children?: any,
-    onPress?: ()=>void
+    onPress?: () => void,
+    onSwipeLeft?: () => void,
+    onSwipeRight?: () => void
 }) => {
-    return <View style={prop.showBorder === true ? styles.containerStyleWithBorder : styles.containerStyleWithoutBorder}>
+    return <GestureRecognizer onSwipeLeft={prop.onSwipeLeft} onSwipeRight={prop.onSwipeRight} style={prop.showBorder === true ? styles.containerStyleWithBorder : styles.containerStyleWithoutBorder}>
         <Text style={styles.titleStyle}>{prop.title}</Text>
         <TouchableOpacity style={styles.buttonStyle} onPress={prop.onPress}>
             {prop.icon}
             <Text style={styles.valueStyle}>{prop.value}</Text>
             <SpeechAffordanceIndicator overrideStyle={styles.indicatorStyle} />
         </TouchableOpacity>
-    </View>
+    </GestureRecognizer>
 }

@@ -13,7 +13,7 @@ import { StyleTemplates } from '../../../../style/Styles';
 import { DateTimeHelper } from '../../../../time';
 import { dataSourceManager } from '../../../../system/DataSourceManager';
 import { DataSourceType } from '../../../../measure/DataSourceSpec';
-import {createSetRangeAction} from '../../../../state/exploration/interaction/actions';
+import {createSetRangeAction, setDataSourceAction, InteractionType} from '../../../../state/exploration/interaction/actions';
 
 const titleBarOptionButtonIconInfo = {
     name: "ios-settings",
@@ -93,7 +93,22 @@ function generateRangeBar(props: ExplorationProps, key?: ParameterKey): any {
 function generateDataSourceRow(props: ExplorationProps): any {
     const sourceType = explorationInfoHelper.getParameterValue(props.explorationState.info, ParameterType.DataSource) as DataSourceType
     const sourceSpec = dataSourceManager.getSpec(sourceType)
-    return <CategoricalRow title="Data Source" showBorder={true} value={sourceSpec.name} icon={<DataSourceIcon type={sourceType} color="white" size={20} />} />
+    return <CategoricalRow title="Data Source" showBorder={true} value={sourceSpec.name} 
+        icon={<DataSourceIcon type={sourceType} color="white" size={20}/>}
+        onSwipeLeft={()=>{
+            let currentSourceIndex = dataSourceManager.supportedDataSources.findIndex(spec => spec.type === sourceType)
+            currentSourceIndex--
+            if(currentSourceIndex < 0){
+                currentSourceIndex = dataSourceManager.supportedDataSources.length -1
+            }
+            props.dispatchCommand(setDataSourceAction(InteractionType.TouchOnly, dataSourceManager.supportedDataSources[currentSourceIndex].type))
+        }}
+        onSwipeRight={()=>{
+            let currentSourceIndex = dataSourceManager.supportedDataSources.findIndex(spec => spec.type === sourceType)
+            currentSourceIndex = (currentSourceIndex+1)%dataSourceManager.supportedDataSources.length
+            props.dispatchCommand(setDataSourceAction(InteractionType.TouchOnly, dataSourceManager.supportedDataSources[currentSourceIndex].type))
+        }} 
+    />
 }
 
 function generateComparisonTypeRow(props: ExplorationProps): any {

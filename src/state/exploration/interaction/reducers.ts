@@ -10,6 +10,7 @@ import {
   SetRangeAction,
   GoToBrowseRangeAction,
   MemoUIStatusAction,
+  SetDataSourceAction,
 } from './actions';
 import {explorationInfoHelper} from '../../../core/exploration/ExplorationInfoHelper';
 import {ExplorationDataActionType} from '../data/actions';
@@ -67,7 +68,7 @@ export const explorationStateReducer = (
       case ExplorationActionType.SetRange:
         const setRangeAction = action as SetRangeAction;
         if (state.info.type === ExplorationType.B_Day) {
-          //noop
+          return state;
         } else {
           explorationInfoHelper.setParameterValue(
             newState.info,
@@ -75,6 +76,18 @@ export const explorationStateReducer = (
             ParameterType.Range,
             setRangeAction.key as any,
           );
+        }
+        break;
+      case ExplorationActionType.SetDataSource:
+        const setDataSourceAction = action as SetDataSourceAction;
+        if (state.info.type === ExplorationType.B_Ovrvw) {
+          return state;
+        } else {
+          explorationInfoHelper.setParameterValue(
+            newState.info,
+            setDataSourceAction.dataSource,
+            ParameterType.DataSource
+          )
         }
         break;
       case ExplorationActionType.GoToBrowseRange:
