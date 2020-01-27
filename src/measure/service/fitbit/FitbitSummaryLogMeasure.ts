@@ -1,72 +1,88 @@
 import {DateTimeHelper} from '../../../time';
-import {IDataEntry} from './realm/schema';
 import {parse, getDay} from 'date-fns';
 import {FITBIT_DATE_FORMAT} from './api';
 import {FitbitRangeMeasure} from './FitbitRangeMeasure';
+import { FitbitLocalTableName } from './sqlite/database';
+import { SQLiteHelper } from '../../../database/sqlite/sqlite-helper';
 
 export abstract class FitbitSummaryLogMeasure<
-  QueryResultType,
-  RealmEntryClassType extends IDataEntry<any>
-> extends FitbitRangeMeasure<QueryResultType> {
-
-  protected abstract realmEntryClassType;
+  QueryResultType> extends FitbitRangeMeasure<QueryResultType> {
   protected maxQueryRangeLength: number = 1095;
+
+  protected abstract dbTableName: FitbitLocalTableName;
 
   protected abstract getQueryResultEntryValue(queryResultEntry: any): any;
 
-  protected getLocalRangeQueryCondition(startDate: number, endDate: number): string{
-    return 'numberedDate >= ' + startDate +
-    ' AND numberedDate <= ' + endDate
+  protected getLocalRangeQueryCondition(
+    startDate: number,
+    endDate: number,
+  ): string {
+    return 'numberedDate >= ' + startDate + ' AND numberedDate <= ' + endDate;
   }
 
-  fetchPreliminaryData(startDate: number, endDate: number): Promise<{list: Array<any>, avg: number, min: number, max: number, sum: number }> {
+  async fetchPreliminaryData(
+    startDate: number,
+    endDate: number,
+  ): Promise<{
+    list: Array<any>;
+    avg: number;
+    min: number;
+    max: number;
+    sum: number;
+  }> {
+
+    const condition = "`numberedDate` BETWEEN ? AND ? ORDER BY `numberedDate`"
+    const params = [startDate, endDate]
+    const list = await this.service.fitbitLocalDbManager.fetchData(this.dbTableName, condition, params)
+/*
     const filtered = this.service.realm
       .objects<RealmEntryClassType>(this.realmEntryClassType)
       .filtered(this.getLocalRangeQueryCondition(startDate, endDate))
-      .sorted("numberedDate")
-      
-    const avg = filtered.avg('value') as number
-    const min = filtered.min('value') as number
-    const max = filtered.max('value') as number
-    const sum = filtered.sum('value') as number
-    
+      .sorted('numberedDate');
+
+    const avg = filtered.avg('value') as number;
+    const min = filtered.min('value') as number;
+    const max = filtered.max('value') as number;
+    const sum = filtered.sum('value') as number;*/
+
     return Promise.resolve({
-        list: filtered.snapshot().map(v => v.toJson()),
-        avg,
-        min,
-        max,
-        sum
-    })
+      list,
+      avg: await this.service.fitbitLocalDbManager.getAggregatedValue(this.dbTableName, SQLiteHelper.AggregationType.AVG, 'value', condition, params),
+      min: await this.service.fitbitLocalDbManager.getAggregatedValue(this.dbTableName, SQLiteHelper.AggregationType.MIN, 'value', condition, params),
+      max: await this.service.fitbitLocalDbManager.getAggregatedValue(this.dbTableName, SQLiteHelper.AggregationType.MAX, 'value', condition, params),
+      sum: await this.service.fitbitLocalDbManager.getAggregatedValue(this.dbTableName, SQLiteHelper.AggregationType.SUM, 'value', condition, params),
+    });
   }
 
-  fetchTodayValue(): number{
-    const today = DateTimeHelper.toNumberedDateFromDate(new Date())
-    const filtered = this.service.realm
-      .objects<RealmEntryClassType>(this.realmEntryClassType)
-      .filtered(this.getLocalRangeQueryCondition(today, today));
+  async  fetchTodayValue(): Promise<number> {
+    const today = DateTimeHelper.toNumberedDateFromDate(new Date());
+
+    const todayResult = await this.service.fitbitLocalDbManager.fetchData(this.dbTableName, "`numberedDate` = ?", [today])
     
-    return filtered.length > 0? filtered[0]["value"] : null
+    return todayResult.length > 0 ? todayResult[0]['value'] : null;
   }
 
   //abstract formatTodayValue(value: number): Array<{text: string, type: 'unit'|'value'}>
 
-  protected handleQueryResultEntry(realm: Realm, entry: any, now: Date) {
-    const numberedDate = DateTimeHelper.fromFormattedString(entry.dateTime);
-    const date = parse(entry.dateTime, FITBIT_DATE_FORMAT, now);
+  protected async handleQueryResultEntry(entries: any[], now: Date) {
+    const entriesReady = entries
+      .map(entry => {
+        const numberedDate = DateTimeHelper.fromFormattedString(entry.dateTime);
+        const date = parse(entry.dateTime, FITBIT_DATE_FORMAT, now);
 
-    const value = this.getQueryResultEntryValue(entry);
-    if (value != null && Number.isNaN(value) === false) {
-      realm.create(
-        this.realmEntryClassType,
-        {
-          value,
-          numberedDate,
-          year: DateTimeHelper.getYear(numberedDate),
-          month: DateTimeHelper.getMonth(numberedDate),
-          dayOfWeek: getDay(date),
-        },
-        true,
-      );
-    }
+        const value = this.getQueryResultEntryValue(entry);
+        if (value != null && Number.isNaN(value) === false) {
+          return {
+            value,
+            numberedDate,
+            year: DateTimeHelper.getYear(numberedDate),
+            month: DateTimeHelper.getMonth(numberedDate),
+            dayOfWeek: getDay(date),
+          };
+        } else return null;
+      })
+      .filter(e => e != null);
+    
+    return this.service.fitbitLocalDbManager.insert(this.dbTableName, entriesReady)
   }
 }

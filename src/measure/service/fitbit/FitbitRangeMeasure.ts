@@ -1,13 +1,15 @@
 import {DateTimeHelper} from '../../../time';
 import {FitbitServiceMeasure} from './FitbitServiceMeasure';
+import { FitbitLocalTableName } from './sqlite/database';
 
 export abstract class FitbitRangeMeasure<
   QueryResultType> extends FitbitServiceMeasure {
+
   protected abstract resourcePropertyKey: string;
   protected abstract maxQueryRangeLength: number;
   protected abstract makeQueryUrl(startDate: number, endDate: number): string;
 
-  protected abstract handleQueryResultEntry(realm: Realm, entry: any, now: Date)
+  protected abstract handleQueryResultEntry(entries: any[], now: Date): Promise<void>
 
   protected async fetchAndCacheFitbitData(
     startDate: number,
@@ -48,11 +50,14 @@ export abstract class FitbitRangeMeasure<
 
     const now = new Date();
 
+    /*
     this.service.realm.write(() => {
       result[this.resourcePropertyKey].forEach(entry => {
         this.handleQueryResultEntry(this.service.realm, entry, now)
       });
-    });
+    });*/
+
+    this.handleQueryResultEntry(result[this.resourcePropertyKey], now)
 
     console.log('Finish storing data into Realm.');
   }

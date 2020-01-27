@@ -2,7 +2,6 @@ import {FitbitSleepQueryResult} from './types';
 import {FitbitRangeMeasure} from './FitbitRangeMeasure';
 import {makeFitbitSleepApiUrl, FITBIT_DATE_FORMAT} from './api';
 import {DateTimeHelper} from '../../../time';
-import {DailyMainSleepEntry} from './realm/schema';
 import {
   parse,
   getDay,
@@ -10,8 +9,10 @@ import {
   differenceInSeconds,
   startOfDay,
 } from 'date-fns';
-import {SleepRangedData} from '../../../core/exploration/data/types';
+import {SleepRangedData, IDailySleepSummaryEntry} from '../../../core/exploration/data/types';
 import {DataSourceType} from '../../DataSourceSpec';
+import { FitbitLocalTableName } from './sqlite/database';
+import { SQLiteHelper } from '../../../database/sqlite/sqlite-helper';
 
 export class FitbitSleepMeasure extends FitbitRangeMeasure<
   FitbitSleepQueryResult
@@ -23,47 +24,50 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
   protected makeQueryUrl(startDate: number, endDate: number): string {
     return makeFitbitSleepApiUrl(startDate, endDate);
   }
-  protected handleQueryResultEntry(realm: Realm, entry: any, now: Date) {
-    if (entry.isMainSleep === true) {
-      // we are interested only in the main sleep.
-      const numberedDate = DateTimeHelper.fromFormattedString(
-        entry.dateOfSleep,
-      );
-      const date = startOfDay(
-        parse(entry.dateOfSleep, FITBIT_DATE_FORMAT, now),
-      );
+  protected handleQueryResultEntry(
+    entries: Array<any>,
+    now: Date,
+  ): Promise<void> {
+    const entriesReady = entries.map(entry => {
+      if (entry.isMainSleep === true) {
+        // we are interested only in the main sleep.
+        const numberedDate = DateTimeHelper.fromFormattedString(
+          entry.dateOfSleep,
+        );
+        const date = startOfDay(
+          parse(entry.dateOfSleep, FITBIT_DATE_FORMAT, now),
+        );
 
-      const bedTime = parseISO(entry.startTime);
-      const wakeTime = parseISO(entry.endTime);
+        const bedTime = parseISO(entry.startTime);
+        const wakeTime = parseISO(entry.endTime);
 
-      const bedTimeDiff = differenceInSeconds(bedTime, date);
-      const wakeTimeDiff = differenceInSeconds(wakeTime, date);
+        const bedTimeDiff = differenceInSeconds(bedTime, date);
+        const wakeTimeDiff = differenceInSeconds(wakeTime, date);
 
-      realm.create(
-        DailyMainSleepEntry,
-        {
-          quality: entry.efficiency,
-          lengthInSeconds: entry.duration / 1000,
-          bedTimeDiffSeconds: bedTimeDiff,
-          wakeTimeDiffSeconds: wakeTimeDiff,
+        return {
+            quality: entry.efficiency,
+            lengthInSeconds: entry.duration / 1000,
+            bedTimeDiffSeconds: bedTimeDiff,
+            wakeTimeDiffSeconds: wakeTimeDiff,
 
-          listOfLevels: entry.levels.data.map(levelEntry => {
-            return (
-              levelEntry.level +
-              '|' +
-              differenceInSeconds(parseISO(levelEntry.dateTime), bedTime) +
-              '|' +
-              levelEntry.seconds
-            );
-          }),
-          numberedDate,
-          year: DateTimeHelper.getYear(numberedDate),
-          month: DateTimeHelper.getMonth(numberedDate),
-          dayOfWeek: getDay(date),
-        },
-        true,
-      );
-    }
+            listOfLevels: entry.levels.data.map(levelEntry => {
+              return (
+                levelEntry.level +
+                '|' +
+                differenceInSeconds(parseISO(levelEntry.dateTime), bedTime) +
+                '|' +
+                levelEntry.seconds
+              )
+            }).join(","),
+            numberedDate,
+            year: DateTimeHelper.getYear(numberedDate),
+            month: DateTimeHelper.getMonth(numberedDate),
+            dayOfWeek: getDay(date),
+          }
+      }else return null
+    }).filter(e => e != null)
+
+    return this.service.fitbitLocalDbManager.insert(FitbitLocalTableName.SleepLog, entriesReady) 
   }
 
   async fetchData(
@@ -71,14 +75,11 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
     startDate: number,
     endDate: number,
   ): Promise<SleepRangedData> {
-    const filtered = this.service.realm
-      .objects<DailyMainSleepEntry>(DailyMainSleepEntry)
-      .filtered(
-        'numberedDate >= ' + startDate +
-          ' AND numberedDate <= ' + endDate,
-      ).sorted("numberedDate")
 
-    const logs = filtered.snapshot().map(v => v.toJson(false));
+    const condition = "`numberedDate` BETWEEN ? AND ? ORDER BY `numberedDate`"
+    const params = [startDate, endDate]
+    const logs = await this.service.fitbitLocalDbManager
+      .fetchData<IDailySleepSummaryEntry>(FitbitLocalTableName.SleepLog, condition, params)
 
     const base = {
       source: sourceType,
@@ -88,11 +89,8 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
       statistics: null,
     };
 
-    const todayLogs = this.service.realm
-      .objects<DailyMainSleepEntry>(DailyMainSleepEntry)
-      .filtered(
-        'numberedDate = ' + DateTimeHelper.toNumberedDateFromDate(new Date()),
-      );
+    const todayLogs = await this.service.fitbitLocalDbManager
+      .fetchData<IDailySleepSummaryEntry>(FitbitLocalTableName.SleepLog, "`numberedDate` = ? LIMIT 1", [DateTimeHelper.toNumberedDateFromDate(new Date())])
 
     const todayLog = todayLogs.length > 0 ? todayLogs[0] : null;
 
@@ -100,9 +98,18 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
       case DataSourceType.HoursSlept:
         base.today = todayLog != null ? todayLog.lengthInSeconds : null;
         base.statistics = [
-          {type: 'avg', value: filtered.avg('lengthInSeconds')},
-          {type: 'range', value: [filtered.min('lengthInSeconds'), filtered.max('lengthInSeconds')]},
-        ]
+          {type: 'avg', value: await this.service.fitbitLocalDbManager
+            .getAggregatedValue(FitbitLocalTableName.SleepLog, SQLiteHelper.AggregationType.AVG, 'lengthInSeconds', condition, params)},
+          {
+            type: 'range',
+            value: [
+              await this.service.fitbitLocalDbManager
+            .getAggregatedValue(FitbitLocalTableName.SleepLog, SQLiteHelper.AggregationType.MIN, 'lengthInSeconds', condition, params),
+            await this.service.fitbitLocalDbManager
+            .getAggregatedValue(FitbitLocalTableName.SleepLog, SQLiteHelper.AggregationType.MAX, 'lengthInSeconds', condition, params),
+            ],
+          },
+        ];
 
         break;
       case DataSourceType.SleepRange:
@@ -110,11 +117,13 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
           todayLog != null
             ? [todayLog.bedTimeDiffSeconds, todayLog.wakeTimeDiffSeconds]
             : null;
-        
-            base.statistics = [
-              {type: 'waketime', value: filtered.avg('wakeTimeDiffSeconds')},
-              {type: 'bedtime', value: filtered.avg('bedTimeDiffSeconds')},
-            ]
+
+        base.statistics = [
+          {type: 'waketime', value: await this.service.fitbitLocalDbManager
+            .getAggregatedValue(FitbitLocalTableName.SleepLog, SQLiteHelper.AggregationType.AVG, 'wakeTimeDiffSeconds', condition, params)},
+          {type: 'bedtime', value: await this.service.fitbitLocalDbManager
+          .getAggregatedValue(FitbitLocalTableName.SleepLog, SQLiteHelper.AggregationType.AVG, 'bedTimeDiffSeconds', condition, params)},
+        ];
         break;
     }
 

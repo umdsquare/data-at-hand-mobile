@@ -1,15 +1,15 @@
 import { FitbitDailyActivityStepsQueryResult } from "./types";
-import { DailyStepCountEntry } from './realm/schema';
 import { makeFitbitDayLevelActivityLogsUrl } from "./api";
 import { FitbitSummaryLogMeasure } from "./FitbitSummaryLogMeasure";
 import { StepCountRangedData } from "../../../core/exploration/data/types";
 import { DataSourceType } from "../../DataSourceSpec";
+import { FitbitLocalTableName } from "./sqlite/database";
 
-export class FitbitDailyStepMeasure extends FitbitSummaryLogMeasure<FitbitDailyActivityStepsQueryResult, DailyStepCountEntry> {
+export class FitbitDailyStepMeasure extends FitbitSummaryLogMeasure<FitbitDailyActivityStepsQueryResult> {
+  protected dbTableName = FitbitLocalTableName.StepCount;
   
   key = 'daily_step'
 
-  protected realmEntryClassType: any = DailyStepCountEntry
   protected resourcePropertyKey: string = "activities-steps"
   protected makeQueryUrl(startDate: number, endDate: number): string {
     return makeFitbitDayLevelActivityLogsUrl("activities/steps", startDate, endDate)
@@ -29,7 +29,7 @@ export class FitbitDailyStepMeasure extends FitbitSummaryLogMeasure<FitbitDailyA
       source: DataSourceType.StepCount,
       data: rangedData.list,
       range: [startDate, endDate],
-      today: this.fetchTodayValue(),
+      today: await this.fetchTodayValue(),
       statistics: [
         {type: 'avg', value: rangedData.avg},
         {type: 'total', value: rangedData.sum},

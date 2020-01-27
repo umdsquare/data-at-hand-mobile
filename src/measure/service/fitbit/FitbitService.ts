@@ -10,13 +10,12 @@ import {DataSourceType} from '../../DataSourceSpec';
 import {FitbitDailyStepMeasure} from './FitbitDailyStepMeasure';
 import {FitbitDailyHeartRateMeasure} from './FitbitDailyHeartRateMeasure';
 import {DateTimeHelper} from '../../../time';
-import {FitbitLocalCacheConfig} from './realm/schema';
-import * as Realm from 'realm';
 import {DataLevel} from '../../../core/exploration/types';
 import {FITBIT_PROFILE_URL} from './api';
 import {FitbitServiceMeasure} from './FitbitServiceMeasure';
 import {FitbitWeightMeasure} from './FitbitWeightMeasure';
 import { FitbitSleepMeasure } from './FitbitSleepMeasure';
+import { FitbitLocalDbManager } from './sqlite/database';
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -40,11 +39,8 @@ export class FitbitService extends DataService {
   private _credential: FitbitCredential = null;
   private _authConfig = null;
 
-  private _realm: Realm;
-
-  get realm(): Realm {
-    return this._realm;
-  }
+  private _fitbitLocalDbManager : FitbitLocalDbManager = new FitbitLocalDbManager()
+  get fitbitLocalDbManager(): FitbitLocalDbManager {return this._fitbitLocalDbManager}
 
   get credential(): FitbitCredential {
     return this._credential;
@@ -151,7 +147,8 @@ export class FitbitService extends DataService {
       await AsyncStorageHelper.remove(STORAGE_KEY_AUTH_STATE);
       await AsyncStorageHelper.remove(STORAGE_KEY_USER_TIMEZONE);
       await AsyncStorageHelper.remove(STORAGE_KEY_USER_MEMBER_SINCE);
-      Realm.deleteFile(FitbitLocalCacheConfig);
+      await this.fitbitLocalDbManager.close()
+      await this.fitbitLocalDbManager.deleteDatabase()
     }
   }
 
@@ -162,8 +159,7 @@ export class FitbitService extends DataService {
         const initialDate = await this.getMembershipStartDate();
         const now = DateTimeHelper.toNumberedDateFromDate(new Date());
 
-        console.log('initialize new realm.');
-        this._realm = await Realm.open(FitbitLocalCacheConfig);
+        await this.fitbitLocalDbManager.open()
 
         for (const measure of this.measures) {
           await measure.cacheServerData(now);
@@ -193,8 +189,8 @@ export class FitbitService extends DataService {
     }
   }
 
-  onSystemExit() {
-    this._realm.close();
+  async onSystemExit(): Promise<void> {
+    await this.fitbitLocalDbManager.close()
   }
 
   async updateUserProfile(): Promise<boolean> {
