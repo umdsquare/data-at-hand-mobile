@@ -1,5 +1,5 @@
 import React from "react";
-import { View, FlatList, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, FlatList, Text, StyleSheet, ActivityIndicator, LayoutAnimation } from 'react-native';
 import { MeasureUnitType, DataSourceType } from "../../../../../measure/DataSourceSpec";
 import { ExplorationAction } from "../../../../../state/exploration/interaction/actions";
 import { connect } from "react-redux";
@@ -17,6 +17,8 @@ import Colors from "../../../../../style/Colors";
 import { Icon } from "react-native-elements";
 import commaNumber from 'comma-number';
 import unitConvert from 'convert-units';
+import * as Progress from 'react-native-progress';
+import { BusyHorizontalIndicator } from "../../../../exploration/BusyHorizontalIndicator";
 
 const styles = StyleSheet.create({
     listItemStyle: {
@@ -70,13 +72,22 @@ interface Props {
 
 class BrowseRangeMainPanel extends React.Component<Props>{
 
+    componentDidUpdate(prevProps: Props){
+        if(prevProps.isLoadingData !== this.props.isLoadingData){
+            //LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
+        }
+    }
+
     render() {
-        if (this.props.data != null && this.props.isLoadingData === false) {
+        if (this.props.data != null) {
             const today = DateTimeHelper.toNumberedDateFromDate(new Date())
             const sourceRangedData = this.props.data as OverviewSourceRow
             const dataList: Array<any> = (this.props.source === DataSourceType.Weight ? sourceRangedData.data.logs : sourceRangedData.data).slice(0)
             dataList.sort((a: any, b: any) => b["numberedDate"] - a["numberedDate"])
             return <View style={StyleTemplates.fillFlex}>
+                {
+                    this.props.isLoadingData === true && <BusyHorizontalIndicator/>
+                }
                 <DataSourceChartFrame data={sourceRangedData}
                     measureUnitType={this.props.measureUnitType}
                     showToday={false}
@@ -95,8 +106,8 @@ class BrowseRangeMainPanel extends React.Component<Props>{
                     </View>
                 }
             </View>
-        }else return <View style={StyleTemplates.fillFlex}>
-            <ActivityIndicator/>
+        } else return <View style={StyleTemplates.fillFlex}>
+            <ActivityIndicator />
         </View>
     }
 }
@@ -181,31 +192,31 @@ const Item = (prop: {
 
             const actualBedTime = addSeconds(pivot, Math.round(prop.item.bedTimeDiffSeconds))
             const actualWakeTime = addSeconds(pivot, Math.round(prop.item.wakeTimeDiffSeconds))
-            
+
             const rangeText = format(actualBedTime, 'hh:mm a').toLowerCase() + " - " + format(actualWakeTime, 'hh:mm a').toLowerCase()
-            
+
             const lengthHr = Math.floor(prop.item.lengthInSeconds / 3600)
-            let lengthMin = Math.floor((prop.item.lengthInSeconds%3600)/60)
+            let lengthMin = Math.floor((prop.item.lengthInSeconds % 3600) / 60)
             const lengthSec = prop.item.lengthInSeconds % 60
-            if(lengthSec > 30){
+            if (lengthSec > 30) {
                 lengthMin++
             }
 
             const durationFormat = []
-            if(lengthHr > 0){
-                durationFormat.push({type: 'value', text: lengthHr})
-                durationFormat.push({type: 'unit', text: " hr"})
+            if (lengthHr > 0) {
+                durationFormat.push({ type: 'value', text: lengthHr })
+                durationFormat.push({ type: 'unit', text: " hr" })
             }
-            durationFormat.push({type: "value", text: lengthHr > 0 ? (" " + lengthMin) : lengthMin})
-            durationFormat.push({type: "unit", text: " min"})
-            
+            durationFormat.push({ type: "value", text: lengthHr > 0 ? (" " + lengthMin) : lengthMin })
+            durationFormat.push({ type: "unit", text: " min" })
+
 
             valueElement = <View style={styles.listItemValueContainerStyle}>
-                <Text style={{marginBottom: 8, fontSize: Sizes.smallFontSize, color: Colors.textColorLight}}>{rangeText}</Text>
+                <Text style={{ marginBottom: 8, fontSize: Sizes.smallFontSize, color: Colors.textColorLight }}>{rangeText}</Text>
                 <Text>
                     {
-                        durationFormat.map((f,i) => <Text key={i} 
-                        style={f.type === 'value'? styles.listItemValueDigitStyle : styles.listItemValueUnitStyle}>
+                        durationFormat.map((f, i) => <Text key={i}
+                            style={f.type === 'value' ? styles.listItemValueDigitStyle : styles.listItemValueUnitStyle}>
                             {f.text}
                         </Text>)
                     }

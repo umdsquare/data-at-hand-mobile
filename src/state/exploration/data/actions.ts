@@ -7,11 +7,11 @@ export enum ExplorationDataActionType{
 }
  
 export interface StartLoadingData extends ActionTypeBase{
-    info: ExplorationInfo,
     taskId: string
 }
 
 export interface FinishLoadingData extends ActionTypeBase{
+    info: ExplorationInfo,
     data?: any,
     error?: any
 }

@@ -36,7 +36,6 @@ export const explorationDataStateReducer = (
     case ExplorationDataActionType.StartLoadingDataAction:
       const startAction = action as StartLoadingData;
       newState.isBusy = true;
-      newState.info = startAction.info;
       newState.ongoingTaskId = startAction.taskId;
       return newState;
     case ExplorationDataActionType.FinishLoadingDataAction:
@@ -47,6 +46,7 @@ export const explorationDataStateReducer = (
         newState.error = finishAction.error;
       }
       if (finishAction.data) {
+        newState.info = finishAction.info;
         newState.data = finishAction.data;
       }
       return newState;
@@ -61,7 +61,6 @@ export function startLoadingForInfo(explorationInfo: ExplorationInfo) {
     //set to loading status
     dispatch({
       type: ExplorationDataActionType.StartLoadingDataAction,
-      info: explorationInfo,
       taskId: taskId,
     } as StartLoadingData);
 
@@ -87,6 +86,7 @@ export function startLoadingForInfo(explorationInfo: ExplorationInfo) {
         console.log('Completed data load');
         dispatch({
           type: ExplorationDataActionType.FinishLoadingDataAction,
+          info: explorationInfo,
           data: data,
         } as FinishLoadingData);
       }
