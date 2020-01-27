@@ -54,6 +54,9 @@ export const DailySleepRangeChart = (prop: Props) => {
         .domain(niceDomain)
         .range([0, chartArea.h])
 
+    const bedTimeAvg = d3Array.mean(prop.data, d => d.bedTimeDiffSeconds)
+    const wakeTimeAvg = d3Array.mean(prop.data, d => d.wakeTimeDiffSeconds)
+
     return <Svg width={prop.containerWidth} height={prop.containerHeight}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={tickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
@@ -71,6 +74,12 @@ export const DailySleepRangeChart = (prop: Props) => {
                                 opacity={0.62}
                             />
                 })
+            }
+            {
+                Number.isNaN(bedTimeAvg) === false && <Line x1={0} x2={chartArea.w} y={scaleY(bedTimeAvg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"}/>
+            }
+            {
+                Number.isNaN(wakeTimeAvg) === false && <Line x1={0} x2={chartArea.w} y={scaleY(wakeTimeAvg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"}/>
             }
         </G>
     </Svg>

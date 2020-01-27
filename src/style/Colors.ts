@@ -26,6 +26,7 @@ export default {
 
   chartDimmedText: "#8B8B8B",
   chartLightText: "#BABABA",
+  chartAvgLineColor: "#505050ee",
 
   stepCountColor: "#EA87C8",
   heartRateColor: "#F88569",

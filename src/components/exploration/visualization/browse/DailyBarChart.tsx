@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChartProps } from '../types';
-import Svg, {G, Rect} from 'react-native-svg';
+import Svg, {G, Rect, Line} from 'react-native-svg';
 import { CommonBrowsingChartStyles } from './CommonStyles';
 import { AxisSvg } from '../../../visualization/axis';
 import { Padding } from '../../../visualization/types';
@@ -35,6 +35,8 @@ export const DailyBarChart = (prop: Props) => {
         .range([chartArea.h, 0])
         .nice()
 
+    const mean = prop.data.length > 0 ? d3Array.mean(prop.data, d => d.value) : null
+
     return <Svg width={prop.containerWidth} height={prop.containerHeight}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={prop.valueTicksOverride != null ? prop.valueTicksOverride(scaleY.domain()[1]) : scaleY.ticks(5)} tickFormat={prop.valueTickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
@@ -52,6 +54,9 @@ export const DailyBarChart = (prop: Props) => {
                                 opacity={0.62}
                             />
                 })
+            }
+            {
+                mean != null && <Line x1={0} x2={chartArea.w} y={scaleY(mean)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"}/>
             }
         </G>
     </Svg>

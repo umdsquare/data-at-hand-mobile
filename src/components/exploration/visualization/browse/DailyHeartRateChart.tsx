@@ -36,6 +36,8 @@ export const DailyHeartRateChart = (prop: ChartProps) => {
         .y((d) => scaleY(d.value))
         .curve(d3Shape.curveCardinal)
 
+    const avg = d3Array.mean(prop.data, d => d.value)
+
     return <Svg width={prop.containerWidth} height={prop.containerHeight}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={scaleY.ticks(5)} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
@@ -60,6 +62,9 @@ export const DailyHeartRateChart = (prop: ChartProps) => {
                         opacity={0.62}
                     />
                 })
+            }
+            {
+                Number.isNaN(avg) === false && <Line x1={0} x2={chartArea.w} y={scaleY(avg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"}/>
             }
         </G>
     </Svg>
