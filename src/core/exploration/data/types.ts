@@ -1,6 +1,4 @@
 import {DataSourceType} from '../../../measure/DataSourceSpec';
-import { IWeightIntraDayLogEntry } from '../../../measure/service/fitbit/realm/schema';
-
 export type StatisticsType = 'avg' | 'range' | 'total' | 'bedtime' | 'waketime';
 
 export interface IDailySummaryEntry {
@@ -24,6 +22,11 @@ export interface IDailySleepSummaryEntry extends IDailySummaryEntry {
 
 export interface IIntraDayLogEntry extends IDailySummaryEntry {
   secondsOfDay: number;
+}
+
+export interface IWeightIntraDayLogEntry extends IIntraDayLogEntry {
+  value: number;
+  source: string;
 }
 
 export interface OverviewData {

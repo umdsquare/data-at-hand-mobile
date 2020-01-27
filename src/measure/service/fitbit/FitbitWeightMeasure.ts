@@ -2,7 +2,6 @@ import {FitbitService} from './FitbitService';
 import {FitbitWeightQueryResult, FitbitWeightTrendQueryResult} from './types';
 import {FitbitServiceMeasure} from './FitbitServiceMeasure';
 import {FitbitSummaryLogMeasure} from './FitbitSummaryLogMeasure';
-import {DailyWeightTrendEntry, WeightIntraDayLogEntry} from './realm/schema';
 import {
   makeFitbitWeightTrendApiUrl,
   makeFitbitWeightLogApiUrl,
@@ -13,6 +12,7 @@ import {DateTimeHelper} from '../../../time';
 import {parse, getDay} from 'date-fns';
 import {WeightRangedData} from '../../../core/exploration/data/types';
 import {DataSourceType} from '../../DataSourceSpec';
+import { FitbitLocalTableName } from './sqlite/database';
 
 export class FitbitWeightMeasure extends FitbitServiceMeasure {
   key: string = 'weight';
@@ -66,7 +66,7 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
       },
       pastNearestLog: latestLog,
       futureNearestLog: futureNearestLog,
-      today: this.fetchTodayValue(),
+      today: await this.fetchTodayValue(),
       statistics: [
         {type: 'avg', value: trendData.avg},
         {type: 'range', value: [trendData.min, trendData.max]},
@@ -77,14 +77,10 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
     };
   }
 
-  private fetchTodayValue(): number {
-    const sorted = this.service.realm
-      .objects<WeightIntraDayLogEntry>(WeightIntraDayLogEntry)
-      .sorted([
-        ['numberedDate', true],
-        ['secondsOfDay', true],
-      ]);
-    return sorted.length > 0 ? sorted[0].value : null;
+  private async fetchTodayValue(): Promise<number> {
+    const sorted = await this.service.fitbitLocalDbManager.fetchData(FitbitLocalTableName.WeightLog,
+      "1 ORDER BY `numberedDate` DESC, `secondsOfDay` DESC LIMIT 1", [])
+    return sorted.length > 0 ? (sorted[0] as any).value : null;
     /*
     if(sorted.length > 0){
       return {label: 'Recently', value: sorted[0].value, formatted: [{type: 'value', text: sorted[0].value.toFixed(1)}, {type: 'unit', text: ' kg'}]}
@@ -92,13 +88,10 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
   }
 }
 
-class FitbitWeightTrendMeasure extends FitbitSummaryLogMeasure<
-  FitbitWeightTrendQueryResult,
-  DailyWeightTrendEntry
-> {
+class FitbitWeightTrendMeasure extends FitbitSummaryLogMeasure<FitbitWeightTrendQueryResult> {
   key: string = 'weight_trend';
 
-  protected realmEntryClassType: any = DailyWeightTrendEntry;
+  protected dbTableName = FitbitLocalTableName.WeightTrend
   protected resourcePropertyKey: string = 'body-weight';
 
   protected makeQueryUrl(startDate: number, endDate: number): string {
@@ -126,19 +119,18 @@ class FitbitWeightLogMeasure extends FitbitRangeMeasure<
     return makeFitbitWeightLogApiUrl(startDate, endDate);
   }
 
-  protected handleQueryResultEntry(realm: Realm, entry: any, now: Date) {
-    if (entry.weight != null) {
-      const numberedDate = DateTimeHelper.fromFormattedString(entry.date);
-      const date = parse(entry.date, FITBIT_DATE_FORMAT, now);
-
-      const timeSplit = entry.time.split(':');
-      const hour = Number.parseInt(timeSplit[0]);
-      const minute = Number.parseInt(timeSplit[1]);
-      const second = Number.parseInt(timeSplit[2]);
-
-      realm.create(
-        WeightIntraDayLogEntry,
-        {
+  protected handleQueryResultEntry(entries: Array<any>, now: Date): Promise<void> {
+    const entriesReady = entries.map(entry => {
+      if (entry.weight != null) {
+        const numberedDate = DateTimeHelper.fromFormattedString(entry.date);
+        const date = parse(entry.date, FITBIT_DATE_FORMAT, now);
+  
+        const timeSplit = entry.time.split(':');
+        const hour = Number.parseInt(timeSplit[0]);
+        const minute = Number.parseInt(timeSplit[1]);
+        const second = Number.parseInt(timeSplit[2]);
+  
+        return {
           id: entry.date + 'T' + entry.time,
           value: entry.weight,
           source: entry.source,
@@ -147,50 +139,33 @@ class FitbitWeightLogMeasure extends FitbitRangeMeasure<
           year: DateTimeHelper.getYear(numberedDate),
           month: DateTimeHelper.getMonth(numberedDate),
           dayOfWeek: getDay(date),
-        },
-        true,
-      );
-    }
+        }
+      }else null
+    }).filter(e => e != null)
+
+    return this.service.fitbitLocalDbManager.insert(FitbitLocalTableName.WeightLog, entriesReady)
   }
 
   fetchData(startDate: number, endDate: number): Promise<any> {
-    const filtered = this.service.realm
-      .objects<WeightIntraDayLogEntry>(WeightIntraDayLogEntry)
-      .filtered(
-        'numberedDate >= ' + startDate + ' AND numberedDate <= ' + endDate,
-      )
-      .sorted([
-        ['numberedDate', false],
-        ['secondsOfDay', false],
-      ]);
-    return filtered.snapshot().map(v => v.toJson()) as any;
+    return this.service.fitbitLocalDbManager
+      .fetchData(FitbitLocalTableName.WeightLog, "`numberedDate` BETWEEN ? AND ? ORDER BY `numberedDate` ASC, `secondsOfDay` ASC", [startDate, endDate]) 
   }
 
   async fetchLatestLog(before: number): Promise<any> {
-    const filtered = this.service.realm
-      .objects<WeightIntraDayLogEntry>(WeightIntraDayLogEntry)
-      .filtered('numberedDate < ' + before)
-      .sorted([
-        ['numberedDate', true],
-        ['secondsOfDay', true],
-      ]);
-
+    const filtered = await this.service.fitbitLocalDbManager.fetchData(FitbitLocalTableName.WeightLog,
+      "`numberedDate` < ? ORDER BY `numberedDate` DESC, `secondsOfDay` DESC LIMIT 1", [before])
+    
     if (filtered.length > 0) {
-      return filtered[0].toJson();
+      return filtered[0];
     } else return null;
   }
 
   async fetchFutureNearestLog(after: number): Promise<any> {
-    const filtered = this.service.realm
-      .objects<WeightIntraDayLogEntry>(WeightIntraDayLogEntry)
-      .filtered('numberedDate > ' + after)
-      .sorted([
-        ['numberedDate', false],
-        ['secondsOfDay', false],
-      ]);
+    const filtered = await this.service.fitbitLocalDbManager.fetchData(FitbitLocalTableName.WeightLog,
+      "`numberedDate` > ? ORDER BY `numberedDate` ASC, `secondsOfDay` ASC LIMIT 1", [after])
 
     if (filtered.length > 0) {
-      return filtered[0].toJson();
+      return filtered[0];
     } else return null;
   }
 }

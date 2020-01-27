@@ -1,15 +1,14 @@
 import {FitbitDailyActivityHeartRateQueryResult} from './types';
 import {FitbitSummaryLogMeasure} from './FitbitSummaryLogMeasure';
-import {RestingHeartRateEntry} from './realm/schema';
 import {makeFitbitDayLevelActivityLogsUrl} from './api';
 import { RestingHeartRateRangedData, STATISTICS_LABEL_RANGE } from '../../../core/exploration/data/types';
 import { DataSourceType } from '../../DataSourceSpec';
+import { FitbitLocalTableName } from './sqlite/database';
 
-export class FitbitDailyHeartRateMeasure extends FitbitSummaryLogMeasure<
-  FitbitDailyActivityHeartRateQueryResult,
-  RestingHeartRateEntry
-> {
-  protected realmEntryClassType: any = RestingHeartRateEntry;
+export class FitbitDailyHeartRateMeasure extends FitbitSummaryLogMeasure<FitbitDailyActivityHeartRateQueryResult> {
+  
+  protected dbTableName = FitbitLocalTableName.RestingHeartRate;
+
   protected resourcePropertyKey: string = 'activities-heart';
   key: string = 'resting_heart_rate';
   protected makeQueryUrl(startDate: number, endDate: number): string {
@@ -29,7 +28,7 @@ export class FitbitDailyHeartRateMeasure extends FitbitSummaryLogMeasure<
       source: DataSourceType.HeartRate,
       data: rangedData.list,
       range: [startDate, endDate],
-      today: this.fetchTodayValue(),
+      today: await this.fetchTodayValue(),
       statistics:
         [/*
           {

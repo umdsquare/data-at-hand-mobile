@@ -25,7 +25,6 @@ import { Platform, UIManager } from 'react-native';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { DateTimeHelper } from './src/time';
 
-
 if (
   Platform.OS === 'android' &&
   UIManager.setLayoutAnimationEnabledExperimental

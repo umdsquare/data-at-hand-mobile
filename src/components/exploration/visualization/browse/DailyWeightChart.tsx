@@ -9,8 +9,7 @@ import { scaleLinear } from 'd3-scale';
 import * as d3Array from 'd3-array';
 import * as d3Shape from 'd3-shape';
 import Colors from '../../../../style/Colors';
-import { IIntraDayLogEntry } from '../../../../core/exploration/data/types';
-import { IWeightIntraDayLogEntry } from '../../../../measure/service/fitbit/realm/schema';
+import { IIntraDayLogEntry, IWeightIntraDayLogEntry } from '../../../../core/exploration/data/types';
 
 
 export const DailyWeightChart = (prop: {
