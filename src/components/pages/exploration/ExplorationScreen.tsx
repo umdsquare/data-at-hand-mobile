@@ -11,9 +11,9 @@ import { generateHeaderView } from "./parts/header";
 import { BottomBar } from "../../exploration/BottomBar";
 import { explorationInfoHelper } from "../../../core/exploration/ExplorationInfoHelper";
 import { DataServiceManager } from "../../../system/DataServiceManager";
-import { ExplorationInfo, ExplorationType } from "../../../core/exploration/types";
+import { ExplorationInfo, ExplorationType, ExplorationMode } from "../../../core/exploration/types";
 import { ExplorationDataState, startLoadingForInfo } from "../../../state/exploration/data/reducers";
-import { ExplorationAction, createUndoAction, InteractionType, createRedoAction } from "../../../state/exploration/interaction/actions";
+import { ExplorationAction, createUndoAction, InteractionType, createRedoAction, createGoToBrowseOverviewAction } from "../../../state/exploration/interaction/actions";
 import { Button } from "react-native-elements";
 import { Sizes } from "../../../style/Sizes";
 import { OverviewMainPanel } from "./parts/main/OverviewMainPanel";
@@ -115,6 +115,14 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
         }
     }
 
+    onBottomBarButtonPress = (mode: ExplorationMode) => {
+        switch(mode){
+            case ExplorationMode.Browse:
+                this.props.dispatchCommand(createGoToBrowseOverviewAction(InteractionType.TouchOnly))
+            break;
+        }
+    }
+
     undo = () => {
         this.props.dispatchCommand(createUndoAction(InteractionType.TouchOnly))
     }
@@ -155,7 +163,9 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 </View>
             </View>
 
-            <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationState.info)} />
+            <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationState.info)}
+                onModePress={this.onBottomBarButtonPress}
+            />
 
         </View>
     }

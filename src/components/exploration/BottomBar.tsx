@@ -83,8 +83,8 @@ export class BottomBar extends React.Component<Props> {
     render() {
         return <View style={Styles.bottomBarContainerStyle} removeClippedSubviews={false}>
             <SafeAreaView style={Styles.bottomBarInnerListStyle}>
-                <BottomBarButton isOn={this.props.mode === 'browse'} title="Browse" icon={ExplorationMode.Browse} />
-                <BottomBarButton isOn={this.props.mode === 'compare'} title="Compare" icon={ExplorationMode.Compare} />
+                <BottomBarButton isOn={this.props.mode === 'browse'} title="Browse" mode={ExplorationMode.Browse} onPress={()=>{this.props.onModePress(ExplorationMode.Browse)}} />
+                <BottomBarButton isOn={this.props.mode === 'compare'} title="Compare" mode={ExplorationMode.Compare} onPress={()=>{this.props.onModePress(ExplorationMode.Compare)}}/>
                 <View style={Styles.bottomBarVoiceButtonContainerStyle}>
                     <VoiceInputButton isBusy={false} onTouchDown={() => { return null }} onTouchUp={() => { return null }} />
                 </View>
@@ -94,22 +94,24 @@ export class BottomBar extends React.Component<Props> {
 }
 
 
-const BottomBarButton = (prop: { isOn: boolean, icon: ExplorationMode, title: string }) => {
-    const color = prop.isOn === true ? Colors.primary : Colors.chartLightText
+const BottomBarButton = (prop: { isOn: boolean, mode: ExplorationMode, title: string, onPress?: ()=>void }) => {
+    //const color = prop.isOn === true ? Colors.primary : Colors.chartLightText
+    const color = Colors.textGray
     return <SafeAreaConsumer>
         {
             inset => <View style={inset.bottom > 0 ? Styles.bottomBarButtonStyleInset : Styles.bottomBarButtonStyleNoInset}>
-                {prop.isOn===true && <View style={{
+                {/*prop.isOn===true && <View style={{
                     height: 2, 
                     backgroundColor: Colors.primary, 
                     position: 'absolute',
                     left: 0,
                     right: 0,
                     top: 0
-                }}/>}<TouchableOpacity style={Styles.bottomBarButtonContainerStyle} onPress={()=>{}}>
+                }}/>*/}
+                <TouchableOpacity style={Styles.bottomBarButtonContainerStyle} onPress={prop.onPress}>
                 
                 {
-                    prop.icon == 'compare' && <Svg width={bottomBarIconSize} height={bottomBarIconSize} viewBox="0 0 153.04 193.85">
+                    prop.mode == 'compare' && <Svg width={bottomBarIconSize} height={bottomBarIconSize} viewBox="0 0 153.04 193.85">
                         <Path id="Rectangle_763" data-name="Rectangle 763"
                             d="M54,24.09h51a10.21,10.21,0,0,1,10.2,10.21V218H43.79V34.3A10.21,10.21,0,0,1,54,24.09Z"
                             transform="translate(-43.79 -24.09)"
@@ -122,14 +124,14 @@ const BottomBarButton = (prop: { isOn: boolean, icon: ExplorationMode, title: st
                     </Svg>
                 }
                 {
-                    prop.icon == 'browse' && <Svg width={bottomBarIconSize} height={bottomBarIconSize} viewBox="0 0 215.64 215.63">
+                    prop.mode == 'browse' && <Svg width={bottomBarIconSize} height={bottomBarIconSize} viewBox="0 0 215.64 215.63">
                         <Path id="Icon_material-pie-chart" data-name="Icon material-pie-chart" d="M108.38,12.21V227.82a108.4,108.4,0,0,1,0-215.61Zm21.88,0v96.92H227A108.28,108.28,0,0,0,130.26,12.21Zm0,118.7v96.92A108.15,108.15,0,0,0,227,130.91Z" transform="translate(-11.33 -12.21)" fill={color} />
                     </Svg>
                 }
                 <Text style={{
                     ...Styles.bottomBarButtonTextStyle,
                     color: color,
-                    fontWeight: prop.isOn === true ? "bold" : "normal"
+                    fontWeight: "bold" /*prop.isOn === true ? "bold" : "normal"*/
                 }}>{prop.title}</Text>
             </TouchableOpacity>
             </View>

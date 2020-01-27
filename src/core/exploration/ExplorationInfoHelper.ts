@@ -4,6 +4,7 @@ import {
   ParameterKey,
   ExplorationType,
   ExplorationMode,
+  ExplorationInfoParameter,
 } from './types';
 
 class ExplorationInfoHelper {
@@ -40,6 +41,10 @@ class ExplorationInfoHelper {
         value: value,
       });
     }
+  }
+
+  filterParameters(stateInfo: ExplorationInfo, filterFunc:(parameter: ExplorationInfoParameter)=>boolean){
+    stateInfo.values = stateInfo.values.filter(param => filterFunc(param) === true)
   }
 
   getMode(stateInfo: ExplorationInfo): ExplorationMode {

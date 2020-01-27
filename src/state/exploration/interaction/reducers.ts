@@ -25,7 +25,7 @@ const INITIAL_STATE = {
   info: makeInitialStateInfo(),
   past: [],
   future: [],
-  uiStatus: {}
+  uiStatus: {},
 } as ExplorationState;
 
 export const explorationStateReducer = (
@@ -55,9 +55,9 @@ export const explorationStateReducer = (
         } else return state;
 
       case ExplorationActionType.MemoUiStatus:
-        const memoUiStatusAction = action as MemoUIStatusAction
-        newState.uiStatus[memoUiStatusAction.key] = memoUiStatusAction.value
-        return newState
+        const memoUiStatusAction = action as MemoUIStatusAction;
+        newState.uiStatus[memoUiStatusAction.key] = memoUiStatusAction.value;
+        return newState;
     }
   } else {
     newState.past.push(JSON.parse(JSON.stringify(newState.info)));
@@ -105,6 +105,17 @@ export const explorationStateReducer = (
             dataSource,
             ParameterType.DataSource,
           );
+        }
+        break;
+      case ExplorationActionType.GoToBrowseOverview:
+        if (newState.info.type === ExplorationType.B_Ovrvw) {
+          return state;
+        } else {
+          explorationInfoHelper.filterParameters(
+            newState.info,
+            param => param.parameter === ParameterType.Range,
+          );
+          newState.info.type = ExplorationType.B_Ovrvw;
         }
         break;
       default:

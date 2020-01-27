@@ -10,6 +10,7 @@ export enum ExplorationActionType{
     SelectElementOfDay="exploration:interaction:selectElmDay",
     SelectElementOfRange="exploration:interaction:selectElmRange",
     GoToBrowseRange="exploration:interaction:goToBrowseRange",
+    GoToBrowseOverview = "exploration:interaction:goToBrowseOverview",
     Redo="exploration:interaction:redo",
     Undo="exploration:interaction:undo"
 }
@@ -55,6 +56,13 @@ export function createGoToBrowseRangeAction(interactionType: InteractionType, da
         interactionType,
         range,
         dataSource
+    }
+}
+
+export function createGoToBrowseOverviewAction(interactionType: InteractionType): ExplorationActionBase{
+    return {
+        type: ExplorationActionType.GoToBrowseOverview,
+        interactionType
     }
 }
 
