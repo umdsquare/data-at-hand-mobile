@@ -1,7 +1,7 @@
-import React from "react";
-import { View, FlatList, Text, StyleSheet, ActivityIndicator, LayoutAnimation } from 'react-native';
+import React, { useState } from "react";
+import { View, FlatList, Text, StyleSheet, ActivityIndicator, LayoutAnimation, UIManager, findNodeHandle } from 'react-native';
 import { MeasureUnitType, DataSourceType } from "../../../../../measure/DataSourceSpec";
-import { ExplorationAction } from "../../../../../state/exploration/interaction/actions";
+import { ExplorationAction, setTouchElementInfo } from "../../../../../state/exploration/interaction/actions";
 import { connect } from "react-redux";
 import { ReduxAppState } from "../../../../../state/types";
 import { Dispatch } from "redux";
@@ -18,6 +18,7 @@ import { Icon } from "react-native-elements";
 import commaNumber from 'comma-number';
 import unitConvert from 'convert-units';
 import { BusyHorizontalIndicator } from "../../../../exploration/BusyHorizontalIndicator";
+import { TouchableHighlight } from "react-native-gesture-handler";
 
 const styles = StyleSheet.create({
     listItemStyle: {
@@ -89,6 +90,18 @@ class BrowseRangeMainPanel extends React.Component<Props>{
         }
     }
 
+    onListElementClick = (date: number) => {
+        //TODO open today
+    }
+
+    onListElementLongPressIn = (date: number, element: TouchingElementInfo) => {
+        this.props.dispatchExplorationAction(setTouchElementInfo(element))
+    }
+
+    onListElementLongPressOut = (date: number) => {
+        this.props.dispatchExplorationAction(setTouchElementInfo(null))
+    }
+
     render() {
         if (this.props.data != null) {
             const today = DateTimeHelper.toNumberedDateFromDate(new Date())
@@ -97,10 +110,10 @@ class BrowseRangeMainPanel extends React.Component<Props>{
             dataList.sort((a: any, b: any) => b["numberedDate"] - a["numberedDate"])
 
             let highlightedDate: number = null
-            if(this.props.touchingElementInfo){
+            if (this.props.touchingElementInfo) {
                 const dataSource = explorationInfoHelper.getParameterValueOfParams<DataSourceType>(this.props.touchingElementInfo.params, ParameterType.DataSource)
                 const date = explorationInfoHelper.getParameterValueOfParams<number>(this.props.touchingElementInfo.params, ParameterType.Date)
-                if(dataSource === this.props.source && date != null){
+                if (dataSource === this.props.source && date != null) {
                     highlightedDate = date
                 }
             }
@@ -119,9 +132,12 @@ class BrowseRangeMainPanel extends React.Component<Props>{
                     dataList.length > 0 && <FlatList style={StyleTemplates.fillFlex} data={dataList}
                         renderItem={(entry) => <Item date={entry.item["numberedDate"]}
                             today={today} item={entry.item} type={this.props.source}
-                            unitType={this.props.measureUnitType} 
+                            unitType={this.props.measureUnitType}
                             isHighlighted={entry.item["numberedDate"] === highlightedDate}
-                            />}
+                            onClick={this.onListElementClick}
+                            onLongPressIn={this.onListElementLongPressIn}
+                            onLongPressOut={this.onListElementLongPressOut}
+                        />}
                         keyExtractor={item => item["id"] || item["numberedDate"].toString()}
                     />
                 }
@@ -168,7 +184,10 @@ const Item = (prop: {
     today: number,
     type: DataSourceType,
     unitType: MeasureUnitType,
-    isHighlighted: boolean
+    isHighlighted: boolean,
+    onClick: (date) => void,
+    onLongPressIn: (date, touchingElement: TouchingElementInfo) => void,
+    onLongPressOut: (date) => void
 }) => {
     var dateString
     if (prop.date === prop.today) {
@@ -252,14 +271,47 @@ const Item = (prop: {
             break;
     }
 
-    return <View style={styles.listItemStyle}>
-        <Text style={prop.today === prop.date ? styles.listItemDateTodayStyle : styles.listItemDateStyle}>{dateString}</Text>
-        {
-            valueElement
-        }
-        <Icon type="materialicons" name="keyboard-arrow-right" color={Colors.textGray} />
-        {
-            prop.isHighlighted === true && <View style={styles.listItemHighlightStyle}/>
-        }
-    </View>
+    const [isInLongPress, setInLongPress] = useState(false)
+
+    let elmRef
+
+    return <TouchableHighlight activeOpacity={0.95}
+        ref={ref => elmRef = ref}
+        onLongPress={(event) => {
+            if (prop.onLongPressIn) {
+                UIManager.measureInWindow(findNodeHandle(elmRef), (x, y, width, height) => {
+                    console.log(x, y, width, height)
+                    setInLongPress(true);
+                    prop.onLongPressIn(prop.date, {
+                        touchId: Date.now().toString(),
+                        elementBoundInScreen: { x, y, width, height },
+                        params: [
+                            { parameter: ParameterType.DataSource, value: prop.type },
+                            { parameter: ParameterType.Date, value: prop.date }
+                        ]
+                    })
+                })
+            } else {
+                setInLongPress(true);
+            }
+        }}
+        onPress={(ev) => { console.log("click"); prop.onClick(prop.date) }}
+        onPressOut={(ev) => {
+            if (isInLongPress === true) {
+                console.log("long press out")
+                setInLongPress(false)
+                prop.onLongPressOut && prop.onLongPressOut(prop.date)
+            } else {
+                console.log("click press out")
+            }
+        }}><View style={styles.listItemStyle}>
+            <Text style={prop.today === prop.date ? styles.listItemDateTodayStyle : styles.listItemDateStyle}>{dateString}</Text>
+            {
+                valueElement
+            }
+            <Icon type="materialicons" name="keyboard-arrow-right" color={Colors.textGray} />
+            {
+                prop.isHighlighted === true && <View style={styles.listItemHighlightStyle} />
+            }
+        </View></TouchableHighlight>
 }
