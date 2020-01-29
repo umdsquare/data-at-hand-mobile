@@ -3,6 +3,7 @@ import {
   makeInitialStateInfo,
   ExplorationType,
   ParameterType,
+  TouchingElementInfo,
 } from '../../../core/exploration/types';
 import {
   ExplorationAction,
@@ -11,15 +12,16 @@ import {
   GoToBrowseRangeAction,
   MemoUIStatusAction,
   SetDataSourceAction,
+  SetTouchingElementInfoAction,
 } from './actions';
 import {explorationInfoHelper} from '../../../core/exploration/ExplorationInfoHelper';
-import {ExplorationDataActionType} from '../data/actions';
 
 export interface ExplorationState {
   info: ExplorationInfo;
   past: Array<ExplorationInfo>;
   future: Array<ExplorationInfo>;
-  uiStatus: any;
+  uiStatus: {[key:string]:any};
+  touchingElement: TouchingElementInfo
 }
 
 const INITIAL_STATE = {
@@ -27,18 +29,27 @@ const INITIAL_STATE = {
   past: [],
   future: [],
   uiStatus: {},
+  touchingElement: null
 } as ExplorationState;
 
 export const explorationStateReducer = (
   state: ExplorationState = INITIAL_STATE,
   action: ExplorationAction,
 ): ExplorationState => {
-  const newState: ExplorationState = JSON.parse(JSON.stringify(state));
+
+  const newState: ExplorationState = {
+    info: JSON.parse(JSON.stringify(state.info)),
+    past: state.past.slice(0),
+    future: state.future.slice(0),
+    uiStatus: state.uiStatus,
+    touchingElement: state.touchingElement
+  }
 
   if (
     action.type === ExplorationActionType.Undo ||
     action.type === ExplorationActionType.Redo ||
-    action.type === ExplorationActionType.MemoUiStatus
+    action.type === ExplorationActionType.MemoUiStatus ||
+    action.type === ExplorationActionType.SetTouchElementInfo
   ) {
     switch (action.type) {
       case ExplorationActionType.Undo:
@@ -57,7 +68,12 @@ export const explorationStateReducer = (
 
       case ExplorationActionType.MemoUiStatus:
         const memoUiStatusAction = action as MemoUIStatusAction;
+        newState.uiStatus = {...state.uiStatus}
         newState.uiStatus[memoUiStatusAction.key] = memoUiStatusAction.value;
+        return newState;
+      case ExplorationActionType.SetTouchElementInfo:
+        const setTouchElementInfoAction = action as SetTouchingElementInfoAction
+        newState.touchingElement = setTouchElementInfoAction.info
         return newState;
     }
   } else {

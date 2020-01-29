@@ -1,23 +1,24 @@
 import React from 'react';
-import { Rectangle, Padding } from './types';
+import { Padding } from './types';
 import { G, Line, Circle, Text } from 'react-native-svg';
 import Colors from '../../style/Colors';
 import { getHours, format } from 'date-fns';
+import { LayoutRectangle } from 'react-native';
 
 interface Props<T> {
     ticks: Array<T>
     tickMargin: number
     scale: (T) => number
     tickFormat?: (T) => string
-    chartArea: Rectangle
+    chartArea: LayoutRectangle
     position: Padding
 }
 
 export const AxisSvg = (props: Props<any>) => {
     switch (props.position) {
         case Padding.Bottom:
-            return <G x={props.chartArea.x} y={props.chartArea.y + props.chartArea.h}>
-                <Line x1={-props.tickMargin} x2={props.chartArea.w + 8} y1={0} y2={0} stroke={Colors.textColorLight} strokeWidth={0.5} />
+            return <G x={props.chartArea.x} y={props.chartArea.y + props.chartArea.height}>
+                <Line x1={-props.tickMargin} x2={props.chartArea.width + 8} y1={0} y2={0} stroke={Colors.textColorLight} strokeWidth={0.5} />
 
                 {
                     props.ticks.map(tick => {
@@ -34,7 +35,7 @@ export const AxisSvg = (props: Props<any>) => {
             {
                 props.ticks.map(tick => {
                     return <G key={tick} y={props.scale(tick)}>
-                        <Line x1={props.chartArea.x - props.tickMargin} x2={props.chartArea.x + props.chartArea.w} stroke="rgba(0,0,0,0.07)" />
+                        <Line x1={props.chartArea.x - props.tickMargin} x2={props.chartArea.x + props.chartArea.width} stroke="rgba(0,0,0,0.07)" />
                         <Text alignmentBaseline="central" fontWeight={500} textAnchor="end" x={props.chartArea.x - props.tickMargin - 8} fill={Colors.chartLightText}>{props.tickFormat? props.tickFormat(tick): tick}</Text>
                     </G>
 

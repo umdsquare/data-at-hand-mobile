@@ -1,5 +1,6 @@
 import {startOfDay, subDays, endOfDay} from 'date-fns';
 import {DateTimeHelper} from '../../time';
+import { LayoutRectangle } from 'react-native';
 
 export enum ExplorationType {
   B_Ovrvw,
@@ -34,6 +35,12 @@ export interface ExplorationInfoParameter {
   parameter: ParameterType;
   key?: ParameterKey;
   value: any;
+}
+
+export interface TouchingElementInfo {
+  touchId: string;
+  elementBoundInScreen: LayoutRectangle;
+  params: Array<ExplorationInfoParameter>;
 }
 
 export interface ExplorationInfo {

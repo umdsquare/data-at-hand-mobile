@@ -271,9 +271,14 @@ function formatStatistics(sourceType: DataSourceType, statisticsType: Statistics
 function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, width: number, height: number): any {
     switch (sourceType) {
         case DataSourceType.StepCount:
-            return <DailyBarChart dateRange={data.range} data={data.data} containerHeight={height} containerWidth={width} valueTickFormat={(tick: number) => { return (tick % 1000 === 0 && tick != 0) ? tick / 1000 + "k" : commaNumber(tick) }} />
+            return <DailyBarChart
+                dataSource={DataSourceType.StepCount}
+                dateRange={data.range} data={data.data} containerHeight={height} containerWidth={width}
+                valueTickFormat={(tick: number) => { return (tick % 1000 === 0 && tick != 0) ? tick / 1000 + "k" : commaNumber(tick) }} />
         case DataSourceType.HoursSlept:
             return <DailyBarChart dateRange={data.range}
+
+                dataSource={DataSourceType.HoursSlept}
                 data={data.data.map(d => ({ numberedDate: d.numberedDate, value: d.lengthInSeconds }))}
                 containerHeight={height} containerWidth={width}
                 valueTickFormat={(tick: number) => { return DateTimeHelper.formatDuration(tick, true) }}
@@ -284,10 +289,14 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, width
             />
         case DataSourceType.HeartRate:
             return <DailyHeartRateChart
+
+                dataSource={DataSourceType.HeartRate}
                 dateRange={data.range} data={data.data} containerWidth={width} containerHeight={height}
             />
         case DataSourceType.SleepRange:
-            return <DailySleepRangeChart dateRange={data.range} data={data.data}
+            return <DailySleepRangeChart
+                dataSource={DataSourceType.SleepRange}
+                dateRange={data.range} data={data.data}
                 containerHeight={height} containerWidth={width}
             />
         case DataSourceType.Weight:

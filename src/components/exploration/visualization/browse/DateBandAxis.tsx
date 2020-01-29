@@ -1,17 +1,17 @@
 import React from 'react'
 import { ScaleBand } from "d3-scale"
-import { Rectangle } from "../../../visualization/types"
 import Colors from "../../../../style/Colors"
 import { G, Circle, Text, Line } from "react-native-svg"
 import { Sizes } from '../../../../style/Sizes'
+import { LayoutRectangle } from 'react-native'
 
 
-export const DateBandAxis = (props: { scale: ScaleBand<number>, chartArea: Rectangle, dateSequence: number[], today: number, tickFormat: (date: number) => string }) => {
+export const DateBandAxis = (props: { scale: ScaleBand<number>, chartArea: LayoutRectangle, dateSequence: number[], today: number, tickFormat: (date: number) => string }) => {
 
     const divider = Math.ceil(props.dateSequence.length / 8)
 
-    return <G x={props.chartArea.x} y={props.chartArea.y + props.chartArea.h}>
-        <Line x1={0} x2={props.chartArea.w} y1={0} y2={0} stroke={Colors.textColorLight} strokeWidth={0.5} />
+    return <G x={props.chartArea.x} y={props.chartArea.y + props.chartArea.height}>
+        <Line x1={0} x2={props.chartArea.width} y1={0} y2={0} stroke={Colors.textColorLight} strokeWidth={0.5} />
 
         {
             props.dateSequence.map((date, i) => {

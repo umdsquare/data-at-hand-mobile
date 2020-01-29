@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChartProps } from '../types';
 import Svg, { G, Rect, Circle, Line, Path } from 'react-native-svg';
-import { CommonBrowsingChartStyles } from './CommonStyles';
+import { CommonBrowsingChartStyles } from './common';
 import { AxisSvg } from '../../../visualization/axis';
 import { Padding } from '../../../visualization/types';
 import { DateTimeHelper } from '../../../../time';
@@ -11,6 +11,7 @@ import * as d3Array from 'd3-array';
 import * as d3Shape from 'd3-shape';
 import Colors from '../../../../style/Colors';
 import { startOfDay, addSeconds, format } from 'date-fns';
+import { GroupWithTouchInteraction } from './GroupWithTouchInteraction';
 
 interface Props extends ChartProps{
     data: Array<{numberedDate: number, value: number, bedTimeDiffSeconds: number, wakeTimeDiffSeconds: number}>
@@ -32,7 +33,7 @@ export const DailySleepRangeChart = (prop: Props) => {
     const scaleX = CommonBrowsingChartStyles
         .makeDateScale(null, prop.dateRange[0], prop.dateRange[1])
         .padding(0.2)
-        .range([0, chartArea.w])
+        .range([0, chartArea.width])
 
 
     const today = DateTimeHelper.toNumberedDateFromDate(new Date())
@@ -52,7 +53,7 @@ export const DailySleepRangeChart = (prop: Props) => {
 
     const scaleY = scaleLinear()
         .domain(niceDomain)
-        .range([0, chartArea.h])
+        .range([0, chartArea.height])
 
     const bedTimeAvg = d3Array.mean(prop.data, d => d.bedTimeDiffSeconds)
     const wakeTimeAvg = d3Array.mean(prop.data, d => d.wakeTimeDiffSeconds)
@@ -60,7 +61,7 @@ export const DailySleepRangeChart = (prop: Props) => {
     return <Svg width={prop.containerWidth} height={prop.containerHeight}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={tickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
-        <G key="chart" {...chartArea}>
+        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource}>
             {
                 prop.data.map(d => {
                     const barHeight = scaleY(d.wakeTimeDiffSeconds) - scaleY(d.bedTimeDiffSeconds)
@@ -76,12 +77,12 @@ export const DailySleepRangeChart = (prop: Props) => {
                 })
             }
             {
-                Number.isNaN(bedTimeAvg) === false && <Line x1={0} x2={chartArea.w} y={scaleY(bedTimeAvg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"}/>
+                Number.isNaN(bedTimeAvg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(bedTimeAvg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"}/>
             }
             {
-                Number.isNaN(wakeTimeAvg) === false && <Line x1={0} x2={chartArea.w} y={scaleY(wakeTimeAvg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"}/>
+                Number.isNaN(wakeTimeAvg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(wakeTimeAvg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"}/>
             }
-        </G>
+        </GroupWithTouchInteraction>
     </Svg>
 
 }

@@ -1,6 +1,6 @@
-import {Rectangle} from '../../../visualization/types';
 import {ScaleBand, scaleBand} from 'd3-scale';
 import {DateTimeHelper} from '../../../../time';
+import { PanResponder, LayoutRectangle } from 'react-native';
 
 export namespace CommonBrowsingChartStyles {
   export const xAxisHeight = 26;
@@ -21,13 +21,13 @@ export namespace CommonBrowsingChartStyles {
   export function makeChartArea(
     containerWidth: number,
     containerHeight: number,
-  ): Rectangle {
+  ): LayoutRectangle {
     return {
       x: yAxisWidth,
       y: topPadding,
-      w: containerWidth - yAxisWidth - rightPadding,
-      h: containerHeight - xAxisHeight - topPadding,
-    } as Rectangle;
+      width: containerWidth - yAxisWidth - rightPadding,
+      height: containerHeight - xAxisHeight - topPadding,
+    }
   }
 
   export function makeDateScale(

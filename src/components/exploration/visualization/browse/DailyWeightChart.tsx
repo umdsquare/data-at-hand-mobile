@@ -1,6 +1,6 @@
 import React from 'react';
 import Svg, { G, Circle, Path, Line } from 'react-native-svg';
-import { CommonBrowsingChartStyles } from './CommonStyles';
+import { CommonBrowsingChartStyles } from './common';
 import { AxisSvg } from '../../../visualization/axis';
 import { Padding } from '../../../visualization/types';
 import { DateTimeHelper } from '../../../../time';
@@ -29,7 +29,7 @@ export const DailyWeightChart = (prop: {
     const scaleX = CommonBrowsingChartStyles
         .makeDateScale(null, prop.dateRange[0], prop.dateRange[1])
         .padding(0.2)
-        .range([0, chartArea.w])
+        .range([0, chartArea.width])
 
 
     const today = DateTimeHelper.toNumberedDateFromDate(new Date())
@@ -46,7 +46,7 @@ export const DailyWeightChart = (prop: {
             (trendMin != null || logMin != null ? (Math.min(trendMin || logMin, logMin || trendMin) - 1) : 0),
             (trendMax != null || logMax != null ? (Math.max(trendMax || logMax, logMax || trendMax) + 1) : 0),
         ])
-        .range([chartArea.h, 0])
+        .range([chartArea.height, 0])
         .nice()
 
     const trendLine = d3Shape.line<{ value: number, numberedDate: number }>()
@@ -84,7 +84,7 @@ export const DailyWeightChart = (prop: {
             {
                 veryLastLog && <Line 
                     x1={scaleX(Math.max(veryLastLog.numberedDate, scaleX.domain()[0]))} 
-                    x2={chartArea.w}
+                    x2={chartArea.width}
                     y1={scaleY(veryLastLog.value)}
                     y2={scaleY(veryLastLog.value)}
                     stroke={Colors.today}

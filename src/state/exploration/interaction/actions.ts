@@ -1,5 +1,6 @@
 import { ActionTypeBase } from "../../types"
 import { DataSourceType } from "../../../measure/DataSourceSpec"
+import { TouchingElementInfo } from "../../../core/exploration/types"
 
 const ACTION_PREFIX = "exploration:interaction:"
 
@@ -12,7 +13,8 @@ export enum ExplorationActionType{
     GoToBrowseRange="exploration:interaction:goToBrowseRange",
     GoToBrowseOverview = "exploration:interaction:goToBrowseOverview",
     Redo="exploration:interaction:redo",
-    Undo="exploration:interaction:undo"
+    Undo="exploration:interaction:undo",
+    SetTouchElementInfo="exploration:interaction:setTouchElementInfo"
 }
 
 export enum InteractionType{
@@ -43,7 +45,11 @@ export interface GoToBrowseRangeAction extends ExplorationActionBase{
     range?:[number, number]
 }
 
-export type ExplorationAction = ExplorationActionBase | SetRangeAction | GoToBrowseRangeAction | MemoUIStatusAction | SetDataSourceAction
+export interface SetTouchingElementInfoAction extends ActionTypeBase{
+    info: TouchingElementInfo
+}
+
+export type ExplorationAction = ExplorationActionBase | SetRangeAction | GoToBrowseRangeAction | MemoUIStatusAction | SetDataSourceAction | SetTouchingElementInfoAction
 
 export function createSetRangeAction(interactionType: InteractionType, range: [number, number], key?: string): SetRangeAction{
     return {
@@ -97,6 +103,13 @@ export function setDataSourceAction(interactionType: InteractionType, dataSource
         type: ExplorationActionType.SetDataSource,
         interactionType,
         dataSource
+    }
+}
+
+export function setTouchElementInfo(info: TouchingElementInfo): SetTouchingElementInfoAction{
+    return {
+        type: ExplorationActionType.SetTouchElementInfo,
+        info
     }
 }
 

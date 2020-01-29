@@ -8,13 +8,20 @@ import {
 } from './types';
 
 class ExplorationInfoHelper {
-
   getParameterValue<T>(
     stateInfo: ExplorationInfo,
     parameter: ParameterType,
     key?: ParameterKey,
   ): T {
-    const found = stateInfo.values.find(
+    return this.getParameterValueOfParams<T>(stateInfo.values, parameter, key);
+  }
+
+  getParameterValueOfParams<T>(
+    paramSet: Array<ExplorationInfoParameter>,
+    parameter: ParameterType,
+    key?: ParameterKey,
+  ): T {
+    const found = paramSet.find(
       v => v.parameter === parameter && (key == null || v.key === key),
     );
     if (found) {
@@ -43,8 +50,13 @@ class ExplorationInfoHelper {
     }
   }
 
-  filterParameters(stateInfo: ExplorationInfo, filterFunc:(parameter: ExplorationInfoParameter)=>boolean){
-    stateInfo.values = stateInfo.values.filter(param => filterFunc(param) === true)
+  filterParameters(
+    stateInfo: ExplorationInfo,
+    filterFunc: (parameter: ExplorationInfoParameter) => boolean,
+  ) {
+    stateInfo.values = stateInfo.values.filter(
+      param => filterFunc(param) === true,
+    );
   }
 
   getMode(stateInfo: ExplorationInfo): ExplorationMode {
