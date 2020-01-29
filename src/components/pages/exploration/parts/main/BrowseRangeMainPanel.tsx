@@ -8,7 +8,7 @@ import { Dispatch } from "redux";
 import { OverviewSourceRow } from "../../../../../core/exploration/data/types";
 import { DataSourceChartFrame } from "../../../../exploration/DataSourceChartFrame";
 import { explorationInfoHelper } from "../../../../../core/exploration/ExplorationInfoHelper";
-import { ParameterType } from "../../../../../core/exploration/types";
+import { ParameterType, TouchingElementInfo } from "../../../../../core/exploration/types";
 import { DateTimeHelper } from "../../../../../time";
 import { format, startOfDay, addSeconds } from "date-fns";
 import { StyleTemplates } from "../../../../../style/Styles";
@@ -17,7 +17,6 @@ import Colors from "../../../../../style/Colors";
 import { Icon } from "react-native-elements";
 import commaNumber from 'comma-number';
 import unitConvert from 'convert-units';
-import * as Progress from 'react-native-progress';
 import { BusyHorizontalIndicator } from "../../../../exploration/BusyHorizontalIndicator";
 
 const styles = StyleSheet.create({
@@ -30,6 +29,17 @@ const styles = StyleSheet.create({
         borderBottomColor: "#00000015",
         borderBottomWidth: 1
     },
+
+    listItemHighlightStyle: {
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        right: 0,
+        bottom: 0,
+        borderColor: Colors.accent + "60",
+        borderWidth: 3
+    },
+
 
     listItemDateStyle: {
         color: Colors.textGray,
@@ -67,13 +77,14 @@ interface Props {
     source?: DataSourceType,
     data?: any,
     measureUnitType?: MeasureUnitType,
+    touchingElementInfo?: TouchingElementInfo,
     dispatchExplorationAction?: (action: ExplorationAction) => void
 }
 
 class BrowseRangeMainPanel extends React.Component<Props>{
 
-    componentDidUpdate(prevProps: Props){
-        if(prevProps.isLoadingData !== this.props.isLoadingData){
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.isLoadingData !== this.props.isLoadingData) {
             //LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
         }
     }
@@ -84,9 +95,19 @@ class BrowseRangeMainPanel extends React.Component<Props>{
             const sourceRangedData = this.props.data as OverviewSourceRow
             const dataList: Array<any> = (this.props.source === DataSourceType.Weight ? sourceRangedData.data.logs : sourceRangedData.data).slice(0)
             dataList.sort((a: any, b: any) => b["numberedDate"] - a["numberedDate"])
+
+            let highlightedDate: number = null
+            if(this.props.touchingElementInfo){
+                const dataSource = explorationInfoHelper.getParameterValueOfParams<DataSourceType>(this.props.touchingElementInfo.params, ParameterType.DataSource)
+                const date = explorationInfoHelper.getParameterValueOfParams<number>(this.props.touchingElementInfo.params, ParameterType.Date)
+                if(dataSource === this.props.source && date != null){
+                    highlightedDate = date
+                }
+            }
+
             return <View style={StyleTemplates.fillFlex}>
                 {
-                    this.props.isLoadingData === true && <BusyHorizontalIndicator/>
+                    this.props.isLoadingData === true && <BusyHorizontalIndicator />
                 }
                 <DataSourceChartFrame data={sourceRangedData}
                     measureUnitType={this.props.measureUnitType}
@@ -96,7 +117,11 @@ class BrowseRangeMainPanel extends React.Component<Props>{
                 />
                 {
                     dataList.length > 0 && <FlatList style={StyleTemplates.fillFlex} data={dataList}
-                        renderItem={(entry) => <Item date={entry.item["numberedDate"]} today={today} item={entry.item} type={this.props.source} unitType={this.props.measureUnitType} />}
+                        renderItem={(entry) => <Item date={entry.item["numberedDate"]}
+                            today={today} item={entry.item} type={this.props.source}
+                            unitType={this.props.measureUnitType} 
+                            isHighlighted={entry.item["numberedDate"] === highlightedDate}
+                            />}
                         keyExtractor={item => item["id"] || item["numberedDate"].toString()}
                     />
                 }
@@ -126,7 +151,8 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
         source: explorationInfoHelper.getParameterValue(appState.explorationDataState.info, ParameterType.DataSource),
         data: appState.explorationDataState.data,
         measureUnitType: appState.settingsState.unit,
-        isLoadingData: appState.explorationDataState.isBusy
+        isLoadingData: appState.explorationDataState.isBusy,
+        touchingElementInfo: appState.explorationState.touchingElement
     }
 }
 
@@ -141,7 +167,8 @@ const Item = (prop: {
     item: any,
     today: number,
     type: DataSourceType,
-    unitType: MeasureUnitType
+    unitType: MeasureUnitType,
+    isHighlighted: boolean
 }) => {
     var dateString
     if (prop.date === prop.today) {
@@ -231,5 +258,8 @@ const Item = (prop: {
             valueElement
         }
         <Icon type="materialicons" name="keyboard-arrow-right" color={Colors.textGray} />
+        {
+            prop.isHighlighted === true && <View style={styles.listItemHighlightStyle}/>
+        }
     </View>
 }
