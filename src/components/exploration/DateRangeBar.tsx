@@ -13,6 +13,7 @@ import { StyleTemplates } from "../../style/Styles";
 import { DatePicker, WeekPicker, MonthPicker } from "../common/CalendarPickers";
 import { SafeAreaConsumer } from "react-native-safe-area-context";
 import { InteractionType } from "../../state/exploration/interaction/actions";
+import { DateTimeHelper } from "../../time";
 
 const dateButtonWidth = 140
 const barHeight = 60
@@ -95,14 +96,16 @@ const styles = StyleSheet.create({
 })
 
 interface Props {
-    from: Date,
-    to: Date,
-    onRangeChanged?: (from: Date, to: Date, interactionType?: InteractionType) => void
+    from: number,
+    to: number,
+    onRangeChanged?: (from: number, to: number, interactionType?: InteractionType) => void
 }
 
 interface State {
-    from: Date,
-    to: Date,
+    from: number,
+    to: number,
+    fromDate: Date,
+    toDate: Date,
     semanticPeriodCaptured: boolean,
     numDays: number,
     level?: "day" | "week" | "month",
@@ -113,35 +116,44 @@ interface State {
 
 export class DateRangeBar extends React.PureComponent<Props, State> {
 
-    static deriveState(from: Date, to: Date, prevState: State): State {
-        const numDays = -differenceInCalendarDays(from, to) + 1
+    static deriveState(from: number, to: number, prevState: State): State {
+        
+        const fromDate = DateTimeHelper.toDate(from)
+        const toDate = DateTimeHelper.toDate(to)
+        const numDays = -differenceInCalendarDays(fromDate, toDate) + 1
 
-        if (isSameMonth(from, to) === true && isFirstDayOfMonth(from) === true && isLastDayOfMonth(to)) {
+        if (DateTimeHelper.getMonth(from) === DateTimeHelper.getMonth(to) && isFirstDayOfMonth(fromDate) === true && isLastDayOfMonth(toDate)) {
             //month
             return {
                 ...prevState,
-                from: from,
-                to: to,
+                from,
+                to,
+                fromDate,
+                toDate,
                 semanticPeriodCaptured: true,
                 numDays: numDays,
                 level: "month",
-                periodName: format(from, "MMM yyyy")
+                periodName: format(fromDate, "MMM yyyy")
             }
-        } else if (numDays === 7 && (isMonday(from) || isSunday(from))) {
+        } else if (numDays === 7 && (isMonday(fromDate) || isSunday(fromDate))) {
             return {
                 ...prevState,
-                from: from,
-                to: to,
+                from,
+                to,
+                fromDate,
+                toDate,
                 semanticPeriodCaptured: true,
                 numDays: numDays,
                 level: "week",
-                periodName: "Week of " + format(from, "MMM dd")
+                periodName: "Week of " + format(fromDate, "MMM dd")
             }
         } else {
             return {
                 ...prevState,
-                from: from,
-                to: to,
+                from,
+                to,
+                fromDate,
+                toDate,
                 semanticPeriodCaptured: false,
                 numDays: numDays,
                 level: "day",
@@ -150,9 +162,9 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         }
     }
 
-    static getDerivedStateFromProps(nextProps: Props, currentState: State): State{
-        if(isSameDay(currentState.from, nextProps.from) === false || 
-            isSameDay(currentState.to, nextProps.to) === false){
+    static getDerivedStateFromProps(nextProps: Props, currentState: State): State {
+        if (currentState.from !== nextProps.from ||
+            currentState.to !== nextProps.to) {
             return DateRangeBar.deriveState(nextProps.from, nextProps.to, currentState)
         }
         return null
@@ -184,33 +196,35 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
     }
 
     onSwipeLeft = () => {
+
         var from: Date
         var to: Date
         if (this.state.level !== 'month') {
-            from = addDays(this.state.from, this.state.numDays)
-            to = addDays(this.state.to, this.state.numDays)
+            from = addDays(this.state.fromDate, this.state.numDays)
+            to = addDays(this.state.toDate, this.state.numDays)
         } else {
-            const lastMonthFirst = addMonths(this.state.from, 1)
+            const lastMonthFirst = addMonths(this.state.fromDate, 1)
             const lastMonthLast = endOfMonth(lastMonthFirst)
             from = lastMonthFirst
             to = lastMonthLast
         }
-        this.setRange(from, to, InteractionType.TouchOnly)
+        this.setRange(DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to), InteractionType.TouchOnly)
     }
 
     onSwipeRight = () => {
+
         var from: Date
         var to: Date
         if (this.state.level !== 'month') {
-            from = subDays(this.state.from, this.state.numDays)
-            to = subDays(this.state.to, this.state.numDays)
+            from = subDays(this.state.fromDate, this.state.numDays)
+            to = subDays(this.state.toDate, this.state.numDays)
         } else {
-            const lastMonthFirst = subMonths(this.state.from, 1)
+            const lastMonthFirst = subMonths(this.state.fromDate, 1)
             const lastMonthLast = endOfMonth(lastMonthFirst)
             from = lastMonthFirst
             to = lastMonthLast
         }
-        this.setRange(from, to, InteractionType.TouchOnly)
+        this.setRange(DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to), InteractionType.TouchOnly)
     }
 
     closeBottomSheet = () => {
@@ -221,7 +235,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         })
     }
 
-    setRange = (from: Date, to: Date, interactionType: InteractionType=InteractionType.TouchOnly) => {
+    setRange = (from: number, to: number, interactionType: InteractionType = InteractionType.TouchOnly) => {
         this.setState(DateRangeBar.deriveState(
             from,
             to,
@@ -229,21 +243,22 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         ))
 
         if (this.props.onRangeChanged) {
-            this.props.onRangeChanged(startOfDay(from), endOfDay(to), interactionType)
+            this.props.onRangeChanged(from, to, interactionType)
         }
     }
 
-    setFromDate = (from: Date, interactionType: InteractionType=InteractionType.TouchOnly) => {
-        this.setRange(from, this.state.to, interactionType)
+    setFromDate = (from: Date, interactionType: InteractionType = InteractionType.TouchOnly) => {
+        this.setRange(DateTimeHelper.toNumberedDateFromDate(from), this.state.to, interactionType)
     }
 
-    setToDate = (to: Date, interactionType: InteractionType=InteractionType.TouchOnly) => {
+    setToDate = (to: Date, interactionType: InteractionType = InteractionType.TouchOnly) => {
         this.setRange(
-            this.state.from, to, interactionType)
+            this.state.from, DateTimeHelper.toNumberedDateFromDate(to), interactionType)
     }
 
     setMonth = (monthDate: Date, interactionType: InteractionType) => {
-        this.setRange(startOfMonth(monthDate), endOfMonth(monthDate), interactionType)
+        this.setRange(DateTimeHelper.toNumberedDateFromDate(startOfMonth(monthDate)),
+            DateTimeHelper.toNumberedDateFromDate(endOfMonth(monthDate)), interactionType)
     }
 
     setMonthByCalendar = (monthDate: Date) => {
@@ -262,18 +277,18 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                 case 'period':
                     switch (this.state.level) {
                         case 'week':
-                            modalPickerView = <WeekPicker selectedWeekFirstDay={this.state.from} onWeekSelected={this.setRange} />
+                            modalPickerView = <WeekPicker selectedWeekFirstDay={this.state.fromDate} onWeekSelected={(start, end)=>this.setRange(DateTimeHelper.toNumberedDateFromDate(start), DateTimeHelper.toNumberedDateFromDate(end))} />
                             break;
                         case 'month':
-                            modalPickerView = <MonthPicker selectedMonth={this.state.from} onMonthSelected={this.setMonthByCalendar} />
+                            modalPickerView = <MonthPicker selectedMonth={this.state.fromDate} onMonthSelected={this.setMonthByCalendar} />
                             break;
                     }
                     break;
                 case 'from':
-                    modalPickerView = <DatePicker selectedDay={this.state.from} earliedPossibleDay={undefined} latestPossibleDay={subDays(this.state.to, 1)} onDayPress={this.setFromDate} ghostRange={[this.state.from, this.state.to]} />
+                    modalPickerView = <DatePicker selectedDay={this.state.fromDate} earliedPossibleDay={undefined} latestPossibleDay={subDays(this.state.toDate, 1)} onDayPress={this.setFromDate} ghostRange={[this.state.fromDate, this.state.toDate]} />
                     break;
                 case 'to':
-                    modalPickerView = <DatePicker selectedDay={this.state.to} earliedPossibleDay={addDays(this.state.from, 1)} latestPossibleDay={undefined} onDayPress={this.setToDate} ghostRange={[this.state.from, this.state.to]} />
+                    modalPickerView = <DatePicker selectedDay={this.state.toDate} earliedPossibleDay={addDays(this.state.fromDate, 1)} latestPossibleDay={undefined} onDayPress={this.setToDate} ghostRange={[this.state.fromDate, this.state.toDate]} />
                     break;
             }
         }
@@ -304,7 +319,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             >
                 <SafeAreaConsumer>{
                     inset =>
-                        <View style={{...StyleTemplates.bottomSheetModalViewStyle, paddingBottom: Math.max(20, inset.bottom)}}>
+                        <View style={{ ...StyleTemplates.bottomSheetModalViewStyle, paddingBottom: Math.max(20, inset.bottom) }}>
                             {
                                 modalPickerView
                             }
@@ -316,9 +331,10 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
     }
 }
 
-const DateButton = (props: { date: Date, onPress: () => void }) => {
-    const dateString = format(props.date, "MMM dd, yyyy")
-    const subText = isToday(props.date) === true ? 'Today' : (isYesterday(props.date) === true ? "Yesterday" : format(props.date, "EEEE"))
+const DateButton = (props: { date: number, onPress: () => void }) => {
+    const date = DateTimeHelper.toDate(props.date)
+    const dateString = format(date, "MMM dd, yyyy")
+    const subText = isToday(date) === true ? 'Today' : (isYesterday(date) === true ? "Yesterday" : format(date, "EEEE"))
     return <TouchableOpacity onPress={props.onPress}><View style={styles.dateButtonContainerStyle}>
         <View style={styles.dateButtonDatePartStyle}>
             <Text style={styles.dateButtonDateTextStyle}>{dateString}</Text>

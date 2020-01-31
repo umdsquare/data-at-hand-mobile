@@ -98,7 +98,10 @@ export function generateHeaderView(props: ExplorationProps): any {
                 {generateRangeBar(props)}
             </HeaderContainer>
         case ExplorationType.B_Day:
-            break;
+            return <HeaderContainer>
+                {generateDataSourceRow(props)}
+
+            </HeaderContainer>
         case ExplorationType.C_Cyclic:
             break;
         case ExplorationType.C_CyclicDetail:
@@ -130,8 +133,8 @@ const HeaderContainer = (prop: { children?: any, }) => {
 
 function generateRangeBar(props: ExplorationProps, key?: ParameterKey): any {
     const range = explorationInfoHelper.getParameterValue(props.explorationState.info, ParameterType.Range, key)
-    return <DateRangeBar from={range && startOfDay(DateTimeHelper.toDate(range[0]))} to={range && endOfDay(DateTimeHelper.toDate(range[1]))} onRangeChanged={(from, to, xType) => {
-        props.dispatchCommand(createSetRangeAction(xType, [DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to)], key))
+    return <DateRangeBar from={range && range[0]} to={range && range[1]} onRangeChanged={(from, to, xType) => {
+        props.dispatchCommand(createSetRangeAction(xType, [from, to], key))
     }} />
 }
 
