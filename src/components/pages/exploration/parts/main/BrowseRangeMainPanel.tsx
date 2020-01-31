@@ -17,7 +17,6 @@ import Colors from "../../../../../style/Colors";
 import { Icon } from "react-native-elements";
 import commaNumber from 'comma-number';
 import unitConvert from 'convert-units';
-import { BusyHorizontalIndicator } from "../../../../exploration/BusyHorizontalIndicator";
 import { TouchableHighlight } from "react-native-gesture-handler";
 
 const styles = StyleSheet.create({
@@ -119,9 +118,6 @@ class BrowseRangeMainPanel extends React.Component<Props>{
             }
 
             return <View style={StyleTemplates.fillFlex}>
-                {
-                    this.props.isLoadingData === true && <BusyHorizontalIndicator />
-                }
                 <DataSourceChartFrame data={sourceRangedData}
                     measureUnitType={this.props.measureUnitType}
                     showToday={false}

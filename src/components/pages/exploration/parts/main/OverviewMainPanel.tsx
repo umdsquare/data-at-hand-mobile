@@ -55,11 +55,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
         if (this.props.data != null) {
             const overviewData = this.props.data as OverviewData
 
-            return <View>
-                {
-                    this.props.isLoading === true && <BusyHorizontalIndicator />
-                }
-                <FlatList
+            return <FlatList
                     nestedScrollEnabled={true}
                     ref={this._listRef}
                     data={overviewData.sourceDataList}
@@ -92,7 +88,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
 
                     scrollEnabled = {this.props.isTouchingChartElement === false}
                     
-                /></View>
+                />
         } else return <></>
     }
 }

@@ -18,6 +18,7 @@ import { Button } from "react-native-elements";
 import { Sizes } from "../../../style/Sizes";
 import { OverviewMainPanel } from "./parts/main/OverviewMainPanel";
 import { BrowseRangeMainPanel } from "./parts/main/BrowseRangeMainPanel";
+import { BusyHorizontalIndicator } from "../../exploration/BusyHorizontalIndicator";
 var deepEqual = require('deep-equal');
 
 const styles = StyleSheet.create({
@@ -141,6 +142,10 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
             </View>
             <View style={styles.mainContainerStyle}>
                 {/* main data panel ===================================================================*/}
+
+                {
+                    this.props.explorationDataState.isBusy === true && <BusyHorizontalIndicator />
+                }
 
                 {
                     this.props.explorationDataState.info != null ?
