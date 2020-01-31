@@ -1,11 +1,9 @@
-import {FitbitService} from './FitbitService';
 import {differenceInMinutes} from 'date-fns';
 import {ICachedRangeEntry} from './sqlite/database';
+import { FitbitServiceMeasureBase } from './FitbitServiceMeasureBase';
 
-export abstract class FitbitServiceMeasure {
+export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
   abstract key: string;
-
-  constructor(protected readonly service: FitbitService) {}
 
   protected abstract fetchAndCacheFitbitData(
     startDate: number,

@@ -5,7 +5,7 @@ export const FITBIT_DATE_FORMAT = 'yyyy-MM-dd';
 
 const FITBIT_ACTIVITY_SUMMARY_URL =
   'https://api.fitbit.com/1/user/-/activities/date/{date}.json';
-const FITBIT_INTRADAY_ACTIVITY_API_URL = `https://api.fitbit.com/1/user/-/{resourcePath}/date/{date}/1d/15min/time/{startTime}/{endTime}.json`;
+const FITBIT_INTRADAY_ACTIVITY_API_URL = `https://api.fitbit.com/1/user/-/{resourcePath}/date/{date}/1d/15min.json`;
 const FITBIT_DAY_LEVEL_ACTIVITY_API_URL = `https://api.fitbit.com/1/user/-/{resourcePath}/date/{startDate}/{endDate}.json`;
 
 const FITBIT_SLEEP_LOGS_URL =
@@ -30,14 +30,12 @@ export const FITBIT_PROFILE_URL = 'https://api.fitbit.com/1/user/-/profile.json'
  */
 export function makeFitbitIntradayActivityApiUrl(
   resourcePath: string,
-  date: Date,
+  date: number,
 ): string {
   const stringFormat = require('string-format');
   return stringFormat(FITBIT_INTRADAY_ACTIVITY_API_URL, {
     resourcePath: resourcePath,
-    date: format(date, FITBIT_DATE_FORMAT),
-    startTime: '00:00',
-    endTime: '23:59',
+    date: DateTimeHelper.toFormattedString(date)
   });
 }
 

@@ -15,6 +15,7 @@ import {
   SetTouchingElementInfoAction,
   InteractionType,
   GoToBrowseDayAction,
+  SetDateAction,
 } from './actions';
 import {explorationInfoHelper} from '../../../core/exploration/ExplorationInfoHelper';
 
@@ -106,6 +107,14 @@ export const explorationStateReducer = (
             setRangeAction.key as any,
           );
         }
+        break;
+      case ExplorationActionType.SetDate:
+        const setDateAction = action as SetDateAction
+        explorationInfoHelper.setParameterValue(
+          newState.info,
+          setDateAction.date,
+          ParameterType.Date
+        )
         break;
       case ExplorationActionType.SetDataSource:
         const setDataSourceAction = action as SetDataSourceAction;

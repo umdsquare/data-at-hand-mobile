@@ -9,7 +9,7 @@ export interface FitbitUserProfile {
   };
 }
 
-export interface IntradayStepDay {
+export interface FitbitIntradayStepDayQueryResult {
   'activities-steps': [{dateTime: string; value: string}];
   'activities-steps-intraday': {
     dataset: Array<{time: string; value: number}>;

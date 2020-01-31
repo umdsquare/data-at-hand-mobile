@@ -63,7 +63,7 @@ class ExplorationDataResolver {
     info: ExplorationInfo,
     selectedServiceKey: string
   ): Promise<any>{
-
+    console.log("load intraday")
     const selectedService = DataServiceManager.getServiceByKey(
       selectedServiceKey,
     );

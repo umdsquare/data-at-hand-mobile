@@ -16,6 +16,7 @@ import {FitbitServiceMeasure} from './FitbitServiceMeasure';
 import {FitbitWeightMeasure} from './FitbitWeightMeasure';
 import { FitbitSleepMeasure } from './FitbitSleepMeasure';
 import { FitbitLocalDbManager } from './sqlite/database';
+import { FitbitIntraDayStepMeasure } from './FitbitIntraDayStepMeasure';
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -55,7 +56,9 @@ export class FitbitService extends DataService {
   private weightLogMeasure = new FitbitWeightMeasure(this);
   private sleepMeasure = new FitbitSleepMeasure(this)
 
-  private measures: Array<FitbitServiceMeasure> = [
+  private intradayStepMeasure = new FitbitIntraDayStepMeasure(this);
+
+  private preloadableMeasures: Array<FitbitServiceMeasure> = [
     this.dailyStepMeasure,
     this.dailyHeartRateMeasure,
     this.weightLogMeasure,
@@ -92,6 +95,10 @@ export class FitbitService extends DataService {
 
       return null;
     } else {
+      switch(dataSource){
+        case DataSourceType.StepCount:
+          return await this.intradayStepMeasure.fetchData(start)
+      }
       return null;
     }
   }
@@ -161,7 +168,7 @@ export class FitbitService extends DataService {
 
         await this.fitbitLocalDbManager.open()
 
-        for (const measure of this.measures) {
+        for (const measure of this.preloadableMeasures) {
           await measure.cacheServerData(now);
         }
 

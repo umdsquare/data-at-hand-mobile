@@ -8,6 +8,13 @@ export interface IDailySummaryEntry {
   dayOfWeek: number;
 }
 
+export interface IIntraDayStepCountLog {
+  id: string,
+  numberedDate: number,
+  hourOfDay: number,
+  value: number
+}
+
 export interface IDailyNumericSummaryEntry extends IDailySummaryEntry {
   value: number;
 }
@@ -43,6 +50,10 @@ export interface OverviewSourceRow {
 
 export interface StepCountRangedData extends OverviewSourceRow {
   data: Array<IDailySummaryEntry>;
+}
+
+export interface StepCountIntraDayData {
+  hourlySteps: Array<IIntraDayStepCountLog>
 }
 
 export interface RestingHeartRateRangedData extends OverviewSourceRow {

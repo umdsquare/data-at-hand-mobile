@@ -9,6 +9,13 @@ export interface ICachedRangeEntry {
   queriedAt?: Date;
 }
 
+export interface ICachedIntraDayDateEntry {
+  id: string;
+  measureKey: string;
+  date: number;
+  queriedAt: Date;
+}
+
 export enum FitbitLocalTableName {
   StepCount = 'StepCount',
   SleepLog = 'SleepLog',
@@ -16,22 +23,10 @@ export enum FitbitLocalTableName {
   WeightTrend = 'WeightTrend',
   WeightLog = 'WeightLog',
   CachedRange = 'CachedRange',
-}
 
-enum FitbitLocalTableColumnName {
-  NUMBERED_DATE = 'numberedDate',
-  YEAR = 'year',
-  MONTH = 'month',
-  dayOfWeek = 'dayOfWeek',
-  secondsOfDay = 'secondsOfDay',
-  ID = 'id',
-  VALUE = 'value',
-  SOURCE = 'source',
-  QUALITY = 'quality',
-  lengthInSeconds = 'lengthInSeconds',
-  bedTimeDiffSeconds = 'bedTimeDiffSeconds',
-  wakeTimeDiffSeconds = 'wakeTimeDiffSeconds',
-  listOfLevels = 'listOfLevels',
+  CachedIntraDayDates = 'CachedIntraDayDates',
+
+  StepCountIntraDay = 'StepCountIntraDay',
 }
 
 const dailySummaryProperties = {
@@ -55,6 +50,16 @@ const StepCountSchema = {
     value: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
   },
 } as SQLiteHelper.TableSchema;
+
+const IntraDayStepCountSchema = {
+  name: FitbitLocalTableName.StepCountIntraDay,
+  columns: {
+    numberedDate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
+    hourOfDay: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
+    value: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
+    id: {type: SQLiteHelper.SQLiteColumnType.TEXT, primary: true},
+  },
+};
 
 const RestingHeartRateSchema = {
   name: FitbitLocalTableName.RestingHeartRate,
@@ -105,6 +110,16 @@ const CachedRangeSchema = {
   },
 };
 
+const CachedIntraDayDatesSchema = {
+  name: FitbitLocalTableName.CachedIntraDayDates,
+  columns: {
+    measureKey: {type: SQLiteHelper.SQLiteColumnType.TEXT, index: true},
+    date: {type: SQLiteHelper.SQLiteColumnType.INTEGER, index: true},
+    queriedAt: {type: SQLiteHelper.SQLiteColumnType.TEXT},
+    id: {type: SQLiteHelper.SQLiteColumnType.TEXT, primary: true},
+  },
+};
+
 const schemas = [
   StepCountSchema,
   RestingHeartRateSchema,
@@ -112,25 +127,28 @@ const schemas = [
   WeightLogSchema,
   MainSleepLogSchema,
   CachedRangeSchema,
+  IntraDayStepCountSchema,
+  CachedIntraDayDatesSchema,
 ];
 
 const dbConfig = {
-    name: 'fitbit-local-cache.sqlite',
-    location: 'default',
-  } as SQLite.DatabaseParams
+  name: 'fitbit-local-cache.sqlite',
+  location: 'default',
+} as SQLite.DatabaseParams;
 
 export class FitbitLocalDbManager {
   private _database: SQLite.SQLiteDatabase;
 
-  deleteDatabase(): Promise<void>{
-      return SQLite.deleteDatabase(dbConfig)
+  deleteDatabase(): Promise<void> {
+    return SQLite.deleteDatabase(dbConfig);
   }
 
   open(): Promise<SQLite.SQLiteDatabase> {
     if (this._database != null) {
       return Promise.resolve(this._database);
     } else
-      return SQLite.openDatabase(dbConfig).then(db => {
+      return SQLite.openDatabase(dbConfig)
+        .then(db => {
           this._database = db;
           return db;
         })
@@ -209,41 +227,80 @@ export class FitbitLocalDbManager {
     if (result.rows.length > 0) {
       const entry = result.rows.item(0);
       entry.queriedAt = new Date(entry.queriedAt);
-      console.log('raw entry:', entry);
       return entry;
     } else {
       return null;
     }
   }
 
-  async fetchData<T>(tableName: FitbitLocalTableName, condition: string, parameters: any[]): Promise<T[]>
-  {
-      const query = "SELECT * FROM " + tableName + " WHERE " + condition;
-      try{
-      const [result] = await this._database.executeSql(query, parameters)
-      if(result.rows.length > 0){
-        return result.rows.raw()
-      }else return []
-    }catch(ex){
-        console.log("Fetch error:")
-        console.log(ex)
-        return []
-    }
-  }
-
   async upsertCachedRange(obj: ICachedRangeEntry): Promise<void> {
-      if(obj.queriedAt){
-          obj.queriedAt = obj.queriedAt.toString() as any
-      }
+    if (obj.queriedAt) {
+      obj.queriedAt = obj.queriedAt.toString() as any;
+    }
     return this.insert(FitbitLocalTableName.CachedRange, [obj]);
   }
 
-  async getAggregatedValue(tableName: FitbitLocalTableName, type: SQLiteHelper.AggregationType, aggregatedColumnName: string, condition: string, parameters: any[]): Promise<number>{
-      const query = "SELECT " + type + "(" + aggregatedColumnName + ") FROM " + tableName + " WHERE " + condition
-      const [result] = await this._database.executeSql(query, parameters)
-      if(result.rows.length > 0){
-          const obj = result.rows.item(0)
-          return obj[Object.keys(obj)[0]]
-      }else return null
+  async getCachedIntraDayDate(
+    measureKey: string,
+    date: number,
+  ): Promise<ICachedIntraDayDateEntry> {
+    const query =
+      'SELECT * FROM ' +
+      FitbitLocalTableName.CachedIntraDayDates +
+      ' WHERE `measureKey` = ? AND `date` = ? LIMIT 1';
+    const [result] = await this._database.executeSql(query, [measureKey, date]);
+    if (result.rows.length > 0) {
+      const entry = result.rows.item(0);
+      entry.queriedAt = new Date(entry.queriedAt);
+      return entry;
+    } else return null;
+  }
+
+  async upsertCachedIntraDayDate(obj: ICachedIntraDayDateEntry): Promise<void>{
+    if(obj.queriedAt){
+        obj.queriedAt = obj.queriedAt.toString() as any;
+    }
+    return this.insert(FitbitLocalTableName.CachedIntraDayDates, [obj])
+  }
+
+  async fetchData<T>(
+    tableName: FitbitLocalTableName,
+    condition: string,
+    parameters: any[],
+  ): Promise<T[]> {
+    const query = 'SELECT * FROM ' + tableName + ' WHERE ' + condition;
+    try {
+      const [result] = await this._database.executeSql(query, parameters);
+      if (result.rows.length > 0) {
+        return result.rows.raw();
+      } else return [];
+    } catch (ex) {
+      console.log('Fetch error:');
+      console.log(ex);
+      return [];
+    }
+  }
+
+  async getAggregatedValue(
+    tableName: FitbitLocalTableName,
+    type: SQLiteHelper.AggregationType,
+    aggregatedColumnName: string,
+    condition: string,
+    parameters: any[],
+  ): Promise<number> {
+    const query =
+      'SELECT ' +
+      type +
+      '(' +
+      aggregatedColumnName +
+      ') FROM ' +
+      tableName +
+      ' WHERE ' +
+      condition;
+    const [result] = await this._database.executeSql(query, parameters);
+    if (result.rows.length > 0) {
+      const obj = result.rows.item(0);
+      return obj[Object.keys(obj)[0]];
+    } else return null;
   }
 }

@@ -101,7 +101,7 @@ export class DateTimeHelper{
 }
 
 
-function pad(n, len) {
+export function pad(n, len) {
    
     var s = n.toString();
     if (s.length < len) {
