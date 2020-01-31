@@ -7,7 +7,7 @@ import { ScaleBand } from "d3-scale";
 import Colors from "../../../../style/Colors";
 import { Dispatch } from "redux";
 import { TouchingElementInfo, ParameterType } from "../../../../core/exploration/types";
-import { setTouchElementInfo } from "../../../../state/exploration/interaction/actions";
+import { setTouchElementInfo, createGoToBrowseDayAction, InteractionType } from "../../../../state/exploration/interaction/actions";
 import { ReduxAppState } from "../../../../state/types";
 import { connect } from "react-redux";
 import { DataSourceType } from "../../../../measure/DataSourceSpec";
@@ -27,7 +27,8 @@ interface Props {
 
     currentTouchingInfo?: TouchingElementInfo,
     isContainerScrolling?: boolean,
-    setTouchingInfo?: (info: TouchingElementInfo) => void
+    setTouchingInfo?: (info: TouchingElementInfo) => void,
+    goToDayDetail?: (date: number)=>void
 }
 interface State {
     touchedDate: number,
@@ -154,6 +155,7 @@ class GroupWithTouchInteraction extends React.Component<Props, State>{
 
                 if (this.state.touchStartedAt != null && Date.now() - this.state.touchStartedAt < CLICK_THRESHOLD_MILLIS && gestureState.moveX < 50 && gestureState.moveY < 50) {
                     this.props.onDateClick && this.props.onDateClick(date)
+                    this.props.goToDayDetail(date)
                     console.log("click")
                 }
 
@@ -194,7 +196,8 @@ class GroupWithTouchInteraction extends React.Component<Props, State>{
 function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props {
     return {
         ...ownProps,
-        setTouchingInfo: (info) => dispatch(setTouchElementInfo(info))
+        setTouchingInfo: (info) => dispatch(setTouchElementInfo(info)),
+        goToDayDetail: (date)=> dispatch(createGoToBrowseDayAction(InteractionType.TouchOnly, ownProps.dataSource, date))
     }
 }
 

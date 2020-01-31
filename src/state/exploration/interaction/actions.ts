@@ -6,12 +6,13 @@ const ACTION_PREFIX = "exploration:interaction:"
 
 export enum ExplorationActionType{
     MemoUiStatus="exploration:interaction:memoUIStatus",
-    SetRange="exploration:interaction:setR",
-    SetDataSource="exploration:interaction:setDS",
-    SelectElementOfDay="exploration:interaction:selectElmDay",
-    SelectElementOfRange="exploration:interaction:selectElmRange",
+    SetRange="exploration:interaction:setRange",
+    SetDataSource="exploration:interaction:setDataSource",
+    SetDate="exploration:interaction:setDate",
+    
     GoToBrowseRange="exploration:interaction:goToBrowseRange",
     GoToBrowseOverview = "exploration:interaction:goToBrowseOverview",
+    GoToBrowseDay = "exploration:interaction:goToBrowseDay",
 
     //History 
     RestorePreviousInfo="exploration:interaction:restorePreviousInfo",
@@ -40,6 +41,10 @@ export interface SetRangeAction extends ExplorationActionBase{
     key?: string
 }
 
+export interface SetDateAction extends ExplorationActionBase{
+    date: number
+}
+
 export interface SetDataSourceAction extends ExplorationActionBase{
     dataSource: DataSourceType
 }
@@ -49,11 +54,16 @@ export interface GoToBrowseRangeAction extends ExplorationActionBase{
     range?:[number, number]
 }
 
+export interface GoToBrowseDayAction extends ExplorationActionBase{
+    dataSource?: DataSourceType,
+    date?: number
+}
+
 export interface SetTouchingElementInfoAction extends ActionTypeBase{
     info: TouchingElementInfo
 }
 
-export type ExplorationAction = ActionTypeBase | ExplorationActionBase | SetRangeAction | GoToBrowseRangeAction | MemoUIStatusAction | SetDataSourceAction | SetTouchingElementInfoAction
+export type ExplorationAction = ActionTypeBase | ExplorationActionBase | SetRangeAction | SetDateAction | GoToBrowseRangeAction | GoToBrowseDayAction | MemoUIStatusAction | SetDataSourceAction | SetTouchingElementInfoAction
 
 export function createSetRangeAction(interactionType: InteractionType, range: [number, number], key?: string): SetRangeAction{
     return {
@@ -80,6 +90,15 @@ export function createGoToBrowseOverviewAction(interactionType: InteractionType)
     }
 }
 
+export function createGoToBrowseDayAction(interactionType: InteractionType, dataSource?: DataSourceType, date?: number): GoToBrowseDayAction{
+    return {
+        type: ExplorationActionType.GoToBrowseDay,
+        interactionType,
+        dataSource,
+        date
+    }
+}
+
 export function createRestorePreviousInfoAction(): ActionTypeBase{
     return {
         type: ExplorationActionType.RestorePreviousInfo
@@ -99,6 +118,14 @@ export function setDataSourceAction(interactionType: InteractionType, dataSource
         type: ExplorationActionType.SetDataSource,
         interactionType,
         dataSource
+    }
+}
+
+export function setDateAction(interactionType: InteractionType, date: number): SetDateAction{
+    return {
+        type: ExplorationActionType.SetDate,
+        interactionType,
+        date 
     }
 }
 

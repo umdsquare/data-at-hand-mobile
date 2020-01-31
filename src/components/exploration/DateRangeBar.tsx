@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, Text } from "react-native";
 import Colors from "../../style/Colors";
 import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
@@ -30,13 +30,21 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         backgroundColor: "#00000025",
         height: barHeight,
-        flexDirection: 'row'
+        flexDirection: 'row',
+        justifyContent: 'center'
     },
     dateButtonContainerStyle: {
         height: barHeight,
         justifyContent: 'center',
         alignItems: 'center',
         width: dateButtonWidth
+    },
+    dateButtonContainerStyleFreeWidth: {
+        height: barHeight,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingRight: Sizes.horizontalPadding,
+        paddingLeft: Sizes.horizontalPadding
     },
     dateButtonDatePartStyle: {
         flexDirection: 'row'
@@ -114,10 +122,27 @@ interface State {
     isBottomSheetOpen?: boolean
 }
 
+const DateButton = (props: { date: number, overrideFormat?: string, freeWidth?: boolean, onPress: () => void }) => {
+    const date = DateTimeHelper.toDate(props.date)
+    const dateString = format(date, props.overrideFormat || "MMM dd, yyyy")
+    const subText = isToday(date) === true ? 'Today' : (isYesterday(date) === true ? "Yesterday" : format(date, "EEEE"))
+    return <TouchableOpacity onPress={props.onPress}><View style={props.freeWidth===true? styles.dateButtonContainerStyleFreeWidth : styles.dateButtonContainerStyle}>
+        <View style={styles.dateButtonDatePartStyle}>
+            <Text style={styles.dateButtonDateTextStyle}>{dateString}</Text>
+            <View style={styles.dateButtonIndicatorContainerStyle}>
+                <SpeechAffordanceIndicator />
+            </View>
+        </View>
+        <Text style={styles.midViewDescriptionTextStyle}>
+            {subText}
+        </Text></View>
+    </TouchableOpacity>
+}
+
 export class DateRangeBar extends React.PureComponent<Props, State> {
 
     static deriveState(from: number, to: number, prevState: State): State {
-        
+
         const fromDate = DateTimeHelper.toDate(from)
         const toDate = DateTimeHelper.toDate(to)
         const numDays = -differenceInCalendarDays(fromDate, toDate) + 1
@@ -277,7 +302,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                 case 'period':
                     switch (this.state.level) {
                         case 'week':
-                            modalPickerView = <WeekPicker selectedWeekFirstDay={this.state.fromDate} onWeekSelected={(start, end)=>this.setRange(DateTimeHelper.toNumberedDateFromDate(start), DateTimeHelper.toNumberedDateFromDate(end))} />
+                            modalPickerView = <WeekPicker selectedWeekFirstDay={this.state.fromDate} onWeekSelected={(start, end) => this.setRange(DateTimeHelper.toNumberedDateFromDate(start), DateTimeHelper.toNumberedDateFromDate(end))} />
                             break;
                         case 'month':
                             modalPickerView = <MonthPicker selectedMonth={this.state.fromDate} onMonthSelected={this.setMonthByCalendar} />
@@ -331,19 +356,45 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
     }
 }
 
-const DateButton = (props: { date: number, onPress: () => void }) => {
-    const date = DateTimeHelper.toDate(props.date)
-    const dateString = format(date, "MMM dd, yyyy")
-    const subText = isToday(date) === true ? 'Today' : (isYesterday(date) === true ? "Yesterday" : format(date, "EEEE"))
-    return <TouchableOpacity onPress={props.onPress}><View style={styles.dateButtonContainerStyle}>
-        <View style={styles.dateButtonDatePartStyle}>
-            <Text style={styles.dateButtonDateTextStyle}>{dateString}</Text>
-            <View style={styles.dateButtonIndicatorContainerStyle}>
-                <SpeechAffordanceIndicator />
-            </View>
-        </View>
-        <Text style={styles.midViewDescriptionTextStyle}>
-            {subText}
-        </Text></View>
-    </TouchableOpacity>
+
+
+export const DateBar = (props: {
+    date: number,
+    onDateChanged?: (date: number, interactionType?: InteractionType) => void
+}) => {
+
+    const [date, setDate] = useState(props.date)
+    const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
+
+    const shiftDay = (amount: number) => {
+        console.log(amount, date)
+        setDate(DateTimeHelper.toNumberedDateFromDate(addDays(DateTimeHelper.toDate(date), amount)))
+        props.onDateChanged && props.onDateChanged(date, InteractionType.TouchOnly)
+    }
+    
+
+    return <GestureRecognizer onSwipeLeft={() => shiftDay(1)} onSwipeRight={() => shiftDay(-1)} style={styles.containerStyle}>
+        <DateButton date ={date} overrideFormat="MMMM dd, yyyy" freeWidth={true} onPress={()=>{setIsBottomSheetOpen(true)}}/>
+
+        <Modal
+                isVisible={isBottomSheetOpen === true}
+                onBackdropPress={()=>{setIsBottomSheetOpen(false)}}
+                style={StyleTemplates.bottomSheetModalContainerStyle}
+                backdropOpacity={0.3}
+            >
+                <SafeAreaConsumer>{
+                    inset =>
+                        <View style={{ ...StyleTemplates.bottomSheetModalViewStyle, paddingBottom: Math.max(20, inset.bottom) }}>
+                            {
+                                <DatePicker selectedDay={DateTimeHelper.toDate(date)} onDayPress={(d)=>{
+                                    const newDate = DateTimeHelper.toNumberedDateFromDate(d)
+                                    setDate(newDate)
+                                    setIsBottomSheetOpen(false)
+                                    props.onDateChanged && props.onDateChanged(newDate, InteractionType.TouchOnly)
+                                }}/>
+                            }
+                        </View>
+                }</SafeAreaConsumer>
+            </Modal>
+    </GestureRecognizer>
 }

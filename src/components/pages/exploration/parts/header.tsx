@@ -4,7 +4,7 @@ import { SafeAreaView, View, Text, StyleSheet, TextStyle, ViewStyle } from 'reac
 import { CategoricalRow } from '../../../exploration/CategoricalRow';
 import { DataSourceIcon } from '../../../common/DataSourceIcon';
 import { ExplorationProps } from '../ExplorationScreen';
-import { DateRangeBar } from '../../../exploration/DateRangeBar';
+import { DateRangeBar, DateBar } from '../../../exploration/DateRangeBar';
 import { explorationInfoHelper } from '../../../../core/exploration/ExplorationInfoHelper';
 import { startOfDay, endOfDay } from 'date-fns';
 import { Button } from 'react-native-elements';
@@ -13,7 +13,7 @@ import { StyleTemplates } from '../../../../style/Styles';
 import { DateTimeHelper } from '../../../../time';
 import { dataSourceManager } from '../../../../system/DataSourceManager';
 import { DataSourceType } from '../../../../measure/DataSourceSpec';
-import { createSetRangeAction, setDataSourceAction, InteractionType, goBackAction } from '../../../../state/exploration/interaction/actions';
+import { createSetRangeAction, setDataSourceAction, InteractionType, goBackAction, setDateAction } from '../../../../state/exploration/interaction/actions';
 import Colors from '../../../../style/Colors';
 import { useDispatch, useSelector } from 'react-redux';
 import { ReduxAppState } from '../../../../state/types';
@@ -100,6 +100,7 @@ export function generateHeaderView(props: ExplorationProps): any {
         case ExplorationType.B_Day:
             return <HeaderContainer>
                 {generateDataSourceRow(props)}
+                {generateDateBar(props)}
 
             </HeaderContainer>
         case ExplorationType.C_Cyclic:
@@ -136,6 +137,13 @@ function generateRangeBar(props: ExplorationProps, key?: ParameterKey): any {
     return <DateRangeBar from={range && range[0]} to={range && range[1]} onRangeChanged={(from, to, xType) => {
         props.dispatchCommand(createSetRangeAction(xType, [from, to], key))
     }} />
+}
+
+function generateDateBar(props: ExplorationProps): any {
+    const date = explorationInfoHelper.getParameterValue<number>(props.explorationState.info, ParameterType.Date)
+    return <DateBar date={date !=null? date : null} onDateChanged={(date: number, interactionType: InteractionType)=>{
+        props.dispatchCommand(setDateAction(interactionType, date))
+    }}/>
 }
 
 function generateDataSourceRow(props: ExplorationProps): any {

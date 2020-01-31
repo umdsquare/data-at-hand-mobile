@@ -19,7 +19,7 @@ class ExplorationDataResolver {
       case ExplorationType.B_Range:
         return this.loadBrowseRangeData(explorationInfo, selectedServiceKey)
       case ExplorationType.B_Day:
-        break;
+        return this.loadIntraDayData(explorationInfo, selectedServiceKey)
       default:
         Promise.reject({error: 'Unsupported exploration type.'});
     }
@@ -57,6 +57,20 @@ class ExplorationDataResolver {
         selectedService.fetchData(source.type, DataLevel.DailyActivity, range[0], range[1])
             .then(result => result != null? result : {source: source.type})
     )).then(dataPerSource => ({sourceDataList: dataPerSource}));
+  }
+
+  private loadIntraDayData(
+    info: ExplorationInfo,
+    selectedServiceKey: string
+  ): Promise<any>{
+
+    const selectedService = DataServiceManager.getServiceByKey(
+      selectedServiceKey,
+    );
+    const source = explorationInfoHelper.getParameterValue<DataSourceType>(info, ParameterType.DataSource)
+    const date = explorationInfoHelper.getParameterValue<number>(info, ParameterType.Date)
+
+    return selectedService.fetchData(source, DataLevel.IntraDay, date, date)
   }
 }
 

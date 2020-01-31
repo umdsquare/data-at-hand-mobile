@@ -14,6 +14,7 @@ import {
   SetDataSourceAction,
   SetTouchingElementInfoAction,
   InteractionType,
+  GoToBrowseDayAction,
 } from './actions';
 import {explorationInfoHelper} from '../../../core/exploration/ExplorationInfoHelper';
 
@@ -65,7 +66,7 @@ export const explorationStateReducer = (
                 newState.backNavStack[newState.backNavStack.length - 1],
               ) === true
             ) {
-              newState.backNavStack.pop()
+              newState.backNavStack.pop();
             }
           }
           return newState;
@@ -121,32 +122,66 @@ export const explorationStateReducer = (
       case ExplorationActionType.GoToBrowseRange:
         //check parameters
         const goToBrowseRangeAction = action as GoToBrowseRangeAction;
-        const dataSource =
-          goToBrowseRangeAction.dataSource ||
-          explorationInfoHelper.getParameterValue(
-            state.info,
-            ParameterType.DataSource,
-          );
-        const range =
-          goToBrowseRangeAction.range ||
-          explorationInfoHelper.getParameterValue(
-            state.info,
-            ParameterType.Range,
-          );
-        if (dataSource != null && range != null) {
-          newState.info.type = ExplorationType.B_Range;
-          newState.info.values = [];
-          explorationInfoHelper.setParameterValue(
-            newState.info,
-            range,
-            ParameterType.Range,
-          );
-          explorationInfoHelper.setParameterValue(
-            newState.info,
-            dataSource,
-            ParameterType.DataSource,
-          );
+        {
+          const dataSource =
+            goToBrowseRangeAction.dataSource ||
+            explorationInfoHelper.getParameterValue(
+              state.info,
+              ParameterType.DataSource,
+            );
+          const range =
+            goToBrowseRangeAction.range ||
+            explorationInfoHelper.getParameterValue(
+              state.info,
+              ParameterType.Range,
+            );
+          if (dataSource != null && range != null) {
+            newState.info.type = ExplorationType.B_Range;
+            newState.info.values = [];
+            explorationInfoHelper.setParameterValue(
+              newState.info,
+              range,
+              ParameterType.Range,
+            );
+            explorationInfoHelper.setParameterValue(
+              newState.info,
+              dataSource,
+              ParameterType.DataSource,
+            );
+          }
         }
+        break;
+      case ExplorationActionType.GoToBrowseDay:
+        const goToBrowseDayAction = action as GoToBrowseDayAction;
+        {
+          const dataSource =
+            goToBrowseDayAction.dataSource ||
+            explorationInfoHelper.getParameterValue(
+              state.info,
+              ParameterType.DataSource,
+            );
+          const date =
+            goToBrowseDayAction.date ||
+            explorationInfoHelper.getParameterValue(
+              state.info,
+              ParameterType.Date,
+            );
+          if (dataSource != null && date != null) {
+            newState.info.type = ExplorationType.B_Day;
+            newState.info.values = [];
+            explorationInfoHelper.setParameterValue(
+              newState.info,
+              dataSource,
+              ParameterType.DataSource,
+            );
+            explorationInfoHelper.setParameterValue(
+              newState.info,
+              date,
+              ParameterType.Date,
+            );
+          }
+        }
+
         break;
       case ExplorationActionType.GoToBrowseOverview:
         if (newState.info.type === ExplorationType.B_Ovrvw) {
