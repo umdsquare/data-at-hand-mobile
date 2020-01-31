@@ -13,7 +13,7 @@ import { explorationInfoHelper } from "../../../core/exploration/ExplorationInfo
 import { DataServiceManager } from "../../../system/DataServiceManager";
 import { ExplorationInfo, ExplorationType, ExplorationMode } from "../../../core/exploration/types";
 import { ExplorationDataState, startLoadingForInfo } from "../../../state/exploration/data/reducers";
-import { ExplorationAction, createUndoAction, InteractionType, createRedoAction, createGoToBrowseOverviewAction } from "../../../state/exploration/interaction/actions";
+import { ExplorationAction, InteractionType, createGoToBrowseOverviewAction, createRestorePreviousInfoAction } from "../../../state/exploration/interaction/actions";
 import { Button } from "react-native-elements";
 import { Sizes } from "../../../style/Sizes";
 import { OverviewMainPanel } from "./parts/main/OverviewMainPanel";
@@ -41,12 +41,15 @@ const styles = StyleSheet.create({
     },
 
     historyButtonStyle: {
-        borderRadius: 50, width: 38, height: 38, padding: 0, 
-        backgroundColor: Colors.primary,
+        borderRadius: 50,
+        height: 38, padding: 0,
+        backgroundColor: Colors.primary + "ee",
         shadowColor: 'black',
         shadowOpacity: 0.2,
         shadowOffset: { width: 0, height: 4 },
-        shadowRadius: 3
+        shadowRadius: 3,
+        paddingLeft: 8,
+        paddingRight: 16
     },
 
     historyButtonContainerStyle: {
@@ -54,15 +57,15 @@ const styles = StyleSheet.create({
         paddingRight: 4
     },
 
-    historyButtonDisabledStyle: {
-        backgroundColor: '#00000020',
-        shadowOpacity: null,
-        shadowColor: null,
+    historyButtonTitleStyle: {
+        fontSize: Sizes.smallFontSize,
+        color: 'white',
+        fontWeight: 'bold'
     }
 })
 
 const historyIconStyle = { type: 'ionicon', name: "ios-undo", color: 'white', size: 20 }
-const undoIconStyle = { ...historyIconStyle, name: "ios-undo" }
+const undoIconStyle = { ...historyIconStyle, type: 'fontawesome', name: "undo" }
 const redoIconStyle = { ...historyIconStyle, name: "ios-redo" }
 
 
@@ -116,19 +119,15 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
     }
 
     onBottomBarButtonPress = (mode: ExplorationMode) => {
-        switch(mode){
+        switch (mode) {
             case ExplorationMode.Browse:
                 this.props.dispatchCommand(createGoToBrowseOverviewAction(InteractionType.TouchOnly))
-            break;
+                break;
         }
     }
 
     undo = () => {
-        this.props.dispatchCommand(createUndoAction(InteractionType.TouchOnly))
-    }
-
-    redo = () => {
-        this.props.dispatchCommand(createRedoAction(InteractionType.TouchOnly))
+        this.props.dispatchCommand(createRestorePreviousInfoAction())
     }
 
     render() {
@@ -149,18 +148,16 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 }
 
                 {/* history panel ===================================================================*/}
-                <View style={styles.historyPanelStyle}>
-                    <Button disabled={this.props.explorationState.past.length === 0}
+                {this.props.explorationState.prevInfo != null && <View style={styles.historyPanelStyle}>
+                    <Button
                         containerStyle={styles.historyButtonContainerStyle}
                         buttonStyle={styles.historyButtonStyle}
-                        disabledStyle={styles.historyButtonDisabledStyle}
-                        icon={undoIconStyle} onPress={this.undo} />
-                    <Button disabled={this.props.explorationState.future.length === 0}
-                        containerStyle={styles.historyButtonContainerStyle}
-                        buttonStyle={styles.historyButtonStyle}
-                        disabledStyle={styles.historyButtonDisabledStyle}
-                        icon={redoIconStyle} onPress={this.redo} />
-                </View>
+                        icon={undoIconStyle} onPress={this.undo}
+                        title="Cancel latest"
+                        titleStyle={styles.historyButtonTitleStyle}
+                        />
+                    </View>
+                }
             </View>
 
             <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationState.info)}
@@ -170,12 +167,12 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
         </View>
     }
 
-    makeMainPanel(type: ExplorationType): any{
-        switch(type){
+    makeMainPanel(type: ExplorationType): any {
+        switch (type) {
             case ExplorationType.B_Ovrvw:
-                return <OverviewMainPanel/>
+                return <OverviewMainPanel />
             case ExplorationType.B_Range:
-                return <BrowseRangeMainPanel/>
+                return <BrowseRangeMainPanel />
         }
     }
 }

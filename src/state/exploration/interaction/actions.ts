@@ -12,8 +12,12 @@ export enum ExplorationActionType{
     SelectElementOfRange="exploration:interaction:selectElmRange",
     GoToBrowseRange="exploration:interaction:goToBrowseRange",
     GoToBrowseOverview = "exploration:interaction:goToBrowseOverview",
-    Redo="exploration:interaction:redo",
-    Undo="exploration:interaction:undo",
+
+    //History 
+    RestorePreviousInfo="exploration:interaction:restorePreviousInfo",
+    GoBack="exploration:interaction:goBack",
+    
+    //Touch
     SetTouchElementInfo="exploration:interaction:setTouchElementInfo"
 }
 
@@ -49,7 +53,7 @@ export interface SetTouchingElementInfoAction extends ActionTypeBase{
     info: TouchingElementInfo
 }
 
-export type ExplorationAction = ExplorationActionBase | SetRangeAction | GoToBrowseRangeAction | MemoUIStatusAction | SetDataSourceAction | SetTouchingElementInfoAction
+export type ExplorationAction = ActionTypeBase | ExplorationActionBase | SetRangeAction | GoToBrowseRangeAction | MemoUIStatusAction | SetDataSourceAction | SetTouchingElementInfoAction
 
 export function createSetRangeAction(interactionType: InteractionType, range: [number, number], key?: string): SetRangeAction{
     return {
@@ -76,17 +80,9 @@ export function createGoToBrowseOverviewAction(interactionType: InteractionType)
     }
 }
 
-export function createUndoAction(interactionType: InteractionType): ExplorationActionBase{
+export function createRestorePreviousInfoAction(): ActionTypeBase{
     return {
-        type: ExplorationActionType.Undo,
-        interactionType
-    }
-}
-
-export function createRedoAction(interactionType: InteractionType): ExplorationActionBase{
-    return {
-        type: ExplorationActionType.Redo,
-        interactionType
+        type: ExplorationActionType.RestorePreviousInfo
     }
 }
 
@@ -110,6 +106,12 @@ export function setTouchElementInfo(info: TouchingElementInfo): SetTouchingEleme
     return {
         type: ExplorationActionType.SetTouchElementInfo,
         info
+    }
+}
+
+export function goBackAction(): ActionTypeBase{
+    return {
+        type:ExplorationActionType.GoBack
     }
 }
 

@@ -13,72 +13,84 @@ import {
   MemoUIStatusAction,
   SetDataSourceAction,
   SetTouchingElementInfoAction,
+  InteractionType,
 } from './actions';
 import {explorationInfoHelper} from '../../../core/exploration/ExplorationInfoHelper';
 
+var deepEqual = require('deep-equal');
+
 export interface ExplorationState {
   info: ExplorationInfo;
-  past: Array<ExplorationInfo>;
-  future: Array<ExplorationInfo>;
-  uiStatus: {[key:string]:any};
-  touchingElement: TouchingElementInfo
+  prevInfo: ExplorationInfo;
+  backNavStack: Array<ExplorationInfo>;
+  uiStatus: {[key: string]: any};
+  touchingElement: TouchingElementInfo;
 }
 
 const INITIAL_STATE = {
   info: makeInitialStateInfo(),
-  past: [],
-  future: [],
+  prevInfo: null,
+  backNavStack: [],
   uiStatus: {},
-  touchingElement: null
+  touchingElement: null,
 } as ExplorationState;
 
 export const explorationStateReducer = (
   state: ExplorationState = INITIAL_STATE,
   action: ExplorationAction,
 ): ExplorationState => {
-
   const newState: ExplorationState = {
     info: JSON.parse(JSON.stringify(state.info)),
-    past: state.past.slice(0),
-    future: state.future.slice(0),
+    prevInfo: state.prevInfo,
+    backNavStack: state.backNavStack.slice(0),
     uiStatus: state.uiStatus,
-    touchingElement: state.touchingElement
-  }
+    touchingElement: state.touchingElement,
+  };
 
   if (
-    action.type === ExplorationActionType.Undo ||
-    action.type === ExplorationActionType.Redo ||
+    action.type === ExplorationActionType.RestorePreviousInfo ||
+    action.type === ExplorationActionType.GoBack ||
     action.type === ExplorationActionType.MemoUiStatus ||
     action.type === ExplorationActionType.SetTouchElementInfo
   ) {
     switch (action.type) {
-      case ExplorationActionType.Undo:
-        if (state.past.length > 0) {
-          newState.future.unshift(newState.info);
-          newState.info = newState.past.pop();
+      case ExplorationActionType.RestorePreviousInfo:
+        if (state.prevInfo) {
+          newState.info = newState.prevInfo;
+          newState.prevInfo = null;
+          if (newState.backNavStack.length > 0) {
+            if (
+              deepEqual(
+                newState.info,
+                newState.backNavStack[newState.backNavStack.length - 1],
+              ) === true
+            ) {
+              newState.backNavStack.pop()
+            }
+          }
           return newState;
         } else return state;
 
-      case ExplorationActionType.Redo:
-        if (state.future.length > 0) {
-          newState.past.push(newState.info);
-          newState.info = newState.future.shift();
+      case ExplorationActionType.GoBack:
+        if (state.backNavStack.length > 0) {
+          newState.info = newState.backNavStack.pop();
+          newState.prevInfo = null;
           return newState;
         } else return state;
-
       case ExplorationActionType.MemoUiStatus:
         const memoUiStatusAction = action as MemoUIStatusAction;
-        newState.uiStatus = {...state.uiStatus}
+        newState.uiStatus = {...state.uiStatus};
         newState.uiStatus[memoUiStatusAction.key] = memoUiStatusAction.value;
         return newState;
       case ExplorationActionType.SetTouchElementInfo:
-        const setTouchElementInfoAction = action as SetTouchingElementInfoAction
-        newState.touchingElement = setTouchElementInfoAction.info
+        const setTouchElementInfoAction = action as SetTouchingElementInfoAction;
+        newState.touchingElement = setTouchElementInfoAction.info;
         return newState;
     }
   } else {
-    newState.past.push(JSON.parse(JSON.stringify(newState.info)));
-    newState.future = [];
+    if (action['interactionType'] === InteractionType.Multimodal) {
+      newState.prevInfo = JSON.parse(JSON.stringify(newState.info));
+    }
 
     switch (action.type) {
       case ExplorationActionType.SetRange:
@@ -102,8 +114,8 @@ export const explorationStateReducer = (
           explorationInfoHelper.setParameterValue(
             newState.info,
             setDataSourceAction.dataSource,
-            ParameterType.DataSource
-          )
+            ParameterType.DataSource,
+          );
         }
         break;
       case ExplorationActionType.GoToBrowseRange:
@@ -149,6 +161,10 @@ export const explorationStateReducer = (
         break;
       default:
         return state;
+    }
+
+    if (newState.info.type != state.info.type) {
+      newState.backNavStack.push(JSON.parse(JSON.stringify(state.info)));
     }
 
     return newState;

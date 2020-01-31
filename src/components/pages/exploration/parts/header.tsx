@@ -1,6 +1,6 @@
 import React from 'react';
 import { ExplorationType, ParameterKey, ParameterType } from "../../../../core/exploration/types";
-import { SafeAreaView, View, Text, StyleSheet } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, TextStyle, ViewStyle } from 'react-native';
 import { CategoricalRow } from '../../../exploration/CategoricalRow';
 import { DataSourceIcon } from '../../../common/DataSourceIcon';
 import { ExplorationProps } from '../ExplorationScreen';
@@ -13,7 +13,10 @@ import { StyleTemplates } from '../../../../style/Styles';
 import { DateTimeHelper } from '../../../../time';
 import { dataSourceManager } from '../../../../system/DataSourceManager';
 import { DataSourceType } from '../../../../measure/DataSourceSpec';
-import {createSetRangeAction, setDataSourceAction, InteractionType} from '../../../../state/exploration/interaction/actions';
+import { createSetRangeAction, setDataSourceAction, InteractionType, goBackAction } from '../../../../state/exploration/interaction/actions';
+import Colors from '../../../../style/Colors';
+import { useDispatch, useSelector } from 'react-redux';
+import { ReduxAppState } from '../../../../state/types';
 
 const titleBarOptionButtonIconInfo = {
     name: "ios-settings",
@@ -46,19 +49,41 @@ const styles = StyleSheet.create({
         height: 28,
         borderRadius: 14,
         padding: 0,
-        paddingTop:2,
+        paddingTop: 2,
         margin: 0
     }
 })
 
+const backButtonProps = {
+    icon: { type: 'materialicon', size: 18, name: 'keyboard-arrow-left', color: Colors.headerBackgroundDarker, containerStyle: { padding: 0, margin: 0 } },
+    containerStyle: {
+        alignSelf: 'flex-start',
+        marginLeft: Sizes.horizontalPadding - 4
+    } as ViewStyle,
+
+    buttonStyle: {
+        paddingTop: 0,
+        paddingBottom: 0,
+        paddingLeft: 2,
+        paddingRight: 12,
+        borderRadius: 50,
+        backgroundColor: '#FFFFFFdd'
+    },
+    titleStyle: {
+        color: Colors.headerBackground,
+        fontSize: Sizes.tinyFontSize,
+        fontWeight: 'bold'
+    } as TextStyle
+}
+
 export function generateHeaderView(props: ExplorationProps): any {
     switch (props.explorationState.info.type) {
         case ExplorationType.B_Ovrvw:
-            return <SafeAreaView>
+            return <HeaderContainer>
                 <View style={styles.titleBarStyle}>
                     <Text style={styles.titleBarTitleStyle}>Browse</Text>
-                    <Button 
-                        buttonStyle={styles.titleBarButtonStyle} 
+                    <Button
+                        buttonStyle={styles.titleBarButtonStyle}
                         containerStyle={styles.titleBarButtonContainerStyle}
                         icon={titleBarOptionButtonIconInfo}
                         onPress={() => {
@@ -66,12 +91,12 @@ export function generateHeaderView(props: ExplorationProps): any {
                         }} />
                 </View>
                 {generateRangeBar(props)}
-            </SafeAreaView>
+            </HeaderContainer>
         case ExplorationType.B_Range:
-            return <SafeAreaView>
+            return <HeaderContainer>
                 {generateDataSourceRow(props)}
                 {generateRangeBar(props)}
-            </SafeAreaView>
+            </HeaderContainer>
         case ExplorationType.B_Day:
             break;
         case ExplorationType.C_Cyclic:
@@ -81,6 +106,26 @@ export function generateHeaderView(props: ExplorationProps): any {
         case ExplorationType.C_TwoRanges:
             break;
     }
+}
+
+const HeaderContainer = (prop: { children?: any, }) => {
+
+    const dispatch = useDispatch()
+    const backStackSize = useSelector((appState: ReduxAppState) => {
+        return appState.explorationState.backNavStack.length
+    })
+
+    return <SafeAreaView>
+        { backStackSize > 0 &&
+            <Button title="Back"
+                {...backButtonProps}
+                onPress={() => {
+                    dispatch(goBackAction())
+                }}
+            />
+        }
+        {prop.children}
+    </SafeAreaView>
 }
 
 function generateRangeBar(props: ExplorationProps, key?: ParameterKey): any {
@@ -93,21 +138,21 @@ function generateRangeBar(props: ExplorationProps, key?: ParameterKey): any {
 function generateDataSourceRow(props: ExplorationProps): any {
     const sourceType = explorationInfoHelper.getParameterValue(props.explorationState.info, ParameterType.DataSource) as DataSourceType
     const sourceSpec = dataSourceManager.getSpec(sourceType)
-    return <CategoricalRow title="Data Source" showBorder={true} value={sourceSpec.name} 
-        icon={<DataSourceIcon type={sourceType} color="white" size={20}/>}
-        onSwipeLeft={()=>{
+    return <CategoricalRow title="Data Source" showBorder={true} value={sourceSpec.name}
+        icon={<DataSourceIcon type={sourceType} color="white" size={20} />}
+        onSwipeLeft={() => {
             let currentSourceIndex = dataSourceManager.supportedDataSources.findIndex(spec => spec.type === sourceType)
             currentSourceIndex--
-            if(currentSourceIndex < 0){
-                currentSourceIndex = dataSourceManager.supportedDataSources.length -1
+            if (currentSourceIndex < 0) {
+                currentSourceIndex = dataSourceManager.supportedDataSources.length - 1
             }
             props.dispatchCommand(setDataSourceAction(InteractionType.TouchOnly, dataSourceManager.supportedDataSources[currentSourceIndex].type))
         }}
-        onSwipeRight={()=>{
+        onSwipeRight={() => {
             let currentSourceIndex = dataSourceManager.supportedDataSources.findIndex(spec => spec.type === sourceType)
-            currentSourceIndex = (currentSourceIndex+1)%dataSourceManager.supportedDataSources.length
+            currentSourceIndex = (currentSourceIndex + 1) % dataSourceManager.supportedDataSources.length
             props.dispatchCommand(setDataSourceAction(InteractionType.TouchOnly, dataSourceManager.supportedDataSources[currentSourceIndex].type))
-        }} 
+        }}
     />
 }
 
