@@ -26,12 +26,23 @@ export interface IDailyNumericSummaryEntry extends IDailySummaryEntry {
   value: number;
 }
 
+export enum SleepStage{
+  Wake='wake',
+  Light='light',
+  Rem='rem',
+  Deep='deep',
+  Asleep='asleep',
+  Restless='restless',
+  Awake='awake'
+}
+
 export interface IDailySleepSummaryEntry extends IDailySummaryEntry {
     quality: number;
+    stageType: 'stages'|'simple';
     lengthInSeconds: number;
     bedTimeDiffSeconds: number;
     wakeTimeDiffSeconds: number;
-    levels?: Array<any>
+    listOfLevels?: Array<{type: SleepStage, startBedtimeDiff: number, lengthInSeconds: number}>
 }
 
 export interface IIntraDayLogEntry extends IDailySummaryEntry {

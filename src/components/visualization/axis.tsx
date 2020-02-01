@@ -23,7 +23,6 @@ export const AxisSvg = (props: Props<any>) => {
 
                 {
                     props.ticks.map(tick => {
-                        const tickFormatted = props.tickFormat(tick)
                         return <G key={tick instanceof Date? tick.toISOString() : tick} x={props.scale(tick)}>
                             <Circle fill="rgba(0,0,0,0.3)" r={2.5} cy={12} />
                             <Text {...props.overrideTickLabelStyle} textAnchor="end" y={12} transform="rotate(-45)translate(-16)" fill={Colors.textColorLight}>{props.tickFormat? props.tickFormat(tick): tick}</Text>

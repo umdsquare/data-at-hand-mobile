@@ -102,6 +102,8 @@ export class FitbitService extends DataService {
           return await this.intradayStepMeasure.fetchData(date);
         case IntraDayDataSourceType.HeartRate:
           return await this.intradayHeartRateMeasure.fetchData(date);
+        case IntraDayDataSourceType.Sleep:
+          return await this.sleepMeasure.fetchIntraDayData(date);
       }
     }
     return null;

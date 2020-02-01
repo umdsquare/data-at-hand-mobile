@@ -42,8 +42,8 @@ export enum FitbitLocalTableName {
 const dailySummaryProperties = {
   numberedDate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, primary: true},
   year: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
-  month: {type: SQLiteHelper.SQLiteColumnType.TEXT, indexed: true},
-  dayOfWeek: {type: SQLiteHelper.SQLiteColumnType.TEXT, indexed: true},
+  month: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
+  dayOfWeek: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
 };
 
 const intraDayLogProperties = {
@@ -125,6 +125,7 @@ const MainSleepLogSchema = {
       type: SQLiteHelper.SQLiteColumnType.INTEGER,
       indexed: true,
     },
+    stageType: {type: SQLiteHelper.SQLiteColumnType.TEXT, optional: true},
     bedTimeDiffSeconds: {type: SQLiteHelper.SQLiteColumnType.INTEGER},
     wakeTimeDiffSeconds: {type: SQLiteHelper.SQLiteColumnType.INTEGER},
     listOfLevels: {type: SQLiteHelper.SQLiteColumnType.TEXT, optional: true},
@@ -299,8 +300,10 @@ export class FitbitLocalDbManager {
     tableName: FitbitLocalTableName,
     condition: string,
     parameters: any[],
+    specifyColumns?: string[],
   ): Promise<T[]> {
-    const query = 'SELECT * FROM ' + tableName + ' WHERE ' + condition;
+
+    const query = 'SELECT ' +  (specifyColumns!=null? specifyColumns.join(",") : "*") + ' FROM ' + tableName + ' WHERE ' + condition;
     try {
       const [result] = await this._database.executeSql(query, parameters);
       if (result.rows.length > 0) {

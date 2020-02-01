@@ -14,6 +14,10 @@ import {DataSourceType} from '../../DataSourceSpec';
 import { FitbitLocalTableName } from './sqlite/database';
 import { SQLiteHelper } from '../../../database/sqlite/sqlite-helper';
 
+const columnNamesForRangeData = [
+  "numberedDate", "year", "month", "dayOfWeek",
+  "quality", "lengthInSeconds", "bedTimeDiffSeconds", "wakeTimeDiffSeconds"]
+
 export class FitbitSleepMeasure extends FitbitRangeMeasure<
   FitbitSleepQueryResult
 > {
@@ -49,6 +53,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
             lengthInSeconds: entry.duration / 1000,
             bedTimeDiffSeconds: bedTimeDiff,
             wakeTimeDiffSeconds: wakeTimeDiff,
+            stageType: entry.type === 'classic'? 'simple' : entry.type,
 
             listOfLevels: entry.levels.data.map(levelEntry => {
               return (
@@ -79,7 +84,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
     const condition = "`numberedDate` BETWEEN ? AND ? ORDER BY `numberedDate`"
     const params = [startDate, endDate]
     const logs = await this.service.fitbitLocalDbManager
-      .fetchData<IDailySleepSummaryEntry>(FitbitLocalTableName.SleepLog, condition, params)
+      .fetchData<IDailySleepSummaryEntry>(FitbitLocalTableName.SleepLog, condition, params, columnNamesForRangeData)
 
     const base = {
       source: sourceType,
@@ -90,7 +95,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
     };
 
     const todayLogs = await this.service.fitbitLocalDbManager
-      .fetchData<IDailySleepSummaryEntry>(FitbitLocalTableName.SleepLog, "`numberedDate` = ? LIMIT 1", [DateTimeHelper.toNumberedDateFromDate(new Date())])
+      .fetchData<IDailySleepSummaryEntry>(FitbitLocalTableName.SleepLog, "`numberedDate` = ? LIMIT 1", [DateTimeHelper.toNumberedDateFromDate(new Date())], columnNamesForRangeData)
 
     const todayLog = todayLogs.length > 0 ? todayLogs[0] : null;
 
@@ -128,5 +133,26 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
     }
 
     return base;
+  }
+
+  async fetchIntraDayData(date: number): Promise<IDailySleepSummaryEntry>{
+    const dailyLogs = await this.service.fitbitLocalDbManager
+    .fetchData<IDailySleepSummaryEntry>(FitbitLocalTableName.SleepLog, "`numberedDate` = ? LIMIT 1", [date])
+
+    if(dailyLogs.length > 0){
+      const dailyLog = dailyLogs[0]
+      if(dailyLog.listOfLevels && dailyLog.listOfLevels.length > 0){
+        const split = (dailyLog.listOfLevels as any).split(",")
+        dailyLog.listOfLevels = split.map(elm => {
+          const elmSplit = elm.split("|")
+          return {
+            type: elmSplit[0],
+            startBedtimeDiff: Number.parseInt(elmSplit[1]),
+            lengthInSeconds: Number.parseInt(elmSplit[2])
+          }
+        })
+      }
+      return dailyLog
+    }else return {} as any
   }
 }
