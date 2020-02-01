@@ -12,7 +12,6 @@ export abstract class FitbitIntraDayMeasure<
       this.key,
       date,
     );
-    console.log(cacheInfo);
     if (cacheInfo) {
       const now = new Date();
       const cachedDate = endOfDay(DateTimeHelper.toDate(cacheInfo.date));

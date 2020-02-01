@@ -14,6 +14,7 @@ import { AxisSvg } from '../../../../../visualization/axis'
 import { Padding } from '../../../../../visualization/types'
 import commaNumber from 'comma-number';
 import { pad } from '../../../../../../time'
+import { commonIntraDayPanelStyles } from './common'
 
 const xAxisHeight = 50
 const yAxisWidth = 60
@@ -22,12 +23,7 @@ const rightPadding = 10
 const barPadding = 1
 
 const styles = StyleSheet.create({
-    containerStyle: { ...StyleTemplates.fillFlex, backgroundColor: 'white' },
     chartContainerStyle: { aspectRatio: 1, marginTop: Sizes.horizontalPadding },
-    summaryTextGlobalStyle: {textAlign:'center', fontSize: Sizes.BigFontSize },
-    summaryTextTitleStyle: { marginRight: 20, fontSize: Sizes.normalFontSize, color: Colors.textGray },
-    summaryTextUnitStyle: { fontSize: Sizes.smallFontSize, color: Colors.textColorLight }
-
 })
 
 const yTickLabelStyle = { fontSize: Sizes.smallFontSize }
@@ -51,9 +47,9 @@ export const StepIntraDayPanel = (props: {
             height: chartContainerHeight - xAxisHeight - topPadding
         }
         const scaleX = scaleLinear().domain([0, 24]).range([0, chartArea.width])
-        const scaleY = scaleLinear().domain([0, max(data.hourlySteps, d => d.value)]).range([chartArea.height, 0])
+        const scaleY = scaleLinear().domain([0, max(data.hourlySteps, d => d.value)]).range([chartArea.height, 0]).nice()
 
-        return <View style={styles.containerStyle}>
+        return <View style={commonIntraDayPanelStyles.containerStyle}>
             <SizeWatcher containerStyle={styles.chartContainerStyle} onSizeChange={(width, height) => { setChartContainerWidth(width); setChartContainerHeight(height) }}>
                 <Svg width={chartContainerWidth} height={chartContainerHeight}>
                     <G {...chartArea}>
@@ -86,11 +82,11 @@ export const StepIntraDayPanel = (props: {
             </SizeWatcher>
 
             <View style={StyleTemplates.contentVerticalCenteredContainer}>
-                    <Text style={styles.summaryTextGlobalStyle}>
+                    <Text style={commonIntraDayPanelStyles.summaryTextGlobalStyle}>
 
-                        <Text style={styles.summaryTextTitleStyle}>Total    </Text>
+                        <Text style={commonIntraDayPanelStyles.summaryTextTitleStyle}>Total    </Text>
                         <Text>{commaNumber(sum(data.hourlySteps, d => d.value))}</Text>
-                        <Text style={styles.summaryTextUnitStyle}> steps</Text>
+                        <Text style={commonIntraDayPanelStyles.summaryTextUnitStyle}> steps</Text>
                     </Text>
             </View>
         </View>

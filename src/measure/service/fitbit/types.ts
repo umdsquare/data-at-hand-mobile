@@ -84,11 +84,20 @@ export interface FitbitDailyActivityHeartRateQueryResult {
         caloriesOut: number;
         max: number;
         min: number;
-        minutes: 1090;
-        name: string;
+        minutes: number;
+        name: string | "Out of Range" | "Fat Burn" | "Cardio" | "Peak";
       }>;
     };
   }>;
+}
+
+export interface FitbitHeartRateIntraDayQueryResult extends FitbitDailyActivityHeartRateQueryResult{
+  "activities-heart-intraday": {
+    dataset: Array<{
+      time: string,
+      value: number
+    }>
+  }
 }
 
 export interface FitbitActivitySummaryDay {

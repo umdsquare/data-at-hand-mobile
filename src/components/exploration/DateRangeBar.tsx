@@ -126,7 +126,7 @@ const DateButton = (props: { date: number, overrideFormat?: string, freeWidth?: 
     const date = DateTimeHelper.toDate(props.date)
     const dateString = format(date, props.overrideFormat || "MMM dd, yyyy")
     const subText = isToday(date) === true ? 'Today' : (isYesterday(date) === true ? "Yesterday" : format(date, "EEEE"))
-    return <TouchableOpacity onPress={props.onPress}><View style={props.freeWidth===true? styles.dateButtonContainerStyleFreeWidth : styles.dateButtonContainerStyle}>
+    return <TouchableOpacity onPress={props.onPress}><View style={props.freeWidth === true ? styles.dateButtonContainerStyleFreeWidth : styles.dateButtonContainerStyle}>
         <View style={styles.dateButtonDatePartStyle}>
             <Text style={styles.dateButtonDateTextStyle}>{dateString}</Text>
             <View style={styles.dateButtonIndicatorContainerStyle}>
@@ -367,34 +367,39 @@ export const DateBar = (props: {
     const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
 
     const shiftDay = (amount: number) => {
-        const newDate = DateTimeHelper.toNumberedDateFromDate(addDays(DateTimeHelper.toDate(date), amount))
-        setDate(newDate)
-        props.onDateChanged && props.onDateChanged(newDate, InteractionType.TouchOnly)
+        const newDate = addDays(DateTimeHelper.toDate(date), amount)
+        if (differenceInCalendarDays(newDate, new Date()) < 1) {
+            const newNumberedDate = DateTimeHelper.toNumberedDateFromDate(newDate)
+            setDate(newNumberedDate)
+            props.onDateChanged && props.onDateChanged(newNumberedDate, InteractionType.TouchOnly)
+        }
     }
-    
+
 
     return <GestureRecognizer onSwipeLeft={() => shiftDay(1)} onSwipeRight={() => shiftDay(-1)} style={styles.containerStyle}>
-        <DateButton date ={date} overrideFormat="MMMM dd, yyyy" freeWidth={true} onPress={()=>{setIsBottomSheetOpen(true)}}/>
+        <DateButton date={date} overrideFormat="MMMM dd, yyyy" freeWidth={true} onPress={() => { setIsBottomSheetOpen(true) }} />
 
         <Modal
-                isVisible={isBottomSheetOpen === true}
-                onBackdropPress={()=>{setIsBottomSheetOpen(false)}}
-                style={StyleTemplates.bottomSheetModalContainerStyle}
-                backdropOpacity={0.3}
-            >
-                <SafeAreaConsumer>{
-                    inset =>
-                        <View style={{ ...StyleTemplates.bottomSheetModalViewStyle, paddingBottom: Math.max(20, inset.bottom) }}>
-                            {
-                                <DatePicker selectedDay={DateTimeHelper.toDate(date)} onDayPress={(d)=>{
+            isVisible={isBottomSheetOpen === true}
+            onBackdropPress={() => { setIsBottomSheetOpen(false) }}
+            style={StyleTemplates.bottomSheetModalContainerStyle}
+            backdropOpacity={0.3}
+        >
+            <SafeAreaConsumer>{
+                inset =>
+                    <View style={{ ...StyleTemplates.bottomSheetModalViewStyle, paddingBottom: Math.max(20, inset.bottom) }}>
+                        {
+                            <DatePicker selectedDay={DateTimeHelper.toDate(date)}
+                                latestPossibleDay={new Date()}
+                                onDayPress={(d) => {
                                     const newDate = DateTimeHelper.toNumberedDateFromDate(d)
                                     setDate(newDate)
                                     setIsBottomSheetOpen(false)
                                     props.onDateChanged && props.onDateChanged(newDate, InteractionType.TouchOnly)
-                                }}/>
-                            }
-                        </View>
-                }</SafeAreaConsumer>
-            </Modal>
+                                }} />
+                        }
+                    </View>
+            }</SafeAreaConsumer>
+        </Modal>
     </GestureRecognizer>
 }

@@ -1,5 +1,6 @@
-import { format } from "date-fns";
-import { DateTimeHelper } from "../../../time";
+import {format} from 'date-fns';
+import {DateTimeHelper} from '../../../time';
+import stringFormat from 'string-format';
 
 export const FITBIT_DATE_FORMAT = 'yyyy-MM-dd';
 
@@ -13,7 +14,6 @@ const FITBIT_SLEEP_LOGS_URL =
 
 const FITBIT_WEIGHT_TREND_URL =
   'https://api.fitbit.com/1/user/-/body/weight/date/{startDate}/{endDate}.json';
-  
 
 const FITBIT_WEIGHT_LOGS_URL =
   'https://api.fitbit.com/1/user/-/body/log/weight/date/{startDate}/{endDate}.json';
@@ -21,7 +21,11 @@ const FITBIT_WEIGHT_LOGS_URL =
 const FITBIT_HEARTRATE_LOGS_URL =
   'https://api.fitbit.com/1/user/-/activities/heart/date/{date}/1d/1min/time/{startTime}/{endTime}.json';
 
-export const FITBIT_PROFILE_URL = 'https://api.fitbit.com/1/user/-/profile.json';
+const FITBIT_HEARTRATE_INTRADAY_URL =
+  'https://api.fitbit.com/1/user/-/activities/heart/date/{date}/1d/1min.json';
+
+export const FITBIT_PROFILE_URL =
+  'https://api.fitbit.com/1/user/-/profile.json';
 
 /**
  *
@@ -32,10 +36,9 @@ export function makeFitbitIntradayActivityApiUrl(
   resourcePath: string,
   date: number,
 ): string {
-  const stringFormat = require('string-format');
   return stringFormat(FITBIT_INTRADAY_ACTIVITY_API_URL, {
     resourcePath: resourcePath,
-    date: DateTimeHelper.toFormattedString(date)
+    date: DateTimeHelper.toFormattedString(date),
   });
 }
 
@@ -43,18 +46,20 @@ export function makeFitbitSleepApiUrl(
   startDate: number,
   endDate: number,
 ): string {
-  const stringFormat = require('string-format');
   return stringFormat(FITBIT_SLEEP_LOGS_URL, {
     startDate: DateTimeHelper.toFormattedString(startDate),
     endDate: DateTimeHelper.toFormattedString(endDate),
   });
 }
 
+export function makeFitbitHeartRateIntraDayLogApiUrl(date: number): string {
+  return stringFormat(FITBIT_HEARTRATE_INTRADAY_URL, {date: DateTimeHelper.toFormattedString(date)});
+}
+
 export function makeFitbitWeightLogApiUrl(
   startDate: number,
   endDate: number,
 ): string {
-  const stringFormat = require('string-format');
   return stringFormat(FITBIT_WEIGHT_LOGS_URL, {
     startDate: DateTimeHelper.toFormattedString(startDate),
     endDate: DateTimeHelper.toFormattedString(endDate),
@@ -65,17 +70,13 @@ export function makeFitbitWeightTrendApiUrl(
   startDate: number,
   endDate: number,
 ): string {
-  const stringFormat = require('string-format');
   return stringFormat(FITBIT_WEIGHT_TREND_URL, {
     startDate: DateTimeHelper.toFormattedString(startDate),
     endDate: DateTimeHelper.toFormattedString(endDate),
   });
 }
 
-
-
 export function makeFitbitHeartRateIntradayUrl(date: number): string {
-  const stringFormat = require('string-format');
   return stringFormat(FITBIT_HEARTRATE_LOGS_URL, {
     date: DateTimeHelper.toFormattedString(date),
     startTime: '00:00',
@@ -84,17 +85,19 @@ export function makeFitbitHeartRateIntradayUrl(date: number): string {
 }
 
 export function makeFitbitDailyActivitySummaryUrl(date: number): string {
-  const stringFormat = require('string-format');
   return stringFormat(FITBIT_ACTIVITY_SUMMARY_URL, {
     date: DateTimeHelper.toFormattedString(date),
   });
 }
 
-export function makeFitbitDayLevelActivityLogsUrl(resourcePath: string, startDate: number, endDate: number): string {
-  const stringFormat = require('string-format');
+export function makeFitbitDayLevelActivityLogsUrl(
+  resourcePath: string,
+  startDate: number,
+  endDate: number,
+): string {
   return stringFormat(FITBIT_DAY_LEVEL_ACTIVITY_API_URL, {
     resourcePath,
     startDate: DateTimeHelper.toFormattedString(startDate),
-    endDate: DateTimeHelper.toFormattedString(endDate)
-  })
+    endDate: DateTimeHelper.toFormattedString(endDate),
+  });
 }

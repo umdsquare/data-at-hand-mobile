@@ -15,6 +15,13 @@ export interface IIntraDayStepCountLog {
   value: number
 }
 
+export interface IIntraDayHeartRatePoint {
+  id: string,
+  numberedDate: number,
+  secondOfDay: number,
+  value: number
+}
+
 export interface IDailyNumericSummaryEntry extends IDailySummaryEntry {
   value: number;
 }
@@ -58,6 +65,28 @@ export interface StepCountIntraDayData {
 
 export interface RestingHeartRateRangedData extends OverviewSourceRow {
   data: Array<IDailySummaryEntry>;
+}
+
+export interface HeartRateZoneInfo{
+  name: HeartRateZone,
+  minutes: number,
+  caloriesOut: number,
+  max: number,
+  min: number
+}
+
+export enum HeartRateZone{
+  Peak="peak",
+  FatBurn="fat_burn",
+  Cardio="cardio",
+  OutOfRange="out"
+}
+
+export interface HeartRateIntraDayData{
+  points: Array<IIntraDayHeartRatePoint>,
+  restingHeartRate: number,
+  zones: Array<HeartRateZoneInfo>,
+  customZones: Array<HeartRateZoneInfo>
 }
 
 export interface WeightRangedData extends OverviewSourceRow {

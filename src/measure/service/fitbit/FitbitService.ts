@@ -13,10 +13,11 @@ import {DateTimeHelper} from '../../../time';
 import {FITBIT_PROFILE_URL} from './api';
 import {FitbitServiceMeasure} from './FitbitServiceMeasure';
 import {FitbitWeightMeasure} from './FitbitWeightMeasure';
-import { FitbitSleepMeasure } from './FitbitSleepMeasure';
-import { FitbitLocalDbManager } from './sqlite/database';
-import { FitbitIntraDayStepMeasure } from './FitbitIntraDayStepMeasure';
-import { IntraDayDataSourceType } from '../../../core/exploration/types';
+import {FitbitSleepMeasure} from './FitbitSleepMeasure';
+import {FitbitLocalDbManager} from './sqlite/database';
+import {FitbitIntraDayStepMeasure} from './FitbitIntraDayStepMeasure';
+import {IntraDayDataSourceType} from '../../../core/exploration/types';
+import {FitbitIntraDayHeartRateMeasure} from './FitbitIntraDayHeartRateMeasure';
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -32,7 +33,6 @@ const STORAGE_KEY_USER_MEMBER_SINCE =
   DataService.STORAGE_PREFIX + 'fitbit:user_memberSince';
 
 export class FitbitService extends DataService {
-  
   key: string = 'fitbit';
   name: string = 'Fitbit';
   description: string = 'Fitbit Fitness Tracker';
@@ -41,8 +41,10 @@ export class FitbitService extends DataService {
   private _credential: FitbitCredential = null;
   private _authConfig = null;
 
-  private _fitbitLocalDbManager : FitbitLocalDbManager = new FitbitLocalDbManager()
-  get fitbitLocalDbManager(): FitbitLocalDbManager {return this._fitbitLocalDbManager}
+  private _fitbitLocalDbManager: FitbitLocalDbManager = new FitbitLocalDbManager();
+  get fitbitLocalDbManager(): FitbitLocalDbManager {
+    return this._fitbitLocalDbManager;
+  }
 
   get credential(): FitbitCredential {
     return this._credential;
@@ -55,15 +57,16 @@ export class FitbitService extends DataService {
   private dailyStepMeasure = new FitbitDailyStepMeasure(this);
   private dailyHeartRateMeasure = new FitbitDailyHeartRateMeasure(this);
   private weightLogMeasure = new FitbitWeightMeasure(this);
-  private sleepMeasure = new FitbitSleepMeasure(this)
+  private sleepMeasure = new FitbitSleepMeasure(this);
 
   private intradayStepMeasure = new FitbitIntraDayStepMeasure(this);
+  private intradayHeartRateMeasure = new FitbitIntraDayHeartRateMeasure(this);
 
   private preloadableMeasures: Array<FitbitServiceMeasure> = [
     this.dailyStepMeasure,
     this.dailyHeartRateMeasure,
     this.weightLogMeasure,
-    this.sleepMeasure
+    this.sleepMeasure,
   ];
 
   protected async fetchDataImpl(
@@ -71,30 +74,35 @@ export class FitbitService extends DataService {
     start: number,
     end: number,
   ): Promise<any> {
-      switch (dataSource) {
-        case DataSourceType.StepCount:
-          console.log('try get fitbit step data from db');
-          return await this.dailyStepMeasure.fetchData(start, end);
+    switch (dataSource) {
+      case DataSourceType.StepCount:
+        console.log('try get fitbit step data from db');
+        return await this.dailyStepMeasure.fetchData(start, end);
 
-        case DataSourceType.HeartRate:
-            console.log('try get fitbit HR data from db');
-            return await this.dailyHeartRateMeasure.fetchData(start, end);
-          break;
-        case DataSourceType.HoursSlept:
-        case DataSourceType.SleepRange:
-            return await this.sleepMeasure.fetchData(dataSource, start, end)
-          break;
-        case DataSourceType.Weight:
-          return await this.weightLogMeasure.fetchData(start, end);
-      }
-
-      return null;
+      case DataSourceType.HeartRate:
+        console.log('try get fitbit HR data from db');
+        return await this.dailyHeartRateMeasure.fetchData(start, end);
+        break;
+      case DataSourceType.HoursSlept:
+      case DataSourceType.SleepRange:
+        return await this.sleepMeasure.fetchData(dataSource, start, end);
+      case DataSourceType.Weight:
+        return await this.weightLogMeasure.fetchData(start, end);
+    }
   }
 
-  async fetchIntraDayData(intraDayDataSource: IntraDayDataSourceType, date: number): Promise<any> {
-    switch(intraDayDataSource){
-      case IntraDayDataSourceType.StepCount:
-        return await this.intradayStepMeasure.fetchData(date)
+  async fetchIntraDayData(
+    intraDayDataSource: IntraDayDataSourceType,
+    date: number,
+  ): Promise<any> {
+    const now = DateTimeHelper.toNumberedDateFromDate(new Date());
+    if (date <= now) {
+      switch (intraDayDataSource) {
+        case IntraDayDataSourceType.StepCount:
+          return await this.intradayStepMeasure.fetchData(date);
+        case IntraDayDataSourceType.HeartRate:
+          return await this.intradayHeartRateMeasure.fetchData(date);
+      }
     }
     return null;
   }
@@ -150,8 +158,8 @@ export class FitbitService extends DataService {
       await AsyncStorageHelper.remove(STORAGE_KEY_AUTH_STATE);
       await AsyncStorageHelper.remove(STORAGE_KEY_USER_TIMEZONE);
       await AsyncStorageHelper.remove(STORAGE_KEY_USER_MEMBER_SINCE);
-      await this.fitbitLocalDbManager.close()
-      await this.fitbitLocalDbManager.deleteDatabase()
+      await this.fitbitLocalDbManager.close();
+      await this.fitbitLocalDbManager.deleteDatabase();
     }
   }
 
@@ -162,7 +170,7 @@ export class FitbitService extends DataService {
         const initialDate = await this.getMembershipStartDate();
         const now = DateTimeHelper.toNumberedDateFromDate(new Date());
 
-        await this.fitbitLocalDbManager.open()
+        await this.fitbitLocalDbManager.open();
 
         for (const measure of this.preloadableMeasures) {
           await measure.cacheServerData(now);
@@ -193,7 +201,7 @@ export class FitbitService extends DataService {
   }
 
   async onSystemExit(): Promise<void> {
-    await this.fitbitLocalDbManager.close()
+    await this.fitbitLocalDbManager.close();
   }
 
   async updateUserProfile(): Promise<boolean> {

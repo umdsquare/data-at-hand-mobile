@@ -16,10 +16,20 @@ export interface ICachedIntraDayDateEntry {
   queriedAt: Date;
 }
 
+export interface HeartRateIntraDayInfo {
+  numberedDate: number;
+  restingHeartRate: number;
+  customZones: string;
+  zones: string;
+}
+
 export enum FitbitLocalTableName {
   StepCount = 'StepCount',
   SleepLog = 'SleepLog',
   RestingHeartRate = 'RestingHeartRate',
+  HeartRateIntraDayPoints = 'HeartRateIntraDayPoints',
+  HeartRateIntraDayInfo = 'HeartRateIntraDayInfo',
+
   WeightTrend = 'WeightTrend',
   WeightLog = 'WeightLog',
   CachedRange = 'CachedRange',
@@ -66,6 +76,26 @@ const RestingHeartRateSchema = {
   columns: {
     ...dailySummaryProperties,
     value: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
+  },
+};
+
+const IntraDayHeartRateSchema = {
+  name: FitbitLocalTableName.HeartRateIntraDayPoints,
+  columns: {
+    numberedDate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
+    secondOfDay: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
+    value: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
+    id: {type: SQLiteHelper.SQLiteColumnType.TEXT, primary: true},
+  },
+};
+
+const IntraDayHeartRateInfoSchema = {
+  name: FitbitLocalTableName.HeartRateIntraDayInfo,
+  columns: {
+    numberedDate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, primary: true},
+    restingHeartRate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, optional: true},
+    customZones: {type: SQLiteHelper.SQLiteColumnType.TEXT, optional: true},
+    zones: {type: SQLiteHelper.SQLiteColumnType.TEXT},
   },
 };
 
@@ -129,6 +159,8 @@ const schemas = [
   CachedRangeSchema,
   IntraDayStepCountSchema,
   CachedIntraDayDatesSchema,
+  IntraDayHeartRateSchema,
+  IntraDayHeartRateInfoSchema,
 ];
 
 const dbConfig = {
@@ -256,11 +288,11 @@ export class FitbitLocalDbManager {
     } else return null;
   }
 
-  async upsertCachedIntraDayDate(obj: ICachedIntraDayDateEntry): Promise<void>{
-    if(obj.queriedAt){
-        obj.queriedAt = obj.queriedAt.toString() as any;
+  async upsertCachedIntraDayDate(obj: ICachedIntraDayDateEntry): Promise<void> {
+    if (obj.queriedAt) {
+      obj.queriedAt = obj.queriedAt.toString() as any;
     }
-    return this.insert(FitbitLocalTableName.CachedIntraDayDates, [obj])
+    return this.insert(FitbitLocalTableName.CachedIntraDayDates, [obj]);
   }
 
   async fetchData<T>(
