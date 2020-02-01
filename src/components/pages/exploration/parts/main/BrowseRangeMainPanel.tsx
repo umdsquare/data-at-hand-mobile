@@ -66,8 +66,6 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: Colors.textGray
     },
-
-    noItemIndicatorContainerStyle: { flex: 1, justifyContent: 'center' },
     noItemIndicatorStyle: { alignSelf: 'center', color: Colors.textColorLight }
 
 })
@@ -138,7 +136,7 @@ class BrowseRangeMainPanel extends React.Component<Props>{
                     />
                 }
                 {
-                    dataList.length === 0 && <View style={styles.noItemIndicatorContainerStyle}>
+                    dataList.length === 0 && <View style={StyleTemplates.contentVerticalCenteredContainer}>
                         <Text style={styles.noItemIndicatorStyle}>No data during this range.</Text>
                     </View>
                 }

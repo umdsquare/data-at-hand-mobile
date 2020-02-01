@@ -1,19 +1,17 @@
 import React from 'react';
-import { ExplorationType, ParameterKey, ParameterType } from "../../../../core/exploration/types";
+import { ExplorationType, ParameterKey, ParameterType, IntraDayDataSourceType, getIntraDayDataSourceName, inferIntraDayDataSourceType, inferDataSource } from "../../../../core/exploration/types";
 import { SafeAreaView, View, Text, StyleSheet, TextStyle, ViewStyle } from 'react-native';
 import { CategoricalRow } from '../../../exploration/CategoricalRow';
 import { DataSourceIcon } from '../../../common/DataSourceIcon';
 import { ExplorationProps } from '../ExplorationScreen';
 import { DateRangeBar, DateBar } from '../../../exploration/DateRangeBar';
 import { explorationInfoHelper } from '../../../../core/exploration/ExplorationInfoHelper';
-import { startOfDay, endOfDay } from 'date-fns';
 import { Button } from 'react-native-elements';
 import { Sizes } from '../../../../style/Sizes';
 import { StyleTemplates } from '../../../../style/Styles';
-import { DateTimeHelper } from '../../../../time';
 import { dataSourceManager } from '../../../../system/DataSourceManager';
 import { DataSourceType } from '../../../../measure/DataSourceSpec';
-import { createSetRangeAction, setDataSourceAction, InteractionType, goBackAction, setDateAction } from '../../../../state/exploration/interaction/actions';
+import { createSetRangeAction, setDataSourceAction, InteractionType, goBackAction, setDateAction, setIntraDayDataSourceAction } from '../../../../state/exploration/interaction/actions';
 import Colors from '../../../../style/Colors';
 import { useDispatch, useSelector } from 'react-redux';
 import { ReduxAppState } from '../../../../state/types';
@@ -99,7 +97,7 @@ export function generateHeaderView(props: ExplorationProps): any {
             </HeaderContainer>
         case ExplorationType.B_Day:
             return <HeaderContainer>
-                {generateDataSourceRow(props)}
+                {generateIntraDayDataSourceRow(props)}
                 {generateDateBar(props)}
 
             </HeaderContainer>
@@ -163,6 +161,35 @@ function generateDataSourceRow(props: ExplorationProps): any {
             let currentSourceIndex = dataSourceManager.supportedDataSources.findIndex(spec => spec.type === sourceType)
             currentSourceIndex = (currentSourceIndex + 1) % dataSourceManager.supportedDataSources.length
             props.dispatchCommand(setDataSourceAction(InteractionType.TouchOnly, dataSourceManager.supportedDataSources[currentSourceIndex].type))
+        }}
+    />
+}
+
+function generateIntraDayDataSourceRow(props: ExplorationProps): any {
+    const intraDaySourceType = explorationInfoHelper.getParameterValue<IntraDayDataSourceType>(props.explorationState.info, ParameterType.IntraDayDataSource)
+    const sourceTypeName = getIntraDayDataSourceName(intraDaySourceType)
+    const supportedIntraDayDataSourceTypes = []
+    dataSourceManager.supportedDataSources.forEach(s => {
+        const inferred = inferIntraDayDataSourceType(s.type)
+        if(supportedIntraDayDataSourceTypes.indexOf(inferred) === -1 && inferred != null){
+            supportedIntraDayDataSourceTypes.push(inferred)
+        }
+    })
+    
+    return <CategoricalRow title="Data Source" showBorder={true} value={sourceTypeName}
+        icon={<DataSourceIcon type={inferDataSource(intraDaySourceType)} color="white" size={20} />}
+        onSwipeLeft={() => {
+            let currentSourceIndex = supportedIntraDayDataSourceTypes.indexOf(intraDaySourceType)
+            currentSourceIndex--
+            if (currentSourceIndex < 0) {
+                currentSourceIndex = supportedIntraDayDataSourceTypes.length - 1
+            }
+            props.dispatchCommand(setIntraDayDataSourceAction(InteractionType.TouchOnly, supportedIntraDayDataSourceTypes[currentSourceIndex]))
+        }}
+        onSwipeRight={() => {
+            let currentSourceIndex = supportedIntraDayDataSourceTypes.indexOf(intraDaySourceType)
+            currentSourceIndex = (currentSourceIndex + 1) % supportedIntraDayDataSourceTypes.length
+            props.dispatchCommand(setIntraDayDataSourceAction(InteractionType.TouchOnly, supportedIntraDayDataSourceTypes[currentSourceIndex]))
         }}
     />
 }

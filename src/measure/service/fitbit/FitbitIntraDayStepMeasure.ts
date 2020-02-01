@@ -23,7 +23,6 @@ export class FitbitIntraDayStepMeasure extends FitbitIntraDayMeasure<StepCountIn
     protected async fetchLocalData(date: number): Promise<StepCountIntraDayData> {
         const list = await this.service.fitbitLocalDbManager.fetchData<IIntraDayStepCountLog>(FitbitLocalTableName.StepCountIntraDay, "`numberedDate` = ?", [date])
         
-        console.log(list)
         return {
             hourlySteps: list
         }

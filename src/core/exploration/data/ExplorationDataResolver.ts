@@ -1,4 +1,4 @@
-import {ExplorationInfo, ExplorationType, ParameterType, DataLevel} from '../types';
+import {ExplorationInfo, ExplorationType, ParameterType, IntraDayDataSourceType} from '../types';
 import {OverviewData, OverviewSourceRow} from './types';
 import {explorationInfoHelper} from '../ExplorationInfoHelper';
 import {DateTimeHelper} from '../../../time';
@@ -36,7 +36,7 @@ class ExplorationDataResolver {
       selectedServiceKey,
     );
     
-    return selectedService.fetchData(source, DataLevel.DailyActivity, range[0], range[1])
+    return selectedService.fetchData(source,  range[0], range[1])
   }
 
   private loadOverviewData(
@@ -54,7 +54,7 @@ class ExplorationDataResolver {
     
     return Promise.all(
       dataSourceManager.supportedDataSources.map(source =>
-        selectedService.fetchData(source.type, DataLevel.DailyActivity, range[0], range[1])
+        selectedService.fetchData(source.type, range[0], range[1])
             .then(result => result != null? result : {source: source.type})
     )).then(dataPerSource => ({sourceDataList: dataPerSource}));
   }
@@ -67,10 +67,10 @@ class ExplorationDataResolver {
     const selectedService = DataServiceManager.getServiceByKey(
       selectedServiceKey,
     );
-    const source = explorationInfoHelper.getParameterValue<DataSourceType>(info, ParameterType.DataSource)
+    const source = explorationInfoHelper.getParameterValue<IntraDayDataSourceType>(info, ParameterType.IntraDayDataSource)
     const date = explorationInfoHelper.getParameterValue<number>(info, ParameterType.Date)
 
-    return selectedService.fetchData(source, DataLevel.IntraDay, date, date)
+    return selectedService.fetchIntraDayData(source, date)
   }
 }
 

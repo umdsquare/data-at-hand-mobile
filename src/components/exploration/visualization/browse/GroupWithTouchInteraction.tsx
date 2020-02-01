@@ -6,7 +6,7 @@ import { G, Rect } from "react-native-svg";
 import { ScaleBand } from "d3-scale";
 import Colors from "../../../../style/Colors";
 import { Dispatch } from "redux";
-import { TouchingElementInfo, ParameterType } from "../../../../core/exploration/types";
+import { TouchingElementInfo, ParameterType, inferIntraDayDataSourceType } from "../../../../core/exploration/types";
 import { setTouchElementInfo, createGoToBrowseDayAction, InteractionType } from "../../../../state/exploration/interaction/actions";
 import { ReduxAppState } from "../../../../state/types";
 import { connect } from "react-redux";
@@ -197,7 +197,7 @@ function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props {
     return {
         ...ownProps,
         setTouchingInfo: (info) => dispatch(setTouchElementInfo(info)),
-        goToDayDetail: (date)=> dispatch(createGoToBrowseDayAction(InteractionType.TouchOnly, ownProps.dataSource, date))
+        goToDayDetail: (date)=> dispatch(createGoToBrowseDayAction(InteractionType.TouchOnly, inferIntraDayDataSourceType(ownProps.dataSource), date))
     }
 }
 

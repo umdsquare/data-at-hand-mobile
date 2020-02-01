@@ -111,8 +111,10 @@ const StyleTemplates = StyleSheet.create({
 
   flexHorizontalCenteredListContainer: {
     flexDirection: 'row',
-    alignItems: 'center'
-  }
+    alignItems: 'center',
+  },
+
+  contentVerticalCenteredContainer: {flex: 1, justifyContent: 'center'},
 });
 
 export {StyleTemplates};

@@ -1,6 +1,7 @@
 import {startOfDay, subDays, endOfDay} from 'date-fns';
 import {DateTimeHelper} from '../../time';
 import { LayoutRectangle } from 'react-native';
+import { DataSourceType } from '../../measure/DataSourceSpec';
 
 export enum ExplorationType {
   B_Ovrvw,
@@ -18,17 +19,12 @@ export enum ExplorationMode {
 
 export enum ParameterType {
   DataSource,
+  IntraDayDataSource,
   Date,
   Range,
   CycleType,
   CycleDimension,
 }
-
-export enum DataLevel {
-  IntraDay = 'intra',
-  DailyActivity = 'dailyActivity',
-}
-
 export type ParameterKey = 'range1' | 'range2' | 'pivot';
 
 export interface ExplorationInfoParameter {
@@ -46,6 +42,47 @@ export interface TouchingElementInfo {
 export interface ExplorationInfo {
   type: ExplorationType;
   values: Array<ExplorationInfoParameter>;
+}
+
+export enum IntraDayDataSourceType {
+    StepCount="step",
+    HeartRate="heart_rate",
+    Sleep="sleep"
+}
+
+export function getIntraDayDataSourceName(type: IntraDayDataSourceType): string{
+    switch(type){
+        case IntraDayDataSourceType.StepCount:
+            return "Step Count"
+        case IntraDayDataSourceType.Sleep:
+            return "Main Sleep"
+        case IntraDayDataSourceType.HeartRate:
+            return "Heart Rate"
+    }
+}
+
+export function inferIntraDayDataSourceType(dataSource: DataSourceType): IntraDayDataSourceType{
+    switch(dataSource){
+        case DataSourceType.StepCount:
+            return IntraDayDataSourceType.StepCount
+        case DataSourceType.HeartRate:
+            return IntraDayDataSourceType.HeartRate
+        case DataSourceType.HoursSlept:
+        case DataSourceType.SleepRange:
+            return IntraDayDataSourceType.Sleep
+        default: return null
+    }
+}
+
+export function inferDataSource(intraDayDataSource: IntraDayDataSourceType): DataSourceType{
+    switch(intraDayDataSource){
+        case IntraDayDataSourceType.StepCount:
+            return DataSourceType.StepCount
+        case IntraDayDataSourceType.Sleep:
+            return DataSourceType.SleepRange
+        case IntraDayDataSourceType.HeartRate:
+            return DataSourceType.HeartRate
+    }
 }
 
 export function makeInitialStateInfo(): ExplorationInfo {

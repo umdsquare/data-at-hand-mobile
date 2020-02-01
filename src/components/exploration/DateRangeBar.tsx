@@ -367,9 +367,9 @@ export const DateBar = (props: {
     const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
 
     const shiftDay = (amount: number) => {
-        console.log(amount, date)
-        setDate(DateTimeHelper.toNumberedDateFromDate(addDays(DateTimeHelper.toDate(date), amount)))
-        props.onDateChanged && props.onDateChanged(date, InteractionType.TouchOnly)
+        const newDate = DateTimeHelper.toNumberedDateFromDate(addDays(DateTimeHelper.toDate(date), amount))
+        setDate(newDate)
+        props.onDateChanged && props.onDateChanged(newDate, InteractionType.TouchOnly)
     }
     
 

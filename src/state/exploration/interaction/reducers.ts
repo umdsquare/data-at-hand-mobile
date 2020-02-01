@@ -4,6 +4,7 @@ import {
   ExplorationType,
   ParameterType,
   TouchingElementInfo,
+  inferIntraDayDataSourceType,
 } from '../../../core/exploration/types';
 import {
   ExplorationAction,
@@ -16,6 +17,7 @@ import {
   InteractionType,
   GoToBrowseDayAction,
   SetDateAction,
+  SetIntraDayDataSourceAction,
 } from './actions';
 import {explorationInfoHelper} from '../../../core/exploration/ExplorationInfoHelper';
 
@@ -109,12 +111,12 @@ export const explorationStateReducer = (
         }
         break;
       case ExplorationActionType.SetDate:
-        const setDateAction = action as SetDateAction
+        const setDateAction = action as SetDateAction;
         explorationInfoHelper.setParameterValue(
           newState.info,
           setDateAction.date,
-          ParameterType.Date
-        )
+          ParameterType.Date,
+        );
         break;
       case ExplorationActionType.SetDataSource:
         const setDataSourceAction = action as SetDataSourceAction;
@@ -127,6 +129,14 @@ export const explorationStateReducer = (
             ParameterType.DataSource,
           );
         }
+        break;
+      case ExplorationActionType.SetIntraDayDataSource:
+        const setIntraDayDataSourceAction = action as SetIntraDayDataSourceAction;
+        explorationInfoHelper.setParameterValue(
+          newState.info,
+          setIntraDayDataSourceAction.intraDayDataSource,
+          ParameterType.IntraDayDataSource,
+        );
         break;
       case ExplorationActionType.GoToBrowseRange:
         //check parameters
@@ -164,11 +174,12 @@ export const explorationStateReducer = (
         const goToBrowseDayAction = action as GoToBrowseDayAction;
         {
           const dataSource =
-            goToBrowseDayAction.dataSource ||
+            goToBrowseDayAction.intraDayDataSource ||
             explorationInfoHelper.getParameterValue(
               state.info,
-              ParameterType.DataSource,
-            );
+              ParameterType.IntraDayDataSource,
+            ) || inferIntraDayDataSourceType(explorationInfoHelper.getParameterValue(state.info, ParameterType.DataSource))
+
           const date =
             goToBrowseDayAction.date ||
             explorationInfoHelper.getParameterValue(
@@ -181,7 +192,7 @@ export const explorationStateReducer = (
             explorationInfoHelper.setParameterValue(
               newState.info,
               dataSource,
-              ParameterType.DataSource,
+              ParameterType.IntraDayDataSource,
             );
             explorationInfoHelper.setParameterValue(
               newState.info,

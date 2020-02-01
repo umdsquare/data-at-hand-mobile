@@ -19,6 +19,7 @@ import { Sizes } from "../../../style/Sizes";
 import { OverviewMainPanel } from "./parts/main/OverviewMainPanel";
 import { BrowseRangeMainPanel } from "./parts/main/BrowseRangeMainPanel";
 import { BusyHorizontalIndicator } from "../../exploration/BusyHorizontalIndicator";
+import { getIntraDayMainPanel } from "./parts/main/IntraDayMainPanel";
 var deepEqual = require('deep-equal');
 
 const styles = StyleSheet.create({
@@ -178,6 +179,8 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 return <OverviewMainPanel />
             case ExplorationType.B_Range:
                 return <BrowseRangeMainPanel />
+            case ExplorationType.B_Day:
+                return getIntraDayMainPanel(this.props.explorationDataState.info)
         }
     }
 }

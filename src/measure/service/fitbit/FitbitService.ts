@@ -10,13 +10,13 @@ import {DataSourceType} from '../../DataSourceSpec';
 import {FitbitDailyStepMeasure} from './FitbitDailyStepMeasure';
 import {FitbitDailyHeartRateMeasure} from './FitbitDailyHeartRateMeasure';
 import {DateTimeHelper} from '../../../time';
-import {DataLevel} from '../../../core/exploration/types';
 import {FITBIT_PROFILE_URL} from './api';
 import {FitbitServiceMeasure} from './FitbitServiceMeasure';
 import {FitbitWeightMeasure} from './FitbitWeightMeasure';
 import { FitbitSleepMeasure } from './FitbitSleepMeasure';
 import { FitbitLocalDbManager } from './sqlite/database';
 import { FitbitIntraDayStepMeasure } from './FitbitIntraDayStepMeasure';
+import { IntraDayDataSourceType } from '../../../core/exploration/types';
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -32,6 +32,7 @@ const STORAGE_KEY_USER_MEMBER_SINCE =
   DataService.STORAGE_PREFIX + 'fitbit:user_memberSince';
 
 export class FitbitService extends DataService {
+  
   key: string = 'fitbit';
   name: string = 'Fitbit';
   description: string = 'Fitbit Fitness Tracker';
@@ -67,40 +68,35 @@ export class FitbitService extends DataService {
 
   protected async fetchDataImpl(
     dataSource: DataSourceType,
-    level: DataLevel,
     start: number,
     end: number,
   ): Promise<any> {
-    if (level === DataLevel.DailyActivity) {
       switch (dataSource) {
         case DataSourceType.StepCount:
           console.log('try get fitbit step data from db');
           return await this.dailyStepMeasure.fetchData(start, end);
 
         case DataSourceType.HeartRate:
-          if (level === DataLevel.DailyActivity) {
             console.log('try get fitbit HR data from db');
             return await this.dailyHeartRateMeasure.fetchData(start, end);
-          }
           break;
         case DataSourceType.HoursSlept:
         case DataSourceType.SleepRange:
-          if (level === DataLevel.DailyActivity) {
             return await this.sleepMeasure.fetchData(dataSource, start, end)
-          }
           break;
         case DataSourceType.Weight:
           return await this.weightLogMeasure.fetchData(start, end);
       }
 
       return null;
-    } else {
-      switch(dataSource){
-        case DataSourceType.StepCount:
-          return await this.intradayStepMeasure.fetchData(start)
-      }
-      return null;
+  }
+
+  async fetchIntraDayData(intraDayDataSource: IntraDayDataSourceType, date: number): Promise<any> {
+    switch(intraDayDataSource){
+      case IntraDayDataSourceType.StepCount:
+        return await this.intradayStepMeasure.fetchData(date)
     }
+    return null;
   }
 
   async checkTokenValid(): Promise<boolean> {

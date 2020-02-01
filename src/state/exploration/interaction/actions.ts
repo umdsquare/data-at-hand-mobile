@@ -1,6 +1,6 @@
 import { ActionTypeBase } from "../../types"
 import { DataSourceType } from "../../../measure/DataSourceSpec"
-import { TouchingElementInfo } from "../../../core/exploration/types"
+import { TouchingElementInfo, IntraDayDataSourceType } from "../../../core/exploration/types"
 
 const ACTION_PREFIX = "exploration:interaction:"
 
@@ -8,6 +8,7 @@ export enum ExplorationActionType{
     MemoUiStatus="exploration:interaction:memoUIStatus",
     SetRange="exploration:interaction:setRange",
     SetDataSource="exploration:interaction:setDataSource",
+    SetIntraDayDataSource="exploration:interaction:setIntraDayDataSource",
     SetDate="exploration:interaction:setDate",
     
     GoToBrowseRange="exploration:interaction:goToBrowseRange",
@@ -49,13 +50,17 @@ export interface SetDataSourceAction extends ExplorationActionBase{
     dataSource: DataSourceType
 }
 
+export interface SetIntraDayDataSourceAction extends ExplorationActionBase{
+    intraDayDataSource: IntraDayDataSourceType
+}
+
 export interface GoToBrowseRangeAction extends ExplorationActionBase{
     dataSource?: DataSourceType,
     range?:[number, number]
 }
 
 export interface GoToBrowseDayAction extends ExplorationActionBase{
-    dataSource?: DataSourceType,
+    intraDayDataSource?: IntraDayDataSourceType,
     date?: number
 }
 
@@ -63,7 +68,7 @@ export interface SetTouchingElementInfoAction extends ActionTypeBase{
     info: TouchingElementInfo
 }
 
-export type ExplorationAction = ActionTypeBase | ExplorationActionBase | SetRangeAction | SetDateAction | GoToBrowseRangeAction | GoToBrowseDayAction | MemoUIStatusAction | SetDataSourceAction | SetTouchingElementInfoAction
+export type ExplorationAction = ActionTypeBase | ExplorationActionBase | SetRangeAction | SetDateAction | SetIntraDayDataSourceAction | GoToBrowseRangeAction | GoToBrowseDayAction | MemoUIStatusAction | SetDataSourceAction | SetTouchingElementInfoAction
 
 export function createSetRangeAction(interactionType: InteractionType, range: [number, number], key?: string): SetRangeAction{
     return {
@@ -90,11 +95,11 @@ export function createGoToBrowseOverviewAction(interactionType: InteractionType)
     }
 }
 
-export function createGoToBrowseDayAction(interactionType: InteractionType, dataSource?: DataSourceType, date?: number): GoToBrowseDayAction{
+export function createGoToBrowseDayAction(interactionType: InteractionType, intraDayDataSource?: IntraDayDataSourceType, date?: number): GoToBrowseDayAction{
     return {
         type: ExplorationActionType.GoToBrowseDay,
         interactionType,
-        dataSource,
+        intraDayDataSource,
         date
     }
 }
@@ -120,6 +125,15 @@ export function setDataSourceAction(interactionType: InteractionType, dataSource
         dataSource
     }
 }
+
+export function setIntraDayDataSourceAction(interactionType: InteractionType, intraDayDataSource: IntraDayDataSourceType): SetIntraDayDataSourceAction{
+    return {
+        type: ExplorationActionType.SetIntraDayDataSource,
+        interactionType,
+        intraDayDataSource
+    }
+}
+
 
 export function setDateAction(interactionType: InteractionType, date: number): SetDateAction{
     return {
