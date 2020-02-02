@@ -1,3 +1,5 @@
+import { SleepStage } from "../../../core/exploration/data/types";
+
 export interface FitbitUserProfile {
   user: {
     age: number;
@@ -28,14 +30,7 @@ export interface FitbitSleepQueryResult {
     type: 'stages' | 'classic';
     levels: {data: Array<{
       dateTime: string;
-      level:
-        | 'wake'
-        | 'light'
-        | 'rem'
-        | 'deep'
-        | 'asleep'
-        | 'restless'
-        | 'awake';
+      level: SleepStage;
       seconds: number;
     }>};
     summary: any;
