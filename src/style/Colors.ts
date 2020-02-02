@@ -28,6 +28,10 @@ export default {
   chartLightText: "#BABABA",
   chartAvgLineColor: "#505050ee",
 
+  chartAxisLightColor: "#00000015",
+
+  chartRangeColor: "#96959530",
+
   stepCountColor: "#EA87C8",
   heartRateColor: "#F88569",
   sleepColor: "#D08E65",

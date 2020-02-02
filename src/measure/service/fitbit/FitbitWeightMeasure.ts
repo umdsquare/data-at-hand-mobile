@@ -10,7 +10,7 @@ import {
 import {FitbitRangeMeasure} from './FitbitRangeMeasure';
 import {DateTimeHelper} from '../../../time';
 import {parse, getDay} from 'date-fns';
-import {WeightRangedData} from '../../../core/exploration/data/types';
+import {WeightRangedData, CyclicTimeFrame, GroupedData} from '../../../core/exploration/data/types';
 import {DataSourceType} from '../../DataSourceSpec';
 import { FitbitLocalTableName } from './sqlite/database';
 
@@ -85,6 +85,11 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
     if(sorted.length > 0){
       return {label: 'Recently', value: sorted[0].value, formatted: [{type: 'value', text: sorted[0].value.toFixed(1)}, {type: 'unit', text: ' kg'}]}
     }*/
+  }
+
+
+  async fetchCyclicGroupedData(start: number, end: number, cycleType: CyclicTimeFrame): Promise<GroupedData>{
+    return this.trendMeasure.fetchCyclicGroupedData(start, end, cycleType)
   }
 }
 

@@ -43,18 +43,31 @@ export enum FitbitLocalTableName {
 
 const groupByQueryFormat =
   'SELECT {select} FROM {tableName} WHERE {whereClause} GROUP BY {groupBy}';
+
+const groupSelectClauseFormat = "MIN({minColumnName}) as min, MAX({maxColumnName}) as max, AVG({avgColumnName}) as avg, COUNT({countColumnName}) as n"
+
 export function makeCyclicGroupQuery(
   tableName: string,
   start: number,
   end: number,
   cycleType: CyclicTimeFrame,
-  selectColumnsClause: string = "MIN(value) as min, MAX(value) as max, AVG(value) as avg, COUNT(value) as n"
+  minColumnName:string="value",
+  maxColumnName:string="value",
+  avgColumnName:string="value",
+  countColumnName:string="value"
 ): string {
   const base = {
     tableName,
     groupBy: 'timeKey',
     whereClause: '`numberedDate` BETWEEN ' + start + ' AND ' + end
   }
+
+  const selectColumnsClause = stringFormat(groupSelectClauseFormat, {
+      minColumnName,
+      maxColumnName,
+      avgColumnName,
+      countColumnName
+  })
 
   switch (cycleType) {
     case CyclicTimeFrame.DayOfWeek:

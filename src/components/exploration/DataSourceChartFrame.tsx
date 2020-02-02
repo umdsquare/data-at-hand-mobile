@@ -134,16 +134,16 @@ function formatTodayValue(data: OverviewSourceRow, unitType: MeasureUnitType): T
 
     switch (data.source) {
         case DataSourceType.StepCount:
-            info.formatted = data.today && [
+            info.formatted = data.today != null? [
                 {
                     text: commaNumber(data.today),
                     type: 'value',
                 },
                 { text: ' steps', type: 'unit' },
-            ]
+            ] : null
             break;
         case DataSourceType.HeartRate:
-            info.formatted = data.today && [
+            info.formatted = data.today != null? [
                 {
                     text: data.today.toString(),
                     type: 'value',
@@ -152,7 +152,7 @@ function formatTodayValue(data: OverviewSourceRow, unitType: MeasureUnitType): T
                     text: ' bpm',
                     type: 'unit',
                 },
-            ];
+            ] : null
             break;
         case DataSourceType.Weight:
             if (data.today) {
@@ -335,15 +335,15 @@ export const DataSourceChartFrame = (props: {
             </View>
 
             {
-                props.showToday !== false && props.data.today && <Text style={styles.headerDescriptionTextStyle}>
+                props.showToday !== false && props.data.today != null? <Text style={styles.headerDescriptionTextStyle}>
                     <Text>{todayInfo.label + ": "}</Text>
                     {
                         todayInfo.formatted != null ? todayInfo.formatted.map((chunk, index) =>
                             <Text key={index} style={chunk.type === 'unit' ? styles.todayUnitStyle : styles.todayValueStyle}>{chunk.text}</Text>)
                             :
-                            <Text style={styles.todayValueStyle}>no value</Text>
+                            (<Text style={styles.todayValueStyle}>no value</Text>)
                     }
-                </Text>
+                </Text> : <></>
             }
         </View>}
         <View style={styles.chartAreaStyle}>

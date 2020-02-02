@@ -117,6 +117,10 @@ export class FitbitService extends DataService {
         return await this.dailyStepMeasure.fetchCyclicGroupedData(start, end, cycle)
       case DataSourceType.HeartRate:
         return await this.dailyHeartRateMeasure.fetchCyclicGroupedData(start, end, cycle)
+      case DataSourceType.HoursSlept:
+        return await this.sleepMeasure.fetchHoursSleptCyclicGroupedData(start, end, cycle)
+      case DataSourceType.Weight:
+        return await this.weightLogMeasure.fetchCyclicGroupedData(start, end, cycle)
     }
   }
 

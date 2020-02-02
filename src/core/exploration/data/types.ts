@@ -9,6 +9,7 @@ export enum CyclicTimeFrame{
 }
 
 export interface IAggregatedValue {
+  timeKey: number;
   avg: number;
   min: number;
   max: number;
@@ -133,7 +134,7 @@ export interface SleepRangedData extends OverviewSourceRow {
 }
 
 export interface GroupedData {
-  data: Array<{timeKey: number, value:IAggregatedValue}>
+  data: Array<IAggregatedValue>
 }
 
 export const STATISTICS_LABEL_AVERAGE = 'Avg.';

@@ -9,9 +9,9 @@ import {
   differenceInSeconds,
   startOfDay,
 } from 'date-fns';
-import {SleepRangedData, IDailySleepSummaryEntry} from '../../../core/exploration/data/types';
+import {SleepRangedData, IDailySleepSummaryEntry, CyclicTimeFrame, GroupedData} from '../../../core/exploration/data/types';
 import {DataSourceType} from '../../DataSourceSpec';
-import { FitbitLocalTableName } from './sqlite/database';
+import { FitbitLocalTableName, makeCyclicGroupQuery } from './sqlite/database';
 import { SQLiteHelper } from '../../../database/sqlite/sqlite-helper';
 
 const columnNamesForRangeData = [
@@ -154,5 +154,13 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
       }
       return dailyLog
     }else return {} as any
+  }
+
+  async fetchHoursSleptCyclicGroupedData(start: number, end: number, cycleType: CyclicTimeFrame): Promise<GroupedData>{
+    const result = await this.service.fitbitLocalDbManager.selectQuery(makeCyclicGroupQuery(FitbitLocalTableName.SleepLog, start, end, cycleType, "lengthInSeconds", "lengthInSeconds", "lengthInSeconds", "lengthInSeconds"))
+    
+    return {
+      data: result as any
+    }
   }
 }
