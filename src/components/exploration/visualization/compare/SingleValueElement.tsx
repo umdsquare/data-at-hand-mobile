@@ -9,7 +9,6 @@ export const SingleValueElement = (props: {
     scaleX: ScaleBand<number>,
     value: IAggregatedValue   
 })=>{
-    console.log(props.value.min,props.value.max)
 
     const x1 = props.scaleX(props.value.timeKey)
     const x2 = x1 + props.scaleX.bandwidth()

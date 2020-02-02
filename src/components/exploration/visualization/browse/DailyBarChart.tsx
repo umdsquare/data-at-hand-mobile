@@ -41,7 +41,7 @@ export const DailyBarChart = (prop: Props) => {
 
     const mean = prop.data.length > 0 ? d3Array.mean(prop.data, d => d.value) : null
 
-    return <Svg width={prop.containerWidth} height={prop.containerHeight} onLayout={(layout) => { console.log(layout.nativeEvent.layout); setChartLayout(layout.nativeEvent.layout) }}>
+    return <Svg width={prop.containerWidth} height={prop.containerHeight} onLayout={(layout) => { setChartLayout(layout.nativeEvent.layout) }}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={prop.valueTicksOverride != null ? prop.valueTicksOverride(scaleY.domain()[1]) : scaleY.ticks(5)} tickFormat={prop.valueTickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
 

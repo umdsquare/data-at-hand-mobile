@@ -268,7 +268,7 @@ function formatStatistics(sourceType: DataSourceType, statisticsType: Statistics
     }
 }
 
-function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, width: number, height: number): any {
+function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, width: number, height: number, measureUnitType: MeasureUnitType): any {
     switch (sourceType) {
         case DataSourceType.StepCount:
             return <DailyBarChart
@@ -304,7 +304,9 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, width
             return <DailyWeightChart dateRange={data.range} data={data.data}
                 pastNearestLog={weightData.pastNearestLog}
                 futureNearestLog={weightData.futureNearestLog}
-                containerWidth={width} containerHeight={height} />
+                containerWidth={width} containerHeight={height}
+                measureUnitType={measureUnitType}
+                />
     }
 }
 
@@ -349,7 +351,7 @@ export const DataSourceChartFrame = (props: {
         <View style={styles.chartAreaStyle}>
             <SizeWatcher containerStyle={{ aspectRatio: 3 }} onSizeChange={(width, height) => { setChartContainerWidth(width); setChartContainerHeight(height) }}>
                 {
-                    getChartView(spec.type, props.data, chartContainerWidth, chartContainerHeight)
+                    getChartView(spec.type, props.data, chartContainerWidth, chartContainerHeight, props.measureUnitType)
                 }
             </SizeWatcher>
         </View>
