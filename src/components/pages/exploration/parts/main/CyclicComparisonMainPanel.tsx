@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { StyleTemplates } from '../../../../../style/Styles';
-import { GroupedData, CyclicTimeFrame } from '../../../../../core/exploration/data/types';
+import { GroupedData, CyclicTimeFrame, GroupedRangeData } from '../../../../../core/exploration/data/types';
 import { Dispatch } from 'redux';
 import { ReduxAppState } from '../../../../../state/types';
 import { DataSourceType, MeasureUnitType } from '../../../../../measure/DataSourceSpec';
@@ -13,6 +13,8 @@ import commaNumber from 'comma-number';
 import { DateTimeHelper } from '../../../../../time';
 import { scaleLinear } from 'd3-scale';
 import convertUnit from 'convert-units';
+import { RangeValueCyclicChart } from '../../../../exploration/visualization/compare/RangeValueCyclicChart';
+import { startOfDay, format, addSeconds } from 'date-fns';
 
 const styles = StyleSheet.create({
     containerStyle: {
@@ -21,8 +23,17 @@ const styles = StyleSheet.create({
     }
 })
 
+const timePivot = startOfDay(new Date())
+
+const timeTickFormat = (tick:number) => {
+    if(tick === 0){
+        return "MN"
+    }
+    else return format(addSeconds(timePivot, tick),"h a").toLowerCase()
+}
+
 interface Props {
-    data?: GroupedData,
+    data?: GroupedData | GroupedRangeData,
     source?: DataSourceType,
     cycleType?: CyclicTimeFrame,
     measureUnitType?: MeasureUnitType
@@ -42,14 +53,12 @@ class CyclicComparisonMainPanel extends React.Component<Props> {
 
     private makeMainView(): any {
         switch (this.props.source) {
-            case DataSourceType.SleepRange:
-                return null
             case DataSourceType.StepCount:
-                return <SingleValueCyclicChart values={this.props.data.data} cycleType={this.props.cycleType} startFromZero={true} yTickFormat={commaNumber} />
+                return <SingleValueCyclicChart values={this.props.data.data as any} cycleType={this.props.cycleType} startFromZero={true} yTickFormat={commaNumber} />
             case DataSourceType.HeartRate:
-                return <SingleValueCyclicChart values={this.props.data.data} cycleType={this.props.cycleType} startFromZero={false} />
+                return <SingleValueCyclicChart values={this.props.data.data as any} cycleType={this.props.cycleType} startFromZero={false} />
             case DataSourceType.HoursSlept:
-                return <SingleValueCyclicChart values={this.props.data.data} cycleType={this.props.cycleType} startFromZero={true}
+                return <SingleValueCyclicChart values={this.props.data.data as any} cycleType={this.props.cycleType} startFromZero={true}
                     yTickFormat={v => DateTimeHelper.formatDuration(v, true)}
                     ticksOverride={(min, max) => {
                         const scale = scaleLinear().domain([min / 3600, max / 3600]).nice()
@@ -58,7 +67,7 @@ class CyclicComparisonMainPanel extends React.Component<Props> {
                 />
             case DataSourceType.Weight:
                 return <SingleValueCyclicChart
-                    values={this.props.data.data}
+                    values={this.props.data.data as any}
                     cycleType={this.props.cycleType}
                     startFromZero={false}
                     valueConverter = {
@@ -71,6 +80,19 @@ class CyclicComparisonMainPanel extends React.Component<Props> {
                             }
                         }
                     }
+                />
+            case DataSourceType.SleepRange:
+                return <RangeValueCyclicChart
+                values={this.props.data.data as any}
+                cycleType={this.props.cycleType}
+                startFromZero={false}
+                ticksOverride={(min, max) => {
+                    const scale = scaleLinear().domain([min / 3600, max / 3600]).nice()
+                    return scale.ticks().map(t => t * 3600)
+                }}
+                yTickFormat={timeTickFormat}
+                rangeALabel="Bedtime Range"
+                rangeBLabel="Wake Time Range"
                 />
         }
     }

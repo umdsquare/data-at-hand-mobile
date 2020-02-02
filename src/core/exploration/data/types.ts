@@ -17,6 +17,20 @@ export interface IAggregatedValue {
   sum: number;
 }
 
+export interface IAggregatedRangeValue{
+  timeKey: number;
+  
+  avgA: number;
+  minA: number;
+  maxA: number;
+
+  avgB: number;
+  minB: number;
+  maxB: number;
+  
+  n: number;
+}
+
 export interface IDailySummaryEntry {
   numberedDate: number;
   year: number;
@@ -135,6 +149,10 @@ export interface SleepRangedData extends OverviewSourceRow {
 
 export interface GroupedData {
   data: Array<IAggregatedValue>
+}
+
+export interface GroupedRangeData {
+  data: Array<IAggregatedRangeValue>
 }
 
 export const STATISTICS_LABEL_AVERAGE = 'Avg.';

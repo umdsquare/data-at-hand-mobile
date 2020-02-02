@@ -1,5 +1,5 @@
 import {ExplorationInfo, ExplorationType, ParameterType, IntraDayDataSourceType} from '../types';
-import {OverviewData, OverviewSourceRow, GroupedData, CyclicTimeFrame} from './types';
+import {OverviewData, OverviewSourceRow, GroupedData, CyclicTimeFrame, GroupedRangeData} from './types';
 import {explorationInfoHelper} from '../ExplorationInfoHelper';
 import {DateTimeHelper} from '../../../time';
 import {dataSourceManager} from '../../../system/DataSourceManager';
@@ -75,7 +75,7 @@ class ExplorationDataResolver {
   }
 
   private loadCyclicComparisonData(info: ExplorationInfo, 
-    selectedServiceKey: string): Promise<GroupedData>{
+    selectedServiceKey: string): Promise<GroupedData | GroupedRangeData>{
 
       const selectedService = DataServiceManager.getServiceByKey(
         selectedServiceKey,

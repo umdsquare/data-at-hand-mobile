@@ -44,40 +44,47 @@ export enum FitbitLocalTableName {
 const groupByQueryFormat =
   'SELECT {select} FROM {tableName} WHERE {whereClause} GROUP BY {groupBy}';
 
-const groupSelectClauseFormat = "MIN({minColumnName}) as min, MAX({maxColumnName}) as max, AVG({avgColumnName}) as avg, COUNT({countColumnName}) as n"
+const groupSelectClauseFormat =
+  'MIN({minColumnName}) as min, MAX({maxColumnName}) as max, AVG({avgColumnName}) as avg, COUNT({countColumnName}) as n';
+
+export function makeGroupSelectClause(
+  minColumnName: string = 'value',
+  maxColumnName: string = 'value',
+  avgColumnName: string = 'value',
+  countColumnName: string = 'value',
+) {
+  return stringFormat(groupSelectClauseFormat, {
+    minColumnName,
+    maxColumnName,
+    avgColumnName,
+    countColumnName,
+  });
+}
 
 export function makeCyclicGroupQuery(
   tableName: string,
   start: number,
   end: number,
   cycleType: CyclicTimeFrame,
-  minColumnName:string="value",
-  maxColumnName:string="value",
-  avgColumnName:string="value",
-  countColumnName:string="value"
+  selectColumnsClause: string = makeGroupSelectClause()
 ): string {
   const base = {
     tableName,
     groupBy: 'timeKey',
-    whereClause: '`numberedDate` BETWEEN ' + start + ' AND ' + end
-  }
-
-  const selectColumnsClause = stringFormat(groupSelectClauseFormat, {
-      minColumnName,
-      maxColumnName,
-      avgColumnName,
-      countColumnName
-  })
+    whereClause: '`numberedDate` BETWEEN ' + start + ' AND ' + end,
+  };
 
   switch (cycleType) {
     case CyclicTimeFrame.DayOfWeek:
-      return stringFormat(groupByQueryFormat, {...base,
-        select: "dayOfWeek as timeKey, " + selectColumnsClause,
+      return stringFormat(groupByQueryFormat, {
+        ...base,
+        select: 'dayOfWeek as timeKey, ' + selectColumnsClause,
       });
     case CyclicTimeFrame.MonthOfYear:
-        return stringFormat(groupByQueryFormat, {...base,
-            select: "month as timeKey, " + selectColumnsClause,
-          });
+      return stringFormat(groupByQueryFormat, {
+        ...base,
+        select: 'month as timeKey, ' + selectColumnsClause,
+      });
     case CyclicTimeFrame.SeasonOfYear:
       break;
     case CyclicTimeFrame.WeekdayWeekends:
@@ -370,9 +377,9 @@ export class FitbitLocalDbManager {
     }
   }
 
-  async selectQuery<T>(query: string): Promise<T[]>{
-      const [result] = await this._database.executeSql(query)
-      return result.rows.raw()
+  async selectQuery<T>(query: string): Promise<T[]> {
+    const [result] = await this._database.executeSql(query);
+    return result.rows.raw();
   }
 
   async getAggregatedValue(

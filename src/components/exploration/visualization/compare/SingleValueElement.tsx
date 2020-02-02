@@ -7,16 +7,19 @@ import Colors from '../../../../style/Colors';
 export const SingleValueElement = (props: {
     scaleY: ScaleLinear<number, number>,
     scaleX: ScaleBand<number>,
-    value: IAggregatedValue   
+    value: IAggregatedValue,
+    additionalPadding?: number,
+    rangeColor?: string
 })=>{
 
-    const x1 = props.scaleX(props.value.timeKey)
-    const x2 = x1 + props.scaleX.bandwidth()
+    const bandPadding = props.additionalPadding || 0
+    const x1 = props.scaleX(props.value.timeKey) + bandPadding * props.scaleX.bandwidth()
+    const x2 = x1 + props.scaleX.bandwidth() - 2*bandPadding*props.scaleX.bandwidth()
 
     return <G>
         <Rect x={x1} y={props.scaleY(props.value.max)} 
-            width={props.scaleX.bandwidth()} height={props.scaleY(props.value.min) - props.scaleY(props.value.max)}
-            fill={Colors.chartRangeColor}
+            width={x2-x1} height={props.scaleY(props.value.min) - props.scaleY(props.value.max)}
+            fill={props.rangeColor || Colors.chartRangeColor}
             />
         <Line x1={x1} x2={x2} y={props.scaleY(props.value.avg)} stroke={Colors.textColorDark} strokeWidth={2} strokeDasharray={"1.5"}/>
         <Line x1={x1} x2={x2} y={props.scaleY(props.value.max)} stroke={Colors.chartLightText}/>
