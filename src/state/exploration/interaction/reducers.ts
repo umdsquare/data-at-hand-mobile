@@ -20,6 +20,8 @@ import {
   SetIntraDayDataSourceAction,
 } from './actions';
 import {explorationInfoHelper} from '../../../core/exploration/ExplorationInfoHelper';
+import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
+import { DateTimeHelper } from '../../../time';
 
 var deepEqual = require('deep-equal');
 
@@ -207,10 +209,31 @@ export const explorationStateReducer = (
         if (newState.info.type === ExplorationType.B_Ovrvw) {
           return state;
         } else {
+
+          const currentRange = explorationInfoHelper.getParameterValue(newState.info, ParameterType.Range)
+          if(currentRange == null){
+            const dateParam = explorationInfoHelper.getParameterValue<number>(newState.info, ParameterType.Date)
+            if(dateParam != null){
+              const date = DateTimeHelper.toDate(dateParam)
+              explorationInfoHelper.setParameterValue(newState.info, [
+                DateTimeHelper.toNumberedDateFromDate(startOfWeek(date)),
+                DateTimeHelper.toNumberedDateFromDate(endOfWeek(date)),
+              ], ParameterType.Range)
+            }else{
+              const now = startOfDay(new Date());
+              explorationInfoHelper.setParameterValue(newState.info, [
+                DateTimeHelper.toNumberedDateFromDate(subDays(now, 7)),
+                DateTimeHelper.toNumberedDateFromDate(endOfDay(now)),
+              ], ParameterType.Range)
+            }
+          }
+          
           explorationInfoHelper.filterParameters(
             newState.info,
             param => param.parameter === ParameterType.Range,
           );
+
+          
           newState.info.type = ExplorationType.B_Ovrvw;
         }
         break;
