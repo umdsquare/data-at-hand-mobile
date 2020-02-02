@@ -1,6 +1,9 @@
 import {DataSourceType} from '../../../measure/DataSourceSpec';
 export type StatisticsType = 'avg' | 'range' | 'total' | 'bedtime' | 'waketime';
 
+export interface IAggregatedValue{ avg: number, min: number, max: number }
+
+
 export interface IDailySummaryEntry {
   numberedDate: number;
   year: number;
