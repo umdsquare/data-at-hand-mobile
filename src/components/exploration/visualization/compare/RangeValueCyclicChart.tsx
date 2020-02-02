@@ -28,7 +28,7 @@ export const RangeValueCyclicChart = (props: {
     startFromZero?: boolean,
     ticksOverride?: (min: number, max: number) => number[],
     rangeALabel: string,
-    rangeBLabel: string
+    rangeBLabel: string,
 }) => {
 
     const [chartContainerWidth, setChartContainerWidth] = useState(-1)

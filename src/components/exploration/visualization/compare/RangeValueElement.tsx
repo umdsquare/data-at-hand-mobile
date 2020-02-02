@@ -8,15 +8,17 @@ import { SingleValueElement } from './SingleValueElement';
 export const RangeValueElement = (props: {
     scaleY: ScaleLinear<number, number>,
     scaleX: ScaleBand<number>,
-    value: IAggregatedRangeValue,
+    value: IAggregatedRangeValue
 }) => {
+
+    let connectionWidth = Math.min(40, props.scaleX.bandwidth())
 
     return <G>
 
-        <Rect fill="#BEBEBE50" rx={props.scaleX.bandwidth() * 0.1}
-            x={props.scaleX(props.value.timeKey)}
+        <Rect fill="#BEBEBE50" rx={connectionWidth * 0.1}
+            x={props.scaleX(props.value.timeKey) + (props.scaleX.bandwidth() - connectionWidth)*0.5}
             y={props.scaleY(Math.min(props.value.avgA, props.value.avgB))}
-            width={props.scaleX.bandwidth()}
+            width={connectionWidth}
             height={Math.abs(props.scaleY(props.value.avgA) - props.scaleY(props.value.avgB))}
             stroke="#70707020"
             strokeWidth={1}
@@ -31,7 +33,7 @@ export const RangeValueElement = (props: {
                 sum: 0,
                 n: props.value.n
             }
-        } additionalPadding={0.1} rangeColor={Colors.chartRangeAColor} />
+        } additionalPadding={0.1} maxWidth={30} rangeColor={Colors.chartRangeAColor} />
 
         <SingleValueElement scaleX={props.scaleX} scaleY={props.scaleY} value={
             {
@@ -42,7 +44,7 @@ export const RangeValueElement = (props: {
                 sum: 0,
                 n: props.value.n
             }
-        } additionalPadding={0.1} rangeColor={Colors.chartRangeBColor} />
+        } additionalPadding={0.1} maxWidth={30} rangeColor={Colors.chartRangeBColor} />
 
     </G>
 }

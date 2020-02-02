@@ -9,12 +9,18 @@ export const SingleValueElement = (props: {
     scaleX: ScaleBand<number>,
     value: IAggregatedValue,
     additionalPadding?: number,
-    rangeColor?: string
+    rangeColor?: string,
+    maxWidth?: number
 })=>{
 
     const bandPadding = props.additionalPadding || 0
-    const x1 = props.scaleX(props.value.timeKey) + bandPadding * props.scaleX.bandwidth()
-    const x2 = x1 + props.scaleX.bandwidth() - 2*bandPadding*props.scaleX.bandwidth()
+    let x1 = props.scaleX(props.value.timeKey) + bandPadding * props.scaleX.bandwidth()
+    let x2 = x1 + props.scaleX.bandwidth() - 2*bandPadding*props.scaleX.bandwidth()
+
+    if(props.maxWidth && props.maxWidth < x2-x1){
+        x1 = x1 + (x2-x1 - props.maxWidth)/2
+        x2 = x1 + props.maxWidth
+    }
 
     return <G>
         <Rect x={x1} y={props.scaleY(props.value.max)} 

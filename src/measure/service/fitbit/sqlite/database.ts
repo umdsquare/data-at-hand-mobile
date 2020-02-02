@@ -42,7 +42,7 @@ export enum FitbitLocalTableName {
 }
 
 const groupByQueryFormat =
-  'SELECT {select} FROM {tableName} WHERE {whereClause} GROUP BY {groupBy}';
+  'SELECT {select} FROM {fromClause} WHERE {whereClause} GROUP BY {groupBy}';
 
 const groupSelectClauseFormat =
   'MIN({minColumnName}) as min, MAX({maxColumnName}) as max, AVG({avgColumnName}) as avg, COUNT({countColumnName}) as n';
@@ -66,10 +66,11 @@ export function makeCyclicGroupQuery(
   start: number,
   end: number,
   cycleType: CyclicTimeFrame,
-  selectColumnsClause: string = makeGroupSelectClause()
+  selectColumnsClause: string = makeGroupSelectClause(),
+  fromClause: string = tableName
 ): string {
   const base = {
-    tableName,
+    fromClause,
     groupBy: 'timeKey',
     whereClause: '`numberedDate` BETWEEN ' + start + ' AND ' + end,
   };
@@ -86,9 +87,25 @@ export function makeCyclicGroupQuery(
         select: 'month as timeKey, ' + selectColumnsClause,
       });
     case CyclicTimeFrame.SeasonOfYear:
-      break;
+        return stringFormat(groupByQueryFormat, {
+            ...base,
+            select: 'CASE \
+                WHEN \
+                    month BETWEEN 3 AND 5 THEN 0 \
+                WHEN month BETWEEN 6 AND 8 THEN 1 \
+                WHEN month BETWEEN 9 AND 11 THEN 2 \
+                WHEN month = 12 OR month = 1 OR month = 2 THEN 3 \
+                END timeKey, ' + selectColumnsClause,
+          });
     case CyclicTimeFrame.WeekdayWeekends:
-      break;
+        return stringFormat(groupByQueryFormat, {
+            ...base,
+            select: 'CASE \
+                WHEN \
+                    dayOfWeek BETWEEN 1 AND 5 THEN 0 \
+                WHEN dayOfWeek = 0 OR dayOfWeek = 6 THEN 1 \
+                END timeKey, ' + selectColumnsClause,
+          });
   }
 }
 

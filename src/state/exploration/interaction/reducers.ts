@@ -19,6 +19,7 @@ import {
   SetDateAction,
   SetIntraDayDataSourceAction,
   GoToComparisonCyclicAction,
+  SetCycleTypeAction,
 } from './actions';
 import {explorationInfoHelper} from '../../../core/exploration/ExplorationInfoHelper';
 import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
@@ -140,6 +141,15 @@ export const explorationStateReducer = (
           setIntraDayDataSourceAction.intraDayDataSource,
           ParameterType.IntraDayDataSource,
         );
+        break;
+
+      case ExplorationActionType.SetCycleType:
+        const setCycleTypeAction = action as SetCycleTypeAction
+        explorationInfoHelper.setParameterValue(
+          newState.info,
+          setCycleTypeAction.cycleType,
+          ParameterType.CycleType
+        )
         break;
       case ExplorationActionType.GoToBrowseRange:
         //check parameters

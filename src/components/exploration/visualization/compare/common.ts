@@ -15,8 +15,15 @@ const monthNames = [
   'Nov',
   'Dec',
 ];
+
+const seasonNames = ['Spring', 'Summer', 'Fall', 'Winter'];
+
+const wdweNames = ['Weekdays', 'Weekends'];
+
 const getDowName = (i: number) => dowNames[i];
-const getMonthName = (i: number) => monthNames[i];
+const getMonthName = (i: number) => monthNames[i - 1];
+const getSeasonName = (i: number) => seasonNames[i];
+const getWdWeName = (i: number) => wdweNames[i];
 
 export function getDomainAndTickFormat(
   cycleType: CyclicTimeFrame,
@@ -32,8 +39,16 @@ export function getDomainAndTickFormat(
       tickFormat = getDowName;
       break;
     case CyclicTimeFrame.MonthOfYear:
-      domain = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+      domain = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
       tickFormat = getMonthName;
+      break;
+    case CyclicTimeFrame.SeasonOfYear:
+      domain = [0, 1, 2, 3];
+      tickFormat = getSeasonName;
+      break;
+    case CyclicTimeFrame.WeekdayWeekends:
+      domain = [0, 1];
+      tickFormat = getWdWeName;
       break;
   }
 

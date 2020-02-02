@@ -11,10 +11,11 @@ import { Sizes } from '../../../../style/Sizes';
 import { StyleTemplates } from '../../../../style/Styles';
 import { dataSourceManager } from '../../../../system/DataSourceManager';
 import { DataSourceType } from '../../../../measure/DataSourceSpec';
-import { createSetRangeAction, setDataSourceAction, InteractionType, goBackAction, setDateAction, setIntraDayDataSourceAction } from '../../../../state/exploration/interaction/actions';
+import { createSetRangeAction, setDataSourceAction, InteractionType, goBackAction, setDateAction, setIntraDayDataSourceAction, setCycleTypeAction } from '../../../../state/exploration/interaction/actions';
 import Colors from '../../../../style/Colors';
 import { useDispatch, useSelector } from 'react-redux';
 import { ReduxAppState } from '../../../../state/types';
+import { CyclicTimeFrame, cyclicTimeFrameSpecs } from '../../../../core/exploration/data/types';
 
 const titleBarOptionButtonIconInfo = {
     name: "ios-settings",
@@ -92,7 +93,7 @@ export function generateHeaderView(props: ExplorationProps): any {
             </HeaderContainer>
         case ExplorationType.B_Range:
             return <HeaderContainer>
-                {generateDataSourceRow(props)}
+                {generateDataSourceRow(props, false)}
                 {generateRangeBar(props)}
             </HeaderContainer>
         case ExplorationType.B_Day:
@@ -103,8 +104,8 @@ export function generateHeaderView(props: ExplorationProps): any {
             </HeaderContainer>
         case ExplorationType.C_Cyclic:
             return <HeaderContainer>
-                {generateComparisonTypeRow(props)}
-                {generateDataSourceRow(props)}
+                {generateCyclicComparisonTypeRow(props)}
+                {generateDataSourceRow(props, false)}
                 {generateRangeBar(props)}
             </HeaderContainer>
             break;
@@ -149,10 +150,10 @@ function generateDateBar(props: ExplorationProps): any {
     }} />
 }
 
-function generateDataSourceRow(props: ExplorationProps): any {
+function generateDataSourceRow(props: ExplorationProps, showBorder: boolean): any {
     const sourceType = explorationInfoHelper.getParameterValue(props.explorationState.info, ParameterType.DataSource) as DataSourceType
     const sourceSpec = dataSourceManager.getSpec(sourceType)
-    return <CategoricalRow title="Data Source" showBorder={true} value={sourceSpec.name}
+    return <CategoricalRow title="Data Source" showBorder={showBorder} value={sourceSpec.name}
         icon={<DataSourceIcon type={sourceType} color="white" size={20} />}
         onSwipeLeft={() => {
             let currentSourceIndex = dataSourceManager.supportedDataSources.findIndex(spec => spec.type === sourceType)
@@ -181,7 +182,7 @@ function generateIntraDayDataSourceRow(props: ExplorationProps): any {
         }
     })
 
-    return <CategoricalRow title="Data Source" showBorder={true} value={sourceTypeName}
+    return <CategoricalRow title="Data Source" showBorder={false} value={sourceTypeName}
         icon={<DataSourceIcon type={inferDataSource(intraDaySourceType)} color="white" size={20} />}
         onSwipeLeft={() => {
             let currentSourceIndex = supportedIntraDayDataSourceTypes.indexOf(intraDaySourceType)
@@ -199,6 +200,23 @@ function generateIntraDayDataSourceRow(props: ExplorationProps): any {
     />
 }
 
-function generateComparisonTypeRow(props: ExplorationProps): any {
-    return <CategoricalRow title="Comparison Type" showBorder={false} value="Days of the Week" />
+function generateCyclicComparisonTypeRow(props: ExplorationProps): any {
+    const cycleType = explorationInfoHelper.getParameterValue<CyclicTimeFrame>(props.explorationState.info, ParameterType.CycleType)
+    const cycles = Object.keys(cyclicTimeFrameSpecs)
+
+    return <CategoricalRow title="Group By" showBorder={true} value={cyclicTimeFrameSpecs[cycleType].name}
+        onSwipeLeft={()=>{
+            let currentIndex = cycles.indexOf(cycleType)
+            currentIndex--
+            if(currentIndex < 0){
+                currentIndex = cycles.length - 1
+            }
+            props.dispatchCommand(setCycleTypeAction(InteractionType.TouchOnly, cycles[currentIndex] as any))
+        }}
+
+        onSwipeRight={()=>{
+            const currentIndex = ( cycles.indexOf(cycleType) + 1 ) % cycles.length
+            props.dispatchCommand(setCycleTypeAction(InteractionType.TouchOnly, cycles[currentIndex] as any))
+        }}
+    />
 }

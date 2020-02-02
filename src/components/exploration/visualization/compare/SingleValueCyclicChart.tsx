@@ -78,7 +78,9 @@ export const SingleValueCyclicChart = (props: {
             >
                 <G x={chartArea.x} y={chartArea.y}>
                     {
-                        props.values.map(value => <SingleValueElement key={value.timeKey} value={{ ...value, avg: convert(value.avg), max: convert(value.max), min: convert(value.min), sum: convert(value.sum) }} scaleX={scaleX} scaleY={scaleY} />)
+                        props.values.map(value => <SingleValueElement key={value.timeKey} 
+                                value={{ ...value, avg: convert(value.avg), max: convert(value.max), min: convert(value.min), sum: convert(value.sum) }} 
+                                scaleX={scaleX} scaleY={scaleY} maxWidth= {40} />)
                     }
                 </G>
             </CycleChartFrame>

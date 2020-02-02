@@ -14,6 +14,7 @@ export enum ExplorationActionType {
   SetDataSource = 'exploration:interaction:setDataSource',
   SetIntraDayDataSource = 'exploration:interaction:setIntraDayDataSource',
   SetDate = 'exploration:interaction:setDate',
+  SetCycleType = "exploration:interaction:setCycleType",
 
   GoToBrowseRange = 'exploration:interaction:goToBrowseRange',
   GoToBrowseOverview = 'exploration:interaction:goToBrowseOverview',
@@ -57,6 +58,10 @@ export interface SetDataSourceAction extends ExplorationActionBase {
 
 export interface SetIntraDayDataSourceAction extends ExplorationActionBase {
   intraDayDataSource: IntraDayDataSourceType;
+}
+
+export interface SetCycleTypeAction extends ExplorationActionBase {
+    cycleType: CyclicTimeFrame
 }
 
 export interface GoToBrowseRangeAction extends ExplorationActionBase {
@@ -189,6 +194,17 @@ export function setIntraDayDataSourceAction(
     interactionType,
     intraDayDataSource,
   };
+}
+
+export function setCycleTypeAction(
+    interactionType: InteractionType,
+    cycleType: CyclicTimeFrame
+): SetCycleTypeAction {
+    return {
+        type: ExplorationActionType.SetCycleType,
+        interactionType,
+        cycleType
+    }
 }
 
 export function setDateAction(

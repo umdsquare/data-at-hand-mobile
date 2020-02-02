@@ -89,7 +89,8 @@ export abstract class FitbitSummaryLogMeasure<
 
   async fetchCyclicGroupedData(start: number, end: number, cycleType: CyclicTimeFrame): Promise<GroupedData>{
     const result = await this.service.fitbitLocalDbManager.selectQuery(makeCyclicGroupQuery(this.dbTableName, start, end, cycleType))
-    
+    console.log("query:", makeCyclicGroupQuery(this.dbTableName, start, end, cycleType))
+    console.log(result)
     return {
       data: result as any
     }
