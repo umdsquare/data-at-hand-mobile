@@ -274,7 +274,6 @@ const Item = (prop: {
         onLongPress={(event) => {
             if (prop.onLongPressIn) {
                 UIManager.measureInWindow(findNodeHandle(elmRef), (x, y, width, height) => {
-                    console.log(x, y, width, height)
                     setInLongPress(true);
                     prop.onLongPressIn(prop.date, {
                         touchId: Date.now().toString(),

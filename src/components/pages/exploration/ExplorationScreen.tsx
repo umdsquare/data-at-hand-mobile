@@ -13,13 +13,15 @@ import { explorationInfoHelper } from "../../../core/exploration/ExplorationInfo
 import { DataServiceManager } from "../../../system/DataServiceManager";
 import { ExplorationInfo, ExplorationType, ExplorationMode } from "../../../core/exploration/types";
 import { ExplorationDataState, startLoadingForInfo } from "../../../state/exploration/data/reducers";
-import { ExplorationAction, InteractionType, createGoToBrowseOverviewAction, createRestorePreviousInfoAction } from "../../../state/exploration/interaction/actions";
+import { ExplorationAction, InteractionType, createGoToBrowseOverviewAction, createRestorePreviousInfoAction, createGoToComparisonCyclicAction } from "../../../state/exploration/interaction/actions";
 import { Button } from "react-native-elements";
 import { Sizes } from "../../../style/Sizes";
 import { OverviewMainPanel } from "./parts/main/OverviewMainPanel";
 import { BrowseRangeMainPanel } from "./parts/main/BrowseRangeMainPanel";
 import { BusyHorizontalIndicator } from "../../exploration/BusyHorizontalIndicator";
 import { getIntraDayMainPanel } from "./parts/main/IntraDayMainPanel";
+import { CyclicTimeFrame } from "../../../core/exploration/data/types";
+import { CyclicComparisonMainPanel } from "./parts/main/CyclicComparisonMainPanel";
 var deepEqual = require('deep-equal');
 
 const styles = StyleSheet.create({
@@ -125,6 +127,9 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
             case ExplorationMode.Browse:
                 this.props.dispatchCommand(createGoToBrowseOverviewAction(InteractionType.TouchOnly))
                 break;
+            case ExplorationMode.Compare:
+                this.props.dispatchCommand(createGoToComparisonCyclicAction(InteractionType.TouchOnly, null, null, CyclicTimeFrame.DayOfWeek))
+                break;
         }
     }
 
@@ -181,6 +186,8 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 return <BrowseRangeMainPanel />
             case ExplorationType.B_Day:
                 return getIntraDayMainPanel(this.props.explorationDataState.info)
+            case ExplorationType.C_Cyclic:
+                return <CyclicComparisonMainPanel />
         }
     }
 }

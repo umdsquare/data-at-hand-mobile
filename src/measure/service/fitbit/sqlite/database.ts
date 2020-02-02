@@ -1,5 +1,7 @@
 import SQLite from 'react-native-sqlite-storage';
 import {SQLiteHelper} from '../../../../database/sqlite/sqlite-helper';
+import {CyclicTimeFrame} from '../../../../core/exploration/data/types';
+import stringFormat from 'string-format';
 SQLite.DEBUG(false);
 SQLite.enablePromise(true);
 
@@ -37,6 +39,74 @@ export enum FitbitLocalTableName {
   CachedIntraDayDates = 'CachedIntraDayDates',
 
   StepCountIntraDay = 'StepCountIntraDay',
+}
+
+const groupByQueryFormat =
+  'SELECT {select} FROM {fromClause} WHERE {whereClause} GROUP BY {groupBy}';
+
+const groupSelectClauseFormat =
+  'MIN({minColumnName}) as min, MAX({maxColumnName}) as max, AVG({avgColumnName}) as avg, COUNT({countColumnName}) as n';
+
+export function makeGroupSelectClause(
+  minColumnName: string = 'value',
+  maxColumnName: string = 'value',
+  avgColumnName: string = 'value',
+  countColumnName: string = 'value',
+) {
+  return stringFormat(groupSelectClauseFormat, {
+    minColumnName,
+    maxColumnName,
+    avgColumnName,
+    countColumnName,
+  });
+}
+
+export function makeCyclicGroupQuery(
+  tableName: string,
+  start: number,
+  end: number,
+  cycleType: CyclicTimeFrame,
+  selectColumnsClause: string = makeGroupSelectClause(),
+  fromClause: string = tableName
+): string {
+  const base = {
+    fromClause,
+    groupBy: 'timeKey',
+    whereClause: '`numberedDate` BETWEEN ' + start + ' AND ' + end,
+  };
+
+  switch (cycleType) {
+    case CyclicTimeFrame.DayOfWeek:
+      return stringFormat(groupByQueryFormat, {
+        ...base,
+        select: 'dayOfWeek as timeKey, ' + selectColumnsClause,
+      });
+    case CyclicTimeFrame.MonthOfYear:
+      return stringFormat(groupByQueryFormat, {
+        ...base,
+        select: 'month as timeKey, ' + selectColumnsClause,
+      });
+    case CyclicTimeFrame.SeasonOfYear:
+        return stringFormat(groupByQueryFormat, {
+            ...base,
+            select: 'CASE \
+                WHEN \
+                    month BETWEEN 3 AND 5 THEN 0 \
+                WHEN month BETWEEN 6 AND 8 THEN 1 \
+                WHEN month BETWEEN 9 AND 11 THEN 2 \
+                WHEN month = 12 OR month = 1 OR month = 2 THEN 3 \
+                END timeKey, ' + selectColumnsClause,
+          });
+    case CyclicTimeFrame.WeekdayWeekends:
+        return stringFormat(groupByQueryFormat, {
+            ...base,
+            select: 'CASE \
+                WHEN \
+                    dayOfWeek BETWEEN 1 AND 5 THEN 0 \
+                WHEN dayOfWeek = 0 OR dayOfWeek = 6 THEN 1 \
+                END timeKey, ' + selectColumnsClause,
+          });
+  }
 }
 
 const dailySummaryProperties = {
@@ -93,7 +163,10 @@ const IntraDayHeartRateInfoSchema = {
   name: FitbitLocalTableName.HeartRateIntraDayInfo,
   columns: {
     numberedDate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, primary: true},
-    restingHeartRate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, optional: true},
+    restingHeartRate: {
+      type: SQLiteHelper.SQLiteColumnType.INTEGER,
+      optional: true,
+    },
     customZones: {type: SQLiteHelper.SQLiteColumnType.TEXT, optional: true},
     zones: {type: SQLiteHelper.SQLiteColumnType.TEXT},
   },
@@ -302,8 +375,13 @@ export class FitbitLocalDbManager {
     parameters: any[],
     specifyColumns?: string[],
   ): Promise<T[]> {
-
-    const query = 'SELECT ' +  (specifyColumns!=null? specifyColumns.join(",") : "*") + ' FROM ' + tableName + ' WHERE ' + condition;
+    const query =
+      'SELECT ' +
+      (specifyColumns != null ? specifyColumns.join(',') : '*') +
+      ' FROM ' +
+      tableName +
+      ' WHERE ' +
+      condition;
     try {
       const [result] = await this._database.executeSql(query, parameters);
       if (result.rows.length > 0) {
@@ -314,6 +392,11 @@ export class FitbitLocalDbManager {
       console.log(ex);
       return [];
     }
+  }
+
+  async selectQuery<T>(query: string): Promise<T[]> {
+    const [result] = await this._database.executeSql(query);
+    return result.rows.raw();
   }
 
   async getAggregatedValue(

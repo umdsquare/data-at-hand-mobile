@@ -1,5 +1,6 @@
 import { DataSourceType } from '../DataSourceSpec';
 import { IntraDayDataSourceType } from '../../core/exploration/types';
+import { CyclicTimeFrame, GroupedData, GroupedRangeData } from '../../core/exploration/data/types';
 
 export interface ServiceActivationResult{
   success: boolean,
@@ -53,6 +54,8 @@ export abstract class DataService {
   abstract fetchIntraDayData(intraDayDataSource: IntraDayDataSourceType, date: number): Promise<any>
 
   protected abstract fetchDataImpl(dataSource: DataSourceType, start: number, end: number): Promise<any>
+
+  abstract fetchCyclicAggregatedData(dataSource: DataSourceType, start:number, end: number, cycle: CyclicTimeFrame): Promise<GroupedData | GroupedRangeData>
 
   abstract async activateInSystem(): Promise<ServiceActivationResult>
   abstract async deactivatedInSystem(): Promise<boolean>

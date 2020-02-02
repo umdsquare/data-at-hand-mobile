@@ -1,5 +1,5 @@
 import {ExplorationInfo, ExplorationType, ParameterType, IntraDayDataSourceType} from '../types';
-import {OverviewData, OverviewSourceRow} from './types';
+import {OverviewData, OverviewSourceRow, GroupedData, CyclicTimeFrame, GroupedRangeData} from './types';
 import {explorationInfoHelper} from '../ExplorationInfoHelper';
 import {DateTimeHelper} from '../../../time';
 import {dataSourceManager} from '../../../system/DataSourceManager';
@@ -20,6 +20,8 @@ class ExplorationDataResolver {
         return this.loadBrowseRangeData(explorationInfo, selectedServiceKey)
       case ExplorationType.B_Day:
         return this.loadIntraDayData(explorationInfo, selectedServiceKey)
+      case ExplorationType.C_Cyclic:
+        return this.loadCyclicComparisonData(explorationInfo, selectedServiceKey)
       default:
         Promise.reject({error: 'Unsupported exploration type.'});
     }
@@ -63,7 +65,6 @@ class ExplorationDataResolver {
     info: ExplorationInfo,
     selectedServiceKey: string
   ): Promise<any>{
-    console.log("load intraday")
     const selectedService = DataServiceManager.getServiceByKey(
       selectedServiceKey,
     );
@@ -72,6 +73,22 @@ class ExplorationDataResolver {
 
     return selectedService.fetchIntraDayData(source, date)
   }
+
+  private loadCyclicComparisonData(info: ExplorationInfo, 
+    selectedServiceKey: string): Promise<GroupedData | GroupedRangeData>{
+
+      const selectedService = DataServiceManager.getServiceByKey(
+        selectedServiceKey,
+      );
+      const source = explorationInfoHelper.getParameterValue<DataSourceType>(info, ParameterType.DataSource)
+      const range = explorationInfoHelper.getParameterValue(
+        info,
+        ParameterType.Range,
+      );
+      const cycleType = explorationInfoHelper.getParameterValue<CyclicTimeFrame>(info, ParameterType.CycleType)
+
+      return selectedService.fetchCyclicAggregatedData(source, range[0], range[1], cycleType)
+    }
 }
 
 const resolver = new ExplorationDataResolver();

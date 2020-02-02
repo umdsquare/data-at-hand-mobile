@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChartProps } from '../types';
-import Svg, { G, Rect, Circle, Line, Path } from 'react-native-svg';
+import Svg, { Rect, Line } from 'react-native-svg';
 import { CommonBrowsingChartStyles } from './common';
 import { AxisSvg } from '../../../visualization/axis';
 import { Padding } from '../../../visualization/types';
@@ -8,7 +8,6 @@ import { DateTimeHelper } from '../../../../time';
 import { DateBandAxis } from './DateBandAxis';
 import { scaleLinear } from 'd3-scale';
 import * as d3Array from 'd3-array';
-import * as d3Shape from 'd3-shape';
 import Colors from '../../../../style/Colors';
 import { startOfDay, addSeconds, format } from 'date-fns';
 import { GroupWithTouchInteraction } from './GroupWithTouchInteraction';

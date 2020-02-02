@@ -10,7 +10,10 @@ import * as d3Array from 'd3-array';
 import * as d3Shape from 'd3-shape';
 import Colors from '../../../../style/Colors';
 import { IIntraDayLogEntry, IWeightIntraDayLogEntry } from '../../../../core/exploration/data/types';
+import { MeasureUnitType } from '../../../../measure/DataSourceSpec';
+import unitConvert from 'convert-units';
 
+const noop = (k) => k
 
 export const DailyWeightChart = (prop: {
     dateRange: number[],
@@ -21,8 +24,11 @@ export const DailyWeightChart = (prop: {
     futureNearestLog: IWeightIntraDayLogEntry,
     pastNearestLog: IWeightIntraDayLogEntry,
     containerWidth: number,
-    containerHeight: number
+    containerHeight: number,
+    measureUnitType: MeasureUnitType
 }) => {
+
+    const convert = prop.measureUnitType === MeasureUnitType.Metric? noop : (n) => unitConvert(n).from('kg').to('lb')
 
     const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
 
@@ -35,11 +41,11 @@ export const DailyWeightChart = (prop: {
     const today = DateTimeHelper.toNumberedDateFromDate(new Date())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
-    const trendMin = prop.data.trend.length > 0 ? d3Array.min(prop.data.trend, d => d.value) : null
-    const trendMax = prop.data.trend.length > 0 ? d3Array.max(prop.data.trend, d => d.value) : null
+    const trendMin = prop.data.trend.length > 0 ? d3Array.min(prop.data.trend, d => convert(d.value)) : null
+    const trendMax = prop.data.trend.length > 0 ? d3Array.max(prop.data.trend, d => convert(d.value)) : null
 
-    const logMin = prop.data.logs.length > 0 ? d3Array.min(prop.data.logs, d => d.value) : null
-    const logMax = prop.data.logs.length > 0 ? d3Array.max(prop.data.logs, d => d.value) : null
+    const logMin = prop.data.logs.length > 0 ? d3Array.min(prop.data.logs, d => convert(d.value)) : null
+    const logMax = prop.data.logs.length > 0 ? d3Array.max(prop.data.logs, d => convert(d.value)) : null
 
     const scaleY = scaleLinear()
         .domain([
@@ -51,7 +57,7 @@ export const DailyWeightChart = (prop: {
 
     const trendLine = d3Shape.line<{ value: number, numberedDate: number }>()
         .x((d) => scaleX(d.numberedDate) + scaleX.bandwidth() * 0.5)
-        .y((d) => scaleY(d.value))
+        .y((d) => scaleY(convert(d.value)))
 
 
     const veryLastLog = prop.futureNearestLog == null ? (prop.data.logs.length > 0 ? prop.data.logs[prop.data.logs.length - 1] : prop.pastNearestLog) : null
@@ -64,7 +70,7 @@ export const DailyWeightChart = (prop: {
                 prop.data.logs.map(d => {
                     return <Circle key={d.numberedDate}
                         x={scaleX(d.numberedDate) + scaleX.bandwidth() * 0.5}
-                        y={scaleY(d.value)}
+                        y={scaleY(convert(d.value))}
                         r={Math.min(scaleX.bandwidth(), 8) / 2}
                         strokeWidth={2}
                         fill='white'
@@ -85,8 +91,7 @@ export const DailyWeightChart = (prop: {
                 veryLastLog && <Line 
                     x1={scaleX(Math.max(veryLastLog.numberedDate, scaleX.domain()[0]))} 
                     x2={chartArea.width}
-                    y1={scaleY(veryLastLog.value)}
-                    y2={scaleY(veryLastLog.value)}
+                    y={scaleY(convert(veryLastLog.value))}
                     stroke={Colors.today}
                     strokeWidth={2}
                     />

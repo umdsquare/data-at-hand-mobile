@@ -18,6 +18,11 @@ import {FitbitLocalDbManager} from './sqlite/database';
 import {FitbitIntraDayStepMeasure} from './FitbitIntraDayStepMeasure';
 import {IntraDayDataSourceType} from '../../../core/exploration/types';
 import {FitbitIntraDayHeartRateMeasure} from './FitbitIntraDayHeartRateMeasure';
+import {
+  CyclicTimeFrame,
+  GroupedData,
+  GroupedRangeData,
+} from '../../../core/exploration/data/types';
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -107,6 +112,46 @@ export class FitbitService extends DataService {
       }
     }
     return null;
+  }
+
+  async fetchCyclicAggregatedData(
+    dataSource: DataSourceType,
+    start: number,
+    end: number,
+    cycle: CyclicTimeFrame,
+  ): Promise<GroupedData | GroupedRangeData> {
+    switch (dataSource) {
+      case DataSourceType.StepCount:
+        return await this.dailyStepMeasure.fetchCyclicGroupedData(
+          start,
+          end,
+          cycle,
+        );
+      case DataSourceType.HeartRate:
+        return await this.dailyHeartRateMeasure.fetchCyclicGroupedData(
+          start,
+          end,
+          cycle,
+        );
+      case DataSourceType.HoursSlept:
+        return await this.sleepMeasure.fetchHoursSleptCyclicGroupedData(
+          start,
+          end,
+          cycle,
+        );
+      case DataSourceType.Weight:
+        return await this.weightLogMeasure.fetchCyclicGroupedData(
+          start,
+          end,
+          cycle,
+        );
+      case DataSourceType.SleepRange:
+        return await this.sleepMeasure.fetchSleepRangeCyclicGroupedData(
+          start,
+          end,
+          cycle,
+        );
+    }
   }
 
   async checkTokenValid(): Promise<boolean> {

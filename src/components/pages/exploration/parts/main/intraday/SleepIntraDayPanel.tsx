@@ -63,7 +63,6 @@ const xTickFormat = (diffSeconds) => {
 
     if (diffSeconds < 0) {
         diffSeconds = 24 * 3600 + diffSeconds
-        console.log(diffSeconds)
     }
     if (diffSeconds === 0) {
         return "Midnight"
