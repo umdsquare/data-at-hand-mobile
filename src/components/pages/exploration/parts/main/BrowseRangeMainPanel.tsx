@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { View, FlatList, Text, StyleSheet, ActivityIndicator, LayoutAnimation, UIManager, findNodeHandle } from 'react-native';
 import { MeasureUnitType, DataSourceType } from "../../../../../measure/DataSourceSpec";
-import { ExplorationAction, setTouchElementInfo } from "../../../../../state/exploration/interaction/actions";
+import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, InteractionType } from "../../../../../state/exploration/interaction/actions";
 import { connect } from "react-redux";
 import { ReduxAppState } from "../../../../../state/types";
 import { Dispatch } from "redux";
 import { OverviewSourceRow } from "../../../../../core/exploration/data/types";
 import { DataSourceChartFrame } from "../../../../exploration/DataSourceChartFrame";
 import { explorationInfoHelper } from "../../../../../core/exploration/ExplorationInfoHelper";
-import { ParameterType, TouchingElementInfo } from "../../../../../core/exploration/types";
+import { ParameterType, TouchingElementInfo, inferIntraDayDataSourceType } from "../../../../../core/exploration/types";
 import { DateTimeHelper } from "../../../../../time";
 import { format, startOfDay, addSeconds } from "date-fns";
 import { StyleTemplates } from "../../../../../style/Styles";
@@ -88,7 +88,7 @@ class BrowseRangeMainPanel extends React.Component<Props>{
     }
 
     onListElementClick = (date: number) => {
-        //TODO open today
+        this.props.dispatchExplorationAction(createGoToBrowseDayAction(InteractionType.TouchOnly, inferIntraDayDataSourceType(this.props.source), date))
     }
 
     onListElementLongPressIn = (date: number, element: TouchingElementInfo) => {
