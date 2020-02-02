@@ -1,8 +1,20 @@
 import {DataSourceType} from '../../../measure/DataSourceSpec';
 export type StatisticsType = 'avg' | 'range' | 'total' | 'bedtime' | 'waketime';
 
-export interface IAggregatedValue{ avg: number, min: number, max: number }
+export enum CyclicTimeFrame{
+  DayOfWeek = "dow",
+  MonthOfYear = "month",
+  SeasonOfYear = "season",
+  WeekdayWeekends = "wdwe",
+}
 
+export interface IAggregatedValue {
+  avg: number;
+  min: number;
+  max: number;
+  n: number;
+  sum: number;
+}
 
 export interface IDailySummaryEntry {
   numberedDate: number;
@@ -12,40 +24,44 @@ export interface IDailySummaryEntry {
 }
 
 export interface IIntraDayStepCountLog {
-  id: string,
-  numberedDate: number,
-  hourOfDay: number,
-  value: number
+  id: string;
+  numberedDate: number;
+  hourOfDay: number;
+  value: number;
 }
 
 export interface IIntraDayHeartRatePoint {
-  id: string,
-  numberedDate: number,
-  secondOfDay: number,
-  value: number
+  id: string;
+  numberedDate: number;
+  secondOfDay: number;
+  value: number;
 }
 
 export interface IDailyNumericSummaryEntry extends IDailySummaryEntry {
   value: number;
 }
 
-export enum SleepStage{
-  Wake='wake',
-  Light='light',
-  Rem='rem',
-  Deep='deep',
-  Asleep='asleep',
-  Restless='restless',
-  Awake='awake'
+export enum SleepStage {
+  Wake = 'wake',
+  Light = 'light',
+  Rem = 'rem',
+  Deep = 'deep',
+  Asleep = 'asleep',
+  Restless = 'restless',
+  Awake = 'awake',
 }
 
 export interface IDailySleepSummaryEntry extends IDailySummaryEntry {
-    quality: number;
-    stageType: 'stages'|'simple';
+  quality: number;
+  stageType: 'stages' | 'simple';
+  lengthInSeconds: number;
+  bedTimeDiffSeconds: number;
+  wakeTimeDiffSeconds: number;
+  listOfLevels?: Array<{
+    type: SleepStage;
+    startBedtimeDiff: number;
     lengthInSeconds: number;
-    bedTimeDiffSeconds: number;
-    wakeTimeDiffSeconds: number;
-    listOfLevels?: Array<{type: SleepStage, startBedtimeDiff: number, lengthInSeconds: number}>
+  }>;
 }
 
 export interface IIntraDayLogEntry extends IDailySummaryEntry {
@@ -63,7 +79,7 @@ export interface OverviewData {
 
 export interface OverviewSourceRow {
   source: DataSourceType;
-  range: number[],
+  range: number[];
   data: any;
   today: number;
   statistics: Array<{type: StatisticsType; value: any}>;
@@ -74,33 +90,33 @@ export interface StepCountRangedData extends OverviewSourceRow {
 }
 
 export interface StepCountIntraDayData {
-  hourlySteps: Array<IIntraDayStepCountLog>
+  hourlySteps: Array<IIntraDayStepCountLog>;
 }
 
 export interface RestingHeartRateRangedData extends OverviewSourceRow {
   data: Array<IDailySummaryEntry>;
 }
 
-export interface HeartRateZoneInfo{
-  name: HeartRateZone,
-  minutes: number,
-  caloriesOut: number,
-  max: number,
-  min: number
+export interface HeartRateZoneInfo {
+  name: HeartRateZone;
+  minutes: number;
+  caloriesOut: number;
+  max: number;
+  min: number;
 }
 
-export enum HeartRateZone{
-  Peak="peak",
-  FatBurn="fat_burn",
-  Cardio="cardio",
-  OutOfRange="out"
+export enum HeartRateZone {
+  Peak = 'peak',
+  FatBurn = 'fat_burn',
+  Cardio = 'cardio',
+  OutOfRange = 'out',
 }
 
-export interface HeartRateIntraDayData{
-  points: Array<IIntraDayHeartRatePoint>,
-  restingHeartRate: number,
-  zones: Array<HeartRateZoneInfo>,
-  customZones: Array<HeartRateZoneInfo>
+export interface HeartRateIntraDayData {
+  points: Array<IIntraDayHeartRatePoint>;
+  restingHeartRate: number;
+  zones: Array<HeartRateZoneInfo>;
+  customZones: Array<HeartRateZoneInfo>;
 }
 
 export interface WeightRangedData extends OverviewSourceRow {
@@ -113,7 +129,11 @@ export interface WeightRangedData extends OverviewSourceRow {
 }
 
 export interface SleepRangedData extends OverviewSourceRow {
-    data: Array<IDailySleepSummaryEntry>
+  data: Array<IDailySleepSummaryEntry>;
+}
+
+export interface GroupedData {
+  data: Array<{timeKey: number, value:IAggregatedValue}>
 }
 
 export const STATISTICS_LABEL_AVERAGE = 'Avg.';

@@ -1,5 +1,7 @@
 import SQLite from 'react-native-sqlite-storage';
 import {SQLiteHelper} from '../../../../database/sqlite/sqlite-helper';
+import {CyclicTimeFrame} from '../../../../core/exploration/data/types';
+import stringFormat from 'string-format';
 SQLite.DEBUG(false);
 SQLite.enablePromise(true);
 
@@ -37,6 +39,37 @@ export enum FitbitLocalTableName {
   CachedIntraDayDates = 'CachedIntraDayDates',
 
   StepCountIntraDay = 'StepCountIntraDay',
+}
+
+const groupByQueryFormat =
+  'SELECT {select} FROM {tableName} WHERE {whereClause} GROUP BY {groupBy}';
+export function makeCyclicGroupQuery(
+  tableName: string,
+  start: number,
+  end: number,
+  cycleType: CyclicTimeFrame,
+  selectColumnsClause: string = "MIN(value) as min, MAX(value) as max, AVG(value) as avg, COUNT(value) as n"
+): string {
+  const base = {
+    tableName,
+    groupBy: 'timeKey',
+    whereClause: '`numberedDate` BETWEEN ' + start + ' AND ' + end
+  }
+
+  switch (cycleType) {
+    case CyclicTimeFrame.DayOfWeek:
+      return stringFormat(groupByQueryFormat, {...base,
+        select: "dayOfWeek as timeKey, " + selectColumnsClause,
+      });
+    case CyclicTimeFrame.MonthOfYear:
+        return stringFormat(groupByQueryFormat, {...base,
+            select: "month as timeKey, " + selectColumnsClause,
+          });
+    case CyclicTimeFrame.SeasonOfYear:
+      break;
+    case CyclicTimeFrame.WeekdayWeekends:
+      break;
+  }
 }
 
 const dailySummaryProperties = {
@@ -93,7 +126,10 @@ const IntraDayHeartRateInfoSchema = {
   name: FitbitLocalTableName.HeartRateIntraDayInfo,
   columns: {
     numberedDate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, primary: true},
-    restingHeartRate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, optional: true},
+    restingHeartRate: {
+      type: SQLiteHelper.SQLiteColumnType.INTEGER,
+      optional: true,
+    },
     customZones: {type: SQLiteHelper.SQLiteColumnType.TEXT, optional: true},
     zones: {type: SQLiteHelper.SQLiteColumnType.TEXT},
   },
@@ -302,8 +338,13 @@ export class FitbitLocalDbManager {
     parameters: any[],
     specifyColumns?: string[],
   ): Promise<T[]> {
-
-    const query = 'SELECT ' +  (specifyColumns!=null? specifyColumns.join(",") : "*") + ' FROM ' + tableName + ' WHERE ' + condition;
+    const query =
+      'SELECT ' +
+      (specifyColumns != null ? specifyColumns.join(',') : '*') +
+      ' FROM ' +
+      tableName +
+      ' WHERE ' +
+      condition;
     try {
       const [result] = await this._database.executeSql(query, parameters);
       if (result.rows.length > 0) {
@@ -314,6 +355,11 @@ export class FitbitLocalDbManager {
       console.log(ex);
       return [];
     }
+  }
+
+  async selectQuery<T>(query: string): Promise<T[]>{
+      const [result] = await this._database.executeSql(query)
+      return result.rows.raw()
   }
 
   async getAggregatedValue(

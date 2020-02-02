@@ -18,6 +18,7 @@ import {FitbitLocalDbManager} from './sqlite/database';
 import {FitbitIntraDayStepMeasure} from './FitbitIntraDayStepMeasure';
 import {IntraDayDataSourceType} from '../../../core/exploration/types';
 import {FitbitIntraDayHeartRateMeasure} from './FitbitIntraDayHeartRateMeasure';
+import { CyclicTimeFrame, GroupedData } from '../../../core/exploration/data/types';
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -107,6 +108,16 @@ export class FitbitService extends DataService {
       }
     }
     return null;
+  }
+
+
+  async fetchCyclicAggregatedData(dataSource: DataSourceType, start: number, end: number, cycle: CyclicTimeFrame): Promise<GroupedData> {
+    switch(dataSource){
+      case DataSourceType.StepCount:
+        return await this.dailyStepMeasure.fetchCyclicGroupedData(start, end, cycle)
+      case DataSourceType.HeartRate:
+        return await this.dailyHeartRateMeasure.fetchCyclicGroupedData(start, end, cycle)
+    }
   }
 
   async checkTokenValid(): Promise<boolean> {

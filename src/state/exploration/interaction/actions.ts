@@ -1,159 +1,220 @@
-import { ActionTypeBase } from "../../types"
-import { DataSourceType } from "../../../measure/DataSourceSpec"
-import { TouchingElementInfo, IntraDayDataSourceType } from "../../../core/exploration/types"
+import {ActionTypeBase} from '../../types';
+import {DataSourceType} from '../../../measure/DataSourceSpec';
+import {
+  TouchingElementInfo,
+  IntraDayDataSourceType,
+} from '../../../core/exploration/types';
+import { CyclicTimeFrame } from '../../../core/exploration/data/types';
 
-const ACTION_PREFIX = "exploration:interaction:"
+const ACTION_PREFIX = 'exploration:interaction:';
 
-export enum ExplorationActionType{
-    MemoUiStatus="exploration:interaction:memoUIStatus",
-    SetRange="exploration:interaction:setRange",
-    SetDataSource="exploration:interaction:setDataSource",
-    SetIntraDayDataSource="exploration:interaction:setIntraDayDataSource",
-    SetDate="exploration:interaction:setDate",
-    
-    GoToBrowseRange="exploration:interaction:goToBrowseRange",
-    GoToBrowseOverview = "exploration:interaction:goToBrowseOverview",
-    GoToBrowseDay = "exploration:interaction:goToBrowseDay",
+export enum ExplorationActionType {
+  MemoUiStatus = 'exploration:interaction:memoUIStatus',
+  SetRange = 'exploration:interaction:setRange',
+  SetDataSource = 'exploration:interaction:setDataSource',
+  SetIntraDayDataSource = 'exploration:interaction:setIntraDayDataSource',
+  SetDate = 'exploration:interaction:setDate',
 
-    //History 
-    RestorePreviousInfo="exploration:interaction:restorePreviousInfo",
-    GoBack="exploration:interaction:goBack",
-    
-    //Touch
-    SetTouchElementInfo="exploration:interaction:setTouchElementInfo"
+  GoToBrowseRange = 'exploration:interaction:goToBrowseRange',
+  GoToBrowseOverview = 'exploration:interaction:goToBrowseOverview',
+  GoToBrowseDay = 'exploration:interaction:goToBrowseDay',
+  GoToComparisonCyclic = 'exploration:interaction:goToComparisonCyclic',
+
+  //History
+  RestorePreviousInfo = 'exploration:interaction:restorePreviousInfo',
+  GoBack = 'exploration:interaction:goBack',
+
+  //Touch
+  SetTouchElementInfo = 'exploration:interaction:setTouchElementInfo',
 }
 
-export enum InteractionType{
-    TouchOnly="touchonly",
-    Multimodal="multimodal"
+export enum InteractionType {
+  TouchOnly = 'touchonly',
+  Multimodal = 'multimodal',
 }
 
-interface ExplorationActionBase extends ActionTypeBase{
-    interactionType: InteractionType
+interface ExplorationActionBase extends ActionTypeBase {
+  interactionType: InteractionType;
 }
 
-export interface MemoUIStatusAction extends ActionTypeBase{
-    key: string,
-    value: any
+export interface MemoUIStatusAction extends ActionTypeBase {
+  key: string;
+  value: any;
 }
 
-export interface SetRangeAction extends ExplorationActionBase{
-    range: [number, number],
-    key?: string
+export interface SetRangeAction extends ExplorationActionBase {
+  range: [number, number];
+  key?: string;
 }
 
-export interface SetDateAction extends ExplorationActionBase{
-    date: number
+export interface SetDateAction extends ExplorationActionBase {
+  date: number;
 }
 
-export interface SetDataSourceAction extends ExplorationActionBase{
-    dataSource: DataSourceType
+export interface SetDataSourceAction extends ExplorationActionBase {
+  dataSource: DataSourceType;
 }
 
-export interface SetIntraDayDataSourceAction extends ExplorationActionBase{
-    intraDayDataSource: IntraDayDataSourceType
+export interface SetIntraDayDataSourceAction extends ExplorationActionBase {
+  intraDayDataSource: IntraDayDataSourceType;
 }
 
-export interface GoToBrowseRangeAction extends ExplorationActionBase{
+export interface GoToBrowseRangeAction extends ExplorationActionBase {
+  dataSource?: DataSourceType;
+  range?: [number, number];
+}
+
+export interface GoToBrowseDayAction extends ExplorationActionBase {
+  intraDayDataSource?: IntraDayDataSourceType;
+  date?: number;
+}
+
+export interface GoToComparisonCyclicAction extends ExplorationActionBase {
     dataSource?: DataSourceType,
-    range?:[number, number]
+    range?: [number, number],
+    cycleType?: CyclicTimeFrame
 }
 
-export interface GoToBrowseDayAction extends ExplorationActionBase{
-    intraDayDataSource?: IntraDayDataSourceType,
-    date?: number
+export interface SetTouchingElementInfoAction extends ActionTypeBase {
+  info: TouchingElementInfo;
 }
 
-export interface SetTouchingElementInfoAction extends ActionTypeBase{
-    info: TouchingElementInfo
+export type ExplorationAction =
+  | ActionTypeBase
+  | ExplorationActionBase
+  | SetRangeAction
+  | SetDateAction
+  | SetIntraDayDataSourceAction
+  | GoToBrowseRangeAction
+  | GoToBrowseDayAction
+  | GoToComparisonCyclicAction
+  | MemoUIStatusAction
+  | SetDataSourceAction
+  | SetTouchingElementInfoAction;
+
+export function createSetRangeAction(
+  interactionType: InteractionType,
+  range: [number, number],
+  key?: string,
+): SetRangeAction {
+  return {
+    type: ExplorationActionType.SetRange,
+    interactionType,
+    range,
+    key,
+  };
 }
 
-export type ExplorationAction = ActionTypeBase | ExplorationActionBase | SetRangeAction | SetDateAction | SetIntraDayDataSourceAction | GoToBrowseRangeAction | GoToBrowseDayAction | MemoUIStatusAction | SetDataSourceAction | SetTouchingElementInfoAction
+export function createGoToBrowseRangeAction(
+  interactionType: InteractionType,
+  dataSource?: DataSourceType,
+  range?: [number, number],
+): GoToBrowseRangeAction {
+  return {
+    type: ExplorationActionType.GoToBrowseRange,
+    interactionType,
+    range,
+    dataSource,
+  };
+}
 
-export function createSetRangeAction(interactionType: InteractionType, range: [number, number], key?: string): SetRangeAction{
+export function createGoToBrowseOverviewAction(
+  interactionType: InteractionType,
+): ExplorationActionBase {
+  return {
+    type: ExplorationActionType.GoToBrowseOverview,
+    interactionType,
+  };
+}
+
+export function createGoToBrowseDayAction(
+  interactionType: InteractionType,
+  intraDayDataSource?: IntraDayDataSourceType,
+  date?: number,
+): GoToBrowseDayAction {
+  return {
+    type: ExplorationActionType.GoToBrowseDay,
+    interactionType,
+    intraDayDataSource,
+    date,
+  };
+}
+
+export function createGoToComparisonCyclicAction(
+    interactionType: InteractionType,
+    dataSource?: DataSourceType,
+    range?: [number, number],
+    cycleType?: CyclicTimeFrame
+): GoToComparisonCyclicAction{
     return {
-        type: ExplorationActionType.SetRange,
+        type: ExplorationActionType.GoToComparisonCyclic,
         interactionType,
+        dataSource,
         range,
-        key
+        cycleType
     }
 }
 
-export function createGoToBrowseRangeAction(interactionType: InteractionType, dataSource?: DataSourceType, range?: [number,number]): GoToBrowseRangeAction{
-    return {
-        type: ExplorationActionType.GoToBrowseRange,
-        interactionType,
-        range,
-        dataSource
-    }
+export function createRestorePreviousInfoAction(): ActionTypeBase {
+  return {
+    type: ExplorationActionType.RestorePreviousInfo,
+  };
 }
 
-export function createGoToBrowseOverviewAction(interactionType: InteractionType): ExplorationActionBase{
-    return {
-        type: ExplorationActionType.GoToBrowseOverview,
-        interactionType
-    }
+export function memoUIStatus(key: string, value: any): MemoUIStatusAction {
+  return {
+    type: ExplorationActionType.MemoUiStatus,
+    key,
+    value,
+  };
 }
 
-export function createGoToBrowseDayAction(interactionType: InteractionType, intraDayDataSource?: IntraDayDataSourceType, date?: number): GoToBrowseDayAction{
-    return {
-        type: ExplorationActionType.GoToBrowseDay,
-        interactionType,
-        intraDayDataSource,
-        date
-    }
+export function setDataSourceAction(
+  interactionType: InteractionType,
+  dataSource: DataSourceType,
+): SetDataSourceAction {
+  return {
+    type: ExplorationActionType.SetDataSource,
+    interactionType,
+    dataSource,
+  };
 }
 
-export function createRestorePreviousInfoAction(): ActionTypeBase{
-    return {
-        type: ExplorationActionType.RestorePreviousInfo
-    }
+export function setIntraDayDataSourceAction(
+  interactionType: InteractionType,
+  intraDayDataSource: IntraDayDataSourceType,
+): SetIntraDayDataSourceAction {
+  return {
+    type: ExplorationActionType.SetIntraDayDataSource,
+    interactionType,
+    intraDayDataSource,
+  };
 }
 
-export function memoUIStatus(key: string, value: any): MemoUIStatusAction{
-    return {
-        type: ExplorationActionType.MemoUiStatus,
-        key,
-        value
-    }
+export function setDateAction(
+  interactionType: InteractionType,
+  date: number,
+): SetDateAction {
+  return {
+    type: ExplorationActionType.SetDate,
+    interactionType,
+    date,
+  };
 }
 
-export function setDataSourceAction(interactionType: InteractionType, dataSource: DataSourceType): SetDataSourceAction{
-    return {
-        type: ExplorationActionType.SetDataSource,
-        interactionType,
-        dataSource
-    }
+export function setTouchElementInfo(
+  info: TouchingElementInfo,
+): SetTouchingElementInfoAction {
+  return {
+    type: ExplorationActionType.SetTouchElementInfo,
+    info,
+  };
 }
 
-export function setIntraDayDataSourceAction(interactionType: InteractionType, intraDayDataSource: IntraDayDataSourceType): SetIntraDayDataSourceAction{
-    return {
-        type: ExplorationActionType.SetIntraDayDataSource,
-        interactionType,
-        intraDayDataSource
-    }
-}
-
-
-export function setDateAction(interactionType: InteractionType, date: number): SetDateAction{
-    return {
-        type: ExplorationActionType.SetDate,
-        interactionType,
-        date 
-    }
-}
-
-export function setTouchElementInfo(info: TouchingElementInfo): SetTouchingElementInfoAction{
-    return {
-        type: ExplorationActionType.SetTouchElementInfo,
-        info
-    }
-}
-
-export function goBackAction(): ActionTypeBase{
-    return {
-        type:ExplorationActionType.GoBack
-    }
+export function goBackAction(): ActionTypeBase {
+  return {
+    type: ExplorationActionType.GoBack,
+  };
 }
 
 //===================================================

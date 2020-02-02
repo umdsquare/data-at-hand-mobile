@@ -102,6 +102,11 @@ export function generateHeaderView(props: ExplorationProps): any {
 
             </HeaderContainer>
         case ExplorationType.C_Cyclic:
+            return <HeaderContainer>
+                {generateComparisonTypeRow(props)}
+                {generateDataSourceRow(props)}
+                {generateRangeBar(props)}
+            </HeaderContainer>
             break;
         case ExplorationType.C_CyclicDetail:
             break;
@@ -118,7 +123,7 @@ const HeaderContainer = (prop: { children?: any, }) => {
     })
 
     return <SafeAreaView>
-        { backStackSize > 0 &&
+        {backStackSize > 0 &&
             <Button title="Back"
                 {...backButtonProps}
                 onPress={() => {
@@ -139,9 +144,9 @@ function generateRangeBar(props: ExplorationProps, key?: ParameterKey): any {
 
 function generateDateBar(props: ExplorationProps): any {
     const date = explorationInfoHelper.getParameterValue<number>(props.explorationState.info, ParameterType.Date)
-    return <DateBar date={date !=null? date : null} onDateChanged={(date: number, interactionType: InteractionType)=>{
+    return <DateBar date={date != null ? date : null} onDateChanged={(date: number, interactionType: InteractionType) => {
         props.dispatchCommand(setDateAction(interactionType, date))
-    }}/>
+    }} />
 }
 
 function generateDataSourceRow(props: ExplorationProps): any {
@@ -171,11 +176,11 @@ function generateIntraDayDataSourceRow(props: ExplorationProps): any {
     const supportedIntraDayDataSourceTypes = []
     dataSourceManager.supportedDataSources.forEach(s => {
         const inferred = inferIntraDayDataSourceType(s.type)
-        if(supportedIntraDayDataSourceTypes.indexOf(inferred) === -1 && inferred != null){
+        if (supportedIntraDayDataSourceTypes.indexOf(inferred) === -1 && inferred != null) {
             supportedIntraDayDataSourceTypes.push(inferred)
         }
     })
-    
+
     return <CategoricalRow title="Data Source" showBorder={true} value={sourceTypeName}
         icon={<DataSourceIcon type={inferDataSource(intraDaySourceType)} color="white" size={20} />}
         onSwipeLeft={() => {
@@ -195,5 +200,5 @@ function generateIntraDayDataSourceRow(props: ExplorationProps): any {
 }
 
 function generateComparisonTypeRow(props: ExplorationProps): any {
-    return <CategoricalRow title="Comparison Type" showBorder={false} value="Two Date Ranges" />
+    return <CategoricalRow title="Comparison Type" showBorder={false} value="Days of the Week" />
 }

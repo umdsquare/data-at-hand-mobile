@@ -4,12 +4,12 @@ import { LayoutRectangle } from 'react-native';
 import { DataSourceType } from '../../measure/DataSourceSpec';
 
 export enum ExplorationType {
-  B_Ovrvw,
-  B_Range,
-  B_Day,
-  C_Cyclic,
-  C_CyclicDetail,
-  C_TwoRanges,
+  B_Ovrvw="b_overview",
+  B_Range="b_range",
+  B_Day="b_day",
+  C_Cyclic="c_cyclic",
+  C_CyclicDetail="c_cyclic_detail",
+  C_TwoRanges="c_two_ranges",
 }
 
 export enum ExplorationMode {

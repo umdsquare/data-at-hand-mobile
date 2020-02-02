@@ -18,6 +18,7 @@ import {
   GoToBrowseDayAction,
   SetDateAction,
   SetIntraDayDataSourceAction,
+  GoToComparisonCyclicAction,
 } from './actions';
 import {explorationInfoHelper} from '../../../core/exploration/ExplorationInfoHelper';
 import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
@@ -237,6 +238,23 @@ export const explorationStateReducer = (
           newState.info.type = ExplorationType.B_Ovrvw;
         }
         break;
+
+      case ExplorationActionType.GoToComparisonCyclic:
+        const comparisonCyclicAction = action as GoToComparisonCyclicAction
+        {
+          const dataSource = comparisonCyclicAction.dataSource || explorationInfoHelper.getParameterValue(newState.info, ParameterType.DataSource)
+          const range = comparisonCyclicAction.range || explorationInfoHelper.getParameterValue(newState.info, ParameterType.Range)
+          const cycleType = comparisonCyclicAction.cycleType || explorationInfoHelper.getParameterValue(newState.info, ParameterType.CycleType)
+          if(dataSource && range && cycleType){
+            newState.info.type = ExplorationType.C_Cyclic
+            newState.info.values = []
+            explorationInfoHelper.setParameterValue(newState.info, dataSource, ParameterType.DataSource)
+            explorationInfoHelper.setParameterValue(newState.info, range, ParameterType.Range)
+            explorationInfoHelper.setParameterValue(newState.info, cycleType, ParameterType.CycleType)
+          }else return state
+        }
+        break;
+      
       default:
         return state;
     }
