@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, LayoutRectangle } from 'react-native';
+import { View, Text, StyleSheet, LayoutRectangle, Platform } from 'react-native';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '../../../../../../state/types';
 import { IDailySleepSummaryEntry, SleepStage } from '../../../../../../core/exploration/data/types';
@@ -14,9 +14,9 @@ import Colors from '../../../../../../style/Colors';
 import { DateTimeHelper } from '../../../../../../time';
 import { DurationText } from '../../../../../common/DurationText';
 
-const xAxisHeight = 35
+const xAxisHeight = 30
 const yAxisWidth = 80
-const topPadding = 0
+const topPadding = 5
 const rightPadding = 20
 
 const stagesSet = [SleepStage.Wake, SleepStage.Rem, SleepStage.Light, SleepStage.Deep]
@@ -42,14 +42,20 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         marginLeft: Sizes.horizontalPadding,
         marginRight: Sizes.horizontalPadding,
-        marginBottom: Sizes.horizontalPadding,
+        marginBottom: Sizes.verticalPadding,
     },
     stageLengthContainerStyle: {
-        marginTop: Sizes.horizontalPadding,
+        marginTop: Sizes.verticalPadding,
         marginLeft: Sizes.horizontalPadding,
         marginRight: Sizes.horizontalPadding,
-        marginBottom: Sizes.horizontalPadding,
+        marginBottom: Sizes.verticalPadding,
     },
+    stageLengthRowStyle: {
+        flexDirection: 'row', alignItems: 'center',
+        paddingTop: Platform.OS === 'ios'? 1.5 : 0,
+        paddingBottom: Platform.OS === 'ios'? 1.5 : 0
+    },
+    
     subTitleStyle: { ...commonIntraDayPanelStyles.summaryTextTitleStyle, padding: Sizes.horizontalPadding, paddingBottom: 0 },
     summaryTitleStyle: { ...commonIntraDayPanelStyles.summaryTextTitleStyle, padding: 0, marginBottom: 6},
     summaryGlobalTextStyle: {...commonIntraDayPanelStyles.summaryTextGlobalStyle, textAlign: 'left', marginBottom: 2*Sizes.horizontalPadding},
@@ -182,11 +188,7 @@ export const SleepIntraDayPanel = () => {
                     stageSet.map(stage => {
                         const length = fragmentsByGroup.has(stage) === true ? sum(fragmentsByGroup.get(stage), elm => elm.lengthInSeconds) : 0
 
-                        return <View style={{
-                            flexDirection: 'row', alignItems: 'center',
-                            paddingTop: 3,
-                            paddingBottom: 3
-                        }}>
+                        return <View key={stage} style={styles.stageLengthRowStyle}>
                             <Text style={{
                                 color: stageSpecs[stage].color,
                                 fontSize: Sizes.smallFontSize,

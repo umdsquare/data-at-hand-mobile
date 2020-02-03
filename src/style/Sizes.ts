@@ -6,7 +6,7 @@ const Sizes = {
     navHeaderSize: Platform.OS ==='ios'? 56 : 60,
 
     horizontalPadding: 16,
-    verticalPadding: 12,
+    verticalPadding: Platform.OS === 'ios'? 16 : 12,
 
     hugeTitleFontSize: 28,
     BigFontSize: 22,
