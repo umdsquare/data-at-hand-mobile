@@ -12,6 +12,8 @@ import { getDomainAndTickFormat } from './common';
 import { CycleChartFrame } from './CycleChartFrame';
 import { RangeValueElement } from './RangeValueElement';
 import { RangeValueElementLegend } from './RangeValueElementLegend';
+import { useDispatch } from 'react-redux';
+import { createGoToBrowseRangeAction } from '../../../../state/exploration/interaction/actions';
 
 
 const xAxisHeight = 100
@@ -43,6 +45,7 @@ export const RangeValueCyclicChart = (props: {
     }
 
     const { domain, tickFormat } = getDomainAndTickFormat(props.cycleType)
+    const dispatch = useDispatch()
 
     const scaleX = scaleBand<number>().domain(domain).range([0, chartArea.width]).padding(0.35)
     let scaleY = scaleLinear()
@@ -76,7 +79,18 @@ export const RangeValueCyclicChart = (props: {
             >
                 <G x={chartArea.x} y={chartArea.y}>
                     {
-                        props.values.map(value => <RangeValueElement key={value.timeKey} scaleX={scaleX} scaleY={scaleY} value={value} />)
+                        props.values.map(value => 
+                        <RangeValueElement key={value.timeKey} scaleX={scaleX} scaleY={scaleY} value={value} 
+                            onClick={(timeKey)=>{
+                                //TODO go to Cyclic Detail
+                            }}
+                            onLongPressIn={(timeKey)=>{
+                                //TODO tooltip show
+                            }}
+                            onLongPressOut={(timeKey)=>{
+                                //TODO tooltip end
+                            }}
+                        />)
                     }
                 </G>
             </CycleChartFrame>

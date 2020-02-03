@@ -25,6 +25,7 @@ import { min, max } from 'd3-array'
 import { SingleValueElement } from '../../../../exploration/visualization/compare/SingleValueElement'
 import { RangeValueElement } from '../../../../exploration/visualization/compare/RangeValueElement'
 import { startOfYear, isSameYear, getDayOfYear, isSameMonth, startOfMonth, endOfMonth, format } from 'date-fns'
+import { ExplorationAction, createGoToBrowseRangeAction, InteractionType } from '../../../../../state/exploration/interaction/actions'
 
 const INDEX_AGGREGATED = 0
 const INDEX_SUM = 1
@@ -41,12 +42,12 @@ function formatRange(range: [number, number]): string[] {
     const startDate = DateTimeHelper.toDate(range[0])
     const endDate = DateTimeHelper.toDate(range[1])
 
-    if(isSameYear(startDate, endDate) && DateTimeHelper.getMonth(range[0]) === 1 && DateTimeHelper.getDayOfMonth(range[0]) === 1 && DateTimeHelper.getMonth(range[1]) === 12 && DateTimeHelper.getDayOfMonth(range[1]) === 31){
+    if (isSameYear(startDate, endDate) && DateTimeHelper.getMonth(range[0]) === 1 && DateTimeHelper.getDayOfMonth(range[0]) === 1 && DateTimeHelper.getMonth(range[1]) === 12 && DateTimeHelper.getDayOfMonth(range[1]) === 31) {
         //yaer
         return [DateTimeHelper.getYear(range[0]).toString()]
-    }else if(isSameMonth(startDate, endDate) && DateTimeHelper.toNumberedDateFromDate(startOfMonth(startDate)) === range[0] &&  DateTimeHelper.toNumberedDateFromDate(endOfMonth(endDate)) === range[1]){
+    } else if (isSameMonth(startDate, endDate) && DateTimeHelper.toNumberedDateFromDate(startOfMonth(startDate)) === range[0] && DateTimeHelper.toNumberedDateFromDate(endOfMonth(endDate)) === range[1]) {
         return [format(startDate, "MMMM yyyy")]
-    }else return [format(startDate, "MMM dd, yyyy -"), format(endDate, "MMM dd, yyyy")]
+    } else return [format(startDate, "MMM dd, yyyy -"), format(endDate, "MMM dd, yyyy")]
 }
 
 const styles = StyleSheet.create({
@@ -78,7 +79,8 @@ interface Props {
     data?: RangeAggregatedComparisonData<IAggregatedRangeValue | IAggregatedValue>,
     source?: DataSourceType,
     sumSupported?: boolean,
-    measureUnitType?: MeasureUnitType
+    measureUnitType?: MeasureUnitType,
+    dispatchExplorationAction?: (ExplorationAction) => void
 }
 
 interface State {
@@ -112,6 +114,21 @@ class TwoRangeComparisonMainPanel extends React.Component<Props, State>{
             aggregationSettingIndex: index
         })
     }
+
+    private onElementClick = (timeKey: number) => {
+        this.props.dispatchExplorationAction(createGoToBrowseRangeAction(InteractionType.TouchOnly, null, 
+            this.props.data.data[timeKey].range
+            ))
+    }
+
+    private onElementLongPressIn = (timeKey: number) => {
+        //TODO show tooltip
+    }
+
+    private onElementLongPressOut = (timeKey: number) => {
+        //TODO hide tooltip
+    }
+
 
     render() {
         const aggregationSettingIndex = this.props.sumSupported === true ? this.state.aggregationSettingIndex : INDEX_AGGREGATED
@@ -241,16 +258,16 @@ class TwoRangeComparisonMainPanel extends React.Component<Props, State>{
                                 key={rangeIndex}
                                 y={12}
                                 x={scaleX(rangeIndex) + scaleX.bandwidth() * .5}>
-                                    {formatRange(this.props.data.data[rangeIndex].range).map((chunk, i) => 
+                                {formatRange(this.props.data.data[rangeIndex].range).map((chunk, i) =>
                                     <SvgText
-                                    key={i}
-                                    textAnchor={"middle"}
-                                    alignmentBaseline="hanging"
-                                    fontSize={Sizes.smallFontSize}
-                                    fill={Colors.textColorLight}
-                                    y={i*(Sizes.smallFontSize*1.5)}
+                                        key={i}
+                                        textAnchor={"middle"}
+                                        alignmentBaseline="hanging"
+                                        fontSize={Sizes.smallFontSize}
+                                        fill={Colors.textColorLight}
+                                        y={i * (Sizes.smallFontSize * 1.5)}
                                     >{chunk}</SvgText>)}
-                                    </G>)
+                            </G>)
                         }
                     </G>
 
@@ -280,6 +297,9 @@ class TwoRangeComparisonMainPanel extends React.Component<Props, State>{
                                             maxB: valueConverter(d.value["maxB"]),
                                         }}
                                         scaleX={scaleX} scaleY={scaleY}
+                                        onClick={this.onElementClick}
+                                        onLongPressIn={this.onElementLongPressIn}
+                                        onLongPressOut={this.onElementLongPressOut}
                                     />
                                 } else return <SingleValueElement key={i}
                                     value={{
@@ -290,7 +310,13 @@ class TwoRangeComparisonMainPanel extends React.Component<Props, State>{
                                         min: valueConverter(d.value["min"]),
                                         sum: valueConverter(d.value["sum"])
                                     }}
-                                    scaleX={scaleX} scaleY={scaleY} maxWidth={40} />
+                                    scaleX={scaleX} scaleY={scaleY} maxWidth={40}
+                                    
+                                    onClick={this.onElementClick}
+                                    onLongPressIn={this.onElementLongPressIn}
+                                    onLongPressOut={this.onElementLongPressOut}
+                                    
+                                    />
                             }) : this.props.data.data.map((d, i) => {
                                 return <Rect
                                     key={i}
@@ -314,6 +340,7 @@ class TwoRangeComparisonMainPanel extends React.Component<Props, State>{
 function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props {
     return {
         ...ownProps,
+        dispatchExplorationAction: (action) => dispatch(action)
     }
 }
 
