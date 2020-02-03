@@ -1,10 +1,10 @@
-import {createStackNavigator, HeaderBackButton} from 'react-navigation-stack';
-import {ExplorationScreen} from './pages/exploration/ExplorationScreen';
-import {createAppContainer} from 'react-navigation';
-import {SettingsScreen} from './pages/settings/SettingsScreen';
-import {ServiceSelectionScreen} from './pages/sources/service-wizard/ServiceSelectionScreen';
-import { Button } from 'react-native-elements';
+import { createStackNavigator, HeaderBackButton, TransitionPresets } from 'react-navigation-stack';
+import { ExplorationScreen } from './pages/exploration/ExplorationScreen';
+import { createAppContainer } from 'react-navigation';
+import { SettingsScreen } from './pages/settings/SettingsScreen';
+import { ServiceSelectionScreen } from './pages/sources/service-wizard/ServiceSelectionScreen';
 import React from 'react';
+import { Platform } from 'react-native';
 
 const MainStack = createStackNavigator(
   {
@@ -20,7 +20,7 @@ const MainStack = createStackNavigator(
         navigationOptions: (navigation) => ({
           title: 'Settings',
           headerBackTitle: 'Back',
-          headerLeft: ()=> <HeaderBackButton onPress={navigation.navigation.dismiss}/>
+          headerLeft: () => <HeaderBackButton onPress={navigation.navigation.dismiss} />
         }),
       },
       ServiceWizardModal: {
@@ -30,12 +30,21 @@ const MainStack = createStackNavigator(
           headerBackTitle: "Back"
         })
       }
-    }, {initialRouteName: "Main"}),
+    }, {
+      initialRouteName: "Main",
+      defaultNavigationOptions: {
+        ...TransitionPresets.SlideFromRightIOS,
+        headerStatusBarHeight: Platform.OS === 'ios'? 4 : 0
+      }
+    }),
   },
   {
     initialRouteName: 'Home',
-    headerMode: 'none'
-  },
+    headerMode: 'none',
+    defaultNavigationOptions: {
+      ...TransitionPresets.ModalPresentationIOS
+    }
+  }
 );
 
 export default createAppContainer(MainStack);

@@ -92,7 +92,6 @@ class SettingsScreen extends React.PureComponent<Props, State>{
 
     render() {
         return <View>
-            <StatusBar barStyle="dark-content" />
             
             <SettingsRow title="Service" value={DataServiceManager.getServiceByKey(this.props.selectedServiceKey).name} 
                 onClick={this.onPressServiceButton}/>
