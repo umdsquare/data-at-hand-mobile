@@ -7,8 +7,8 @@ import { ExplorationState } from "../../../state/exploration/interaction/reducer
 import { ThunkDispatch } from "redux-thunk";
 import { ReduxAppState } from "../../../state/types";
 import { connect } from "react-redux";
-import { generateHeaderView } from "./parts/header";
 import { BottomBar } from "./BottomBar";
+import { ExplorationViewHeader} from '../exploration/parts/header';
 import { explorationInfoHelper } from "../../../core/exploration/ExplorationInfoHelper";
 import { DataServiceManager } from "../../../system/DataServiceManager";
 import { ExplorationInfo, ExplorationType, ExplorationMode } from "../../../core/exploration/types";
@@ -158,9 +158,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
         return <View style={StyleTemplates.screenDefaultStyle}>
             <StatusBar barStyle="light-content" backgroundColor={Colors.headerBackground} />
             <View style={styles.headerContainerStyle}>
-                {
-                    generateHeaderView(this.props)
-                }
+                    <ExplorationViewHeader {...this.props}/>
             </View>
             <View style={styles.mainContainerStyle}>
                 {/* main data panel ===================================================================*/}

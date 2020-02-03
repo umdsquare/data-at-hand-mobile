@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ExplorationType, ParameterKey, ParameterType, IntraDayDataSourceType, getIntraDayDataSourceName, inferIntraDayDataSourceType, inferDataSource } from "../../../../core/exploration/types";
-import { SafeAreaView, View, Text, StyleSheet, TextStyle, ViewStyle } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, TextStyle, ViewStyle, LayoutAnimation } from 'react-native';
 import { CategoricalRow } from '../../../exploration/CategoricalRow';
 import { DataSourceIcon } from '../../../common/DataSourceIcon';
 import { ExplorationProps } from '../ExplorationScreen';
@@ -76,6 +76,18 @@ const backButtonProps = {
     } as TextStyle
 }
 
+export const ExplorationViewHeader = (props: ExplorationProps) => {
+    useEffect(() => {
+        LayoutAnimation.configureNext(
+            LayoutAnimation.create(
+                500, LayoutAnimation.Types.easeInEaseOut, "opacity")
+        )
+
+    }, [props.explorationState.info.type])
+
+    return generateHeaderView(props)
+}
+
 export function generateHeaderView(props: ExplorationProps): any {
     switch (props.explorationState.info.type) {
         case ExplorationType.B_Ovrvw:
@@ -145,7 +157,7 @@ function generateRangeBar(props: ExplorationProps, key?: ParameterKey, showBorde
     const range = explorationInfoHelper.getParameterValue(props.explorationState.info, ParameterType.Range, key)
     return <DateRangeBar from={range && range[0]} to={range && range[1]} onRangeChanged={(from, to, xType) => {
         props.dispatchCommand(createSetRangeAction(xType, [from, to], key))
-    }} showBorder={showBorder}/>
+    }} showBorder={showBorder} />
 }
 
 function generateDateBar(props: ExplorationProps): any {
@@ -210,17 +222,17 @@ function generateCyclicComparisonTypeRow(props: ExplorationProps): any {
     const cycles = Object.keys(cyclicTimeFrameSpecs)
 
     return <CategoricalRow title="Group By" showBorder={true} value={cyclicTimeFrameSpecs[cycleType].name}
-        onSwipeLeft={()=>{
+        onSwipeLeft={() => {
             let currentIndex = cycles.indexOf(cycleType)
             currentIndex--
-            if(currentIndex < 0){
+            if (currentIndex < 0) {
                 currentIndex = cycles.length - 1
             }
             props.dispatchCommand(setCycleTypeAction(InteractionType.TouchOnly, cycles[currentIndex] as any))
         }}
 
-        onSwipeRight={()=>{
-            const currentIndex = ( cycles.indexOf(cycleType) + 1 ) % cycles.length
+        onSwipeRight={() => {
+            const currentIndex = (cycles.indexOf(cycleType) + 1) % cycles.length
             props.dispatchCommand(setCycleTypeAction(InteractionType.TouchOnly, cycles[currentIndex] as any))
         }}
     />
