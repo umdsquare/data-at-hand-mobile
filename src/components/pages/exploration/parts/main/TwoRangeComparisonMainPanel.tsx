@@ -33,7 +33,7 @@ const SEGEMENTED_VALUES = ["Daily Average", "Total"]
 
 const noop = (a) => a
 
-const xAxisHeight = 100
+const xAxisHeight = 70
 const yAxisWidth = 70
 const topPadding = 10
 const rightPadding = 20
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     },
 
     androidButtonGroupWrapperStyle: { margin: Sizes.horizontalPadding * 0.5 },
-    androidButtonGroupContainerStyle: { borderRadius: 8 },
+    androidButtonGroupContainerStyle: { borderRadius: 8, height: 32 },
     androidButtonGroupTextStyle: {
         fontSize: Sizes.smallFontSize,
     },
@@ -69,8 +69,8 @@ const styles = StyleSheet.create({
     androidButtonGroupSelectedTextStyle: { color: Colors.textColorDark, fontWeight: '700' },
     androidButtonGroupButtonStyle: { backgroundColor: "#76768025" },
 
-    rangeLegendContainerStyle: { alignItems: 'flex-end', padding: Sizes.horizontalPadding, paddingLeft: 0, paddingRight: 0 },
-    singleLegendContainerStyle: { alignItems: 'flex-end', padding: Sizes.horizontalPadding },
+    rangeLegendContainerStyle: { alignItems: 'flex-end', padding: Sizes.verticalPadding, paddingLeft: 0, paddingRight: 0 },
+    singleLegendContainerStyle: { alignItems: 'flex-end', padding: Sizes.verticalPadding, paddingLeft: Sizes.horizontalPadding, paddingRight: Sizes.horizontalPadding },
 
     chartContainerStyleWithoutLegend: { ...StyleTemplates.fillFlex, marginTop: 20 }
 })
