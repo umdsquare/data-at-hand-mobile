@@ -13,7 +13,7 @@ import { connect } from "react-redux";
 import { DataSourceType } from "../../../../measure/DataSourceSpec";
 import { explorationInfoHelper } from "../../../../core/exploration/ExplorationInfoHelper";
 
-const CLICK_THRESHOLD_MILLIS = 150
+const CLICK_THRESHOLD_MILLIS = 300
 
 interface Props {
     chartArea: LayoutRectangle,
@@ -140,7 +140,6 @@ class GroupWithTouchInteraction extends React.Component<Props, State>{
                 }, CLICK_THRESHOLD_MILLIS + 10)
                 break;
             case "move":
-
                 if (this.state.touchedDate !== date) {
                     //date changed
                     this.setState({
@@ -152,8 +151,8 @@ class GroupWithTouchInteraction extends React.Component<Props, State>{
                 }
                 break;
             case "end":
-
-                if (this.state.touchStartedAt != null && Date.now() - this.state.touchStartedAt < CLICK_THRESHOLD_MILLIS && gestureState.moveX < 50 && gestureState.moveY < 50) {
+                
+                if (this.state.touchStartedAt != null && Date.now() - this.state.touchStartedAt < CLICK_THRESHOLD_MILLIS && this.state.touchedDate === date) {
                     this.props.onDateClick && this.props.onDateClick(date)
                     this.props.goToDayDetail(date)
                     console.log("click")
@@ -184,7 +183,11 @@ class GroupWithTouchInteraction extends React.Component<Props, State>{
         }
 
         return <G {...this.props.chartArea} {...this.chartAreaResponder.panHandlers}>
+            
             <Rect x={0} y={0} width={this.props.chartArea.width} height={this.props.chartArea.height} fill="transparent" />
+            {
+                this.state.touchedDate && !linkedDate && <Rect fill="#00000015" x={this.props.scaleX(this.state.touchedDate)} width={this.props.scaleX.bandwidth()} height={this.props.chartArea.height} />
+            }
             {
                 linkedDate && <Rect fill="#00000010" strokeWidth={1} stroke={Colors.accent} x={this.props.scaleX(linkedDate)} width={this.props.scaleX.bandwidth()} height={this.props.chartArea.height} />
             }
