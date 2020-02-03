@@ -1,6 +1,6 @@
 import { PropsWithNavigation } from "../../../PropsWithNavigation";
 import React from "react";
-import { StatusBar, View, StyleSheet, Platform, LayoutAnimation } from "react-native";
+import { StatusBar, View, StyleSheet, Platform, LayoutAnimation, BackHandler } from "react-native";
 import Colors from "../../../style/Colors";
 import { StyleTemplates } from "../../../style/Styles";
 import { ExplorationState } from "../../../state/exploration/interaction/reducers";
@@ -13,7 +13,7 @@ import { explorationInfoHelper } from "../../../core/exploration/ExplorationInfo
 import { DataServiceManager } from "../../../system/DataServiceManager";
 import { ExplorationInfo, ExplorationType, ExplorationMode } from "../../../core/exploration/types";
 import { ExplorationDataState, startLoadingForInfo } from "../../../state/exploration/data/reducers";
-import { ExplorationAction, InteractionType, createGoToBrowseOverviewAction, createRestorePreviousInfoAction, createGoToComparisonCyclicAction, createGoToComparisonTwoRangesAction } from "../../../state/exploration/interaction/actions";
+import { ExplorationAction, InteractionType, createGoToBrowseOverviewAction, createRestorePreviousInfoAction, createGoToComparisonCyclicAction, createGoToComparisonTwoRangesAction, goBackAction } from "../../../state/exploration/interaction/actions";
 import { Button } from "react-native-elements";
 import { Sizes } from "../../../style/Sizes";
 import { OverviewMainPanel } from "./parts/main/OverviewMainPanel";
@@ -104,7 +104,16 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                         }} />
     */
 
+    private onHardwareBackPress = ()=>{
+        if(this.props.explorationState.backNavStack.length > 0){
+            this.props.dispatchCommand(goBackAction())
+            return true
+        }else return false
+    }
+
     componentDidMount() {
+
+        BackHandler.addEventListener('hardwareBackPress', this.onHardwareBackPress)
 
         if (this.props.selectedServiceKey) {
             DataServiceManager.getServiceByKey(this.props.selectedServiceKey).activateInSystem().then(() => {
@@ -121,6 +130,10 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
             console.log("should reload data")
             this.props.dispatchDataReload(this.props.explorationState.info)
         }
+    }
+
+    componentWillUnmount(){
+        BackHandler.removeEventListener("hardwareBackPress", this.onHardwareBackPress)
     }
 
     onBottomBarButtonPress = (mode: ExplorationMode) => {
