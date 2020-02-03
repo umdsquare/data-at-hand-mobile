@@ -1,26 +1,25 @@
 import { PropsWithNavigation } from "../../../PropsWithNavigation";
 import React from "react";
-import { StatusBar, View, StyleSheet, Platform, LayoutAnimation, BackHandler } from "react-native";
+import { StatusBar, View, StyleSheet, Platform, BackHandler } from "react-native";
 import Colors from "../../../style/Colors";
 import { StyleTemplates } from "../../../style/Styles";
 import { ExplorationState } from "../../../state/exploration/interaction/reducers";
 import { ThunkDispatch } from "redux-thunk";
 import { ReduxAppState } from "../../../state/types";
 import { connect } from "react-redux";
-import { BottomBar } from "./BottomBar";
+import { BottomBar } from "./parts/main/BottomBar";
 import { ExplorationViewHeader} from '../exploration/parts/header';
 import { explorationInfoHelper } from "../../../core/exploration/ExplorationInfoHelper";
 import { DataServiceManager } from "../../../system/DataServiceManager";
 import { ExplorationInfo, ExplorationType, ExplorationMode } from "../../../core/exploration/types";
 import { ExplorationDataState, startLoadingForInfo } from "../../../state/exploration/data/reducers";
-import { ExplorationAction, InteractionType, createGoToBrowseOverviewAction, createRestorePreviousInfoAction, createGoToComparisonCyclicAction, createGoToComparisonTwoRangesAction, goBackAction } from "../../../state/exploration/interaction/actions";
+import { ExplorationAction, InteractionType, createGoToBrowseOverviewAction, createRestorePreviousInfoAction, createGoToComparisonTwoRangesAction, goBackAction } from "../../../state/exploration/interaction/actions";
 import { Button } from "react-native-elements";
 import { Sizes } from "../../../style/Sizes";
 import { OverviewMainPanel } from "./parts/main/OverviewMainPanel";
 import { BrowseRangeMainPanel } from "./parts/main/BrowseRangeMainPanel";
 import { BusyHorizontalIndicator } from "../../exploration/BusyHorizontalIndicator";
 import { getIntraDayMainPanel } from "./parts/main/IntraDayMainPanel";
-import { CyclicTimeFrame } from "../../../core/exploration/data/types";
 import { CyclicComparisonMainPanel } from "./parts/main/CyclicComparisonMainPanel";
 import { TwoRangeComparisonMainPanel } from "./parts/main/TwoRangeComparisonMainPanel";
 var deepEqual = require('deep-equal');
@@ -71,7 +70,6 @@ const styles = StyleSheet.create({
 
 const historyIconStyle = { type: 'ionicon', name: "ios-undo", color: 'white', size: 20 }
 const undoIconStyle = { ...historyIconStyle, type: 'fontawesome', name: "undo" }
-const redoIconStyle = { ...historyIconStyle, name: "ios-redo" }
 
 
 export interface ExplorationProps extends PropsWithNavigation {

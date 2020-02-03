@@ -24,7 +24,6 @@ const headerHeight = 60
 
 const containerStyle = {
     backgroundColor: 'white',
-    marginBottom: 12,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 8,
     shadowColor: 'black',
@@ -35,7 +34,6 @@ const styles = StyleSheet.create({
     containerStyle: containerStyle,
     containerStyleFlat: {
         ...containerStyle,
-        marginBottom: 0,
         shadowOffset: null,
         shadowColor: null,
         shadowRadius: null,

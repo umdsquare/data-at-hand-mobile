@@ -1,12 +1,12 @@
 import React from 'react';
-import { View, SafeAreaView, StyleSheet, Dimensions, TouchableOpacity, Text } from 'react-native';
-import Colors from '../../../style/Colors';
-import { Sizes } from '../../../style/Sizes';
-import { StyleTemplates } from '../../../style/Styles';
+import { View, SafeAreaView, StyleSheet, Dimensions, TouchableOpacity, Text, Platform } from 'react-native';
+import Colors from '../../../../../style/Colors';
+import { Sizes } from '../../../../../style/Sizes';
+import { StyleTemplates } from '../../../../../style/Styles';
 import { SafeAreaConsumer } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
-import { VoiceInputButton } from '../../exploration/VoiceInputButton';
-import { ExplorationMode } from '../../../core/exploration/types';
+import { VoiceInputButton } from '../../../../exploration/VoiceInputButton';
+import { ExplorationMode } from '../../../../../core/exploration/types';
 
 
 const bottomBarIconSize = 21
@@ -14,7 +14,7 @@ const bottomBarIconSize = 21
 const bottomBarButtonStyleBase = {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
 }
 
 const Styles = StyleSheet.create({
@@ -32,10 +32,14 @@ const Styles = StyleSheet.create({
     bottomBarContainerStyle: {
         backgroundColor: "#F5F5F5",
         shadowColor: "#000",
-        shadowOpacity: 0.1,
-        textShadowOffset: { width: 0, height: -0.5 },
+        shadowOpacity: 0.2,
+        shadowOffset: { width: 0, height: -1 },
         shadowRadius: 3,
-        overflow: "visible"
+        zIndex: 10,
+        elevation: 4,
+        overflow: "visible",
+        borderTopColor: Platform.OS === 'android'? '#00000020' : null,
+        borderTopWidth: Platform.OS === 'android'? 1 : null,
     },
 
     bottomBarInnerListStyle: {

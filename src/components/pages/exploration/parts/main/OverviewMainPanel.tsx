@@ -1,14 +1,15 @@
 import { createGoToBrowseRangeAction, InteractionType, memoUIStatus, ExplorationAction } from "../../../../../state/exploration/interaction/actions";
-import React, { useState, Ref } from "react";
-import { useSelector, useDispatch, connect } from "react-redux";
+import React from "react";
+import { connect } from "react-redux";
 import { ReduxAppState } from "../../../../../state/types";
-import { FlatList, ScrollView, View, PanResponderInstance, PanResponder } from "react-native";
+import { FlatList, View } from "react-native";
 import { DataSourceChartFrame } from "../../../../exploration/DataSourceChartFrame";
 import { OverviewData } from "../../../../../core/exploration/data/types";
 import { MeasureUnitType } from "../../../../../measure/DataSourceSpec";
 import { Dispatch } from "redux";
-import { BusyHorizontalIndicator } from "../../../../exploration/BusyHorizontalIndicator";
-import { TouchingElementInfo } from "../../../../../core/exploration/types";
+import { Sizes } from "../../../../../style/Sizes";
+
+const separatorStyle = {height: Sizes.verticalPadding}
 
 interface Props {
     data?: OverviewData,
@@ -51,6 +52,10 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
         this.props.dispatchAction(memoUIStatus("overviewScrollY", this.state.currentListScrollOffset))
     }
 
+    private Separator = () => {
+        return <View style={separatorStyle}/>
+    }
+
     render() {
         if (this.props.data != null) {
             const overviewData = this.props.data as OverviewData
@@ -60,6 +65,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
                     ref={this._listRef}
                     data={overviewData.sourceDataList}
                     keyExtractor={item => item.source}
+                    ItemSeparatorComponent = {this.Separator}
                     renderItem={({ item }) => <DataSourceChartFrame key={item.source.toString()}
                         data={item}
                         measureUnitType={this.props.measureUnitType}
