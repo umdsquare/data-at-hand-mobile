@@ -4,9 +4,7 @@ import {
   TouchingElementInfo,
   IntraDayDataSourceType,
 } from '../../../core/exploration/types';
-import { CyclicTimeFrame } from '../../../core/exploration/data/types';
-
-const ACTION_PREFIX = 'exploration:interaction:';
+import {CyclicTimeFrame} from '../../../core/exploration/data/types';
 
 export enum ExplorationActionType {
   MemoUiStatus = 'exploration:interaction:memoUIStatus',
@@ -14,12 +12,13 @@ export enum ExplorationActionType {
   SetDataSource = 'exploration:interaction:setDataSource',
   SetIntraDayDataSource = 'exploration:interaction:setIntraDayDataSource',
   SetDate = 'exploration:interaction:setDate',
-  SetCycleType = "exploration:interaction:setCycleType",
+  SetCycleType = 'exploration:interaction:setCycleType',
 
   GoToBrowseRange = 'exploration:interaction:goToBrowseRange',
   GoToBrowseOverview = 'exploration:interaction:goToBrowseOverview',
   GoToBrowseDay = 'exploration:interaction:goToBrowseDay',
   GoToComparisonCyclic = 'exploration:interaction:goToComparisonCyclic',
+  GoToComparisonToRanges = 'exploration:interaction:goToComparisonTwoRanges',
 
   //History
   RestorePreviousInfo = 'exploration:interaction:restorePreviousInfo',
@@ -61,7 +60,7 @@ export interface SetIntraDayDataSourceAction extends ExplorationActionBase {
 }
 
 export interface SetCycleTypeAction extends ExplorationActionBase {
-    cycleType: CyclicTimeFrame
+  cycleType: CyclicTimeFrame;
 }
 
 export interface GoToBrowseRangeAction extends ExplorationActionBase {
@@ -75,9 +74,15 @@ export interface GoToBrowseDayAction extends ExplorationActionBase {
 }
 
 export interface GoToComparisonCyclicAction extends ExplorationActionBase {
-    dataSource?: DataSourceType,
-    range?: [number, number],
-    cycleType?: CyclicTimeFrame
+  dataSource?: DataSourceType;
+  range?: [number, number];
+  cycleType?: CyclicTimeFrame;
+}
+
+export interface GoToComparisonTwoRangesAction extends ExplorationActionBase {
+  dataSource?: DataSourceType;
+  rangeA?: [number, number];
+  rangeB?: [number, number];
 }
 
 export interface SetTouchingElementInfoAction extends ActionTypeBase {
@@ -93,6 +98,7 @@ export type ExplorationAction =
   | GoToBrowseRangeAction
   | GoToBrowseDayAction
   | GoToComparisonCyclicAction
+  | GoToComparisonTwoRangesAction
   | MemoUIStatusAction
   | SetDataSourceAction
   | SetTouchingElementInfoAction;
@@ -146,17 +152,32 @@ export function createGoToBrowseDayAction(
 }
 
 export function createGoToComparisonCyclicAction(
-    interactionType: InteractionType,
-    dataSource?: DataSourceType,
-    range?: [number, number],
-    cycleType?: CyclicTimeFrame
-): GoToComparisonCyclicAction{
+  interactionType: InteractionType,
+  dataSource?: DataSourceType,
+  range?: [number, number],
+  cycleType?: CyclicTimeFrame,
+): GoToComparisonCyclicAction {
+  return {
+    type: ExplorationActionType.GoToComparisonCyclic,
+    interactionType,
+    dataSource,
+    range,
+    cycleType,
+  };
+}
+
+export function createGoToComparisonTwoRangesAction(
+  interactionType: InteractionType,
+  dataSource?: DataSourceType,
+  rangeA?: [number, number],
+  rangeB?: [number, number],
+){
     return {
-        type: ExplorationActionType.GoToComparisonCyclic,
+        type: ExplorationActionType.GoToComparisonToRanges,
         interactionType,
         dataSource,
-        range,
-        cycleType
+        rangeA,
+        rangeB
     }
 }
 
@@ -197,14 +218,14 @@ export function setIntraDayDataSourceAction(
 }
 
 export function setCycleTypeAction(
-    interactionType: InteractionType,
-    cycleType: CyclicTimeFrame
+  interactionType: InteractionType,
+  cycleType: CyclicTimeFrame,
 ): SetCycleTypeAction {
-    return {
-        type: ExplorationActionType.SetCycleType,
-        interactionType,
-        cycleType
-    }
+  return {
+    type: ExplorationActionType.SetCycleType,
+    interactionType,
+    cycleType,
+  };
 }
 
 export function setDateAction(

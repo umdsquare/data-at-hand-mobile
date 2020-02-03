@@ -25,7 +25,11 @@ export enum ParameterType {
   CycleType,
   CycleDimension,
 }
-export type ParameterKey = 'range1' | 'range2' | 'pivot';
+export enum ParameterKey {
+    RangeA ='rangeA',
+    RangeB = 'rangeB',
+    Pivot = 'pivot'
+}
 
 export interface ExplorationInfoParameter {
   parameter: ParameterType;

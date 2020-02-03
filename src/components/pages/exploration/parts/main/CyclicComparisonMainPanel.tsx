@@ -15,6 +15,7 @@ import { scaleLinear } from 'd3-scale';
 import convertUnit from 'convert-units';
 import { RangeValueCyclicChart } from '../../../../exploration/visualization/compare/RangeValueCyclicChart';
 import { startOfDay, format, addSeconds } from 'date-fns';
+import { timeTickFormat } from '../../../../exploration/visualization/compare/common';
 
 const styles = StyleSheet.create({
     containerStyle: {
@@ -22,15 +23,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'white'
     }
 })
-
-const timePivot = startOfDay(new Date())
-
-const timeTickFormat = (tick:number) => {
-    if(tick === 0){
-        return "MN"
-    }
-    else return format(addSeconds(timePivot, tick),"h a").toLowerCase()
-}
 
 interface Props {
     data?: GroupedData | GroupedRangeData,

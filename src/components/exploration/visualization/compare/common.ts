@@ -1,4 +1,5 @@
 import {CyclicTimeFrame} from '../../../../core/exploration/data/types';
+import { startOfDay, format, addSeconds } from 'date-fns';
 
 const dowNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const monthNames = [
@@ -56,4 +57,14 @@ export function getDomainAndTickFormat(
     domain,
     tickFormat,
   };
+}
+
+
+const timePivot = startOfDay(new Date())
+
+export const timeTickFormat = (tick:number) => {
+    if(tick === 0){
+        return "MN"
+    }
+    else return format(addSeconds(timePivot, tick),"h a").toLowerCase()
 }

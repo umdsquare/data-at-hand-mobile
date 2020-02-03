@@ -56,6 +56,7 @@ const styles = StyleSheet.create({
 const backButtonProps = {
     icon: { type: 'materialicon', size: 18, name: 'keyboard-arrow-left', color: Colors.headerBackgroundDarker, containerStyle: { padding: 0, margin: 0 } },
     containerStyle: {
+        marginTop: 8,
         alignSelf: 'flex-start',
         marginLeft: Sizes.horizontalPadding - 4
     } as ViewStyle,
@@ -112,7 +113,11 @@ export function generateHeaderView(props: ExplorationProps): any {
         case ExplorationType.C_CyclicDetail:
             break;
         case ExplorationType.C_TwoRanges:
-            break;
+            return <HeaderContainer>
+                {generateDataSourceRow(props, false)}
+                {generateRangeBar(props, ParameterKey.RangeA, true)}
+                {generateRangeBar(props, ParameterKey.RangeB)}
+            </HeaderContainer>
     }
 }
 
@@ -136,11 +141,11 @@ const HeaderContainer = (prop: { children?: any, }) => {
     </SafeAreaView>
 }
 
-function generateRangeBar(props: ExplorationProps, key?: ParameterKey): any {
+function generateRangeBar(props: ExplorationProps, key?: ParameterKey, showBorder?: boolean): any {
     const range = explorationInfoHelper.getParameterValue(props.explorationState.info, ParameterType.Range, key)
     return <DateRangeBar from={range && range[0]} to={range && range[1]} onRangeChanged={(from, to, xType) => {
         props.dispatchCommand(createSetRangeAction(xType, [from, to], key))
-    }} />
+    }} showBorder={showBorder}/>
 }
 
 function generateDateBar(props: ExplorationProps): any {

@@ -1,13 +1,12 @@
 import React from 'react';
 import { View, SafeAreaView, StyleSheet, Dimensions, TouchableOpacity, Text } from 'react-native';
-import Colors from '../../style/Colors';
-import { Sizes } from '../../style/Sizes';
-import { StyleTemplates } from '../../style/Styles';
+import Colors from '../../../style/Colors';
+import { Sizes } from '../../../style/Sizes';
+import { StyleTemplates } from '../../../style/Styles';
 import { SafeAreaConsumer } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
-import { VoiceInputButton } from './VoiceInputButton';
-import { ExplorationMode } from '../../core/exploration/types';
-import { Button } from 'react-native-elements';
+import { VoiceInputButton } from '../../exploration/VoiceInputButton';
+import { ExplorationMode } from '../../../core/exploration/types';
 
 
 const bottomBarIconSize = 21

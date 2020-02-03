@@ -8,12 +8,12 @@ import { ThunkDispatch } from "redux-thunk";
 import { ReduxAppState } from "../../../state/types";
 import { connect } from "react-redux";
 import { generateHeaderView } from "./parts/header";
-import { BottomBar } from "../../exploration/BottomBar";
+import { BottomBar } from "./BottomBar";
 import { explorationInfoHelper } from "../../../core/exploration/ExplorationInfoHelper";
 import { DataServiceManager } from "../../../system/DataServiceManager";
 import { ExplorationInfo, ExplorationType, ExplorationMode } from "../../../core/exploration/types";
 import { ExplorationDataState, startLoadingForInfo } from "../../../state/exploration/data/reducers";
-import { ExplorationAction, InteractionType, createGoToBrowseOverviewAction, createRestorePreviousInfoAction, createGoToComparisonCyclicAction } from "../../../state/exploration/interaction/actions";
+import { ExplorationAction, InteractionType, createGoToBrowseOverviewAction, createRestorePreviousInfoAction, createGoToComparisonCyclicAction, createGoToComparisonTwoRangesAction } from "../../../state/exploration/interaction/actions";
 import { Button } from "react-native-elements";
 import { Sizes } from "../../../style/Sizes";
 import { OverviewMainPanel } from "./parts/main/OverviewMainPanel";
@@ -22,6 +22,7 @@ import { BusyHorizontalIndicator } from "../../exploration/BusyHorizontalIndicat
 import { getIntraDayMainPanel } from "./parts/main/IntraDayMainPanel";
 import { CyclicTimeFrame } from "../../../core/exploration/data/types";
 import { CyclicComparisonMainPanel } from "./parts/main/CyclicComparisonMainPanel";
+import { TwoRangeComparisonMainPanel } from "./parts/main/TwoRangeComparisonMainPanel";
 var deepEqual = require('deep-equal');
 
 const styles = StyleSheet.create({
@@ -128,7 +129,9 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 this.props.dispatchCommand(createGoToBrowseOverviewAction(InteractionType.TouchOnly))
                 break;
             case ExplorationMode.Compare:
-                this.props.dispatchCommand(createGoToComparisonCyclicAction(InteractionType.TouchOnly, null, null, CyclicTimeFrame.DayOfWeek))
+                //this.props.dispatchCommand(createGoToComparisonCyclicAction(InteractionType.TouchOnly, null, null, CyclicTimeFrame.DayOfWeek))
+                //TODO replace the command
+                this.props.dispatchCommand(createGoToComparisonTwoRangesAction(InteractionType.TouchOnly, null, [20191101, 20191130], [20191201, 20191231]))
                 break;
         }
     }
@@ -188,6 +191,8 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 return getIntraDayMainPanel(this.props.explorationDataState.info)
             case ExplorationType.C_Cyclic:
                 return <CyclicComparisonMainPanel />
+            case ExplorationType.C_TwoRanges:
+                return <TwoRangeComparisonMainPanel />
         }
     }
 }

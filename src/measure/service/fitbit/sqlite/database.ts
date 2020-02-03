@@ -45,20 +45,31 @@ const groupByQueryFormat =
   'SELECT {select} FROM {fromClause} WHERE {whereClause} GROUP BY {groupBy}';
 
 const groupSelectClauseFormat =
-  'MIN({minColumnName}) as min, MAX({maxColumnName}) as max, AVG({avgColumnName}) as avg, COUNT({countColumnName}) as n';
+  'MIN({minColumnName}) as min, MAX({maxColumnName}) as max, SUM({sumColumnName}) as sum, AVG({avgColumnName}) as avg, COUNT({countColumnName}) as n';
 
 export function makeGroupSelectClause(
   minColumnName: string = 'value',
   maxColumnName: string = 'value',
   avgColumnName: string = 'value',
   countColumnName: string = 'value',
+  sumColumnName: string=  "value"
 ) {
   return stringFormat(groupSelectClauseFormat, {
     minColumnName,
     maxColumnName,
     avgColumnName,
     countColumnName,
+    sumColumnName
   });
+}
+
+export function makeAggregatedQuery(
+    tableName: string,
+    start: number,
+    end: number,
+    selectColumnClause = makeGroupSelectClause()
+): string{
+    return "SELECT " + selectColumnClause + " FROM " + tableName + " WHERE " + '`numberedDate` BETWEEN ' + start + ' AND ' + end
 }
 
 export function makeCyclicGroupQuery(

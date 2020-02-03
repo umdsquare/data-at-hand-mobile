@@ -5,6 +5,7 @@ import {
   ParameterType,
   TouchingElementInfo,
   inferIntraDayDataSourceType,
+  ParameterKey,
 } from '../../../core/exploration/types';
 import {
   ExplorationAction,
@@ -20,6 +21,7 @@ import {
   SetIntraDayDataSourceAction,
   GoToComparisonCyclicAction,
   SetCycleTypeAction,
+  GoToComparisonTwoRangesAction,
 } from './actions';
 import {explorationInfoHelper} from '../../../core/exploration/ExplorationInfoHelper';
 import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
@@ -265,6 +267,24 @@ export const explorationStateReducer = (
         }
         break;
       
+      case ExplorationActionType.GoToComparisonToRanges:
+        const comparisonRangesAction = action as GoToComparisonTwoRangesAction
+        {
+          const dataSource = comparisonRangesAction.dataSource || explorationInfoHelper.getParameterValue(newState.info, ParameterType.DataSource)
+          let rangeA = comparisonRangesAction.rangeA || explorationInfoHelper.getParameterValue(newState.info, ParameterType.Range, ParameterKey.RangeA)
+          let rangeB = comparisonRangesAction.rangeB || explorationInfoHelper.getParameterValue(newState.info, ParameterType.Range, ParameterKey.RangeB)
+
+          if(dataSource && rangeA && rangeB){
+            newState.info.type = ExplorationType.C_TwoRanges
+            newState.info.values = []
+
+            explorationInfoHelper.setParameterValue(newState.info, dataSource, ParameterType.DataSource)
+            explorationInfoHelper.setParameterValue(newState.info, rangeA, ParameterType.Range, ParameterKey.RangeA)
+            explorationInfoHelper.setParameterValue(newState.info, rangeB, ParameterType.Range, ParameterKey.RangeB)
+          }else return state
+        }
+        break;
+
       default:
         return state;
     }

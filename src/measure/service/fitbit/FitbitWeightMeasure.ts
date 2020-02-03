@@ -10,7 +10,7 @@ import {
 import {FitbitRangeMeasure} from './FitbitRangeMeasure';
 import {DateTimeHelper} from '../../../time';
 import {parse, getDay} from 'date-fns';
-import {WeightRangedData, CyclicTimeFrame, GroupedData} from '../../../core/exploration/data/types';
+import {WeightRangedData, CyclicTimeFrame, GroupedData, IAggregatedValue} from '../../../core/exploration/data/types';
 import {DataSourceType} from '../../DataSourceSpec';
 import { FitbitLocalTableName } from './sqlite/database';
 
@@ -90,6 +90,10 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
 
   async fetchCyclicGroupedData(start: number, end: number, cycleType: CyclicTimeFrame): Promise<GroupedData>{
     return this.trendMeasure.fetchCyclicGroupedData(start, end, cycleType)
+  }
+
+  async fetchRangeGroupedData(start: number, end: number): Promise<IAggregatedValue>{
+    return this.trendMeasure.fetchRangeGroupedData(start, end)
   }
 }
 

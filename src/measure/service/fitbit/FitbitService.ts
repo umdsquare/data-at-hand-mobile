@@ -22,6 +22,8 @@ import {
   CyclicTimeFrame,
   GroupedData,
   GroupedRangeData,
+  IAggregatedValue,
+  IAggregatedRangeValue,
 } from '../../../core/exploration/data/types';
 
 interface FitbitCredential {
@@ -151,6 +153,25 @@ export class FitbitService extends DataService {
           end,
           cycle,
         );
+    }
+  }
+
+  async fetchRangeAggregatedData(
+    dataSource: DataSourceType,
+    start: number,
+    end: number,
+  ): Promise<IAggregatedValue | IAggregatedRangeValue> {
+    switch (dataSource) {
+      case DataSourceType.StepCount:
+        return await this.dailyStepMeasure.fetchRangeGroupedData(start, end);
+      case DataSourceType.HeartRate:
+        return await this.dailyHeartRateMeasure.fetchRangeGroupedData(start, end);
+      case DataSourceType.Weight:
+        return await this.weightLogMeasure.fetchRangeGroupedData(start, end);
+      case DataSourceType.HoursSlept:
+        return await this.sleepMeasure.fetchHoursSleptAggregatedData(start, end);
+      case DataSourceType.SleepRange:
+        return await this.sleepMeasure.fetchSleepRangeAggregatedData(start, end);
     }
   }
 

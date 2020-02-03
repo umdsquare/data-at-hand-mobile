@@ -1,6 +1,6 @@
 import React from 'react';
 import { IAggregatedValue, CyclicTimeFrame } from "../../../../core/exploration/data/types";
-import { View, LayoutRectangle } from "react-native";
+import { View, LayoutRectangle, ViewStyle } from "react-native";
 import { SizeWatcher } from "../../../visualization/SizeWatcher";
 import { useState } from "react";
 import { StyleTemplates } from "../../../../style/Styles";
@@ -19,6 +19,8 @@ const xAxisHeight = 100
 const yAxisWidth = 60
 const topPadding = 20
 const rightPadding = 20
+
+const legendContainerStyle = { alignItems: 'flex-end', padding: Sizes.horizontalPadding } as ViewStyle
 
 export const SingleValueCyclicChart = (props: {
     values: Array<IAggregatedValue>,
@@ -57,7 +59,7 @@ export const SingleValueCyclicChart = (props: {
     }
 
     return <View style={StyleTemplates.fillFlex}>
-        <View style={{ alignItems: 'flex-end', padding: Sizes.horizontalPadding }}>
+        <View style={legendContainerStyle}>
 
             <SingleValueElementLegend />
         </View>

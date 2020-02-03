@@ -162,6 +162,10 @@ export interface GroupedRangeData {
   data: Array<IAggregatedRangeValue>
 }
 
+export interface RangeAggregatedComparisonData<T> {
+  data: Array<{range: [number, number], value: T}>
+}
+
 export const STATISTICS_LABEL_AVERAGE = 'Avg.';
 export const STATISTICS_LABEL_TOTAL = 'Total';
 export const STATISTICS_LABEL_RANGE = 'Range';

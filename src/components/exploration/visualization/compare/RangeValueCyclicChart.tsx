@@ -1,6 +1,6 @@
 import React from 'react';
 import { CyclicTimeFrame, IAggregatedRangeValue } from "../../../../core/exploration/data/types";
-import { View, LayoutRectangle } from "react-native";
+import { View, LayoutRectangle, ViewStyle } from "react-native";
 import { SizeWatcher } from "../../../visualization/SizeWatcher";
 import { useState } from "react";
 import { StyleTemplates } from "../../../../style/Styles";
@@ -8,18 +8,18 @@ import { scaleBand, scaleLinear } from "d3-scale";
 import { min, max } from "d3-array";
 import { G } from "react-native-svg";
 import { Sizes } from '../../../../style/Sizes';
-import { SingleValueElementLegend } from './SingleValueElementLegend';
 import { getDomainAndTickFormat } from './common';
 import { CycleChartFrame } from './CycleChartFrame';
 import { RangeValueElement } from './RangeValueElement';
 import { RangeValueElementLegend } from './RangeValueElementLegend';
 
-const dummyConverter = (num: number) => num
 
 const xAxisHeight = 100
 const yAxisWidth = 60
 const topPadding = 20
 const rightPadding = 20
+
+const legendContainerStyle = { alignItems: 'flex-end', padding: Sizes.horizontalPadding, paddingLeft: 0, paddingRight: 0 } as ViewStyle
 
 export const RangeValueCyclicChart = (props: {
     values: Array<IAggregatedRangeValue>,
@@ -56,7 +56,7 @@ export const RangeValueCyclicChart = (props: {
     }
 
     return <View style={StyleTemplates.fillFlex}>
-        <View style={{ alignItems: 'flex-end', padding: Sizes.horizontalPadding, paddingLeft: 0, paddingRight: 0 }}>
+        <View style={legendContainerStyle}>
             <RangeValueElementLegend rangeALabel={props.rangeALabel} rangeBLabel={props.rangeBLabel}/>
         </View>
         <SizeWatcher containerStyle={StyleTemplates.fillFlex} onSizeChange={(width, height) => {
