@@ -57,6 +57,7 @@ const backButtonProps = {
     icon: { type: 'materialicon', size: 18, name: 'keyboard-arrow-left', color: Colors.headerBackgroundDarker, containerStyle: { padding: 0, margin: 0 } },
     containerStyle: {
         marginTop: 8,
+        marginBottom: 8,
         alignSelf: 'flex-start',
         marginLeft: Sizes.horizontalPadding - 4
     } as ViewStyle,

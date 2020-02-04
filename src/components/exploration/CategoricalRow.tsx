@@ -4,6 +4,7 @@ import { Sizes } from '../../style/Sizes';
 import { SpeechAffordanceIndicator } from './SpeechAffordanceIndicator';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import GestureRecognizer from 'react-native-swipe-gestures';
+import { SwipedFeedback } from '../common/SwipedFeedback';
 const height = 50
 const containerStyleBase = {
     flexDirection: 'row',
@@ -57,7 +58,21 @@ export const CategoricalRow = (prop: {
     onSwipeLeft?: () => void,
     onSwipeRight?: () => void
 }) => {
-    return <GestureRecognizer onSwipeLeft={prop.onSwipeLeft} onSwipeRight={prop.onSwipeRight} style={prop.showBorder === true ? styles.containerStyleWithBorder : styles.containerStyleWithoutBorder}>
+
+    let swipedFeedbackRef: SwipedFeedback
+
+    return <GestureRecognizer
+        onSwipeLeft={prop.onSwipeLeft != null ? () => {
+            prop.onSwipeLeft()
+            swipedFeedbackRef.startFeedback('left')
+        } : null}
+        onSwipeRight={prop.onSwipeRight != null ? () => {
+            prop.onSwipeRight()
+            swipedFeedbackRef.startFeedback('right')
+        } : null} style={prop.showBorder === true ? styles.containerStyleWithBorder : styles.containerStyleWithoutBorder}>
+        {
+            (prop.onSwipeLeft != null || prop.onSwipeRight != null) ? <SwipedFeedback ref={ref => swipedFeedbackRef = ref} /> : null
+        }
         <Text style={styles.titleStyle}>{prop.title}</Text>
         <TouchableOpacity style={styles.buttonStyle} onPress={prop.onPress}>
             {prop.icon}

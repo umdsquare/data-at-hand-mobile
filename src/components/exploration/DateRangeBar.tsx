@@ -14,6 +14,7 @@ import { DatePicker, WeekPicker, MonthPicker } from "../common/CalendarPickers";
 import { SafeAreaConsumer } from "react-native-safe-area-context";
 import { InteractionType } from "../../state/exploration/interaction/actions";
 import { DateTimeHelper } from "../../time";
+import { SwipedFeedback } from "../common/SwipedFeedback";
 
 const dateButtonWidth = 140
 const barHeight = 60
@@ -205,6 +206,8 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         return null
     }
 
+    private swipedFeedbackRef: SwipedFeedback
+
     constructor(props: Props) {
         super(props)
         this.state = DateRangeBar.deriveState(props.from, props.to, { isBottomSheetOpen: false } as any)
@@ -244,6 +247,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             to = lastMonthLast
         }
         this.setRange(DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to), InteractionType.TouchOnly)
+        this.swipedFeedbackRef.startFeedback('left')
     }
 
     onSwipeRight = () => {
@@ -260,6 +264,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             to = lastMonthLast
         }
         this.setRange(DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to), InteractionType.TouchOnly)
+        this.swipedFeedbackRef.startFeedback('right')
     }
 
     closeBottomSheet = () => {
@@ -329,6 +334,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         }
 
         return <GestureRecognizer onSwipeLeft={this.onSwipeLeft} onSwipeRight={this.onSwipeRight} style={this.props.showBorder===true ? styles.conatainerWithBorder : styles.containerStyle}>
+            <SwipedFeedback ref={ref => this.swipedFeedbackRef = ref}/>
             <DateButton date={this.state.from} onPress={this.onFromDatePressed} />
             <View style={styles.midViewContainerStyle} >
                 <Dash style={styles.dashViewStyle} dashGap={4} dashColor="gray" dashLength={3} dashThickness={3} dashStyle={styles.dashLineStyle} />
