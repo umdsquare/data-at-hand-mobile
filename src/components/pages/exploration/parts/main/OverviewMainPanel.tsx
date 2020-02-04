@@ -83,12 +83,10 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
                     }}
 
                     onScrollBeginDrag={()=>{
-                        console.log("began scroll")
                         this.props.dispatchAction(memoUIStatus("overviewScrolling", true))
                     }}
 
                     onScrollEndDrag={()=>{
-                        console.log("ended scroll")
                         this.props.dispatchAction(memoUIStatus("overviewScrolling", false))
                     }}
 

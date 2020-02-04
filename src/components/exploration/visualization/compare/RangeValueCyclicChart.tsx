@@ -1,5 +1,5 @@
 import React from 'react';
-import { CyclicTimeFrame, IAggregatedRangeValue } from "../../../../core/exploration/data/types";
+import { IAggregatedRangeValue } from "../../../../core/exploration/data/types";
 import { View, LayoutRectangle, ViewStyle } from "react-native";
 import { SizeWatcher } from "../../../visualization/SizeWatcher";
 import { useState } from "react";
@@ -14,6 +14,7 @@ import { RangeValueElement } from './RangeValueElement';
 import { RangeValueElementLegend } from './RangeValueElementLegend';
 import { useDispatch } from 'react-redux';
 import { createGoToBrowseRangeAction } from '../../../../state/exploration/interaction/actions';
+import { CyclicTimeFrame } from '../../../../core/exploration/cyclic_time';
 
 
 const xAxisHeight = 100

@@ -1,9 +1,10 @@
 import {ExplorationInfo, ExplorationType, ParameterType, IntraDayDataSourceType, ParameterKey} from '../types';
-import {OverviewData, OverviewSourceRow, GroupedData, CyclicTimeFrame, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData} from './types';
+import {OverviewData, OverviewSourceRow, GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData} from './types';
 import {explorationInfoHelper} from '../ExplorationInfoHelper';
 import {dataSourceManager} from '../../../system/DataSourceManager';
 import {DataServiceManager} from '../../../system/DataServiceManager';
 import { DataSourceType } from '../../../measure/DataSourceSpec';
+import { CyclicTimeFrame } from '../cyclic_time';
 
 class ExplorationDataResolver {
   loadData(

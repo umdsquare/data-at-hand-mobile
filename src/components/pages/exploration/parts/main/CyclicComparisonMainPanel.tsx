@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { StyleTemplates } from '../../../../../style/Styles';
-import { GroupedData, CyclicTimeFrame, GroupedRangeData } from '../../../../../core/exploration/data/types';
+import { GroupedData, GroupedRangeData } from '../../../../../core/exploration/data/types';
 import { Dispatch } from 'redux';
 import { ReduxAppState } from '../../../../../state/types';
 import { DataSourceType, MeasureUnitType } from '../../../../../measure/DataSourceSpec';
@@ -16,6 +16,7 @@ import convertUnit from 'convert-units';
 import { RangeValueCyclicChart } from '../../../../exploration/visualization/compare/RangeValueCyclicChart';
 import { startOfDay, format, addSeconds } from 'date-fns';
 import { timeTickFormat } from '../../../../exploration/visualization/compare/common';
+import { CyclicTimeFrame } from '../../../../../core/exploration/cyclic_time';
 
 const styles = StyleSheet.create({
     containerStyle: {

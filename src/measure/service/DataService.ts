@@ -1,6 +1,7 @@
 import { DataSourceType } from '../DataSourceSpec';
 import { IntraDayDataSourceType } from '../../core/exploration/types';
-import { CyclicTimeFrame, GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue } from '../../core/exploration/data/types';
+import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue } from '../../core/exploration/data/types';
+import { CyclicTimeFrame } from '../../core/exploration/cyclic_time';
 
 export interface ServiceActivationResult{
   success: boolean,

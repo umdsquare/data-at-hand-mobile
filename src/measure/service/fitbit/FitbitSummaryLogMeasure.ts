@@ -4,7 +4,8 @@ import {FITBIT_DATE_FORMAT} from './api';
 import {FitbitRangeMeasure} from './FitbitRangeMeasure';
 import { FitbitLocalTableName, makeCyclicGroupQuery, makeAggregatedQuery } from './sqlite/database';
 import { SQLiteHelper } from '../../../database/sqlite/sqlite-helper';
-import { CyclicTimeFrame, GroupedData, IAggregatedValue } from '../../../core/exploration/data/types';
+import { GroupedData, IAggregatedValue } from '../../../core/exploration/data/types';
+import { CyclicTimeFrame } from '../../../core/exploration/cyclic_time';
 
 export abstract class FitbitSummaryLogMeasure<
   QueryResultType> extends FitbitRangeMeasure<QueryResultType> {

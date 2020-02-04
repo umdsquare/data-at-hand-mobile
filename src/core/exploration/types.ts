@@ -8,7 +8,8 @@ export enum ExplorationType {
   B_Range="b_range",
   B_Day="b_day",
   C_Cyclic="c_cyclic",
-  C_CyclicDetail="c_cyclic_detail",
+  C_CyclicDetail_Daily="c_cyclic_detail_daily",
+  C_CyclicDetail_Range="c_cyclic_detail_range",
   C_TwoRanges="c_two_ranges",
 }
 
@@ -25,6 +26,7 @@ export enum ParameterType {
   CycleType,
   CycleDimension,
 }
+
 export enum ParameterKey {
     RangeA ='rangeA',
     RangeB = 'rangeB',
@@ -53,6 +55,7 @@ export enum IntraDayDataSourceType {
     HeartRate="heart_rate",
     Sleep="sleep"
 }
+
 
 export function getIntraDayDataSourceName(type: IntraDayDataSourceType): string{
     switch(type){

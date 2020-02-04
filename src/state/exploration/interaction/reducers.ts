@@ -22,10 +22,12 @@ import {
   GoToComparisonCyclicAction,
   SetCycleTypeAction,
   GoToComparisonTwoRangesAction,
+  GoToCyclicDetailAction,
+  SetCycleDimensionAction,
 } from './actions';
 import {explorationInfoHelper} from '../../../core/exploration/ExplorationInfoHelper';
-import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
-import { DateTimeHelper } from '../../../time';
+import {startOfDay, subDays, endOfDay, startOfWeek, endOfWeek} from 'date-fns';
+import {DateTimeHelper} from '../../../time';
 
 var deepEqual = require('deep-equal');
 
@@ -146,13 +148,23 @@ export const explorationStateReducer = (
         break;
 
       case ExplorationActionType.SetCycleType:
-        const setCycleTypeAction = action as SetCycleTypeAction
+        const setCycleTypeAction = action as SetCycleTypeAction;
         explorationInfoHelper.setParameterValue(
           newState.info,
           setCycleTypeAction.cycleType,
-          ParameterType.CycleType
+          ParameterType.CycleType,
+        );
+        break;
+
+      case ExplorationActionType.SetCycleDimension:
+        const setCycleDimensionAction = action as SetCycleDimensionAction;
+        explorationInfoHelper.setParameterValue(
+          newState.info,
+          setCycleDimensionAction.cycleDimension,
+          ParameterType.CycleDimension
         )
         break;
+
       case ExplorationActionType.GoToBrowseRange:
         //check parameters
         const goToBrowseRangeAction = action as GoToBrowseRangeAction;
@@ -193,7 +205,13 @@ export const explorationStateReducer = (
             explorationInfoHelper.getParameterValue(
               state.info,
               ParameterType.IntraDayDataSource,
-            ) || inferIntraDayDataSourceType(explorationInfoHelper.getParameterValue(state.info, ParameterType.DataSource))
+            ) ||
+            inferIntraDayDataSourceType(
+              explorationInfoHelper.getParameterValue(
+                state.info,
+                ParameterType.DataSource,
+              ),
+            );
 
           const date =
             goToBrowseDayAction.date ||
@@ -222,66 +240,181 @@ export const explorationStateReducer = (
         if (newState.info.type === ExplorationType.B_Ovrvw) {
           return state;
         } else {
-
-          const currentRange = explorationInfoHelper.getParameterValue(newState.info, ParameterType.Range)
-          if(currentRange == null){
-            const dateParam = explorationInfoHelper.getParameterValue<number>(newState.info, ParameterType.Date)
-            if(dateParam != null){
-              const date = DateTimeHelper.toDate(dateParam)
-              explorationInfoHelper.setParameterValue(newState.info, [
-                DateTimeHelper.toNumberedDateFromDate(startOfWeek(date)),
-                DateTimeHelper.toNumberedDateFromDate(endOfWeek(date)),
-              ], ParameterType.Range)
-            }else{
+          const currentRange = explorationInfoHelper.getParameterValue(
+            newState.info,
+            ParameterType.Range,
+          );
+          if (currentRange == null) {
+            const dateParam = explorationInfoHelper.getParameterValue<number>(
+              newState.info,
+              ParameterType.Date,
+            );
+            if (dateParam != null) {
+              const date = DateTimeHelper.toDate(dateParam);
+              explorationInfoHelper.setParameterValue(
+                newState.info,
+                [
+                  DateTimeHelper.toNumberedDateFromDate(startOfWeek(date)),
+                  DateTimeHelper.toNumberedDateFromDate(endOfWeek(date)),
+                ],
+                ParameterType.Range,
+              );
+            } else {
               const now = startOfDay(new Date());
-              explorationInfoHelper.setParameterValue(newState.info, [
-                DateTimeHelper.toNumberedDateFromDate(subDays(now, 7)),
-                DateTimeHelper.toNumberedDateFromDate(endOfDay(now)),
-              ], ParameterType.Range)
+              explorationInfoHelper.setParameterValue(
+                newState.info,
+                [
+                  DateTimeHelper.toNumberedDateFromDate(subDays(now, 7)),
+                  DateTimeHelper.toNumberedDateFromDate(endOfDay(now)),
+                ],
+                ParameterType.Range,
+              );
             }
           }
-          
+
           explorationInfoHelper.filterParameters(
             newState.info,
             param => param.parameter === ParameterType.Range,
           );
 
-          
           newState.info.type = ExplorationType.B_Ovrvw;
         }
         break;
 
       case ExplorationActionType.GoToComparisonCyclic:
-        const comparisonCyclicAction = action as GoToComparisonCyclicAction
+        const comparisonCyclicAction = action as GoToComparisonCyclicAction;
         {
-          const dataSource = comparisonCyclicAction.dataSource || explorationInfoHelper.getParameterValue(newState.info, ParameterType.DataSource)
-          const range = comparisonCyclicAction.range || explorationInfoHelper.getParameterValue(newState.info, ParameterType.Range)
-          const cycleType = comparisonCyclicAction.cycleType || explorationInfoHelper.getParameterValue(newState.info, ParameterType.CycleType)
-          if(dataSource && range && cycleType){
-            newState.info.type = ExplorationType.C_Cyclic
-            newState.info.values = []
-            explorationInfoHelper.setParameterValue(newState.info, dataSource, ParameterType.DataSource)
-            explorationInfoHelper.setParameterValue(newState.info, range, ParameterType.Range)
-            explorationInfoHelper.setParameterValue(newState.info, cycleType, ParameterType.CycleType)
-          }else return state
+          const dataSource =
+            comparisonCyclicAction.dataSource ||
+            explorationInfoHelper.getParameterValue(
+              newState.info,
+              ParameterType.DataSource,
+            );
+          const range =
+            comparisonCyclicAction.range ||
+            explorationInfoHelper.getParameterValue(
+              newState.info,
+              ParameterType.Range,
+            );
+          const cycleType =
+            comparisonCyclicAction.cycleType ||
+            explorationInfoHelper.getParameterValue(
+              newState.info,
+              ParameterType.CycleType,
+            );
+          if (dataSource && range && cycleType) {
+            newState.info.type = ExplorationType.C_Cyclic;
+            newState.info.values = [];
+            explorationInfoHelper.setParameterValue(
+              newState.info,
+              dataSource,
+              ParameterType.DataSource,
+            );
+            explorationInfoHelper.setParameterValue(
+              newState.info,
+              range,
+              ParameterType.Range,
+            );
+            explorationInfoHelper.setParameterValue(
+              newState.info,
+              cycleType,
+              ParameterType.CycleType,
+            );
+          } else return state;
         }
         break;
-      
+
       case ExplorationActionType.GoToComparisonToRanges:
-        const comparisonRangesAction = action as GoToComparisonTwoRangesAction
+        const comparisonRangesAction = action as GoToComparisonTwoRangesAction;
         {
-          const dataSource = comparisonRangesAction.dataSource || explorationInfoHelper.getParameterValue(newState.info, ParameterType.DataSource)
-          let rangeA = comparisonRangesAction.rangeA || explorationInfoHelper.getParameterValue(newState.info, ParameterType.Range, ParameterKey.RangeA)
-          let rangeB = comparisonRangesAction.rangeB || explorationInfoHelper.getParameterValue(newState.info, ParameterType.Range, ParameterKey.RangeB)
+          const dataSource =
+            comparisonRangesAction.dataSource ||
+            explorationInfoHelper.getParameterValue(
+              newState.info,
+              ParameterType.DataSource,
+            );
+          let rangeA =
+            comparisonRangesAction.rangeA ||
+            explorationInfoHelper.getParameterValue(
+              newState.info,
+              ParameterType.Range,
+              ParameterKey.RangeA,
+            );
+          let rangeB =
+            comparisonRangesAction.rangeB ||
+            explorationInfoHelper.getParameterValue(
+              newState.info,
+              ParameterType.Range,
+              ParameterKey.RangeB,
+            );
 
-          if(dataSource && rangeA && rangeB){
-            newState.info.type = ExplorationType.C_TwoRanges
-            newState.info.values = []
+          if (dataSource && rangeA && rangeB) {
+            newState.info.type = ExplorationType.C_TwoRanges;
+            newState.info.values = [];
 
-            explorationInfoHelper.setParameterValue(newState.info, dataSource, ParameterType.DataSource)
-            explorationInfoHelper.setParameterValue(newState.info, rangeA, ParameterType.Range, ParameterKey.RangeA)
-            explorationInfoHelper.setParameterValue(newState.info, rangeB, ParameterType.Range, ParameterKey.RangeB)
-          }else return state
+            explorationInfoHelper.setParameterValue(
+              newState.info,
+              dataSource,
+              ParameterType.DataSource,
+            );
+            explorationInfoHelper.setParameterValue(
+              newState.info,
+              rangeA,
+              ParameterType.Range,
+              ParameterKey.RangeA,
+            );
+            explorationInfoHelper.setParameterValue(
+              newState.info,
+              rangeB,
+              ParameterType.Range,
+              ParameterKey.RangeB,
+            );
+          } else return state;
+        }
+        break;
+
+
+      case ExplorationActionType.GoToCyclicDetailRange:
+      case ExplorationActionType.GoToCyclicDetailDaily:
+        const goToCyclicDetailAction = action as GoToCyclicDetailAction;
+        {
+          const dataSource =
+            goToCyclicDetailAction.dataSource ||
+            explorationInfoHelper.getParameterValue(
+              newState.info,
+              ParameterType.DataSource,
+            );
+          const range =
+            goToCyclicDetailAction.range ||
+            explorationInfoHelper.getParameterValue(
+              newState.info,
+              ParameterType.Range,
+            );
+          const cycleDimension =
+            goToCyclicDetailAction.cycleDimension ||
+            explorationInfoHelper.getParameterValue(
+              newState.info,
+              ParameterType.CycleDimension,
+            );
+          if (dataSource && range && cycleDimension) {
+            newState.info.type = action.type === ExplorationActionType.GoToCyclicDetailDaily ? ExplorationType.C_CyclicDetail_Daily : ExplorationType.C_CyclicDetail_Range
+            newState.info.values = [];
+            explorationInfoHelper.setParameterValue(
+              newState.info,
+              dataSource,
+              ParameterType.DataSource,
+            );
+            explorationInfoHelper.setParameterValue(
+              newState.info,
+              range,
+              ParameterType.Range,
+            );
+            explorationInfoHelper.setParameterValue(
+              newState.info,
+              cycleDimension,
+              ParameterType.CycleDimension,
+            );
+          } else return state;
         }
         break;
 

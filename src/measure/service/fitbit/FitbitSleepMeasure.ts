@@ -12,7 +12,6 @@ import {
 import {
   SleepRangedData,
   IDailySleepSummaryEntry,
-  CyclicTimeFrame,
   GroupedData,
   GroupedRangeData,
   IAggregatedValue,
@@ -26,6 +25,7 @@ import {
   makeAggregatedQuery,
 } from './sqlite/database';
 import {SQLiteHelper} from '../../../database/sqlite/sqlite-helper';
+import { CyclicTimeFrame } from '../../../core/exploration/cyclic_time';
 
 const columnNamesForRangeData = [
   'numberedDate',

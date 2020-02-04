@@ -332,7 +332,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                     break;
             }
         }
-
+        
         return <GestureRecognizer onSwipeLeft={this.onSwipeLeft} onSwipeRight={this.onSwipeRight} style={this.props.showBorder===true ? styles.conatainerWithBorder : styles.containerStyle}>
             <SwipedFeedback ref={ref => this.swipedFeedbackRef = ref}/>
             <DateButton date={this.state.from} onPress={this.onFromDatePressed} />

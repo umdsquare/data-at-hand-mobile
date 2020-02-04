@@ -6,7 +6,7 @@ import { ReduxAppState } from '../../../../../state/types'
 import { RangeAggregatedComparisonData, IAggregatedRangeValue, IAggregatedValue } from '../../../../../core/exploration/data/types'
 import { DataSourceType, MeasureUnitType } from '../../../../../measure/DataSourceSpec'
 import { Dispatch } from 'redux'
-import { View, StyleSheet, Text, Platform, LayoutRectangle } from 'react-native'
+import { View, StyleSheet, Platform, LayoutRectangle } from 'react-native'
 import { StyleTemplates } from '../../../../../style/Styles'
 import SegmentedControlIOS from '@react-native-community/segmented-control';
 import { Sizes } from '../../../../../style/Sizes'
@@ -15,7 +15,7 @@ import Colors from '../../../../../style/Colors'
 import { SizeWatcher } from '../../../../visualization/SizeWatcher'
 import { RangeValueElementLegend } from '../../../../exploration/visualization/compare/RangeValueElementLegend'
 import { SingleValueElementLegend } from '../../../../exploration/visualization/compare/SingleValueElementLegend'
-import Svg, { G, Line, Text as SvgText, Rect, TSpan } from 'react-native-svg'
+import Svg, { G, Line, Text as SvgText, Rect } from 'react-native-svg'
 import { scaleBand, scaleLinear } from 'd3-scale'
 import commaNumber from 'comma-number';
 import { DateTimeHelper } from '../../../../../time'
@@ -24,7 +24,7 @@ import { timeTickFormat } from '../../../../exploration/visualization/compare/co
 import { min, max } from 'd3-array'
 import { SingleValueElement } from '../../../../exploration/visualization/compare/SingleValueElement'
 import { RangeValueElement } from '../../../../exploration/visualization/compare/RangeValueElement'
-import { startOfYear, isSameYear, getDayOfYear, isSameMonth, startOfMonth, endOfMonth, format } from 'date-fns'
+import { isSameYear, isSameMonth, startOfMonth, endOfMonth, format } from 'date-fns'
 import { ExplorationAction, createGoToBrowseRangeAction, InteractionType } from '../../../../../state/exploration/interaction/actions'
 
 const INDEX_AGGREGATED = 0
@@ -89,7 +89,7 @@ interface State {
     chartContainerHeight: number
 }
 
-class TwoRangeComparisonMainPanel extends React.Component<Props, State>{
+class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
 
     constructor(props) {
         super(props)
@@ -121,11 +121,11 @@ class TwoRangeComparisonMainPanel extends React.Component<Props, State>{
             ))
     }
 
-    private onElementLongPressIn = (timeKey: number) => {
+    private onElementLongPressIn = () => {
         //TODO show tooltip
     }
 
-    private onElementLongPressOut = (timeKey: number) => {
+    private onElementLongPressOut = () => {
         //TODO hide tooltip
     }
 
@@ -357,6 +357,6 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
 }
 
 
-const connected = connect(mapStateToProps, mapDispatchToProps)(TwoRangeComparisonMainPanel)
+const connected = connect(mapStateToProps, mapDispatchToProps)(MultiRangeComparisonMainPanel)
 
-export { connected as TwoRangeComparisonMainPanel }
+export { connected as MultiRangeComparisonMainPanel }

@@ -19,12 +19,12 @@ import {FitbitIntraDayStepMeasure} from './FitbitIntraDayStepMeasure';
 import {IntraDayDataSourceType} from '../../../core/exploration/types';
 import {FitbitIntraDayHeartRateMeasure} from './FitbitIntraDayHeartRateMeasure';
 import {
-  CyclicTimeFrame,
   GroupedData,
   GroupedRangeData,
   IAggregatedValue,
   IAggregatedRangeValue,
 } from '../../../core/exploration/data/types';
+import { CyclicTimeFrame } from '../../../core/exploration/cyclic_time';
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -48,10 +48,15 @@ export class FitbitService extends DataService {
   private _credential: FitbitCredential = null;
   private _authConfig = null;
 
-  private _fitbitLocalDbManager: FitbitLocalDbManager = new FitbitLocalDbManager();
+  private _fitbitLocalDbManager: FitbitLocalDbManager = null
+  
   get fitbitLocalDbManager(): FitbitLocalDbManager {
+    if(this._fitbitLocalDbManager == null){
+      this._fitbitLocalDbManager = new FitbitLocalDbManager();
+    }
     return this._fitbitLocalDbManager;
   }
+
 
   get credential(): FitbitCredential {
     return this._credential;
@@ -83,13 +88,10 @@ export class FitbitService extends DataService {
   ): Promise<any> {
     switch (dataSource) {
       case DataSourceType.StepCount:
-        console.log('try get fitbit step data from db');
         return await this.dailyStepMeasure.fetchData(start, end);
 
       case DataSourceType.HeartRate:
-        console.log('try get fitbit HR data from db');
         return await this.dailyHeartRateMeasure.fetchData(start, end);
-        break;
       case DataSourceType.HoursSlept:
       case DataSourceType.SleepRange:
         return await this.sleepMeasure.fetchData(dataSource, start, end);
@@ -190,27 +192,29 @@ export class FitbitService extends DataService {
     const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
     if (state) {
       try {
+        console.log("refresh token found. try refreshing it with token...")
         const newState = await refresh(this._authConfig, {
           refreshToken: state.refreshToken,
         });
         if (newState) {
+          console.log("token refresh succeeded.")
           await AsyncStorageHelper.set(STORAGE_KEY_AUTH_STATE, newState);
           return newState.accessToken;
         }
       } catch (e) {
+        console.log("token refresh failed. try re-authorize.")
         console.log(e);
       }
     }
 
     try {
+      console.log("try re-authorization.")
       const newState = await authorize(this._authConfig);
-      if (newState) {
         await AsyncStorageHelper.set(STORAGE_KEY_AUTH_STATE, newState);
         return newState.accessToken;
-      } else {
-        return null;
-      }
     } catch (e) {
+      console.log("Authorization failed.")
+      console.log(e, JSON.stringify(e))
       return null;
     }
   }
@@ -233,12 +237,11 @@ export class FitbitService extends DataService {
 
   async activateInSystem(): Promise<ServiceActivationResult> {
     try {
+      console.log("start Fitbit activation...")
       const accessToken = await this.authenticate();
       if (accessToken != null) {
         const initialDate = await this.getMembershipStartDate();
         const now = DateTimeHelper.toNumberedDateFromDate(new Date());
-
-        await this.fitbitLocalDbManager.open();
 
         for (const measure of this.preloadableMeasures) {
           await measure.cacheServerData(now);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { IAggregatedValue, CyclicTimeFrame } from "../../../../core/exploration/data/types";
+import { IAggregatedValue } from "../../../../core/exploration/data/types";
 import { View, LayoutRectangle, ViewStyle } from "react-native";
 import { SizeWatcher } from "../../../visualization/SizeWatcher";
 import { useState } from "react";
@@ -12,6 +12,9 @@ import { SingleValueElement } from './SingleValueElement';
 import { SingleValueElementLegend } from './SingleValueElementLegend';
 import { getDomainAndTickFormat } from './common';
 import { CycleChartFrame } from './CycleChartFrame';
+import { useDispatch } from 'react-redux';
+import { createGoToCyclicDetailDailyAction, InteractionType, createGoToCyclicDetailRangeAction } from '../../../../state/exploration/interaction/actions';
+import { CyclicTimeFrame, CycleDimension } from '../../../../core/exploration/cyclic_time';
 
 const dummyConverter = (num: number) => num
 
@@ -36,6 +39,7 @@ export const SingleValueCyclicChart = (props: {
     const [chartContainerWidth, setChartContainerWidth] = useState(-1)
     const [chartContainerHeight, setChartContainerHeight] = useState(-1)
 
+    const dispatch = useDispatch()
 
     const chartArea: LayoutRectangle = {
         x: yAxisWidth,
@@ -82,7 +86,36 @@ export const SingleValueCyclicChart = (props: {
                     {
                         props.values.map(value => <SingleValueElement key={value.timeKey} 
                                 value={{ ...value, avg: convert(value.avg), max: convert(value.max), min: convert(value.min), sum: convert(value.sum) }} 
-                                scaleX={scaleX} scaleY={scaleY} maxWidth= {40} />)
+                                scaleX={scaleX} scaleY={scaleY} maxWidth= {40}
+                                onClick={(timeKey: number)=>{
+                                    switch(props.cycleType){
+                                        case CyclicTimeFrame.DayOfWeek:
+                                            {
+                                                const cycleDimension = "day|dow|" + timeKey
+                                                dispatch(createGoToCyclicDetailDailyAction(InteractionType.TouchOnly, null, null, cycleDimension as CycleDimension))
+                                            }
+                                            break;
+                                        case CyclicTimeFrame.MonthOfYear:
+                                            {
+                                                const cycleDimension = "year|month|" + timeKey
+                                                dispatch(createGoToCyclicDetailRangeAction(InteractionType.TouchOnly, null, null, cycleDimension as CycleDimension))
+                                            }
+                                            break;
+                                        case CyclicTimeFrame.SeasonOfYear:
+                                            {
+                                                const cycleDimension = "year|season|" + timeKey
+                                                dispatch(createGoToCyclicDetailRangeAction(InteractionType.TouchOnly, null, null, cycleDimension as CycleDimension))
+                                            }
+                                            break;
+                                        case CyclicTimeFrame.WeekdayWeekends:
+                                            {
+                                                const cycleDimension = "year|wdwe|" + timeKey
+                                                dispatch(createGoToCyclicDetailRangeAction(InteractionType.TouchOnly, null, null, cycleDimension as CycleDimension))
+                                            }
+                                            break;
+                                    }
+                                }}
+                                />)
                     }
                 </G>
             </CycleChartFrame>

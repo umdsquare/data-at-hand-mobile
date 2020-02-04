@@ -1,19 +1,6 @@
 import {DataSourceType} from '../../../measure/DataSourceSpec';
 export type StatisticsType = 'avg' | 'range' | 'total' | 'bedtime' | 'waketime';
 
-export enum CyclicTimeFrame{
-  DayOfWeek = "dow",
-  MonthOfYear = "month",
-  SeasonOfYear = "season",
-  WeekdayWeekends = "wdwe",
-}
-
-export const cyclicTimeFrameSpecs: {[type: string]: {type: CyclicTimeFrame, name: string}} = {}
-cyclicTimeFrameSpecs[CyclicTimeFrame.DayOfWeek]={type: CyclicTimeFrame.DayOfWeek, name: "Days of the Week"}
-cyclicTimeFrameSpecs[CyclicTimeFrame.MonthOfYear]={type: CyclicTimeFrame.MonthOfYear, name: "Months of the Year"}
-cyclicTimeFrameSpecs[CyclicTimeFrame.SeasonOfYear]={type: CyclicTimeFrame.SeasonOfYear, name: "Seasons of the Year"}
-cyclicTimeFrameSpecs[CyclicTimeFrame.WeekdayWeekends]={type: CyclicTimeFrame.WeekdayWeekends, name: "Weekday / Weekends"}
-
 
 export interface IAggregatedValue {
   timeKey: number;

@@ -10,9 +10,10 @@ import {
 import {FitbitRangeMeasure} from './FitbitRangeMeasure';
 import {DateTimeHelper} from '../../../time';
 import {parse, getDay} from 'date-fns';
-import {WeightRangedData, CyclicTimeFrame, GroupedData, IAggregatedValue} from '../../../core/exploration/data/types';
+import {WeightRangedData, GroupedData, IAggregatedValue} from '../../../core/exploration/data/types';
 import {DataSourceType} from '../../DataSourceSpec';
 import { FitbitLocalTableName } from './sqlite/database';
+import { CyclicTimeFrame } from '../../../core/exploration/cyclic_time';
 
 export class FitbitWeightMeasure extends FitbitServiceMeasure {
   key: string = 'weight';

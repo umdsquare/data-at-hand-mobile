@@ -1,5 +1,5 @@
-import {CyclicTimeFrame} from '../../../../core/exploration/data/types';
 import { startOfDay, format, addSeconds } from 'date-fns';
+import { CyclicTimeFrame } from '../../../../core/exploration/cyclic_time';
 
 const dowNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const monthNames = [
