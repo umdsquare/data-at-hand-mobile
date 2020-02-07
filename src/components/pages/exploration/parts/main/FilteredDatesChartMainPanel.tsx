@@ -184,7 +184,6 @@ class FilteredDatesChartMainPanel extends React.Component<Props, State> {
                                         return <Rect key={datum.numberedDate}
                                             x={sizeInfo.x}
                                             y={scaleY(converter(datum.value))}
-                                            rx={scaleX.bandwidth() * 0.1}
                                             fill={Colors.chartElementDefault}
                                             width={sizeInfo.size}
                                             height={scaleY(converter(datum.value2)) - scaleY(converter(datum.value))}
