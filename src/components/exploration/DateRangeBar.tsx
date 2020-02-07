@@ -5,16 +5,14 @@ import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
 import { Sizes } from "../../style/Sizes";
 import Dash from 'react-native-dash';
 import { Button } from "react-native-elements";
-import { format, isToday, isYesterday, differenceInCalendarDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, isMonday, isSunday, addDays, subDays, startOfMonth, endOfMonth, subMonths, addMonths, startOfDay, endOfDay, isSameDay } from "date-fns";
+import { format, isToday, isYesterday, differenceInCalendarDays, isFirstDayOfMonth, isLastDayOfMonth, isMonday, isSunday, addDays, subDays, startOfMonth, endOfMonth, subMonths, addMonths } from "date-fns";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import GestureRecognizer from 'react-native-swipe-gestures';
-import Modal from "react-native-modal";
-import { StyleTemplates } from "../../style/Styles";
 import { DatePicker, WeekPicker, MonthPicker } from "../common/CalendarPickers";
-import { SafeAreaConsumer } from "react-native-safe-area-context";
 import { InteractionType } from "../../state/exploration/interaction/actions";
 import { DateTimeHelper } from "../../time";
 import { SwipedFeedback } from "../common/SwipedFeedback";
+import { BottomSheet } from "../common/BottomSheet";
 
 const dateButtonWidth = 140
 const barHeight = 60
@@ -36,11 +34,11 @@ const conatinerStyleBase = {
 
 const styles = StyleSheet.create({
     containerStyle: conatinerStyleBase,
-    
+
     conatainerWithBorder: {
-       ...conatinerStyleBase,
-       borderBottomColor: '#ffffff30',
-       borderBottomWidth: 1
+        ...conatinerStyleBase,
+        borderBottomColor: '#ffffff30',
+        borderBottomWidth: 1
     },
     dateButtonContainerStyle: {
         height: barHeight,
@@ -129,7 +127,6 @@ interface State {
     level?: "day" | "week" | "month",
     periodName?: string,
     clickedElementType?: 'from' | 'to' | 'period',
-    isBottomSheetOpen?: boolean
 }
 
 const DateButton = (props: { date: number, overrideFormat?: string, freeWidth?: boolean, onPress: () => void }) => {
@@ -138,15 +135,15 @@ const DateButton = (props: { date: number, overrideFormat?: string, freeWidth?: 
     const subText = isToday(date) === true ? 'Today' : (isYesterday(date) === true ? "Yesterday" : format(date, "EEEE"))
     return <TouchableOpacity onPress={props.onPress}>
         <View style={props.freeWidth === true ? styles.dateButtonContainerStyleFreeWidth : styles.dateButtonContainerStyle}>
-        <View style={styles.dateButtonDatePartStyle}>
-            <Text style={styles.dateButtonDateTextStyle}>{dateString}</Text>
-            <View style={styles.dateButtonIndicatorContainerStyle}>
-                <SpeechAffordanceIndicator />
+            <View style={styles.dateButtonDatePartStyle}>
+                <Text style={styles.dateButtonDateTextStyle}>{dateString}</Text>
+                <View style={styles.dateButtonIndicatorContainerStyle}>
+                    <SpeechAffordanceIndicator />
+                </View>
             </View>
-        </View>
-        <Text style={styles.midViewDescriptionTextStyle}>
-            {subText}
-        </Text></View>
+            <Text style={styles.midViewDescriptionTextStyle}>
+                {subText}
+            </Text></View>
     </TouchableOpacity>
 }
 
@@ -207,6 +204,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
     }
 
     private swipedFeedbackRef: SwipedFeedback
+    private bottomSheetRef: BottomSheet
 
     constructor(props: Props) {
         super(props)
@@ -217,8 +215,8 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         this.setState({
             ...this.state,
             clickedElementType: type,
-            isBottomSheetOpen: true
         })
+        this.bottomSheetRef.open()
     }
 
     onFromDatePressed = () => {
@@ -267,20 +265,14 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         this.swipedFeedbackRef.startFeedback('right')
     }
 
-    closeBottomSheet = () => {
-        this.setState({
-            ...this.state,
-            isBottomSheetOpen: false,
-            clickedElementType: null
-        })
-    }
-
     setRange = (from: number, to: number, interactionType: InteractionType = InteractionType.TouchOnly) => {
         this.setState(DateRangeBar.deriveState(
             from,
             to,
-            { ...this.state, isBottomSheetOpen: false, clickedElementType: null }
+            { ...this.state, clickedElementType: null }
         ))
+
+        this.bottomSheetRef?.close()
 
         if (this.props.onRangeChanged) {
             this.props.onRangeChanged(from, to, interactionType)
@@ -332,9 +324,9 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                     break;
             }
         }
-        
-        return <GestureRecognizer onSwipeLeft={this.onSwipeLeft} onSwipeRight={this.onSwipeRight} style={this.props.showBorder===true ? styles.conatainerWithBorder : styles.containerStyle}>
-            <SwipedFeedback ref={ref => this.swipedFeedbackRef = ref}/>
+
+        return <GestureRecognizer onSwipeLeft={this.onSwipeLeft} onSwipeRight={this.onSwipeRight} style={this.props.showBorder === true ? styles.conatainerWithBorder : styles.containerStyle}>
+            <SwipedFeedback ref={ref => this.swipedFeedbackRef = ref} />
             <DateButton date={this.state.from} onPress={this.onFromDatePressed} />
             <View style={styles.midViewContainerStyle} >
                 <Dash style={styles.dashViewStyle} dashGap={4} dashColor="gray" dashLength={3} dashThickness={3} dashStyle={styles.dashLineStyle} />
@@ -352,21 +344,9 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             </View>
             <DateButton date={this.state.to} onPress={this.onToDatePressed} />
 
-            <Modal
-                isVisible={this.state.isBottomSheetOpen === true}
-                onBackdropPress={this.closeBottomSheet}
-                style={StyleTemplates.bottomSheetModalContainerStyle}
-                backdropOpacity={0.3}
-            >
-                <SafeAreaConsumer>{
-                    inset =>
-                        <View style={{ ...StyleTemplates.bottomSheetModalViewStyle, paddingBottom: Math.max(20, inset.bottom) }}>
-                            {
-                                modalPickerView
-                            }
-                        </View>
-                }</SafeAreaConsumer>
-            </Modal>
+            <BottomSheet ref={ref => { this.bottomSheetRef = ref }}>
+                {modalPickerView}
+            </BottomSheet>
 
         </GestureRecognizer>
     }
@@ -380,7 +360,6 @@ export const DateBar = (props: {
 }) => {
 
     const [date, setDate] = useState(props.date)
-    const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false)
 
     const shiftDay = (amount: number) => {
         const newDate = addDays(DateTimeHelper.toDate(date), amount)
@@ -388,39 +367,29 @@ export const DateBar = (props: {
             const newNumberedDate = DateTimeHelper.toNumberedDateFromDate(newDate)
             setDate(newNumberedDate)
             props.onDateChanged && props.onDateChanged(newNumberedDate, InteractionType.TouchOnly)
-            if(swipedFeedbackRef != null){
+            if (swipedFeedbackRef != null) {
                 swipedFeedbackRef.startFeedback(amount > 0 ? 'left' : 'right')
             }
         }
     }
 
-    let swipedFeedbackRef : SwipedFeedback
+    let bottomSheetRef: BottomSheet
+
+    let swipedFeedbackRef: SwipedFeedback
 
     return <GestureRecognizer onSwipeLeft={() => shiftDay(1)} onSwipeRight={() => shiftDay(-1)} style={styles.containerStyle}>
-        <SwipedFeedback ref={ref => swipedFeedbackRef = ref}/>
-        <DateButton date={date} overrideFormat="MMMM dd, yyyy" freeWidth={true} onPress={() => { setIsBottomSheetOpen(true) }} />
+        <SwipedFeedback ref={ref => swipedFeedbackRef = ref} />
+        <DateButton date={date} overrideFormat="MMMM dd, yyyy" freeWidth={true} onPress={() => { bottomSheetRef.open() }} />
 
-        <Modal
-            isVisible={isBottomSheetOpen === true}
-            onBackdropPress={() => { setIsBottomSheetOpen(false) }}
-            style={StyleTemplates.bottomSheetModalContainerStyle}
-            backdropOpacity={0.3}
-        >
-            <SafeAreaConsumer>{
-                inset =>
-                    <View style={{ ...StyleTemplates.bottomSheetModalViewStyle, paddingBottom: Math.max(20, inset.bottom) }}>
-                        {
-                            <DatePicker selectedDay={DateTimeHelper.toDate(date)}
-                                latestPossibleDay={new Date()}
-                                onDayPress={(d) => {
-                                    const newDate = DateTimeHelper.toNumberedDateFromDate(d)
-                                    setDate(newDate)
-                                    setIsBottomSheetOpen(false)
-                                    props.onDateChanged && props.onDateChanged(newDate, InteractionType.TouchOnly)
-                                }} />
-                        }
-                    </View>
-            }</SafeAreaConsumer>
-        </Modal>
+        <BottomSheet ref={ref => { bottomSheetRef = ref }}>
+            <DatePicker selectedDay={DateTimeHelper.toDate(date)}
+                latestPossibleDay={new Date()}
+                onDayPress={(d) => {
+                    const newDate = DateTimeHelper.toNumberedDateFromDate(d)
+                    setDate(newDate)
+                    bottomSheetRef.close()
+                    props.onDateChanged && props.onDateChanged(newDate, InteractionType.TouchOnly)
+                }} />
+        </BottomSheet>
     </GestureRecognizer>
 }
