@@ -1,7 +1,7 @@
 import SQLite from 'react-native-sqlite-storage';
 import {SQLiteHelper} from '../../../../database/sqlite/sqlite-helper';
-import {CyclicTimeFrame} from '../../../../core/exploration/data/types';
 import stringFormat from 'string-format';
+import {CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension} from '../../../../core/exploration/cyclic_time';
 SQLite.DEBUG(false);
 SQLite.enablePromise(true);
 
@@ -47,29 +47,53 @@ const groupByQueryFormat =
 const groupSelectClauseFormat =
   'MIN({minColumnName}) as min, MAX({maxColumnName}) as max, SUM({sumColumnName}) as sum, AVG({avgColumnName}) as avg, COUNT({countColumnName}) as n';
 
+const seasonCaseClause = "CASE \
+WHEN \
+    month BETWEEN 3 AND 5 THEN 0 \
+WHEN month BETWEEN 6 AND 8 THEN 1 \
+WHEN month BETWEEN 9 AND 11 THEN 2 \
+WHEN month = 12 OR month = 1 OR month = 2 THEN 3 \
+END"
+
+const dayOfWeekCaseClause = "CASE \
+WHEN \
+    dayOfWeek BETWEEN 1 AND 5 THEN 0 \
+WHEN dayOfWeek = 0 OR dayOfWeek = 6 THEN 1 \
+END"
+
 export function makeGroupSelectClause(
   minColumnName: string = 'value',
   maxColumnName: string = 'value',
   avgColumnName: string = 'value',
   countColumnName: string = 'value',
-  sumColumnName: string=  "value"
+  sumColumnName: string = 'value',
 ) {
   return stringFormat(groupSelectClauseFormat, {
     minColumnName,
     maxColumnName,
     avgColumnName,
     countColumnName,
-    sumColumnName
+    sumColumnName,
   });
 }
 
 export function makeAggregatedQuery(
-    tableName: string,
-    start: number,
-    end: number,
-    selectColumnClause = makeGroupSelectClause()
-): string{
-    return "SELECT " + selectColumnClause + " FROM " + tableName + " WHERE " + '`numberedDate` BETWEEN ' + start + ' AND ' + end
+  tableName: string,
+  start: number,
+  end: number,
+  selectColumnClause = makeGroupSelectClause(),
+): string {
+  return (
+    'SELECT ' +
+    selectColumnClause +
+    ' FROM ' +
+    tableName +
+    ' WHERE ' +
+    '`numberedDate` BETWEEN ' +
+    start +
+    ' AND ' +
+    end
+  );
 }
 
 export function makeCyclicGroupQuery(
@@ -78,7 +102,7 @@ export function makeCyclicGroupQuery(
   end: number,
   cycleType: CyclicTimeFrame,
   selectColumnsClause: string = makeGroupSelectClause(),
-  fromClause: string = tableName
+  fromClause: string = tableName,
 ): string {
   const base = {
     fromClause,
@@ -98,25 +122,57 @@ export function makeCyclicGroupQuery(
         select: 'month as timeKey, ' + selectColumnsClause,
       });
     case CyclicTimeFrame.SeasonOfYear:
-        return stringFormat(groupByQueryFormat, {
-            ...base,
-            select: 'CASE \
-                WHEN \
-                    month BETWEEN 3 AND 5 THEN 0 \
-                WHEN month BETWEEN 6 AND 8 THEN 1 \
-                WHEN month BETWEEN 9 AND 11 THEN 2 \
-                WHEN month = 12 OR month = 1 OR month = 2 THEN 3 \
-                END timeKey, ' + selectColumnsClause,
-          });
+      return stringFormat(groupByQueryFormat, {
+        ...base,
+        select: seasonCaseClause + ' timeKey, ' + selectColumnsClause,
+      });/*
     case CyclicTimeFrame.WeekdayWeekends:
-        return stringFormat(groupByQueryFormat, {
-            ...base,
-            select: 'CASE \
-                WHEN \
-                    dayOfWeek BETWEEN 1 AND 5 THEN 0 \
-                WHEN dayOfWeek = 0 OR dayOfWeek = 6 THEN 1 \
-                END timeKey, ' + selectColumnsClause,
-          });
+      return stringFormat(groupByQueryFormat, {
+        ...base,
+        select: dayOfWeekCaseClause + ' timeKey, ' + selectColumnsClause,
+      });*/
+  }
+}
+
+export function makeCycleDimensionRangeQuery(
+  tableName: string,
+  start: number,
+  end: number,
+  cycleDimension: CycleDimension,
+  selectColumnsClause: string = makeGroupSelectClause(),
+): string {
+  const cycleLevel = getCycleLevelOfDimension(cycleDimension)
+  const cycleType = getCycleTypeOfDimension(cycleDimension)
+
+  if(cycleLevel != "year"){
+    throw "Cycle level should be either year."
+  }else{
+
+    const base = {
+      select: cycleLevel + ' as timeKey, ' + selectColumnsClause,
+      fromClause: tableName,
+      groupBy: 'timeKey',
+      whereClause:
+        '`numberedDate` BETWEEN ' +
+        start +
+        ' AND ' +
+        end +
+        ' AND ' +
+        cycleType +
+        ' = ' +
+        getTimeKeyOfDimension(cycleDimension),
+    };
+
+    if(cycleType == CyclicTimeFrame.SeasonOfYear){
+      base.select = seasonCaseClause + ' timeKey, ' + selectColumnsClause
+      base.whereClause = '`numberedDate` BETWEEN ' +
+      start +
+      ' AND ' +
+      end +
+      ' AND timeKey = ' + getTimeKeyOfDimension(cycleDimension)
+    }
+
+    return stringFormat(groupByQueryFormat, base);
   }
 }
 
@@ -256,6 +312,10 @@ const dbConfig = {
 export class FitbitLocalDbManager {
   private _database: SQLite.SQLiteDatabase;
 
+  constructor() {
+    console.log('initialize Fitbit Local DB Manager');
+  }
+
   deleteDatabase(): Promise<void> {
     return SQLite.deleteDatabase(dbConfig);
   }
@@ -292,8 +352,10 @@ export class FitbitLocalDbManager {
   }
 
   async close(): Promise<void> {
-    await this._database.close();
-    this._database = null;
+    if (this._database) {
+      await this._database.close();
+      this._database = null;
+    } else return
   }
 
   async insert(
@@ -323,7 +385,7 @@ export class FitbitLocalDbManager {
       'VALUES ' +
       valueTemplate;
 
-    return this._database
+    return (await this.open())
       .transaction(tx => {
         for (const entry of entries) {
           tx.executeSql(
@@ -340,7 +402,7 @@ export class FitbitLocalDbManager {
       'SELECT * FROM ' +
       FitbitLocalTableName.CachedRange +
       ' WHERE `measureKey` = ? LIMIT 1';
-    const [result] = await this._database.executeSql(query, [measureKey]);
+    const [result] = await (await this.open()).executeSql(query, [measureKey]);
     if (result.rows.length > 0) {
       const entry = result.rows.item(0);
       entry.queriedAt = new Date(entry.queriedAt);
@@ -365,7 +427,7 @@ export class FitbitLocalDbManager {
       'SELECT * FROM ' +
       FitbitLocalTableName.CachedIntraDayDates +
       ' WHERE `measureKey` = ? AND `date` = ? LIMIT 1';
-    const [result] = await this._database.executeSql(query, [measureKey, date]);
+    const [result] = await (await this.open()).executeSql(query, [measureKey, date]);
     if (result.rows.length > 0) {
       const entry = result.rows.item(0);
       entry.queriedAt = new Date(entry.queriedAt);
@@ -394,19 +456,18 @@ export class FitbitLocalDbManager {
       ' WHERE ' +
       condition;
     try {
-      const [result] = await this._database.executeSql(query, parameters);
+      const [result] = await (await this.open()).executeSql(query, parameters);
       if (result.rows.length > 0) {
         return result.rows.raw();
       } else return [];
     } catch (ex) {
-      console.log('Fetch error:');
       console.log(ex);
       return [];
     }
   }
 
   async selectQuery<T>(query: string): Promise<T[]> {
-    const [result] = await this._database.executeSql(query);
+    const [result] = await (await this.open()).executeSql(query);
     return result.rows.raw();
   }
 
@@ -426,7 +487,7 @@ export class FitbitLocalDbManager {
       tableName +
       ' WHERE ' +
       condition;
-    const [result] = await this._database.executeSql(query, parameters);
+    const [result] = await (await this.open()).executeSql(query, parameters);
     if (result.rows.length > 0) {
       const obj = result.rows.item(0);
       return obj[Object.keys(obj)[0]];

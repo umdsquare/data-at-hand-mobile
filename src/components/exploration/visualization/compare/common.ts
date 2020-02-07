@@ -1,5 +1,5 @@
-import {CyclicTimeFrame} from '../../../../core/exploration/data/types';
 import { startOfDay, format, addSeconds } from 'date-fns';
+import { CyclicTimeFrame } from '../../../../core/exploration/cyclic_time';
 
 const dowNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const monthNames = [
@@ -47,10 +47,11 @@ export function getDomainAndTickFormat(
       domain = [0, 1, 2, 3];
       tickFormat = getSeasonName;
       break;
+      /*
     case CyclicTimeFrame.WeekdayWeekends:
       domain = [0, 1];
       tickFormat = getWdWeName;
-      break;
+      break;*/
   }
 
   return {

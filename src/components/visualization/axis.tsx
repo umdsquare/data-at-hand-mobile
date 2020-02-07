@@ -25,7 +25,8 @@ export const AxisSvg = (props: Props<any>) => {
                     props.ticks.map(tick => {
                         return <G key={tick instanceof Date? tick.toISOString() : tick} x={props.scale(tick)}>
                             <Circle fill="rgba(0,0,0,0.3)" r={2.5} cy={12} />
-                            <Text {...props.overrideTickLabelStyle} textAnchor="end" y={12} transform="rotate(-45)translate(-16)" fill={Colors.textColorLight}>{props.tickFormat? props.tickFormat(tick): tick}</Text>
+                            <Text {...props.overrideTickLabelStyle} textAnchor="end" y={12} transform="rotate(-45)translate(-16)"
+                            fill={Colors.chartElementDefault}>{props.tickFormat? props.tickFormat(tick): tick}</Text>
                         </G>
                     })
                 }
@@ -36,7 +37,7 @@ export const AxisSvg = (props: Props<any>) => {
                 props.ticks.map(tick => {
                     return <G key={tick} y={props.scale(tick)}>
                         <Line x1={props.chartArea.x - props.tickMargin} x2={props.chartArea.x + props.chartArea.width} stroke="rgba(0,0,0,0.07)" />
-                        <Text {...props.overrideTickLabelStyle} alignmentBaseline="central" fontWeight={500} textAnchor="end" x={props.chartArea.x - props.tickMargin - 8} fill={Colors.chartLightText}>{props.tickFormat? props.tickFormat(tick): tick}</Text>
+                        <Text {...props.overrideTickLabelStyle} alignmentBaseline="central" fontWeight={500} textAnchor="end" x={props.chartArea.x - props.tickMargin - 8} fill={Colors.chartElementDefault}>{props.tickFormat? props.tickFormat(tick): tick}</Text>
                     </G>
 
                 })

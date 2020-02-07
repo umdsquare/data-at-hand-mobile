@@ -6,7 +6,7 @@ import { ReduxAppState } from '../../../../../state/types'
 import { RangeAggregatedComparisonData, IAggregatedRangeValue, IAggregatedValue } from '../../../../../core/exploration/data/types'
 import { DataSourceType, MeasureUnitType } from '../../../../../measure/DataSourceSpec'
 import { Dispatch } from 'redux'
-import { View, StyleSheet, Text, Platform, LayoutRectangle } from 'react-native'
+import { View, StyleSheet, Platform, LayoutRectangle } from 'react-native'
 import { StyleTemplates } from '../../../../../style/Styles'
 import SegmentedControlIOS from '@react-native-community/segmented-control';
 import { Sizes } from '../../../../../style/Sizes'
@@ -15,7 +15,7 @@ import Colors from '../../../../../style/Colors'
 import { SizeWatcher } from '../../../../visualization/SizeWatcher'
 import { RangeValueElementLegend } from '../../../../exploration/visualization/compare/RangeValueElementLegend'
 import { SingleValueElementLegend } from '../../../../exploration/visualization/compare/SingleValueElementLegend'
-import Svg, { G, Line, Text as SvgText, Rect, TSpan } from 'react-native-svg'
+import Svg, { G, Line, Text as SvgText, Rect } from 'react-native-svg'
 import { scaleBand, scaleLinear } from 'd3-scale'
 import commaNumber from 'comma-number';
 import { DateTimeHelper } from '../../../../../time'
@@ -24,14 +24,13 @@ import { timeTickFormat } from '../../../../exploration/visualization/compare/co
 import { min, max } from 'd3-array'
 import { SingleValueElement } from '../../../../exploration/visualization/compare/SingleValueElement'
 import { RangeValueElement } from '../../../../exploration/visualization/compare/RangeValueElement'
-import { startOfYear, isSameYear, getDayOfYear, isSameMonth, startOfMonth, endOfMonth, format } from 'date-fns'
+import { isSameYear, isSameMonth, startOfMonth, endOfMonth, format } from 'date-fns'
 import { ExplorationAction, createGoToBrowseRangeAction, InteractionType } from '../../../../../state/exploration/interaction/actions'
+import { noop } from '../../../../../utils'
 
 const INDEX_AGGREGATED = 0
 const INDEX_SUM = 1
 const SEGEMENTED_VALUES = ["Daily Average", "Total"]
-
-const noop = (a) => a
 
 const xAxisHeight = 70
 const yAxisWidth = 70
@@ -89,7 +88,7 @@ interface State {
     chartContainerHeight: number
 }
 
-class TwoRangeComparisonMainPanel extends React.Component<Props, State>{
+class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
 
     constructor(props) {
         super(props)
@@ -121,16 +120,17 @@ class TwoRangeComparisonMainPanel extends React.Component<Props, State>{
             ))
     }
 
-    private onElementLongPressIn = (timeKey: number) => {
+    private onElementLongPressIn = () => {
         //TODO show tooltip
     }
 
-    private onElementLongPressOut = (timeKey: number) => {
+    private onElementLongPressOut = () => {
         //TODO hide tooltip
     }
 
 
     render() {
+        console.log(this.props.data)
         const aggregationSettingIndex = this.props.sumSupported === true ? this.state.aggregationSettingIndex : INDEX_AGGREGATED
 
         let isRanged = false
@@ -178,15 +178,16 @@ class TwoRangeComparisonMainPanel extends React.Component<Props, State>{
         const scaleX = scaleBand<number>().domain(indices).range([0, chartArea.width]).padding(0.55).paddingOuter(0.25)
 
         const scaleY = scaleLinear().range([chartArea.height, 0])
+        const availableData = this.props.data.data.filter(d => d.value != null)
         if (aggregationSettingIndex === INDEX_AGGREGATED) {
-            scaleY.domain([startFromZero === true ? 0 : min(this.props.data.data, d => {
+            scaleY.domain([startFromZero === true ? 0 : min(availableData, d => {
                 if (isRanged === true) {
                     //range
                     return Math.min(valueConverter(d.value["minA"]), valueConverter(d.value["minB"]))
                 } else {
                     return valueConverter(d.value["min"])
                 }
-            }), max(this.props.data.data, d => {
+            }), max(availableData, d => {
                 if (isRanged === true) {
                     //range
                     return Math.max(valueConverter(d.value["maxA"]), valueConverter(d.value["maxB"]))
@@ -196,7 +197,7 @@ class TwoRangeComparisonMainPanel extends React.Component<Props, State>{
             })])
         } else if (aggregationSettingIndex === INDEX_SUM) {
 
-            scaleY.domain([0, max(this.props.data.data, d => {
+            scaleY.domain([0, max(availableData, d => {
                 if (isRanged === true) {
                     //range
                     return Math.max(valueConverter(d.value["sumA"]), valueConverter(d.value["sumB"]))
@@ -283,7 +284,7 @@ class TwoRangeComparisonMainPanel extends React.Component<Props, State>{
                     </G>
                     <G x={chartArea.x} y={chartArea.y}>
                         {
-                            aggregationSettingIndex === INDEX_AGGREGATED ? this.props.data.data.map((d, i) => {
+                            aggregationSettingIndex === INDEX_AGGREGATED ? availableData.map((d, i) => {
                                 if (isRanged === true) {
                                     return <RangeValueElement key={i}
                                         value={{
@@ -317,7 +318,7 @@ class TwoRangeComparisonMainPanel extends React.Component<Props, State>{
                                     onLongPressOut={this.onElementLongPressOut}
                                     
                                     />
-                            }) : this.props.data.data.map((d, i) => {
+                            }) : availableData.map((d, i) => {
                                 return <Rect
                                     key={i}
                                     x={scaleX(i)}
@@ -357,6 +358,6 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
 }
 
 
-const connected = connect(mapStateToProps, mapDispatchToProps)(TwoRangeComparisonMainPanel)
+const connected = connect(mapStateToProps, mapDispatchToProps)(MultiRangeComparisonMainPanel)
 
-export { connected as TwoRangeComparisonMainPanel }
+export { connected as MultiRangeComparisonMainPanel }

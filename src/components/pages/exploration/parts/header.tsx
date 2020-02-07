@@ -11,11 +11,11 @@ import { Sizes } from '../../../../style/Sizes';
 import { StyleTemplates } from '../../../../style/Styles';
 import { dataSourceManager } from '../../../../system/DataSourceManager';
 import { DataSourceType } from '../../../../measure/DataSourceSpec';
-import { createSetRangeAction, setDataSourceAction, InteractionType, goBackAction, setDateAction, setIntraDayDataSourceAction, setCycleTypeAction } from '../../../../state/exploration/interaction/actions';
+import { createSetRangeAction, setDataSourceAction, InteractionType, goBackAction, setDateAction, setIntraDayDataSourceAction, setCycleTypeAction, setCycleDimensionAction } from '../../../../state/exploration/interaction/actions';
 import Colors from '../../../../style/Colors';
 import { useDispatch, useSelector } from 'react-redux';
 import { ReduxAppState } from '../../../../state/types';
-import { CyclicTimeFrame, cyclicTimeFrameSpecs } from '../../../../core/exploration/data/types';
+import { CyclicTimeFrame, cyclicTimeFrameSpecs, CycleDimension, getFilteredCycleDimensionList, getHomogeneousCycleDimensionList, getCycleDimensionSpec } from '../../../../core/exploration/cyclic_time';
 
 const titleBarOptionButtonIconInfo = {
     name: "ios-settings",
@@ -91,7 +91,7 @@ export const ExplorationViewHeader = (props: ExplorationProps) => {
 
 export function generateHeaderView(props: ExplorationProps): any {
     switch (props.explorationState.info.type) {
-        case ExplorationType.B_Ovrvw:
+        case ExplorationType.B_Overview:
             return <HeaderContainer>
                 <View style={styles.titleBarStyle}>
                     <Text style={styles.titleBarTitleStyle}>Browse</Text>
@@ -118,13 +118,18 @@ export function generateHeaderView(props: ExplorationProps): any {
             </HeaderContainer>
         case ExplorationType.C_Cyclic:
             return <HeaderContainer>
-                {generateCyclicComparisonTypeRow(props)}
-                {generateDataSourceRow(props, false)}
+                {generateDataSourceRow(props, true)}
+                {generateCyclicComparisonTypeRow(props, false)}
                 {generateRangeBar(props)}
             </HeaderContainer>
             break;
-        case ExplorationType.C_CyclicDetail:
-            break;
+        case ExplorationType.C_CyclicDetail_Daily:
+        case ExplorationType.C_CyclicDetail_Range:
+            return <HeaderContainer>
+                {generateDataSourceRow(props, true)}
+                {generateCycleDimensionRow(props, false)}
+                {generateRangeBar(props)}
+            </HeaderContainer>
         case ExplorationType.C_TwoRanges:
             return <HeaderContainer>
                 {generateDataSourceRow(props, false)}
@@ -218,11 +223,11 @@ function generateIntraDayDataSourceRow(props: ExplorationProps): any {
     />
 }
 
-function generateCyclicComparisonTypeRow(props: ExplorationProps): any {
+function generateCyclicComparisonTypeRow(props: ExplorationProps, showBorder: boolean): any {
     const cycleType = explorationInfoHelper.getParameterValue<CyclicTimeFrame>(props.explorationState.info, ParameterType.CycleType)
     const cycles = Object.keys(cyclicTimeFrameSpecs)
 
-    return <CategoricalRow title="Group By" showBorder={true} value={cyclicTimeFrameSpecs[cycleType].name}
+    return <CategoricalRow title="Group By" showBorder={showBorder} value={cyclicTimeFrameSpecs[cycleType].name}
         onSwipeLeft={() => {
             let currentIndex = cycles.indexOf(cycleType)
             currentIndex--
@@ -237,4 +242,27 @@ function generateCyclicComparisonTypeRow(props: ExplorationProps): any {
             props.dispatchCommand(setCycleTypeAction(InteractionType.TouchOnly, cycles[currentIndex] as any))
         }}
     />
+}
+
+function generateCycleDimensionRow(props: ExplorationProps, showBorder: boolean): any {
+    const cycleDimension = explorationInfoHelper.getParameterValue<CycleDimension>(props.explorationState.info, ParameterType.CycleDimension)
+    const spec = getCycleDimensionSpec(cycleDimension)
+    const selectableDimensions = getHomogeneousCycleDimensionList(cycleDimension)
+
+    return <CategoricalRow title="Cycle Filter" showBorder={showBorder} value={spec.name}
+        onSwipeLeft={() => {
+            let currentIndex = selectableDimensions.findIndex(spec => spec.dimension === cycleDimension)
+            currentIndex--
+            if (currentIndex < 0) {
+                currentIndex = selectableDimensions.length - 1
+            }
+            props.dispatchCommand(setCycleDimensionAction(InteractionType.TouchOnly, selectableDimensions[currentIndex].dimension))
+        }}
+
+        onSwipeRight={() => {
+            const currentIndex = (selectableDimensions.findIndex(spec => spec.dimension === cycleDimension) + 1) % selectableDimensions.length
+            props.dispatchCommand(setCycleDimensionAction(InteractionType.TouchOnly, selectableDimensions[currentIndex].dimension))
+        }}
+    />
+
 }

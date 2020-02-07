@@ -2,9 +2,10 @@ import {DateTimeHelper} from '../../../time';
 import {parse, getDay} from 'date-fns';
 import {FITBIT_DATE_FORMAT} from './api';
 import {FitbitRangeMeasure} from './FitbitRangeMeasure';
-import { FitbitLocalTableName, makeCyclicGroupQuery, makeAggregatedQuery } from './sqlite/database';
+import { FitbitLocalTableName, makeCyclicGroupQuery, makeAggregatedQuery, makeCycleDimensionRangeQuery } from './sqlite/database';
 import { SQLiteHelper } from '../../../database/sqlite/sqlite-helper';
-import { CyclicTimeFrame, GroupedData, IAggregatedValue } from '../../../core/exploration/data/types';
+import { GroupedData, IAggregatedValue, GroupedRangeData, FilteredDailyValues } from '../../../core/exploration/data/types';
+import { CyclicTimeFrame, CycleDimension, getCycleTypeOfDimension, getTimeKeyOfDimension } from '../../../core/exploration/cyclic_time';
 
 export abstract class FitbitSummaryLogMeasure<
   QueryResultType> extends FitbitRangeMeasure<QueryResultType> {
@@ -99,5 +100,32 @@ export abstract class FitbitSummaryLogMeasure<
     if(result.length > 0){
       return result[0] as any
     }else return null
+  }
+
+  async fetchCycleRangeDimensionData(start: number, end: number, cycleDimension: CycleDimension): Promise<IAggregatedValue[]> {
+    const result = await this.service.fitbitLocalDbManager.selectQuery<IAggregatedValue>(makeCycleDimensionRangeQuery(this.dbTableName, start, end, cycleDimension))
+    return result
+  }
+   
+  async fetchCycleDailyDimensionData(start: number, end: number, cycleDimension: CycleDimension): Promise<FilteredDailyValues> {
+    let condition = "`numberedDate` BETWEEN ? AND ?" 
+
+    const cycleType = getCycleTypeOfDimension(cycleDimension)
+    switch(cycleType){
+      case CyclicTimeFrame.DayOfWeek:
+        condition += " AND `dayOfWeek` = " + getTimeKeyOfDimension(cycleDimension)
+        break;
+    }
+
+    condition += " ORDER BY `numberedDate`"
+    const params = [start, end]
+
+
+    const list = await this.service.fitbitLocalDbManager.fetchData<{numberedDate: number, value: number}>(this.dbTableName, condition, params)
+
+    return {
+      type: 'length',
+      data: list
+    }
   }
 } 

@@ -12,8 +12,8 @@ import Colors from '../../../../style/Colors';
 import { IIntraDayLogEntry, IWeightIntraDayLogEntry } from '../../../../core/exploration/data/types';
 import { MeasureUnitType } from '../../../../measure/DataSourceSpec';
 import unitConvert from 'convert-units';
+import { noop } from '../../../../utils';
 
-const noop = (k) => k
 
 export const DailyWeightChart = (prop: {
     dateRange: number[],

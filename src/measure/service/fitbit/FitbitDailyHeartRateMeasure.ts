@@ -1,9 +1,10 @@
 import {FitbitDailyActivityHeartRateQueryResult} from './types';
 import {FitbitSummaryLogMeasure} from './FitbitSummaryLogMeasure';
 import {makeFitbitDayLevelActivityLogsUrl} from './api';
-import { RestingHeartRateRangedData, STATISTICS_LABEL_RANGE } from '../../../core/exploration/data/types';
+import { RestingHeartRateRangedData, STATISTICS_LABEL_RANGE, FilteredDailyValues } from '../../../core/exploration/data/types';
 import { DataSourceType } from '../../DataSourceSpec';
 import { FitbitLocalTableName } from './sqlite/database';
+import { CycleDimension } from '../../../core/exploration/cyclic_time';
 
 export class FitbitDailyHeartRateMeasure extends FitbitSummaryLogMeasure<FitbitDailyActivityHeartRateQueryResult> {
   
@@ -53,5 +54,11 @@ export class FitbitDailyHeartRateMeasure extends FitbitSummaryLogMeasure<FitbitD
     } as RestingHeartRateRangedData;
 
     return base;
+  }
+
+  async fetchCycleDailyDimensionData(start: number, end: number, cycleDimension: CycleDimension): Promise<FilteredDailyValues> {
+    const data = await super.fetchCycleDailyDimensionData(start, end, cycleDimension)
+    data.type = 'point'
+    return data
   }
 }

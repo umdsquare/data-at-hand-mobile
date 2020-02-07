@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { Sizes } from '../../style/Sizes';
 import { SpeechAffordanceIndicator } from './SpeechAffordanceIndicator';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -11,7 +11,8 @@ const containerStyleBase = {
     alignItems: 'center',
     height,
     paddingLeft: Sizes.horizontalPadding,
-}
+    justifyContent: 'space-between'
+} as ViewStyle
 const styles = StyleSheet.create({
     containerStyleWithBorder: {
         ...containerStyleBase as any,
@@ -23,7 +24,6 @@ const styles = StyleSheet.create({
     titleStyle: {
         fontSize: Sizes.normalFontSize,
         color: "#E0E0E0",
-        flex: 1
     },
 
     buttonStyle: {
@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
         color: 'white',
         fontSize: Sizes.normalFontSize,
         fontWeight: '500',
-        marginLeft: 4
+        marginLeft: 4,
     },
 
     indicatorStyle: {

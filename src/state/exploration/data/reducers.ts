@@ -91,7 +91,8 @@ export function startLoadingForInfo(explorationInfo: ExplorationInfo) {
         } as FinishLoadingData);
       }
     } catch (err) {
-      console.error('Error in data loading task: ', taskId, err, JSON.stringify(err));
+      console.error("error in data loading task.", err)
+      //console.error('Error in data loading task: ', taskId, err, JSON.stringify(err));
       const currentAppState = getState();
       if (taskId === currentAppState.explorationDataState.ongoingTaskId) {
         dispatch({

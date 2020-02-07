@@ -332,7 +332,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                     break;
             }
         }
-
+        
         return <GestureRecognizer onSwipeLeft={this.onSwipeLeft} onSwipeRight={this.onSwipeRight} style={this.props.showBorder===true ? styles.conatainerWithBorder : styles.containerStyle}>
             <SwipedFeedback ref={ref => this.swipedFeedbackRef = ref}/>
             <DateButton date={this.state.from} onPress={this.onFromDatePressed} />
@@ -388,11 +388,16 @@ export const DateBar = (props: {
             const newNumberedDate = DateTimeHelper.toNumberedDateFromDate(newDate)
             setDate(newNumberedDate)
             props.onDateChanged && props.onDateChanged(newNumberedDate, InteractionType.TouchOnly)
+            if(swipedFeedbackRef != null){
+                swipedFeedbackRef.startFeedback(amount > 0 ? 'left' : 'right')
+            }
         }
     }
 
+    let swipedFeedbackRef : SwipedFeedback
 
     return <GestureRecognizer onSwipeLeft={() => shiftDay(1)} onSwipeRight={() => shiftDay(-1)} style={styles.containerStyle}>
+        <SwipedFeedback ref={ref => swipedFeedbackRef = ref}/>
         <DateButton date={date} overrideFormat="MMMM dd, yyyy" freeWidth={true} onPress={() => { setIsBottomSheetOpen(true) }} />
 
         <Modal

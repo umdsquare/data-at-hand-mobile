@@ -17,16 +17,12 @@ export const RangeValueElement = (props: {
 
     let connectionWidth = Math.min(40, props.scaleX.bandwidth())
 
-    console.log(props.scaleY.domain(), props.scaleY(props.scaleY.domain()[0]), props.scaleY(props.scaleY.domain()[1]))
-
     const feedbackArea = {
         x: props.scaleX(props.value.timeKey),
         y: 0,
         width: props.scaleX.bandwidth(),
         height: Math.abs(props.scaleY(props.scaleY.domain()[0]) - props.scaleY(props.scaleY.domain()[1]))
     }
-
-    console.log(feedbackArea)
 
     return <TouchableGroup
         onClick={() => props.onClick && props.onClick(props.value.timeKey)}

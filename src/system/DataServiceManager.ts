@@ -1,12 +1,9 @@
 import {DataService} from '../measure/service/DataService';
 import {FitbitService} from '../measure/service/fitbit/FitbitService';
-import {AppleHealthService} from '../measure/service/healthkit/AppleHealthService';
-import { SettingsState } from '../state/settings/reducer';
 
 class DataServiceManager {
   installedServices: ReadonlyArray<DataService> = [
     new FitbitService(),
-    new AppleHealthService(),
   ];
 
   private _supportedServices: ReadonlyArray<DataService> = null;

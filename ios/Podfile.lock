@@ -205,7 +205,7 @@ PODS:
   - react-native-app-auth (5.0.0):
     - AppAuth (= 1.2.0)
     - React
-  - react-native-safe-area-context (0.6.4):
+  - react-native-safe-area-context (0.7.2):
     - React
   - react-native-segmented-control (1.1.1):
     - React
@@ -254,7 +254,7 @@ PODS:
     - React
     - SDWebImage (~> 5.0)
     - SDWebImageWebPCoder (~> 0.2.3)
-  - RNGestureHandler (1.5.3):
+  - RNGestureHandler (1.5.6):
     - React
   - RNPermissions (2.0.9):
     - React
@@ -434,7 +434,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: d5525f9ed5f782fdbacb64b9b01a43a9323d2386
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
   react-native-app-auth: 40f06f24fd0ff00d5258b8b4cd5436fe64c9edc3
-  react-native-safe-area-context: 042dfc9d4db17196841df962ba9497f6e7a5bd02
+  react-native-safe-area-context: d227bd5ef6776683c330f44187351dc138b2a4cb
   react-native-segmented-control: d957a684d2dda51282245071203f46938f13dcd9
   react-native-sqlite-storage: bb10beb2407e5fc21f3f1bcd86bacbfd6edcc818
   React-RCTActionSheet: 600b4d10e3aea0913b5a92256d2719c0cdd26d76
@@ -450,7 +450,7 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 8539fc80a0075fcc9c8e2dff84cd22dc5bf1dacf
   RNCMaskedView: e5b99bc191945f157adeede68da9d424462de177
   RNFastImage: 9b0c22643872bb7494c8d87bbbb66cc4c0d9e7a2
-  RNGestureHandler: 02905abe54e1f6e59c081a10b4bd689721e17aa6
+  RNGestureHandler: 911d3b110a7a233a34c4f800e7188a84b75319c6
   RNPermissions: 6db7e0a4d94c9c02390d11020b1d3d187aaf77e5
   RNReanimated: 031fe8d9ea93c2bd689a40f05320ef9d96f74d7f
   RNScreens: 9d8a2900cd4f967af70dbfed74b64f77fbb6600a

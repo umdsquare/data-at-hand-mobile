@@ -4,7 +4,7 @@ import {
   TouchingElementInfo,
   IntraDayDataSourceType,
 } from '../../../core/exploration/types';
-import {CyclicTimeFrame} from '../../../core/exploration/data/types';
+import { CyclicTimeFrame, CycleDimension} from '../../../core/exploration/cyclic_time';
 
 export enum ExplorationActionType {
   MemoUiStatus = 'exploration:interaction:memoUIStatus',
@@ -13,13 +13,16 @@ export enum ExplorationActionType {
   SetIntraDayDataSource = 'exploration:interaction:setIntraDayDataSource',
   SetDate = 'exploration:interaction:setDate',
   SetCycleType = 'exploration:interaction:setCycleType',
+  SetCycleDimension = 'exploration:interaction:setCycleDimension',
 
   GoToBrowseRange = 'exploration:interaction:goToBrowseRange',
   GoToBrowseOverview = 'exploration:interaction:goToBrowseOverview',
   GoToBrowseDay = 'exploration:interaction:goToBrowseDay',
   GoToComparisonCyclic = 'exploration:interaction:goToComparisonCyclic',
   GoToComparisonToRanges = 'exploration:interaction:goToComparisonTwoRanges',
-
+  GoToCyclicDetailDaily = "exploration:interaction:goToCyclicDetailDaily",
+  GoToCyclicDetailRange = "exploration:interaction:goToCyclicDetailRange",
+  
   //History
   RestorePreviousInfo = 'exploration:interaction:restorePreviousInfo',
   GoBack = 'exploration:interaction:goBack',
@@ -85,6 +88,16 @@ export interface GoToComparisonTwoRangesAction extends ExplorationActionBase {
   rangeB?: [number, number];
 }
 
+export interface GoToCyclicDetailAction extends ExplorationActionBase {
+  dataSource?: DataSourceType;
+  range?: [number, number];
+  cycleDimension?: CycleDimension;
+}
+
+export interface SetCycleDimensionAction extends ExplorationActionBase { 
+  cycleDimension: CycleDimension;
+}
+
 export interface SetTouchingElementInfoAction extends ActionTypeBase {
   info: TouchingElementInfo;
 }
@@ -99,9 +112,12 @@ export type ExplorationAction =
   | GoToBrowseDayAction
   | GoToComparisonCyclicAction
   | GoToComparisonTwoRangesAction
+  | GoToCyclicDetailAction
   | MemoUIStatusAction
   | SetDataSourceAction
-  | SetTouchingElementInfoAction;
+  | SetTouchingElementInfoAction
+  | SetCycleDimensionAction
+
 
 export function createSetRangeAction(
   interactionType: InteractionType,
@@ -187,6 +203,34 @@ export function createRestorePreviousInfoAction(): ActionTypeBase {
   };
 }
 
+export function createGoToCyclicDetailDailyAction(
+  interactionType: InteractionType, 
+  dataSource?: DataSourceType, 
+  range?: [number, number], 
+  cycleDimension?: CycleDimension): GoToCyclicDetailAction {
+  return {
+    type: ExplorationActionType.GoToCyclicDetailDaily,
+    interactionType,
+    dataSource,
+    range,
+    cycleDimension
+  }
+}
+
+export function createGoToCyclicDetailRangeAction(
+  interactionType: InteractionType, 
+  dataSource?: DataSourceType, 
+  range?: [number, number], 
+  cycleDimension?: CycleDimension): GoToCyclicDetailAction {
+  return {
+    type: ExplorationActionType.GoToCyclicDetailRange,
+    interactionType,
+    dataSource,
+    range,
+    cycleDimension
+  }
+}
+
 export function memoUIStatus(key: string, value: any): MemoUIStatusAction {
   return {
     type: ExplorationActionType.MemoUiStatus,
@@ -237,6 +281,14 @@ export function setDateAction(
     interactionType,
     date,
   };
+}
+
+export function setCycleDimensionAction(interactionType: InteractionType, cycleDimension: CycleDimension): SetCycleDimensionAction {
+  return {
+    type: ExplorationActionType.SetCycleDimension,
+    interactionType,
+    cycleDimension
+  }
 }
 
 export function setTouchElementInfo(

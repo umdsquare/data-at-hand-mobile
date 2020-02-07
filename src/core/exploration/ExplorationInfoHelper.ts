@@ -62,11 +62,12 @@ class ExplorationInfoHelper {
   getMode(stateInfo: ExplorationInfo): ExplorationMode {
     switch (stateInfo.type) {
       case ExplorationType.B_Day:
-      case ExplorationType.B_Ovrvw:
+      case ExplorationType.B_Overview:
       case ExplorationType.B_Range:
         return ExplorationMode.Browse;
       case ExplorationType.C_Cyclic:
-      case ExplorationType.C_CyclicDetail:
+      case ExplorationType.C_CyclicDetail_Daily:
+      case ExplorationType.C_CyclicDetail_Range:
       case ExplorationType.C_TwoRanges:
         return ExplorationMode.Compare;
     }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CyclicTimeFrame, IAggregatedRangeValue } from "../../../../core/exploration/data/types";
+import { IAggregatedRangeValue } from "../../../../core/exploration/data/types";
 import { View, LayoutRectangle, ViewStyle } from "react-native";
 import { SizeWatcher } from "../../../visualization/SizeWatcher";
 import { useState } from "react";
@@ -13,7 +13,8 @@ import { CycleChartFrame } from './CycleChartFrame';
 import { RangeValueElement } from './RangeValueElement';
 import { RangeValueElementLegend } from './RangeValueElementLegend';
 import { useDispatch } from 'react-redux';
-import { createGoToBrowseRangeAction } from '../../../../state/exploration/interaction/actions';
+import { createGoToBrowseRangeAction, createGoToCyclicDetailDailyAction, createGoToCyclicDetailRangeAction, InteractionType } from '../../../../state/exploration/interaction/actions';
+import { CyclicTimeFrame, getCycleDimensionWithTimeKey, getCycleLevelOfDimension } from '../../../../core/exploration/cyclic_time';
 
 
 const xAxisHeight = 100
@@ -51,7 +52,7 @@ export const RangeValueCyclicChart = (props: {
     let scaleY = scaleLinear()
         .domain([props.startFromZero === true ? 0 : Math.min(min(props.values, v => (v.minA)), min(props.values, v => (v.minB))), Math.max(max(props.values, v => (v.maxA)), max(props.values, v => (v.maxB)))])
         .range([0, chartArea.height]).nice()
-    
+
     let ticks
     if (props.ticksOverride) {
         ticks = props.ticksOverride(scaleY.domain()[0], scaleY.domain()[1])
@@ -60,7 +61,7 @@ export const RangeValueCyclicChart = (props: {
 
     return <View style={StyleTemplates.fillFlex}>
         <View style={legendContainerStyle}>
-            <RangeValueElementLegend rangeALabel={props.rangeALabel} rangeBLabel={props.rangeBLabel}/>
+            <RangeValueElementLegend rangeALabel={props.rangeALabel} rangeBLabel={props.rangeBLabel} />
         </View>
         <SizeWatcher containerStyle={StyleTemplates.fillFlex} onSizeChange={(width, height) => {
             setChartContainerWidth(width)
@@ -79,18 +80,23 @@ export const RangeValueCyclicChart = (props: {
             >
                 <G x={chartArea.x} y={chartArea.y}>
                     {
-                        props.values.map(value => 
-                        <RangeValueElement key={value.timeKey} scaleX={scaleX} scaleY={scaleY} value={value} 
-                            onClick={(timeKey)=>{
-                                //TODO go to Cyclic Detail
-                            }}
-                            onLongPressIn={(timeKey)=>{
-                                //TODO tooltip show
-                            }}
-                            onLongPressOut={(timeKey)=>{
-                                //TODO tooltip end
-                            }}
-                        />)
+                        props.values.map(value =>
+                            <RangeValueElement key={value.timeKey} scaleX={scaleX} scaleY={scaleY} value={value}
+                                onClick={(timeKey: number) => {
+                                    const dimension = getCycleDimensionWithTimeKey(props.cycleType, timeKey)
+                                    if (getCycleLevelOfDimension(dimension) === 'day') {
+                                        dispatch(createGoToCyclicDetailDailyAction(InteractionType.TouchOnly, null, null, dimension))
+                                    } else {
+                                        dispatch(createGoToCyclicDetailRangeAction(InteractionType.TouchOnly, null, null, dimension))
+                                    }
+                                }}
+                                onLongPressIn={(timeKey) => {
+                                    //TODO tooltip show
+                                }}
+                                onLongPressOut={(timeKey) => {
+                                    //TODO tooltip end
+                                }}
+                            />)
                     }
                 </G>
             </CycleChartFrame>

@@ -1,6 +1,5 @@
 import {DateTimeHelper} from '../../../time';
 import {FitbitServiceMeasure} from './FitbitServiceMeasure';
-import { FitbitLocalTableName } from './sqlite/database';
 
 export abstract class FitbitRangeMeasure<
   QueryResultType> extends FitbitServiceMeasure {
