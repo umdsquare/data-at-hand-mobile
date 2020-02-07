@@ -48,7 +48,6 @@ const styles = StyleSheet.create({
         height: headerHeight,
         flexDirection: "row",
         alignItems: 'center',
-        paddingRight: Sizes.horizontalPadding,
     },
 
     headerTitleStyle: {
@@ -66,6 +65,11 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         color: lightTextColor,
         fontSize: 14
+    },
+
+    todayButtonStyle: {
+        height: headerHeight * 0.7, justifyContent: 'center',
+        paddingRight: Sizes.horizontalPadding, paddingLeft: Sizes.horizontalPadding
     },
 
     todayUnitStyle: {
@@ -132,7 +136,7 @@ function formatTodayValue(data: OverviewSourceRow, unitType: MeasureUnitType): T
 
     switch (data.source) {
         case DataSourceType.StepCount:
-            info.formatted = data.today != null? [
+            info.formatted = data.today != null ? [
                 {
                     text: commaNumber(data.today),
                     type: 'value',
@@ -141,7 +145,7 @@ function formatTodayValue(data: OverviewSourceRow, unitType: MeasureUnitType): T
             ] : null
             break;
         case DataSourceType.HeartRate:
-            info.formatted = data.today != null? [
+            info.formatted = data.today != null ? [
                 {
                     text: data.today.toString(),
                     type: 'value',
@@ -304,7 +308,7 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, width
                 futureNearestLog={weightData.futureNearestLog}
                 containerWidth={width} containerHeight={height}
                 measureUnitType={measureUnitType}
-                />
+            />
     }
 }
 
@@ -315,6 +319,7 @@ export const DataSourceChartFrame = (props: {
     flat?: boolean
     showHeader?: boolean
     onHeaderPressed?: () => void
+    onTodayPressed?: () => void
 }) => {
 
     const [chartContainerWidth, setChartContainerWidth] = useState(-1)
@@ -335,15 +340,17 @@ export const DataSourceChartFrame = (props: {
             </View>
 
             {
-                props.showToday !== false && props.data.today != null? <Text style={styles.headerDescriptionTextStyle}>
-                    <Text>{todayInfo.label + ": "}</Text>
-                    {
-                        todayInfo.formatted != null ? todayInfo.formatted.map((chunk, index) =>
-                            <Text key={index} style={chunk.type === 'unit' ? styles.todayUnitStyle : styles.todayValueStyle}>{chunk.text}</Text>)
-                            :
-                            (<Text style={styles.todayValueStyle}>no value</Text>)
-                    }
-                </Text> : <></>
+                props.showToday !== false && props.data.today != null ?
+                    <TouchableOpacity style={styles.todayButtonStyle}
+                        onPress={props.onTodayPressed} disabled = {props.onTodayPressed == null}><Text style={styles.headerDescriptionTextStyle}>
+                            <Text>{todayInfo.label + ": "}</Text>
+                            {
+                                todayInfo.formatted != null ? todayInfo.formatted.map((chunk, index) =>
+                                    <Text key={index} style={chunk.type === 'unit' ? styles.todayUnitStyle : styles.todayValueStyle}>{chunk.text}</Text>)
+                                    :
+                                    (<Text style={styles.todayValueStyle}>no value</Text>)
+                            }
+                        </Text></TouchableOpacity> : <></>
             }
         </View>}
         <View style={styles.chartAreaStyle}>

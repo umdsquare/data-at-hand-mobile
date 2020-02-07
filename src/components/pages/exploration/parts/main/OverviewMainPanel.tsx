@@ -1,4 +1,4 @@
-import { createGoToBrowseRangeAction, InteractionType, memoUIStatus, ExplorationAction } from "../../../../../state/exploration/interaction/actions";
+import { createGoToBrowseRangeAction, InteractionType, memoUIStatus, ExplorationAction, createGoToBrowseDayAction } from "../../../../../state/exploration/interaction/actions";
 import React from "react";
 import { connect } from "react-redux";
 import { ReduxAppState } from "../../../../../state/types";
@@ -8,6 +8,8 @@ import { OverviewData } from "../../../../../core/exploration/data/types";
 import { MeasureUnitType } from "../../../../../measure/DataSourceSpec";
 import { Dispatch } from "redux";
 import { Sizes } from "../../../../../style/Sizes";
+import { DateTimeHelper } from "../../../../../time";
+import { inferIntraDayDataSourceType } from "../../../../../core/exploration/types";
 
 const separatorStyle = {height: Sizes.verticalPadding}
 
@@ -72,6 +74,9 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
                         onHeaderPressed={() => {
                             this.props.dispatchAction(createGoToBrowseRangeAction(InteractionType.TouchOnly, item.source))
                         }}
+                        onTodayPressed={inferIntraDayDataSourceType(item.source) != null ? ()=>{
+                            this.props.dispatchAction(createGoToBrowseDayAction(InteractionType.TouchOnly, inferIntraDayDataSourceType(item.source), DateTimeHelper.toNumberedDateFromDate(new Date())))
+                        } : null}
                     />}
 
                     onScroll={(event) => {
