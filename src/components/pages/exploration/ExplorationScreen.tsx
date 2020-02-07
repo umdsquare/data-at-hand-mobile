@@ -23,6 +23,7 @@ import { getIntraDayMainPanel } from "./parts/main/IntraDayMainPanel";
 import { CyclicComparisonMainPanel } from "./parts/main/CyclicComparisonMainPanel";
 import { MultiRangeComparisonMainPanel } from "./parts/main/MultiRangeComparisonMainPanel";
 import { CyclicTimeFrame } from "../../../core/exploration/cyclic_time";
+import { FilteredDatesChartMainPanel } from "./parts/main/FilteredDatesChartMainPanel";
 var deepEqual = require('deep-equal');
 
 const styles = StyleSheet.create({
@@ -205,6 +206,8 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 return <MultiRangeComparisonMainPanel />
             case ExplorationType.C_CyclicDetail_Range:
                 return <MultiRangeComparisonMainPanel />
+            case ExplorationType.C_CyclicDetail_Daily:
+                return <FilteredDatesChartMainPanel />
         }
     }
 }

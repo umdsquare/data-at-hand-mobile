@@ -1,10 +1,9 @@
 import { DataSourceType } from '../DataSourceSpec';
 import { IntraDayDataSourceType } from '../../core/exploration/types';
-import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData } from '../../core/exploration/data/types';
+import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData, FilteredDailyValues } from '../../core/exploration/data/types';
 import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension, getFilteredCycleDimensionList } from '../../core/exploration/cyclic_time';
 import { DateTimeHelper } from '../../time';
 import { startOfMonth, endOfMonth, addMonths } from 'date-fns';
-import { min } from 'd3-array';
 import { getNumberSequence } from '../../utils';
 
 export interface ServiceActivationResult{
@@ -117,6 +116,7 @@ export abstract class DataService {
     }
   }
 
+  abstract fetchCycleDailyDimensionData(dataSource: DataSourceType, start: number, end: number, cycleDimension: CycleDimension) : Promise<FilteredDailyValues>
 
   abstract async activateInSystem(): Promise<ServiceActivationResult>
   abstract async deactivatedInSystem(): Promise<boolean>

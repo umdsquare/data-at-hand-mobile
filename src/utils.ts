@@ -10,3 +10,6 @@ export function getNumberSequence(from: number, to: number): Array<number>{
 
     return result
 }
+
+
+export function noop(k){ return k }

@@ -47,10 +47,11 @@ export function getDomainAndTickFormat(
       domain = [0, 1, 2, 3];
       tickFormat = getSeasonName;
       break;
+      /*
     case CyclicTimeFrame.WeekdayWeekends:
       domain = [0, 1];
       tickFormat = getWdWeName;
-      break;
+      break;*/
   }
 
   return {

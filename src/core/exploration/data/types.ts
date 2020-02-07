@@ -153,6 +153,11 @@ export interface RangeAggregatedComparisonData<T> {
   data: Array<{range: [number, number], value: T}>
 }
 
+export interface FilteredDailyValues {
+  type: "point" | "length" | "range",
+  data: Array<{numberedDate: number, value: number, value2?: number}>
+}
+
 export const STATISTICS_LABEL_AVERAGE = 'Avg.';
 export const STATISTICS_LABEL_TOTAL = 'Total';
 export const STATISTICS_LABEL_RANGE = 'Range';

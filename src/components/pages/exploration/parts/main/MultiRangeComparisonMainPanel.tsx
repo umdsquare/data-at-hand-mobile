@@ -26,12 +26,11 @@ import { SingleValueElement } from '../../../../exploration/visualization/compar
 import { RangeValueElement } from '../../../../exploration/visualization/compare/RangeValueElement'
 import { isSameYear, isSameMonth, startOfMonth, endOfMonth, format } from 'date-fns'
 import { ExplorationAction, createGoToBrowseRangeAction, InteractionType } from '../../../../../state/exploration/interaction/actions'
+import { noop } from '../../../../../utils'
 
 const INDEX_AGGREGATED = 0
 const INDEX_SUM = 1
 const SEGEMENTED_VALUES = ["Daily Average", "Total"]
-
-const noop = (a) => a
 
 const xAxisHeight = 70
 const yAxisWidth = 70

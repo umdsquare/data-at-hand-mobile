@@ -3,26 +3,27 @@ import {
   UnSupportedReason,
   ServiceActivationResult,
 } from '../DataService';
-import {AsyncStorageHelper} from '../../../system/AsyncStorageHelper';
-import {refresh, authorize, revoke} from 'react-native-app-auth';
-import {FitbitUserProfile} from './types';
-import {DataSourceType} from '../../DataSourceSpec';
-import {FitbitDailyStepMeasure} from './FitbitDailyStepMeasure';
-import {FitbitDailyHeartRateMeasure} from './FitbitDailyHeartRateMeasure';
-import {DateTimeHelper} from '../../../time';
-import {FITBIT_PROFILE_URL} from './api';
-import {FitbitServiceMeasure} from './FitbitServiceMeasure';
-import {FitbitWeightMeasure} from './FitbitWeightMeasure';
-import {FitbitSleepMeasure} from './FitbitSleepMeasure';
-import {FitbitLocalDbManager} from './sqlite/database';
-import {FitbitIntraDayStepMeasure} from './FitbitIntraDayStepMeasure';
-import {IntraDayDataSourceType} from '../../../core/exploration/types';
-import {FitbitIntraDayHeartRateMeasure} from './FitbitIntraDayHeartRateMeasure';
+import { AsyncStorageHelper } from '../../../system/AsyncStorageHelper';
+import { refresh, authorize, revoke } from 'react-native-app-auth';
+import { FitbitUserProfile } from './types';
+import { DataSourceType } from '../../DataSourceSpec';
+import { FitbitDailyStepMeasure } from './FitbitDailyStepMeasure';
+import { FitbitDailyHeartRateMeasure } from './FitbitDailyHeartRateMeasure';
+import { DateTimeHelper } from '../../../time';
+import { FITBIT_PROFILE_URL } from './api';
+import { FitbitServiceMeasure } from './FitbitServiceMeasure';
+import { FitbitWeightMeasure } from './FitbitWeightMeasure';
+import { FitbitSleepMeasure } from './FitbitSleepMeasure';
+import { FitbitLocalDbManager } from './sqlite/database';
+import { FitbitIntraDayStepMeasure } from './FitbitIntraDayStepMeasure';
+import { IntraDayDataSourceType } from '../../../core/exploration/types';
+import { FitbitIntraDayHeartRateMeasure } from './FitbitIntraDayHeartRateMeasure';
 import {
   GroupedData,
   GroupedRangeData,
   IAggregatedValue,
   IAggregatedRangeValue,
+  FilteredDailyValues,
 } from '../../../core/exploration/data/types';
 import { CyclicTimeFrame, CycleDimension } from '../../../core/exploration/cyclic_time';
 
@@ -49,9 +50,9 @@ export class FitbitService extends DataService {
   private _authConfig = null;
 
   private _fitbitLocalDbManager: FitbitLocalDbManager = null
-  
+
   get fitbitLocalDbManager(): FitbitLocalDbManager {
-    if(this._fitbitLocalDbManager == null){
+    if (this._fitbitLocalDbManager == null) {
       this._fitbitLocalDbManager = new FitbitLocalDbManager();
     }
     return this._fitbitLocalDbManager;
@@ -179,7 +180,7 @@ export class FitbitService extends DataService {
 
 
   async fetchCycleRangeDimensionDataImpl(dataSource: DataSourceType, start: number, end: number, cycleDimension: CycleDimension): Promise<IAggregatedRangeValue[] | IAggregatedValue[]> {
-    switch(dataSource){
+    switch (dataSource) {
       case DataSourceType.StepCount:
         return await this.dailyStepMeasure.fetchCycleRangeDimensionData(start, end, cycleDimension)
       case DataSourceType.HeartRate:
@@ -190,6 +191,21 @@ export class FitbitService extends DataService {
         return await this.sleepMeasure.fetchHoursSleptRangeDimensionData(start, end, cycleDimension)
       case DataSourceType.SleepRange:
         return await this.sleepMeasure.fetchSleepRangeCycleRangeDimensionData(start, end, cycleDimension)
+    }
+  }
+
+
+  async fetchCycleDailyDimensionData(dataSource: DataSourceType, start: number, end: number, cycleDimension: CycleDimension): Promise<FilteredDailyValues> {
+    switch (dataSource) {
+      case DataSourceType.StepCount:
+        return await this.dailyStepMeasure.fetchCycleDailyDimensionData(start, end, cycleDimension)
+      case DataSourceType.HeartRate:
+        return await this.dailyHeartRateMeasure.fetchCycleDailyDimensionData(start, end, cycleDimension)
+      case DataSourceType.Weight:
+        return await this.weightLogMeasure.fetchCycleDailyDimensionData(start, end, cycleDimension)
+      case DataSourceType.HoursSlept:
+      case DataSourceType.SleepRange:
+        return await this.sleepMeasure.fetchCycleDailyDimensionData(dataSource, start, end, cycleDimension)
     }
   }
 
@@ -226,8 +242,8 @@ export class FitbitService extends DataService {
     try {
       console.log("try re-authorization.")
       const newState = await authorize(this._authConfig);
-        await AsyncStorageHelper.set(STORAGE_KEY_AUTH_STATE, newState);
-        return newState.accessToken;
+      await AsyncStorageHelper.set(STORAGE_KEY_AUTH_STATE, newState);
+      return newState.accessToken;
     } catch (e) {
       console.log("Authorization failed.")
       console.log(e, JSON.stringify(e))
@@ -273,7 +289,7 @@ export class FitbitService extends DataService {
         };
     } catch (ex) {
       console.log(ex);
-      return {success: false, error: ex};
+      return { success: false, error: ex };
     }
   }
 
@@ -369,7 +385,7 @@ export class FitbitService extends DataService {
                 'Fitbit token is expired. refresh token and try once again.',
               );
               return this.authenticate().then(() => this.fetchFitbitQuery(url));
-            } else throw {error: 'Access token invalid.'};
+            } else throw { error: 'Access token invalid.' };
 
           case 429:
             throw {
@@ -379,7 +395,7 @@ export class FitbitService extends DataService {
                 ' secs.',
             };
           default:
-            throw {error: result.status};
+            throw { error: result.status };
         }
       } else {
         console.log(
@@ -410,7 +426,7 @@ export class FitbitService extends DataService {
           revocationEndpoint: 'https://api.fitbit.com/oauth2/revoke',
         },
       };
-      return Promise.resolve({supported: true});
+      return Promise.resolve({ supported: true });
     } catch (e) {
       console.log(e);
       return Promise.resolve({
