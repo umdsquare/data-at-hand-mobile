@@ -4,7 +4,7 @@ import { LayoutRectangle } from 'react-native';
 import { DataSourceType } from '../../measure/DataSourceSpec';
 
 export enum ExplorationType {
-  B_Ovrvw="b_overview",
+  B_Overview="b_overview",
   B_Range="b_range",
   B_Day="b_day",
   C_Cyclic="c_cyclic",
@@ -95,12 +95,12 @@ export function inferDataSource(intraDayDataSource: IntraDayDataSourceType): Dat
 export function makeInitialStateInfo(): ExplorationInfo {
   const now = startOfDay(new Date());
   return {
-    type: ExplorationType.B_Ovrvw,
+    type: ExplorationType.B_Overview,
     values: [
       {
         parameter: ParameterType.Range,
         value: [
-          DateTimeHelper.toNumberedDateFromDate(subDays(now, 7)),
+          DateTimeHelper.toNumberedDateFromDate(subDays(now, 6)),
           DateTimeHelper.toNumberedDateFromDate(endOfDay(now)),
         ],
       },

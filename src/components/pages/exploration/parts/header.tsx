@@ -91,7 +91,7 @@ export const ExplorationViewHeader = (props: ExplorationProps) => {
 
 export function generateHeaderView(props: ExplorationProps): any {
     switch (props.explorationState.info.type) {
-        case ExplorationType.B_Ovrvw:
+        case ExplorationType.B_Overview:
             return <HeaderContainer>
                 <View style={styles.titleBarStyle}>
                     <Text style={styles.titleBarTitleStyle}>Browse</Text>
@@ -118,16 +118,16 @@ export function generateHeaderView(props: ExplorationProps): any {
             </HeaderContainer>
         case ExplorationType.C_Cyclic:
             return <HeaderContainer>
-                {generateCyclicComparisonTypeRow(props)}
-                {generateDataSourceRow(props, false)}
+                {generateDataSourceRow(props, true)}
+                {generateCyclicComparisonTypeRow(props, false)}
                 {generateRangeBar(props)}
             </HeaderContainer>
             break;
         case ExplorationType.C_CyclicDetail_Daily:
         case ExplorationType.C_CyclicDetail_Range:
             return <HeaderContainer>
-                {generateDataSourceRow(props, false)}
-                {generateCycleDimensionRow(props)}
+                {generateDataSourceRow(props, true)}
+                {generateCycleDimensionRow(props, false)}
                 {generateRangeBar(props)}
             </HeaderContainer>
         case ExplorationType.C_TwoRanges:
@@ -223,11 +223,11 @@ function generateIntraDayDataSourceRow(props: ExplorationProps): any {
     />
 }
 
-function generateCyclicComparisonTypeRow(props: ExplorationProps): any {
+function generateCyclicComparisonTypeRow(props: ExplorationProps, showBorder: boolean): any {
     const cycleType = explorationInfoHelper.getParameterValue<CyclicTimeFrame>(props.explorationState.info, ParameterType.CycleType)
     const cycles = Object.keys(cyclicTimeFrameSpecs)
 
-    return <CategoricalRow title="Group By" showBorder={true} value={cyclicTimeFrameSpecs[cycleType].name}
+    return <CategoricalRow title="Group By" showBorder={showBorder} value={cyclicTimeFrameSpecs[cycleType].name}
         onSwipeLeft={() => {
             let currentIndex = cycles.indexOf(cycleType)
             currentIndex--
@@ -244,12 +244,12 @@ function generateCyclicComparisonTypeRow(props: ExplorationProps): any {
     />
 }
 
-function generateCycleDimensionRow(props: ExplorationProps): any{
+function generateCycleDimensionRow(props: ExplorationProps, showBorder: boolean): any {
     const cycleDimension = explorationInfoHelper.getParameterValue<CycleDimension>(props.explorationState.info, ParameterType.CycleDimension)
     const spec = getCycleDimensionSpec(cycleDimension)
     const selectableDimensions = getHomogeneousCycleDimensionList(cycleDimension)
 
-    return <CategoricalRow title="Cycle Filter" showBorder={true} value={spec.name}
+    return <CategoricalRow title="Cycle Filter" showBorder={showBorder} value={spec.name}
         onSwipeLeft={() => {
             let currentIndex = selectableDimensions.findIndex(spec => spec.dimension === cycleDimension)
             currentIndex--

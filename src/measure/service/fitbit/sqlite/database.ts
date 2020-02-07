@@ -1,7 +1,7 @@
 import SQLite from 'react-native-sqlite-storage';
 import {SQLiteHelper} from '../../../../database/sqlite/sqlite-helper';
 import stringFormat from 'string-format';
-import {CyclicTimeFrame} from '../../../../core/exploration/cyclic_time';
+import {CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension} from '../../../../core/exploration/cyclic_time';
 SQLite.DEBUG(false);
 SQLite.enablePromise(true);
 
@@ -46,6 +46,20 @@ const groupByQueryFormat =
 
 const groupSelectClauseFormat =
   'MIN({minColumnName}) as min, MAX({maxColumnName}) as max, SUM({sumColumnName}) as sum, AVG({avgColumnName}) as avg, COUNT({countColumnName}) as n';
+
+const seasonCaseClause = "CASE \
+WHEN \
+    month BETWEEN 3 AND 5 THEN 0 \
+WHEN month BETWEEN 6 AND 8 THEN 1 \
+WHEN month BETWEEN 9 AND 11 THEN 2 \
+WHEN month = 12 OR month = 1 OR month = 2 THEN 3 \
+END"
+
+const dayOfWeekCaseClause = "CASE \
+WHEN \
+    dayOfWeek BETWEEN 1 AND 5 THEN 0 \
+WHEN dayOfWeek = 0 OR dayOfWeek = 6 THEN 1 \
+END"
 
 export function makeGroupSelectClause(
   minColumnName: string = 'value',
@@ -110,27 +124,55 @@ export function makeCyclicGroupQuery(
     case CyclicTimeFrame.SeasonOfYear:
       return stringFormat(groupByQueryFormat, {
         ...base,
-        select:
-          'CASE \
-                WHEN \
-                    month BETWEEN 3 AND 5 THEN 0 \
-                WHEN month BETWEEN 6 AND 8 THEN 1 \
-                WHEN month BETWEEN 9 AND 11 THEN 2 \
-                WHEN month = 12 OR month = 1 OR month = 2 THEN 3 \
-                END timeKey, ' +
-          selectColumnsClause,
-      });
+        select: seasonCaseClause + ' timeKey, ' + selectColumnsClause,
+      });/*
     case CyclicTimeFrame.WeekdayWeekends:
       return stringFormat(groupByQueryFormat, {
         ...base,
-        select:
-          'CASE \
-                WHEN \
-                    dayOfWeek BETWEEN 1 AND 5 THEN 0 \
-                WHEN dayOfWeek = 0 OR dayOfWeek = 6 THEN 1 \
-                END timeKey, ' +
-          selectColumnsClause,
-      });
+        select: dayOfWeekCaseClause + ' timeKey, ' + selectColumnsClause,
+      });*/
+  }
+}
+
+export function makeCycleDimensionRangeQuery(
+  tableName: string,
+  start: number,
+  end: number,
+  cycleDimension: CycleDimension,
+  selectColumnsClause: string = makeGroupSelectClause(),
+): string {
+  const cycleLevel = getCycleLevelOfDimension(cycleDimension)
+  const cycleType = getCycleTypeOfDimension(cycleDimension)
+
+  if(cycleLevel != "year"){
+    throw "Cycle level should be either year."
+  }else{
+
+    const base = {
+      select: cycleLevel + ' as timeKey, ' + selectColumnsClause,
+      fromClause: tableName,
+      groupBy: 'timeKey',
+      whereClause:
+        '`numberedDate` BETWEEN ' +
+        start +
+        ' AND ' +
+        end +
+        ' AND ' +
+        cycleType +
+        ' = ' +
+        getTimeKeyOfDimension(cycleDimension),
+    };
+
+    if(cycleType == CyclicTimeFrame.SeasonOfYear){
+      base.select = seasonCaseClause + ' timeKey, ' + selectColumnsClause
+      base.whereClause = '`numberedDate` BETWEEN ' +
+      start +
+      ' AND ' +
+      end +
+      ' AND timeKey = ' + getTimeKeyOfDimension(cycleDimension)
+    }
+
+    return stringFormat(groupByQueryFormat, base);
   }
 }
 

@@ -14,7 +14,7 @@ import { getDomainAndTickFormat } from './common';
 import { CycleChartFrame } from './CycleChartFrame';
 import { useDispatch } from 'react-redux';
 import { createGoToCyclicDetailDailyAction, InteractionType, createGoToCyclicDetailRangeAction } from '../../../../state/exploration/interaction/actions';
-import { CyclicTimeFrame, CycleDimension } from '../../../../core/exploration/cyclic_time';
+import { CyclicTimeFrame, CycleDimension, getCycleDimensionWithTimeKey, getCycleLevelOfDimension } from '../../../../core/exploration/cyclic_time';
 
 const dummyConverter = (num: number) => num
 
@@ -88,31 +88,11 @@ export const SingleValueCyclicChart = (props: {
                                 value={{ ...value, avg: convert(value.avg), max: convert(value.max), min: convert(value.min), sum: convert(value.sum) }} 
                                 scaleX={scaleX} scaleY={scaleY} maxWidth= {40}
                                 onClick={(timeKey: number)=>{
-                                    switch(props.cycleType){
-                                        case CyclicTimeFrame.DayOfWeek:
-                                            {
-                                                const cycleDimension = "day|dow|" + timeKey
-                                                dispatch(createGoToCyclicDetailDailyAction(InteractionType.TouchOnly, null, null, cycleDimension as CycleDimension))
-                                            }
-                                            break;
-                                        case CyclicTimeFrame.MonthOfYear:
-                                            {
-                                                const cycleDimension = "year|month|" + timeKey
-                                                dispatch(createGoToCyclicDetailRangeAction(InteractionType.TouchOnly, null, null, cycleDimension as CycleDimension))
-                                            }
-                                            break;
-                                        case CyclicTimeFrame.SeasonOfYear:
-                                            {
-                                                const cycleDimension = "year|season|" + timeKey
-                                                dispatch(createGoToCyclicDetailRangeAction(InteractionType.TouchOnly, null, null, cycleDimension as CycleDimension))
-                                            }
-                                            break;
-                                        case CyclicTimeFrame.WeekdayWeekends:
-                                            {
-                                                const cycleDimension = "year|wdwe|" + timeKey
-                                                dispatch(createGoToCyclicDetailRangeAction(InteractionType.TouchOnly, null, null, cycleDimension as CycleDimension))
-                                            }
-                                            break;
+                                    const dimension = getCycleDimensionWithTimeKey(props.cycleType, timeKey)
+                                    if(getCycleLevelOfDimension(dimension) === 'day'){
+                                        dispatch(createGoToCyclicDetailDailyAction(InteractionType.TouchOnly, null, null, dimension))
+                                    }else{
+                                        dispatch(createGoToCyclicDetailRangeAction(InteractionType.TouchOnly, null, null, dimension))
                                     }
                                 }}
                                 />)

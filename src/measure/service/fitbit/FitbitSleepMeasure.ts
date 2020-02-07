@@ -23,9 +23,13 @@ import {
   makeCyclicGroupQuery,
   makeGroupSelectClause,
   makeAggregatedQuery,
+  makeCycleDimensionRangeQuery,
 } from './sqlite/database';
 import {SQLiteHelper} from '../../../database/sqlite/sqlite-helper';
-import { CyclicTimeFrame } from '../../../core/exploration/cyclic_time';
+import {
+  CyclicTimeFrame,
+  CycleDimension,
+} from '../../../core/exploration/cyclic_time';
 
 const columnNamesForRangeData = [
   'numberedDate',
@@ -37,6 +41,9 @@ const columnNamesForRangeData = [
   'bedTimeDiffSeconds',
   'wakeTimeDiffSeconds',
 ];
+
+const aggregationSelectClause =
+  'AVG(bedTimeDiffSeconds) as avgA, MIN(bedTimeDiffSeconds) as minA, MAX(bedTimeDiffSeconds) as maxA, AVG(wakeTimeDiffSeconds) as avgB, MIN(wakeTimeDiffSeconds) as minB, MAX(wakeTimeDiffSeconds) as maxB, COUNT(bedTimeDiffSeconds) as n';
 
 export class FitbitSleepMeasure extends FitbitRangeMeasure<
   FitbitSleepQueryResult
@@ -245,7 +252,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
           'lengthInSeconds',
           'lengthInSeconds',
           'lengthInSeconds',
-          'lengthInSeconds'
+          'lengthInSeconds',
         ),
       ),
     );
@@ -266,7 +273,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
         start,
         end,
         cycleType,
-        'AVG(bedTimeDiffSeconds) as avgA, MIN(bedTimeDiffSeconds) as minA, MAX(bedTimeDiffSeconds) as maxA, AVG(wakeTimeDiffSeconds) as avgB, MIN(wakeTimeDiffSeconds) as minB, MAX(wakeTimeDiffSeconds) as maxB, COUNT(bedTimeDiffSeconds) as n',
+        aggregationSelectClause,
       ),
     );
 
@@ -277,29 +284,79 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
 
   async fetchHoursSleptAggregatedData(
     start: number,
-    end: number
-  ): Promise<IAggregatedValue>{
-    const result = await this.service.fitbitLocalDbManager.selectQuery(makeAggregatedQuery(FitbitLocalTableName.SleepLog, start, end, makeGroupSelectClause(
-      'lengthInSeconds',
-      'lengthInSeconds',
-      'lengthInSeconds',
-      'lengthInSeconds',
-      'lengthInSeconds'
-    )))
+    end: number,
+  ): Promise<IAggregatedValue> {
+    const result = await this.service.fitbitLocalDbManager.selectQuery(
+      makeAggregatedQuery(
+        FitbitLocalTableName.SleepLog,
+        start,
+        end,
+        makeGroupSelectClause(
+          'lengthInSeconds',
+          'lengthInSeconds',
+          'lengthInSeconds',
+          'lengthInSeconds',
+          'lengthInSeconds',
+        ),
+      ),
+    );
 
-    if(result.length > 0){
-      return result[0] as any
-    }else return null
+    if (result.length > 0) {
+      return result[0] as any;
+    } else return null;
   }
 
-  async fetchSleepRangeAggregatedData(start: number, end: number): Promise<IAggregatedRangeValue>{
-    const result = await this.service.fitbitLocalDbManager.selectQuery(makeAggregatedQuery(FitbitLocalTableName.SleepLog, start, end, 
-      'AVG(bedTimeDiffSeconds) as avgA, MIN(bedTimeDiffSeconds) as minA, MAX(bedTimeDiffSeconds) as maxA, AVG(wakeTimeDiffSeconds) as avgB, MIN(wakeTimeDiffSeconds) as minB, MAX(wakeTimeDiffSeconds) as maxB, COUNT(bedTimeDiffSeconds) as n',
-    ))
-    
-    if(result.length > 0){
-      return result[0] as any
-    }else return null
+  async fetchHoursSleptRangeDimensionData(start: number, end: number, cycleDimension: CycleDimension): Promise<IAggregatedValue[]> {
+    const result = await this.service.fitbitLocalDbManager.selectQuery<IAggregatedValue>(
+    makeCycleDimensionRangeQuery(
+      FitbitLocalTableName.SleepLog,
+      start,
+      end,
+      cycleDimension,
+      makeGroupSelectClause(
+        'lengthInSeconds',
+        'lengthInSeconds',
+        'lengthInSeconds',
+        'lengthInSeconds',
+        'lengthInSeconds',
+      ),
+    ),
+  );
+  return result;
   }
 
+  async fetchSleepRangeAggregatedData(
+    start: number,
+    end: number,
+  ): Promise<IAggregatedRangeValue> {
+    const result = await this.service.fitbitLocalDbManager.selectQuery(
+      makeAggregatedQuery(
+        FitbitLocalTableName.SleepLog,
+        start,
+        end,
+        aggregationSelectClause,
+      ),
+    );
+
+    if (result.length > 0) {
+      return result[0] as any;
+    } else return null;
+  }
+
+  async fetchSleepRangeCycleRangeDimensionData(
+    start: number,
+    end: number,
+    cycleDimension: CycleDimension,
+  ): Promise<IAggregatedRangeValue[]> {
+    const result = await this.service.fitbitLocalDbManager.selectQuery<IAggregatedRangeValue>(
+      makeCycleDimensionRangeQuery(
+        FitbitLocalTableName.SleepLog,
+        start,
+        end,
+        cycleDimension,
+        aggregationSelectClause,
+      ),
+    );
+    return result;
+  }
 }

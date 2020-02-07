@@ -131,6 +131,7 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
 
 
     render() {
+        console.log(this.props.data)
         const aggregationSettingIndex = this.props.sumSupported === true ? this.state.aggregationSettingIndex : INDEX_AGGREGATED
 
         let isRanged = false
@@ -178,15 +179,16 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
         const scaleX = scaleBand<number>().domain(indices).range([0, chartArea.width]).padding(0.55).paddingOuter(0.25)
 
         const scaleY = scaleLinear().range([chartArea.height, 0])
+        const availableData = this.props.data.data.filter(d => d.value != null)
         if (aggregationSettingIndex === INDEX_AGGREGATED) {
-            scaleY.domain([startFromZero === true ? 0 : min(this.props.data.data, d => {
+            scaleY.domain([startFromZero === true ? 0 : min(availableData, d => {
                 if (isRanged === true) {
                     //range
                     return Math.min(valueConverter(d.value["minA"]), valueConverter(d.value["minB"]))
                 } else {
                     return valueConverter(d.value["min"])
                 }
-            }), max(this.props.data.data, d => {
+            }), max(availableData, d => {
                 if (isRanged === true) {
                     //range
                     return Math.max(valueConverter(d.value["maxA"]), valueConverter(d.value["maxB"]))
@@ -196,7 +198,7 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
             })])
         } else if (aggregationSettingIndex === INDEX_SUM) {
 
-            scaleY.domain([0, max(this.props.data.data, d => {
+            scaleY.domain([0, max(availableData, d => {
                 if (isRanged === true) {
                     //range
                     return Math.max(valueConverter(d.value["sumA"]), valueConverter(d.value["sumB"]))
@@ -283,7 +285,7 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                     </G>
                     <G x={chartArea.x} y={chartArea.y}>
                         {
-                            aggregationSettingIndex === INDEX_AGGREGATED ? this.props.data.data.map((d, i) => {
+                            aggregationSettingIndex === INDEX_AGGREGATED ? availableData.map((d, i) => {
                                 if (isRanged === true) {
                                     return <RangeValueElement key={i}
                                         value={{
@@ -317,7 +319,7 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                                     onLongPressOut={this.onElementLongPressOut}
                                     
                                     />
-                            }) : this.props.data.data.map((d, i) => {
+                            }) : availableData.map((d, i) => {
                                 return <Rect
                                     key={i}
                                     x={scaleX(i)}

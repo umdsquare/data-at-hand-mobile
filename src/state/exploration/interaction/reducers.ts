@@ -128,7 +128,7 @@ export const explorationStateReducer = (
         break;
       case ExplorationActionType.SetDataSource:
         const setDataSourceAction = action as SetDataSourceAction;
-        if (state.info.type === ExplorationType.B_Ovrvw) {
+        if (state.info.type === ExplorationType.B_Overview) {
           return state;
         } else {
           explorationInfoHelper.setParameterValue(
@@ -237,7 +237,7 @@ export const explorationStateReducer = (
 
         break;
       case ExplorationActionType.GoToBrowseOverview:
-        if (newState.info.type === ExplorationType.B_Ovrvw) {
+        if (newState.info.type === ExplorationType.B_Overview) {
           return state;
         } else {
           const currentRange = explorationInfoHelper.getParameterValue(
@@ -277,7 +277,7 @@ export const explorationStateReducer = (
             param => param.parameter === ParameterType.Range,
           );
 
-          newState.info.type = ExplorationType.B_Ovrvw;
+          newState.info.type = ExplorationType.B_Overview;
         }
         break;
 

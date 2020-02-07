@@ -193,7 +193,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
     makeMainPanel(type: ExplorationType): any {
         switch (type) {
-            case ExplorationType.B_Ovrvw:
+            case ExplorationType.B_Overview:
                 return <OverviewMainPanel />
             case ExplorationType.B_Range:
                 return <BrowseRangeMainPanel />
@@ -202,6 +202,8 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
             case ExplorationType.C_Cyclic:
                 return <CyclicComparisonMainPanel />
             case ExplorationType.C_TwoRanges:
+                return <MultiRangeComparisonMainPanel />
+            case ExplorationType.C_CyclicDetail_Range:
                 return <MultiRangeComparisonMainPanel />
         }
     }

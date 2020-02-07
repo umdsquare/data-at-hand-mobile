@@ -24,7 +24,7 @@ import {
   IAggregatedValue,
   IAggregatedRangeValue,
 } from '../../../core/exploration/data/types';
-import { CyclicTimeFrame } from '../../../core/exploration/cyclic_time';
+import { CyclicTimeFrame, CycleDimension } from '../../../core/exploration/cyclic_time';
 
 interface FitbitCredential {
   readonly client_secret: string;
@@ -174,6 +174,22 @@ export class FitbitService extends DataService {
         return await this.sleepMeasure.fetchHoursSleptAggregatedData(start, end);
       case DataSourceType.SleepRange:
         return await this.sleepMeasure.fetchSleepRangeAggregatedData(start, end);
+    }
+  }
+
+
+  async fetchCycleRangeDimensionDataImpl(dataSource: DataSourceType, start: number, end: number, cycleDimension: CycleDimension): Promise<IAggregatedRangeValue[] | IAggregatedValue[]> {
+    switch(dataSource){
+      case DataSourceType.StepCount:
+        return await this.dailyStepMeasure.fetchCycleRangeDimensionData(start, end, cycleDimension)
+      case DataSourceType.HeartRate:
+        return await this.dailyHeartRateMeasure.fetchCycleRangeDimensionData(start, end, cycleDimension)
+      case DataSourceType.Weight:
+        return await this.weightLogMeasure.fetchCycleRangeDimensionData(start, end, cycleDimension)
+      case DataSourceType.HoursSlept:
+        return await this.sleepMeasure.fetchHoursSleptRangeDimensionData(start, end, cycleDimension)
+      case DataSourceType.SleepRange:
+        return await this.sleepMeasure.fetchSleepRangeCycleRangeDimensionData(start, end, cycleDimension)
     }
   }
 

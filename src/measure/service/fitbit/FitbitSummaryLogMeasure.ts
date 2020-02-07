@@ -2,10 +2,10 @@ import {DateTimeHelper} from '../../../time';
 import {parse, getDay} from 'date-fns';
 import {FITBIT_DATE_FORMAT} from './api';
 import {FitbitRangeMeasure} from './FitbitRangeMeasure';
-import { FitbitLocalTableName, makeCyclicGroupQuery, makeAggregatedQuery } from './sqlite/database';
+import { FitbitLocalTableName, makeCyclicGroupQuery, makeAggregatedQuery, makeCycleDimensionRangeQuery } from './sqlite/database';
 import { SQLiteHelper } from '../../../database/sqlite/sqlite-helper';
-import { GroupedData, IAggregatedValue } from '../../../core/exploration/data/types';
-import { CyclicTimeFrame } from '../../../core/exploration/cyclic_time';
+import { GroupedData, IAggregatedValue, GroupedRangeData } from '../../../core/exploration/data/types';
+import { CyclicTimeFrame, CycleDimension } from '../../../core/exploration/cyclic_time';
 
 export abstract class FitbitSummaryLogMeasure<
   QueryResultType> extends FitbitRangeMeasure<QueryResultType> {
@@ -101,4 +101,10 @@ export abstract class FitbitSummaryLogMeasure<
       return result[0] as any
     }else return null
   }
+
+  async fetchCycleRangeDimensionData(start: number, end: number, cycleDimension: CycleDimension): Promise<IAggregatedValue[]> {
+    const result = await this.service.fitbitLocalDbManager.selectQuery<IAggregatedValue>(makeCycleDimensionRangeQuery(this.dbTableName, start, end, cycleDimension))
+    return result
+  }
+   
 } 

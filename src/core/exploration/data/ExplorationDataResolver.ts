@@ -4,7 +4,7 @@ import {explorationInfoHelper} from '../ExplorationInfoHelper';
 import {dataSourceManager} from '../../../system/DataSourceManager';
 import {DataServiceManager} from '../../../system/DataServiceManager';
 import { DataSourceType } from '../../../measure/DataSourceSpec';
-import { CyclicTimeFrame } from '../cyclic_time';
+import { CyclicTimeFrame, CycleDimension } from '../cyclic_time';
 
 class ExplorationDataResolver {
   loadData(
@@ -14,7 +14,7 @@ class ExplorationDataResolver {
     prevData?: any,
   ): Promise<any> {
     switch (explorationInfo.type) {
-      case ExplorationType.B_Ovrvw:
+      case ExplorationType.B_Overview:
         return this.loadOverviewData(explorationInfo, selectedServiceKey);
       case ExplorationType.B_Range:
         return this.loadBrowseRangeData(explorationInfo, selectedServiceKey)
@@ -24,6 +24,8 @@ class ExplorationDataResolver {
         return this.loadCyclicComparisonData(explorationInfo, selectedServiceKey)
       case ExplorationType.C_TwoRanges:
         return this.loadTwoRangeComparisonData(explorationInfo, selectedServiceKey)
+      case ExplorationType.C_CyclicDetail_Range:
+        return this.loadCyclicRangeDetailData(explorationInfo, selectedServiceKey)
       default:
         Promise.reject({error: 'Unsupported exploration type.'});
     }
@@ -76,8 +78,7 @@ class ExplorationDataResolver {
     return selectedService.fetchIntraDayData(source, date)
   }
 
-  private loadCyclicComparisonData(info: ExplorationInfo, 
-    selectedServiceKey: string): Promise<GroupedData | GroupedRangeData>{
+  private loadCyclicComparisonData(info: ExplorationInfo, selectedServiceKey: string): Promise<GroupedData | GroupedRangeData>{
 
       const selectedService = DataServiceManager.getServiceByKey(
         selectedServiceKey,
@@ -90,7 +91,28 @@ class ExplorationDataResolver {
       const cycleType = explorationInfoHelper.getParameterValue<CyclicTimeFrame>(info, ParameterType.CycleType)
 
       return selectedService.fetchCyclicAggregatedData(source, range[0], range[1], cycleType)
-    }
+  }
+  
+  private loadCyclicRangeDetailData(info: ExplorationInfo, selectedServiceKey: string): Promise<RangeAggregatedComparisonData<IAggregatedValue|IAggregatedRangeValue>>{
+    const selectedService = DataServiceManager.getServiceByKey(
+      selectedServiceKey,
+    );
+    const source = explorationInfoHelper.getParameterValue<DataSourceType>(
+      info,
+      ParameterType.DataSource,
+    );
+    const range = explorationInfoHelper.getParameterValue(
+      info,
+      ParameterType.Range,
+    );
+    const cycleDimension = explorationInfoHelper.getParameterValue<CycleDimension>(
+      info,
+      ParameterType.CycleDimension,
+    );
+
+    return selectedService.fetchCycleRangeDimensionData(source, range[0], range[1], cycleDimension)
+  }
+    
 
   private async loadTwoRangeComparisonData(info: ExplorationInfo, selectedServiceKey: string): Promise<RangeAggregatedComparisonData<IAggregatedValue|IAggregatedRangeValue>>{
     const selectedService = DataServiceManager.getServiceByKey(

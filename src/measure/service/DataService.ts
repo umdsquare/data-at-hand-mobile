@@ -1,7 +1,11 @@
 import { DataSourceType } from '../DataSourceSpec';
 import { IntraDayDataSourceType } from '../../core/exploration/types';
-import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue } from '../../core/exploration/data/types';
-import { CyclicTimeFrame } from '../../core/exploration/cyclic_time';
+import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData } from '../../core/exploration/data/types';
+import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension, getFilteredCycleDimensionList } from '../../core/exploration/cyclic_time';
+import { DateTimeHelper } from '../../time';
+import { startOfMonth, endOfMonth, addMonths } from 'date-fns';
+import { min } from 'd3-array';
+import { getNumberSequence } from '../../utils';
 
 export interface ServiceActivationResult{
   success: boolean,
@@ -59,6 +63,60 @@ export abstract class DataService {
   abstract fetchCyclicAggregatedData(dataSource: DataSourceType, start:number, end: number, cycle: CyclicTimeFrame): Promise<GroupedData | GroupedRangeData>
 
   abstract fetchRangeAggregatedData(dataSource: DataSourceType, start: number, end: number): Promise<IAggregatedValue|IAggregatedRangeValue>
+
+  protected abstract fetchCycleRangeDimensionDataImpl(dataSource: DataSourceType, start: number, end: number, cycleDimension: CycleDimension): Promise<IAggregatedRangeValue[] | IAggregatedValue[]>
+  
+  async fetchCycleRangeDimensionData(dataSource: DataSourceType, start: number, end: number, cycleDimension: CycleDimension): Promise<RangeAggregatedComparisonData<IAggregatedRangeValue | IAggregatedValue>>{
+    const result = await this.fetchCycleRangeDimensionDataImpl(dataSource, start, end, cycleDimension)
+
+
+    const cycleLevel = getCycleLevelOfDimension(cycleDimension)
+    const dimensionIndex = getTimeKeyOfDimension(cycleDimension)
+    const cycleType = getCycleTypeOfDimension(cycleDimension)
+    
+    let timeKeySequence: Array<{timeKey: number, range: [number, number]}>
+    switch(cycleLevel){
+      case "year":
+        timeKeySequence = getNumberSequence(DateTimeHelper.getYear(start), DateTimeHelper.getYear(end)).map(year => {
+
+          let range: [number, number] 
+          switch(cycleType){
+            case CyclicTimeFrame.MonthOfYear: {
+                const pivot = new Date(year, dimensionIndex-1, 1)
+                range = [DateTimeHelper.toNumberedDateFromDate(startOfMonth(pivot)), DateTimeHelper.toNumberedDateFromDate(endOfMonth(pivot))]
+              }
+              break;
+            case CyclicTimeFrame.SeasonOfYear: {
+              /*
+              0 => 2,3,4
+              1 => 5,6,7
+              2 => 8,9,10
+              3 => 11,0,1
+              */
+              const seasonStart = new Date(year, dimensionIndex * 3 + 2, 1)
+              const seasonEnd = addMonths(seasonStart, 3)
+              
+              range = [DateTimeHelper.toNumberedDateFromDate(startOfMonth(seasonStart)), DateTimeHelper.toNumberedDateFromDate(endOfMonth(seasonEnd))]
+              console.log(range)
+            } 
+            break;
+          }
+
+          if(range[1] < start || range[0] > end){
+            return null
+          }else return {timeKey: year, range: range}
+        }).filter(elm => elm != null)
+        break;
+    }
+    
+    return {
+      data: timeKeySequence.map(elm => {
+        const datum = (result as any).find(d => d.timeKey === elm.timeKey)
+        return {range: elm.range, value: datum}
+      })
+    }
+  }
+
 
   abstract async activateInSystem(): Promise<ServiceActivationResult>
   abstract async deactivatedInSystem(): Promise<boolean>
