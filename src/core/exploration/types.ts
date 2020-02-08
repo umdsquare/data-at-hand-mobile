@@ -39,10 +39,18 @@ export interface ExplorationInfoParameter {
   value: any;
 }
 
+export enum TouchingElementValueType{
+  DayValue="day",
+  RangeAggregated="rangeA",
+  CycleDimension="cycleDimension"
+}
+
 export interface TouchingElementInfo {
   touchId: string;
   elementBoundInScreen: LayoutRectangle;
   params: Array<ExplorationInfoParameter>;
+  value?: any
+  valueType?: TouchingElementValueType
 }
 
 export interface ExplorationInfo {

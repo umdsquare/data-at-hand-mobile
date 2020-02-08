@@ -45,7 +45,7 @@ export const DailyBarChart = (prop: Props) => {
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={prop.valueTicksOverride != null ? prop.valueTicksOverride(scaleY.domain()[1]) : scaleY.ticks(5)} tickFormat={prop.valueTickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
 
-        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource}>
+        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date).value}>
             {
                 prop.data.map(d => {
                     const barHeight = scaleY(0) - scaleY(d.value)

@@ -6,7 +6,7 @@ import { G, Rect } from "react-native-svg";
 import { ScaleBand } from "d3-scale";
 import Colors from "../../../../style/Colors";
 import { Dispatch } from "redux";
-import { TouchingElementInfo, ParameterType, inferIntraDayDataSourceType } from "../../../../core/exploration/types";
+import { TouchingElementInfo, ParameterType, inferIntraDayDataSourceType, TouchingElementValueType } from "../../../../core/exploration/types";
 import { setTouchElementInfo, createGoToBrowseDayAction, InteractionType } from "../../../../state/exploration/interaction/actions";
 import { ReduxAppState } from "../../../../state/types";
 import { connect } from "react-redux";
@@ -25,6 +25,8 @@ interface Props {
     onDateTouchEnd?: (date: number) => void,
     onDateClick?: (date: number) => void,
 
+    getValueOfDate: (date: number) => any,
+
     currentTouchingInfo?: TouchingElementInfo,
     isContainerScrolling?: boolean,
     setTouchingInfo?: (info: TouchingElementInfo) => void,
@@ -34,8 +36,7 @@ interface State {
     touchedDate: number,
     touchStartX: number,
     touchStartY: number,
-    touchStartedAt: number,
-    areaInScreen: LayoutRectangle
+    touchStartedAt: number
 }
 class GroupWithTouchInteraction extends React.Component<Props, State>{
 
@@ -72,54 +73,31 @@ class GroupWithTouchInteraction extends React.Component<Props, State>{
             touchStartX: null,
             touchStartY: null,
             touchStartedAt: null,
-            areaInScreen: null
         }
     }
-
-    componentDidMount(){
-        setTimeout(()=>{
-        UIManager.measureInWindow(findNodeHandle(this), (x, y, width, height) => {
-            this.setState(
-                {
-                    ...this.state,
-                    areaInScreen: {x, y, width, height}
-                }
-            )
-        })
-        }, 100)
-    }
-
-    componentDidUpdate(prevProps: Props){
-        if(prevProps.isContainerScrolling === true && this.props.isContainerScrolling === false){
-            UIManager.measureInWindow(findNodeHandle(this), (x, y, width, height) => {
-                this.setState(
-                    {
-                        ...this.state,
-                        areaInScreen: {x, y, width, height}
-                    }
-                )
-            })
-        }
-    }
-
-
 
     onTouchChartArea = (x: number, y: number, type: "start" | "move" | "end", screenX: number, screenY: number, gestureState: PanResponderGestureState) => {
         const localX = CommonBrowsingChartStyles.transformViewXToChartAreaLocalX(x)
         const localY = CommonBrowsingChartStyles.transformViewYToChartAreaLocalY(y)
+
+        const dX = screenX - x
+        const dY = screenY - y
+
         const domains = this.props.scaleX.domain()
         let index = Math.max(0, Math.min(domains.length - 1, Math.floor(localX / this.props.scaleX.step())))
         const date = domains[index]
 
         const touchingInfo = {
             touchId: gestureState.stateID.toString(),
-            elementBoundInScreen: { x: this.state.areaInScreen.x + this.props.scaleX(date), y: this.state.areaInScreen.y, width: this.props.scaleX.bandwidth(), height: this.state.areaInScreen.height },
+            elementBoundInScreen: { x: dX + this.props.chartArea.x + this.props.scaleX(date), y: dY + this.props.chartArea.y, width: this.props.scaleX.bandwidth(), height: this.props.chartArea.height },
             params: [
                 { parameter: ParameterType.DataSource, value: this.props.dataSource },
                 { parameter: ParameterType.Date, value: date }
-            ]
-        } as TouchingElementInfo
+            ],
+            valueType: TouchingElementValueType.DayValue,
+            value: this.props.getValueOfDate(date)
 
+        } as TouchingElementInfo
 
         switch (type) {
             case "start":
@@ -131,6 +109,7 @@ class GroupWithTouchInteraction extends React.Component<Props, State>{
                     touchStartedAt: Date.now(),
                     touchedDate: date
                 })
+                
                 console.log("touch start")
                 setTimeout(() => {
                     if (this.state.touchStartX != null && this.props.isContainerScrolling !== true) {

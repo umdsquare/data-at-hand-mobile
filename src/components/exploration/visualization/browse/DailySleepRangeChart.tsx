@@ -60,7 +60,7 @@ export const DailySleepRangeChart = (prop: Props) => {
     return <Svg width={prop.containerWidth} height={prop.containerHeight}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={tickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
-        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource}>
+        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => { const datum = prop.data.find(d => d.numberedDate === date); return {value: datum.bedTimeDiffSeconds, value2: datum.wakeTimeDiffSeconds}}}>
             {
                 prop.data.map(d => {
                     const barHeight = scaleY(d.wakeTimeDiffSeconds) - scaleY(d.bedTimeDiffSeconds)

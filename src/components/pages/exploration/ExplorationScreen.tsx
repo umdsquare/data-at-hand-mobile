@@ -25,6 +25,7 @@ import { MultiRangeComparisonMainPanel } from "./parts/main/MultiRangeComparison
 import { FilteredDatesChartMainPanel } from "./parts/main/FilteredDatesChartMainPanel";
 import { BottomSheet } from "../../common/BottomSheet";
 import { ComparisonInitPanel } from "./parts/main/ComparisonInitPanel";
+import { TooltipOverlay } from "./parts/main/TooltipOverlay";
 var deepEqual = require('deep-equal');
 
 const styles = StyleSheet.create({
@@ -180,6 +181,8 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
             <BottomSheet ref={ref => {this.comparisonBottomSheetRef = ref}}>
                 <ComparisonInitPanel info={this.props.explorationState.info} onCompleted={()=>{this.comparisonBottomSheetRef.close()}}/>
             </BottomSheet>
+
+            <TooltipOverlay/>
 
         </View>
     }

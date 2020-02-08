@@ -157,7 +157,13 @@ class FilteredDatesChartMainPanel extends React.Component<Props, State> {
 
                     <AxisSvg position={Padding.Left} scale={scaleY} ticks={ticks || scaleY.ticks()} tickFormat={tickFormat} tickMargin={0} chartArea={chartArea} />
 
-                    <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={this.props.source}>
+                    <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={this.props.source} getValueOfDate={(date: number) => {
+                        const datum = this.props.data.data.find(d => d.numberedDate === date)
+                        if(this.props.data.type === 'range'){
+                            return datum
+                        }else return datum.value
+                    }
+                }>
                         {
                             nonNullDataset.map(datum => {
                                 const sizeInfo = this.getXSize(datum.numberedDate, scaleX)

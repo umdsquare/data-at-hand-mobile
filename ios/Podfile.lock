@@ -205,6 +205,8 @@ PODS:
   - react-native-app-auth (5.0.0):
     - AppAuth (= 1.2.0)
     - React
+  - react-native-blur (0.8.0):
+    - React
   - react-native-safe-area-context (0.7.2):
     - React
   - react-native-segmented-control (1.1.1):
@@ -295,6 +297,7 @@ DEPENDENCIES:
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - react-native-app-auth (from `../node_modules/react-native-app-auth`)
+  - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - "react-native-segmented-control (from `../node_modules/@react-native-community/segmented-control`)"
   - react-native-sqlite-storage (from `../node_modules/react-native-sqlite-storage`)
@@ -365,6 +368,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
   react-native-app-auth:
     :path: "../node_modules/react-native-app-auth"
+  react-native-blur:
+    :path: "../node_modules/@react-native-community/blur"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
   react-native-segmented-control:
@@ -434,6 +439,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: d5525f9ed5f782fdbacb64b9b01a43a9323d2386
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
   react-native-app-auth: 40f06f24fd0ff00d5258b8b4cd5436fe64c9edc3
+  react-native-blur: cad4d93b364f91e7b7931b3fa935455487e5c33c
   react-native-safe-area-context: d227bd5ef6776683c330f44187351dc138b2a4cb
   react-native-segmented-control: d957a684d2dda51282245071203f46938f13dcd9
   react-native-sqlite-storage: bb10beb2407e5fc21f3f1bcd86bacbfd6edcc818
@@ -460,6 +466,6 @@ SPEC CHECKSUMS:
   SDWebImageWebPCoder: 947093edd1349d820c40afbd9f42acb6cdecd987
   Yoga: f2a7cd4280bfe2cca5a7aed98ba0eb3d1310f18b
 
-PODFILE CHECKSUM: c516561fbceb07f2570063a86409904bb8c87a25
+PODFILE CHECKSUM: 25a2039f4c99a3acb5509a0620d19c4842806955
 
 COCOAPODS: 1.8.3

@@ -37,6 +37,8 @@ target 'DataAtHand' do
   
   pod 'react-native-safe-area-context', :path => '../node_modules/react-native-safe-area-context'
 
+  pod 'react-native-blur', :path => '../node_modules/@react-native-community/blur'
+
   target 'DataAtHandTests' do
     inherit! :search_paths
     # Pods for testing

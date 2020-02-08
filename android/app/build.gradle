@@ -140,6 +140,9 @@ android {
         versionCode 1
         versionName "1.0"
 
+        renderscriptTargetApi 23
+        renderscriptSupportModeEnabled true
+
         manifestPlaceholders = [
                 appAuthRedirectScheme: 'edu.umd.hcil.data-at-hand'
         ]
@@ -189,6 +192,7 @@ android {
 }
 
 dependencies {
+    implementation project(':@react-native-community_blur')
     implementation project(':react-native-safe-area-context')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
