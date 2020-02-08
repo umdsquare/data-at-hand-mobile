@@ -8,13 +8,14 @@ import { scaleBand, scaleLinear } from "d3-scale";
 import { min, max } from "d3-array";
 import { G } from "react-native-svg";
 import { Sizes } from '../../../../style/Sizes';
-import { getDomainAndTickFormat } from './common';
+import { getDomainAndTickFormat, makeTouchingInfoForCycle } from './common';
 import { CycleChartFrame } from './CycleChartFrame';
 import { RangeValueElement } from './RangeValueElement';
 import { RangeValueElementLegend } from './RangeValueElementLegend';
 import { useDispatch } from 'react-redux';
-import { createGoToBrowseRangeAction, createGoToCyclicDetailDailyAction, createGoToCyclicDetailRangeAction, InteractionType } from '../../../../state/exploration/interaction/actions';
+import { createGoToBrowseRangeAction, createGoToCyclicDetailDailyAction, createGoToCyclicDetailRangeAction, InteractionType, setTouchElementInfo } from '../../../../state/exploration/interaction/actions';
 import { CyclicTimeFrame, getCycleDimensionWithTimeKey, getCycleLevelOfDimension } from '../../../../core/exploration/cyclic_time';
+import { DataSourceType } from '../../../../measure/DataSourceSpec';
 
 
 const xAxisHeight = 100
@@ -26,6 +27,7 @@ const legendContainerStyle = { alignItems: 'flex-end', padding: Sizes.horizontal
 
 export const RangeValueCyclicChart = (props: {
     values: Array<IAggregatedRangeValue>,
+    dataSource: DataSourceType,
     cycleType: CyclicTimeFrame,
     yTickFormat?: (number) => string,
     startFromZero?: boolean,
@@ -90,11 +92,16 @@ export const RangeValueCyclicChart = (props: {
                                         dispatch(createGoToCyclicDetailRangeAction(InteractionType.TouchOnly, null, null, dimension))
                                     }
                                 }}
-                                onLongPressIn={(timeKey) => {
-                                    //TODO tooltip show
+                                onLongPressIn={(timeKey, x, y, screenX, screenY, touchId) => {
+                                    dispatch(setTouchElementInfo(makeTouchingInfoForCycle(timeKey,
+                                        props.dataSource,
+                                        props.cycleType,
+                                        scaleX, chartArea, x, y, screenX, screenY, touchId, (timeKey) => {
+                                            return props.values.find(v => v.timeKey === timeKey)
+                                        })))
                                 }}
-                                onLongPressOut={(timeKey) => {
-                                    //TODO tooltip end
+                                onLongPressOut={(timeKey, x, y, screenX, screenY) => {
+                                    dispatch(setTouchElementInfo(null))
                                 }}
                             />)
                     }

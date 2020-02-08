@@ -1,5 +1,9 @@
 import { startOfDay, format, addSeconds } from 'date-fns';
-import { CyclicTimeFrame } from '../../../../core/exploration/cyclic_time';
+import { CyclicTimeFrame, getCycleDimensionWithTimeKey } from '../../../../core/exploration/cyclic_time';
+import { ScaleBand } from 'd3-scale';
+import { LayoutRectangle } from 'react-native';
+import { TouchingElementInfo, TouchingElementValueType, ParameterType } from '../../../../core/exploration/types';
+import { DataSourceType } from '../../../../measure/DataSourceSpec';
 
 const dowNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const monthNames = [
@@ -47,11 +51,11 @@ export function getDomainAndTickFormat(
       domain = [0, 1, 2, 3];
       tickFormat = getSeasonName;
       break;
-      /*
-    case CyclicTimeFrame.WeekdayWeekends:
-      domain = [0, 1];
-      tickFormat = getWdWeName;
-      break;*/
+    /*
+  case CyclicTimeFrame.WeekdayWeekends:
+    domain = [0, 1];
+    tickFormat = getWdWeName;
+    break;*/
   }
 
   return {
@@ -63,9 +67,41 @@ export function getDomainAndTickFormat(
 
 const timePivot = startOfDay(new Date())
 
-export const timeTickFormat = (tick:number) => {
-    if(tick === 0){
-        return "MN"
-    }
-    else return format(addSeconds(timePivot, tick),"h a").toLowerCase()
+export const timeTickFormat = (tick: number) => {
+  if (tick === 0) {
+    return "MN"
+  }
+  else return format(addSeconds(timePivot, tick), "h a").toLowerCase()
+}
+
+export function makeTouchingInfoForCycle(
+  timeKey: number,
+  dataSource: DataSourceType,
+  cycleType: CyclicTimeFrame,
+  scaleX: ScaleBand<number>,
+  chartArea: LayoutRectangle,
+  touchX: number, touchY: number, touchScreenX: number, touchScreenY: number,
+  touchId: string, getValue: (timeKey: number) => any): TouchingElementInfo {
+  const info = {
+    touchId,
+    elementBoundInScreen: {
+      x: touchScreenX - touchX + chartArea.x + (scaleX(timeKey) + scaleX.bandwidth() * .5 - scaleX.step() * .5),
+      y: touchScreenY - touchY + chartArea.y,
+      width: scaleX.step(),
+      height: chartArea.height
+    },
+    params: [
+      { parameter: ParameterType.DataSource, value: dataSource },
+      { parameter: ParameterType.CycleDimension, value: getCycleDimensionWithTimeKey(cycleType, timeKey) }
+    ],
+    valueType: TouchingElementValueType.CycleDimension
+  } as TouchingElementInfo
+
+  try {
+    info.value = getValue(timeKey)
+  } catch (e) {
+
+  }
+
+  return info
 }

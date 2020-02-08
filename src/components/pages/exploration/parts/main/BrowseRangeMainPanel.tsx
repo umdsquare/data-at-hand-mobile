@@ -8,7 +8,7 @@ import { Dispatch } from "redux";
 import { OverviewSourceRow } from "../../../../../core/exploration/data/types";
 import { DataSourceChartFrame } from "../../../../exploration/DataSourceChartFrame";
 import { explorationInfoHelper } from "../../../../../core/exploration/ExplorationInfoHelper";
-import { ParameterType, TouchingElementInfo, inferIntraDayDataSourceType } from "../../../../../core/exploration/types";
+import { ParameterType, TouchingElementInfo, inferIntraDayDataSourceType, TouchingElementValueType } from "../../../../../core/exploration/types";
 import { DateTimeHelper } from "../../../../../time";
 import { format, startOfDay, addSeconds } from "date-fns";
 import { StyleTemplates } from "../../../../../style/Styles";
@@ -281,7 +281,10 @@ const Item = (prop: {
                         params: [
                             { parameter: ParameterType.DataSource, value: prop.type },
                             { parameter: ParameterType.Date, value: prop.date }
-                        ]
+                        ],
+                        valueType: TouchingElementValueType.DayValue,
+                        value: prop.type === DataSourceType.SleepRange ? { value: prop.item.bedTimeDiffSeconds, value2: prop.item.wakeTimeDiffSeconds }
+                            : (prop.type === DataSourceType.HoursSlept ? prop.item.lengthInSeconds : prop.item.value)
                     })
                 })
             } else {

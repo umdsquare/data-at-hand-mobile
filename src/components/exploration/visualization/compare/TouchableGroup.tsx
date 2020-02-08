@@ -6,8 +6,8 @@ const AnimatedRect = Animated.createAnimatedComponent(Rect)
 
 export const TouchableGroup = (prop: {
     onClick: () => void,
-    onLongPressIn: () => void,
-    onLongPressOut: () => void,
+    onLongPressIn: (x,y, screenX, screenY, touchId) => void,
+    onLongPressOut: (x,y, screenX, screnY) => void,
     children?: any,
     feedbackArea?: LayoutRectangle
 }) => {
@@ -17,9 +17,15 @@ export const TouchableGroup = (prop: {
 
     return <G
         onPress={prop.onClick}
-        onLongPress={() => {
+        onLongPress={(event) => {
             setIsLongPressed(true)
-            prop.onLongPressIn()
+            prop.onLongPressIn(
+                event.nativeEvent.locationX, 
+                event.nativeEvent.locationY,
+                event.nativeEvent.pageX,
+                event.nativeEvent.pageY,
+                event.nativeEvent.identifier
+                )
         }}
         onPressIn={() => {
             Animated.timing(feedbackColor, {
@@ -28,9 +34,13 @@ export const TouchableGroup = (prop: {
                 useNativeDriver: true
             }).start()
         }}
-        onPressOut={() => {
+        onPressOut={(event) => {
             if (isLongPressed === true) {
-                prop.onLongPressOut()
+                prop.onLongPressOut(
+                    event.nativeEvent.locationX, 
+                    event.nativeEvent.locationY,
+                    event.nativeEvent.pageX,
+                    event.nativeEvent.pageY)
             }
             setIsLongPressed(false)
             feedbackColor.setValue(1)

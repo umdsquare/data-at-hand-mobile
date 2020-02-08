@@ -13,8 +13,8 @@ export const SingleValueElement = (props: {
     rangeColor?: string,
     maxWidth?: number,
     onClick?: (timeKey: number) => void,
-    onLongPressIn?: (timeKey: number) => void,
-    onLongPressOut?: (timeKey: number) => void
+    onLongPressIn?: (timeKey: number, x: number, y: number, screenX: number, screenY: number, touchId: string) => void,
+    onLongPressOut?: (timeKey: number, x: number, y: number, screenX: number, screenY: number) => void
 }) => {
 
     const bandPadding = props.additionalPadding || 0
@@ -29,10 +29,10 @@ export const SingleValueElement = (props: {
     if (props.onClick != null || props.onLongPressIn != null || props.onLongPressOut != null) {
         return <TouchableGroup
             onClick={() => props.onClick && props.onClick(props.value.timeKey)}
-            onLongPressIn={() => props.onLongPressIn && props.onLongPressIn(props.value.timeKey)}
-            onLongPressOut={() => props.onLongPressOut && props.onLongPressOut(props.value.timeKey)}
+            onLongPressIn={(x, y, screenX, screenY, touchId) => props.onLongPressIn && props.onLongPressIn(props.value.timeKey, x, y, screenX, screenY, touchId)}
+            onLongPressOut={(x, y, screenX, screenY) => props.onLongPressOut && props.onLongPressOut(props.value.timeKey, x, y, screenX, screenY)}
             feedbackArea={{
-                x: props.scaleX(props.value.timeKey) + props.scaleX.bandwidth()*.5 - props.scaleX.step()*.5,
+                x: props.scaleX(props.value.timeKey) + props.scaleX.bandwidth() * .5 - props.scaleX.step() * .5,
                 y: props.scaleY(Math.max(props.scaleY.domain()[0], props.scaleY.domain()[1])),
                 width: props.scaleX.step(),
                 height: Math.abs(props.scaleY(props.scaleY.domain()[0]) - props.scaleY(props.scaleY.domain()[1]))

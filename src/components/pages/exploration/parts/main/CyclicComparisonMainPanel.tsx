@@ -47,11 +47,11 @@ class CyclicComparisonMainPanel extends React.Component<Props> {
     private makeMainView(): any {
         switch (this.props.source) {
             case DataSourceType.StepCount:
-                return <SingleValueCyclicChart values={this.props.data.data as any} cycleType={this.props.cycleType} startFromZero={true} yTickFormat={commaNumber} />
+                return <SingleValueCyclicChart dataSource={this.props.source} values={this.props.data.data as any} cycleType={this.props.cycleType} startFromZero={true} yTickFormat={commaNumber} />
             case DataSourceType.HeartRate:
-                return <SingleValueCyclicChart values={this.props.data.data as any} cycleType={this.props.cycleType} startFromZero={false} />
+                return <SingleValueCyclicChart dataSource={this.props.source} values={this.props.data.data as any} cycleType={this.props.cycleType} startFromZero={false} />
             case DataSourceType.HoursSlept:
-                return <SingleValueCyclicChart values={this.props.data.data as any} cycleType={this.props.cycleType} startFromZero={true}
+                return <SingleValueCyclicChart dataSource={this.props.source} values={this.props.data.data as any} cycleType={this.props.cycleType} startFromZero={true}
                     yTickFormat={v => DateTimeHelper.formatDuration(v, true)}
                     ticksOverride={(min, max) => {
                         const scale = scaleLinear().domain([min / 3600, max / 3600]).nice()
@@ -60,12 +60,13 @@ class CyclicComparisonMainPanel extends React.Component<Props> {
                 />
             case DataSourceType.Weight:
                 return <SingleValueCyclicChart
+                    dataSource={this.props.source}
                     values={this.props.data.data as any}
                     cycleType={this.props.cycleType}
                     startFromZero={false}
-                    valueConverter = {
+                    valueConverter={
                         (value) => {
-                            switch(this.props.measureUnitType){
+                            switch (this.props.measureUnitType) {
                                 case MeasureUnitType.Metric:
                                     return value;
                                 case MeasureUnitType.US:
@@ -76,16 +77,17 @@ class CyclicComparisonMainPanel extends React.Component<Props> {
                 />
             case DataSourceType.SleepRange:
                 return <RangeValueCyclicChart
-                values={this.props.data.data as any}
-                cycleType={this.props.cycleType}
-                startFromZero={false}
-                ticksOverride={(min, max) => {
-                    const scale = scaleLinear().domain([min / 3600, max / 3600]).nice()
-                    return scale.ticks().map(t => t * 3600)
-                }}
-                yTickFormat={timeTickFormat}
-                rangeALabel="Bedtime Range"
-                rangeBLabel="Wake Time Range"
+                    dataSource={this.props.source}
+                    values={this.props.data.data as any}
+                    cycleType={this.props.cycleType}
+                    startFromZero={false}
+                    ticksOverride={(min, max) => {
+                        const scale = scaleLinear().domain([min / 3600, max / 3600]).nice()
+                        return scale.ticks().map(t => t * 3600)
+                    }}
+                    yTickFormat={timeTickFormat}
+                    rangeALabel="Bedtime Range"
+                    rangeBLabel="Wake Time Range"
                 />
         }
     }

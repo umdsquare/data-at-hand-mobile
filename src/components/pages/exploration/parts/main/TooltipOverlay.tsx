@@ -17,6 +17,7 @@ import unitConvert from 'convert-units'
 import { addSeconds } from 'date-fns/esm'
 import LinearGradient from 'react-native-linear-gradient'
 import Colors from '../../../../../style/Colors'
+import { CycleDimension, getCycleDimensionSpec } from '../../../../../core/exploration/cyclic_time'
 
 const borderRadius = 8
 
@@ -49,6 +50,19 @@ const styles = StyleSheet.create({
         fontSize: Sizes.normalFontSize,
         fontWeight: 'bold',
         marginTop: 8
+    },
+
+    tooltipValueLabelTitleStyle: {
+        ...tooltipTextStyleBase,
+        fontSize: Sizes.smallFontSize,
+        fontWeight: '400'
+    },
+
+    tooltipValueDigitStyle: {
+        fontSize: 20
+    },
+    tooltipValueUnitStyle: {
+        fontSize: Sizes.smallFontSize,
     },
 
     tooltipStyle: {
@@ -318,8 +332,73 @@ class TooltipOverlay extends React.Component<Props, State>{
                         <Text style={styles.tooltipTimeMainLabelStyle}>{format(date, "MMM dd, yyyy")}</Text>
                         <Text style={styles.tooltipTimeSubLabelStyle}>{dayOfWeekLabel}</Text>
                         <Text style={styles.tooltipValueLabelStyle}>{valueText}</Text>
+                    </View>
+                }
+
+            case TouchingElementValueType.CycleDimension:
+                {
+                    const dataSource = explorationInfoHelper.getParameterValueOfParams<DataSourceType>(touchingInfo.params, ParameterType.DataSource)
+                    const cycleDimension = explorationInfoHelper.getParameterValueOfParams<CycleDimension>(touchingInfo.params, ParameterType.CycleDimension)
+                    var pluralize = require('pluralize')
+
+                    let valueDef: Array<{ type: "unit" | "digit", text: string }>
+                    switch (dataSource) {
+                        case DataSourceType.StepCount:
+                            valueDef = [
+                                { type: "digit", text: commaNumber(touchingInfo.value.avg) },
+                                { type: "unit", text: "steps" }
+                            ]
+                            break;
+                        case DataSourceType.HeartRate:
+                            valueDef = [
+                                { type: 'digit', text: touchingInfo.value.avg.toFixed(1) },
+                                { type: 'unit', text: "bpm" }
+                            ]
+                            break;
+                        case DataSourceType.HoursSlept:
+                            valueDef = DateTimeHelper.formatDurationParsed(Math.round(touchingInfo.value.avg), true)
+                            break;
+
+                        case DataSourceType.Weight:
+                            switch (this.props.measureUnitType) {
+                                case MeasureUnitType.Metric:
+                                    valueDef = [{ type: "digit", text: touchingInfo.value.avg }, { type: 'unit', text: 'kg' }]
+                                    break;
+                                case MeasureUnitType.US:
+                                    valueDef = [{ type: "digit", text: unitConvert(touchingInfo.value.avg).from('kg').to('lb') }, { type: 'unit', text: 'lb' }]
+                                    break;
+                            }
+                            break;
+
+                        case DataSourceType.SleepRange:
+
+                            const pivot = startOfDay(Date.now())
+                            const bedTime = addSeconds(pivot, touchingInfo.value.avgA)
+                            const wakeTime = addSeconds(pivot, touchingInfo.value.avgB)
+
+                            valueDef = [{ type: "digit", text: format(bedTime, "hh:mm") }, { type: 'unit', text: format(bedTime, "a").toLowerCase() },
+                            { type: 'unit', text: '-' },
+                            { type: "digit", text: format(wakeTime, "hh:mm") }, { type: 'unit', text: format(wakeTime, "a").toLowerCase() }]
+                            break;
+                    }
+
+                    return <View style={styles.tooltipContentContainerStyle}>
+                        <Text style={styles.tooltipTimeMainLabelStyle}>{pluralize(getCycleDimensionSpec(cycleDimension).name)}</Text>
+                        <Text style={styles.tooltipValueLabelStyle}>
+                            <Text style={styles.tooltipValueLabelTitleStyle}>Avg: </Text>
+                            {
+                                valueDef.map((d, i) => <Text key={i} style={d.type === 'unit' ? styles.tooltipValueUnitStyle : styles.tooltipValueDigitStyle}> {d.text}</Text>)
+                            }
+                        </Text>
+
+                        <Text style={{ ...styles.tooltipTimeSubLabelStyle, marginTop: 12 }}>{touchingInfo.value.n} items</Text>
 
                     </View>
+                }
+
+            case TouchingElementValueType.RangeAggregated:
+                {
+
                 }
         }
     }
