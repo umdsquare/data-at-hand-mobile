@@ -14,7 +14,7 @@ export const DataSourceIcon = (props: { type: DataSourceType, color: string, siz
                 <Rect fill={props.color} x="27.3" y="17.45" width="1.49" height="1.56" />
                 <Path fill={props.color} d="M33.43,8a2.82,2.82,0,0,0-2,.81,3,3,0,0,0-.93,2.32V16a3,3,0,0,0,.93,2.32,2.87,2.87,0,0,0,2,.82,3,3,0,0,0,2.07-.82A3.11,3.11,0,0,0,36.4,16V11.14a3.12,3.12,0,0,0-.9-2.33A2.9,2.9,0,0,0,33.43,8Zm1.47,7.86c0,1.11-.52,1.67-1.47,1.68S32,17,32,15.86V11.23c0-1.1.51-1.65,1.47-1.67s1.45.57,1.47,1.67Z" />
             </Svg>
-
+        default:
         case DataSourceType.StepCount:
             return <Svg width={size} height={size} viewBox="0 0 41.83 56.57">
                 <Path fill={props.color} d="M16.33,11C16.56,9.44,15.65-1.58,7.19.19-5.24,2.8,1.86,25.41,3.52,28.25l11-2.07C13.7,20.55,15.5,16.4,16.33,11Z" />

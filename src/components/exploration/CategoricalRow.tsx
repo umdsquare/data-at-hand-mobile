@@ -83,20 +83,12 @@ export const CategoricalRow = (prop: {
 
     let bottomSheetRef: BottomSheet
 
-    const [currentValue, setCurrentValue] = useState(prop.value)
-
-    useEffect(() => {
-        setCurrentValue(prop.value)
-    }, [prop.value, prop.values])
-
     return <GestureRecognizer
         onSwipeLeft={prop.values ? () => {
-            let currentIndex = prop.values.indexOf(currentValue)
+            let currentIndex = prop.values.indexOf(prop.value)
             if (currentIndex === 0) {
                 currentIndex = prop.values.length - 1
             } else currentIndex--
-
-            setCurrentValue(prop.values[currentIndex])
 
             if (prop.onValueChange) {
                 prop.onValueChange(prop.values[currentIndex], currentIndex)
@@ -104,10 +96,8 @@ export const CategoricalRow = (prop: {
             swipedFeedbackRef.startFeedback('left')
         } : null}
         onSwipeRight={prop.values ? () => {
-            let currentIndex = prop.values.indexOf(currentValue)
+            let currentIndex = prop.values.indexOf(prop.value)
             currentIndex = (currentIndex + 1) % prop.values.length
-
-            setCurrentValue(prop.values[currentIndex])
 
             if (prop.onValueChange) {
                 prop.onValueChange(prop.values[currentIndex], currentIndex)
@@ -127,9 +117,9 @@ export const CategoricalRow = (prop: {
             {
                 prop.IconComponent ? <prop.IconComponent
                     {...{ color: prop.isLightMode === true ? Colors.textGray : 'white', size: 20 }}
-                    {...(prop.iconProps && prop.iconProps(prop.values.indexOf(currentValue)))} /> : null
+                    {...(prop.iconProps && prop.iconProps(prop.values.indexOf(prop.value)))} /> : null
             }
-            <Text style={prop.isLightMode === true ? styles.valueStyelLight : styles.valueStyle}>{currentValue}</Text>
+            <Text style={prop.isLightMode === true ? styles.valueStyelLight : styles.valueStyle}>{prop.value}</Text>
             {prop.useSpeechIndicator !== false ?
                 <SpeechAffordanceIndicator overrideStyle={styles.indicatorStyle} /> : null}
         </TouchableOpacity>
@@ -149,7 +139,6 @@ export const CategoricalRow = (prop: {
                         return <TouchableOpacity
                             onPress={
                                 () => {
-                                    setCurrentValue(prop.values[entry.index])
                                     if (prop.onValueChange) {
                                         prop.onValueChange(prop.values[entry.index], entry.index)
                                     }

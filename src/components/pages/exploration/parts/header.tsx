@@ -177,14 +177,14 @@ function generateDataSourceRow(props: ExplorationProps, showBorder: boolean): an
     const sourceType = explorationInfoHelper.getParameterValue(props.explorationState.info, ParameterType.DataSource) as DataSourceType
     const sourceSpec = dataSourceManager.getSpec(sourceType)
     return <CategoricalRow title="Data Source" showBorder={showBorder} value={sourceSpec.name}
-        IconComponent = {DataSourceIcon}
-        iconProps = {(index) => {
+        IconComponent={DataSourceIcon}
+        iconProps={(index) => {
             return {
-                type: dataSourceManager.supportedDataSources[index].type,   
+                type: dataSourceManager.supportedDataSources[index].type,
             }
         }}
         values={dataSourceManager.supportedDataSources.map(spec => spec.name)}
-        onValueChange={(newValue, newIndex) => 
+        onValueChange={(newValue, newIndex) =>
             props.dispatchCommand(setDataSourceAction(InteractionType.TouchOnly, dataSourceManager.supportedDataSources[newIndex].type))
         }
     />
@@ -204,11 +204,14 @@ function generateIntraDayDataSourceRow(props: ExplorationProps): any {
 
     return <CategoricalRow title="Data Source" showBorder={false} value={sourceTypeName}
         IconComponent={DataSourceIcon}
-        iconProps = {(index) => ({
-            type: inferDataSource(supportedIntraDayDataSourceTypes[index])
-        })}
+        iconProps={(index) => {
+            console.log("inferred: ", index, supportedIntraDayDataSourceTypes[index])
+            return {
+                type: inferDataSource(supportedIntraDayDataSourceTypes[index])
+            }
+        }}
         values={values}
-        onValueChange={(value, index)=>{
+        onValueChange={(value, index) => {
             props.dispatchCommand(setIntraDayDataSourceAction(InteractionType.TouchOnly, supportedIntraDayDataSourceTypes[index]))
         }}
     />
@@ -233,7 +236,7 @@ function generateCycleDimensionRow(props: ExplorationProps, showBorder: boolean)
 
     return <CategoricalRow title="Cycle Filter" showBorder={showBorder} value={spec.name}
         values={selectableDimensions.map(spec => spec.name)}
-        onValueChange={(value, index)=> {
+        onValueChange={(value, index) => {
             props.dispatchCommand(setCycleDimensionAction(InteractionType.TouchOnly, selectableDimensions[index].dimension))
         }}
     />
