@@ -177,20 +177,16 @@ function generateDataSourceRow(props: ExplorationProps, showBorder: boolean): an
     const sourceType = explorationInfoHelper.getParameterValue(props.explorationState.info, ParameterType.DataSource) as DataSourceType
     const sourceSpec = dataSourceManager.getSpec(sourceType)
     return <CategoricalRow title="Data Source" showBorder={showBorder} value={sourceSpec.name}
-        icon={<DataSourceIcon type={sourceType} color="white" size={20} />}
-        onSwipeLeft={() => {
-            let currentSourceIndex = dataSourceManager.supportedDataSources.findIndex(spec => spec.type === sourceType)
-            currentSourceIndex--
-            if (currentSourceIndex < 0) {
-                currentSourceIndex = dataSourceManager.supportedDataSources.length - 1
+        IconComponent = {DataSourceIcon}
+        iconProps = {(index) => {
+            return {
+                type: dataSourceManager.supportedDataSources[index].type,   
             }
-            props.dispatchCommand(setDataSourceAction(InteractionType.TouchOnly, dataSourceManager.supportedDataSources[currentSourceIndex].type))
         }}
-        onSwipeRight={() => {
-            let currentSourceIndex = dataSourceManager.supportedDataSources.findIndex(spec => spec.type === sourceType)
-            currentSourceIndex = (currentSourceIndex + 1) % dataSourceManager.supportedDataSources.length
-            props.dispatchCommand(setDataSourceAction(InteractionType.TouchOnly, dataSourceManager.supportedDataSources[currentSourceIndex].type))
-        }}
+        values={dataSourceManager.supportedDataSources.map(spec => spec.name)}
+        onValueChange={(newValue, newIndex) => 
+            props.dispatchCommand(setDataSourceAction(InteractionType.TouchOnly, dataSourceManager.supportedDataSources[newIndex].type))
+        }
     />
 }
 
@@ -204,21 +200,16 @@ function generateIntraDayDataSourceRow(props: ExplorationProps): any {
             supportedIntraDayDataSourceTypes.push(inferred)
         }
     })
+    const values = supportedIntraDayDataSourceTypes.map(type => getIntraDayDataSourceName(type))
 
     return <CategoricalRow title="Data Source" showBorder={false} value={sourceTypeName}
-        icon={<DataSourceIcon type={inferDataSource(intraDaySourceType)} color="white" size={20} />}
-        onSwipeLeft={() => {
-            let currentSourceIndex = supportedIntraDayDataSourceTypes.indexOf(intraDaySourceType)
-            currentSourceIndex--
-            if (currentSourceIndex < 0) {
-                currentSourceIndex = supportedIntraDayDataSourceTypes.length - 1
-            }
-            props.dispatchCommand(setIntraDayDataSourceAction(InteractionType.TouchOnly, supportedIntraDayDataSourceTypes[currentSourceIndex]))
-        }}
-        onSwipeRight={() => {
-            let currentSourceIndex = supportedIntraDayDataSourceTypes.indexOf(intraDaySourceType)
-            currentSourceIndex = (currentSourceIndex + 1) % supportedIntraDayDataSourceTypes.length
-            props.dispatchCommand(setIntraDayDataSourceAction(InteractionType.TouchOnly, supportedIntraDayDataSourceTypes[currentSourceIndex]))
+        IconComponent={DataSourceIcon}
+        iconProps = {(index) => ({
+            type: inferDataSource(supportedIntraDayDataSourceTypes[index])
+        })}
+        values={values}
+        onValueChange={(value, index)=>{
+            props.dispatchCommand(setIntraDayDataSourceAction(InteractionType.TouchOnly, supportedIntraDayDataSourceTypes[index]))
         }}
     />
 }
@@ -228,18 +219,9 @@ function generateCyclicComparisonTypeRow(props: ExplorationProps, showBorder: bo
     const cycles = Object.keys(cyclicTimeFrameSpecs)
 
     return <CategoricalRow title="Group By" showBorder={showBorder} value={cyclicTimeFrameSpecs[cycleType].name}
-        onSwipeLeft={() => {
-            let currentIndex = cycles.indexOf(cycleType)
-            currentIndex--
-            if (currentIndex < 0) {
-                currentIndex = cycles.length - 1
-            }
-            props.dispatchCommand(setCycleTypeAction(InteractionType.TouchOnly, cycles[currentIndex] as any))
-        }}
-
-        onSwipeRight={() => {
-            const currentIndex = (cycles.indexOf(cycleType) + 1) % cycles.length
-            props.dispatchCommand(setCycleTypeAction(InteractionType.TouchOnly, cycles[currentIndex] as any))
+        values={cycles.map(key => cyclicTimeFrameSpecs[key].name)}
+        onValueChange={(value, index) => {
+            props.dispatchCommand(setCycleTypeAction(InteractionType.TouchOnly, cycles[index] as any))
         }}
     />
 }
@@ -250,18 +232,9 @@ function generateCycleDimensionRow(props: ExplorationProps, showBorder: boolean)
     const selectableDimensions = getHomogeneousCycleDimensionList(cycleDimension)
 
     return <CategoricalRow title="Cycle Filter" showBorder={showBorder} value={spec.name}
-        onSwipeLeft={() => {
-            let currentIndex = selectableDimensions.findIndex(spec => spec.dimension === cycleDimension)
-            currentIndex--
-            if (currentIndex < 0) {
-                currentIndex = selectableDimensions.length - 1
-            }
-            props.dispatchCommand(setCycleDimensionAction(InteractionType.TouchOnly, selectableDimensions[currentIndex].dimension))
-        }}
-
-        onSwipeRight={() => {
-            const currentIndex = (selectableDimensions.findIndex(spec => spec.dimension === cycleDimension) + 1) % selectableDimensions.length
-            props.dispatchCommand(setCycleDimensionAction(InteractionType.TouchOnly, selectableDimensions[currentIndex].dimension))
+        values={selectableDimensions.map(spec => spec.name)}
+        onValueChange={(value, index)=> {
+            props.dispatchCommand(setCycleDimensionAction(InteractionType.TouchOnly, selectableDimensions[index].dimension))
         }}
     />
 

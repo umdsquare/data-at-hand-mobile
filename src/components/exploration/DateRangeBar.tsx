@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Text, ViewStyle } from "react-native";
+import { View, StyleSheet, Text, ViewStyle, TextStyle } from "react-native";
 import Colors from "../../style/Colors";
 import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
 import { Sizes } from "../../style/Sizes";
@@ -20,8 +20,7 @@ const barHeight = 60
 const dateButtonSubTextStyle = {
     marginTop: 2,
     fontSize: Sizes.tinyFontSize,
-    color: 'white',
-    opacity: 0.58
+    color: '#B8BAC0',
 }
 
 const conatinerStyleBase = {
@@ -32,6 +31,14 @@ const conatinerStyleBase = {
     justifyContent: 'center'
 } as ViewStyle
 
+const dateButtonDateTextStyleBase = {
+    fontSize: Sizes.normalFontSize,
+    color: 'white',
+    fontWeight: '600',
+    marginRight: 4,
+} as TextStyle
+
+
 const styles = StyleSheet.create({
     containerStyle: conatinerStyleBase,
 
@@ -40,6 +47,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#ffffff30',
         borderBottomWidth: 1
     },
+
     dateButtonContainerStyle: {
         height: barHeight,
         justifyContent: 'center',
@@ -56,11 +64,11 @@ const styles = StyleSheet.create({
     dateButtonDatePartStyle: {
         flexDirection: 'row'
     },
-    dateButtonDateTextStyle: {
-        fontSize: Sizes.normalFontSize,
-        color: 'white',
-        fontWeight: '600',
-        marginRight: 4,
+    dateButtonDateTextStyle: dateButtonDateTextStyleBase,
+    dateButtonDateTextStyleLight: {
+        ...dateButtonDateTextStyleBase,
+        color: Colors.textColorLight,
+        fontWeight: '500'
     },
 
     midViewDescriptionTextStyle: {
@@ -114,7 +122,8 @@ interface Props {
     from: number,
     to: number,
     onRangeChanged?: (from: number, to: number, interactionType?: InteractionType) => void,
-    showBorder?: boolean
+    showBorder?: boolean,
+    isLightMode?: boolean
 }
 
 interface State {
@@ -129,14 +138,14 @@ interface State {
     clickedElementType?: 'from' | 'to' | 'period',
 }
 
-const DateButton = (props: { date: number, overrideFormat?: string, freeWidth?: boolean, onPress: () => void }) => {
+const DateButton = (props: { date: number, overrideFormat?: string, freeWidth?: boolean, onPress: () => void, isLightMode?: boolean }) => {
     const date = DateTimeHelper.toDate(props.date)
     const dateString = format(date, props.overrideFormat || "MMM dd, yyyy")
     const subText = isToday(date) === true ? 'Today' : (isYesterday(date) === true ? "Yesterday" : format(date, "EEEE"))
     return <TouchableOpacity onPress={props.onPress}>
         <View style={props.freeWidth === true ? styles.dateButtonContainerStyleFreeWidth : styles.dateButtonContainerStyle}>
             <View style={styles.dateButtonDatePartStyle}>
-                <Text style={styles.dateButtonDateTextStyle}>{dateString}</Text>
+                <Text style={props.isLightMode === true ? styles.dateButtonDateTextStyleLight : styles.dateButtonDateTextStyle}>{dateString}</Text>
                 <View style={styles.dateButtonIndicatorContainerStyle}>
                     <SpeechAffordanceIndicator />
                 </View>
@@ -325,9 +334,15 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             }
         }
 
-        return <GestureRecognizer onSwipeLeft={this.onSwipeLeft} onSwipeRight={this.onSwipeRight} style={this.props.showBorder === true ? styles.conatainerWithBorder : styles.containerStyle}>
+        return <GestureRecognizer
+            onSwipeLeft={this.onSwipeLeft}
+            onSwipeRight={this.onSwipeRight}
+            style={{
+                ...(this.props.showBorder === true ? styles.conatainerWithBorder : styles.containerStyle),
+                backgroundColor: this.props.isLightMode ? null : styles.containerStyle.backgroundColor
+            }}>
             <SwipedFeedback ref={ref => this.swipedFeedbackRef = ref} />
-            <DateButton date={this.state.from} onPress={this.onFromDatePressed} />
+            <DateButton date={this.state.from} onPress={this.onFromDatePressed} isLightMode={this.props.isLightMode} />
             <View style={styles.midViewContainerStyle} >
                 <Dash style={styles.dashViewStyle} dashGap={4} dashColor="gray" dashLength={3} dashThickness={3} dashStyle={styles.dashLineStyle} />
                 <View style={styles.midViewFooterContainerStyle}>
@@ -342,7 +357,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
                 </View>
             </View>
-            <DateButton date={this.state.to} onPress={this.onToDatePressed} />
+            <DateButton date={this.state.to} onPress={this.onToDatePressed}  isLightMode={this.props.isLightMode}/>
 
             <BottomSheet ref={ref => { this.bottomSheetRef = ref }}>
                 {modalPickerView}

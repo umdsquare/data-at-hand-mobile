@@ -1,4 +1,4 @@
-import { getYear, getMonth, getDate, differenceInDays, subDays, addDays } from "date-fns"
+import { getYear, getMonth, getDate, differenceInDays, subDays, addDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, addMonths, lastDayOfMonth } from "date-fns"
 import { toDate } from "date-fns-tz"
 
 /**
@@ -97,6 +97,21 @@ export class DateTimeHelper{
         const minutes = Math.floor((usedDuration%3600)/60)
         const seconds = usedDuration%60
         return ((hours>0? (hours + "h ") :"") + (minutes>0? (minutes + "m "):"") + (seconds>0? (seconds + "s "):"")).trim()
+    }
+
+    static pageRange(range:[number, number], direction: -1|1): [number, number]{
+        const startDate = DateTimeHelper.toDate(range[0])
+        const endDate = DateTimeHelper.toDate(range[1])
+        if(isSameMonth(startDate, endDate) === true && isFirstDayOfMonth(startDate) ===true && isLastDayOfMonth(endDate)===true)
+        {
+            const newStartDate = addMonths(startDate, direction)
+            //month
+            return [DateTimeHelper.toNumberedDateFromDate(newStartDate), DateTimeHelper.toNumberedDateFromDate(lastDayOfMonth(newStartDate))]
+        }else{
+            const numDays = differenceInDays(endDate, startDate) + 1
+            return [DateTimeHelper.toNumberedDateFromDate(addDays(startDate, direction * numDays)), 
+                DateTimeHelper.toNumberedDateFromDate(addDays(endDate, direction * numDays))]
+        }
     }
 }
 

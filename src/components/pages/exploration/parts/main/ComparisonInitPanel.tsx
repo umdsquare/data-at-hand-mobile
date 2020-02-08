@@ -1,0 +1,137 @@
+import React, { useEffect, useState } from 'react'
+import { View, StyleSheet, Text, LayoutAnimation } from 'react-native'
+import { Button } from 'react-native-elements'
+import LinearGradient from 'react-native-linear-gradient'
+import Colors from '../../../../../style/Colors'
+import { Sizes } from '../../../../../style/Sizes'
+import { ExplorationInfo, ParameterType, ExplorationType, ParameterKey } from '../../../../../core/exploration/types'
+import { DataSourceType } from '../../../../../measure/DataSourceSpec'
+import { CyclicTimeFrame, cyclicTimeFrameSpecs } from '../../../../../core/exploration/cyclic_time'
+import { explorationInfoHelper } from '../../../../../core/exploration/ExplorationInfoHelper'
+import { useDispatch } from 'react-redux'
+import { createGoToComparisonTwoRangesAction, InteractionType, createGoToComparisonCyclicAction } from '../../../../../state/exploration/interaction/actions'
+import { CategoricalRow } from '../../../../exploration/CategoricalRow'
+import { dataSourceManager } from '../../../../../system/DataSourceManager'
+import { DataSourceIcon } from '../../../../common/DataSourceIcon'
+import { DateRangeBar } from '../../../../exploration/DateRangeBar'
+import { StyleTemplates } from '../../../../../style/Styles'
+import { DateTimeHelper } from '../../../../../time'
+
+const styles = StyleSheet.create({
+    containerStyle: { paddingLeft: Sizes.horizontalPadding*.5, paddingRight: Sizes.horizontalPadding*.5 },
+    buttonContainerStyle: { marginTop: Sizes.verticalPadding, marginLeft: Sizes.horizontalPadding*.5, marginRight: Sizes.horizontalPadding*.5 },
+    buttonStyle: { borderRadius: 50, paddingTop: Sizes.verticalPadding, paddingBottom: Sizes.verticalPadding },
+    titleStyle: { fontSize: Sizes.normalFontSize, fontWeight: 'bold' },
+    disabledTitleStyle: { color: 'white' },
+    disabledStyle: { opacity: 0.5 },
+
+    rangeSeparatorLineStyle: { height: 1, flex: 1, backgroundColor: Colors.lightBorderColor },
+    rangeSeparatorTextStyle: { marginLeft: 8, marginRight: 8, color: Colors.textColorLight },
+
+    rangeSeparatorStyle: {
+        ...StyleTemplates.flexHorizontalCenteredListContainer,
+        paddingLeft: Sizes.horizontalPadding,
+        paddingRight: Sizes.horizontalPadding, 
+    }
+})
+const iconInfo = { name: "arrow-forward", type: 'materialicon', color: 'white' }
+const gradientProps = { colors: Colors.decisionButtonGradient, start: { x: 0, y: 0 }, end: { x: 1, y: 0 } }
+
+const CompareTwoRangesLabel = "Compare Two Ranges"
+const comparisonTypes = Object.keys(cyclicTimeFrameSpecs).map(type => cyclicTimeFrameSpecs[type].name)
+comparisonTypes.push(CompareTwoRangesLabel)
+
+export const ComparisonInitPanel = (props: { info: ExplorationInfo, onCompleted?: () => void }) => {
+
+    const [dataSource, setDataSource] = useState<DataSourceType>(explorationInfoHelper.getParameterValue(props.info, ParameterType.DataSource) || DataSourceType.StepCount)
+    const [cycleType, setCycleType] = useState<CyclicTimeFrame | "compareTwoRanges">(
+        explorationInfoHelper.getParameterValue(props.info, ParameterType.CycleType) || (props.info.type === ExplorationType.C_TwoRanges ? "compareTwoRanges" : CyclicTimeFrame.DayOfWeek))
+    const [rangeA, setRangeA] = useState<[number, number]>(explorationInfoHelper.getParameterValue(props.info, ParameterType.Range))
+    const [rangeB, setRangeB] = useState<[number, number]>(explorationInfoHelper.getParameterValue(props.info, ParameterType.Range, ParameterKey.RangeB) || DateTimeHelper.pageRange(rangeA, -1))
+
+    const dispatch = useDispatch()
+
+    useEffect(() => {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
+    }, [cycleType])
+
+    return <View style={styles.containerStyle}>
+        <CategoricalRow title="Data Source" isLightMode={true} value={dataSourceManager.getSpec(dataSource).name}
+            useSpeechIndicator={false}
+            values={dataSourceManager.supportedDataSources.map(s => s.name)}
+            onValueChange={(value, index) => { setDataSource(dataSourceManager.supportedDataSources[index].type) }}
+            IconComponent={DataSourceIcon}
+            iconProps={(index) => ({
+                type: dataSourceManager.supportedDataSources[index].type
+            })}
+            showBorder={true} />
+        <CategoricalRow title="Comparison Type"
+            useSpeechIndicator={false}
+            isLightMode={true}
+            value={cycleType === 'compareTwoRanges' ? CompareTwoRangesLabel : cyclicTimeFrameSpecs[cycleType].name}
+            values={comparisonTypes}
+            onValueChange={(value, index) => {
+                const newCycleType = Object.keys(cyclicTimeFrameSpecs).find(type => cyclicTimeFrameSpecs[type].name === value)
+                setCycleType(newCycleType || "compareTwoRanges" as any)
+            }}
+            showBorder={true} />
+
+        <View style={{ marginBottom: 16 }} />
+
+        <DateRangeBar
+            from={rangeA[0]}
+            to={rangeA[1]}
+            isLightMode={true}
+            onRangeChanged={(from, to) => {
+                setRangeA([from, to])
+            }}
+        />
+
+        {
+            cycleType === 'compareTwoRanges' ? <View style={styles.rangeSeparatorStyle}>
+                <View style={styles.rangeSeparatorLineStyle} />
+                <Text style={styles.rangeSeparatorTextStyle}>Vs.</Text>
+                <View style={styles.rangeSeparatorLineStyle} />
+            </View> : null
+        }
+
+        {
+            cycleType === 'compareTwoRanges' ? <DateRangeBar
+                from={rangeB[0]}
+                to={rangeB[1]}
+                isLightMode={true}
+                onRangeChanged={(from, to) => {
+                    setRangeB([from, to])
+                }}
+            /> : null
+        }
+
+        <Button
+            containerStyle={styles.buttonContainerStyle}
+            ViewComponent={LinearGradient}
+            linearGradientProps={gradientProps}
+            buttonStyle={styles.buttonStyle}
+            iconRight={true}
+            icon={iconInfo}
+            titleStyle={styles.titleStyle}
+            title="Start Comparison"
+            disabledStyle={styles.disabledStyle}
+            disabledTitleStyle={styles.disabledTitleStyle}
+            disabled={dataSource == null || cycleType == null || rangeA == null || (cycleType === 'compareTwoRanges' && rangeB == null)}
+            onPress={() => {
+                if (cycleType === 'compareTwoRanges') {
+                    dispatch(createGoToComparisonTwoRangesAction(InteractionType.TouchOnly, dataSource, rangeA, rangeB))
+                    if (props.onCompleted) {
+                        props.onCompleted()
+                    }
+                } else {
+                    dispatch(createGoToComparisonCyclicAction(InteractionType.TouchOnly, dataSource, rangeA, cycleType))
+                    if (props.onCompleted) {
+                        props.onCompleted()
+                    }
+                }
+            }}
+        />
+    </View>
+}
+

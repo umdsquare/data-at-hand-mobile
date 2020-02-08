@@ -1,6 +1,6 @@
 import { PropsWithNavigation } from "../../../PropsWithNavigation";
 import React from "react";
-import { StatusBar, View, StyleSheet, Platform, BackHandler } from "react-native";
+import { StatusBar, View, StyleSheet, Platform, BackHandler, Text } from "react-native";
 import Colors from "../../../style/Colors";
 import { StyleTemplates } from "../../../style/Styles";
 import { ExplorationState } from "../../../state/exploration/interaction/reducers";
@@ -13,7 +13,7 @@ import { explorationInfoHelper } from "../../../core/exploration/ExplorationInfo
 import { DataServiceManager } from "../../../system/DataServiceManager";
 import { ExplorationInfo, ExplorationType, ExplorationMode } from "../../../core/exploration/types";
 import { ExplorationDataState, startLoadingForInfo } from "../../../state/exploration/data/reducers";
-import { ExplorationAction, InteractionType, createGoToBrowseOverviewAction, createRestorePreviousInfoAction, createGoToComparisonTwoRangesAction, goBackAction, createGoToComparisonCyclicAction } from "../../../state/exploration/interaction/actions";
+import { ExplorationAction, InteractionType, createGoToBrowseOverviewAction, createRestorePreviousInfoAction, goBackAction } from "../../../state/exploration/interaction/actions";
 import { Button } from "react-native-elements";
 import { Sizes } from "../../../style/Sizes";
 import { OverviewMainPanel } from "./parts/main/OverviewMainPanel";
@@ -22,8 +22,9 @@ import { BusyHorizontalIndicator } from "../../exploration/BusyHorizontalIndicat
 import { getIntraDayMainPanel } from "./parts/main/IntraDayMainPanel";
 import { CyclicComparisonMainPanel } from "./parts/main/CyclicComparisonMainPanel";
 import { MultiRangeComparisonMainPanel } from "./parts/main/MultiRangeComparisonMainPanel";
-import { CyclicTimeFrame } from "../../../core/exploration/cyclic_time";
 import { FilteredDatesChartMainPanel } from "./parts/main/FilteredDatesChartMainPanel";
+import { BottomSheet } from "../../common/BottomSheet";
+import { ComparisonInitPanel } from "./parts/main/ComparisonInitPanel";
 var deepEqual = require('deep-equal');
 
 const styles = StyleSheet.create({
@@ -88,21 +89,7 @@ interface State {
 
 class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
-    /*
-     <View style={{ padding: 12, flexDirection: 'row' }}>
-                            <Text style={{ flex: 1 }}>Browse</Text>
-                            <Button onPress={() => {
-                                this.props.navigation.navigate("Settings")
-                            }}></Button>
-                        </View>
-    
-                        <CategoricalRow title="DataSource" showBorder = {true} value="Step Count" icon={<DataSourceIcon type="step" color="white" size={20}/>}/>
-                        <CategoricalRow title="Comparison Type" showBorder = {false} value="Two Date Ranges"/>
-    
-                        <DateRangeBar from={startOfMonth(new Date())} to={endOfMonth(new Date())} onRangeChanged={(from, to) => {
-                            console.log("set to ", from, to)
-                        }} />
-    */
+    private comparisonBottomSheetRef: BottomSheet
 
     private onHardwareBackPress = ()=>{
         if(this.props.explorationState.backNavStack.length > 0){
@@ -142,9 +129,10 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 this.props.dispatchCommand(createGoToBrowseOverviewAction(InteractionType.TouchOnly))
                 break;
             case ExplorationMode.Compare:
-                this.props.dispatchCommand(createGoToComparisonCyclicAction(InteractionType.TouchOnly, null, null, CyclicTimeFrame.DayOfWeek))
+                //this.props.dispatchCommand(createGoToComparisonCyclicAction(InteractionType.TouchOnly, null, null, CyclicTimeFrame.DayOfWeek))
                 //TODO replace the command
                 //this.props.dispatchCommand(createGoToComparisonTwoRangesAction(InteractionType.TouchOnly, null, [20191101, 20191130], [20191201, 20191231]))
+                this.comparisonBottomSheetRef?.open()
                 break;
         }
     }
@@ -188,6 +176,10 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
             <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationState.info)}
                 onModePress={this.onBottomBarButtonPress}
             />
+
+            <BottomSheet ref={ref => {this.comparisonBottomSheetRef = ref}}>
+                <ComparisonInitPanel info={this.props.explorationState.info} onCompleted={()=>{this.comparisonBottomSheetRef.close()}}/>
+            </BottomSheet>
 
         </View>
     }
