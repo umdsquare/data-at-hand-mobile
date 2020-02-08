@@ -96,7 +96,6 @@ export abstract class DataService {
               const seasonEnd = addMonths(seasonStart, 3)
               
               range = [DateTimeHelper.toNumberedDateFromDate(startOfMonth(seasonStart)), DateTimeHelper.toNumberedDateFromDate(endOfMonth(seasonEnd))]
-              console.log(range)
             } 
             break;
           }

@@ -16,10 +16,11 @@ import { DataSourceIcon } from '../../../../common/DataSourceIcon'
 import { DateRangeBar } from '../../../../exploration/DateRangeBar'
 import { StyleTemplates } from '../../../../../style/Styles'
 import { DateTimeHelper } from '../../../../../time'
+import { subDays } from 'date-fns'
 
 const styles = StyleSheet.create({
-    containerStyle: { paddingLeft: Sizes.horizontalPadding*.5, paddingRight: Sizes.horizontalPadding*.5 },
-    buttonContainerStyle: { marginTop: Sizes.verticalPadding, marginLeft: Sizes.horizontalPadding*.5, marginRight: Sizes.horizontalPadding*.5 },
+    containerStyle: { paddingLeft: Sizes.horizontalPadding * .5, paddingRight: Sizes.horizontalPadding * .5 },
+    buttonContainerStyle: { marginTop: Sizes.verticalPadding, marginLeft: Sizes.horizontalPadding * .5, marginRight: Sizes.horizontalPadding * .5 },
     buttonStyle: { borderRadius: 50, paddingTop: Sizes.verticalPadding, paddingBottom: Sizes.verticalPadding },
     titleStyle: { fontSize: Sizes.normalFontSize, fontWeight: 'bold' },
     disabledTitleStyle: { color: 'white' },
@@ -31,7 +32,7 @@ const styles = StyleSheet.create({
     rangeSeparatorStyle: {
         ...StyleTemplates.flexHorizontalCenteredListContainer,
         paddingLeft: Sizes.horizontalPadding,
-        paddingRight: Sizes.horizontalPadding, 
+        paddingRight: Sizes.horizontalPadding,
     }
 })
 const iconInfo = { name: "arrow-forward", type: 'materialicon', color: 'white' }
@@ -41,18 +42,29 @@ const CompareTwoRangesLabel = "Compare Two Ranges"
 const comparisonTypes = Object.keys(cyclicTimeFrameSpecs).map(type => cyclicTimeFrameSpecs[type].name)
 comparisonTypes.push(CompareTwoRangesLabel)
 
+function inferRange(info: ExplorationInfo): [number, number] {
+    const date = explorationInfoHelper.getParameterValue<number>(info, ParameterType.Date)
+    if (date != null) {
+        return [DateTimeHelper.toNumberedDateFromDate(subDays(DateTimeHelper.toDate(date), 6)), date]
+    }
+}
+
 export const ComparisonInitPanel = (props: { info: ExplorationInfo, onCompleted?: () => void }) => {
 
     const [dataSource, setDataSource] = useState<DataSourceType>(explorationInfoHelper.getParameterValue(props.info, ParameterType.DataSource) || DataSourceType.StepCount)
     const [cycleType, setCycleType] = useState<CyclicTimeFrame | "compareTwoRanges">(
         explorationInfoHelper.getParameterValue(props.info, ParameterType.CycleType) || (props.info.type === ExplorationType.C_TwoRanges ? "compareTwoRanges" : CyclicTimeFrame.DayOfWeek))
-    const [rangeA, setRangeA] = useState<[number, number]>(explorationInfoHelper.getParameterValue(props.info, ParameterType.Range))
-    const [rangeB, setRangeB] = useState<[number, number]>(explorationInfoHelper.getParameterValue(props.info, ParameterType.Range, ParameterKey.RangeB) || DateTimeHelper.pageRange(rangeA, -1))
+    const [rangeA, setRangeA] = useState<[number, number]>(explorationInfoHelper.getParameterValue(props.info, ParameterType.Range) || inferRange(props.info))
+    const [rangeB, setRangeB] = useState<[number, number]>(explorationInfoHelper.getParameterValue(props.info, ParameterType.Range, ParameterKey.RangeB))
 
     const dispatch = useDispatch()
 
     useEffect(() => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
+
+        if (cycleType === 'compareTwoRanges' && rangeB == null) {
+            setRangeB(DateTimeHelper.pageRange(rangeA, -1))
+        }
     }, [cycleType])
 
     return <View style={styles.containerStyle}>
@@ -96,7 +108,7 @@ export const ComparisonInitPanel = (props: { info: ExplorationInfo, onCompleted?
         }
 
         {
-            cycleType === 'compareTwoRanges' ? <DateRangeBar
+            cycleType === 'compareTwoRanges' && rangeB ? <DateRangeBar
                 from={rangeB[0]}
                 to={rangeB[1]}
                 isLightMode={true}
