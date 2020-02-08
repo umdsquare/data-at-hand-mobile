@@ -27,6 +27,7 @@ import { RangeValueElement } from '../../../../exploration/visualization/compare
 import { isSameYear, isSameMonth, startOfMonth, endOfMonth, format } from 'date-fns'
 import { ExplorationAction, createGoToBrowseRangeAction, InteractionType } from '../../../../../state/exploration/interaction/actions'
 import { noop } from '../../../../../utils'
+import { TouchableGroup } from '../../../../exploration/visualization/compare/TouchableGroup'
 
 const INDEX_AGGREGATED = 0
 const INDEX_SUM = 1
@@ -115,22 +116,21 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
     }
 
     private onElementClick = (timeKey: number) => {
-        this.props.dispatchExplorationAction(createGoToBrowseRangeAction(InteractionType.TouchOnly, null, 
+        this.props.dispatchExplorationAction(createGoToBrowseRangeAction(InteractionType.TouchOnly, null,
             this.props.data.data[timeKey].range
-            ))
+        ))
     }
 
-    private onElementLongPressIn = () => {
+    private onElementLongPressIn = (timeKey: number) => {
         //TODO show tooltip
     }
 
-    private onElementLongPressOut = () => {
+    private onElementLongPressOut = (timeKey: number) => {
         //TODO hide tooltip
     }
 
 
     render() {
-        console.log(this.props.data)
         const aggregationSettingIndex = this.props.sumSupported === true ? this.state.aggregationSettingIndex : INDEX_AGGREGATED
 
         let isRanged = false
@@ -312,21 +312,31 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                                         sum: valueConverter(d.value["sum"])
                                     }}
                                     scaleX={scaleX} scaleY={scaleY} maxWidth={40}
-                                    
+
                                     onClick={this.onElementClick}
                                     onLongPressIn={this.onElementLongPressIn}
                                     onLongPressOut={this.onElementLongPressOut}
-                                    
-                                    />
-                            }) : availableData.map((d, i) => {
-                                return <Rect
-                                    key={i}
-                                    x={scaleX(i)}
-                                    y={scaleY(valueConverter(d.value["sum"]))}
-                                    width={scaleX.bandwidth()}
-                                    height={scaleY(valueConverter(0)) - scaleY(valueConverter(d.value["sum"]))}
-                                    fill={Colors.chartElementDefault + "aa"}
+
                                 />
+                            }) : availableData.map((d, i) => {
+                                return <TouchableGroup
+                                    key={i}
+                                    onClick={() => this.onElementClick(i)}
+                                    onLongPressIn={() => this.onElementLongPressIn(i)}
+                                    onLongPressOut={() => this.onElementLongPressOut(i)}
+                                    feedbackArea={{
+                                        x: scaleX(i) + scaleX.bandwidth() * .5 - scaleX.step() * .5,
+                                        y: 0,
+                                        height: chartArea.height,
+                                        width: scaleX.step()
+                                    }}
+                                ><Rect
+                                        x={scaleX(i)}
+                                        y={scaleY(valueConverter(d.value["sum"]))}
+                                        width={scaleX.bandwidth()}
+                                        height={scaleY(valueConverter(0)) - scaleY(valueConverter(d.value["sum"]))}
+                                        fill={Colors.chartElementDefault + "aa"}
+                                    /></TouchableGroup>
                             })
                         }
                     </G>
