@@ -95,9 +95,14 @@ class GroupWithTouchInteraction extends React.Component<Props, State>{
                 { parameter: ParameterType.Date, value: date }
             ],
             valueType: TouchingElementValueType.DayValue,
-            value: this.props.getValueOfDate(date)
 
         } as TouchingElementInfo
+
+        try{
+            touchingInfo.value = this.props.getValueOfDate(date)
+        }catch(e){
+            touchingInfo.value = null
+        }
 
         switch (type) {
             case "start":

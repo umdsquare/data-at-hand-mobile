@@ -8,7 +8,7 @@ import { connect } from 'react-redux'
 import { BlurView } from "@react-native-community/blur";
 import { explorationInfoHelper } from '../../../../../core/exploration/ExplorationInfoHelper'
 import { DateTimeHelper } from '../../../../../time'
-import { format, startOfDay } from 'date-fns'
+import { format, startOfDay, isToday, isYesterday } from 'date-fns'
 import { Sizes } from '../../../../../style/Sizes'
 import { DataSourceType, MeasureUnitType } from '../../../../../measure/DataSourceSpec'
 import commaNumber from 'comma-number';
@@ -271,39 +271,52 @@ class TooltipOverlay extends React.Component<Props, State>{
                     const date = DateTimeHelper.toDate(explorationInfoHelper.getParameterValueOfParams<number>(touchingInfo.params, ParameterType.Date))
                     const dataSource = explorationInfoHelper.getParameterValueOfParams<DataSourceType>(touchingInfo.params, ParameterType.DataSource)
                     let valueText: string
-                    switch (dataSource) {
-                        case DataSourceType.StepCount:
-                            valueText = `${commaNumber(touchingInfo.value)} steps`
-                            break;
-                        case DataSourceType.HeartRate:
-                            valueText = `${touchingInfo.value} bpm`
-                            break;
-                        case DataSourceType.HoursSlept:
-                            valueText = DateTimeHelper.formatDuration(touchingInfo.value, true)
-                            break;
-                        case DataSourceType.SleepRange:
-                            {
-                                const pivot = startOfDay(Date.now())
-                                const bedTime = addSeconds(pivot, touchingInfo.value.value)
-                                const wakeTime = addSeconds(pivot, touchingInfo.value.value2)
+                    if (touchingInfo.value) {
+                        switch (dataSource) {
+                            case DataSourceType.StepCount:
+                                valueText = `${commaNumber(touchingInfo.value)} steps`
+                                break;
+                            case DataSourceType.HeartRate:
+                                valueText = `${touchingInfo.value} bpm`
+                                break;
+                            case DataSourceType.HoursSlept:
+                                valueText = DateTimeHelper.formatDuration(touchingInfo.value, true)
+                                break;
+                            case DataSourceType.SleepRange:
+                                {
+                                    const pivot = startOfDay(Date.now())
+                                    const bedTime = addSeconds(pivot, touchingInfo.value.value)
+                                    const wakeTime = addSeconds(pivot, touchingInfo.value.value2)
 
-                                valueText = `${format(bedTime, "hh:mm a")} - ${format(wakeTime, "hh:mm a")}`.toLowerCase()
-                            }
-                            break;
-                        case DataSourceType.Weight:
-                            switch (this.props.measureUnitType) {
-                                case MeasureUnitType.Metric:
-                                    valueText = `${touchingInfo.value} kg`
-                                    break;
-                                case MeasureUnitType.US:
-                                    valueText = `${unitConvert(touchingInfo.value).from('kg').to('lb')} lb`
-                                    break;
-                            }
-                            break;
+                                    valueText = `${format(bedTime, "hh:mm a")} - ${format(wakeTime, "hh:mm a")}`.toLowerCase()
+                                }
+                                break;
+                            case DataSourceType.Weight:
+                                switch (this.props.measureUnitType) {
+                                    case MeasureUnitType.Metric:
+                                        valueText = `${touchingInfo.value} kg`
+                                        break;
+                                    case MeasureUnitType.US:
+                                        valueText = `${unitConvert(touchingInfo.value).from('kg').to('lb')} lb`
+                                        break;
+                                }
+                                break;
+                        }
+                    } else {
+                        valueText = "No value"
                     }
+
+                    let dayOfWeekLabel = format(date, "EEEE")
+                    if (isToday(date) === true) {
+                        dayOfWeekLabel += " (Today)"
+                    } else if (isYesterday(date) === true) {
+                        dayOfWeekLabel += " (Yesterday)"
+                    }
+
+
                     return <View style={styles.tooltipContentContainerStyle}>
                         <Text style={styles.tooltipTimeMainLabelStyle}>{format(date, "MMM dd, yyyy")}</Text>
-                        <Text style={styles.tooltipTimeSubLabelStyle}>{format(date, "EEEE")}</Text>
+                        <Text style={styles.tooltipTimeSubLabelStyle}>{dayOfWeekLabel}</Text>
                         <Text style={styles.tooltipValueLabelStyle}>{valueText}</Text>
 
                     </View>
