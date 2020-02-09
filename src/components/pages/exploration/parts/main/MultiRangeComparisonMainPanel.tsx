@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { explorationInfoHelper } from '../../../../../core/exploration/ExplorationInfoHelper'
-import { ParameterType } from '../../../../../core/exploration/types'
+import { ParameterType, TouchingElementInfo, TouchingElementValueType } from '../../../../../core/exploration/types'
 import { ReduxAppState } from '../../../../../state/types'
 import { RangeAggregatedComparisonData, IAggregatedRangeValue, IAggregatedValue } from '../../../../../core/exploration/data/types'
 import { DataSourceType, MeasureUnitType } from '../../../../../measure/DataSourceSpec'
@@ -16,7 +16,7 @@ import { SizeWatcher } from '../../../../visualization/SizeWatcher'
 import { RangeValueElementLegend } from '../../../../exploration/visualization/compare/RangeValueElementLegend'
 import { SingleValueElementLegend } from '../../../../exploration/visualization/compare/SingleValueElementLegend'
 import Svg, { G, Line, Text as SvgText, Rect } from 'react-native-svg'
-import { scaleBand, scaleLinear } from 'd3-scale'
+import { scaleBand, scaleLinear, ScaleBand } from 'd3-scale'
 import commaNumber from 'comma-number';
 import { DateTimeHelper } from '../../../../../time'
 import convertUnit from 'convert-units';
@@ -24,8 +24,7 @@ import { timeTickFormat } from '../../../../exploration/visualization/compare/co
 import { min, max } from 'd3-array'
 import { SingleValueElement } from '../../../../exploration/visualization/compare/SingleValueElement'
 import { RangeValueElement } from '../../../../exploration/visualization/compare/RangeValueElement'
-import { isSameYear, isSameMonth, startOfMonth, endOfMonth, format } from 'date-fns'
-import { ExplorationAction, createGoToBrowseRangeAction, InteractionType } from '../../../../../state/exploration/interaction/actions'
+import { ExplorationAction, createGoToBrowseRangeAction, InteractionType, setTouchElementInfo } from '../../../../../state/exploration/interaction/actions'
 import { noop } from '../../../../../utils'
 import { TouchableGroup } from '../../../../exploration/visualization/compare/TouchableGroup'
 
@@ -37,18 +36,6 @@ const xAxisHeight = 70
 const yAxisWidth = 70
 const topPadding = 10
 const rightPadding = 20
-
-function formatRange(range: [number, number]): string[] {
-    const startDate = DateTimeHelper.toDate(range[0])
-    const endDate = DateTimeHelper.toDate(range[1])
-
-    if (isSameYear(startDate, endDate) && DateTimeHelper.getMonth(range[0]) === 1 && DateTimeHelper.getDayOfMonth(range[0]) === 1 && DateTimeHelper.getMonth(range[1]) === 12 && DateTimeHelper.getDayOfMonth(range[1]) === 31) {
-        //yaer
-        return [DateTimeHelper.getYear(range[0]).toString()]
-    } else if (isSameMonth(startDate, endDate) && DateTimeHelper.toNumberedDateFromDate(startOfMonth(startDate)) === range[0] && DateTimeHelper.toNumberedDateFromDate(endOfMonth(endDate)) === range[1]) {
-        return [format(startDate, "MMMM yyyy")]
-    } else return [format(startDate, "MMM dd, yyyy -"), format(endDate, "MMM dd, yyyy")]
-}
 
 const styles = StyleSheet.create({
     containerStyle: {
@@ -121,12 +108,31 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
         ))
     }
 
-    private onElementLongPressIn = (timeKey: number) => {
-        //TODO show tooltip
+    private onElementLongPressIn = (timeKey: number, dX: number, dY: number, scaleX: ScaleBand<number>, chartArea: LayoutRectangle, touchId: string) => {
+        const dataPoint = this.props.data.data[timeKey]
+        const touchingInfo = {
+            touchId,
+            elementBoundInScreen: {
+                x: dX + chartArea.x + (scaleX(timeKey) + scaleX.bandwidth() * .5 - scaleX.step() * .5),
+                y: dY + chartArea.y,
+                width: scaleX.step(),
+                height: chartArea.height
+            },
+            valueType: TouchingElementValueType.RangeAggregated,
+            params: [
+                {parameter: ParameterType.DataSource, value: this.props.source},
+                {parameter: ParameterType.Range, value: dataPoint.range}
+            ],
+            value: dataPoint.value
+        } as TouchingElementInfo
+
+
+
+        this.props.dispatchExplorationAction(setTouchElementInfo(touchingInfo))
     }
 
     private onElementLongPressOut = (timeKey: number) => {
-        //TODO hide tooltip
+        this.props.dispatchExplorationAction(setTouchElementInfo(null))
     }
 
 
@@ -259,7 +265,7 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                                 key={rangeIndex}
                                 y={12}
                                 x={scaleX(rangeIndex) + scaleX.bandwidth() * .5}>
-                                {formatRange(this.props.data.data[rangeIndex].range).map((chunk, i) =>
+                                {DateTimeHelper.formatRange(this.props.data.data[rangeIndex].range).map((chunk, i) =>
                                     <SvgText
                                         key={i}
                                         textAnchor={"middle"}
@@ -299,7 +305,7 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                                         }}
                                         scaleX={scaleX} scaleY={scaleY}
                                         onClick={this.onElementClick}
-                                        onLongPressIn={this.onElementLongPressIn}
+                                        onLongPressIn={(timeKey, x, y, sX, sY, touchId) => this.onElementLongPressIn(i, sX - x, sY - y, scaleX, chartArea, touchId)}
                                         onLongPressOut={this.onElementLongPressOut}
                                     />
                                 } else return <SingleValueElement key={i}
@@ -314,7 +320,7 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                                     scaleX={scaleX} scaleY={scaleY} maxWidth={40}
 
                                     onClick={this.onElementClick}
-                                    onLongPressIn={this.onElementLongPressIn}
+                                    onLongPressIn={(timeKey, x, y, sX, sY, touchId) => this.onElementLongPressIn(i, sX - x, sY - y, scaleX, chartArea, touchId)}
                                     onLongPressOut={this.onElementLongPressOut}
 
                                 />
@@ -322,7 +328,7 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                                 return <TouchableGroup
                                     key={i}
                                     onClick={() => this.onElementClick(i)}
-                                    onLongPressIn={() => this.onElementLongPressIn(i)}
+                                    onLongPressIn={(x, y, screenX, screenY, touchId) => this.onElementLongPressIn(i, screenX - x, screenY - y, scaleX, chartArea, touchId)}
                                     onLongPressOut={() => this.onElementLongPressOut(i)}
                                     feedbackArea={{
                                         x: scaleX(i) + scaleX.bandwidth() * .5 - scaleX.step() * .5,

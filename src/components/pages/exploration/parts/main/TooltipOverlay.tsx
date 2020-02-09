@@ -8,7 +8,7 @@ import { connect } from 'react-redux'
 import { BlurView } from "@react-native-community/blur";
 import { explorationInfoHelper } from '../../../../../core/exploration/ExplorationInfoHelper'
 import { DateTimeHelper } from '../../../../../time'
-import { format, startOfDay, isToday, isYesterday } from 'date-fns'
+import { format, startOfDay, isToday, isYesterday, differenceInDays } from 'date-fns'
 import { Sizes } from '../../../../../style/Sizes'
 import { DataSourceType, MeasureUnitType } from '../../../../../measure/DataSourceSpec'
 import commaNumber from 'comma-number';
@@ -45,6 +45,12 @@ const styles = StyleSheet.create({
         opacity: 0.8
     },
 
+    tooltipRangeStyle: {
+        ...tooltipTextStyleBase,
+        fontSize: Sizes.smallFontSize,
+        marginTop: 8
+    },
+
     tooltipValueLabelStyle: {
         ...tooltipTextStyleBase,
         fontSize: Sizes.normalFontSize,
@@ -55,7 +61,8 @@ const styles = StyleSheet.create({
     tooltipValueLabelTitleStyle: {
         ...tooltipTextStyleBase,
         fontSize: Sizes.smallFontSize,
-        fontWeight: '400'
+        fontWeight: '400',
+        width: 60
     },
 
     tooltipValueDigitStyle: {
@@ -79,12 +86,14 @@ const styles = StyleSheet.create({
         borderRadius,
         borderColor: "#90909020",
         borderWidth: 1,
-    }
+    },
+
+    valueTableRow: { ...StyleTemplates.flexHorizontalCenteredListContainer, alignItems: "baseline" }
 })
 
 const gradientBackgroundProps = {
     style: {
-        ...StyleTemplates.fitParent, opacity: 0.8,
+        ...StyleTemplates.fitParent, opacity: 0.85,
         borderTopLeftRadius: borderRadius,
         borderTopRightRadius: borderRadius,
     },
@@ -336,69 +345,108 @@ class TooltipOverlay extends React.Component<Props, State>{
                 }
 
             case TouchingElementValueType.CycleDimension:
-                {
-                    const dataSource = explorationInfoHelper.getParameterValueOfParams<DataSourceType>(touchingInfo.params, ParameterType.DataSource)
-                    const cycleDimension = explorationInfoHelper.getParameterValueOfParams<CycleDimension>(touchingInfo.params, ParameterType.CycleDimension)
-                    var pluralize = require('pluralize')
-
-                    let valueDef: Array<{ type: "unit" | "digit", text: string }>
-                    switch (dataSource) {
-                        case DataSourceType.StepCount:
-                            valueDef = [
-                                { type: "digit", text: commaNumber(touchingInfo.value.avg) },
-                                { type: "unit", text: "steps" }
-                            ]
-                            break;
-                        case DataSourceType.HeartRate:
-                            valueDef = [
-                                { type: 'digit', text: touchingInfo.value.avg.toFixed(1) },
-                                { type: 'unit', text: "bpm" }
-                            ]
-                            break;
-                        case DataSourceType.HoursSlept:
-                            valueDef = DateTimeHelper.formatDurationParsed(Math.round(touchingInfo.value.avg), true)
-                            break;
-
-                        case DataSourceType.Weight:
-                            switch (this.props.measureUnitType) {
-                                case MeasureUnitType.Metric:
-                                    valueDef = [{ type: "digit", text: touchingInfo.value.avg }, { type: 'unit', text: 'kg' }]
-                                    break;
-                                case MeasureUnitType.US:
-                                    valueDef = [{ type: "digit", text: unitConvert(touchingInfo.value.avg).from('kg').to('lb') }, { type: 'unit', text: 'lb' }]
-                                    break;
-                            }
-                            break;
-
-                        case DataSourceType.SleepRange:
-
-                            const pivot = startOfDay(Date.now())
-                            const bedTime = addSeconds(pivot, touchingInfo.value.avgA)
-                            const wakeTime = addSeconds(pivot, touchingInfo.value.avgB)
-
-                            valueDef = [{ type: "digit", text: format(bedTime, "hh:mm") }, { type: 'unit', text: format(bedTime, "a").toLowerCase() },
-                            { type: 'unit', text: '-' },
-                            { type: "digit", text: format(wakeTime, "hh:mm") }, { type: 'unit', text: format(wakeTime, "a").toLowerCase() }]
-                            break;
-                    }
-
-                    return <View style={styles.tooltipContentContainerStyle}>
-                        <Text style={styles.tooltipTimeMainLabelStyle}>{pluralize(getCycleDimensionSpec(cycleDimension).name)}</Text>
-                        <Text style={styles.tooltipValueLabelStyle}>
-                            <Text style={styles.tooltipValueLabelTitleStyle}>Avg: </Text>
-                            {
-                                valueDef.map((d, i) => <Text key={i} style={d.type === 'unit' ? styles.tooltipValueUnitStyle : styles.tooltipValueDigitStyle}> {d.text}</Text>)
-                            }
-                        </Text>
-
-                        <Text style={{ ...styles.tooltipTimeSubLabelStyle, marginTop: 12 }}>{touchingInfo.value.n} items</Text>
-
-                    </View>
-                }
-
             case TouchingElementValueType.RangeAggregated:
                 {
+                    const dataSource = explorationInfoHelper.getParameterValueOfParams<DataSourceType>(touchingInfo.params, ParameterType.DataSource)
 
+                    let valueDef: Array<{ type: "unit" | "digit", text: string }> = null
+                    let rangeText: string = null
+                    let sumText: string = null
+                    if (touchingInfo.value != null && touchingInfo.value.n > 0) {
+                        switch (dataSource) {
+                            case DataSourceType.StepCount:
+                                valueDef = [
+                                    { type: "digit", text: commaNumber(Math.round(touchingInfo.value.avg)) },
+                                    { type: "unit", text: "steps" }
+                                ]
+                                rangeText = `${commaNumber(Math.round(touchingInfo.value.min))} - ${commaNumber(Math.round(touchingInfo.value.max))}`
+                                sumText = commaNumber(touchingInfo.value.sum)
+                                break;
+                            case DataSourceType.HeartRate:
+                                valueDef = [
+                                    { type: 'digit', text: touchingInfo.value.avg.toFixed(1) },
+                                    { type: 'unit', text: "bpm" }
+                                ]
+                                rangeText = `${touchingInfo.value.min} - ${touchingInfo.value.max}`
+                                break;
+                            case DataSourceType.HoursSlept:
+                                valueDef = DateTimeHelper.formatDurationParsed(Math.round(touchingInfo.value.avg), true)
+                                rangeText = `${DateTimeHelper.formatDuration(touchingInfo.value.min, true)} - ${DateTimeHelper.formatDuration(touchingInfo.value.max, true)}`
+                                sumText = DateTimeHelper.formatDuration(touchingInfo.value.sum, true)
+                                break;
+
+                            case DataSourceType.Weight:
+                                switch (this.props.measureUnitType) {
+                                    case MeasureUnitType.Metric:
+                                        valueDef = [{ type: "digit", text: touchingInfo.value.avg.toFixed(1) }, { type: 'unit', text: 'kg' }]
+                                        rangeText = `${touchingInfo.value.min.toFixed(1)} - ${touchingInfo.value.max.toFixed(1)}`
+                                        break;
+                                    case MeasureUnitType.US:
+                                        valueDef = [{ type: "digit", text: unitConvert(touchingInfo.value.avg).from('kg').to('lb').toFixed(1) }, { type: 'unit', text: 'lb' }]
+                                        rangeText = `${unitConvert(touchingInfo.value.min).from('kg').to('lb').toFixed(1)} - ${unitConvert(touchingInfo.value.max).from('kg').to('lb').toFixed(1)}`
+                                        break;
+                                }
+                                break;
+
+                            case DataSourceType.SleepRange:
+
+                                const pivot = startOfDay(Date.now())
+                                const bedTime = addSeconds(pivot, touchingInfo.value.avgA)
+                                const wakeTime = addSeconds(pivot, touchingInfo.value.avgB)
+
+                                valueDef = [{ type: "digit", text: format(bedTime, "hh:mm") }, { type: 'unit', text: format(bedTime, "a").toLowerCase() },
+                                { type: 'unit', text: '-' },
+                                { type: "digit", text: format(wakeTime, "hh:mm") }, { type: 'unit', text: format(wakeTime, "a").toLowerCase() }]
+                                break;
+                        }
+                    }
+
+                    const valueView = valueDef != null ? <View>
+                        <View style={styles.valueTableRow}>
+                            <Text style={styles.tooltipValueLabelTitleStyle}>Avg:</Text><Text key={"value"} style={styles.tooltipValueLabelStyle}>
+                                {
+                                    valueDef.map((d, i) => <Text key={i} style={d.type === 'unit' ? styles.tooltipValueUnitStyle : styles.tooltipValueDigitStyle}>{(i > 0 ? " " : "") + d.text}</Text>)
+                                }
+                            </Text>
+                        </View>
+                        {
+                            rangeText != null ? <View style={styles.valueTableRow}>
+                                <Text style={styles.tooltipValueLabelTitleStyle}>Range: </Text>
+                                <Text style={styles.tooltipRangeStyle}>
+                                    {rangeText}
+                                </Text>
+
+                            </View> : <></>
+                        }
+                        {
+                            touchingInfo.valueType === TouchingElementValueType.RangeAggregated && sumText != null ? <View style={styles.valueTableRow}>
+
+                                <Text style={styles.tooltipValueLabelTitleStyle}>Total: </Text>
+                                <Text style={{ ...styles.tooltipRangeStyle }}>{sumText}</Text>
+                            </View> : <></>
+                        }
+                    </View> : <Text style={styles.tooltipValueLabelStyle}>No value</Text>
+
+                    if (touchingInfo.valueType === TouchingElementValueType.CycleDimension) {
+                        const cycleDimension = explorationInfoHelper.getParameterValueOfParams<CycleDimension>(touchingInfo.params, ParameterType.CycleDimension)
+                        var pluralize = require('pluralize')
+                        return <View style={styles.tooltipContentContainerStyle}>
+                            <Text style={styles.tooltipTimeMainLabelStyle}>{pluralize(getCycleDimensionSpec(cycleDimension).name)}</Text>
+                            {valueView}
+                            <Text style={{ ...styles.tooltipTimeSubLabelStyle, marginTop: 12 }}>{touchingInfo.value.n} items</Text>
+                        </View>
+                    } else if (touchingInfo.valueType === TouchingElementValueType.RangeAggregated) {
+                        const range = explorationInfoHelper.getParameterValueOfParams<[number, number]>(touchingInfo.params, ParameterType.Range)
+                        const startDate = DateTimeHelper.toDate(range[0])
+                        const endDate = DateTimeHelper.toDate(range[1])
+                        const numDays = differenceInDays(endDate, startDate) + 1
+
+                        return <View style={styles.tooltipContentContainerStyle}>
+                            <Text style={styles.tooltipTimeMainLabelStyle}>{DateTimeHelper.formatRange(range, true)}</Text>
+                            {valueView}
+                            {<Text style={{ ...styles.tooltipTimeSubLabelStyle, marginTop: 12 }}> {touchingInfo.value.n} / {numDays} days</Text>}
+                        </View>
+                    }
                 }
         }
     }

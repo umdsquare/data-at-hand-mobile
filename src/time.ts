@@ -1,4 +1,4 @@
-import { getYear, getMonth, getDate, differenceInDays, subDays, addDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, addMonths, lastDayOfMonth } from "date-fns"
+import { getYear, getMonth, getDate, differenceInDays, subDays, addDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, addMonths, lastDayOfMonth, isSameYear, startOfMonth, endOfMonth, format } from "date-fns"
 import { toDate } from "date-fns-tz"
 
 /**
@@ -146,6 +146,25 @@ export class DateTimeHelper {
             return [DateTimeHelper.toNumberedDateFromDate(addDays(startDate, direction * numDays)),
             DateTimeHelper.toNumberedDateFromDate(addDays(endDate, direction * numDays))]
         }
+    }
+
+    static formatRange(range: [number, number], singleLine: boolean = false): string[] {
+        const startDate = DateTimeHelper.toDate(range[0])
+        const endDate = DateTimeHelper.toDate(range[1])
+
+        if (isSameYear(startDate, endDate) && DateTimeHelper.getMonth(range[0]) === 1 && DateTimeHelper.getDayOfMonth(range[0]) === 1 && DateTimeHelper.getMonth(range[1]) === 12 && DateTimeHelper.getDayOfMonth(range[1]) === 31) {
+            //yaer
+            return [DateTimeHelper.getYear(range[0]).toString()]
+        } else if (isSameMonth(startDate, endDate) && DateTimeHelper.toNumberedDateFromDate(startOfMonth(startDate)) === range[0] && DateTimeHelper.toNumberedDateFromDate(endOfMonth(endDate)) === range[1]) {
+            return [format(startDate, "MMMM yyyy")]
+        } else if (isSameYear(startDate, endDate) === true) {
+            if (isSameMonth(startDate, endDate) === true){
+                return singleLine === true ? [`${format(startDate, "MMM dd")} - ${format(endDate, "dd")}, ${format(endDate, "yyyy")}`]
+                : [`${format(startDate, "MMM dd")} - ${format(endDate, "dd")}`, format(endDate, "yyyy")]
+            } else return singleLine === true ? [`${format(startDate, "MMM dd")} - ${format(endDate, "MMM dd")}, ${format(endDate, "yyyy")}`]
+                : [`${format(startDate, "MMM dd")} - ${format(endDate, "MMM dd")}`, format(endDate, "yyyy")]
+        } else return singleLine === true ? [`${format(startDate, "MMM dd, yyyy")} - ${format(endDate, "MMM dd, yyyy")}`]
+            : [format(startDate, "MMM dd, yyyy -"), format(endDate, "MMM dd, yyyy")]
     }
 }
 
