@@ -7,6 +7,9 @@ import Svg, { Path } from 'react-native-svg';
 import { VoiceInputButton } from '../../../../exploration/VoiceInputButton';
 import { ExplorationMode } from '../../../../../core/exploration/types';
 import StaticSafeAreaInsets from 'react-native-static-safe-area-insets';
+import { useSelector } from 'react-redux';
+import { ReduxAppState } from '../../../../../state/types';
+import { SpeechRecognizerSessionStatus } from '../../../../../state/speech/types';
 
 const bottomBarIconSize = 21
 
@@ -69,21 +72,22 @@ interface Props {
     mode: ExplorationMode,
     onModePressIn?: (mode: ExplorationMode) => void,
     onModePressOut?: (mode: ExplorationMode) => void,
-    onModePress?: (mode: ExplorationMode) => void
+    onModePress?: (mode: ExplorationMode) => void,
+    onVoiceButtonPressIn?: () => void,
+    onVoiceButtonPressOut?: () => void
 }
 
-export class BottomBar extends React.Component<Props> {
-    render() {
-        return <View style={Styles.bottomBarContainerStyle} removeClippedSubviews={false}>
-            <SafeAreaView style={Styles.bottomBarInnerListStyle}>
-                <BottomBarButton isOn={this.props.mode === 'browse'} title="Browse" mode={ExplorationMode.Browse} onPress={() => { this.props.onModePress(ExplorationMode.Browse) }} />
-                <BottomBarButton isOn={this.props.mode === 'compare'} title="Compare" mode={ExplorationMode.Compare} onPress={() => { this.props.onModePress(ExplorationMode.Compare) }} />
-                <View style={Styles.bottomBarVoiceButtonContainerStyle}>
-                    <VoiceInputButton isBusy={false} onTouchDown={() => { return null }} onTouchUp={() => { return null }} />
-                </View>
-            </SafeAreaView>
-        </View>
-    }
+export const BottomBar = (props: Props) => {
+    const speechSessionStatus = useSelector((state: ReduxAppState) => state.speechRecognizerState.status)
+    return <View style={Styles.bottomBarContainerStyle} removeClippedSubviews={false}>
+        <SafeAreaView style={Styles.bottomBarInnerListStyle}>
+            <BottomBarButton isOn={props.mode === 'browse'} title="Browse" mode={ExplorationMode.Browse} onPress={() => { props.onModePress(ExplorationMode.Browse) }} />
+            <BottomBarButton isOn={props.mode === 'compare'} title="Compare" mode={ExplorationMode.Compare} onPress={() => { props.onModePress(ExplorationMode.Compare) }} />
+            <View style={Styles.bottomBarVoiceButtonContainerStyle}>
+                <VoiceInputButton isBusy={speechSessionStatus === SpeechRecognizerSessionStatus.Analyzing} onTouchDown={props.onVoiceButtonPressIn} onTouchUp={props.onVoiceButtonPressOut} />
+            </View>
+        </SafeAreaView>
+    </View>
 }
 
 

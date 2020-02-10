@@ -1,5 +1,5 @@
 import React from 'react'
-import { SafeAreaView, Animated, View, Text, StyleSheet, TextStyle, LayoutAnimation, Dimensions, LayoutRectangle, Easing, LayoutChangeEvent, Vibration } from 'react-native'
+import { SafeAreaView, Animated, View, Text, StyleSheet, TextStyle, LayoutAnimation, Dimensions, LayoutRectangle, Easing, LayoutChangeEvent } from 'react-native'
 import { StyleTemplates } from '../../../../../style/Styles'
 import { TouchingElementInfo, TouchingElementValueType, ParameterType } from '../../../../../core/exploration/types'
 import { Dispatch } from 'redux'
@@ -22,6 +22,7 @@ import { SpeechInputPanel } from '../../../../exploration/SpeechInputPanel';
 import { ThunkDispatch } from 'redux-thunk'
 import { startSpeechSession, requestStopDictation } from '../../../../../state/speech/commands';
 import StaticSafeAreaInsets from 'react-native-static-safe-area-insets';
+import Haptic from 'react-native-haptic-feedback';
 
 const borderRadius = 8
 
@@ -224,7 +225,10 @@ class TooltipOverlay extends React.Component<Props, State>{
                 }).start()
 
                 this.props.dispatchStartSpeechSession()
-                Vibration.vibrate(100);
+                Haptic.trigger("impactHeavy", {
+                    enableVibrateFallback: true,
+                    ignoreAndroidSystemSettings: true
+                })
             } else if (this.props.touchingInfo == null) {
 
                 Animated.timing(this.state.emergingProgress, {
@@ -239,7 +243,6 @@ class TooltipOverlay extends React.Component<Props, State>{
                     })
                 })
                 this.props.dispatchStopDictation()
-                Vibration.cancel()
 
             } else {
 

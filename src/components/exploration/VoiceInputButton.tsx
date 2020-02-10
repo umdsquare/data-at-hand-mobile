@@ -37,8 +37,8 @@ const unPressAnimConfig = {
 interface Props {
     isBusy: boolean,
     containerStyle?: any,
-    onTouchDown: () => {},
-    onTouchUp: () => {}
+    onTouchDown: () => void,
+    onTouchUp: () => void
 }
 
 interface State {

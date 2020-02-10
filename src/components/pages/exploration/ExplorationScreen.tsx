@@ -1,6 +1,6 @@
 import { PropsWithNavigation } from "../../../PropsWithNavigation";
 import React from "react";
-import { StatusBar, View, StyleSheet, Platform, BackHandler, Text, Alert, AppState, AppStateStatus } from "react-native";
+import { StatusBar, View, StyleSheet, Platform, BackHandler, Text, Alert, AppState, AppStateStatus, Vibration } from "react-native";
 import Colors from "../../../style/Colors";
 import { StyleTemplates } from "../../../style/Styles";
 import { ExplorationState } from "../../../state/exploration/interaction/reducers";
@@ -27,6 +27,9 @@ import { BottomSheet } from "../../common/BottomSheet";
 import { ComparisonInitPanel } from "./parts/main/ComparisonInitPanel";
 import { TooltipOverlay } from "./parts/main/TooltipOverlay";
 import { check, PERMISSIONS, RESULTS, request, openSettings } from 'react-native-permissions';
+import { GlobalSpeechOverlay } from "./parts/main/GlobalSpeechOverlay";
+import Haptic from "react-native-haptic-feedback";
+import { startSpeechSession, requestStopDictation } from "../../../state/speech/commands";
 
 var deepEqual = require('deep-equal');
 
@@ -83,11 +86,14 @@ export interface ExplorationProps extends PropsWithNavigation {
     explorationDataState: ExplorationDataState,
     selectedServiceKey: string,
     dispatchCommand: (command: ExplorationAction) => void,
-    dispatchDataReload: (info: ExplorationInfo) => void
+    dispatchDataReload: (info: ExplorationInfo) => void,
+    dispatchStartSpeechSession: () => void,
+    dispatchFinishDictation: () => void
 }
 
 interface State {
-    appState: AppStateStatus
+    appState: AppStateStatus,
+    globalSpeechButtonPressed: boolean
 }
 
 
@@ -116,7 +122,8 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
     constructor(props) {
         super(props)
         this.state = {
-            appState: AppState.currentState
+            appState: AppState.currentState,
+            globalSpeechButtonPressed: false
         }
     }
 
@@ -185,9 +192,6 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 this.props.dispatchCommand(createGoToBrowseOverviewAction(InteractionType.TouchOnly))
                 break;
             case ExplorationMode.Compare:
-                //this.props.dispatchCommand(createGoToComparisonCyclicAction(InteractionType.TouchOnly, null, null, CyclicTimeFrame.DayOfWeek))
-                //TODO replace the command
-                //this.props.dispatchCommand(createGoToComparisonTwoRangesAction(InteractionType.TouchOnly, null, [20191101, 20191130], [20191201, 20191231]))
                 this.comparisonBottomSheetRef?.open()
                 break;
         }
@@ -195,6 +199,27 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
     undo = () => {
         this.props.dispatchCommand(createRestorePreviousInfoAction())
+    }
+
+    onGlobalSpeechInputPressIn = () => {
+        Haptic.trigger("impactHeavy", {
+            enableVibrateFallback: true,
+            ignoreAndroidSystemSettings: true
+        })
+        this.setState({
+            ...this.state,
+            globalSpeechButtonPressed: true
+        })
+        this.props.dispatchStartSpeechSession()
+    }
+
+    onGlobalSpeechInputPressOut = () => {
+        this.setState({
+            ...this.state,
+            globalSpeechButtonPressed: false
+        })
+
+        this.props.dispatchFinishDictation()
     }
 
     render() {
@@ -231,6 +256,8 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
             <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationState.info)}
                 onModePress={this.onBottomBarButtonPress}
+                onVoiceButtonPressIn={this.onGlobalSpeechInputPressIn}
+                onVoiceButtonPressOut={this.onGlobalSpeechInputPressOut}
             />
 
             <BottomSheet ref={ref => { this.comparisonBottomSheetRef = ref }}>
@@ -238,6 +265,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
             </BottomSheet>
 
             <TooltipOverlay />
+            <GlobalSpeechOverlay isGlobalSpeechButtonPressed = {this.state.globalSpeechButtonPressed}/>
 
         </View>
     }
@@ -269,6 +297,8 @@ function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Expl
         ...ownProps,
         dispatchCommand: (command: ExplorationAction) => dispatch(command),
         dispatchDataReload: (info: ExplorationInfo) => dispatch(startLoadingForInfo(info)),
+        dispatchStartSpeechSession: () => dispatch(startSpeechSession()),
+        dispatchFinishDictation: () => dispatch(requestStopDictation()) 
     }
 }
 

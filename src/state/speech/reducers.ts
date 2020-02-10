@@ -35,6 +35,7 @@ export const speechRecognizerStateReducer = (state: SpeechRecognizerState = INIT
             {
                 const a = action as TerminateAction
                 newState.status = SpeechRecognizerSessionStatus.Idle
+                return newState
             }
         default:
             return state

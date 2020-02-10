@@ -264,6 +264,8 @@ PODS:
     - React
   - RNPermissions (2.0.9):
     - React
+  - RNReactNativeHapticFeedback (1.9.0):
+    - React
   - RNReanimated (1.7.0):
     - React
   - RNScreens (2.0.0-alpha.34):
@@ -325,6 +327,7 @@ DEPENDENCIES:
   - RNFastImage (from `../node_modules/react-native-fast-image`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
+  - RNReactNativeHapticFeedback (from `../node_modules/react-native-haptic-feedback`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNStaticSafeAreaInsets (from `../node_modules/react-native-static-safe-area-insets`)
@@ -419,6 +422,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-gesture-handler"
   RNPermissions:
     :path: "../node_modules/react-native-permissions"
+  RNReactNativeHapticFeedback:
+    :path: "../node_modules/react-native-haptic-feedback"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -475,6 +480,7 @@ SPEC CHECKSUMS:
   RNFastImage: 9b0c22643872bb7494c8d87bbbb66cc4c0d9e7a2
   RNGestureHandler: 911d3b110a7a233a34c4f800e7188a84b75319c6
   RNPermissions: 6db7e0a4d94c9c02390d11020b1d3d187aaf77e5
+  RNReactNativeHapticFeedback: 2566b468cc8d0e7bb2f84b23adc0f4614594d071
   RNReanimated: 031fe8d9ea93c2bd689a40f05320ef9d96f74d7f
   RNScreens: 9d8a2900cd4f967af70dbfed74b64f77fbb6600a
   RNStaticSafeAreaInsets: e4450176adbf197061543e4a4aa82036b3d7abe0
