@@ -1,12 +1,11 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Text, ViewStyle, TextStyle } from "react-native";
+import { View, StyleSheet, Text, ViewStyle, TextStyle, TouchableOpacity } from "react-native";
 import Colors from "../../style/Colors";
 import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
 import { Sizes } from "../../style/Sizes";
 import Dash from 'react-native-dash';
 import { Button } from "react-native-elements";
 import { format, isToday, isYesterday, differenceInCalendarDays, isFirstDayOfMonth, isLastDayOfMonth, isMonday, isSunday, addDays, subDays, startOfMonth, endOfMonth, subMonths, addMonths } from "date-fns";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import GestureRecognizer from 'react-native-swipe-gestures';
 import { DatePicker, WeekPicker, MonthPicker } from "../common/CalendarPickers";
 import { InteractionType } from "../../state/exploration/interaction/actions";

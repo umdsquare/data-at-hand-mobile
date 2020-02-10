@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, FlatList } from 'react-native';
 import { Sizes } from '../../style/Sizes';
 import { SpeechAffordanceIndicator } from './SpeechAffordanceIndicator';
-import { TouchableOpacity, FlatList } from 'react-native-gesture-handler';
 import GestureRecognizer from 'react-native-swipe-gestures';
 import { SwipedFeedback } from '../common/SwipedFeedback';
 import Colors from '../../style/Colors';

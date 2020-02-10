@@ -17,12 +17,12 @@ import LottieView from 'lottie-react-native';
 import { DataServiceManager } from './src/system/DataServiceManager';
 import { FadeView } from './src/components/common/FadeView';
 import { voiceDictator } from './src/core/speech/VoiceDictator';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { naturalLanguageRecognizer } from './src/core/speech/NaturalLanguageRecognizer';
 import { ThemeProvider } from 'react-native-elements';
 import { theme } from './src/style/Theme';
 import { Platform, UIManager } from 'react-native';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 if (
   Platform.OS === 'android' &&
@@ -52,7 +52,7 @@ class App extends React.Component<any, State> {
     const loadingStartTime = Date.now()
     //loading initial things
     const services = await DataServiceManager.getServicesSupportedInThisSystem()
-    
+
     const speechInstalled = await voiceDictator.install()
     if (speechInstalled === true) {
       const isAvailableInSystem = await voiceDictator.isAvailableInSystem()
@@ -77,7 +77,6 @@ class App extends React.Component<any, State> {
 
     return <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-
         <SafeAreaProvider>
           <ThemeProvider theme={theme}>
             <ActionSheetProvider>

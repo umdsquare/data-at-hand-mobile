@@ -1,18 +1,15 @@
 import React from 'react'
-import { SafeAreaView, Animated, View, Text, StyleSheet, TextStyle, LayoutAnimation, Dimensions, LayoutRectangle, Easing, LayoutChangeEvent } from 'react-native'
+import { Animated, View, Text, StyleSheet, TextStyle, LayoutAnimation, Dimensions, LayoutRectangle, Easing, LayoutChangeEvent, Platform } from 'react-native'
 import { StyleTemplates } from '../../../../../style/Styles'
 import { TouchingElementInfo, TouchingElementValueType, ParameterType } from '../../../../../core/exploration/types'
-import { Dispatch } from 'redux'
 import { ReduxAppState } from '../../../../../state/types'
 import { connect } from 'react-redux'
-import { BlurView } from "@react-native-community/blur";
 import { explorationInfoHelper } from '../../../../../core/exploration/ExplorationInfoHelper'
 import { DateTimeHelper } from '../../../../../time'
 import { format, startOfDay, isToday, isYesterday, differenceInDays } from 'date-fns'
 import { Sizes } from '../../../../../style/Sizes'
 import { DataSourceType, MeasureUnitType } from '../../../../../measure/DataSourceSpec'
 import commaNumber from 'comma-number';
-import { SizeWatcher } from '../../../../visualization/SizeWatcher'
 import unitConvert from 'convert-units'
 import { addSeconds } from 'date-fns/esm'
 import LinearGradient from 'react-native-linear-gradient'
@@ -21,8 +18,8 @@ import { CycleDimension, getCycleDimensionSpec } from '../../../../../core/explo
 import { SpeechInputPanel } from '../../../../exploration/SpeechInputPanel';
 import { ThunkDispatch } from 'redux-thunk'
 import { startSpeechSession, requestStopDictation } from '../../../../../state/speech/commands';
-import StaticSafeAreaInsets from 'react-native-static-safe-area-insets';
 import Haptic from 'react-native-haptic-feedback';
+import Insets from 'react-native-static-safe-area-insets';
 
 const borderRadius = 8
 
@@ -92,6 +89,7 @@ const styles = StyleSheet.create({
         borderRadius,
         borderColor: "#90909020",
         borderWidth: 1,
+        elevation: 10
     },
 
     valueTableRow: { ...StyleTemplates.flexHorizontalCenteredListContainer, alignItems: "baseline" }
@@ -172,10 +170,21 @@ class TooltipOverlay extends React.Component<Props, State>{
     private calculateOptimalTooltipPosition(touchedRectangle: LayoutRectangle, tooltipWidth: number, tooltipHeight: number): { x: number, y: number } {
         let tooltipPositionX, tooltipPositionY
 
+        //In Android, y 0 is below the menu bar. In IOS, y 0 is the actual top of the screen.
+        const insetTop = Platform.select({
+            ios: Insets.safeAreaInsetsTop,
+            android: 0
+        }) 
+
+        const insetBottom = Platform.select({
+            ios: Insets.safeAreaInsetsBottom,
+            android: 0
+        })
+
         const screenHeight = Dimensions.get("window").height
         const screenWidth = Dimensions.get("window").width
-        const upperSpace = touchedRectangle.y - StaticSafeAreaInsets.safeAreaInsetsTop
-        const underSpace = screenHeight - touchedRectangle.y - touchedRectangle.height - StaticSafeAreaInsets.safeAreaInsetsBottom
+        const upperSpace = touchedRectangle.y - insetTop
+        const underSpace = screenHeight - touchedRectangle.y - touchedRectangle.height - insetBottom
 
         const leftMostTooltipX = Sizes.horizontalPadding
         const rightMostTooltipX = screenWidth - Sizes.horizontalPadding - tooltipWidth
@@ -187,13 +196,13 @@ class TooltipOverlay extends React.Component<Props, State>{
         //priority: upper
         if (upperSpace - Sizes.verticalPadding * 2 >= tooltipHeight) {
             //place above the touched region
-            tooltipPositionY = StaticSafeAreaInsets.safeAreaInsetsTop + upperSpace - Sizes.verticalPadding - tooltipHeight
+            tooltipPositionY = insetTop + upperSpace - Sizes.verticalPadding - tooltipHeight
         } else if (underSpace - Sizes.verticalPadding * 2 >= tooltipHeight) {
             //place below the touched region
             tooltipPositionY = touchedRectangle.y + touchedRectangle.height + Sizes.verticalPadding
         } else {
             //not enough space => TODO check left and right.
-            tooltipPositionY = Sizes.verticalPadding + StaticSafeAreaInsets.safeAreaInsetsTop
+            tooltipPositionY = Sizes.verticalPadding + insetTop
         }
         return { x: tooltipPositionX, y: tooltipPositionY }
     }
@@ -265,7 +274,7 @@ class TooltipOverlay extends React.Component<Props, State>{
     }
 
     render() {
-        return <View pointerEvents="none" style={StyleTemplates.fitParent}>
+        return <View pointerEvents="none" style={{...StyleTemplates.fitParent, zIndex: 2000, elevation: 10}}>
             <Animated.View
                 style={{
                     ...StyleTemplates.fitParent,

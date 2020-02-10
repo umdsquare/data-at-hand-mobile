@@ -192,8 +192,6 @@ android {
 }
 
 dependencies {
-    implementation project(':@react-native-community_blur')
-    implementation project(':react-native-safe-area-context')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
     implementation 'androidx.appcompat:appcompat:1.1.0'

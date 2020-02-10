@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Colors from '../../style/Colors';
 import { Sizes } from '../../style/Sizes';
 import { DataSourceIcon } from '../common/DataSourceIcon';
@@ -9,7 +9,6 @@ import { OverviewSourceRow, StatisticsType, WeightRangedData } from '../../core/
 import commaNumber from 'comma-number';
 import { DateTimeHelper } from '../../time';
 import { startOfDay, addSeconds, format } from 'date-fns';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import { SizeWatcher } from '../visualization/SizeWatcher';
 import { DailyBarChart } from './visualization/browse/DailyBarChart';
 import { scaleLinear } from 'd3-scale';

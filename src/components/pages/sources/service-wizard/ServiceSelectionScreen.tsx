@@ -1,11 +1,10 @@
 import React from "react";
-import { View, Text, ImageBackground, ScrollView, SafeAreaView } from "react-native";
+import { View, Text, ImageBackground, ScrollView, SafeAreaView, TouchableOpacity } from "react-native";
 import { PropsWithNavigation } from "../../../../PropsWithNavigation";
 import { Sizes } from "../../../../style/Sizes";
 import { StyleTemplates } from "../../../../style/Styles";
 import { DataService } from "../../../../measure/service/DataService";
 import { DataServiceManager } from "../../../../system/DataServiceManager";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import Colors from "../../../../style/Colors";
 import { Dispatch } from "redux";
 import { connect } from "react-redux";

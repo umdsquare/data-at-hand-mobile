@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Animated, StyleSheet, Easing } from 'react-native'
+import { View, Animated, StyleSheet, Easing, Platform } from 'react-native'
 import { StyleTemplates } from '../../../../../style/Styles'
 import { SpeechInputPanel } from '../../../../exploration/SpeechInputPanel'
 import { Sizes } from '../../../../../style/Sizes'
@@ -40,12 +40,13 @@ interface State {
 export class GlobalSpeechOverlay extends React.PureComponent<Props, State> {
 
     static getDerivedStateFromProps(nextProps: Props, currentState: State): State {
-        if (nextProps.isGlobalSpeechButtonPressed === true && currentState.isOverlayRendered === false){
+        if (nextProps.isGlobalSpeechButtonPressed === true && currentState.isOverlayRendered === false) {
             return {
                 ...currentState,
+                animatedProgress: new Animated.Value(0),
                 isOverlayRendered: true
             }
-        }else return null
+        } else return null
     }
 
     private currentAnimation: Animated.CompositeAnimation
@@ -94,13 +95,24 @@ export class GlobalSpeechOverlay extends React.PureComponent<Props, State> {
 
     render() {
         return this.state.isOverlayRendered === true ? <View pointerEvents="none" style={styles.containerStyle}>
-            <AnimatedLinearGradient style={{
-                ...StyleTemplates.fitParent,
-                opacity: this.state.animatedProgress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 0.4]
-                })
-            }} colors={["#00000000", "#000000FF"]} />
+            {Platform.select({
+                ios: <AnimatedLinearGradient style={{
+                    ...StyleTemplates.fitParent,
+                    opacity: this.state.animatedProgress.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 0.4]
+                    })
+                }} colors={["#00000000", "#000000FF"]} />,
+                android: <Animated.View style={{
+                    ...StyleTemplates.fitParent,
+                    backgroundColor: 'black',
+                    opacity: this.state.animatedProgress.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 0.25]
+                    })
+                }}/>
+            })
+            }
 
             <Animated.View key={"global_speech_popup"} style={{
                 ...styles.popupStyle,

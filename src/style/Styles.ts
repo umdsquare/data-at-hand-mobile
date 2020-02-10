@@ -96,7 +96,10 @@ const StyleTemplates = StyleSheet.create({
 
   fitParent: { left: 0, right: 0, top: 0, bottom: 0, position: 'absolute' },
 
-  bottomSheetModalContainerStyle: {flexDirection: 'row', margin: 0},
+  bottomSheetModalContainerStyle: {
+    flexDirection: 'row', margin: 0,
+    elevation: 8
+  },
 
   bottomSheetModalViewStyle: {
     alignSelf: 'flex-end',

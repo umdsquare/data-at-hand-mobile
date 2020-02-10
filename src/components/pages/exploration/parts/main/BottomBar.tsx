@@ -6,10 +6,10 @@ import { StyleTemplates } from '../../../../../style/Styles';
 import Svg, { Path } from 'react-native-svg';
 import { VoiceInputButton } from '../../../../exploration/VoiceInputButton';
 import { ExplorationMode } from '../../../../../core/exploration/types';
-import StaticSafeAreaInsets from 'react-native-static-safe-area-insets';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '../../../../../state/types';
 import { SpeechRecognizerSessionStatus } from '../../../../../state/speech/types';
+import { useSafeArea } from 'react-native-safe-area-context';
 
 const bottomBarIconSize = 21
 
@@ -31,7 +31,6 @@ const Styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowOffset: { width: 0, height: -1 },
         shadowRadius: 3,
-        zIndex: 10,
         elevation: 4,
         overflow: "visible",
         borderTopColor: Platform.OS === 'android' ? '#00000020' : null,
@@ -50,9 +49,7 @@ const Styles = StyleSheet.create({
     bottomBarButtonStyle: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
-        paddingTop: StaticSafeAreaInsets.safeAreaInsetsBottom > 0 ? 12 : 0,
-        height: StaticSafeAreaInsets.safeAreaInsetsBottom > 0 ? 45 : 70,
+        justifyContent: 'center'
     },
 
     bottomBarButtonTextStyle: {
@@ -79,6 +76,7 @@ interface Props {
 
 export const BottomBar = (props: Props) => {
     const speechSessionStatus = useSelector((state: ReduxAppState) => state.speechRecognizerState.status)
+
     return <View style={Styles.bottomBarContainerStyle} removeClippedSubviews={false}>
         <SafeAreaView style={Styles.bottomBarInnerListStyle}>
             <BottomBarButton isOn={props.mode === 'browse'} title="Browse" mode={ExplorationMode.Browse} onPress={() => { props.onModePress(ExplorationMode.Browse) }} />
@@ -94,7 +92,14 @@ export const BottomBar = (props: Props) => {
 const BottomBarButton = (prop: { isOn: boolean, mode: ExplorationMode, title: string, onPress?: () => void }) => {
     //const color = prop.isOn === true ? Colors.primary : Colors.chartLightText
     const color = Colors.textGray
-    return <View style={Styles.bottomBarButtonStyle}>
+
+    const insets = useSafeArea()
+
+    return <View style={{
+        ...Styles.bottomBarButtonStyle,
+        paddingTop: insets.bottom > 0 ? 12 : 0,
+        height: insets.bottom > 0 ? 45 : 70,
+    }}>
         {/*prop.isOn===true && <View style={{
                     height: 2, 
                     backgroundColor: Colors.primary, 
