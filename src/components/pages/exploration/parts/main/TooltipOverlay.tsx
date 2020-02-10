@@ -1,5 +1,5 @@
 import React from 'react'
-import { SafeAreaView, Animated, View, Text, StyleSheet, TextStyle, LayoutAnimation, Dimensions, LayoutRectangle, Easing, LayoutChangeEvent } from 'react-native'
+import { SafeAreaView, Animated, View, Text, StyleSheet, TextStyle, LayoutAnimation, Dimensions, LayoutRectangle, Easing, LayoutChangeEvent, Vibration } from 'react-native'
 import { StyleTemplates } from '../../../../../style/Styles'
 import { TouchingElementInfo, TouchingElementValueType, ParameterType } from '../../../../../core/exploration/types'
 import { Dispatch } from 'redux'
@@ -18,6 +18,10 @@ import { addSeconds } from 'date-fns/esm'
 import LinearGradient from 'react-native-linear-gradient'
 import Colors from '../../../../../style/Colors'
 import { CycleDimension, getCycleDimensionSpec } from '../../../../../core/exploration/cyclic_time'
+import { SpeechInputPanel } from '../../../../exploration/SpeechInputPanel';
+import { ThunkDispatch } from 'redux-thunk'
+import { startSpeechSession, requestStopDictation } from '../../../../../state/speech/commands';
+import StaticSafeAreaInsets from 'react-native-static-safe-area-insets';
 
 const borderRadius = 8
 
@@ -77,6 +81,7 @@ const styles = StyleSheet.create({
         top: 0,
         left: 0,
 
+        maxWidth: Dimensions.get('window').width * 0.8,
 
         shadowColor: "black",
         shadowOffset: { width: 0, height: 5 },
@@ -104,7 +109,9 @@ const gradientBackgroundProps = {
 
 interface Props {
     touchingInfo?: TouchingElementInfo,
-    measureUnitType?: MeasureUnitType
+    measureUnitType?: MeasureUnitType,
+    dispatchStartSpeechSession?: () => void,
+    dispatchStopDictation?: () => void,
 }
 
 interface State {
@@ -118,6 +125,8 @@ interface State {
 }
 
 class TooltipOverlay extends React.Component<Props, State>{
+
+    private speechInputPanelRef = null
 
     constructor(props) {
         super(props)
@@ -164,8 +173,8 @@ class TooltipOverlay extends React.Component<Props, State>{
 
         const screenHeight = Dimensions.get("window").height
         const screenWidth = Dimensions.get("window").width
-        const upperSpace = touchedRectangle.y
-        const underSpace = screenHeight - touchedRectangle.y - touchedRectangle.height
+        const upperSpace = touchedRectangle.y - StaticSafeAreaInsets.safeAreaInsetsTop
+        const underSpace = screenHeight - touchedRectangle.y - touchedRectangle.height - StaticSafeAreaInsets.safeAreaInsetsBottom
 
         const leftMostTooltipX = Sizes.horizontalPadding
         const rightMostTooltipX = screenWidth - Sizes.horizontalPadding - tooltipWidth
@@ -177,13 +186,13 @@ class TooltipOverlay extends React.Component<Props, State>{
         //priority: upper
         if (upperSpace - Sizes.verticalPadding * 2 >= tooltipHeight) {
             //place above the touched region
-            tooltipPositionY = upperSpace - Sizes.verticalPadding - tooltipHeight
+            tooltipPositionY = StaticSafeAreaInsets.safeAreaInsetsTop + upperSpace - Sizes.verticalPadding - tooltipHeight
         } else if (underSpace - Sizes.verticalPadding * 2 >= tooltipHeight) {
             //place below the touched region
             tooltipPositionY = touchedRectangle.y + touchedRectangle.height + Sizes.verticalPadding
         } else {
             //not enough space => TODO check left and right.
-            throw "TODO: Check left and right"
+            tooltipPositionY = Sizes.verticalPadding + StaticSafeAreaInsets.safeAreaInsetsTop
         }
         return { x: tooltipPositionX, y: tooltipPositionY }
     }
@@ -214,7 +223,8 @@ class TooltipOverlay extends React.Component<Props, State>{
                     useNativeDriver: true
                 }).start()
 
-
+                this.props.dispatchStartSpeechSession()
+                Vibration.vibrate(100);
             } else if (this.props.touchingInfo == null) {
 
                 Animated.timing(this.state.emergingProgress, {
@@ -228,6 +238,9 @@ class TooltipOverlay extends React.Component<Props, State>{
                         touchingInfo: null
                     })
                 })
+                this.props.dispatchStopDictation()
+                Vibration.cancel()
+
             } else {
 
                 const tooltipPosition = this.calculateOptimalTooltipPosition(this.props.touchingInfo.elementBoundInScreen, this.state.tooltipWidth, this.state.tooltipHeight)
@@ -280,8 +293,8 @@ class TooltipOverlay extends React.Component<Props, State>{
                         />
                         {this.makeContentView(this.state.touchingInfo)}
                     </View>
-                    <View style={{ height: 50, backgroundColor: 'white', borderBottomLeftRadius: borderRadius, borderBottomRightRadius: borderRadius }}>
-
+                    <View style={{ backgroundColor: 'white', borderBottomLeftRadius: borderRadius, borderBottomRightRadius: borderRadius }}>
+                        <SpeechInputPanel />
                     </View>
                 </Animated.View>}
         </View>
@@ -453,9 +466,11 @@ class TooltipOverlay extends React.Component<Props, State>{
 }
 
 
-function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props {
+function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Props): Props {
     return {
         ...ownProps,
+        dispatchStartSpeechSession: () => dispatch(startSpeechSession()),
+        dispatchStopDictation: () => dispatch(requestStopDictation())
     }
 }
 

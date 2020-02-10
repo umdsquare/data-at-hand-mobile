@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import { explorationStateReducer } from './exploration/interaction/reducers';
 import {explorationDataStateReducer} from './exploration/data/reducers';
 import thunk from 'redux-thunk';
+import { speechRecognizerStateReducer } from './speech/reducers';
 
 const persistConfig = {
   key: 'root',
@@ -18,7 +19,8 @@ export default () => {
     persistCombineReducers(persistConfig, {
       settingsState: settingsStateReducer,
       explorationState: explorationStateReducer,
-      explorationDataState: explorationDataStateReducer
+      explorationDataState: explorationDataStateReducer,
+      speechRecognizerState: speechRecognizerStateReducer
     }),
     applyMiddleware(thunk)
   );

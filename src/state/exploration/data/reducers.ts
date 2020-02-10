@@ -104,29 +104,3 @@ export function startLoadingForInfo(explorationInfo: ExplorationInfo) {
     }
   };
 }
-
-/*
-  export function resolveExplorationCommand(command: ExplorationCommand) {
-    return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
-      dispatch({
-        type: ExplorationStateActionTypes.StartStateTransition,
-        command: command
-      });
-      try {
-        const state = getState();
-        const newStateInfo = await explorationInfoHelper.getNewStateInfo(state.explorationState.info, command);
-        dispatch({
-          type: ExplorationStateActionTypes.FinishStateTransition,
-          newStateInfo: newStateInfo,
-          error: null,
-        } as FinishStateTransition);
-      } catch (error) {
-        console.error(error);
-        dispatch({
-          type: ExplorationStateActionTypes.FinishStateTransition,
-          newStateInfo: null,
-          error: error,
-        } as FinishStateTransition);
-      }
-    };
-  }*/

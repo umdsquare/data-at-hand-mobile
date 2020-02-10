@@ -29,34 +29,37 @@ export class AndroidDictatorImpl implements IVoiceDictator {
   isAvailableInSystem(): Promise<boolean> {
     return this.bridge.isAvailableInSystem();
   }
-  registerStartEventListener(listener: () => void) {
-    this.subscriptions.push(
-      this.eventEmitter.addListener(
-        SpeechRecognitionEventType.EVENT_STARTED,
-        listener,
-      ),
-    );
+  registerStartEventListener(listener: () => void): EventSubscription {
+    const subscription = this.eventEmitter.addListener(
+      SpeechRecognitionEventType.EVENT_STARTED,
+      listener,
+    )
+    this.subscriptions.push(subscription);
+    return subscription
   }
-  registerReceivedEventListener(listener: (result: DictationResult) => void) {
-    this.subscriptions.push(
-      this.eventEmitter.addListener(
-        SpeechRecognitionEventType.EVENT_RECEIVED,
-        listener,
-      ),
-    );
+
+  registerReceivedEventListener(listener: (result: DictationResult) => void): EventSubscription {
+    const subscription = this.eventEmitter.addListener(
+      SpeechRecognitionEventType.EVENT_RECEIVED,
+      listener,
+    )
+    this.subscriptions.push(subscription);
+    return subscription
   }
-  registerStopEventListener(listener: (error: any) => void) {
-    this.subscriptions.push(
-      this.eventEmitter.addListener(
-        SpeechRecognitionEventType.EVENT_STOPPED,
-        listener,
-      ),
-    );
+  registerStopEventListener(listener: (error: any) => void): EventSubscription {
+    const subscription = this.eventEmitter.addListener(
+      SpeechRecognitionEventType.EVENT_STOPPED,
+      listener,
+    )
+    this.subscriptions.push(subscription);
+    return subscription
   }
+
   start(): Promise<boolean> {
-      return this.bridge.start()
+    return this.bridge.start()
   }
+  
   stop(): Promise<boolean> {
-      return this.bridge.stop()
+    return this.bridge.stop()
   }
 }

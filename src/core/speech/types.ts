@@ -1,3 +1,5 @@
+import { EmitterSubscription, EventSubscription } from "react-native";
+
 export enum Command{
     DEFAULT_FALLBACK = "Default Fallback Intent"
 }
@@ -12,9 +14,9 @@ export interface IVoiceDictator{
     install(): Promise<boolean>
     uninstall(): Promise<boolean>
     isAvailableInSystem(): Promise<boolean>
-    registerStartEventListener(listener: ()=>void)
-    registerReceivedEventListener(listener: (result: DictationResult) => void)
-    registerStopEventListener(listener: (error)=>void)
+    registerStartEventListener(listener: ()=>void): EventSubscription
+    registerReceivedEventListener(listener: (result: DictationResult) => void): EventSubscription
+    registerStopEventListener(listener: (error)=>void): EventSubscription
     start(): Promise<boolean>
     stop(): Promise<boolean>
 }

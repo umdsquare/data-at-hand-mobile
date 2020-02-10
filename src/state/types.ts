@@ -1,23 +1,16 @@
 import { SettingsState } from "./settings/reducer";
-import { Dispatch } from "redux";
 import { ExplorationState } from "./exploration/interaction/reducers";
 import { ExplorationDataState } from "./exploration/data/reducers";
+import { SpeechRecognizerState } from "./speech/types";
 
 
 export type ReduxAppState = {
     settingsState: SettingsState,
     explorationState: ExplorationState,
-    explorationDataState: ExplorationDataState
+    explorationDataState: ExplorationDataState,
+    speechRecognizerState: SpeechRecognizerState
 }
 
 export interface ActionTypeBase{
     type: string
-}
-
-export enum AsyncActionStatus{
-    Started=0, Completed=1, Failed=2
-}
-
-export interface PropsWithDispatch{
-    dispatch: Dispatch
 }

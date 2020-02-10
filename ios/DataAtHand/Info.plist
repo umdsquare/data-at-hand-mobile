@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Microphone is used to hear your voice input.</string>
+	<string>Data@Hand requires microphone to recognize your speech.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Data@Hand requires your permission to leverage the speech interaction feature.</string>
 	<key>NSHealthShareUsageDescription</key>

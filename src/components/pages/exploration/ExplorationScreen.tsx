@@ -1,6 +1,6 @@
 import { PropsWithNavigation } from "../../../PropsWithNavigation";
 import React from "react";
-import { StatusBar, View, StyleSheet, Platform, BackHandler, Text } from "react-native";
+import { StatusBar, View, StyleSheet, Platform, BackHandler, Text, Alert, AppState, AppStateStatus } from "react-native";
 import Colors from "../../../style/Colors";
 import { StyleTemplates } from "../../../style/Styles";
 import { ExplorationState } from "../../../state/exploration/interaction/reducers";
@@ -8,7 +8,7 @@ import { ThunkDispatch } from "redux-thunk";
 import { ReduxAppState } from "../../../state/types";
 import { connect } from "react-redux";
 import { BottomBar } from "./parts/main/BottomBar";
-import { ExplorationViewHeader} from '../exploration/parts/header';
+import { ExplorationViewHeader } from '../exploration/parts/header';
 import { explorationInfoHelper } from "../../../core/exploration/ExplorationInfoHelper";
 import { DataServiceManager } from "../../../system/DataServiceManager";
 import { ExplorationInfo, ExplorationType, ExplorationMode } from "../../../core/exploration/types";
@@ -26,6 +26,8 @@ import { FilteredDatesChartMainPanel } from "./parts/main/FilteredDatesChartMain
 import { BottomSheet } from "../../common/BottomSheet";
 import { ComparisonInitPanel } from "./parts/main/ComparisonInitPanel";
 import { TooltipOverlay } from "./parts/main/TooltipOverlay";
+import { check, PERMISSIONS, RESULTS, request, openSettings } from 'react-native-permissions';
+
 var deepEqual = require('deep-equal');
 
 const styles = StyleSheet.create({
@@ -85,6 +87,7 @@ export interface ExplorationProps extends PropsWithNavigation {
 }
 
 interface State {
+    appState: AppStateStatus
 }
 
 
@@ -92,25 +95,76 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
     private comparisonBottomSheetRef: BottomSheet
 
-    private onHardwareBackPress = ()=>{
-        if(this.props.explorationState.backNavStack.length > 0){
-            this.props.dispatchCommand(goBackAction())
-            return true
-        }else return false
+    private onAppStateChange = (nextAppState: AppStateStatus) => {
+        if (
+            this.state.appState.match(/inactive|background/) &&
+            nextAppState === 'active'
+        ) {
+            console.log('App has come to the foreground!');
+            this.checkPermission()
+        }
+        this.setState({ appState: nextAppState });
     }
 
-    componentDidMount() {
+    private onHardwareBackPress = () => {
+        if (this.props.explorationState.backNavStack.length > 0) {
+            this.props.dispatchCommand(goBackAction())
+            return true
+        } else return false
+    }
+
+    constructor(props) {
+        super(props)
+        this.state = {
+            appState: AppState.currentState
+        }
+    }
+
+    private async checkPermission() {
+        //permissions
+        if (Platform.OS === 'ios') {
+            const microphonePermissionStatus = await check(PERMISSIONS.IOS.MICROPHONE)
+            console.log("Microphone permission:", microphonePermissionStatus)
+            if (microphonePermissionStatus === RESULTS.BLOCKED) {
+                console.log("Microphone permission is blocked.")
+                Alert.alert('Microphone permission required', "Please grant permission for the microphone access.", [
+                    {
+                        text: "Open settings",
+                        onPress: async () => {
+                            await openSettings()
+                            console.log("returned")
+                        }
+                    }
+                ], {
+                    cancelable: false
+                })
+            }else if (microphonePermissionStatus !== RESULTS.GRANTED && microphonePermissionStatus !== RESULTS.UNAVAILABLE) {
+                const permissionRequestResult = await request(PERMISSIONS.IOS.MICROPHONE)
+                if(permissionRequestResult !== RESULTS.UNAVAILABLE){
+                    await this.checkPermission()
+                }
+            }
+        }
+    }
+
+    async componentDidMount() {
+
+        AppState.addEventListener('change', this.onAppStateChange)
 
         BackHandler.addEventListener('hardwareBackPress', this.onHardwareBackPress)
 
         if (this.props.selectedServiceKey) {
-            DataServiceManager.getServiceByKey(this.props.selectedServiceKey).activateInSystem().then(() => {
+            try {
+                await DataServiceManager.getServiceByKey(this.props.selectedServiceKey).activateInSystem()
                 console.log("activated ", this.props.selectedServiceKey, "successfully.")
                 this.props.dispatchDataReload(this.props.explorationState.info)
-            }).catch(error => {
+            } catch (error) {
                 console.log("service activation error: ", this.props.selectedServiceKey, error)
-            })
+            }
         }
+
+        await this.checkPermission()
+
     }
 
     async componentDidUpdate(prevProps: ExplorationProps) {
@@ -120,7 +174,8 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
         }
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
+        AppState.removeEventListener('change', this.onAppStateChange)
         BackHandler.removeEventListener("hardwareBackPress", this.onHardwareBackPress)
     }
 
@@ -147,7 +202,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
         return <View style={StyleTemplates.screenDefaultStyle}>
             <StatusBar barStyle="light-content" backgroundColor={Colors.headerBackground} />
             <View style={styles.headerContainerStyle}>
-                    <ExplorationViewHeader {...this.props}/>
+                <ExplorationViewHeader {...this.props} />
             </View>
             <View style={styles.mainContainerStyle}>
                 {/* main data panel ===================================================================*/}
@@ -169,8 +224,8 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                         icon={undoIconStyle} onPress={this.undo}
                         title="Cancel latest"
                         titleStyle={styles.historyButtonTitleStyle}
-                        />
-                    </View>
+                    />
+                </View>
                 }
             </View>
 
@@ -178,11 +233,11 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 onModePress={this.onBottomBarButtonPress}
             />
 
-            <BottomSheet ref={ref => {this.comparisonBottomSheetRef = ref}}>
-                <ComparisonInitPanel info={this.props.explorationState.info} onCompleted={()=>{this.comparisonBottomSheetRef.close()}}/>
+            <BottomSheet ref={ref => { this.comparisonBottomSheetRef = ref }}>
+                <ComparisonInitPanel info={this.props.explorationState.info} onCompleted={() => { this.comparisonBottomSheetRef.close() }} />
             </BottomSheet>
 
-            <TooltipOverlay/>
+            <TooltipOverlay />
 
         </View>
     }
