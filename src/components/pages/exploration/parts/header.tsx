@@ -197,7 +197,6 @@ function generateIntraDayDataSourceRow(props: ExplorationProps): any {
     return <CategoricalRow title="Data Source" showBorder={false} value={sourceTypeName}
         IconComponent={DataSourceIcon}
         iconProps={(index) => {
-            console.log("inferred: ", index, supportedIntraDayDataSourceTypes[index])
             return {
                 type: inferDataSource(supportedIntraDayDataSourceTypes[index])
             }

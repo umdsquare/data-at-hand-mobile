@@ -16,6 +16,10 @@ export class FitbitDailyStepMeasure extends FitbitSummaryLogMeasure<FitbitDailyA
     return makeFitbitDayLevelActivityLogsUrl("activities/steps", startDate, endDate)
   }
 
+  protected shouldReject(rowValue: number): boolean {
+    return rowValue === 0
+  }
+
   protected getLocalRangeQueryCondition(startDate: number, endDate: number): string{
     return super.getLocalRangeQueryCondition(startDate, endDate) + ' AND value > 25'
   }

@@ -14,7 +14,7 @@ import { AxisSvg } from '../../../../../visualization/axis';
 import { Padding } from '../../../../../visualization/types';
 import { pad, DateTimeHelper } from '../../../../../../time';
 import * as d3Shape from 'd3-shape';
-import { commonIntraDayPanelStyles } from './common';
+import { commonIntraDayPanelStyles, NoDataFallbackView } from './common';
 
 const xAxisHeight = 50
 const yAxisWidth = 50
@@ -68,11 +68,13 @@ export const HeartRateIntraDayPanel = () => {
         data: appState.explorationDataState.data as HeartRateIntraDayData
     }))
 
-    if (data != null) {
+    const [chartContainerWidth, setChartContainerWidth] = useState(-1)
+    const [chartContainerHeight, setChartContainerHeight] = useState(-1)
+    const [maxZoneBarWidth, setMaxZoneBarWidth] = useState(0)
 
-        const [chartContainerWidth, setChartContainerWidth] = useState(-1)
-        const [chartContainerHeight, setChartContainerHeight] = useState(-1)
-        const [maxZoneBarWidth, setMaxZoneBarWidth] = useState(0)
+    console.log("heart rate data:", data)
+
+    if (data != null && data.points.length > 0) {
 
         const chartArea: LayoutRectangle = {
             x: yAxisWidth,
@@ -155,7 +157,7 @@ export const HeartRateIntraDayPanel = () => {
 
         </View>
 
-    } else return <></>
+    } else return <NoDataFallbackView/>
 }
 
 const SummaryTableRow = (prop: { title: string, value: Array<{ type: "unit" | "value", value: string | number }> }) => {

@@ -237,7 +237,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
         });
       }
       return dailyLog;
-    } else return {} as any;
+    } else return null;
   }
 
   async fetchHoursSleptCyclicGroupedData(start: number, end: number, cycleType: CyclicTimeFrame,

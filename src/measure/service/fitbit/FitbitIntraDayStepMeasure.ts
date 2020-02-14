@@ -3,28 +3,39 @@ import { FitbitIntraDayMeasure } from "./FitbitIntraDayMeasure";
 import { makeFitbitIntradayActivityApiUrl } from "./api";
 import { FitbitIntradayStepDayQueryResult } from "./types";
 import * as d3Array from 'd3-array';
-import { DateTimeHelper, pad } from "../../../time";
 import { FitbitLocalTableName } from "./sqlite/database";
 
 export class FitbitIntraDayStepMeasure extends FitbitIntraDayMeasure<StepCountIntraDayData>{
     key: string = "intraday_step"
 
     protected async fetchAndCacheFitbitData(date: number): Promise<void> {
-        const data: FitbitIntradayStepDayQueryResult = await this.service.fetchFitbitQuery(makeFitbitIntradayActivityApiUrl("activities/steps", date))
 
-        //bin the data into one hour
-        const grouped = Array.from(d3Array.group(data["activities-steps-intraday"].dataset, entry => Number.parseInt(entry.time.split(":")[0])))
+        //first, check whether the day summary data exists.
+        const total = await this.service.fitbitLocalDbManager.selectQuery<{ value: number }>(`SELECT value FROM ${FitbitLocalTableName.StepCount} WHERE numberedDate = ${date}`)
+        if (total != null && total.length > 0 && total[0].value > 0) {
 
-        const hourlyEntries: Array<IIntraDayStepCountLog> = grouped.map(group => ({
-            hourOfDay: group[0],
-            value: d3Array.sum(group[1], e => e.value)
-        }))
+            const data: FitbitIntradayStepDayQueryResult = await this.service.fetchFitbitQuery(makeFitbitIntradayActivityApiUrl("activities/steps", date))
 
-        await this.service.fitbitLocalDbManager.insert(FitbitLocalTableName.StepCountIntraDay,
-            [{
-                numberedDate: date,
-                hourlySteps: JSON.stringify(hourlyEntries)
-            }])
+            //bin the data into one hour
+            const grouped = Array.from(d3Array.group(data["activities-steps-intraday"].dataset, entry => Number.parseInt(entry.time.split(":")[0])))
+
+            const hourlyEntries: Array<IIntraDayStepCountLog> = grouped.map(group => ({
+                hourOfDay: group[0],
+                value: d3Array.sum(group[1], e => e.value)
+            })).filter(entry => entry.value > 0)
+
+            console.log("hourly entries:")
+            console.log(hourlyEntries)
+
+            if (hourlyEntries.length > 0) {
+
+                await this.service.fitbitLocalDbManager.insert(FitbitLocalTableName.StepCountIntraDay,
+                    [{
+                        numberedDate: date,
+                        hourlySteps: JSON.stringify(hourlyEntries)
+                    }])
+            } else return
+        }else return
     }
 
     protected async fetchLocalData(date: number): Promise<StepCountIntraDayData> {

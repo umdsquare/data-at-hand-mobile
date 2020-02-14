@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, LayoutRectangle, Platform } from 'react-native'
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '../../../../../../state/types';
 import { IDailySleepSummaryEntry, SleepStage } from '../../../../../../core/exploration/data/types';
-import { commonIntraDayPanelStyles } from './common';
+import { commonIntraDayPanelStyles, NoDataFallbackView } from './common';
 import { SizeWatcher } from '../../../../../visualization/SizeWatcher';
 import { Sizes } from '../../../../../../style/Sizes';
 import Svg, { G, Line, Text as SvgText, Rect } from 'react-native-svg';
@@ -93,15 +93,15 @@ const xTickFormat = (diffSeconds) => {
 
 export const SleepIntraDayPanel = () => {
 
-
     const { data } = useSelector((appState: ReduxAppState) => ({
         data: appState.explorationDataState.data as IDailySleepSummaryEntry
     }))
 
+    const [chartContainerWidth, setChartContainerWidth] = useState(-1)
+    const [chartContainerHeight, setChartContainerHeight] = useState(-1)
+
     if (data != null) {
 
-        const [chartContainerWidth, setChartContainerWidth] = useState(-1)
-        const [chartContainerHeight, setChartContainerHeight] = useState(-1)
 
         const chartArea: LayoutRectangle = {
             x: yAxisWidth,
@@ -228,5 +228,5 @@ export const SleepIntraDayPanel = () => {
             </View>
 
         </View>
-    } else return <></>
+    } else return <NoDataFallbackView/>
 }

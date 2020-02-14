@@ -67,13 +67,13 @@ export class FitbitService extends DataService {
     return true;
   }
 
-  private dailyStepMeasure = new FitbitDailyStepMeasure(this);
-  private dailyHeartRateMeasure = new FitbitDailyHeartRateMeasure(this);
-  private weightLogMeasure = new FitbitWeightMeasure(this);
-  private sleepMeasure = new FitbitSleepMeasure(this);
+  readonly dailyStepMeasure = new FitbitDailyStepMeasure(this);
+  readonly dailyHeartRateMeasure = new FitbitDailyHeartRateMeasure(this);
+  readonly weightLogMeasure = new FitbitWeightMeasure(this);
+  readonly sleepMeasure = new FitbitSleepMeasure(this);
 
-  private intradayStepMeasure = new FitbitIntraDayStepMeasure(this);
-  private intradayHeartRateMeasure = new FitbitIntraDayHeartRateMeasure(this);
+  readonly intradayStepMeasure = new FitbitIntraDayStepMeasure(this);
+  readonly intradayHeartRateMeasure = new FitbitIntraDayHeartRateMeasure(this);
 
   private preloadableMeasures: Array<FitbitServiceMeasure> = [
     this.dailyStepMeasure,
@@ -440,4 +440,11 @@ export class FitbitService extends DataService {
       });
     }
   }
+
+
+  clearAllCache(): Promise<void> {
+    return this.fitbitLocalDbManager.deleteDatabase()
+  }
+
+
 }

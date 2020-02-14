@@ -1,13 +1,13 @@
-import {ExplorationInfo} from '../../../core/exploration/types';
-import {ActionTypeBase, ReduxAppState} from '../../types';
+import { ExplorationInfo } from '../../../core/exploration/types';
+import { ActionTypeBase, ReduxAppState } from '../../types';
 import {
   ExplorationDataActionType,
   StartLoadingData,
   FinishLoadingData,
 } from './actions';
-import {Dispatch} from 'redux';
+import { Dispatch } from 'redux';
 import uuid from 'uuid/v4';
-import {explorationDataResolver} from '../../../core/exploration/data/ExplorationDataResolver';
+import { explorationDataResolver } from '../../../core/exploration/data/ExplorationDataResolver';
 
 export interface ExplorationDataState {
   info: ExplorationInfo;
@@ -44,13 +44,14 @@ export const explorationDataStateReducer = (
       const finishAction = action as FinishLoadingData;
       newState.isBusy = false;
       newState.ongoingTaskId = null;
+      newState.info = finishAction.info;
+        
       if (finishAction.error) {
         newState.error = finishAction.error;
-      }
-      if (finishAction.data) {
-        newState.info = finishAction.info;
+      } else {
         newState.data = finishAction.data;
       }
+
       return newState;
     default:
       return state;

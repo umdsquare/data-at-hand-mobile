@@ -1,21 +1,21 @@
-import {FitbitIntraDayMeasure} from './FitbitIntraDayMeasure';
-import {makeFitbitHeartRateIntraDayLogApiUrl} from './api';
-import {FitbitHeartRateIntraDayQueryResult} from './types';
-import {FitbitLocalTableName, HeartRateIntraDayInfo} from './sqlite/database';
-import {IIntraDayHeartRatePoint, HeartRateIntraDayData, HeartRateZone} from '../../../core/exploration/data/types';
-import {DateTimeHelper} from '../../../time';
+import { FitbitIntraDayMeasure } from './FitbitIntraDayMeasure';
+import { makeFitbitHeartRateIntraDayLogApiUrl } from './api';
+import { FitbitHeartRateIntraDayQueryResult } from './types';
+import { FitbitLocalTableName, HeartRateIntraDayInfo } from './sqlite/database';
+import { IIntraDayHeartRatePoint, HeartRateIntraDayData, HeartRateZone } from '../../../core/exploration/data/types';
+import { DateTimeHelper } from '../../../time';
 
 export class FitbitIntraDayHeartRateMeasure extends FitbitIntraDayMeasure<HeartRateIntraDayData> {
   key = 'intraday-heartrate';
 
-  private convertHeartRateZone(fitbitName:string): HeartRateZone{
-      switch(fitbitName.toLowerCase()){
-          case 'fat burn': return HeartRateZone.FatBurn
-          case 'out of range': return HeartRateZone.OutOfRange
-          case 'peak': return HeartRateZone.Peak
-          case 'cardio': return HeartRateZone.Cardio
-          default: return fitbitName as any
-      }
+  private convertHeartRateZone(fitbitName: string): HeartRateZone {
+    switch (fitbitName.toLowerCase()) {
+      case 'fat burn': return HeartRateZone.FatBurn
+      case 'out of range': return HeartRateZone.OutOfRange
+      case 'peak': return HeartRateZone.Peak
+      case 'cardio': return HeartRateZone.Cardio
+      default: return fitbitName as any
+    }
   }
 
   protected async fetchAndCacheFitbitData(date: number): Promise<void> {
@@ -37,33 +37,36 @@ export class FitbitIntraDayHeartRateMeasure extends FitbitIntraDayMeasure<HeartR
       };
     });
 
-    result["activities-heart"][0].value.heartRateZones.forEach(zone => {
-        zone.name = this.convertHeartRateZone(zone.name)
-    })
+    if (points.length > 0) {
 
-    result["activities-heart"][0].value.customHeartRateZones.forEach(zone => {
+      result["activities-heart"][0].value.heartRateZones.forEach(zone => {
         zone.name = this.convertHeartRateZone(zone.name)
-    })
+      })
 
-    await this.service.fitbitLocalDbManager.insert(FitbitLocalTableName.HeartRateIntraDayInfo, [{
+      result["activities-heart"][0].value.customHeartRateZones.forEach(zone => {
+        zone.name = this.convertHeartRateZone(zone.name)
+      })
+
+      await this.service.fitbitLocalDbManager.insert(FitbitLocalTableName.HeartRateIntraDayInfo, [{
         numberedDate: date,
         restingHeartRate: result["activities-heart"][0].value.restingHeartRate,
         points: JSON.stringify(points),
         customZones: JSON.stringify(result["activities-heart"][0].value.customHeartRateZones),
         zones: JSON.stringify(result["activities-heart"][0].value.heartRateZones)
-    }])
+      }])
+    } else return
   }
-  
+
   protected async fetchLocalData(date: number): Promise<HeartRateIntraDayData> {
 
     const summaries = await this.service.fitbitLocalDbManager.fetchData<HeartRateIntraDayInfo>(FitbitLocalTableName.HeartRateIntraDayInfo, "`numberedDate` = ?", [date])
     const summary: HeartRateIntraDayInfo = summaries.length > 0 ? summaries[0] : null
 
-    return {
-        points: summary ? JSON.parse(summary.points as any) : [],
-        customZones: summary ? JSON.parse(summary.customZones) : [],
-        zones: summary ? JSON.parse(summary.zones): [],
-        restingHeartRate: summary ? summary.restingHeartRate : -1
-    }
+    return summary ? {
+      points: summary.points ? JSON.parse(summary.points as any) : [],
+      customZones: summary.customZones ? JSON.parse(summary.customZones) : [],
+      zones: summary.zones ? JSON.parse(summary.zones) : [],
+      restingHeartRate: summary.restingHeartRate
+    } : null
   }
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { PropsWithNavigation } from "../../../PropsWithNavigation";
-import { View, Text, StyleSheet, StatusBar, TouchableHighlight } from "react-native";
+import { View, Text, StyleSheet, StatusBar, TouchableHighlight, Alert } from "react-native";
 import { MeasureUnitType } from "../../../measure/DataSourceSpec";
 import { Dispatch } from "redux";
 import { ReduxAppState } from "../../../state/types";
@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         paddingLeft: Sizes.horizontalPadding,
 
-        paddingRight: Sizes.horizontalPadding/2,
+        paddingRight: Sizes.horizontalPadding / 2,
         backgroundColor: 'white'
     },
     rowTitleStyle: {
@@ -37,13 +37,13 @@ const styles = StyleSheet.create({
     }
 })
 
-const SettingsRow = (props: {title: string, value?: string, onClick: ()=>void}) => {
-    return <TouchableHighlight underlayColor="#00000050" onPress={()=>{ props.onClick()}}> 
-        <View  style={styles.rowContainerStyle}><Text style={styles.rowTitleStyle}>{props.title}</Text>
-        <Text style={styles.rowValueStyle}>{props.value}</Text>
-        <SvgIcon type={SvgIconType.ArrowRight} color='gray'/>
+const SettingsRow = (props: { title: string, value?: string, showArrow?: boolean, onClick: () => void }) => {
+    return <TouchableHighlight underlayColor="#00000050" onPress={() => { props.onClick() }}>
+        <View style={styles.rowContainerStyle}><Text style={styles.rowTitleStyle}>{props.title}</Text>
+            <Text style={styles.rowValueStyle}>{props.value}</Text>
+            {(props.showArrow !== false) && <SvgIcon type={SvgIconType.ArrowRight} color='gray' />}
         </View>
-        
+
     </TouchableHighlight>
 }
 
@@ -77,23 +77,46 @@ class SettingsScreen extends React.PureComponent<Props, State>{
         selections.push("Cancel")
         this.props.showActionSheetWithOptions({
             options: selections,
-            cancelButtonIndex: selections.length -1,
+            cancelButtonIndex: selections.length - 1,
 
         }, buttonIndex => {
-            if(buttonIndex!= selections.length -1){
+            if (buttonIndex != selections.length - 1) {
                 this.props.setUnitType(buttonIndex)
             }
         })
-     }
+    }
     onPressServiceButton = () => { this.props.navigation.navigate("ServiceWizardModal") }
+
+    onPressRefreshAllCache = () => {
+        Alert.alert("Refresh all cache", "Clear all cache and reload data?", [
+            {
+                text: "Refresh all",
+                style: 'destructive',
+                onPress: async () => {
+                    const services = await DataServiceManager.getServicesSupportedInThisSystem()
+                    for (const service of services) {
+                        await service.clearAllCache()
+                    }
+                    await DataServiceManager.getServiceByKey(this.props.selectedServiceKey).activateInSystem((progressInfo) => {})
+                }
+            },
+            {
+                text: "Cancel",
+                style: 'cancel'
+            }
+        ], {
+            cancelable: true
+        })
+    }
 
     render() {
         return <View>
-            
-            <SettingsRow title="Service" value={DataServiceManager.getServiceByKey(this.props.selectedServiceKey).name} 
-                onClick={this.onPressServiceButton}/>
-            <SettingsRow title="Unit" value={SettingsScreen.UnitTypes.find(t => t.key === this.props.selectedUnitType).label} 
-                onClick={this.onPressUnitRow}/>
+
+            <SettingsRow title="Service" value={DataServiceManager.getServiceByKey(this.props.selectedServiceKey).name}
+                onClick={this.onPressServiceButton} />
+            <SettingsRow title="Unit" value={SettingsScreen.UnitTypes.find(t => t.key === this.props.selectedUnitType).label}
+                onClick={this.onPressUnitRow} />
+            <SettingsRow title="Refresh all cache" onClick={this.onPressRefreshAllCache} showArrow={false} />
         </View>
     }
 }

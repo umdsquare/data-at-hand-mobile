@@ -14,7 +14,7 @@ import { AxisSvg } from '../../../../../visualization/axis'
 import { Padding } from '../../../../../visualization/types'
 import commaNumber from 'comma-number';
 import { pad } from '../../../../../../time'
-import { commonIntraDayPanelStyles } from './common'
+import { commonIntraDayPanelStyles, NoDataFallbackView } from './common'
 
 const xAxisHeight = 50
 const yAxisWidth = 60
@@ -36,9 +36,10 @@ export const StepIntraDayPanel = (props: {
         data: appState.explorationDataState.data as StepCountIntraDayData
     }))
 
+    const [chartContainerWidth, setChartContainerWidth] = useState(-1)
+    const [chartContainerHeight, setChartContainerHeight] = useState(-1)
+
     if (data != null) {
-        const [chartContainerWidth, setChartContainerWidth] = useState(-1)
-        const [chartContainerHeight, setChartContainerHeight] = useState(-1)
 
         const chartArea: LayoutRectangle = {
             x: yAxisWidth,
@@ -90,6 +91,6 @@ export const StepIntraDayPanel = (props: {
                     </Text>
             </View>
         </View>
-    } return <></>
+    } return <NoDataFallbackView/>
 
 }
