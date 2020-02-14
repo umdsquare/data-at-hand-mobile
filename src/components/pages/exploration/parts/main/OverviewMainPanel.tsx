@@ -42,7 +42,6 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
         console.log("mount overview main panel.")
         if (this._listRef.current != null && this.props.uiStatus.overviewScrollY != null) {
             setTimeout(() => {
-                //this._listRef.current.scrollTo({ x: 0, y: this.props.uiStatus.overviewScrollY, animated: false })}, 10)
                 this._listRef.current.scrollToOffset({ offset: this.props.uiStatus.overviewScrollY, animated: false })
             }, 1)
 

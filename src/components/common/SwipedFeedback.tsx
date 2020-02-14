@@ -11,7 +11,8 @@ interface State {
     progress: Animated.Value<number>,
     alphaProgress: Animated.Value<number>,
     width: number,
-    height: number
+    height: number,
+    feedbackShowing: boolean
 }
 
 export class SwipedFeedback extends React.PureComponent<any, State>{
@@ -24,14 +25,16 @@ export class SwipedFeedback extends React.PureComponent<any, State>{
             progress: new Animated.Value(0),
             alphaProgress: new Animated.Value(0),
             width: 0,
-            height: 0
+            height: 0,
+            feedbackShowing: false
         }
     }
 
     public startFeedback(direction: 'left' | 'right') {
         this.setState({
             ...this.state,
-            swipeDirection: direction
+            swipeDirection: direction,
+            feedbackShowing: true
         })
         this.state.progress.setValue(0)
         this.state.alphaProgress.setValue(0)
@@ -44,7 +47,12 @@ export class SwipedFeedback extends React.PureComponent<any, State>{
             toValue: 1,
             duration: Platform.OS === 'ios'? 800 : 600,
             easing: Easing.in(Easing.linear)
-        }).start()
+        }).start(()=>{
+            this.setState({
+                ...this.state,
+                feedbackShowing: false
+            })
+        })
 
     }
 
@@ -59,8 +67,7 @@ export class SwipedFeedback extends React.PureComponent<any, State>{
     render() {
         return <SizeWatcher containerStyle={StyleTemplates.fitParent} onSizeChange={this.onSizeChanged}>
             <Animated.View style={{
-                left: 0, right: 0, top: 0, bottom: 0, position: 'absolute',
-
+                ...StyleTemplates.fitParent,
                 opacity: this.state.alphaProgress.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0] }),
 
                 transform: [
@@ -72,11 +79,11 @@ export class SwipedFeedback extends React.PureComponent<any, State>{
                     }
                 ]
             } as any}>
-                <LinearGradient
+                {this.state.feedbackShowing && <LinearGradient
                     colors={this.state.swipeDirection === 'left' ? ['transparent', "white"] : ["white", "transparent"]}
                     style={StyleTemplates.fitParent}
                     start={{ x: this.state.swipeDirection === 'left' ? 0 : 0.7, y: 0 }}
-                    end={{ x: this.state.swipeDirection === 'left' ? 0.3 : 1, y: 0 }} />
+                    end={{ x: this.state.swipeDirection === 'left' ? 0.3 : 1, y: 0 }} />}
             </Animated.View>
         </SizeWatcher>
     }
