@@ -8,6 +8,8 @@ import { CycleDimension } from '../../../core/exploration/cyclic_time';
 
 export class FitbitDailyHeartRateMeasure extends FitbitSummaryLogMeasure<FitbitDailyActivityHeartRateQueryResult> {
   
+  displayName = "Resting Heart Rate"
+
   protected dbTableName = FitbitLocalTableName.RestingHeartRate;
 
   protected resourcePropertyKey: string = 'activities-heart';

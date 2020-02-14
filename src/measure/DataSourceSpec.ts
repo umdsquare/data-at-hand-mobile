@@ -20,6 +20,11 @@ export interface DataSourceSpec{
   description: string,
 }
 
+export interface DataSourceCategorySpec{
+  category: DataSourceCategory,
+  name: string
+}
+
 export enum MeasureUnitType{
   Metric = "metric",
   US = "us"

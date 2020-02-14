@@ -117,7 +117,7 @@ export abstract class DataService {
 
   abstract fetchCycleDailyDimensionData(dataSource: DataSourceType, start: number, end: number, cycleDimension: CycleDimension) : Promise<FilteredDailyValues>
 
-  abstract async activateInSystem(): Promise<ServiceActivationResult>
+  abstract async activateInSystem(progressHandler: (progressInfo: {progress: number /*0 - 1*/, message: string})=>void): Promise<ServiceActivationResult>
   abstract async deactivatedInSystem(): Promise<boolean>
 
   abstract onSystemExit()

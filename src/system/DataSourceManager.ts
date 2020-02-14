@@ -1,4 +1,4 @@
-import { DataSourceSpec, DataSourceType, DataSourceCategory } from "../measure/DataSourceSpec";
+import { DataSourceSpec, DataSourceType, DataSourceCategory, DataSourceCategorySpec } from "../measure/DataSourceSpec";
 import commaNumber from 'comma-number';
 
 class DataSourceManager {
@@ -39,9 +39,31 @@ class DataSourceManager {
     },
   ];
 
+  readonly dataSourceCategorySpecs: {[key:string]: DataSourceCategorySpec} = {}
+
   private specMap: Map<DataSourceType, DataSourceSpec>;
 
   constructor() {
+
+    this.dataSourceCategorySpecs[DataSourceCategory.Step] = {
+      category: DataSourceCategory.Step,
+      name: "Step"
+    }
+    this.dataSourceCategorySpecs[DataSourceCategory.Sleep] = {
+      category: DataSourceCategory.Sleep,
+      name: "Sleep"
+    }
+
+    this.dataSourceCategorySpecs[DataSourceCategory.HeartRate] = {
+      category: DataSourceCategory.HeartRate,
+      name: "Heart Rate"
+    }
+
+    this.dataSourceCategorySpecs[DataSourceCategory.Weight] = {
+      category: DataSourceCategory.Weight,
+      name: 'Weight'
+    }
+
     this.specMap = new Map<DataSourceType, DataSourceSpec>();
     this.supportedDataSources.forEach(spec => {
       this.specMap[spec.type] = spec;

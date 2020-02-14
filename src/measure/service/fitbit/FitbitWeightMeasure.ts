@@ -17,6 +17,7 @@ import { CyclicTimeFrame, CycleDimension } from '../../../core/exploration/cycli
 
 export class FitbitWeightMeasure extends FitbitServiceMeasure {
   key: string = 'weight';
+  displayName = "Weight"
 
   private trendMeasure: FitbitWeightTrendMeasure;
   private logMeasure: FitbitWeightLogMeasure;
@@ -110,6 +111,7 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
 
 class FitbitWeightTrendMeasure extends FitbitSummaryLogMeasure<FitbitWeightTrendQueryResult> {
   key: string = 'weight_trend';
+  displayName = "Weight Trend"
 
   protected dbTableName = FitbitLocalTableName.WeightTrend
   protected resourcePropertyKey: string = 'body-weight';
@@ -131,6 +133,7 @@ class FitbitWeightLogMeasure extends FitbitRangeMeasure<
   FitbitWeightQueryResult
 > {
   key: string = 'weight_log';
+  displayName = "Weight Log"
 
   protected resourcePropertyKey: string = 'weight';
   protected maxQueryRangeLength: number = 32;

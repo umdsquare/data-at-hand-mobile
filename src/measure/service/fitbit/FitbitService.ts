@@ -266,8 +266,9 @@ export class FitbitService extends DataService {
       await this.fitbitLocalDbManager.deleteDatabase();
     }
   }
-
-  async activateInSystem(): Promise<ServiceActivationResult> {
+  async activateInSystem(progressHandler: (progressInfo: {
+    progress: number; message: string;
+  }) => void): Promise<ServiceActivationResult> {
     try {
       console.log("start Fitbit activation...")
       const accessToken = await this.authenticate();
@@ -276,6 +277,10 @@ export class FitbitService extends DataService {
         const now = DateTimeHelper.toNumberedDateFromDate(new Date());
 
         for (const measure of this.preloadableMeasures) {
+          progressHandler({
+            progress: 0,
+            message: `Fetching ${measure.displayName} data...`
+          })
           await measure.cacheServerData(now);
         }
 

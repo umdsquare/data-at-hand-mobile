@@ -70,8 +70,7 @@ export namespace SQLiteHelper {
     //make index queries
     const indexedColumnNames = columnNames.filter(c => schema.columns[c].indexed === true)
     result.indexQueries = indexedColumnNames.map((columnName, i)=>{
-        return "CREATE INDEX IF NOT EXISTS " + "idx_" + columnName 
-            + " ON " + schema.name + " (" + columnName + ")"
+        return `CREATE INDEX IF NOT EXISTS idx_${columnName} ON ${schema.name} (${columnName})`
     })
 
     return result;

@@ -33,6 +33,8 @@ import { startSpeechSession, requestStopDictation } from "../../../state/speech/
 import { SvgIcon, SvgIconType } from "../../common/svg/SvgIcon";
 import { ZIndices } from "./parts/zIndices";
 import { DataBusyOverlay } from "./parts/main/DataBusyOverlay";
+import { sleep } from "../../../utils";
+import { InitialLoadingIndicator } from "./parts/main/InitialLoadingIndicator";
 
 var deepEqual = require('deep-equal');
 
@@ -82,7 +84,7 @@ const styles = StyleSheet.create({
     }
 })
 
-const undoIconStyle = <SvgIcon type={SvgIconType.Reset} size={20}/>
+const undoIconStyle = <SvgIcon type={SvgIconType.Reset} size={20} />
 
 
 export interface ExplorationProps extends PropsWithNavigation {
@@ -97,7 +99,9 @@ export interface ExplorationProps extends PropsWithNavigation {
 
 interface State {
     appState: AppStateStatus,
-    globalSpeechButtonPressed: boolean
+    globalSpeechButtonPressed: boolean,
+    initialLoadingFinished: boolean,
+    loadingMessage: string
 }
 
 
@@ -127,7 +131,9 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
         super(props)
         this.state = {
             appState: AppState.currentState,
-            globalSpeechButtonPressed: false
+            globalSpeechButtonPressed: false,
+            initialLoadingFinished: false,
+            loadingMessage: null
         }
     }
 
@@ -149,9 +155,9 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 ], {
                     cancelable: false
                 })
-            }else if (microphonePermissionStatus !== RESULTS.GRANTED && microphonePermissionStatus !== RESULTS.UNAVAILABLE) {
+            } else if (microphonePermissionStatus !== RESULTS.GRANTED && microphonePermissionStatus !== RESULTS.UNAVAILABLE) {
                 const permissionRequestResult = await request(PERMISSIONS.IOS.MICROPHONE)
-                if(permissionRequestResult !== RESULTS.UNAVAILABLE){
+                if (permissionRequestResult !== RESULTS.UNAVAILABLE) {
                     await this.checkPermission()
                 }
             }
@@ -166,22 +172,40 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
         if (this.props.selectedServiceKey) {
             try {
-                await DataServiceManager.getServiceByKey(this.props.selectedServiceKey).activateInSystem()
+                await DataServiceManager.getServiceByKey(this.props.selectedServiceKey).activateInSystem((progressInfo) => {
+                    this.setState({
+                        ...this.state,
+                        loadingMessage: progressInfo.message
+                    })
+                })
+                this.setState({
+                    ...this.state,
+                    loadingMessage: null
+                })
                 console.log("activated ", this.props.selectedServiceKey, "successfully.")
                 this.props.dispatchDataReload(this.props.explorationState.info)
             } catch (error) {
                 console.log("service activation error: ", this.props.selectedServiceKey, error)
             }
         }
-
+        this.setState({
+            ...this.state,
+            loadingMessage: "Checking permission..."
+        })
         await this.checkPermission()
 
+        this.setState({
+            ...this.state,
+            initialLoadingFinished: true
+        })
     }
 
     async componentDidUpdate(prevProps: ExplorationProps) {
         if (this.props.explorationState.info.type !== prevProps.explorationState.info.type || deepEqual(prevProps.explorationState.info.values, this.props.explorationState.info.values) === false) {
-            console.log("should reload data")
-            this.props.dispatchDataReload(this.props.explorationState.info)
+            if (this.state.initialLoadingFinished === true) {
+                console.log("should reload data")
+                this.props.dispatchDataReload(this.props.explorationState.info)
+            }
         }
     }
 
@@ -269,9 +293,12 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
             </BottomSheet>
 
             <TooltipOverlay />
-            <GlobalSpeechOverlay isGlobalSpeechButtonPressed = {this.state.globalSpeechButtonPressed}/>
+            <GlobalSpeechOverlay isGlobalSpeechButtonPressed={this.state.globalSpeechButtonPressed} />
 
-           <DataBusyOverlay isBusy={this.props.explorationDataState.isBusy}/>
+            <DataBusyOverlay isBusy={this.props.explorationDataState.isBusy === true || this.state.initialLoadingFinished === false} />
+            {
+                this.state.initialLoadingFinished === false? <InitialLoadingIndicator loadingMessage={this.state.loadingMessage}/> : <></>
+            }
 
         </View>
     }
@@ -304,7 +331,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Expl
         dispatchCommand: (command: ExplorationAction) => dispatch(command),
         dispatchDataReload: (info: ExplorationInfo) => dispatch(startLoadingForInfo(info)),
         dispatchStartSpeechSession: () => dispatch(startSpeechSession()),
-        dispatchFinishDictation: () => dispatch(requestStopDictation()) 
+        dispatchFinishDictation: () => dispatch(requestStopDictation())
     }
 }
 

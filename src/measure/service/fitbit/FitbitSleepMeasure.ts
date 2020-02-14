@@ -52,6 +52,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
   FitbitSleepQueryResult
   > {
   key: string = 'sleep';
+  displayName = "Sleep"
 
   protected resourcePropertyKey: string = 'sleep';
   protected maxQueryRangeLength: number = 101;

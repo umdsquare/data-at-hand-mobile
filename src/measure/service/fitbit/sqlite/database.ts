@@ -3,7 +3,7 @@ import {SQLiteHelper} from '../../../../database/sqlite/sqlite-helper';
 import stringFormat from 'string-format';
 import {CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension} from '../../../../core/exploration/cyclic_time';
 import { IIntraDayHeartRatePoint } from '../../../../core/exploration/data/types';
-SQLite.DEBUG(true);
+SQLite.DEBUG(false);
 SQLite.enablePromise(true);
 
 export interface ICachedRangeEntry {

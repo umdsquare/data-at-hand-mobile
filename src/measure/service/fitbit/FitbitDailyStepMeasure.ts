@@ -9,6 +9,7 @@ export class FitbitDailyStepMeasure extends FitbitSummaryLogMeasure<FitbitDailyA
   protected dbTableName = FitbitLocalTableName.StepCount;
   
   key = 'daily_step'
+  displayName = "Step Count"
 
   protected resourcePropertyKey: string = "activities-steps"
   protected makeQueryUrl(startDate: number, endDate: number): string {
