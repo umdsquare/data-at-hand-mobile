@@ -33,15 +33,11 @@ export interface IDailySummaryEntry {
 }
 
 export interface IIntraDayStepCountLog {
-  id: string;
-  numberedDate: number;
   hourOfDay: number;
   value: number;
 }
 
 export interface IIntraDayHeartRatePoint {
-  id: string;
-  numberedDate: number;
   secondOfDay: number;
   value: number;
 }
@@ -99,6 +95,7 @@ export interface StepCountRangedData extends OverviewSourceRow {
 }
 
 export interface StepCountIntraDayData {
+  numberedDate: number,
   hourlySteps: Array<IIntraDayStepCountLog>;
 }
 

@@ -32,8 +32,6 @@ export class FitbitIntraDayHeartRateMeasure extends FitbitIntraDayMeasure<HeartR
       const seconds = Number.parseInt(split[2]);
 
       return {
-        id: DateTimeHelper.toFormattedString(date) + 'T' + entry.time,
-        numberedDate: date,
         secondOfDay: hours * 3600 + minutes * 60 + seconds,
         value: entry.value,
       };
@@ -47,25 +45,22 @@ export class FitbitIntraDayHeartRateMeasure extends FitbitIntraDayMeasure<HeartR
         zone.name = this.convertHeartRateZone(zone.name)
     })
 
-
-    await this.service.fitbitLocalDbManager.insert(FitbitLocalTableName.HeartRateIntraDayPoints, points);
-
     await this.service.fitbitLocalDbManager.insert(FitbitLocalTableName.HeartRateIntraDayInfo, [{
         numberedDate: date,
         restingHeartRate: result["activities-heart"][0].value.restingHeartRate,
+        points: JSON.stringify(points),
         customZones: JSON.stringify(result["activities-heart"][0].value.customHeartRateZones),
         zones: JSON.stringify(result["activities-heart"][0].value.heartRateZones)
-    } as HeartRateIntraDayInfo])
+    }])
   }
   
   protected async fetchLocalData(date: number): Promise<HeartRateIntraDayData> {
 
-    const points = await this.service.fitbitLocalDbManager.fetchData<IIntraDayHeartRatePoint>(FitbitLocalTableName.HeartRateIntraDayPoints, "`numberedDate` = ?", [date])
     const summaries = await this.service.fitbitLocalDbManager.fetchData<HeartRateIntraDayInfo>(FitbitLocalTableName.HeartRateIntraDayInfo, "`numberedDate` = ?", [date])
     const summary: HeartRateIntraDayInfo = summaries.length > 0 ? summaries[0] : null
 
     return {
-        points,
+        points: summary ? JSON.parse(summary.points as any) : [],
         customZones: summary ? JSON.parse(summary.customZones) : [],
         zones: summary ? JSON.parse(summary.zones): [],
         restingHeartRate: summary ? summary.restingHeartRate : -1

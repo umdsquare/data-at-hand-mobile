@@ -55,7 +55,7 @@ export const StepIntraDayPanel = (props: {
                     <G {...chartArea}>
                         {
                             data.hourlySteps.map(stepEntry => {
-                                return <Rect key={stepEntry.id} fill={Colors.chartElementDefault}
+                                return <Rect key={stepEntry.hourOfDay} fill={Colors.chartElementDefault}
                                     x={scaleX(stepEntry.hourOfDay) + barPadding}
                                     y={scaleY(stepEntry.value)}
                                     width={scaleX(1) - scaleX(0) - barPadding * 2}

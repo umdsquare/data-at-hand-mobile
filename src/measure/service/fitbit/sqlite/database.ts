@@ -2,7 +2,8 @@ import SQLite from 'react-native-sqlite-storage';
 import {SQLiteHelper} from '../../../../database/sqlite/sqlite-helper';
 import stringFormat from 'string-format';
 import {CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension} from '../../../../core/exploration/cyclic_time';
-SQLite.DEBUG(false);
+import { IIntraDayHeartRatePoint } from '../../../../core/exploration/data/types';
+SQLite.DEBUG(true);
 SQLite.enablePromise(true);
 
 export interface ICachedRangeEntry {
@@ -23,13 +24,13 @@ export interface HeartRateIntraDayInfo {
   restingHeartRate: number;
   customZones: string;
   zones: string;
+  points: Array<IIntraDayHeartRatePoint>
 }
 
 export enum FitbitLocalTableName {
   StepCount = 'StepCount',
   SleepLog = 'SleepLog',
   RestingHeartRate = 'RestingHeartRate',
-  HeartRateIntraDayPoints = 'HeartRateIntraDayPoints',
   HeartRateIntraDayInfo = 'HeartRateIntraDayInfo',
 
   WeightTrend = 'WeightTrend',
@@ -201,10 +202,8 @@ const StepCountSchema = {
 const IntraDayStepCountSchema = {
   name: FitbitLocalTableName.StepCountIntraDay,
   columns: {
-    numberedDate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
-    hourOfDay: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
-    value: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
-    id: {type: SQLiteHelper.SQLiteColumnType.TEXT, primary: true},
+    numberedDate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, primary: true},
+    hourlySteps: {type: SQLiteHelper.SQLiteColumnType.TEXT},
   },
 };
 
@@ -216,16 +215,6 @@ const RestingHeartRateSchema = {
   },
 };
 
-const IntraDayHeartRateSchema = {
-  name: FitbitLocalTableName.HeartRateIntraDayPoints,
-  columns: {
-    numberedDate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
-    secondOfDay: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
-    value: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
-    id: {type: SQLiteHelper.SQLiteColumnType.TEXT, primary: true},
-  },
-};
-
 const IntraDayHeartRateInfoSchema = {
   name: FitbitLocalTableName.HeartRateIntraDayInfo,
   columns: {
@@ -234,6 +223,7 @@ const IntraDayHeartRateInfoSchema = {
       type: SQLiteHelper.SQLiteColumnType.INTEGER,
       optional: true,
     },
+    points: {type: SQLiteHelper.SQLiteColumnType.TEXT},
     customZones: {type: SQLiteHelper.SQLiteColumnType.TEXT, optional: true},
     zones: {type: SQLiteHelper.SQLiteColumnType.TEXT},
   },
@@ -300,7 +290,6 @@ const schemas = [
   CachedRangeSchema,
   IntraDayStepCountSchema,
   CachedIntraDayDatesSchema,
-  IntraDayHeartRateSchema,
   IntraDayHeartRateInfoSchema,
 ];
 
