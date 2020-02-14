@@ -1,13 +1,13 @@
 import React from "react";
 import LinearGradient from "react-native-linear-gradient";
-import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
 import { TouchableHighlight } from "react-native-gesture-handler";
 import LottieView from 'lottie-react-native';
 import { StyleSheet, View, LayoutAnimation } from "react-native";
 import Colors from "../../style/Colors";
 import { Sizes } from "../../style/Sizes";
+import { SvgIconType, SvgIcon } from "../common/svg/SvgIcon";
 
-const microphoneButtonIconSize = 26
+const microphoneButtonIconSize = 32
 
 const busyColor = ["rgba(0,0,0,0)", "rgba(0,0,0,0.1)"]
 
@@ -56,13 +56,13 @@ export class VoiceInputButton extends React.PureComponent<Props, State> {
     }
 
     readonly onPressIn = () => {
-        this.setState({...this.state, isPressed: true})
+        this.setState({ ...this.state, isPressed: true })
         LayoutAnimation.configureNext(pressAnimConfig)
         this.props.onTouchDown()
     }
 
     readonly onPressOut = () => {
-        this.setState({...this.state, isPressed: false})
+        this.setState({ ...this.state, isPressed: false })
         LayoutAnimation.configureNext(unPressAnimConfig)
         this.props.onTouchUp()
     }
@@ -77,7 +77,7 @@ export class VoiceInputButton extends React.PureComponent<Props, State> {
                 shadowOpacity: 0.3,
                 elevation: 5,
                 opacity: this.props.isBusy === true ? 0.8 : 1,
-                marginTop: this.state.isPressed === true? 5: 0
+                marginTop: this.state.isPressed === true ? 5 : 0
             }}>
             <TouchableHighlight
                 style={Styles.buttonContainerStyle}
@@ -108,9 +108,9 @@ export class VoiceInputButton extends React.PureComponent<Props, State> {
                                 style={Styles.loadingIconStyle} />)
                             : (
                                 <View
-                                    style={{ marginTop: this.state.isPressed === true? 5 : 0}}
+                                    style={{ marginTop: this.state.isPressed === true ? 5 : 0 }}
                                 >
-                                    <FontAwesomeIcon name="microphone" size={microphoneButtonIconSize} color="rgba(255,255,255,0.95)"></FontAwesomeIcon>
+                                    <SvgIcon type={SvgIconType.Microphone} size={microphoneButtonIconSize} color="rgba(255,255,255,0.95)" />
                                 </View>
                             )
                     }

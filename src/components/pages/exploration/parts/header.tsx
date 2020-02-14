@@ -16,14 +16,9 @@ import Colors from '../../../../style/Colors';
 import { useDispatch, useSelector } from 'react-redux';
 import { ReduxAppState } from '../../../../state/types';
 import { CyclicTimeFrame, cyclicTimeFrameSpecs, CycleDimension, getFilteredCycleDimensionList, getHomogeneousCycleDimensionList, getCycleDimensionSpec } from '../../../../core/exploration/cyclic_time';
+import { SvgIcon, SvgIconType } from '../../../common/svg/SvgIcon';
 
-const titleBarOptionButtonIconInfo = {
-    name: "ios-settings",
-    type: "ionicon",
-    size: 23,
-    color: 'white'
-}
-
+const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={'white'}/>
 
 const styles = StyleSheet.create({
     titleBarStyle: {
@@ -47,21 +42,18 @@ const styles = StyleSheet.create({
         width: 28,
         height: 28,
         borderRadius: 14,
-        padding: 0,
-        paddingTop: 2,
         margin: 0
     }
 })
 
 const backButtonProps = {
-    icon: { type: 'materialicon', size: 18, name: 'keyboard-arrow-left', color: Colors.headerBackgroundDarker, containerStyle: { padding: 0, margin: 0 } },
+    icon: <SvgIcon color={Colors.headerBackgroundDarker} size={18} type={SvgIconType.ArrowLeft} />,
     containerStyle: {
         marginTop: 8,
         marginBottom: 8,
         alignSelf: 'flex-start',
         marginLeft: Sizes.horizontalPadding - 4
     } as ViewStyle,
-
     buttonStyle: {
         paddingTop: 0,
         paddingBottom: 0,

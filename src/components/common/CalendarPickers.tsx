@@ -5,6 +5,7 @@ import { format, set, addDays, getDay, startOfWeek, endOfWeek, getMonth, getYear
 import { View, StyleSheet, Text } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Sizes } from '../../style/Sizes';
+import { SvgIcon, SvgIconType } from './svg/SvgIcon';
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
@@ -32,6 +33,19 @@ const calendarTheme = {
     }
 }
 
+const calendarProps = {
+    theme: calendarTheme,
+    renderArrow: (direction: 'left' | 'right') => {
+        switch (direction) {
+            default:
+            case 'left':
+                return <SvgIcon type={SvgIconType.ArrowLeft} color={'gray'} />
+            case 'right':
+                return <SvgIcon type={SvgIconType.ArrowRight} color={'gray'} />
+        }
+    },
+}
+
 function formatDate(date: Date): string { return format(date, "yyyy-MM-dd") }
 function parseDate(calendarPickerDateObject: any): Date { return set(new Date(), { year: calendarPickerDateObject.year, month: calendarPickerDateObject.month - 1, date: calendarPickerDateObject.day }) }
 
@@ -49,7 +63,7 @@ export const DatePicker = (props: { selectedDay?: Date, earliedPossibleDay?: Dat
     }*/
 
     return <Calendar
-        theme={calendarTheme}
+        {...calendarProps}
         current={props.selectedDay || new Date()}
         markedDates={markedDates}
         minDate={props.earliedPossibleDay}
@@ -83,7 +97,7 @@ export const WeekPicker = (props: { selectedWeekFirstDay?: Date, onWeekSelected?
 
 
     return <Calendar
-        theme={calendarTheme}
+        {...calendarProps}
         current={props.selectedWeekFirstDay || new Date()}
         markedDates={markedDates}
         markingType={'period'}
@@ -183,12 +197,12 @@ export class MonthPicker extends React.Component<MonthPickerProps, MonthPickerSt
     }
 
     onMonthPressed = (month: number) => {
-        const monthDate = set(new Date(), {year: this.state.currentYear, month: month})
+        const monthDate = set(new Date(), { year: this.state.currentYear, month: month })
         this.setState({
             ...this.state,
             selectedMonth: monthDate
         })
-        if(this.props.onMonthSelected){
+        if (this.props.onMonthSelected) {
             this.props.onMonthSelected(monthDate)
         }
     }
@@ -199,14 +213,14 @@ export class MonthPicker extends React.Component<MonthPickerProps, MonthPickerSt
             <View style={monthPickerStyle.headerStyle}>
                 <Button
                     type="clear"
-                    icon={{ name: "keyboard-arrow-left", type: 'materialicon', color: 'gray' }}
+                    icon={<SvgIcon type={SvgIconType.ArrowLeft} color="gray" />}
                     onPress={this.prevYear}
                     containerStyle={monthPickerStyle.arrowButtonContainerStyle}
                 />
                 <Text style={monthPickerStyle.titleStyle}>{this.state.currentYear}</Text>
                 <Button
                     type="clear"
-                    icon={{ name: "keyboard-arrow-right", type: 'materialicon', color: 'gray' }}
+                    icon={<SvgIcon type={SvgIconType.ArrowRight} color="gray" />}
                     onPress={this.nextYear}
                     containerStyle={monthPickerStyle.arrowButtonContainerStyle}
                 />
@@ -219,12 +233,12 @@ export class MonthPicker extends React.Component<MonthPickerProps, MonthPickerSt
                             return <Button type="clear"
                                 titleStyle={{
                                     ...monthPickerStyle.monthButtonTitleStyle,
-                                    color: isSelected===true? Colors.accent : Colors.textColorLight
+                                    color: isSelected === true ? Colors.accent : Colors.textColorLight
                                 }}
-                                buttonStyle={isSelected===true? monthPickerStyle.monthButtonSelectedStyle : {}}
+                                buttonStyle={isSelected === true ? monthPickerStyle.monthButtonSelectedStyle : {}}
                                 containerStyle={monthPickerStyle.monthButtonStyle} key={month} title={monthNames[month].toUpperCase()}
-                                onPress={()=> isSelected===false && this.onMonthPressed(month)}
-                                />
+                                onPress={() => isSelected === false && this.onMonthPressed(month)}
+                            />
                         })
                     }
                 </View>)

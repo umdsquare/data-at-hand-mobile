@@ -17,6 +17,7 @@ import { DateRangeBar } from '../../../../exploration/DateRangeBar'
 import { StyleTemplates } from '../../../../../style/Styles'
 import { DateTimeHelper } from '../../../../../time'
 import { subDays } from 'date-fns'
+import { SvgIcon, SvgIconType } from '../../../../common/svg/SvgIcon'
 
 const styles = StyleSheet.create({
     containerStyle: { paddingLeft: Sizes.horizontalPadding * .5, paddingRight: Sizes.horizontalPadding * .5 },
@@ -35,7 +36,8 @@ const styles = StyleSheet.create({
         paddingRight: Sizes.horizontalPadding,
     }
 })
-const iconInfo = { name: "arrow-forward", type: 'materialicon', color: 'white' }
+const iconInfo = <SvgIcon style={{marginLeft: 4}} type={SvgIconType.ArrowForward} color={'white'}/>
+
 const gradientProps = { colors: Colors.decisionButtonGradient, start: { x: 0, y: 0 }, end: { x: 1, y: 0 } }
 
 const CompareTwoRangesLabel = "Compare Two Ranges"

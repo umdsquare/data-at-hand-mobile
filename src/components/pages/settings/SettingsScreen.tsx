@@ -11,6 +11,7 @@ import { Icon } from "react-native-elements";
 import Colors from "../../../style/Colors";
 import { DataServiceManager } from "../../../system/DataServiceManager";
 import { connectActionSheet } from '@expo/react-native-action-sheet'
+import { SvgIcon, SvgIconType } from "../../common/svg/SvgIcon";
 
 const styles = StyleSheet.create({
     rowContainerStyle: {
@@ -40,12 +41,8 @@ const SettingsRow = (props: {title: string, value?: string, onClick: ()=>void}) 
     return <TouchableHighlight underlayColor="#00000050" onPress={()=>{ props.onClick()}}> 
         <View  style={styles.rowContainerStyle}><Text style={styles.rowTitleStyle}>{props.title}</Text>
         <Text style={styles.rowValueStyle}>{props.value}</Text>
-        <Icon
-                name="keyboard-arrow-right"
-                type='materialicon'
-                color='gray'
-                onPress={this.onPrevClicked}
-            /></View>
+        <SvgIcon type={SvgIconType.ArrowRight} color='gray'/>
+        </View>
         
     </TouchableHighlight>
 }

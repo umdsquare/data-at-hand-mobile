@@ -30,6 +30,7 @@ import { check, PERMISSIONS, RESULTS, request, openSettings } from 'react-native
 import { GlobalSpeechOverlay } from "./parts/main/GlobalSpeechOverlay";
 import Haptic from "react-native-haptic-feedback";
 import { startSpeechSession, requestStopDictation } from "../../../state/speech/commands";
+import { SvgIcon, SvgIconType } from "../../common/svg/SvgIcon";
 
 var deepEqual = require('deep-equal');
 
@@ -77,8 +78,7 @@ const styles = StyleSheet.create({
     }
 })
 
-const historyIconStyle = { type: 'ionicon', name: "ios-undo", color: 'white', size: 20 }
-const undoIconStyle = { ...historyIconStyle, type: 'fontawesome', name: "undo" }
+const undoIconStyle = <SvgIcon type={SvgIconType.Reset} size={20}/>
 
 
 export interface ExplorationProps extends PropsWithNavigation {

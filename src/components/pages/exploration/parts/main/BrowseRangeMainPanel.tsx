@@ -18,6 +18,7 @@ import { Icon } from "react-native-elements";
 import commaNumber from 'comma-number';
 import unitConvert from 'convert-units';
 import { TouchableHighlight } from "react-native-gesture-handler";
+import { SvgIcon, SvgIconType } from "../../../../common/svg/SvgIcon";
 
 const styles = StyleSheet.create({
     listItemStyle: {
@@ -305,7 +306,7 @@ const Item = (prop: {
             {
                 valueElement
             }
-            <Icon type="materialicons" name="keyboard-arrow-right" color={Colors.textGray} />
+            <SvgIcon type={SvgIconType.ArrowRight} color={Colors.textGray}/>
             {
                 prop.isHighlighted === true && <View style={styles.listItemHighlightStyle} />
             }
