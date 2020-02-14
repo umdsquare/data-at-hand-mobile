@@ -1,5 +1,4 @@
 import {NativeModules} from 'react-native';
-import { DataServiceManager } from '../../../system/DataServiceManager';
 
 export enum HealthDataType {
     Step = "step",

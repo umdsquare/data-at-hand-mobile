@@ -62,8 +62,7 @@ class App extends React.Component<any, State> {
     }
 
     try {
-      await naturalLanguageRecognizer.initialize()
-
+      //await naturalLanguageRecognizer.initialize()
       this.setState({ isLoading: false })
       console.log("initial loading finished in ", Date.now() - loadingStartTime, "milis.")
     } catch (err) {
@@ -72,9 +71,6 @@ class App extends React.Component<any, State> {
   }
 
   render() {
-    const usingHermes = typeof HermesInternal === 'object' && HermesInternal !== null;
-    if (usingHermes === true) console.log("Using Hermes engine.")
-
     return <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <SafeAreaProvider>

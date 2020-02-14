@@ -35,6 +35,7 @@ class SpeechRecognitionManager: RCTEventEmitter{
       return _speechRecognizer!
     }else{
       _speechRecognizer = SFSpeechRecognizer.init(locale: Locale.init(identifier: "en-US"))
+      _speechRecognizer?.defaultTaskHint = .confirmation
       return _speechRecognizer!
     }
   }
@@ -86,6 +87,7 @@ class SpeechRecognitionManager: RCTEventEmitter{
     
     currentRecognitionRequest = SFSpeechAudioBufferRecognitionRequest()
     guard let currentRecognitionRequest = currentRecognitionRequest else { fatalError("Unable to create a SFSpeechAudioBufferRecognitionRequest object") }
+    currentRecognitionRequest.shouldReportPartialResults = true
     
     if #available(iOS 13, *) {
       currentRecognitionRequest.requiresOnDeviceRecognition = false

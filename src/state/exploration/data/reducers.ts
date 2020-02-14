@@ -29,7 +29,9 @@ export const explorationDataStateReducer = (
   state: ExplorationDataState = INITIAL_STATE,
   action: ActionTypeBase,
 ): ExplorationDataState => {
-  const newState: ExplorationDataState = JSON.parse(JSON.stringify(state));
+  const newState: ExplorationDataState = {
+    ...state
+  }
 
 
   switch (action.type) {
