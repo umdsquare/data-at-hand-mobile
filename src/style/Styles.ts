@@ -1,6 +1,7 @@
 import {Sizes} from './Sizes';
 import {StyleSheet} from 'react-native';
 import Colors from './Colors';
+import { ZIndices } from '../components/pages/exploration/parts/zIndices';
 
 const StyleTemplates = StyleSheet.create({
   screenDefaultStyle: {
@@ -98,7 +99,7 @@ const StyleTemplates = StyleSheet.create({
 
   bottomSheetModalContainerStyle: {
     flexDirection: 'row', margin: 0,
-    elevation: 8
+    elevation: 10,
   },
 
   bottomSheetModalViewStyle: {

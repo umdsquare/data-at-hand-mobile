@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import { ReduxAppState } from '../../../../../state/types';
 import { SpeechRecognizerSessionStatus } from '../../../../../state/speech/types';
 import { useSafeArea } from 'react-native-safe-area-context';
+import { ZIndices } from '../zIndices';
 
 const bottomBarIconSize = 21
 
@@ -61,7 +62,7 @@ const Styles = StyleSheet.create({
         position: 'absolute',
         top: -14,
         left: Math.round((Dimensions.get('window').width - Sizes.speechInputButtonSize) / 2),
-        zIndex: 80
+        zIndex: ZIndices.Footer
     }
 })
 

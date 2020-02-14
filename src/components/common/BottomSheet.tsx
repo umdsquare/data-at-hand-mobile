@@ -48,7 +48,8 @@ export class BottomSheet extends React.Component<Props, State>{
             propagateSwipe={true}
             onBackdropPress={this.onBackdropPress}
             style={StyleTemplates.bottomSheetModalContainerStyle}
-            backdropOpacity={0.3}>
+            backdropOpacity={0.3}
+            >
             <SafeAreaConsumer>
                 {
                     insets => <View style={{

@@ -20,6 +20,7 @@ import { ThunkDispatch } from 'redux-thunk'
 import { startSpeechSession, requestStopDictation } from '../../../../../state/speech/commands';
 import Haptic from 'react-native-haptic-feedback';
 import Insets from 'react-native-static-safe-area-insets';
+import { ZIndices } from '../zIndices'
 
 const borderRadius = 8
 
@@ -274,7 +275,7 @@ class TooltipOverlay extends React.Component<Props, State>{
     }
 
     render() {
-        return <View pointerEvents="none" style={{...StyleTemplates.fitParent, zIndex: 2000, elevation: 10}}>
+        return <View pointerEvents="none" style={{...StyleTemplates.fitParent, zIndex: ZIndices.TooltipOverlay, elevation: 10}}>
             <Animated.View
                 style={{
                     ...StyleTemplates.fitParent,

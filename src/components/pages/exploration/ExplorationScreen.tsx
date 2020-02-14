@@ -31,6 +31,8 @@ import { GlobalSpeechOverlay } from "./parts/main/GlobalSpeechOverlay";
 import Haptic from "react-native-haptic-feedback";
 import { startSpeechSession, requestStopDictation } from "../../../state/speech/commands";
 import { SvgIcon, SvgIconType } from "../../common/svg/SvgIcon";
+import { ZIndices } from "./parts/zIndices";
+import { DataBusyOverlay } from "./parts/main/DataBusyOverlay";
 
 var deepEqual = require('deep-equal');
 
@@ -38,12 +40,14 @@ const styles = StyleSheet.create({
 
     headerContainerStyle: {
         backgroundColor: Colors.headerBackground,
+        zIndex: ZIndices.Header,
+        elevation: 7
     },
 
     mainContainerStyle: {
         ...StyleTemplates.screenDefaultStyle,
         backgroundColor: "#EFEFF4",
-        zIndex: Platform.OS === 'android' ? 100 : undefined,
+        zIndex: Platform.OS === 'android' ? 50 : undefined,
     },
 
     historyPanelStyle: {
@@ -266,6 +270,8 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
             <TooltipOverlay />
             <GlobalSpeechOverlay isGlobalSpeechButtonPressed = {this.state.globalSpeechButtonPressed}/>
+
+           <DataBusyOverlay isBusy={this.props.explorationDataState.isBusy}/>
 
         </View>
     }

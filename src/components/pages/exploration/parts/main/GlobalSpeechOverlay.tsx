@@ -4,6 +4,7 @@ import { StyleTemplates } from '../../../../../style/Styles'
 import { SpeechInputPanel } from '../../../../exploration/SpeechInputPanel'
 import { Sizes } from '../../../../../style/Sizes'
 import LinearGradient from 'react-native-linear-gradient'
+import { ZIndices } from '../zIndices'
 
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
@@ -12,7 +13,8 @@ const styles = StyleSheet.create({
     containerStyle: {
         ...StyleTemplates.fitParent,
         ...StyleTemplates.contentVerticalCenteredContainer,
-        zIndex: 2000
+        zIndex: ZIndices.GlobalSpeechOverlay,
+        elevation: 8
     },
     popupStyle: {
         backgroundColor: 'white',
