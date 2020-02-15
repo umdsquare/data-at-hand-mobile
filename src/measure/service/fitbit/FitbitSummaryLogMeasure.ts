@@ -4,7 +4,7 @@ import { FITBIT_DATE_FORMAT } from './api';
 import { FitbitRangeMeasure } from './FitbitRangeMeasure';
 import { FitbitLocalTableName, makeCyclicGroupQuery, makeAggregatedQuery, makeCycleDimensionRangeQuery } from './sqlite/database';
 import { SQLiteHelper } from '../../../database/sqlite/sqlite-helper';
-import { GroupedData, IAggregatedValue, GroupedRangeData, FilteredDailyValues } from '../../../core/exploration/data/types';
+import { GroupedData, IAggregatedValue, GroupedRangeData, FilteredDailyValues, BoxPlotInfo } from '../../../core/exploration/data/types';
 import { CyclicTimeFrame, CycleDimension, getCycleTypeOfDimension, getTimeKeyOfDimension } from '../../../core/exploration/cyclic_time';
 
 export abstract class FitbitSummaryLogMeasure<
@@ -24,6 +24,10 @@ export abstract class FitbitSummaryLogMeasure<
 
   protected shouldReject(rowValue: number): boolean { return false }
 
+  protected getBoxPlotInfoOfDatasetFromDb(): Promise<BoxPlotInfo>{
+    return this.service.fitbitLocalDbManager.getBoxplotInfo(this.dbTableName)
+  }
+
   async fetchPreliminaryData(
     startDate: number,
     endDate: number,
@@ -33,11 +37,14 @@ export abstract class FitbitSummaryLogMeasure<
     min: number;
     max: number;
     sum: number;
+    valueRange: [number, number]
   }> {
 
     const condition = "`numberedDate` BETWEEN ? AND ? ORDER BY `numberedDate`"
     const params = [startDate, endDate]
     const list = await this.service.fitbitLocalDbManager.fetchData(this.dbTableName, condition, params)
+
+    const boxPlotInfo = await this.getBoxPlotInfoOfDataset()
     /*
         const filtered = this.service.realm
           .objects<RealmEntryClassType>(this.realmEntryClassType)
@@ -55,6 +62,7 @@ export abstract class FitbitSummaryLogMeasure<
       min: await this.service.fitbitLocalDbManager.getAggregatedValue(this.dbTableName, SQLiteHelper.AggregationType.MIN, 'value', condition, params),
       max: await this.service.fitbitLocalDbManager.getAggregatedValue(this.dbTableName, SQLiteHelper.AggregationType.MAX, 'value', condition, params),
       sum: await this.service.fitbitLocalDbManager.getAggregatedValue(this.dbTableName, SQLiteHelper.AggregationType.SUM, 'value', condition, params),
+      valueRange: [boxPlotInfo.minWithoutOutlier, boxPlotInfo.maxWithoutOutlier]
     });
   }
 

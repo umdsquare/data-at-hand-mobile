@@ -3,7 +3,8 @@ import { DataSourceType } from "../../../measure/DataSourceSpec";
 
 export interface ChartProps{
     dataSource: DataSourceType,
-    dateRange: number[], 
+    dateRange: number[],
+    preferredValueRange: number[],
     data: Array<{value: number, numberedDate: number}>,
     containerWidth: number, 
     containerHeight: number,

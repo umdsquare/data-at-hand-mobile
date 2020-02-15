@@ -26,9 +26,11 @@ export const DailyHeartRateChart = (prop: ChartProps) => {
     const today = DateTimeHelper.toNumberedDateFromDate(new Date())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
+    const valueMin = Math.min(d3Array.min(prop.data, d => d.value), prop.preferredValueRange[0] || Number.MAX_SAFE_INTEGER)
+    const valueMax = Math.max(d3Array.max(prop.data, d => d.value), prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)
 
     const scaleY = scaleLinear()
-        .domain([d3Array.min(prop.data, d => d.value) - 1, d3Array.max(prop.data, d => d.value) + 1])
+        .domain([valueMin - 1, valueMax + 1])
         .range([chartArea.height, 0])
         .nice()
 

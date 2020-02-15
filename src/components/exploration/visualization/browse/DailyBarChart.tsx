@@ -13,9 +13,10 @@ import { GroupWithTouchInteraction } from './GroupWithTouchInteraction';
 import { UIManager } from 'react-native';
 
 interface Props extends ChartProps {
-    valueRange?: number[],
     valueTickFormat?: (number) => string,
-    valueTicksOverride?: (maxValue: number) => number[]
+    valueTicksOverride?: (maxValue: number) => {
+        newDomain: number[],
+        ticks: number[]}
 }
 
 export const DailyBarChart = (prop: Props) => {
@@ -33,17 +34,26 @@ export const DailyBarChart = (prop: Props) => {
     const today = DateTimeHelper.toNumberedDateFromDate(new Date())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
-
     const scaleY = scaleLinear()
-        .domain([0, d3Array.max(prop.data, d => d.value)])
+        .domain([0, Math.max(d3Array.max(prop.data, d => d.value), prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)])
         .range([chartArea.height, 0])
         .nice()
 
     const mean = prop.data.length > 0 ? d3Array.mean(prop.data, d => d.value) : null
 
+    let ticks: number[]
+    if(prop.valueTicksOverride){
+        const tickInfo = prop.valueTicksOverride(scaleY.domain()[1])
+        scaleY.domain(tickInfo.newDomain)
+        ticks = tickInfo.ticks
+    }
+    else {
+        ticks = scaleY.ticks(5)
+    }
+
     return <Svg width={prop.containerWidth} height={prop.containerHeight} onLayout={(layout) => { setChartLayout(layout.nativeEvent.layout) }}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
-        <AxisSvg key="yAxis" tickMargin={0} ticks={prop.valueTicksOverride != null ? prop.valueTicksOverride(scaleY.domain()[1]) : scaleY.ticks(5)} tickFormat={prop.valueTickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
+        <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={prop.valueTickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
 
         <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date).value}>
             {

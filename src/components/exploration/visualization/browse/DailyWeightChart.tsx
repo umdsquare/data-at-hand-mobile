@@ -21,6 +21,7 @@ export const DailyWeightChart = (prop: {
         trend: Array<{ numberedDate: number, value: number }>,
         logs: Array<IWeightIntraDayLogEntry>
     },
+    preferredValueRange: number[],
     futureNearestLog: IWeightIntraDayLogEntry,
     pastNearestLog: IWeightIntraDayLogEntry,
     containerWidth: number,
@@ -28,7 +29,7 @@ export const DailyWeightChart = (prop: {
     measureUnitType: MeasureUnitType
 }) => {
 
-    const convert = prop.measureUnitType === MeasureUnitType.Metric? noop : (n) => unitConvert(n).from('kg').to('lb')
+    const convert = prop.measureUnitType === MeasureUnitType.Metric ? noop : (n) => unitConvert(n).from('kg').to('lb')
 
     const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
 
@@ -41,17 +42,21 @@ export const DailyWeightChart = (prop: {
     const today = DateTimeHelper.toNumberedDateFromDate(new Date())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
-    const trendMin = prop.data.trend.length > 0 ? d3Array.min(prop.data.trend, d => convert(d.value)) : null
-    const trendMax = prop.data.trend.length > 0 ? d3Array.max(prop.data.trend, d => convert(d.value)) : null
+    const trendMin = prop.data.trend.length > 0 ? d3Array.min(prop.data.trend, d => convert(d.value)) : Number.MAX_SAFE_INTEGER
+    const trendMax = prop.data.trend.length > 0 ? d3Array.max(prop.data.trend, d => convert(d.value)) : Number.MIN_SAFE_INTEGER
 
-    const logMin = prop.data.logs.length > 0 ? d3Array.min(prop.data.logs, d => convert(d.value)) : null
-    const logMax = prop.data.logs.length > 0 ? d3Array.max(prop.data.logs, d => convert(d.value)) : null
+    const logMin = prop.data.logs.length > 0 ? d3Array.min(prop.data.logs, d => convert(d.value)) : Number.MAX_SAFE_INTEGER
+    const logMax = prop.data.logs.length > 0 ? d3Array.max(prop.data.logs, d => convert(d.value)) : Number.MIN_SAFE_INTEGER
+
+    const preferredMin = prop.preferredValueRange[0] != null ? convert(prop.preferredValueRange[0]) : null
+    const preferredMax = prop.preferredValueRange[1] != null ? convert(prop.preferredValueRange[1]) : null
+    const weightDomain = [
+        Math.floor(((trendMin === Number.MAX_SAFE_INTEGER && logMin === Number.MAX_SAFE_INTEGER && preferredMin == null) ? 0 : Math.min(trendMin, logMin, preferredMin || Number.MAX_SAFE_INTEGER)) - 1),
+        Math.ceil(((trendMax === Number.MIN_SAFE_INTEGER && logMax === Number.MIN_SAFE_INTEGER && preferredMax == null) ? 0 : Math.max(trendMax, logMax, preferredMax || Number.MIN_SAFE_INTEGER)) + 1),
+    ]
 
     const scaleY = scaleLinear()
-        .domain([
-            (trendMin != null || logMin != null ? (Math.min(trendMin || logMin, logMin || trendMin) - 1) : 0),
-            (trendMax != null || logMax != null ? (Math.max(trendMax || logMax, logMax || trendMax) + 1) : 0),
-        ])
+        .domain(weightDomain)
         .range([chartArea.height, 0])
         .nice()
 
@@ -88,13 +93,13 @@ export const DailyWeightChart = (prop: {
                 />
             }
             {
-                veryLastLog && <Line 
-                    x1={scaleX(Math.max(veryLastLog.numberedDate, scaleX.domain()[0]))} 
+                veryLastLog && <Line
+                    x1={scaleX(Math.max(veryLastLog.numberedDate, scaleX.domain()[0]))}
                     x2={chartArea.width}
                     y={scaleY(convert(veryLastLog.value))}
                     stroke={Colors.today}
                     strokeWidth={2}
-                    />
+                />
             }
         </G>
     </Svg>

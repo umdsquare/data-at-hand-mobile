@@ -1,8 +1,8 @@
 import SQLite from 'react-native-sqlite-storage';
-import {SQLiteHelper} from '../../../../database/sqlite/sqlite-helper';
+import { SQLiteHelper } from '../../../../database/sqlite/sqlite-helper';
 import stringFormat from 'string-format';
-import {CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension} from '../../../../core/exploration/cyclic_time';
-import { IIntraDayHeartRatePoint } from '../../../../core/exploration/data/types';
+import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension } from '../../../../core/exploration/cyclic_time';
+import { IIntraDayHeartRatePoint, BoxPlotInfo } from '../../../../core/exploration/data/types';
 SQLite.DEBUG(false);
 SQLite.enablePromise(true);
 
@@ -38,6 +38,8 @@ export enum FitbitLocalTableName {
   CachedRange = 'CachedRange',
 
   CachedIntraDayDates = 'CachedIntraDayDates',
+
+  CachedDataSourceSummary = "CachedDataSourceSummary",
 
   StepCountIntraDay = 'StepCountIntraDay',
 }
@@ -145,9 +147,9 @@ export function makeCycleDimensionRangeQuery(
   const cycleLevel = getCycleLevelOfDimension(cycleDimension)
   const cycleType = getCycleTypeOfDimension(cycleDimension)
 
-  if(cycleLevel != "year"){
+  if (cycleLevel != "year") {
     throw "Cycle level should be either year."
-  }else{
+  } else {
 
     const base = {
       select: cycleLevel + ' as timeKey, ' + selectColumnsClause,
@@ -164,13 +166,13 @@ export function makeCycleDimensionRangeQuery(
         getTimeKeyOfDimension(cycleDimension),
     };
 
-    if(cycleType == CyclicTimeFrame.SeasonOfYear){
+    if (cycleType == CyclicTimeFrame.SeasonOfYear) {
       base.select = seasonCaseClause + ' timeKey, ' + selectColumnsClause
       base.whereClause = '`numberedDate` BETWEEN ' +
-      start +
-      ' AND ' +
-      end +
-      ' AND timeKey = ' + getTimeKeyOfDimension(cycleDimension)
+        start +
+        ' AND ' +
+        end +
+        ' AND timeKey = ' + getTimeKeyOfDimension(cycleDimension)
     }
 
     return stringFormat(groupByQueryFormat, base);
@@ -178,32 +180,32 @@ export function makeCycleDimensionRangeQuery(
 }
 
 const dailySummaryProperties = {
-  numberedDate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, primary: true},
-  year: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
-  month: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
-  dayOfWeek: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
+  numberedDate: { type: SQLiteHelper.SQLiteColumnType.INTEGER, primary: true },
+  year: { type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true },
+  month: { type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true },
+  dayOfWeek: { type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true },
 };
 
 const intraDayLogProperties = {
   ...dailySummaryProperties,
-  numberedDate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
-  secondsOfDay: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
-  id: {type: SQLiteHelper.SQLiteColumnType.TEXT, primary: true},
+  numberedDate: { type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true },
+  secondsOfDay: { type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true },
+  id: { type: SQLiteHelper.SQLiteColumnType.TEXT, primary: true },
 };
 
 const StepCountSchema = {
   name: FitbitLocalTableName.StepCount,
   columns: {
     ...dailySummaryProperties,
-    value: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
+    value: { type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true },
   },
 } as SQLiteHelper.TableSchema;
 
 const IntraDayStepCountSchema = {
   name: FitbitLocalTableName.StepCountIntraDay,
   columns: {
-    numberedDate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, primary: true},
-    hourlySteps: {type: SQLiteHelper.SQLiteColumnType.TEXT},
+    numberedDate: { type: SQLiteHelper.SQLiteColumnType.INTEGER, primary: true },
+    hourlySteps: { type: SQLiteHelper.SQLiteColumnType.TEXT },
   },
 };
 
@@ -211,21 +213,21 @@ const RestingHeartRateSchema = {
   name: FitbitLocalTableName.RestingHeartRate,
   columns: {
     ...dailySummaryProperties,
-    value: {type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true},
+    value: { type: SQLiteHelper.SQLiteColumnType.INTEGER, indexed: true },
   },
 };
 
 const IntraDayHeartRateInfoSchema = {
   name: FitbitLocalTableName.HeartRateIntraDayInfo,
   columns: {
-    numberedDate: {type: SQLiteHelper.SQLiteColumnType.INTEGER, primary: true},
+    numberedDate: { type: SQLiteHelper.SQLiteColumnType.INTEGER, primary: true },
     restingHeartRate: {
       type: SQLiteHelper.SQLiteColumnType.INTEGER,
       optional: true,
     },
-    points: {type: SQLiteHelper.SQLiteColumnType.TEXT},
-    customZones: {type: SQLiteHelper.SQLiteColumnType.TEXT, optional: true},
-    zones: {type: SQLiteHelper.SQLiteColumnType.TEXT},
+    points: { type: SQLiteHelper.SQLiteColumnType.TEXT },
+    customZones: { type: SQLiteHelper.SQLiteColumnType.TEXT, optional: true },
+    zones: { type: SQLiteHelper.SQLiteColumnType.TEXT },
   },
 };
 
@@ -233,7 +235,7 @@ const WeightTrendSchema = {
   name: FitbitLocalTableName.WeightTrend,
   columns: {
     ...dailySummaryProperties,
-    value: {type: SQLiteHelper.SQLiteColumnType.REAL, indexed: true},
+    value: { type: SQLiteHelper.SQLiteColumnType.REAL, indexed: true },
   },
 };
 
@@ -241,8 +243,8 @@ const WeightLogSchema = {
   name: FitbitLocalTableName.WeightLog,
   columns: {
     ...intraDayLogProperties,
-    value: {type: SQLiteHelper.SQLiteColumnType.REAL, indexed: true},
-    source: {type: SQLiteHelper.SQLiteColumnType.TEXT, optional: true},
+    value: { type: SQLiteHelper.SQLiteColumnType.REAL, indexed: true },
+    source: { type: SQLiteHelper.SQLiteColumnType.TEXT, optional: true },
   },
 };
 
@@ -250,36 +252,45 @@ const MainSleepLogSchema = {
   name: FitbitLocalTableName.SleepLog,
   columns: {
     ...dailySummaryProperties,
-    quality: {type: SQLiteHelper.SQLiteColumnType.INTEGER},
+    quality: { type: SQLiteHelper.SQLiteColumnType.INTEGER },
     lengthInSeconds: {
       type: SQLiteHelper.SQLiteColumnType.INTEGER,
       indexed: true,
     },
-    stageType: {type: SQLiteHelper.SQLiteColumnType.TEXT, optional: true},
-    bedTimeDiffSeconds: {type: SQLiteHelper.SQLiteColumnType.INTEGER},
-    wakeTimeDiffSeconds: {type: SQLiteHelper.SQLiteColumnType.INTEGER},
-    listOfLevels: {type: SQLiteHelper.SQLiteColumnType.TEXT, optional: true},
+    stageType: { type: SQLiteHelper.SQLiteColumnType.TEXT, optional: true },
+    bedTimeDiffSeconds: { type: SQLiteHelper.SQLiteColumnType.INTEGER },
+    wakeTimeDiffSeconds: { type: SQLiteHelper.SQLiteColumnType.INTEGER },
+    listOfLevels: { type: SQLiteHelper.SQLiteColumnType.TEXT, optional: true },
   },
 };
 
 const CachedRangeSchema = {
   name: FitbitLocalTableName.CachedRange,
   columns: {
-    measureKey: {type: SQLiteHelper.SQLiteColumnType.TEXT, primary: true},
-    endDate: {type: SQLiteHelper.SQLiteColumnType.INTEGER},
-    queriedAt: {type: SQLiteHelper.SQLiteColumnType.TEXT},
+    measureKey: { type: SQLiteHelper.SQLiteColumnType.TEXT, primary: true },
+    endDate: { type: SQLiteHelper.SQLiteColumnType.INTEGER },
+    queriedAt: { type: SQLiteHelper.SQLiteColumnType.TEXT },
   },
 };
 
 const CachedIntraDayDatesSchema = {
   name: FitbitLocalTableName.CachedIntraDayDates,
   columns: {
-    measureKey: {type: SQLiteHelper.SQLiteColumnType.TEXT, index: true},
-    date: {type: SQLiteHelper.SQLiteColumnType.INTEGER, index: true},
-    queriedAt: {type: SQLiteHelper.SQLiteColumnType.TEXT},
-    id: {type: SQLiteHelper.SQLiteColumnType.TEXT, primary: true},
+    measureKey: { type: SQLiteHelper.SQLiteColumnType.TEXT, index: true },
+    date: { type: SQLiteHelper.SQLiteColumnType.INTEGER, index: true },
+    queriedAt: { type: SQLiteHelper.SQLiteColumnType.TEXT },
+    id: { type: SQLiteHelper.SQLiteColumnType.TEXT, primary: true },
   },
 };
+
+const DatasetSummaryCache = {
+  name: FitbitLocalTableName.CachedDataSourceSummary,
+  columns: {
+    measureKey: { type: SQLiteHelper.SQLiteColumnType.TEXT, primary: true },
+    min: { type: SQLiteHelper.SQLiteColumnType.REAL },
+    max: { type: SQLiteHelper.SQLiteColumnType.REAL },
+  }
+}
 
 const schemas = [
   StepCountSchema,
@@ -299,7 +310,7 @@ const dbConfig = {
 } as SQLite.DatabaseParams;
 
 export class FitbitLocalDbManager {
-  private _database: SQLite.SQLiteDatabase;
+  private _dbInitPromise: Promise<SQLite.SQLiteDatabase>
 
   constructor() {
     console.log('initialize Fitbit Local DB Manager');
@@ -310,40 +321,39 @@ export class FitbitLocalDbManager {
   }
 
   open(): Promise<SQLite.SQLiteDatabase> {
-    if (this._database != null) {
-      return Promise.resolve(this._database);
-    } else
-      return SQLite.openDatabase(dbConfig)
-        .then(db => {
-          this._database = db;
-          return db;
-        })
-        .then(db => {
-          return db
-            .transaction(tx => {
-              //initialize tables
-              const queries = schemas.map(s =>
-                SQLiteHelper.genCreateTableQuery(s),
-              );
-              for (const querySet of queries) {
-                if (querySet.createQuery != null) {
-                  tx.executeSql(querySet.createQuery);
-                }
-                if (querySet.indexQueries && querySet.indexQueries.length > 0) {
-                  for (const indexQuery of querySet.indexQueries) {
-                    tx.executeSql(indexQuery);
-                  }
+    if (this._dbInitPromise) {
+      return this._dbInitPromise
+    }
+
+    this._dbInitPromise = SQLite.openDatabase(dbConfig)
+      .then(db => {
+        return db
+          .transaction(tx => {
+            //initialize tables
+            const queries = schemas.map(s =>
+              SQLiteHelper.genCreateTableQuery(s),
+            );
+            for (const querySet of queries) {
+              if (querySet.createQuery != null) {
+                tx.executeSql(querySet.createQuery);
+              }
+              if (querySet.indexQueries && querySet.indexQueries.length > 0) {
+                for (const indexQuery of querySet.indexQueries) {
+                  tx.executeSql(indexQuery);
                 }
               }
-            })
-            .then(tx => db);
-        });
+            }
+          })
+          .then(tx => db);
+      });
+
+    return this._dbInitPromise
   }
 
   async close(): Promise<void> {
-    if (this._database) {
-      await this._database.close();
-      this._database = null;
+    if (this._dbInitPromise) {
+      (await this._dbInitPromise).close();
+      this._dbInitPromise = null
     } else return
   }
 
@@ -383,7 +393,7 @@ export class FitbitLocalDbManager {
           );
         }
       })
-      .then(tx => {});
+      .then(tx => { });
   }
 
   async getCachedRange(measureKey: string): Promise<ICachedRangeEntry> {
@@ -458,6 +468,55 @@ export class FitbitLocalDbManager {
   async selectQuery<T>(query: string): Promise<T[]> {
     const [result] = await (await this.open()).executeSql(query);
     return result.rows.raw();
+  }
+
+  async findPercentileValue(ratio: number, tableName: string, valueColumnName: string = 'value'): Promise<number> {
+    const query = `SELECT ${valueColumnName} as value FROM ${tableName} ORDER BY value ASC\
+    LIMIT 1\
+    OFFSET ROUND((SELECT COUNT(*) FROM ${tableName}) * ${ratio.toFixed(2)}) - 1\
+    `
+    const result = await this.selectQuery<any>(query)
+    if (result.length > 0) {
+      return result[0].value
+    } else return null
+  }
+
+  async findValueClosestTo(closestTo: number, tableName: string, side: 'smaller' | 'larger' | 'closest' = 'closest', valueColumnName: string = 'value'): Promise<number> {
+    let whereClause = null
+    switch (side) {
+      case 'closest':
+        break;
+      case 'smaller':
+        whereClause = `WHERE ${valueColumnName} <= ${closestTo}`
+        break;
+      case 'larger':
+        whereClause = `WHERE ${valueColumnName} >= ${closestTo}`
+    }
+
+    const query = `SELECT ${valueColumnName} as value, MIN(ABS(${closestTo} - ${valueColumnName})) as diff FROM ${tableName} ${whereClause} ORDER BY ${valueColumnName} ASC LIMIT 1 `
+    const result = await this.selectQuery<any>(query)
+    if (result.length > 0) {
+      return result[0].value
+    } else return null
+  }
+
+  async getBoxplotInfo(tableName: string, valueColumnName: string = 'value'): Promise<BoxPlotInfo> {
+    const median = await this.findPercentileValue(0.5, tableName, valueColumnName)
+    
+    const percentile25 = await this.findPercentileValue(0.25, tableName, valueColumnName)
+    const percentile75 = await this.findPercentileValue(0.75, tableName, valueColumnName)
+    const iqr = percentile75 - percentile25
+    const minWithoutOutlier = await this.findValueClosestTo(median - 1 * iqr, tableName, 'larger', valueColumnName)
+    const maxWithoutOutlier = await this.findValueClosestTo(median + 1 * iqr, tableName, 'smaller', valueColumnName)
+
+    return {
+      median,
+      percentile25,
+      percentile75,
+      iqr,
+      minWithoutOutlier,
+      maxWithoutOutlier
+    }
   }
 
   async getAggregatedValue(

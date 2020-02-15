@@ -1,7 +1,9 @@
-import {differenceInMinutes} from 'date-fns';
-import {ICachedRangeEntry} from './sqlite/database';
+import { differenceInMinutes } from 'date-fns';
+import { ICachedRangeEntry } from './sqlite/database';
 import { FitbitServiceMeasureBase } from './FitbitServiceMeasureBase';
-import {DataSourceSpec, DataSourceCategory} from '../../DataSourceSpec'
+import { DataSourceSpec, DataSourceCategory } from '../../DataSourceSpec'
+import { BoxPlotInfo } from '../../../core/exploration/data/types';
+import { AsyncStorageHelper } from '../../../system/AsyncStorageHelper';
 
 export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
   abstract key: string;
@@ -14,7 +16,7 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
 
   async cacheServerData(
     endDate: number,
-  ): Promise<{success: boolean; skipped?: boolean}> {
+  ): Promise<{ success: boolean; skipped?: boolean }> {
     const cachedRange = await this.service.fitbitLocalDbManager.getCachedRange(this.key);
     if (cachedRange != null) {
       console.log(
@@ -27,7 +29,7 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
     if (cachedRange) {
       if (endDate < cachedRange.endDate) {
         console.log("Don't need to cache again for", this.key);
-        return {success: true, skipped: true};
+        return { success: true, skipped: true };
       } else if (endDate === cachedRange.endDate) {
         //if same, check how old after the last day was logged.
         const now = new Date();
@@ -39,6 +41,7 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
             endDate,
             queriedAt: now,
           } as ICachedRangeEntry);
+          await this.invalidateBoxPlotInfoCache()
         } else {
           console.log("Don't need to cache again for", this.key);
         }
@@ -50,6 +53,8 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
           endDate,
           queriedAt: now,
         } as ICachedRangeEntry);
+
+        await this.invalidateBoxPlotInfoCache()
       }
     } else {
       //cache the full region
@@ -62,8 +67,26 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
         endDate,
         queriedAt,
       } as ICachedRangeEntry)
+      await this.invalidateBoxPlotInfoCache()
     }
-
-    return {success: true};
+    return { success: true };
   }
+
+  private async invalidateBoxPlotInfoCache(key: string = null): Promise<void> {
+    return AsyncStorageHelper.remove("fitbit:value_range:" + this.key + ":" + key)
+  }
+
+  async getBoxPlotInfoOfDataset(key: string = null): Promise<BoxPlotInfo> {
+    const cacheKey = "fitbit:value_range:" + this.key + ":" + key
+    const cached = await AsyncStorageHelper.getObject(cacheKey)
+    if (cached) {
+      return cached
+    } else {
+      const result = await this.getBoxPlotInfoOfDatasetFromDb(key)
+      AsyncStorageHelper.set(cacheKey, result)
+      return result
+    }
+  }
+
+  protected abstract getBoxPlotInfoOfDatasetFromDb(key: string): Promise<BoxPlotInfo>
 }

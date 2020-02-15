@@ -1,6 +1,6 @@
 import { DataSourceType } from '../DataSourceSpec';
 import { IntraDayDataSourceType } from '../../core/exploration/types';
-import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData, FilteredDailyValues } from '../../core/exploration/data/types';
+import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData, FilteredDailyValues, OverviewSourceRow } from '../../core/exploration/data/types';
 import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension, getFilteredCycleDimensionList } from '../../core/exploration/cyclic_time';
 import { DateTimeHelper } from '../../time';
 import { startOfMonth, endOfMonth, addMonths } from 'date-fns';
@@ -44,7 +44,7 @@ export abstract class DataService {
 
   abstract isDataSourceSupported(dataSource: DataSourceType): boolean
 
-  fetchData(dataSource: DataSourceType, start: number, end: number): Promise<any>{
+  fetchData(dataSource: DataSourceType, start: number, end: number): Promise<OverviewSourceRow>{
     /*
     const today = DateTimeHelper.toNumberedDateFromDate(new Date())
     if(start > today) {
@@ -54,6 +54,8 @@ export abstract class DataService {
     }*/
     return this.fetchDataImpl(dataSource, start, end)
   }
+
+  abstract getPreferredValueRange(dataSource: DataSourceType): Promise<[number, number]>
 
   abstract fetchIntraDayData(intraDayDataSource: IntraDayDataSourceType, date: number): Promise<any>
 

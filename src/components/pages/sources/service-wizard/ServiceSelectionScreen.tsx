@@ -57,7 +57,7 @@ class ServiceSelectionScreen extends React.Component<Prop, State>{
                                 onSelected={
                                     () => {
                                         if (this.props.selectedServiceKey != service.key) {
-                                            DataServiceManager.getServiceByKey(service.key).activateInSystem()
+                                            DataServiceManager.getServiceByKey(service.key).activateInSystem((progressInfo)=>{})
                                                 .then(result => {
                                                     if (result.success === true) {
                                                         return DataServiceManager.getServiceByKey(this.props.selectedServiceKey)

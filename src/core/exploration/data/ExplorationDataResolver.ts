@@ -33,7 +33,7 @@ class ExplorationDataResolver {
     }
   }
 
-  private loadBrowseRangeData(info: ExplorationInfo, selectedServiceKey: string): Promise<OverviewSourceRow> {
+  private async loadBrowseRangeData(info: ExplorationInfo, selectedServiceKey: string): Promise<OverviewSourceRow> {
     const range = explorationInfoHelper.getParameterValue(
       info,
       ParameterType.Range,
@@ -44,7 +44,9 @@ class ExplorationDataResolver {
       selectedServiceKey,
     );
 
-    return selectedService.fetchData(source, range[0], range[1])
+    const data = await selectedService.fetchData(source, range[0], range[1])
+    data.preferredValueRange = await selectedService.getPreferredValueRange(source)
+    return data
   }
 
   private loadOverviewData(info: ExplorationInfo, selectedServiceKey: string, ): Promise<OverviewData> {
@@ -60,7 +62,10 @@ class ExplorationDataResolver {
     return Promise.all(
       dataSourceManager.supportedDataSources.map(source =>
         selectedService.fetchData(source.type, range[0], range[1])
-          .then(result => result != null ? result : { source: source.type })
+          .then(result => result != null ? (selectedService.getPreferredValueRange(source.type).then(range => {
+            result.preferredValueRange = range
+            return result
+          })) : { source: source.type } as any)
       )).then(dataPerSource => ({ sourceDataList: dataPerSource }));
   }
 

@@ -274,35 +274,43 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, width
         case DataSourceType.StepCount:
             return <DailyBarChart
                 dataSource={DataSourceType.StepCount}
+                preferredValueRange={data.preferredValueRange}
                 dateRange={data.range} data={data.data} containerHeight={height} containerWidth={width}
                 valueTickFormat={(tick: number) => { return (tick % 1000 === 0 && tick != 0) ? tick / 1000 + "k" : commaNumber(tick) }} />
         case DataSourceType.HoursSlept:
             return <DailyBarChart dateRange={data.range}
 
                 dataSource={DataSourceType.HoursSlept}
+                preferredValueRange={data.preferredValueRange}
                 data={data.data.map(d => ({ numberedDate: d.numberedDate, value: d.lengthInSeconds }))}
                 containerHeight={height} containerWidth={width}
                 valueTickFormat={(tick: number) => { return DateTimeHelper.formatDuration(tick, true) }}
                 valueTicksOverride={(maxValue: number) => {
                     const scale = scaleLinear().domain([0, Math.ceil(maxValue / 3600)]).nice()
-                    return scale.ticks(5).map(t => t * 3600)
+                    return {
+                        ticks: scale.ticks(5).map(t => t * 3600),
+                        newDomain: scale.domain().map(t => t * 3600)
+                    }
                 }}
             />
         case DataSourceType.HeartRate:
             return <DailyHeartRateChart
 
                 dataSource={DataSourceType.HeartRate}
+                preferredValueRange={data.preferredValueRange}
                 dateRange={data.range} data={data.data} containerWidth={width} containerHeight={height}
             />
         case DataSourceType.SleepRange:
             return <DailySleepRangeChart
                 dataSource={DataSourceType.SleepRange}
+                preferredValueRange={data.preferredValueRange}
                 dateRange={data.range} data={data.data}
                 containerHeight={height} containerWidth={width}
             />
         case DataSourceType.Weight:
             const weightData = data as WeightRangedData
             return <DailyWeightChart dateRange={data.range} data={data.data}
+                preferredValueRange={data.preferredValueRange}
                 pastNearestLog={weightData.pastNearestLog}
                 futureNearestLog={weightData.futureNearestLog}
                 containerWidth={width} containerHeight={height}
@@ -341,7 +349,7 @@ export const DataSourceChartFrame = (props: {
             {
                 props.showToday !== false && props.data.today != null ?
                     <TouchableOpacity style={styles.todayButtonStyle}
-                        onPress={props.onTodayPressed} disabled = {props.onTodayPressed == null}><Text style={styles.headerDescriptionTextStyle}>
+                        onPress={props.onTodayPressed} disabled={props.onTodayPressed == null}><Text style={styles.headerDescriptionTextStyle}>
                             <Text>{todayInfo.label + ": "}</Text>
                             {
                                 todayInfo.formatted != null ? todayInfo.formatted.map((chunk, index) =>

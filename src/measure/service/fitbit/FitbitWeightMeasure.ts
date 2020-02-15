@@ -10,7 +10,7 @@ import {
 import {FitbitRangeMeasure} from './FitbitRangeMeasure';
 import {DateTimeHelper} from '../../../time';
 import {parse, getDay} from 'date-fns';
-import {WeightRangedData, GroupedData, IAggregatedValue, FilteredDailyValues} from '../../../core/exploration/data/types';
+import {WeightRangedData, GroupedData, IAggregatedValue, FilteredDailyValues, BoxPlotInfo} from '../../../core/exploration/data/types';
 import {DataSourceType} from '../../DataSourceSpec';
 import { FitbitLocalTableName } from './sqlite/database';
 import { CyclicTimeFrame, CycleDimension } from '../../../core/exploration/cyclic_time';
@@ -26,6 +26,11 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
     super(service);
     this.trendMeasure = new FitbitWeightTrendMeasure(service);
     this.logMeasure = new FitbitWeightLogMeasure(service);
+  }
+
+
+  protected getBoxPlotInfoOfDatasetFromDb(): Promise<BoxPlotInfo> {
+    return this.service.fitbitLocalDbManager.getBoxplotInfo(FitbitLocalTableName.WeightTrend)
   }
 
   async cacheServerData(
@@ -132,6 +137,10 @@ class FitbitWeightTrendMeasure extends FitbitSummaryLogMeasure<FitbitWeightTrend
 class FitbitWeightLogMeasure extends FitbitRangeMeasure<
   FitbitWeightQueryResult
 > {
+
+  protected getBoxPlotInfoOfDatasetFromDb(): Promise<BoxPlotInfo> {
+    return null
+  }
   key: string = 'weight_log';
   displayName = "Weight Log"
 

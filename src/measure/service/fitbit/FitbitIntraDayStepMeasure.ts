@@ -24,9 +24,6 @@ export class FitbitIntraDayStepMeasure extends FitbitIntraDayMeasure<StepCountIn
                 value: d3Array.sum(group[1], e => e.value)
             })).filter(entry => entry.value > 0)
 
-            console.log("hourly entries:")
-            console.log(hourlyEntries)
-
             if (hourlyEntries.length > 0) {
 
                 await this.service.fitbitLocalDbManager.insert(FitbitLocalTableName.StepCountIntraDay,

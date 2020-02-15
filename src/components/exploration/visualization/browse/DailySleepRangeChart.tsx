@@ -38,8 +38,8 @@ export const DailySleepRangeChart = (prop: Props) => {
     const today = DateTimeHelper.toNumberedDateFromDate(new Date())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
-    const latestTimeDiff =  Math.max(d3Array.max(prop.data, d => d.wakeTimeDiffSeconds), d3Array.max(prop.data, d => d.bedTimeDiffSeconds))
-    const earliestTimeDiff = Math.min(d3Array.min(prop.data, d => d.wakeTimeDiffSeconds), d3Array.min(prop.data, d => d.bedTimeDiffSeconds))
+    const latestTimeDiff =  Math.max(d3Array.max(prop.data, d => d.wakeTimeDiffSeconds), d3Array.max(prop.data, d => d.bedTimeDiffSeconds), prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)
+    const earliestTimeDiff = Math.min(d3Array.min(prop.data, d => d.wakeTimeDiffSeconds), d3Array.min(prop.data, d => d.bedTimeDiffSeconds), prop.preferredValueRange[0] || Number.MAX_SAFE_INTEGER)
 
     const scaleForNice= scaleLinear()
     .domain([Math.floor(earliestTimeDiff/3600), Math.ceil(latestTimeDiff/3600)])
@@ -48,7 +48,6 @@ export const DailySleepRangeChart = (prop: Props) => {
     const ticks = scaleForNice.ticks(5).map(t => t*3600)
 
     const niceDomain = scaleForNice.domain().map(d => d*3600)
-
 
     const scaleY = scaleLinear()
         .domain(niceDomain)

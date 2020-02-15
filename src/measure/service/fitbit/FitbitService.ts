@@ -14,7 +14,7 @@ import { FITBIT_PROFILE_URL } from './api';
 import { FitbitServiceMeasure } from './FitbitServiceMeasure';
 import { FitbitWeightMeasure } from './FitbitWeightMeasure';
 import { FitbitSleepMeasure } from './FitbitSleepMeasure';
-import { FitbitLocalDbManager } from './sqlite/database';
+import { FitbitLocalDbManager, FitbitLocalTableName } from './sqlite/database';
 import { FitbitIntraDayStepMeasure } from './FitbitIntraDayStepMeasure';
 import { IntraDayDataSourceType } from '../../../core/exploration/types';
 import { FitbitIntraDayHeartRateMeasure } from './FitbitIntraDayHeartRateMeasure';
@@ -24,6 +24,7 @@ import {
   IAggregatedValue,
   IAggregatedRangeValue,
   FilteredDailyValues,
+  BoxPlotInfo,
 } from '../../../core/exploration/data/types';
 import { CyclicTimeFrame, CycleDimension } from '../../../core/exploration/cyclic_time';
 
@@ -81,6 +82,30 @@ export class FitbitService extends DataService {
     this.weightLogMeasure,
     this.sleepMeasure,
   ];
+
+
+  async getPreferredValueRange(dataSource: DataSourceType): Promise<[number, number]> {
+    let boxPlotInfo: BoxPlotInfo
+    switch (dataSource) {
+      case DataSourceType.StepCount:
+        boxPlotInfo = await this.dailyStepMeasure.getBoxPlotInfoOfDataset()
+        break;
+      case DataSourceType.HeartRate:
+        boxPlotInfo = await this.dailyHeartRateMeasure.getBoxPlotInfoOfDataset()
+        break;
+      case DataSourceType.Weight:
+        boxPlotInfo = await this.weightLogMeasure.getBoxPlotInfoOfDataset()
+        break;
+      case DataSourceType.HoursSlept:
+        boxPlotInfo = await this.sleepMeasure.getBoxPlotInfoOfDataset('length')
+        break;
+      case DataSourceType.SleepRange:
+        boxPlotInfo = await this.sleepMeasure.getBoxPlotInfoOfDataset('range')
+        break;
+    }
+
+    return [boxPlotInfo.minWithoutOutlier, boxPlotInfo.maxWithoutOutlier]
+  }
 
   protected async fetchDataImpl(
     dataSource: DataSourceType,
@@ -271,6 +296,10 @@ export class FitbitService extends DataService {
   }) => void): Promise<ServiceActivationResult> {
     try {
       console.log("start Fitbit activation...")
+      progressHandler({
+        progress: 0,
+        message: "Authenticating your Fitbit account..."
+      })
       const accessToken = await this.authenticate();
       if (accessToken != null) {
         const initialDate = await this.getMembershipStartDate();
@@ -442,8 +471,8 @@ export class FitbitService extends DataService {
   }
 
 
-  clearAllCache(): Promise<void> {
-    return this.fitbitLocalDbManager.deleteDatabase()
+  async clearAllCache(): Promise<void> {
+    this.fitbitLocalDbManager.deleteDatabase()
   }
 
 

@@ -1,6 +1,14 @@
-import {DataSourceType} from '../../../measure/DataSourceSpec';
+import { DataSourceType } from '../../../measure/DataSourceSpec';
 export type StatisticsType = 'avg' | 'range' | 'total' | 'bedtime' | 'waketime';
 
+export interface BoxPlotInfo {
+  median: number,
+  percentile25: number,
+  percentile75: number,
+  iqr: number,
+  minWithoutOutlier: number,
+  maxWithoutOutlier: number
+}
 
 export interface IAggregatedValue {
   timeKey: number;
@@ -11,9 +19,9 @@ export interface IAggregatedValue {
   sum: number;
 }
 
-export interface IAggregatedRangeValue{
+export interface IAggregatedRangeValue {
   timeKey: number;
-  
+
   avgA: number;
   minA: number;
   maxA: number;
@@ -21,7 +29,7 @@ export interface IAggregatedRangeValue{
   avgB: number;
   minB: number;
   maxB: number;
-  
+
   n: number;
 }
 
@@ -86,8 +94,9 @@ export interface OverviewSourceRow {
   source: DataSourceType;
   range: number[];
   data: any;
-  today: number;
-  statistics: Array<{type: StatisticsType; value: any}>;
+  today: any;
+  preferredValueRange?: number[],
+  statistics: Array<{ type: StatisticsType; value: any }>;
 }
 
 export interface StepCountRangedData extends OverviewSourceRow {
@@ -147,12 +156,12 @@ export interface GroupedRangeData {
 }
 
 export interface RangeAggregatedComparisonData<T> {
-  data: Array<{range: [number, number], value: T}>
+  data: Array<{ range: [number, number], value: T }>
 }
 
 export interface FilteredDailyValues {
   type: "point" | "length" | "range",
-  data: Array<{numberedDate: number, value: number, value2?: number}>
+  data: Array<{ numberedDate: number, value: number, value2?: number }>
 }
 
 export const STATISTICS_LABEL_AVERAGE = 'Avg.';

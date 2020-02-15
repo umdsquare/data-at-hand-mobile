@@ -1,6 +1,6 @@
 import {ScaleBand, scaleBand} from 'd3-scale';
 import {DateTimeHelper} from '../../../../time';
-import { PanResponder, LayoutRectangle } from 'react-native';
+import { LayoutRectangle } from 'react-native';
 
 export namespace CommonBrowsingChartStyles {
   export const xAxisHeight = 26;
