@@ -345,7 +345,6 @@ export class FitbitService extends DataService {
     const profile: FitbitUserProfile = await this.fetchFitbitQuery(
       FITBIT_PROFILE_URL,
     );
-    console.log(profile);
     if (profile != null) {
       await AsyncStorageHelper.set(
         STORAGE_KEY_USER_TIMEZONE,

@@ -72,8 +72,6 @@ export const HeartRateIntraDayPanel = () => {
     const [chartContainerHeight, setChartContainerHeight] = useState(-1)
     const [maxZoneBarWidth, setMaxZoneBarWidth] = useState(0)
 
-    console.log("heart rate data:", data)
-
     if (data != null && data.points.length > 0) {
 
         const chartArea: LayoutRectangle = {
