@@ -17,11 +17,10 @@ import Colors from '../../../../../style/Colors'
 import { CycleDimension, getCycleDimensionSpec } from '../../../../../core/exploration/cyclic_time'
 import { SpeechInputPanel } from '../../../../exploration/SpeechInputPanel';
 import { ThunkDispatch } from 'redux-thunk'
-import { startSpeechSession, requestStopDictation } from '../../../../../state/speech/commands';
+import { startSpeechSession, requestStopDictation, makeNewSessionId } from '../../../../../state/speech/commands';
 import Haptic from 'react-native-haptic-feedback';
 import Insets from 'react-native-static-safe-area-insets';
 import { ZIndices } from '../zIndices'
-import uuid from 'uuid/v4';
 
 const borderRadius = 8
 
@@ -217,7 +216,7 @@ class TooltipOverlay extends React.Component<Props, State>{
                 const tooltipPosition = this.calculateOptimalTooltipPosition(this.props.touchingInfo.elementBoundInScreen, this.state.tooltipWidth, this.state.tooltipHeight)
 
 
-                const speechSessionId = uuid()
+                const speechSessionId = makeNewSessionId()
                 this.setState({
                     ...this.state,
                     speechSessionId,

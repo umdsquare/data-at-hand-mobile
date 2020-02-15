@@ -12,6 +12,7 @@ import { InteractionType } from "../../state/exploration/interaction/actions";
 import { DateTimeHelper } from "../../time";
 import { SwipedFeedback } from "../common/SwipedFeedback";
 import { BottomSheet } from "../common/BottomSheet";
+import Haptic from "react-native-haptic-feedback";
 
 const dateButtonWidth = 140
 const barHeight = 60
@@ -117,10 +118,14 @@ const styles = StyleSheet.create({
 
 })
 
+export type ElementType = 'from' | 'to' | 'period'
+
 interface Props {
     from: number,
     to: number,
     onRangeChanged?: (from: number, to: number, interactionType?: InteractionType) => void,
+    onLongPressIn?: (position: ElementType) => void,
+    onLongPressOut?: (porition: ElementType) => void,
     showBorder?: boolean,
     isLightMode?: boolean
 }
@@ -134,14 +139,37 @@ interface State {
     numDays: number,
     level?: "day" | "week" | "month",
     periodName?: string,
-    clickedElementType?: 'from' | 'to' | 'period',
+    clickedElementType?: ElementType,
+    isPeriodButtonLongPressed: boolean
 }
 
-const DateButton = (props: { date: number, overrideFormat?: string, freeWidth?: boolean, onPress: () => void, isLightMode?: boolean }) => {
+const DateButton = (props: {
+    date: number, overrideFormat?: string, freeWidth?: boolean, onPress: () => void,
+    onLongPressIn?: () => void,
+    onLongPressOut?: () => void,
+    isLightMode?: boolean
+}) => {
+
+    const [isLongPressed, setIsLongPressed] = useState(false)
+
     const date = DateTimeHelper.toDate(props.date)
     const dateString = format(date, props.overrideFormat || "MMM dd, yyyy")
     const subText = isToday(date) === true ? 'Today' : (isYesterday(date) === true ? "Yesterday" : format(date, "EEEE"))
-    return <TouchableOpacity onPress={props.onPress}>
+    return <TouchableOpacity
+        onPress={props.onPress}
+        onLongPress={() => {
+            setIsLongPressed(true)
+            if (props.onLongPressIn) {
+                props.onLongPressIn()
+            }
+        }}
+        onPressOut={() => {
+            if (isLongPressed === true && props.onLongPressOut) {
+                props.onLongPressOut()
+            }
+            setIsLongPressed(false)
+        }}
+    >
         <View style={props.freeWidth === true ? styles.dateButtonContainerStyleFreeWidth : styles.dateButtonContainerStyle}>
             <View style={styles.dateButtonDatePartStyle}>
                 <Text style={props.isLightMode === true ? styles.dateButtonDateTextStyleLight : styles.dateButtonDateTextStyle}>{dateString}</Text>
@@ -216,10 +244,10 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
     constructor(props: Props) {
         super(props)
-        this.state = DateRangeBar.deriveState(props.from, props.to, { isBottomSheetOpen: false } as any)
+        this.state = DateRangeBar.deriveState(props.from, props.to, { isBottomSheetOpen: false, isPeriodButtonLongPressed: false } as any)
     }
 
-    private onClickedElement(type: 'from' | 'to' | 'period') {
+    private onClickedElement(type: ElementType) {
         this.setState({
             ...this.state,
             clickedElementType: type,
@@ -305,6 +333,55 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         this.setMonth(monthDate, InteractionType.TouchOnly)
     }
 
+    onFromButtonLongPressIn = () => {
+        Haptic.trigger("impactHeavy", {
+            enableVibrateFallback: true,
+            ignoreAndroidSystemSettings: true
+        })
+
+        this.props.onLongPressIn && this.props.onLongPressIn('from')
+    }
+
+    onFromButtonLongPressOut = () => {
+        this.props.onLongPressOut && this.props.onLongPressOut('from')
+    }
+
+
+    onToButtonLongPressIn = () => {
+        Haptic.trigger("impactHeavy", {
+            enableVibrateFallback: true,
+            ignoreAndroidSystemSettings: true
+        })
+        this.props.onLongPressIn && this.props.onLongPressIn('to')
+    }
+
+    onToButtonLongPressOut = () => {
+        this.props.onLongPressOut && this.props.onLongPressOut('to')
+    }
+
+    onPeriodButtonLongPress = () => {
+        Haptic.trigger("impactHeavy", {
+            enableVibrateFallback: true,
+            ignoreAndroidSystemSettings: true
+        })
+        this.props.onLongPressIn && this.props.onLongPressIn('period')
+        this.setState({
+            ...this.state,
+            isPeriodButtonLongPressed: true
+        })
+    }
+
+    onPeriodButtonPressOut = () => {
+        if (this.state.isPeriodButtonLongPressed === true) {
+            this.props.onLongPressOut && this.props.onLongPressOut('period')
+        }
+
+        this.setState({
+            ...this.state,
+            isPeriodButtonLongPressed: false
+        })
+    }
+
     componentDidUpdate() {
     }
 
@@ -341,14 +418,21 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                 backgroundColor: this.props.isLightMode ? null : styles.containerStyle.backgroundColor
             }}>
             <SwipedFeedback ref={ref => this.swipedFeedbackRef = ref} />
-            <DateButton date={this.state.from} onPress={this.onFromDatePressed} isLightMode={this.props.isLightMode} />
+
+            <DateButton date={this.state.from} onPress={this.onFromDatePressed} isLightMode={this.props.isLightMode}
+                onLongPressIn={this.onFromButtonLongPressIn} onLongPressOut={this.onFromButtonLongPressOut} />
+
             <View style={styles.midViewContainerStyle} >
                 <Dash style={styles.dashViewStyle} dashGap={4} dashColor="gray" dashLength={3} dashThickness={3} dashStyle={styles.dashLineStyle} />
                 <View style={styles.midViewFooterContainerStyle}>
 
                     {
                         this.state.semanticPeriodCaptured === true ? (
-                            <Button onPress={this.onPeriodPressed} title={this.state.periodName} buttonStyle={styles.periodButtonStyle} titleStyle={styles.periodButtonTitleStyle} />
+                            <Button onPress={this.onPeriodPressed} title={this.state.periodName}
+                                buttonStyle={styles.periodButtonStyle} titleStyle={styles.periodButtonTitleStyle}
+                                onLongPress={this.onPeriodButtonLongPress}
+                                onPressOut={this.onPeriodButtonPressOut}
+                            />
                         ) : (
                                 <Text style={styles.midViewDescriptionTextStyle}>{this.state.numDays} Days</Text>
                             )
@@ -356,7 +440,9 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
                 </View>
             </View>
-            <DateButton date={this.state.to} onPress={this.onToDatePressed}  isLightMode={this.props.isLightMode}/>
+
+            <DateButton date={this.state.to} onPress={this.onToDatePressed} isLightMode={this.props.isLightMode}
+                onLongPressIn={this.onToButtonLongPressIn} onLongPressOut={this.onToButtonLongPressOut} />
 
             <BottomSheet ref={ref => { this.bottomSheetRef = ref }}>
                 {modalPickerView}
@@ -370,7 +456,9 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
 export const DateBar = (props: {
     date: number,
-    onDateChanged?: (date: number, interactionType?: InteractionType) => void
+    onDateChanged?: (date: number, interactionType?: InteractionType) => void,
+    onLongPressIn: () => void,
+    onLongPressOut: () => void
 }) => {
 
     const [date, setDate] = useState(props.date)
@@ -393,7 +481,11 @@ export const DateBar = (props: {
 
     return <GestureRecognizer onSwipeLeft={() => shiftDay(1)} onSwipeRight={() => shiftDay(-1)} style={styles.containerStyle}>
         <SwipedFeedback ref={ref => swipedFeedbackRef = ref} />
-        <DateButton date={date} overrideFormat="MMMM dd, yyyy" freeWidth={true} onPress={() => { bottomSheetRef.open() }} />
+        <DateButton date={date} overrideFormat="MMMM dd, yyyy" freeWidth={true}
+            onPress={() => { bottomSheetRef.open() }}
+            onLongPressIn={props.onLongPressIn}
+            onLongPressOut={props.onLongPressOut}
+        />
 
         <BottomSheet ref={ref => { bottomSheetRef = ref }}>
             <DatePicker selectedDay={DateTimeHelper.toDate(date)}

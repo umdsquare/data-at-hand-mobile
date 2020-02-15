@@ -1,13 +1,10 @@
 import { Dispatch } from "redux";
 import { ReduxAppState } from "../types";
-import uuid from 'uuid/v4';
 import { createBootstrapAction, createTerminateSessionAction, createUpdateDictationResultAction, createStartDictationAction, TerminationReason, createWaitAction } from "./actions";
 import { VoiceDictator } from "../../core/speech/VoiceDictator";
 import { DictationResult } from "../../core/speech/types";
-import { EventSubscription, StatusBar } from "react-native";
 import { SpeechRecognizerSessionStatus } from "./types";
-import { naturalLanguageRecognizer } from "../../core/speech/NaturalLanguageRecognizer";
-import { Subject, BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { filter, first, ignoreElements } from 'rxjs/operators';
 import { sleep } from "../../utils";
 
@@ -77,7 +74,8 @@ export function startSpeechSession(sessionId: string): (dispatch: Dispatch, getS
                     if (dictationResult != null && dictationResult.text != null && dictationResult.text.length > 0) {
                         //can start analyzing
                         //TODO start analysis
-                        console.log(sessionId, "Analyze...")
+                        console.log(sessionId, "Analyze the phrase, ", dictationResult.text)
+                        
                         await sleep(5000)
                         console.log(sessionId, "Finished analyzing.")
                         terminate(dispatch, TerminationReason.Success, sessionId)
@@ -118,4 +116,8 @@ export function requestStopDictation(sessionId: string): (dispatch: Dispatch, ge
             dispatch(createTerminateSessionAction(TerminationReason.Cancel, sessionId, null))
         }
     }
+}
+
+export function makeNewSessionId(): string{
+    return require('uuid/v4')()
 }

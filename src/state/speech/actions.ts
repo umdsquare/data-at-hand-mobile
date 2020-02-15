@@ -7,7 +7,8 @@ export enum SpeechRecognizerActionType {
     StartDictation = "speech:recognition:start_dictation",
     UpdateDictationResult = "speech:recognition:update_dictation_result",
     FinishDictation = "speech:recognition:finish_dictation",
-    TerminateSession = "speech:recognition:terminate"
+    TerminateSession = "speech:recognition:terminate",
+    SetShowGlobalPopupAction = "speech:recognition:set_show_global_popup"
 }
 
 
@@ -26,13 +27,6 @@ export interface SpeechSessionAction extends ActionTypeBase {
     sessionId: string
 }
 
-export interface BootstrapAction extends SpeechSessionAction {
-}
-
-export interface StartDictationAction extends SpeechSessionAction {
-
-}
-
 export interface UpdateDictationResultAction extends SpeechSessionAction {
     dictationResult: DictationResult
 }
@@ -40,6 +34,10 @@ export interface UpdateDictationResultAction extends SpeechSessionAction {
 export interface TerminateAction extends SpeechSessionAction {
     reason: TerminationReason,
     data?: any
+}
+
+export interface SetShowGlobalPopupAction extends SpeechSessionAction {
+    value: boolean
 }
 
 export function createUpdateDictationResultAction(dictationResult: DictationResult, sessionId: string): UpdateDictationResultAction {
@@ -50,7 +48,7 @@ export function createUpdateDictationResultAction(dictationResult: DictationResu
     }
 }
 
-export function createStartDictationAction(sessionId: string): StartDictationAction {
+export function createStartDictationAction(sessionId: string): SpeechSessionAction {
     return {
         type: SpeechRecognizerActionType.StartDictation,
         sessionId
@@ -64,7 +62,7 @@ export function createWaitAction(sessionId): SpeechSessionAction{
     }
 }
 
-export function createBootstrapAction(sessionId: string): BootstrapAction {
+export function createBootstrapAction(sessionId: string): SpeechSessionAction {
     return {
         type: SpeechRecognizerActionType.BootstrapAction,
         sessionId
@@ -84,5 +82,13 @@ export function createTerminateSessionAction(reason: TerminationReason, sessionI
         reason,
         data,
         sessionId
+    }
+}
+
+export function createSetShowGlobalPopupAction(value: boolean, sessionId: string): SetShowGlobalPopupAction {
+    return {
+        type: SpeechRecognizerActionType.SetShowGlobalPopupAction,
+        sessionId,
+        value
     }
 }

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ExplorationType, ParameterKey, ParameterType, IntraDayDataSourceType, getIntraDayDataSourceName, inferIntraDayDataSourceType, inferDataSource } from "../../../../core/exploration/types";
 import { SafeAreaView, View, Text, StyleSheet, TextStyle, ViewStyle, LayoutAnimation } from 'react-native';
 import { CategoricalRow } from '../../../exploration/CategoricalRow';
@@ -17,8 +17,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { ReduxAppState } from '../../../../state/types';
 import { CyclicTimeFrame, cyclicTimeFrameSpecs, CycleDimension, getFilteredCycleDimensionList, getHomogeneousCycleDimensionList, getCycleDimensionSpec } from '../../../../core/exploration/cyclic_time';
 import { SvgIcon, SvgIconType } from '../../../common/svg/SvgIcon';
+import { makeNewSessionId, startSpeechSession, requestStopDictation } from '../../../../state/speech/commands';
+import { createSetShowGlobalPopupAction } from '../../../../state/speech/actions';
 
-const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={'white'}/>
+const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={'white'} />
 
 const styles = StyleSheet.create({
     titleBarStyle: {
@@ -95,24 +97,24 @@ export function generateHeaderView(props: ExplorationProps): any {
                             props.navigation.navigate("Settings")
                         }} />
                 </View>
-                {generateRangeBar(props)}
+                {<HeaderRangeBar />}
             </HeaderContainer>
         case ExplorationType.B_Range:
             return <HeaderContainer>
                 {generateDataSourceRow(props, false)}
-                {generateRangeBar(props)}
+                {<HeaderRangeBar />}
             </HeaderContainer>
         case ExplorationType.B_Day:
             return <HeaderContainer>
                 {generateIntraDayDataSourceRow(props)}
-                {generateDateBar(props)}
+                {<HeaderDateBar />}
 
             </HeaderContainer>
         case ExplorationType.C_Cyclic:
             return <HeaderContainer>
                 {generateDataSourceRow(props, true)}
                 {generateCyclicComparisonTypeRow(props, false)}
-                {generateRangeBar(props)}
+                {<HeaderRangeBar />}
             </HeaderContainer>
             break;
         case ExplorationType.C_CyclicDetail_Daily:
@@ -120,13 +122,13 @@ export function generateHeaderView(props: ExplorationProps): any {
             return <HeaderContainer>
                 {generateDataSourceRow(props, true)}
                 {generateCycleDimensionRow(props, false)}
-                {generateRangeBar(props)}
+                {<HeaderRangeBar />}
             </HeaderContainer>
         case ExplorationType.C_TwoRanges:
             return <HeaderContainer>
                 {generateDataSourceRow(props, false)}
-                {generateRangeBar(props, ParameterKey.RangeA, true)}
-                {generateRangeBar(props, ParameterKey.RangeB)}
+                {<HeaderRangeBar showBorder={true} parameterKey={ParameterKey.RangeA} />}
+                {<HeaderRangeBar parameterKey={ParameterKey.RangeB} />}
             </HeaderContainer>
     }
 }
@@ -151,18 +153,56 @@ const HeaderContainer = (prop: { children?: any, }) => {
     </SafeAreaView>
 }
 
-function generateRangeBar(props: ExplorationProps, key?: ParameterKey, showBorder?: boolean): any {
-    const range = explorationInfoHelper.getParameterValue(props.explorationState.info, ParameterType.Range, key)
-    return <DateRangeBar from={range && range[0]} to={range && range[1]} onRangeChanged={(from, to, xType) => {
-        props.dispatchCommand(createSetRangeAction(xType, [from, to], key))
-    }} showBorder={showBorder} />
+const HeaderRangeBar = (props: { parameterKey?: ParameterKey, showBorder?: boolean }) => {
+
+    const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
+    const dispatch = useDispatch()
+    const [speechSessionId, setSpeechSessionId] = useState<string>(null)
+
+    const range = explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range, props.parameterKey)
+    return <DateRangeBar from={range && range[0]} to={range && range[1]}
+        onRangeChanged={(from, to, xType) => {
+            dispatch(createSetRangeAction(xType, [from, to], props.parameterKey))
+        }}
+        onLongPressIn={(position) => {
+            const sessionId = makeNewSessionId()
+            setSpeechSessionId(sessionId)
+            dispatch(startSpeechSession(sessionId))
+            dispatch(createSetShowGlobalPopupAction(true, sessionId))
+        }}
+        onLongPressOut={(position) => {
+            if (speechSessionId != null) {
+                dispatch(requestStopDictation(speechSessionId))
+                dispatch(createSetShowGlobalPopupAction(false, speechSessionId))
+            }
+            setSpeechSessionId(null)
+        }}
+        showBorder={props.showBorder} />
 }
 
-function generateDateBar(props: ExplorationProps): any {
-    const date = explorationInfoHelper.getParameterValue<number>(props.explorationState.info, ParameterType.Date)
-    return <DateBar date={date != null ? date : null} onDateChanged={(date: number, interactionType: InteractionType) => {
-        props.dispatchCommand(setDateAction(interactionType, date))
-    }} />
+const HeaderDateBar = () => {
+    const [speechSessionId, setSpeechSessionId] = useState<string>(null)
+    const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
+    const dispatch = useDispatch()
+    const date = explorationInfoHelper.getParameterValue<number>(explorationInfo, ParameterType.Date)
+    return <DateBar date={date != null ? date : null}
+        onDateChanged={(date: number, interactionType: InteractionType) => {
+            dispatch(setDateAction(interactionType, date))
+        }}
+        onLongPressIn={() => {
+            const newSessionId = makeNewSessionId()
+            dispatch(createSetShowGlobalPopupAction(true, newSessionId))
+            dispatch(startSpeechSession(newSessionId))
+            setSpeechSessionId(newSessionId)
+        }}
+        onLongPressOut={() => {
+            if(speechSessionId != null){
+                dispatch(createSetShowGlobalPopupAction(false, speechSessionId))
+                dispatch(requestStopDictation(speechSessionId))
+            }
+            setSpeechSessionId(null)
+        }}
+    />
 }
 
 function generateDataSourceRow(props: ExplorationProps, showBorder: boolean): any {

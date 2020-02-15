@@ -12,10 +12,12 @@ export interface SpeechRecognizerState{
     status: SpeechRecognizerSessionStatus,
     currentSessionId: string
     dictationResult?: DictationResult,
+    showGlobalPopup: boolean
 }
 
 export const INITIAL_STATE = {
     status: SpeechRecognizerSessionStatus.Idle,
     currentSessionId: null,
-    dictationResult: null
+    dictationResult: null,
+    showGlobalPopup: false
 } as SpeechRecognizerState

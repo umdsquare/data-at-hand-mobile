@@ -29,13 +29,14 @@ import { TooltipOverlay } from "./parts/main/TooltipOverlay";
 import { check, PERMISSIONS, RESULTS, request, openSettings } from 'react-native-permissions';
 import { GlobalSpeechOverlay } from "./parts/main/GlobalSpeechOverlay";
 import Haptic from "react-native-haptic-feedback";
-import { startSpeechSession, requestStopDictation } from "../../../state/speech/commands";
+import { startSpeechSession, requestStopDictation, makeNewSessionId } from "../../../state/speech/commands";
 import { SvgIcon, SvgIconType } from "../../common/svg/SvgIcon";
 import { ZIndices } from "./parts/zIndices";
 import { DataBusyOverlay } from "./parts/main/DataBusyOverlay";
 import { sleep } from "../../../utils";
 import { InitialLoadingIndicator } from "./parts/main/InitialLoadingIndicator";
 import uuid from 'uuid/v4';
+import { createSetShowGlobalPopupAction } from "../../../state/speech/actions";
 
 var deepEqual = require('deep-equal');
 
@@ -92,18 +93,19 @@ export interface ExplorationProps extends PropsWithNavigation {
     explorationState: ExplorationState,
     explorationDataState: ExplorationDataState,
     selectedServiceKey: string,
+    showGlobalSpeechPopup: boolean,
     dispatchCommand: (command: ExplorationAction) => void,
     dispatchDataReload: (info: ExplorationInfo) => void,
     dispatchStartSpeechSession: (sessionId: string) => void,
-    dispatchFinishDictation: (sessionId: string) => void
+    dispatchFinishDictation: (sessionId: string) => void,
+    dispatchSetShowGlobalPopup: (value: boolean, sessionId: string) => void
 }
 
 interface State {
     appState: AppStateStatus,
-    globalSpeechButtonPressed: boolean,
-    globalSpeechSessionId: string,
     initialLoadingFinished: boolean,
-    loadingMessage: string
+    loadingMessage: string,
+    globalSpeechSessionId: string
 }
 
 
@@ -133,10 +135,9 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
         super(props)
         this.state = {
             appState: AppState.currentState,
-            globalSpeechButtonPressed: false,
-            globalSpeechSessionId: null,
             initialLoadingFinished: false,
-            loadingMessage: null
+            loadingMessage: null,
+            globalSpeechSessionId: null
         }
     }
 
@@ -238,24 +239,23 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
             ignoreAndroidSystemSettings: true
         })
 
-        const sessionId = uuid()
+        const sessionId = makeNewSessionId()
+        this.props.dispatchSetShowGlobalPopup(true, sessionId)
+        this.props.dispatchStartSpeechSession(sessionId)
 
         this.setState({
             ...this.state,
-            globalSpeechButtonPressed: true,
             globalSpeechSessionId: sessionId
         })
-
-        this.props.dispatchStartSpeechSession(sessionId)
     }
 
     onGlobalSpeechInputPressOut = () => {
 
         this.props.dispatchFinishDictation(this.state.globalSpeechSessionId)
+        this.props.dispatchSetShowGlobalPopup(false, this.state.globalSpeechSessionId)
 
         this.setState({
             ...this.state,
-            globalSpeechButtonPressed: false,
             globalSpeechSessionId: null
         })
     }
@@ -303,11 +303,11 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
             </BottomSheet>
 
             <TooltipOverlay />
-            <GlobalSpeechOverlay isGlobalSpeechButtonPressed={this.state.globalSpeechButtonPressed} />
+            <GlobalSpeechOverlay isGlobalSpeechButtonPressed={this.props.showGlobalSpeechPopup} />
 
             <DataBusyOverlay isBusy={this.props.explorationDataState.isBusy === true || this.state.initialLoadingFinished === false} />
             {
-                this.state.initialLoadingFinished === false? <InitialLoadingIndicator loadingMessage={this.state.loadingMessage}/> : <></>
+                this.state.initialLoadingFinished === false ? <InitialLoadingIndicator loadingMessage={this.state.loadingMessage} /> : <></>
             }
 
         </View>
@@ -341,7 +341,8 @@ function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Expl
         dispatchCommand: (command: ExplorationAction) => dispatch(command),
         dispatchDataReload: (info: ExplorationInfo) => dispatch(startLoadingForInfo(info)),
         dispatchStartSpeechSession: (sessionId) => dispatch(startSpeechSession(sessionId)),
-        dispatchFinishDictation: (sessionId) => dispatch(requestStopDictation(sessionId))
+        dispatchFinishDictation: (sessionId) => dispatch(requestStopDictation(sessionId)),
+        dispatchSetShowGlobalPopup: (value, sessionId) => dispatch(createSetShowGlobalPopupAction(value, sessionId))
     }
 }
 
@@ -350,7 +351,8 @@ function mapStateToProps(appState: ReduxAppState, ownProps: ExplorationProps): E
         ...ownProps,
         explorationState: appState.explorationState,
         explorationDataState: appState.explorationDataState,
-        selectedServiceKey: appState.settingsState.serviceKey
+        selectedServiceKey: appState.settingsState.serviceKey,
+        showGlobalSpeechPopup: appState.speechRecognizerState.showGlobalPopup
     }
 }
 
