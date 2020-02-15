@@ -30,7 +30,7 @@ interface Props {
     currentTouchingInfo?: TouchingElementInfo,
     isContainerScrolling?: boolean,
     setTouchingInfo?: (info: TouchingElementInfo) => void,
-    goToDayDetail?: (date: number)=>void
+    goToDayDetail?: (date: number) => void
 }
 interface State {
     touchedDate: number,
@@ -98,9 +98,9 @@ class GroupWithTouchInteraction extends React.Component<Props, State>{
 
         } as TouchingElementInfo
 
-        try{
+        try {
             touchingInfo.value = this.props.getValueOfDate(date)
-        }catch(e){
+        } catch (e) {
             touchingInfo.value = null
         }
 
@@ -114,7 +114,7 @@ class GroupWithTouchInteraction extends React.Component<Props, State>{
                     touchStartedAt: Date.now(),
                     touchedDate: date
                 })
-                
+
                 console.log("touch start")
                 setTimeout(() => {
                     if (this.state.touchStartX != null && this.props.isContainerScrolling !== true) {
@@ -135,10 +135,16 @@ class GroupWithTouchInteraction extends React.Component<Props, State>{
                 }
                 break;
             case "end":
-                
+
                 if (this.state.touchStartedAt != null && Date.now() - this.state.touchStartedAt < CLICK_THRESHOLD_MILLIS && this.state.touchedDate === date) {
                     this.props.onDateClick && this.props.onDateClick(date)
-                    this.props.goToDayDetail(date)
+                    try{
+                        if (this.props.getValueOfDate(date)) {
+                            this.props.goToDayDetail(date)
+                        }    
+                    }catch (e){
+
+                    }
                     console.log("click")
                 }
 
@@ -167,7 +173,7 @@ class GroupWithTouchInteraction extends React.Component<Props, State>{
         }
 
         return <G {...this.props.chartArea} {...this.chartAreaResponder.panHandlers}>
-            
+
             <Rect x={0} y={0} width={this.props.chartArea.width} height={this.props.chartArea.height} fill="transparent" />
             {
                 this.state.touchedDate && !linkedDate && <Rect fill="#00000015" x={this.props.scaleX(this.state.touchedDate)} width={this.props.scaleX.bandwidth()} height={this.props.chartArea.height} />
@@ -184,7 +190,7 @@ function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props {
     return {
         ...ownProps,
         setTouchingInfo: (info) => dispatch(setTouchElementInfo(info)),
-        goToDayDetail: (date)=> dispatch(createGoToBrowseDayAction(InteractionType.TouchOnly, inferIntraDayDataSourceType(ownProps.dataSource), date))
+        goToDayDetail: (date) => dispatch(createGoToBrowseDayAction(InteractionType.TouchOnly, inferIntraDayDataSourceType(ownProps.dataSource), date))
     }
 }
 

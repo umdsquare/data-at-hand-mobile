@@ -12,17 +12,17 @@ import Colors from '../../../../style/Colors';
 import { startOfDay, addSeconds, format } from 'date-fns';
 import { GroupWithTouchInteraction } from './GroupWithTouchInteraction';
 
-interface Props extends ChartProps{
-    data: Array<{numberedDate: number, value: number, bedTimeDiffSeconds: number, wakeTimeDiffSeconds: number}>
+interface Props extends ChartProps {
+    data: Array<{ numberedDate: number, value: number, bedTimeDiffSeconds: number, wakeTimeDiffSeconds: number }>
 }
 
 const pivot = startOfDay(new Date())
 
-const tickFormat = (tick:number) => {
-    if(tick === 0){
+const tickFormat = (tick: number) => {
+    if (tick === 0) {
         return "MN"
     }
-    else return format(addSeconds(pivot, tick),"h a").toLowerCase()
+    else return format(addSeconds(pivot, tick), "h a").toLowerCase()
 }
 
 export const DailySleepRangeChart = (prop: Props) => {
@@ -38,16 +38,16 @@ export const DailySleepRangeChart = (prop: Props) => {
     const today = DateTimeHelper.toNumberedDateFromDate(new Date())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
-    const latestTimeDiff =  Math.max(d3Array.max(prop.data, d => d.wakeTimeDiffSeconds), d3Array.max(prop.data, d => d.bedTimeDiffSeconds), prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)
+    const latestTimeDiff = Math.max(d3Array.max(prop.data, d => d.wakeTimeDiffSeconds), d3Array.max(prop.data, d => d.bedTimeDiffSeconds), prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)
     const earliestTimeDiff = Math.min(d3Array.min(prop.data, d => d.wakeTimeDiffSeconds), d3Array.min(prop.data, d => d.bedTimeDiffSeconds), prop.preferredValueRange[0] || Number.MAX_SAFE_INTEGER)
 
-    const scaleForNice= scaleLinear()
-    .domain([Math.floor(earliestTimeDiff/3600), Math.ceil(latestTimeDiff/3600)])
-    .nice()
-    
-    const ticks = scaleForNice.ticks(5).map(t => t*3600)
+    const scaleForNice = scaleLinear()
+        .domain([Math.floor(earliestTimeDiff / 3600), Math.ceil(latestTimeDiff / 3600)])
+        .nice()
 
-    const niceDomain = scaleForNice.domain().map(d => d*3600)
+    const ticks = scaleForNice.ticks(5).map(t => t * 3600)
+
+    const niceDomain = scaleForNice.domain().map(d => d * 3600)
 
     const scaleY = scaleLinear()
         .domain(niceDomain)
@@ -59,26 +59,31 @@ export const DailySleepRangeChart = (prop: Props) => {
     return <Svg width={prop.containerWidth} height={prop.containerHeight}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={tickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
-        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => { const datum = prop.data.find(d => d.numberedDate === date); return {value: datum.bedTimeDiffSeconds, value2: datum.wakeTimeDiffSeconds}}}>
+        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => {
+            const datum = prop.data ? prop.data.find(d => d.numberedDate === date) : null;
+            if (datum) {
+                return { value: datum.bedTimeDiffSeconds, value2: datum.wakeTimeDiffSeconds }
+            }else return null
+        }}>
             {
                 prop.data.map(d => {
                     const barHeight = scaleY(d.wakeTimeDiffSeconds) - scaleY(d.bedTimeDiffSeconds)
                     const barWidth = Math.min(scaleX.bandwidth(), 20)
                     return <Rect key={d.numberedDate}
-                                width={barWidth} height={barHeight}
-                                x={scaleX(d.numberedDate) + (scaleX.bandwidth() - barWidth)*0.5 }
-                                y={scaleY(d.bedTimeDiffSeconds)}
-                                rx={2}
-                                fill={today === d.numberedDate? Colors.today : Colors.chartElementDefault}
-                                opacity={0.62}
-                            />
+                        width={barWidth} height={barHeight}
+                        x={scaleX(d.numberedDate) + (scaleX.bandwidth() - barWidth) * 0.5}
+                        y={scaleY(d.bedTimeDiffSeconds)}
+                        rx={2}
+                        fill={today === d.numberedDate ? Colors.today : Colors.chartElementDefault}
+                        opacity={0.62}
+                    />
                 })
             }
             {
-                Number.isNaN(bedTimeAvg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(bedTimeAvg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"}/>
+                Number.isNaN(bedTimeAvg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(bedTimeAvg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"} />
             }
             {
-                Number.isNaN(wakeTimeAvg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(wakeTimeAvg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"}/>
+                Number.isNaN(wakeTimeAvg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(wakeTimeAvg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"} />
             }
         </GroupWithTouchInteraction>
     </Svg>
