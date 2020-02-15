@@ -1,5 +1,5 @@
 import {
-  IVoiceDictator,
+  IVoiceDictatorNative,
   DictationResult,
   SpeechRecognitionEventType,
 } from './types';
@@ -9,7 +9,7 @@ import {
   EventSubscription,
 } from 'react-native';
 
-export class AndroidDictatorImpl implements IVoiceDictator {
+export class AndroidDictatorImpl implements IVoiceDictatorNative {
   private bridge = NativeModules.AndroidSpeechToText;
   private eventEmitter = new NativeEventEmitter(this.bridge);
 

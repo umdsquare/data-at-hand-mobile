@@ -16,7 +16,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 import LottieView from 'lottie-react-native';
 import { DataServiceManager } from './src/system/DataServiceManager';
 import { FadeView } from './src/components/common/FadeView';
-import { voiceDictator } from './src/core/speech/VoiceDictator';
+import { VoiceDictator } from './src/core/speech/VoiceDictator';
 import { naturalLanguageRecognizer } from './src/core/speech/NaturalLanguageRecognizer';
 import { ThemeProvider } from 'react-native-elements';
 import { theme } from './src/style/Theme';
@@ -53,9 +53,9 @@ class App extends React.Component<any, State> {
     //loading initial things
     const services = await DataServiceManager.getServicesSupportedInThisSystem()
 
-    const speechInstalled = await voiceDictator.install()
+    const speechInstalled = await VoiceDictator.instance.install()
     if (speechInstalled === true) {
-      const isAvailableInSystem = await voiceDictator.isAvailableInSystem()
+      const isAvailableInSystem = await VoiceDictator.instance.isAvailableInSystem()
       if (isAvailableInSystem === true) {
         console.log("Speech recognition is available on this system.")
       }
@@ -68,6 +68,10 @@ class App extends React.Component<any, State> {
     } catch (err) {
       console.error(err)
     }
+  }
+
+  async componentWillUnmount(){
+    await VoiceDictator.instance.uninstall()
   }
 
   render() {

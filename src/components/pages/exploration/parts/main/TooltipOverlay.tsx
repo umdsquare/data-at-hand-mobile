@@ -21,6 +21,7 @@ import { startSpeechSession, requestStopDictation } from '../../../../../state/s
 import Haptic from 'react-native-haptic-feedback';
 import Insets from 'react-native-static-safe-area-insets';
 import { ZIndices } from '../zIndices'
+import uuid from 'uuid/v4';
 
 const borderRadius = 8
 
@@ -110,12 +111,13 @@ const gradientBackgroundProps = {
 interface Props {
     touchingInfo?: TouchingElementInfo,
     measureUnitType?: MeasureUnitType,
-    dispatchStartSpeechSession?: () => void,
-    dispatchStopDictation?: () => void,
+    dispatchStartSpeechSession?: (sessionId: string) => void,
+    dispatchStopDictation?: (sessionId: string) => void,
 }
 
 interface State {
     touchingInfo?: TouchingElementInfo,
+    speechSessionId?: string,
     tooltipWidth: number,
     tooltipHeight: number,
     tooltipPositionX: number,
@@ -133,6 +135,7 @@ class TooltipOverlay extends React.Component<Props, State>{
 
         this.state = {
             touchingInfo: null,
+            speechSessionId: null,
             tooltipWidth: 0,
             tooltipHeight: 0,
             tooltipPositionX: 0,
@@ -175,7 +178,7 @@ class TooltipOverlay extends React.Component<Props, State>{
         const insetTop = Platform.select({
             ios: Insets.safeAreaInsetsTop,
             android: 0
-        }) 
+        })
 
         const insetBottom = Platform.select({
             ios: Insets.safeAreaInsetsBottom,
@@ -210,12 +213,14 @@ class TooltipOverlay extends React.Component<Props, State>{
 
     componentDidUpdate(prevProps: Props) {
         if (prevProps.touchingInfo !== this.props.touchingInfo) {
-
             if (prevProps.touchingInfo == null) {
                 const tooltipPosition = this.calculateOptimalTooltipPosition(this.props.touchingInfo.elementBoundInScreen, this.state.tooltipWidth, this.state.tooltipHeight)
 
+
+                const speechSessionId = uuid()
                 this.setState({
                     ...this.state,
+                    speechSessionId,
                     touchingInfo: this.props.touchingInfo,
                     tooltipPositionX: tooltipPosition.x,
                     tooltipPositionY: tooltipPosition.y
@@ -234,7 +239,8 @@ class TooltipOverlay extends React.Component<Props, State>{
                     useNativeDriver: true
                 }).start()
 
-                this.props.dispatchStartSpeechSession()
+                this.props.dispatchStartSpeechSession(speechSessionId)
+
                 Haptic.trigger("impactHeavy", {
                     enableVibrateFallback: true,
                     ignoreAndroidSystemSettings: true
@@ -252,7 +258,9 @@ class TooltipOverlay extends React.Component<Props, State>{
                         touchingInfo: null
                     })
                 })
-                this.props.dispatchStopDictation()
+                if (this.state.speechSessionId) {
+                    this.props.dispatchStopDictation(this.state.speechSessionId)
+                }
 
             } else {
 
@@ -275,7 +283,7 @@ class TooltipOverlay extends React.Component<Props, State>{
     }
 
     render() {
-        return <View pointerEvents="none" style={{...StyleTemplates.fitParent, zIndex: ZIndices.TooltipOverlay, elevation: 10}}>
+        return <View pointerEvents="none" style={{ ...StyleTemplates.fitParent, zIndex: ZIndices.TooltipOverlay, elevation: 10 }}>
             <Animated.View
                 style={{
                     ...StyleTemplates.fitParent,
@@ -482,8 +490,8 @@ class TooltipOverlay extends React.Component<Props, State>{
 function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Props): Props {
     return {
         ...ownProps,
-        dispatchStartSpeechSession: () => dispatch(startSpeechSession()),
-        dispatchStopDictation: () => dispatch(requestStopDictation())
+        dispatchStartSpeechSession: (sessionId) => dispatch(startSpeechSession(sessionId)),
+        dispatchStopDictation: (sessionId) => dispatch(requestStopDictation(sessionId))
     }
 }
 

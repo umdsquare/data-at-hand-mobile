@@ -2,6 +2,7 @@ import { DictationResult } from "../../core/speech/types";
 
 export enum SpeechRecognizerSessionStatus{
     Idle = "idle",
+    Waiting="waiting", // the previous session is still in processing, so waiting.
     Starting="starting",
     Listening="listening",
     Analyzing="analyzing",

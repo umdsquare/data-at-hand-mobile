@@ -35,6 +35,7 @@ import { ZIndices } from "./parts/zIndices";
 import { DataBusyOverlay } from "./parts/main/DataBusyOverlay";
 import { sleep } from "../../../utils";
 import { InitialLoadingIndicator } from "./parts/main/InitialLoadingIndicator";
+import uuid from 'uuid/v4';
 
 var deepEqual = require('deep-equal');
 
@@ -93,13 +94,14 @@ export interface ExplorationProps extends PropsWithNavigation {
     selectedServiceKey: string,
     dispatchCommand: (command: ExplorationAction) => void,
     dispatchDataReload: (info: ExplorationInfo) => void,
-    dispatchStartSpeechSession: () => void,
-    dispatchFinishDictation: () => void
+    dispatchStartSpeechSession: (sessionId: string) => void,
+    dispatchFinishDictation: (sessionId: string) => void
 }
 
 interface State {
     appState: AppStateStatus,
     globalSpeechButtonPressed: boolean,
+    globalSpeechSessionId: string,
     initialLoadingFinished: boolean,
     loadingMessage: string
 }
@@ -132,6 +134,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
         this.state = {
             appState: AppState.currentState,
             globalSpeechButtonPressed: false,
+            globalSpeechSessionId: null,
             initialLoadingFinished: false,
             loadingMessage: null
         }
@@ -234,20 +237,27 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
             enableVibrateFallback: true,
             ignoreAndroidSystemSettings: true
         })
+
+        const sessionId = uuid()
+
         this.setState({
             ...this.state,
-            globalSpeechButtonPressed: true
+            globalSpeechButtonPressed: true,
+            globalSpeechSessionId: sessionId
         })
-        this.props.dispatchStartSpeechSession()
+
+        this.props.dispatchStartSpeechSession(sessionId)
     }
 
     onGlobalSpeechInputPressOut = () => {
+
+        this.props.dispatchFinishDictation(this.state.globalSpeechSessionId)
+
         this.setState({
             ...this.state,
-            globalSpeechButtonPressed: false
+            globalSpeechButtonPressed: false,
+            globalSpeechSessionId: null
         })
-
-        this.props.dispatchFinishDictation()
     }
 
     render() {
@@ -330,8 +340,8 @@ function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Expl
         ...ownProps,
         dispatchCommand: (command: ExplorationAction) => dispatch(command),
         dispatchDataReload: (info: ExplorationInfo) => dispatch(startLoadingForInfo(info)),
-        dispatchStartSpeechSession: () => dispatch(startSpeechSession()),
-        dispatchFinishDictation: () => dispatch(requestStopDictation())
+        dispatchStartSpeechSession: (sessionId) => dispatch(startSpeechSession(sessionId)),
+        dispatchFinishDictation: (sessionId) => dispatch(requestStopDictation(sessionId))
     }
 }
 

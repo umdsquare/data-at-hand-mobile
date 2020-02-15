@@ -22,6 +22,14 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         marginLeft: 4
     },
+
+    waitingTextStyle: {
+        color: Colors.accent,
+        fontSize: Sizes.smallFontSize,
+        fontWeight: '500',
+        marginLeft: 12
+    },
+
     titleContainerStyle: {
         flexDirection: 'row', alignSelf: 'center',
         alignItems: 'center',
@@ -51,7 +59,7 @@ const styles = StyleSheet.create({
 
 interface Props {
     recognizerState?: SpeechRecognizerState,
-    exampleSentences?: string[]
+    exampleSentences?: string[],
 }
 
 interface State {
@@ -82,41 +90,52 @@ class SpeechInputPanel extends React.Component<Props, State>{
     }
 
     render() {
-        return <View style={styles.containerStyle}>
 
-            <View style={styles.titleContainerStyle}>
-                <Spinner size={20} isVisible={true} type="Wave" color={Colors.speechAffordanceColorBackground} />
-                <Text style={styles.listeningTextStyle}>Listening...</Text>
-            </View>
-
-            {
-                this.isRecognizedTextExists(this.props.recognizerState) === true ? <Text style={styles.dictatedMessageStyle}>
-                    {
-                        this.props.recognizerState.dictationResult ? (this.props.recognizerState.dictationResult.diffResult ?
-                            this.props.recognizerState.dictationResult.diffResult.map((diffElm, i) => {
-                                if (diffElm.added == null && diffElm.removed == null) {
-                                    return <Text key={i} >{diffElm.value}</Text>
-                                } else if (diffElm.added === true) {
-                                    return <Text key={i} style={{ color: Colors.accent }}>{diffElm.value}</Text>
-                                }
-                            }) : this.props.recognizerState.dictationResult.text) : null
-                    }
-                    _</Text>
-                    : <View style={{
-                        alignItems: 'center'
-                    }}>
-                        <Text style={styles.exampleTextTitleStyle}>Say something like:</Text>
-                        <View style={{
-                            flexDirection: 'row',
-                            flexWrap: 'wrap',
-                            justifyContent: 'space-around',
-                        }}>
-                            <Text style={styles.exampleTextSentenceStyle}>"Show all data"</Text>
-                            <Text style={styles.exampleTextSentenceStyle}>"Go to heart rate"</Text>
-                        </View>
+        switch (this.props.recognizerState.status) {
+            case SpeechRecognizerSessionStatus.Waiting:
+                return <View style={styles.containerStyle}>
+                    <View style={styles.titleContainerStyle}>
+                        <Spinner size={20} isVisible={true} type="FadingCircle" color={Colors.accent} />
+                        <Text style={styles.waitingTextStyle}>Processing the previous command...</Text>
                     </View>
-            }
-        </View>
+                </View>
+            default:
+                return <View style={styles.containerStyle}>
+
+                <View style={styles.titleContainerStyle}>
+                    <Spinner size={20} isVisible={true} type="Wave" color={Colors.speechAffordanceColorBackground} />
+                    <Text style={styles.listeningTextStyle}>Listening...</Text>
+                </View>
+    
+                {
+                    this.isRecognizedTextExists(this.props.recognizerState) === true ? <Text style={styles.dictatedMessageStyle}>
+                        {
+                            this.props.recognizerState.dictationResult ? (this.props.recognizerState.dictationResult.diffResult ?
+                                this.props.recognizerState.dictationResult.diffResult.map((diffElm, i) => {
+                                    if (diffElm.added == null && diffElm.removed == null) {
+                                        return <Text key={i} >{diffElm.value}</Text>
+                                    } else if (diffElm.added === true) {
+                                        return <Text key={i} style={{ color: Colors.accent }}>{diffElm.value}</Text>
+                                    }
+                                }) : this.props.recognizerState.dictationResult.text) : null
+                        }
+                        _</Text>
+                        : <View style={{
+                            alignItems: 'center'
+                        }}>
+                            <Text style={styles.exampleTextTitleStyle}>Say something like:</Text>
+                            <View style={{
+                                flexDirection: 'row',
+                                flexWrap: 'wrap',
+                                justifyContent: 'space-around',
+                            }}>
+                                <Text style={styles.exampleTextSentenceStyle}>"Show all data"</Text>
+                                <Text style={styles.exampleTextSentenceStyle}>"Go to heart rate"</Text>
+                            </View>
+                        </View>
+                }
+            </View>
+        }
     }
 }
 
