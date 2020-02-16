@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
 })
 
 interface Props {
-    isGlobalSpeechButtonPressed: boolean
+    isGlobalSpeechButtonPressed: boolean,
 }
 
 interface State {
@@ -136,7 +136,7 @@ export class GlobalSpeechOverlay extends React.PureComponent<Props, State> {
                 },
             }}
             >
-                <SpeechInputPanel />
+                <SpeechInputPanel/>
             </Animated.View>
         </View> : null
     }

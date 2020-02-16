@@ -1,40 +1,48 @@
 import { SpeechRecognizerState, INITIAL_STATE, SpeechRecognizerSessionStatus } from "./types";
 import { ActionTypeBase } from "../types";
-import { SpeechRecognizerActionType, BootstrapAction, StartDictationAction, UpdateDictationResultAction, TerminateAction } from "./actions";
+import { SpeechRecognizerActionType, UpdateDictationResultAction, SpeechSessionAction, SetShowGlobalPopupAction } from "./actions";
 
 
-export const speechRecognizerStateReducer = (state: SpeechRecognizerState = INITIAL_STATE, action: ActionTypeBase): SpeechRecognizerState => {
+export const speechRecognizerStateReducer = (state: SpeechRecognizerState = INITIAL_STATE, action: SpeechSessionAction): SpeechRecognizerState => {
     const newState = {
         ...state
     }
 
     switch (action.type) {
         case SpeechRecognizerActionType.BootstrapAction:
-            if (state.status === SpeechRecognizerSessionStatus.Idle) {
-                const a = action as BootstrapAction
-                newState.currentSessionId = a.sessionId
+            {
+                newState.currentSessionId = action.sessionId
                 newState.dictationResult = null
                 newState.status = SpeechRecognizerSessionStatus.Starting
                 return newState;
-            } else return state
+            }
+        case SpeechRecognizerActionType.WaitAction:
+            newState.status = SpeechRecognizerSessionStatus.Waiting
+            newState.currentSessionId = action.sessionId
+            return newState
 
         case SpeechRecognizerActionType.StartDictation:
-            if (state.status === SpeechRecognizerSessionStatus.Starting) {
-                const a = action as StartDictationAction
+            if (state.currentSessionId === action.sessionId) {
                 newState.status = SpeechRecognizerSessionStatus.Listening
                 return newState;
-            }
+            } else return state;
         case SpeechRecognizerActionType.UpdateDictationResult:
-            if (state.status === SpeechRecognizerSessionStatus.Listening) {
+            if (state.currentSessionId === action.sessionId) {
                 const a = action as UpdateDictationResultAction
                 newState.dictationResult = a.dictationResult
                 return newState
-            }
-
+            } else return state;
         case SpeechRecognizerActionType.TerminateSession:
-            {
-                const a = action as TerminateAction
+            if (state.currentSessionId === action.sessionId) {
                 newState.status = SpeechRecognizerSessionStatus.Idle
+                newState.currentSessionId = null
+                return newState
+            } else return state;
+
+        case SpeechRecognizerActionType.SetShowGlobalPopupAction:
+            {
+                const a = action as SetShowGlobalPopupAction
+                newState.showGlobalPopup = a.value
                 return newState
             }
         default:

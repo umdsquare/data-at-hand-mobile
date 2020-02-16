@@ -1,7 +1,7 @@
 import React from 'react'
 import { Animated, View, Text, StyleSheet, TextStyle, LayoutAnimation, Dimensions, LayoutRectangle, Easing, LayoutChangeEvent, Platform } from 'react-native'
 import { StyleTemplates } from '../../../../../style/Styles'
-import { TouchingElementInfo, TouchingElementValueType, ParameterType } from '../../../../../core/exploration/types'
+import { TouchingElementInfo, TouchingElementValueType, ParameterType, ExplorationType, ParameterKey } from '../../../../../core/exploration/types'
 import { ReduxAppState } from '../../../../../state/types'
 import { connect } from 'react-redux'
 import { explorationInfoHelper } from '../../../../../core/exploration/ExplorationInfoHelper'
@@ -17,10 +17,11 @@ import Colors from '../../../../../style/Colors'
 import { CycleDimension, getCycleDimensionSpec } from '../../../../../core/exploration/cyclic_time'
 import { SpeechInputPanel } from '../../../../exploration/SpeechInputPanel';
 import { ThunkDispatch } from 'redux-thunk'
-import { startSpeechSession, requestStopDictation } from '../../../../../state/speech/commands';
+import { startSpeechSession, requestStopDictation, makeNewSessionId } from '../../../../../state/speech/commands';
 import Haptic from 'react-native-haptic-feedback';
 import Insets from 'react-native-static-safe-area-insets';
 import { ZIndices } from '../zIndices'
+import { SpeechContext, SpeechContextHelper } from '../../../../../state/speech/context'
 
 const borderRadius = 8
 
@@ -110,12 +111,14 @@ const gradientBackgroundProps = {
 interface Props {
     touchingInfo?: TouchingElementInfo,
     measureUnitType?: MeasureUnitType,
-    dispatchStartSpeechSession?: () => void,
-    dispatchStopDictation?: () => void,
+    explorationType?: ExplorationType,
+    dispatchStartSpeechSession?: (sessionId: string, context: SpeechContext) => void,
+    dispatchStopDictation?: (sessionId: string) => void,
 }
 
 interface State {
     touchingInfo?: TouchingElementInfo,
+    speechSessionId?: string,
     tooltipWidth: number,
     tooltipHeight: number,
     tooltipPositionX: number,
@@ -133,6 +136,7 @@ class TooltipOverlay extends React.Component<Props, State>{
 
         this.state = {
             touchingInfo: null,
+            speechSessionId: null,
             tooltipWidth: 0,
             tooltipHeight: 0,
             tooltipPositionX: 0,
@@ -175,7 +179,7 @@ class TooltipOverlay extends React.Component<Props, State>{
         const insetTop = Platform.select({
             ios: Insets.safeAreaInsetsTop,
             android: 0
-        }) 
+        })
 
         const insetBottom = Platform.select({
             ios: Insets.safeAreaInsetsBottom,
@@ -210,12 +214,13 @@ class TooltipOverlay extends React.Component<Props, State>{
 
     componentDidUpdate(prevProps: Props) {
         if (prevProps.touchingInfo !== this.props.touchingInfo) {
-
             if (prevProps.touchingInfo == null) {
                 const tooltipPosition = this.calculateOptimalTooltipPosition(this.props.touchingInfo.elementBoundInScreen, this.state.tooltipWidth, this.state.tooltipHeight)
 
+                const speechSessionId = makeNewSessionId()
                 this.setState({
                     ...this.state,
+                    speechSessionId,
                     touchingInfo: this.props.touchingInfo,
                     tooltipPositionX: tooltipPosition.x,
                     tooltipPositionY: tooltipPosition.y
@@ -234,7 +239,54 @@ class TooltipOverlay extends React.Component<Props, State>{
                     useNativeDriver: true
                 }).start()
 
-                this.props.dispatchStartSpeechSession()
+                let context: SpeechContext
+                switch (this.props.touchingInfo.valueType) {
+                    case TouchingElementValueType.CycleDimension:
+                        {
+                            context = SpeechContextHelper.makeCycleDimentionElementSpeechContext(
+                                explorationInfoHelper.getParameterValueOfParams<CycleDimension>(
+                                    this.props.touchingInfo.params,
+                                    ParameterType.CycleDimension),
+                                explorationInfoHelper.getParameterValueOfParams<DataSourceType>(
+                                    this.props.touchingInfo.params,
+                                    ParameterType.DataSource)
+                            )
+                        }
+                        break;
+                    case TouchingElementValueType.DayValue:
+                        {
+                            context = SpeechContextHelper.makeDateElementSpeechContext(
+                                this.props.explorationType,
+                                explorationInfoHelper.getParameterValueOfParams<number>(
+                                    this.props.touchingInfo.params,
+                                    ParameterType.Date
+                                ),
+                                explorationInfoHelper.getParameterValueOfParams<DataSourceType>(
+                                    this.props.touchingInfo.params,
+                                    ParameterType.DataSource
+                                ),
+                            )
+                        }
+                        break;
+                    case TouchingElementValueType.RangeAggregated:
+                        {
+                            context = SpeechContextHelper.makeRangeElementSpeechContext(
+                                this.props.explorationType,
+                                explorationInfoHelper.getParameterValueOfParams<[number, number]>(
+                                    this.props.touchingInfo.params,
+                                    ParameterType.Range
+                                ),
+                                explorationInfoHelper.getParameterValueOfParams<DataSourceType>(
+                                    this.props.touchingInfo.params,
+                                    ParameterType.DataSource
+                                ),
+                            )
+                        }
+                        break;
+                }
+
+                this.props.dispatchStartSpeechSession(speechSessionId, context)
+
                 Haptic.trigger("impactHeavy", {
                     enableVibrateFallback: true,
                     ignoreAndroidSystemSettings: true
@@ -252,7 +304,9 @@ class TooltipOverlay extends React.Component<Props, State>{
                         touchingInfo: null
                     })
                 })
-                this.props.dispatchStopDictation()
+                if (this.state.speechSessionId) {
+                    this.props.dispatchStopDictation(this.state.speechSessionId)
+                }
 
             } else {
 
@@ -275,7 +329,7 @@ class TooltipOverlay extends React.Component<Props, State>{
     }
 
     render() {
-        return <View pointerEvents="none" style={{...StyleTemplates.fitParent, zIndex: ZIndices.TooltipOverlay, elevation: 10}}>
+        return <View pointerEvents="none" style={{ ...StyleTemplates.fitParent, zIndex: ZIndices.TooltipOverlay, elevation: 10 }}>
             <Animated.View
                 style={{
                     ...StyleTemplates.fitParent,
@@ -482,8 +536,8 @@ class TooltipOverlay extends React.Component<Props, State>{
 function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Props): Props {
     return {
         ...ownProps,
-        dispatchStartSpeechSession: () => dispatch(startSpeechSession()),
-        dispatchStopDictation: () => dispatch(requestStopDictation())
+        dispatchStartSpeechSession: (sessionId, context) => dispatch(startSpeechSession(sessionId, context)),
+        dispatchStopDictation: (sessionId) => dispatch(requestStopDictation(sessionId))
     }
 }
 
@@ -491,7 +545,8 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
     return {
         ...ownProps,
         touchingInfo: appState.explorationState.touchingElement,
-        measureUnitType: appState.settingsState.unit
+        measureUnitType: appState.settingsState.unit,
+        explorationType: appState.explorationState.info.type
     }
 }
 

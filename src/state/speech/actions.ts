@@ -3,10 +3,12 @@ import { DictationResult } from "../../core/speech/types";
 
 export enum SpeechRecognizerActionType {
     BootstrapAction = "speech:recognition:bootstrap",
+    WaitAction = "speech:recognition:wait",
     StartDictation = "speech:recognition:start_dictation",
     UpdateDictationResult = "speech:recognition:update_dictation_result",
     FinishDictation = "speech:recognition:finish_dictation",
-    TerminateSession = "speech:recognition:terminate"
+    TerminateSession = "speech:recognition:terminate",
+    SetShowGlobalPopupAction = "speech:recognition:set_show_global_popup"
 }
 
 
@@ -21,54 +23,72 @@ export interface TerminationPayload {
     data?: any;
 }
 
-
-export interface BootstrapAction extends ActionTypeBase {
+export interface SpeechSessionAction extends ActionTypeBase {
     sessionId: string
 }
 
-export interface StartDictationAction extends ActionTypeBase {
-
-}
-
-export interface UpdateDictationResultAction extends ActionTypeBase {
+export interface UpdateDictationResultAction extends SpeechSessionAction {
     dictationResult: DictationResult
 }
 
-export interface TerminateAction extends ActionTypeBase {
+export interface TerminateAction extends SpeechSessionAction {
     reason: TerminationReason,
     data?: any
 }
 
-export function createUpdateDictationResultAction(dictationResult: DictationResult): UpdateDictationResultAction {
+export interface SetShowGlobalPopupAction extends SpeechSessionAction {
+    value: boolean
+}
+
+export function createUpdateDictationResultAction(dictationResult: DictationResult, sessionId: string): UpdateDictationResultAction {
     return {
         type: SpeechRecognizerActionType.UpdateDictationResult,
-        dictationResult
+        dictationResult,
+        sessionId
     }
 }
 
-export function createStartDictationAction(): StartDictationAction {
+export function createStartDictationAction(sessionId: string): SpeechSessionAction {
     return {
-        type: SpeechRecognizerActionType.StartDictation
+        type: SpeechRecognizerActionType.StartDictation,
+        sessionId
     }
 }
 
-export function createBootstrapAction(sessionId: string): BootstrapAction {
+export function createWaitAction(sessionId): SpeechSessionAction{
+    return {
+        type: SpeechRecognizerActionType.WaitAction,
+        sessionId
+    }
+}
+
+export function createBootstrapAction(sessionId: string): SpeechSessionAction {
     return {
         type: SpeechRecognizerActionType.BootstrapAction,
         sessionId
     }
 }
 
-export function craeteFinishDictationAction(): ActionTypeBase {
+export function craeteFinishDictationAction(sessionId: string): SpeechSessionAction {
     return {
-        type: SpeechRecognizerActionType.FinishDictation
+        type: SpeechRecognizerActionType.FinishDictation,
+        sessionId
     }
 }
 
-export function createTerminateSessionAction(reason: TerminationReason, data?: any): TerminateAction {
+export function createTerminateSessionAction(reason: TerminationReason, sessionId: string, data?: any): TerminateAction {
     return {
         type: SpeechRecognizerActionType.TerminateSession,
         reason,
-        data
+        data,
+        sessionId
+    }
+}
+
+export function createSetShowGlobalPopupAction(value: boolean, sessionId: string): SetShowGlobalPopupAction {
+    return {
+        type: SpeechRecognizerActionType.SetShowGlobalPopupAction,
+        sessionId,
+        value
     }
 }
