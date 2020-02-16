@@ -177,7 +177,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
         if (this.props.selectedServiceKey) {
             try {
-                await DataServiceManager.getServiceByKey(this.props.selectedServiceKey).activateInSystem((progressInfo) => {
+                await DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).activateInSystem((progressInfo) => {
                     this.setState({
                         ...this.state,
                         loadingMessage: progressInfo.message

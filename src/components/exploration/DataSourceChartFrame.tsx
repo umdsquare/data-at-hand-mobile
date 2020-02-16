@@ -4,7 +4,7 @@ import Colors from '../../style/Colors';
 import { Sizes } from '../../style/Sizes';
 import { DataSourceIcon } from '../common/DataSourceIcon';
 import { DataSourceType, MeasureUnitType } from '../../measure/DataSourceSpec';
-import { dataSourceManager } from '../../system/DataSourceManager';
+import { DataSourceManager } from '../../system/DataSourceManager';
 import { OverviewSourceRow, StatisticsType, WeightRangedData } from '../../core/exploration/data/types';
 import commaNumber from 'comma-number';
 import { DateTimeHelper } from '../../time';
@@ -332,7 +332,7 @@ export const DataSourceChartFrame = (props: {
     const [chartContainerWidth, setChartContainerWidth] = useState(-1)
     const [chartContainerHeight, setChartContainerHeight] = useState(-1)
 
-    const spec = dataSourceManager.getSpec(props.data.source)
+    const spec = DataSourceManager.instance.getSpec(props.data.source)
     const todayInfo = formatTodayValue(props.data, props.measureUnitType)
 
     return <View style={props.flat === true ? styles.containerStyleFlat : styles.containerStyle}>

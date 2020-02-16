@@ -93,11 +93,11 @@ class SettingsScreen extends React.PureComponent<Props, State>{
                 text: "Refresh all",
                 style: 'destructive',
                 onPress: async () => {
-                    const services = await DataServiceManager.getServicesSupportedInThisSystem()
+                    const services = await DataServiceManager.instance.getServicesSupportedInThisSystem()
                     for (const service of services) {
                         await service.clearAllCache()
                     }
-                    await DataServiceManager.getServiceByKey(this.props.selectedServiceKey).activateInSystem((progressInfo) => {})
+                    await DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).activateInSystem((progressInfo) => {})
                 }
             },
             {
@@ -112,7 +112,7 @@ class SettingsScreen extends React.PureComponent<Props, State>{
     render() {
         return <View>
 
-            <SettingsRow title="Service" value={DataServiceManager.getServiceByKey(this.props.selectedServiceKey).name}
+            <SettingsRow title="Service" value={DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).name}
                 onClick={this.onPressServiceButton} />
             <SettingsRow title="Unit" value={SettingsScreen.UnitTypes.find(t => t.key === this.props.selectedUnitType).label}
                 onClick={this.onPressUnitRow} />

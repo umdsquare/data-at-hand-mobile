@@ -31,7 +31,7 @@ class ServiceSelectionScreen extends React.Component<Prop, State>{
     }
 
     async componentDidMount() {
-        const supportedServices = await DataServiceManager.getServicesSupportedInThisSystem()
+        const supportedServices = await DataServiceManager.instance.getServicesSupportedInThisSystem()
         this.setState({
             ...this.state,
             services: supportedServices
@@ -57,10 +57,10 @@ class ServiceSelectionScreen extends React.Component<Prop, State>{
                                 onSelected={
                                     () => {
                                         if (this.props.selectedServiceKey != service.key) {
-                                            DataServiceManager.getServiceByKey(service.key).activateInSystem((progressInfo)=>{})
+                                            DataServiceManager.instance.getServiceByKey(service.key).activateInSystem((progressInfo)=>{})
                                                 .then(result => {
                                                     if (result.success === true) {
-                                                        return DataServiceManager.getServiceByKey(this.props.selectedServiceKey)
+                                                        return DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey)
                                                             .deactivatedInSystem().then(deactivated => {
                                                                 this.props.selectService(service.key, result.serviceInitialDate)
                                                                 this.props.navigation.goBack()

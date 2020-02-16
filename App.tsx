@@ -51,7 +51,7 @@ class App extends React.Component<any, State> {
 
     const loadingStartTime = Date.now()
     //loading initial things
-    const services = await DataServiceManager.getServicesSupportedInThisSystem()
+    const services = await DataServiceManager.instance.getServicesSupportedInThisSystem()
 
     const speechInstalled = await VoiceDictator.instance.install()
     if (speechInstalled === true) {

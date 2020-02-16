@@ -14,7 +14,7 @@ import { FITBIT_PROFILE_URL } from './api';
 import { FitbitServiceMeasure } from './FitbitServiceMeasure';
 import { FitbitWeightMeasure } from './FitbitWeightMeasure';
 import { FitbitSleepMeasure } from './FitbitSleepMeasure';
-import { FitbitLocalDbManager, FitbitLocalTableName } from './sqlite/database';
+import { FitbitLocalDbManager } from './sqlite/database';
 import { FitbitIntraDayStepMeasure } from './FitbitIntraDayStepMeasure';
 import { IntraDayDataSourceType } from '../../../core/exploration/types';
 import { FitbitIntraDayHeartRateMeasure } from './FitbitIntraDayHeartRateMeasure';

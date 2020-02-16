@@ -1,7 +1,16 @@
 import { DataSourceSpec, DataSourceType, DataSourceCategory, DataSourceCategorySpec } from "../measure/DataSourceSpec";
 import commaNumber from 'comma-number';
 
-class DataSourceManager {
+export class DataSourceManager {
+
+  private static _instance: DataSourceManager
+
+  static get instance(): DataSourceManager {
+    if(this._instance == null){
+      this._instance = new DataSourceManager()
+    }
+    return this._instance
+  }
 
   readonly supportedDataSources: ReadonlyArray<DataSourceSpec> = [
     
@@ -43,7 +52,7 @@ class DataSourceManager {
 
   private specMap: Map<DataSourceType, DataSourceSpec>;
 
-  constructor() {
+  private constructor() {
 
     this.dataSourceCategorySpecs[DataSourceCategory.Step] = {
       category: DataSourceCategory.Step,
@@ -84,6 +93,3 @@ class DataSourceManager {
     }
   }
 }
-
-const dataSourceManager = new DataSourceManager()
-export { dataSourceManager }

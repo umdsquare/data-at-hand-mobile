@@ -1,7 +1,19 @@
 import {DataService} from '../measure/service/DataService';
 import {FitbitService} from '../measure/service/fitbit/FitbitService';
 
-class DataServiceManager {
+export class DataServiceManager {
+
+  private static _instance: DataServiceManager
+
+  static get instance(): DataServiceManager {
+    if(this._instance == null){
+      this._instance = new DataServiceManager()
+    }
+    return this._instance
+  }
+
+  private constructor(){}
+
   installedServices: ReadonlyArray<DataService> = [
     new FitbitService(),
   ];
@@ -27,6 +39,3 @@ class DataServiceManager {
     return this.installedServices.find(s => s.key === serviceKey)
   }
 }
-
-const dataServiceManager = new DataServiceManager();
-export {dataServiceManager as DataServiceManager};

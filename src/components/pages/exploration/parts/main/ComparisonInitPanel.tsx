@@ -11,7 +11,7 @@ import { explorationInfoHelper } from '../../../../../core/exploration/Explorati
 import { useDispatch } from 'react-redux'
 import { createGoToComparisonTwoRangesAction, InteractionType, createGoToComparisonCyclicAction } from '../../../../../state/exploration/interaction/actions'
 import { CategoricalRow } from '../../../../exploration/CategoricalRow'
-import { dataSourceManager } from '../../../../../system/DataSourceManager'
+import { DataSourceManager } from '../../../../../system/DataSourceManager'
 import { DataSourceIcon } from '../../../../common/DataSourceIcon'
 import { DateRangeBar } from '../../../../exploration/DateRangeBar'
 import { StyleTemplates } from '../../../../../style/Styles'
@@ -70,13 +70,13 @@ export const ComparisonInitPanel = (props: { info: ExplorationInfo, onCompleted?
     }, [cycleType])
 
     return <View style={styles.containerStyle}>
-        <CategoricalRow title="Data Source" isLightMode={true} value={dataSourceManager.getSpec(dataSource).name}
+        <CategoricalRow title="Data Source" isLightMode={true} value={DataSourceManager.instance.getSpec(dataSource).name}
             useSpeechIndicator={false}
-            values={dataSourceManager.supportedDataSources.map(s => s.name)}
-            onValueChange={(value, index) => { setDataSource(dataSourceManager.supportedDataSources[index].type) }}
+            values={DataSourceManager.instance.supportedDataSources.map(s => s.name)}
+            onValueChange={(value, index) => { setDataSource(DataSourceManager.instance.supportedDataSources[index].type) }}
             IconComponent={DataSourceIcon}
             iconProps={(index) => ({
-                type: dataSourceManager.supportedDataSources[index].type
+                type: DataSourceManager.instance.supportedDataSources[index].type
             })}
             showBorder={true} />
         <CategoricalRow title="Comparison Type"

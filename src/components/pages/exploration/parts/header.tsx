@@ -9,7 +9,7 @@ import { explorationInfoHelper } from '../../../../core/exploration/ExplorationI
 import { Button } from 'react-native-elements';
 import { Sizes } from '../../../../style/Sizes';
 import { StyleTemplates } from '../../../../style/Styles';
-import { dataSourceManager } from '../../../../system/DataSourceManager';
+import { DataSourceManager } from '../../../../system/DataSourceManager';
 import { DataSourceType } from '../../../../measure/DataSourceSpec';
 import { createSetRangeAction, setDataSourceAction, InteractionType, goBackAction, setDateAction, setIntraDayDataSourceAction, setCycleTypeAction, setCycleDimensionAction } from '../../../../state/exploration/interaction/actions';
 import Colors from '../../../../style/Colors';
@@ -208,17 +208,17 @@ const HeaderDateBar = () => {
 
 function generateDataSourceRow(props: ExplorationProps, showBorder: boolean): any {
     const sourceType = explorationInfoHelper.getParameterValue(props.explorationState.info, ParameterType.DataSource) as DataSourceType
-    const sourceSpec = dataSourceManager.getSpec(sourceType)
+    const sourceSpec = DataSourceManager.instance.getSpec(sourceType)
     return <CategoricalRow title="Data Source" showBorder={showBorder} value={sourceSpec.name}
         IconComponent={DataSourceIcon}
         iconProps={(index) => {
             return {
-                type: dataSourceManager.supportedDataSources[index].type,
+                type: DataSourceManager.instance.supportedDataSources[index].type,
             }
         }}
-        values={dataSourceManager.supportedDataSources.map(spec => spec.name)}
+        values={DataSourceManager.instance.supportedDataSources.map(spec => spec.name)}
         onValueChange={(newValue, newIndex) =>
-            props.dispatchCommand(setDataSourceAction(InteractionType.TouchOnly, dataSourceManager.supportedDataSources[newIndex].type))
+            props.dispatchCommand(setDataSourceAction(InteractionType.TouchOnly, DataSourceManager.instance.supportedDataSources[newIndex].type))
         }
     />
 }
@@ -227,7 +227,7 @@ function generateIntraDayDataSourceRow(props: ExplorationProps): any {
     const intraDaySourceType = explorationInfoHelper.getParameterValue<IntraDayDataSourceType>(props.explorationState.info, ParameterType.IntraDayDataSource)
     const sourceTypeName = getIntraDayDataSourceName(intraDaySourceType)
     const supportedIntraDayDataSourceTypes = []
-    dataSourceManager.supportedDataSources.forEach(s => {
+    DataSourceManager.instance.supportedDataSources.forEach(s => {
         const inferred = inferIntraDayDataSourceType(s.type)
         if (supportedIntraDayDataSourceTypes.indexOf(inferred) === -1 && inferred != null) {
             supportedIntraDayDataSourceTypes.push(inferred)

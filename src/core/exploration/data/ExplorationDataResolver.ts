@@ -1,7 +1,7 @@
 import { ExplorationInfo, ExplorationType, ParameterType, IntraDayDataSourceType, ParameterKey } from '../types';
 import { OverviewData, OverviewSourceRow, GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData, FilteredDailyValues } from './types';
 import { explorationInfoHelper } from '../ExplorationInfoHelper';
-import { dataSourceManager } from '../../../system/DataSourceManager';
+import { DataSourceManager } from '../../../system/DataSourceManager';
 import { DataServiceManager } from '../../../system/DataServiceManager';
 import { DataSourceType } from '../../../measure/DataSourceSpec';
 import { CyclicTimeFrame, CycleDimension } from '../cyclic_time';
@@ -40,7 +40,7 @@ class ExplorationDataResolver {
     );
     const source = explorationInfoHelper.getParameterValue<DataSourceType>(info, ParameterType.DataSource)
 
-    const selectedService = DataServiceManager.getServiceByKey(
+    const selectedService = DataServiceManager.instance.getServiceByKey(
       selectedServiceKey,
     );
 
@@ -55,12 +55,12 @@ class ExplorationDataResolver {
       ParameterType.Range,
     );
 
-    const selectedService = DataServiceManager.getServiceByKey(
+    const selectedService = DataServiceManager.instance.getServiceByKey(
       selectedServiceKey,
     );
 
     return Promise.all(
-      dataSourceManager.supportedDataSources.map(source =>
+      DataSourceManager.instance.supportedDataSources.map(source =>
         selectedService.fetchData(source.type, range[0], range[1])
           .then(result => result != null ? (selectedService.getPreferredValueRange(source.type).then(range => {
             result.preferredValueRange = range
@@ -73,7 +73,7 @@ class ExplorationDataResolver {
     info: ExplorationInfo,
     selectedServiceKey: string
   ): Promise<any> {
-    const selectedService = DataServiceManager.getServiceByKey(
+    const selectedService = DataServiceManager.instance.getServiceByKey(
       selectedServiceKey,
     );
     const source = explorationInfoHelper.getParameterValue<IntraDayDataSourceType>(info, ParameterType.IntraDayDataSource)
@@ -84,7 +84,7 @@ class ExplorationDataResolver {
 
   private loadCyclicComparisonData(info: ExplorationInfo, selectedServiceKey: string): Promise<GroupedData | GroupedRangeData> {
 
-    const selectedService = DataServiceManager.getServiceByKey(
+    const selectedService = DataServiceManager.instance.getServiceByKey(
       selectedServiceKey,
     );
     const source = explorationInfoHelper.getParameterValue<DataSourceType>(info, ParameterType.DataSource)
@@ -98,7 +98,7 @@ class ExplorationDataResolver {
   }
 
   private loadCyclicRangeDetailData(info: ExplorationInfo, selectedServiceKey: string): Promise<RangeAggregatedComparisonData<IAggregatedValue | IAggregatedRangeValue>> {
-    const selectedService = DataServiceManager.getServiceByKey(
+    const selectedService = DataServiceManager.instance.getServiceByKey(
       selectedServiceKey,
     );
     const source = explorationInfoHelper.getParameterValue<DataSourceType>(
@@ -118,7 +118,7 @@ class ExplorationDataResolver {
   }
 
   private loadCyclicDailyDetailData(info: ExplorationInfo, selectedServiceKey: string): Promise<FilteredDailyValues> {
-    const selectedService = DataServiceManager.getServiceByKey(
+    const selectedService = DataServiceManager.instance.getServiceByKey(
       selectedServiceKey,
     );
     const source = explorationInfoHelper.getParameterValue<DataSourceType>(
@@ -139,7 +139,7 @@ class ExplorationDataResolver {
 
 
   private async loadTwoRangeComparisonData(info: ExplorationInfo, selectedServiceKey: string): Promise<RangeAggregatedComparisonData<IAggregatedValue | IAggregatedRangeValue>> {
-    const selectedService = DataServiceManager.getServiceByKey(
+    const selectedService = DataServiceManager.instance.getServiceByKey(
       selectedServiceKey,
     );
     const source = explorationInfoHelper.getParameterValue<DataSourceType>(info, ParameterType.DataSource)
