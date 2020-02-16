@@ -173,6 +173,7 @@ const HeaderRangeBar = (props: { parameterKey?: ParameterKey, showBorder?: boole
         }}
         onLongPressOut={(position) => {
             if (speechSessionId != null) {
+                console.log("request stop dictation")
                 dispatch(requestStopDictation(speechSessionId))
                 dispatch(createSetShowGlobalPopupAction(false, speechSessionId))
             }

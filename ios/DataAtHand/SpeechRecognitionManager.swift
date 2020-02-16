@@ -147,8 +147,8 @@ class SpeechRecognitionManager: RCTEventEmitter{
   @objc
   func stop(_ callback: RCTResponseSenderBlock) -> Void{
     if audioEngine.isRunning {
-      audioEngine.stop()
       currentRecognitionRequest?.endAudio()
+      audioEngine.stop()
     }
   }
   

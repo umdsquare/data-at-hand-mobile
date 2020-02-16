@@ -8,12 +8,22 @@ import { BehaviorSubject } from 'rxjs';
 import { filter, first, ignoreElements } from 'rxjs/operators';
 import { sleep } from "../../utils";
 import { SpeechContext } from "./context";
-import { NLUCommandResolver } from "./nlu";
+import { NLUCommandResolver } from "./nlp/nlu";
 
 const sessionRunning = new BehaviorSubject<boolean>(false)
 
 export function startSpeechSession(sessionId: string, context: SpeechContext): (dispatch: Dispatch, getState: () => ReduxAppState) => void {
     return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
+        const currentState = getState()
+        console.log("Previous speech session state: ", currentState.speechRecognizerState.status)
+        /*
+        if(currentState.speechRecognizerState.status === SpeechRecognizerSessionStatus.Listening)
+        {
+            console.log("It is problematic if the next session intervened while the previous session is still listening. May be the stop dictation command was omitted. Cancel the previous session.")
+            VoiceDictator.instance.clearAllListeners()
+            await VoiceDictator.instance.stop();
+            terminate(dispatch, TerminationReason.Fail, currentState.speechRecognizerState.currentSessionId, {error: "StopDictationOmitted"})
+        }*/
 
         //wait until the previous session stops.
         console.log(sessionId, "Wait until the previous session stops.")
@@ -67,7 +77,7 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
                 console.log(sessionId, "dictator stop event")
                 if (error) {
                     console.log(sessionId, "Finish without dictation")
-                    terminate(dispatch, TerminationReason.Fail, error)
+                    terminate(dispatch, TerminationReason.Fail, sessionId, error)
                 } else {
                     const currentState = getState()
                     const dictationResult = currentState.speechRecognizerState.dictationResult
@@ -107,8 +117,9 @@ function terminate(dispatch: Dispatch, reason: TerminationReason, sessionId: str
 export function requestStopDictation(sessionId: string): (dispatch: Dispatch, getState: () => ReduxAppState) => void {
     return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
         const initialState = getState()
-        console.log("session status:", initialState.speechRecognizerState.status)
-        if (initialState.speechRecognizerState.status === SpeechRecognizerSessionStatus.Listening
+        console.log("request stop on session status:", initialState.speechRecognizerState.status)
+        if (initialState.speechRecognizerState.status === SpeechRecognizerSessionStatus.Listening || 
+            initialState.speechRecognizerState.status === SpeechRecognizerSessionStatus.Starting
             && initialState.speechRecognizerState.currentSessionId === sessionId
         ) {
             await VoiceDictator.instance.stop();
