@@ -1,7 +1,7 @@
 import React from 'react'
 import { Animated, View, Text, StyleSheet, TextStyle, LayoutAnimation, Dimensions, LayoutRectangle, Easing, LayoutChangeEvent, Platform } from 'react-native'
 import { StyleTemplates } from '../../../../../style/Styles'
-import { TouchingElementInfo, TouchingElementValueType, ParameterType } from '../../../../../core/exploration/types'
+import { TouchingElementInfo, TouchingElementValueType, ParameterType, ExplorationType, ParameterKey } from '../../../../../core/exploration/types'
 import { ReduxAppState } from '../../../../../state/types'
 import { connect } from 'react-redux'
 import { explorationInfoHelper } from '../../../../../core/exploration/ExplorationInfoHelper'
@@ -21,6 +21,7 @@ import { startSpeechSession, requestStopDictation, makeNewSessionId } from '../.
 import Haptic from 'react-native-haptic-feedback';
 import Insets from 'react-native-static-safe-area-insets';
 import { ZIndices } from '../zIndices'
+import { SpeechContext, SpeechContextHelper } from '../../../../../state/speech/context'
 
 const borderRadius = 8
 
@@ -110,7 +111,8 @@ const gradientBackgroundProps = {
 interface Props {
     touchingInfo?: TouchingElementInfo,
     measureUnitType?: MeasureUnitType,
-    dispatchStartSpeechSession?: (sessionId: string) => void,
+    explorationType?: ExplorationType,
+    dispatchStartSpeechSession?: (sessionId: string, context: SpeechContext) => void,
     dispatchStopDictation?: (sessionId: string) => void,
 }
 
@@ -215,7 +217,6 @@ class TooltipOverlay extends React.Component<Props, State>{
             if (prevProps.touchingInfo == null) {
                 const tooltipPosition = this.calculateOptimalTooltipPosition(this.props.touchingInfo.elementBoundInScreen, this.state.tooltipWidth, this.state.tooltipHeight)
 
-
                 const speechSessionId = makeNewSessionId()
                 this.setState({
                     ...this.state,
@@ -238,7 +239,53 @@ class TooltipOverlay extends React.Component<Props, State>{
                     useNativeDriver: true
                 }).start()
 
-                this.props.dispatchStartSpeechSession(speechSessionId)
+                let context: SpeechContext
+                switch (this.props.touchingInfo.valueType) {
+                    case TouchingElementValueType.CycleDimension:
+                        {
+                            context = SpeechContextHelper.makeCycleDimentionElementSpeechContext(
+                                explorationInfoHelper.getParameterValueOfParams<CycleDimension>(
+                                    this.props.touchingInfo.params,
+                                    ParameterType.CycleDimension),
+                                explorationInfoHelper.getParameterValueOfParams<DataSourceType>(
+                                    this.props.touchingInfo.params,
+                                    ParameterType.DataSource)
+                            )
+                        }
+                        break;
+                    case TouchingElementValueType.DayValue:
+                        {
+                            context = SpeechContextHelper.makeDateElementSpeechContext(
+                                this.props.explorationType,
+                                explorationInfoHelper.getParameterValueOfParams<number>(
+                                    this.props.touchingInfo.params,
+                                    ParameterType.Date
+                                ),
+                                explorationInfoHelper.getParameterValueOfParams<DataSourceType>(
+                                    this.props.touchingInfo.params,
+                                    ParameterType.DataSource
+                                ),
+                            )
+                        }
+                        break;
+                    case TouchingElementValueType.RangeAggregated:
+                        {
+                            context = SpeechContextHelper.makeRangeElementSpeechContext(
+                                this.props.explorationType,
+                                explorationInfoHelper.getParameterValueOfParams<[number, number]>(
+                                    this.props.touchingInfo.params,
+                                    ParameterType.Range
+                                ),
+                                explorationInfoHelper.getParameterValueOfParams<DataSourceType>(
+                                    this.props.touchingInfo.params,
+                                    ParameterType.DataSource
+                                ),
+                            )
+                        }
+                        break;
+                }
+
+                this.props.dispatchStartSpeechSession(speechSessionId, context)
 
                 Haptic.trigger("impactHeavy", {
                     enableVibrateFallback: true,
@@ -489,7 +536,7 @@ class TooltipOverlay extends React.Component<Props, State>{
 function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Props): Props {
     return {
         ...ownProps,
-        dispatchStartSpeechSession: (sessionId) => dispatch(startSpeechSession(sessionId)),
+        dispatchStartSpeechSession: (sessionId, context) => dispatch(startSpeechSession(sessionId, context)),
         dispatchStopDictation: (sessionId) => dispatch(requestStopDictation(sessionId))
     }
 }
@@ -498,7 +545,8 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
     return {
         ...ownProps,
         touchingInfo: appState.explorationState.touchingElement,
-        measureUnitType: appState.settingsState.unit
+        measureUnitType: appState.settingsState.unit,
+        explorationType: appState.explorationState.info.type
     }
 }
 

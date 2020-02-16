@@ -7,13 +7,13 @@ import { SpeechRecognizerSessionStatus } from "./types";
 import { BehaviorSubject } from 'rxjs';
 import { filter, first, ignoreElements } from 'rxjs/operators';
 import { sleep } from "../../utils";
+import { SpeechContext } from "./context";
+import { NLUCommandResolver } from "./nlu";
 
 const sessionRunning = new BehaviorSubject<boolean>(false)
 
-export function startSpeechSession(sessionId: string): (dispatch: Dispatch, getState: () => ReduxAppState) => void {
+export function startSpeechSession(sessionId: string, context: SpeechContext): (dispatch: Dispatch, getState: () => ReduxAppState) => void {
     return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
-        const currentState = getState()
-        console.log(sessionId, "Try start speech session", currentState.speechRecognizerState.status)
 
         //wait until the previous session stops.
         console.log(sessionId, "Wait until the previous session stops.")
@@ -74,9 +74,10 @@ export function startSpeechSession(sessionId: string): (dispatch: Dispatch, getS
                     if (dictationResult != null && dictationResult.text != null && dictationResult.text.length > 0) {
                         //can start analyzing
                         //TODO start analysis
-                        console.log(sessionId, "Analyze the phrase, ", dictationResult.text)
+                        console.log(sessionId, "Analyze the phrase, ", dictationResult.text, "with context: ", context)
                         
-                        await sleep(5000)
+                        await NLUCommandResolver.instance.resolveSpeechCommand(dictationResult.text, context, dispatch)
+
                         console.log(sessionId, "Finished analyzing.")
                         terminate(dispatch, TerminationReason.Success, sessionId)
                     } else {

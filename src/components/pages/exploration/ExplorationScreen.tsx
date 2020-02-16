@@ -37,6 +37,7 @@ import { sleep } from "../../../utils";
 import { InitialLoadingIndicator } from "./parts/main/InitialLoadingIndicator";
 import uuid from 'uuid/v4';
 import { createSetShowGlobalPopupAction } from "../../../state/speech/actions";
+import { SpeechContextHelper } from "../../../state/speech/context";
 
 var deepEqual = require('deep-equal');
 
@@ -96,7 +97,7 @@ export interface ExplorationProps extends PropsWithNavigation {
     showGlobalSpeechPopup: boolean,
     dispatchCommand: (command: ExplorationAction) => void,
     dispatchDataReload: (info: ExplorationInfo) => void,
-    dispatchStartSpeechSession: (sessionId: string) => void,
+    dispatchStartSpeechSession: (sessionId: string, currentExplorationType: ExplorationType) => void,
     dispatchFinishDictation: (sessionId: string) => void,
     dispatchSetShowGlobalPopup: (value: boolean, sessionId: string) => void
 }
@@ -241,7 +242,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
         const sessionId = makeNewSessionId()
         this.props.dispatchSetShowGlobalPopup(true, sessionId)
-        this.props.dispatchStartSpeechSession(sessionId)
+        this.props.dispatchStartSpeechSession(sessionId, this.props.explorationState.info.type)
 
         this.setState({
             ...this.state,
@@ -340,7 +341,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Expl
         ...ownProps,
         dispatchCommand: (command: ExplorationAction) => dispatch(command),
         dispatchDataReload: (info: ExplorationInfo) => dispatch(startLoadingForInfo(info)),
-        dispatchStartSpeechSession: (sessionId) => dispatch(startSpeechSession(sessionId)),
+        dispatchStartSpeechSession: (sessionId, currentExplorationType) => dispatch(startSpeechSession(sessionId, SpeechContextHelper.makeGlobalContext(currentExplorationType))),
         dispatchFinishDictation: (sessionId) => dispatch(requestStopDictation(sessionId)),
         dispatchSetShowGlobalPopup: (value, sessionId) => dispatch(createSetShowGlobalPopupAction(value, sessionId))
     }

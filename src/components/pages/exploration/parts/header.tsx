@@ -19,6 +19,7 @@ import { CyclicTimeFrame, cyclicTimeFrameSpecs, CycleDimension, getFilteredCycle
 import { SvgIcon, SvgIconType } from '../../../common/svg/SvgIcon';
 import { makeNewSessionId, startSpeechSession, requestStopDictation } from '../../../../state/speech/commands';
 import { createSetShowGlobalPopupAction } from '../../../../state/speech/actions';
+import { SpeechContextHelper } from '../../../../state/speech/context';
 
 const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={'white'} />
 
@@ -167,7 +168,7 @@ const HeaderRangeBar = (props: { parameterKey?: ParameterKey, showBorder?: boole
         onLongPressIn={(position) => {
             const sessionId = makeNewSessionId()
             setSpeechSessionId(sessionId)
-            dispatch(startSpeechSession(sessionId))
+            dispatch(startSpeechSession(sessionId, SpeechContextHelper.makeTimeSpeechContext(position)))
             dispatch(createSetShowGlobalPopupAction(true, sessionId))
         }}
         onLongPressOut={(position) => {
@@ -192,7 +193,7 @@ const HeaderDateBar = () => {
         onLongPressIn={() => {
             const newSessionId = makeNewSessionId()
             dispatch(createSetShowGlobalPopupAction(true, newSessionId))
-            dispatch(startSpeechSession(newSessionId))
+            dispatch(startSpeechSession(newSessionId, SpeechContextHelper.makeTimeSpeechContext('date')))
             setSpeechSessionId(newSessionId)
         }}
         onLongPressOut={() => {
