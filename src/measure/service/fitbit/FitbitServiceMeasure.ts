@@ -17,7 +17,7 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
   async cacheServerData(
     endDate: number,
   ): Promise<{ success: boolean; skipped?: boolean }> {
-    const cachedRange = await this.service.fitbitLocalDbManager.getCachedRange(this.key);
+    const cachedRange = await this.service.core.fitbitLocalDbManager.getCachedRange(this.key);
     if (cachedRange != null) {
       console.log(
         this.key,
@@ -36,7 +36,7 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
         if (differenceInMinutes(now, cachedRange.queriedAt) > 15) {
           console.log('Recache the recent day for ', this.key);
           await this.fetchAndCacheFitbitData(endDate, endDate);
-          await this.service.fitbitLocalDbManager.upsertCachedRange({
+          await this.service.core.fitbitLocalDbManager.upsertCachedRange({
             measureKey: this.key,
             endDate,
             queriedAt: now,
@@ -48,7 +48,7 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
       } else {
         const now = new Date();
         await this.fetchAndCacheFitbitData(cachedRange.endDate, endDate);
-        await this.service.fitbitLocalDbManager.upsertCachedRange({
+        await this.service.core.fitbitLocalDbManager.upsertCachedRange({
           measureKey: this.key,
           endDate,
           queriedAt: now,
@@ -62,7 +62,7 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
       const startDate = await this.service.getMembershipStartDate();
       const queriedAt = new Date();
       await this.fetchAndCacheFitbitData(startDate, endDate);
-      await this.service.fitbitLocalDbManager.upsertCachedRange({
+      await this.service.core.fitbitLocalDbManager.upsertCachedRange({
         measureKey: this.key,
         endDate,
         queriedAt,

@@ -1,12 +1,12 @@
-import {DateTimeHelper} from '../../../time';
-import {FitbitServiceMeasure} from './FitbitServiceMeasure';
+import { DateTimeHelper } from '../../../time';
+import { FitbitServiceMeasure } from './FitbitServiceMeasure';
 
 export abstract class FitbitRangeMeasure<
   QueryResultType> extends FitbitServiceMeasure {
 
   protected abstract resourcePropertyKey: string;
   protected abstract maxQueryRangeLength: number;
-  protected abstract makeQueryUrl(startDate: number, endDate: number): string;
+  protected abstract queryFunc(): (startDate: number, endDate: number) => Promise<QueryResultType>
 
   protected abstract handleQueryResultEntry(entries: any[], now: Date): Promise<void>
 
@@ -26,9 +26,7 @@ export abstract class FitbitRangeMeasure<
     const chunks = DateTimeHelper.splitRange(startDate, endDate, this.maxQueryRangeLength);
 
     const queryResult: Array<QueryResultType> = await Promise.all(
-      chunks.map(chunk =>
-        this.service.fetchFitbitQuery(this.makeQueryUrl(chunk[0], chunk[1])),
-      ),
+      chunks.map(chunk => this.queryFunc()(chunk[0], chunk[1]))
     );
 
     const result: QueryResultType = {} as any;

@@ -1,9 +1,7 @@
 import { FitbitIntraDayMeasure } from './FitbitIntraDayMeasure';
-import { makeFitbitHeartRateIntraDayLogApiUrl } from './api';
 import { FitbitHeartRateIntraDayQueryResult } from './types';
 import { FitbitLocalTableName, HeartRateIntraDayInfo } from './sqlite/database';
 import { IIntraDayHeartRatePoint, HeartRateIntraDayData, HeartRateZone } from '../../../core/exploration/data/types';
-import { DateTimeHelper } from '../../../time';
 
 export class FitbitIntraDayHeartRateMeasure extends FitbitIntraDayMeasure<HeartRateIntraDayData> {
   key = 'intraday-heartrate';
@@ -19,9 +17,7 @@ export class FitbitIntraDayHeartRateMeasure extends FitbitIntraDayMeasure<HeartR
   }
 
   protected async fetchAndCacheFitbitData(date: number): Promise<void> {
-    const result: FitbitHeartRateIntraDayQueryResult = await this.service.fetchFitbitQuery(
-      makeFitbitHeartRateIntraDayLogApiUrl(date),
-    );
+    const result: FitbitHeartRateIntraDayQueryResult = await this.service.core.fetchIntradayHeartRate(date);
 
     const points: Array<IIntraDayHeartRatePoint> = result[
       'activities-heart-intraday'
@@ -47,7 +43,7 @@ export class FitbitIntraDayHeartRateMeasure extends FitbitIntraDayMeasure<HeartR
         zone.name = this.convertHeartRateZone(zone.name)
       })
 
-      await this.service.fitbitLocalDbManager.insert(FitbitLocalTableName.HeartRateIntraDayInfo, [{
+      await this.service.core.fitbitLocalDbManager.insert(FitbitLocalTableName.HeartRateIntraDayInfo, [{
         numberedDate: date,
         restingHeartRate: result["activities-heart"][0].value.restingHeartRate,
         points: JSON.stringify(points),
@@ -59,7 +55,7 @@ export class FitbitIntraDayHeartRateMeasure extends FitbitIntraDayMeasure<HeartR
 
   protected async fetchLocalData(date: number): Promise<HeartRateIntraDayData> {
 
-    const summaries = await this.service.fitbitLocalDbManager.fetchData<HeartRateIntraDayInfo>(FitbitLocalTableName.HeartRateIntraDayInfo, "`numberedDate` = ?", [date])
+    const summaries = await this.service.core.fitbitLocalDbManager.fetchData<HeartRateIntraDayInfo>(FitbitLocalTableName.HeartRateIntraDayInfo, "`numberedDate` = ?", [date])
     const summary: HeartRateIntraDayInfo = summaries.length > 0 ? summaries[0] : null
 
     return summary ? {

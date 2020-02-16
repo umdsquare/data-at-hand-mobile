@@ -1,19 +1,20 @@
 import { FitbitDailyActivityStepsQueryResult } from "./types";
-import { makeFitbitDayLevelActivityLogsUrl } from "./api";
 import { FitbitSummaryLogMeasure } from "./FitbitSummaryLogMeasure";
 import { StepCountRangedData } from "../../../core/exploration/data/types";
 import { DataSourceType } from "../../DataSourceSpec";
 import { FitbitLocalTableName } from "./sqlite/database";
 
 export class FitbitDailyStepMeasure extends FitbitSummaryLogMeasure<FitbitDailyActivityStepsQueryResult> {
+  
   protected dbTableName = FitbitLocalTableName.StepCount;
   
   key = 'daily_step'
   displayName = "Step Count"
 
   protected resourcePropertyKey: string = "activities-steps"
-  protected makeQueryUrl(startDate: number, endDate: number): string {
-    return makeFitbitDayLevelActivityLogsUrl("activities/steps", startDate, endDate)
+
+  protected queryFunc(): (startDate: number, endDate: number) => Promise<FitbitDailyActivityStepsQueryResult> {
+    return this.service.core.fetchStepDailySummary
   }
 
   protected shouldReject(rowValue: number): boolean {

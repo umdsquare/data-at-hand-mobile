@@ -1,12 +1,12 @@
 import {FitbitDailyActivityHeartRateQueryResult} from './types';
 import {FitbitSummaryLogMeasure} from './FitbitSummaryLogMeasure';
-import {makeFitbitDayLevelActivityLogsUrl} from './api';
-import { RestingHeartRateRangedData, STATISTICS_LABEL_RANGE, FilteredDailyValues } from '../../../core/exploration/data/types';
+import { RestingHeartRateRangedData, FilteredDailyValues } from '../../../core/exploration/data/types';
 import { DataSourceType } from '../../DataSourceSpec';
 import { FitbitLocalTableName } from './sqlite/database';
 import { CycleDimension } from '../../../core/exploration/cyclic_time';
 
 export class FitbitDailyHeartRateMeasure extends FitbitSummaryLogMeasure<FitbitDailyActivityHeartRateQueryResult> {
+  
   
   displayName = "Resting Heart Rate"
 
@@ -14,13 +14,11 @@ export class FitbitDailyHeartRateMeasure extends FitbitSummaryLogMeasure<FitbitD
 
   protected resourcePropertyKey: string = 'activities-heart';
   key: string = 'resting_heart_rate';
-  protected makeQueryUrl(startDate: number, endDate: number): string {
-    return makeFitbitDayLevelActivityLogsUrl(
-      'activities/heart',
-      startDate,
-      endDate,
-    );
+
+  protected queryFunc(): (startDate: number, endDate: number) => Promise<FitbitDailyActivityHeartRateQueryResult> {
+    return this.service.core.fetchHeartRateDailySummary
   }
+
   protected getQueryResultEntryValue(queryResultEntry: any) {
     return queryResultEntry.value.restingHeartRate;
   }

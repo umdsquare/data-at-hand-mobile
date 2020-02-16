@@ -1,4 +1,6 @@
 import { SleepStage } from "../../../core/exploration/data/types";
+import { UnSupportedReason } from "../DataService";
+import { FitbitLocalDbManager } from "./sqlite/database";
 
 export interface FitbitUserProfile {
   user: {
@@ -12,9 +14,9 @@ export interface FitbitUserProfile {
 }
 
 export interface FitbitIntradayStepDayQueryResult {
-  'activities-steps': [{dateTime: string; value: string}];
+  'activities-steps': [{ dateTime: string; value: string }];
   'activities-steps-intraday': {
-    dataset: Array<{time: string; value: number}>;
+    dataset: Array<{ time: string; value: number }>;
   };
 }
 
@@ -28,11 +30,13 @@ export interface FitbitSleepQueryResult {
     duration: number; // millisecond
     logId: number;
     type: 'stages' | 'classic';
-    levels: {data: Array<{
-      dateTime: string;
-      level: SleepStage;
-      seconds: number;
-    }>};
+    levels: {
+      data: Array<{
+        dateTime: string;
+        level: SleepStage;
+        seconds: number;
+      }>
+    };
     summary: any;
     /*
     "summary": {
@@ -86,7 +90,7 @@ export interface FitbitDailyActivityHeartRateQueryResult {
   }>;
 }
 
-export interface FitbitHeartRateIntraDayQueryResult extends FitbitDailyActivityHeartRateQueryResult{
+export interface FitbitHeartRateIntraDayQueryResult extends FitbitDailyActivityHeartRateQueryResult {
   "activities-heart-intraday": {
     dataset: Array<{
       time: string,
@@ -126,7 +130,10 @@ export interface FitbitWeightQueryResult {
 }
 
 export interface FitbitWeightTrendQueryResult {
-  
+  'body-weight': Array<{
+    dateTime: string;
+    value: string;
+  }>;
 }
 
 export interface FitbitIntradayHeartRateResult {
@@ -141,4 +148,30 @@ export interface FitbitIntradayHeartRateResult {
       value: number;
     }>;
   };
+}
+
+export interface FitbitServiceCore {
+
+  /** 
+   * return: accessToken
+   */
+  authenticate(): Promise<string>
+  signOut(): Promise<void> 
+
+  onCheckSupportedInSystem(): Promise<{
+    supported: boolean;
+    reason?: UnSupportedReason;
+  }>
+
+  getMembershipStartDate(): Promise<number>
+
+  fetchHeartRateDailySummary(start: number, end: number): Promise<FitbitDailyActivityHeartRateQueryResult>
+  fetchStepDailySummary(start: number, end: number): Promise<FitbitDailyActivityStepsQueryResult>
+  fetchWeightTrend(start: number, end: number): Promise<FitbitWeightTrendQueryResult>
+  fetchWeightLogs(start: number, end: number): Promise<FitbitWeightQueryResult>
+  fetchSleepLogs(start: number, end: number): Promise<FitbitSleepQueryResult>
+
+  fetchIntradayStepCount(date: number): Promise<FitbitIntradayStepDayQueryResult>
+  fetchIntradayHeartRate(date: number): Promise<FitbitHeartRateIntraDayQueryResult>
+  fitbitLocalDbManager: FitbitLocalDbManager
 }

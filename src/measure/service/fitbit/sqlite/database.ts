@@ -1,4 +1,4 @@
-import SQLite from 'react-native-sqlite-storage';
+import SQLite, { DatabaseParams } from 'react-native-sqlite-storage';
 import { SQLiteHelper } from '../../../../database/sqlite/sqlite-helper';
 import stringFormat from 'string-format';
 import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension } from '../../../../core/exploration/cyclic_time';
@@ -283,15 +283,6 @@ const CachedIntraDayDatesSchema = {
   },
 };
 
-const DatasetSummaryCache = {
-  name: FitbitLocalTableName.CachedDataSourceSummary,
-  columns: {
-    measureKey: { type: SQLiteHelper.SQLiteColumnType.TEXT, primary: true },
-    min: { type: SQLiteHelper.SQLiteColumnType.REAL },
-    max: { type: SQLiteHelper.SQLiteColumnType.REAL },
-  }
-}
-
 const schemas = [
   StepCountSchema,
   RestingHeartRateSchema,
@@ -304,20 +295,18 @@ const schemas = [
   IntraDayHeartRateInfoSchema,
 ];
 
-const dbConfig = {
-  name: 'fitbit-local-cache.sqlite',
-  location: 'default',
-} as SQLite.DatabaseParams;
-
 export class FitbitLocalDbManager {
   private _dbInitPromise: Promise<SQLite.SQLiteDatabase>
 
-  constructor() {
+  private readonly _dbConfig: DatabaseParams
+
+  constructor(dbConfig: DatabaseParams) {
+    this._dbConfig = dbConfig
     console.log('initialize Fitbit Local DB Manager');
   }
 
   deleteDatabase(): Promise<void> {
-    return SQLite.deleteDatabase(dbConfig);
+    return SQLite.deleteDatabase(this._dbConfig);
   }
 
   open(): Promise<SQLite.SQLiteDatabase> {
@@ -325,7 +314,7 @@ export class FitbitLocalDbManager {
       return this._dbInitPromise
     }
 
-    this._dbInitPromise = SQLite.openDatabase(dbConfig)
+    this._dbInitPromise = SQLite.openDatabase(this._dbConfig)
       .then(db => {
         return db
           .transaction(tx => {
@@ -343,8 +332,7 @@ export class FitbitLocalDbManager {
                 }
               }
             }
-          })
-          .then(tx => db);
+          }).then(tx => db)
       });
 
     return this._dbInitPromise
@@ -502,7 +490,7 @@ export class FitbitLocalDbManager {
 
   async getBoxplotInfo(tableName: string, valueColumnName: string = 'value'): Promise<BoxPlotInfo> {
     const median = await this.findPercentileValue(0.5, tableName, valueColumnName)
-    
+
     const percentile25 = await this.findPercentileValue(0.25, tableName, valueColumnName)
     const percentile75 = await this.findPercentileValue(0.75, tableName, valueColumnName)
     const iqr = percentile75 - percentile25

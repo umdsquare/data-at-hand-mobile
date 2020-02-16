@@ -30,7 +30,7 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
 
 
   protected getBoxPlotInfoOfDatasetFromDb(): Promise<BoxPlotInfo> {
-    return this.service.fitbitLocalDbManager.getBoxplotInfo(FitbitLocalTableName.WeightTrend)
+    return this.service.core.fitbitLocalDbManager.getBoxplotInfo(FitbitLocalTableName.WeightTrend)
   }
 
   async cacheServerData(
@@ -85,7 +85,7 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
   }
 
   private async fetchTodayValue(): Promise<number> {
-    const sorted = await this.service.fitbitLocalDbManager.fetchData(FitbitLocalTableName.WeightLog,
+    const sorted = await this.service.core.fitbitLocalDbManager.fetchData(FitbitLocalTableName.WeightLog,
       "1 ORDER BY `numberedDate` DESC, `secondsOfDay` DESC LIMIT 1", [])
     return sorted.length > 0 ? (sorted[0] as any).value : null;
     /*
@@ -115,8 +115,13 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
 }
 
 class FitbitWeightTrendMeasure extends FitbitSummaryLogMeasure<FitbitWeightTrendQueryResult> {
+  
   key: string = 'weight_trend';
   displayName = "Weight Trend"
+
+  protected queryFunc(): (startDate: number, endDate: number) => Promise<FitbitWeightTrendQueryResult> {
+    return this.service.core.fetchWeightTrend
+  }
 
   protected dbTableName = FitbitLocalTableName.WeightTrend
   protected resourcePropertyKey: string = 'body-weight';
@@ -137,6 +142,7 @@ class FitbitWeightTrendMeasure extends FitbitSummaryLogMeasure<FitbitWeightTrend
 class FitbitWeightLogMeasure extends FitbitRangeMeasure<
   FitbitWeightQueryResult
 > {
+  
 
   protected getBoxPlotInfoOfDatasetFromDb(): Promise<BoxPlotInfo> {
     return null
@@ -147,8 +153,9 @@ class FitbitWeightLogMeasure extends FitbitRangeMeasure<
   protected resourcePropertyKey: string = 'weight';
   protected maxQueryRangeLength: number = 32;
 
-  protected makeQueryUrl(startDate: number, endDate: number): string {
-    return makeFitbitWeightLogApiUrl(startDate, endDate);
+
+  protected queryFunc(): (startDate: number, endDate: number) => Promise<FitbitWeightQueryResult> {
+    return this.service.core.fetchWeightLogs
   }
 
   protected handleQueryResultEntry(entries: Array<any>, now: Date): Promise<void> {
@@ -175,16 +182,16 @@ class FitbitWeightLogMeasure extends FitbitRangeMeasure<
       }else null
     }).filter(e => e != null)
 
-    return this.service.fitbitLocalDbManager.insert(FitbitLocalTableName.WeightLog, entriesReady)
+    return this.service.core.fitbitLocalDbManager.insert(FitbitLocalTableName.WeightLog, entriesReady)
   }
 
   fetchData(startDate: number, endDate: number): Promise<any> {
-    return this.service.fitbitLocalDbManager
+    return this.service.core.fitbitLocalDbManager
       .fetchData(FitbitLocalTableName.WeightLog, "`numberedDate` BETWEEN ? AND ? ORDER BY `numberedDate` ASC, `secondsOfDay` ASC", [startDate, endDate]) 
   }
 
   async fetchLatestLog(before: number): Promise<any> {
-    const filtered = await this.service.fitbitLocalDbManager.fetchData(FitbitLocalTableName.WeightLog,
+    const filtered = await this.service.core.fitbitLocalDbManager.fetchData(FitbitLocalTableName.WeightLog,
       "`numberedDate` < ? ORDER BY `numberedDate` DESC, `secondsOfDay` DESC LIMIT 1", [before])
     
     if (filtered.length > 0) {
@@ -193,7 +200,7 @@ class FitbitWeightLogMeasure extends FitbitRangeMeasure<
   }
 
   async fetchFutureNearestLog(after: number): Promise<any> {
-    const filtered = await this.service.fitbitLocalDbManager.fetchData(FitbitLocalTableName.WeightLog,
+    const filtered = await this.service.core.fitbitLocalDbManager.fetchData(FitbitLocalTableName.WeightLog,
       "`numberedDate` > ? ORDER BY `numberedDate` ASC, `secondsOfDay` ASC LIMIT 1", [after])
 
     if (filtered.length > 0) {

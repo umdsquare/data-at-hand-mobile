@@ -53,23 +53,23 @@ const aggregationSelectClause =
 export class FitbitSleepMeasure extends FitbitRangeMeasure<
   FitbitSleepQueryResult
   > {
-
+  
   key: string = 'sleep';
   displayName = "Sleep"
 
   protected resourcePropertyKey: string = 'sleep';
   protected maxQueryRangeLength: number = 101;
-  protected makeQueryUrl(startDate: number, endDate: number): string {
-    return makeFitbitSleepApiUrl(startDate, endDate);
+  protected queryFunc(): (startDate: number, endDate: number) => Promise<FitbitSleepQueryResult>{
+    return this.service.core.fetchSleepLogs
   }
-
+  
   protected async getBoxPlotInfoOfDatasetFromDb(key: "range" | "length"): Promise<BoxPlotInfo> {
     switch (key) {
       case 'length':
-        return this.service.fitbitLocalDbManager.getBoxplotInfo(FitbitLocalTableName.SleepLog, 'lengthInSeconds')
+        return this.service.core.fitbitLocalDbManager.getBoxplotInfo(FitbitLocalTableName.SleepLog, 'lengthInSeconds')
       case 'range':
-        const bedTimeInfo = await this.service.fitbitLocalDbManager.getBoxplotInfo(FitbitLocalTableName.SleepLog, 'bedTimeDiffSeconds')
-        const wakeTimeInfo = await this.service.fitbitLocalDbManager.getBoxplotInfo(FitbitLocalTableName.SleepLog, 'wakeTimeDiffSeconds')
+        const bedTimeInfo = await this.service.core.fitbitLocalDbManager.getBoxplotInfo(FitbitLocalTableName.SleepLog, 'bedTimeDiffSeconds')
+        const wakeTimeInfo = await this.service.core.fitbitLocalDbManager.getBoxplotInfo(FitbitLocalTableName.SleepLog, 'wakeTimeDiffSeconds')
         return {
           maxWithoutOutlier: Math.max(bedTimeInfo.maxWithoutOutlier, wakeTimeInfo.maxWithoutOutlier),
           minWithoutOutlier: Math.min(bedTimeInfo.minWithoutOutlier, wakeTimeInfo.minWithoutOutlier),
@@ -129,7 +129,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
       })
       .filter(e => e != null);
 
-    return this.service.fitbitLocalDbManager.insert(
+    return this.service.core.fitbitLocalDbManager.insert(
       FitbitLocalTableName.SleepLog,
       entriesReady,
     );
@@ -142,7 +142,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
   ): Promise<SleepRangedData> {
     const condition = '`numberedDate` BETWEEN ? AND ? ORDER BY `numberedDate`';
     const params = [startDate, endDate];
-    const logs = await this.service.fitbitLocalDbManager.fetchData<
+    const logs = await this.service.core.fitbitLocalDbManager.fetchData<
       IDailySleepSummaryEntry
     >(
       FitbitLocalTableName.SleepLog,
@@ -159,7 +159,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
       statistics: null,
     } as OverviewSourceRow;
 
-    const todayLogs = await this.service.fitbitLocalDbManager.fetchData<
+    const todayLogs = await this.service.core.fitbitLocalDbManager.fetchData<
       IDailySleepSummaryEntry
     >(
       FitbitLocalTableName.SleepLog,
@@ -177,7 +177,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
           base.statistics = [
             {
               type: 'avg',
-              value: await this.service.fitbitLocalDbManager.getAggregatedValue(
+              value: await this.service.core.fitbitLocalDbManager.getAggregatedValue(
                 FitbitLocalTableName.SleepLog,
                 SQLiteHelper.AggregationType.AVG,
                 'lengthInSeconds',
@@ -188,14 +188,14 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
             {
               type: 'range',
               value: [
-                await this.service.fitbitLocalDbManager.getAggregatedValue(
+                await this.service.core.fitbitLocalDbManager.getAggregatedValue(
                   FitbitLocalTableName.SleepLog,
                   SQLiteHelper.AggregationType.MIN,
                   'lengthInSeconds',
                   condition,
                   params,
                 ),
-                await this.service.fitbitLocalDbManager.getAggregatedValue(
+                await this.service.core.fitbitLocalDbManager.getAggregatedValue(
                   FitbitLocalTableName.SleepLog,
                   SQLiteHelper.AggregationType.MAX,
                   'lengthInSeconds',
@@ -218,7 +218,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
           base.statistics = [
             {
               type: 'waketime',
-              value: await this.service.fitbitLocalDbManager.getAggregatedValue(
+              value: await this.service.core.fitbitLocalDbManager.getAggregatedValue(
                 FitbitLocalTableName.SleepLog,
                 SQLiteHelper.AggregationType.AVG,
                 'wakeTimeDiffSeconds',
@@ -228,7 +228,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
             },
             {
               type: 'bedtime',
-              value: await this.service.fitbitLocalDbManager.getAggregatedValue(
+              value: await this.service.core.fitbitLocalDbManager.getAggregatedValue(
                 FitbitLocalTableName.SleepLog,
                 SQLiteHelper.AggregationType.AVG,
                 'bedTimeDiffSeconds',
@@ -245,7 +245,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
   }
 
   async fetchIntraDayData(date: number): Promise<IDailySleepSummaryEntry> {
-    const dailyLogs = await this.service.fitbitLocalDbManager.fetchData<
+    const dailyLogs = await this.service.core.fitbitLocalDbManager.fetchData<
       IDailySleepSummaryEntry
     >(FitbitLocalTableName.SleepLog, '`numberedDate` = ? LIMIT 1', [date]);
 
@@ -268,7 +268,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
 
   async fetchHoursSleptCyclicGroupedData(start: number, end: number, cycleType: CyclicTimeFrame,
   ): Promise<GroupedData> {
-    const result = await this.service.fitbitLocalDbManager.selectQuery(
+    const result = await this.service.core.fitbitLocalDbManager.selectQuery(
       makeCyclicGroupQuery(FitbitLocalTableName.SleepLog, start, end, cycleType,
         makeGroupSelectClause(
           'lengthInSeconds',
@@ -290,7 +290,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
     end: number,
     cycleType: CyclicTimeFrame,
   ): Promise<GroupedRangeData> {
-    const result = await this.service.fitbitLocalDbManager.selectQuery(
+    const result = await this.service.core.fitbitLocalDbManager.selectQuery(
       makeCyclicGroupQuery(
         FitbitLocalTableName.SleepLog,
         start,
@@ -309,7 +309,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
     start: number,
     end: number,
   ): Promise<IAggregatedValue> {
-    const result = await this.service.fitbitLocalDbManager.selectQuery(
+    const result = await this.service.core.fitbitLocalDbManager.selectQuery(
       makeAggregatedQuery(
         FitbitLocalTableName.SleepLog,
         start,
@@ -330,7 +330,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
   }
 
   async fetchHoursSleptRangeDimensionData(start: number, end: number, cycleDimension: CycleDimension): Promise<IAggregatedValue[]> {
-    const result = await this.service.fitbitLocalDbManager.selectQuery<IAggregatedValue>(
+    const result = await this.service.core.fitbitLocalDbManager.selectQuery<IAggregatedValue>(
       makeCycleDimensionRangeQuery(
         FitbitLocalTableName.SleepLog,
         start,
@@ -352,7 +352,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
     start: number,
     end: number,
   ): Promise<IAggregatedRangeValue> {
-    const result = await this.service.fitbitLocalDbManager.selectQuery(
+    const result = await this.service.core.fitbitLocalDbManager.selectQuery(
       makeAggregatedQuery(
         FitbitLocalTableName.SleepLog,
         start,
@@ -371,7 +371,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
     end: number,
     cycleDimension: CycleDimension,
   ): Promise<IAggregatedRangeValue[]> {
-    const result = await this.service.fitbitLocalDbManager.selectQuery<IAggregatedRangeValue>(
+    const result = await this.service.core.fitbitLocalDbManager.selectQuery<IAggregatedRangeValue>(
       makeCycleDimensionRangeQuery(
         FitbitLocalTableName.SleepLog,
         start,
@@ -406,7 +406,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
         break;
     }
 
-    const list = await this.service.fitbitLocalDbManager.fetchData<{ numberedDate: number, value: number }>(FitbitLocalTableName.SleepLog, condition, params, columns)
+    const list = await this.service.core.fitbitLocalDbManager.fetchData<{ numberedDate: number, value: number }>(FitbitLocalTableName.SleepLog, condition, params, columns)
 
     return {
       type: type === DataSourceType.SleepRange ? 'range' : 'length',
