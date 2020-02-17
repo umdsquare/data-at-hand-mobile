@@ -5,6 +5,8 @@ import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOf
 import { IIntraDayHeartRatePoint, BoxPlotInfo } from '../../../../core/exploration/data/types';
 import Papa from 'papaparse';
 import { DateTimeHelper } from '../../../../time';
+import d3Array from 'd3-array';
+import merge from 'merge';
 
 SQLite.DEBUG(false);
 SQLite.enablePromise(true);
@@ -533,16 +535,102 @@ export class FitbitLocalDbManager {
     } else return null;
   }
 
-  async exportToCsv(schemas = [
-    StepCountSchema,
-    RestingHeartRateSchema,
-    WeightTrendSchema,
-    WeightLogSchema,
-    MainSleepLogSchema,
-    IntraDayStepCountSchema,
-    IntraDayHeartRateInfoSchema]): Promise<Array<{ name: string, csv: string }>> {
 
-    const result = []
+  private async exportDailySummaryColumn(...tableInfos: Array<{ schema: SQLiteHelper.TableSchema, exportedValueColumns: { [key: string]: string } }>): Promise<{fields: Array<string>, data: Array<any>}> {
+
+    if (tableInfos.length > 0) {
+
+      const rowsPerTable = await Promise.all(tableInfos.map(async tableInfo => {
+        const query = `SELECT
+      ${tableInfo.schema.name}.numberedDate as numberedDate,
+      ${tableInfo.schema.name}.year as year,
+      ${tableInfo.schema.name}.month as month,
+      ${tableInfo.schema.name}.dayOfWeek as dayOfWeek,
+      ${Object.keys(tableInfo.exportedValueColumns).map(columnName => tableInfo.exportedValueColumns[columnName] != null ?
+          (tableInfo.schema.name + "." + columnName + " as " + tableInfo.exportedValueColumns[columnName])
+          : (tableInfo.schema.name + "." + columnName)).join(",\n")} FROM
+      ${tableInfo.schema.name}`
+
+        const [queryResult] = await (await this.open()).executeSql(query)
+        return {
+          tableInfo: tableInfo,
+          queriedRows: queryResult.rows.raw()
+        }
+      }))
+
+      const headers = ["numberedDate", "year", "month", "dayOfWeek"].concat([].concat.apply([], tableInfos.map(info => Object.keys(info.exportedValueColumns).map(key => info.exportedValueColumns[key] || key))))
+
+      const uniqueDates = new Set([].concat.apply([], rowsPerTable.map(entry => entry.queriedRows.map(r => r.numberedDate))))
+      console.log("Total ", uniqueDates.size, " days of data.")
+      console.log(headers)
+
+      const joinedRows = []
+
+      for (const numberedDate of uniqueDates) {
+        const matchedElements = rowsPerTable.map(entry => entry.queriedRows.find(elm => elm.numberedDate === numberedDate))
+        let merged = matchedElements[0]
+        if (matchedElements.length > 1) {
+          for (let i = 1; i < matchedElements.length; i++) {
+            merged = merge(merged, matchedElements[i])
+          }
+        }
+
+        merged["date"] = DateTimeHelper.toFormattedString(merged["numberedDate"])
+
+        joinedRows.push(merged)
+      }
+
+      return {
+        fields: headers,
+        data: joinedRows
+      }
+    }
+    else return null
+  }
+
+  async exportToCsv(): Promise<Array<{ name: string, csv: string }>> {
+
+    const joinedTable = await this.exportDailySummaryColumn(
+      {
+        schema: StepCountSchema,
+        exportedValueColumns: {
+          value: 'step'
+        }
+      },
+      {
+        schema: MainSleepLogSchema,
+        exportedValueColumns: {
+          lengthInSeconds: 'sleepLengthSeconds',
+          bedTimeDiffSeconds: null,
+          wakeTimeDiffSeconds: null
+        }
+      },
+      {
+        schema: WeightTrendSchema,
+        exportedValueColumns: {
+          value: "kg"
+        }
+      },
+      {
+        schema: RestingHeartRateSchema,
+        exportedValueColumns: {
+          value: 'bpm'
+        }
+      }
+    )
+
+    const result = [{name: "daily_summary", csv: Papa.unparse(joinedTable)}]
+
+    const schemas = [
+      StepCountSchema,
+      RestingHeartRateSchema,
+      WeightTrendSchema,
+      WeightLogSchema,
+      MainSleepLogSchema,
+      IntraDayStepCountSchema,
+      IntraDayHeartRateInfoSchema,
+    ]
+    
     for (const schema of schemas) {
       const [queryResult] = await (await this.open()).executeSql(`SELECT * FROM ${schema.name}`)
       if (queryResult) {
@@ -554,7 +642,7 @@ export class FitbitLocalDbManager {
                 row["date"] = DateTimeHelper.toFormattedString(row["numberedDate"])
               })
             }
-            result.push({name: schema.name, csv: Papa.unparse(rows)})
+            result.push({ name: schema.name, csv: Papa.unparse(rows) })
           }
         }
       }
