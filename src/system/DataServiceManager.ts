@@ -1,6 +1,7 @@
 import { DataService } from '../measure/service/DataService';
 import { FitbitService } from '../measure/service/fitbit/FitbitService';
 import { FitbitOfficialServiceCore } from '../measure/service/fitbit/core/FitbitOfficialServiceCore';
+import { FitbitExampleServiceCore } from '../measure/service/fitbit/core/FitbitExampleServiceCore';
 
 export class DataServiceManager {
 
@@ -17,6 +18,7 @@ export class DataServiceManager {
 
   installedServices: ReadonlyArray<DataService> = [
     new FitbitService(new FitbitOfficialServiceCore()),
+    new FitbitService(new FitbitExampleServiceCore())
   ];
 
   private _supportedServices: ReadonlyArray<DataService> = null;

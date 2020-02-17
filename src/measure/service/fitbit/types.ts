@@ -152,6 +152,11 @@ export interface FitbitIntradayHeartRateResult {
 
 export interface FitbitServiceCore {
 
+  keyOverride?: string
+  nameOverride?: string
+  descriptionOverride?: string
+  thumbnailOverride?: any
+
   /** 
    * return: accessToken
    */

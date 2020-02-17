@@ -32,7 +32,9 @@ export class DateTimeHelper {
     }
 
     static toFormattedString(numberedDate: number): string {
-        return pad(this.getYear(numberedDate), 4) + "-" + pad(this.getMonth(numberedDate), 2) + "-" + pad(this.getDayOfMonth(numberedDate), 2)
+        if(numberedDate){
+            return pad(this.getYear(numberedDate), 4) + "-" + pad(this.getMonth(numberedDate), 2) + "-" + pad(this.getDayOfMonth(numberedDate), 2)
+        }else return null
     }
 
     static fromFormattedString(str: string): number {

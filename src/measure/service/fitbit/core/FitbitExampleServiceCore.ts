@@ -1,9 +1,12 @@
 import { FitbitServiceCore, FitbitDailyActivityHeartRateQueryResult, FitbitDailyActivityStepsQueryResult, FitbitWeightTrendQueryResult, FitbitWeightQueryResult, FitbitSleepQueryResult, FitbitIntradayStepDayQueryResult, FitbitHeartRateIntraDayQueryResult } from "../types";
 import { FitbitLocalDbManager } from "../sqlite/database";
 import { DatabaseParams } from "react-native-sqlite-storage";
+import { UnSupportedReason } from "../../DataService";
 
-export class FitbitExampleQuerySource implements FitbitServiceCore{
-    
+export class FitbitExampleServiceCore implements FitbitServiceCore {
+
+    nameOverride = "Fitbit (Example Data)"
+    keyOverride = "fitbit_example"
 
     private _fitbitLocalDbManager: FitbitLocalDbManager = null
 
@@ -17,23 +20,26 @@ export class FitbitExampleQuerySource implements FitbitServiceCore{
         return this._fitbitLocalDbManager;
     }
 
-    authenticate(): Promise<string> {
-        throw new Error("Method not implemented.");
+    async authenticate(): Promise<string> {
+        return "EXAMPLE_ACCESS_TOKEN"
     }
-    signOut(): Promise<void> {
-        throw new Error("Method not implemented.");
+    
+    async signOut(): Promise<void> {
+        return
     }
-    onCheckSupportedInSystem(): Promise<{ supported: boolean; reason?: import("../../DataService").UnSupportedReason; }> {
-        throw new Error("Method not implemented.");
+
+    async onCheckSupportedInSystem(): Promise<{ supported: boolean; reason?: UnSupportedReason; }> {
+        return { supported: true }
     }
-    getMembershipStartDate(): Promise<number> {
-        throw new Error("Method not implemented.");
+
+    async getMembershipStartDate(): Promise<number> {
+        return 20180101
     }
 
     fetchHeartRateDailySummary(start: number, end: number): Promise<FitbitDailyActivityHeartRateQueryResult> {
         throw new Error("Method not implemented.");
-    }    
-    
+    }
+
     fetchStepDailySummary(start: number, end: number): Promise<FitbitDailyActivityStepsQueryResult> {
         throw new Error("Method not implemented.");
     }
@@ -53,7 +59,7 @@ export class FitbitExampleQuerySource implements FitbitServiceCore{
     fetchIntradayStepCount(date: number): Promise<FitbitIntradayStepDayQueryResult> {
         throw new Error("Method not implemented.");
     }
-    
+
     fetchIntradayHeartRate(date: number): Promise<FitbitHeartRateIntraDayQueryResult> {
         throw new Error("Method not implemented.");
     }

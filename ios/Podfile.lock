@@ -207,7 +207,7 @@ PODS:
   - react-native-app-auth (5.0.0):
     - AppAuth (= 1.2.0)
     - React
-  - react-native-safe-area-context (0.7.2):
+  - react-native-safe-area-context (0.7.3):
     - React
   - react-native-segmented-control (1.1.1):
     - React
@@ -258,7 +258,9 @@ PODS:
     - React
     - SDWebImage (~> 5.0)
     - SDWebImageWebPCoder (~> 0.2.3)
-  - RNGestureHandler (1.5.6):
+  - RNFS (2.16.4):
+    - React
+  - RNGestureHandler (1.6.0):
     - React
   - RNPermissions (2.0.9):
     - React
@@ -268,16 +270,28 @@ PODS:
     - React
   - RNScreens (2.0.0-alpha.34):
     - React
+  - RNShare (3.0.0):
+    - React
   - RNStaticSafeAreaInsets (2.0.0):
     - React
   - RNSVG (11.0.1):
     - React
+  - RNVectorIcons (6.6.0):
+    - React
+  - RNZipArchive (5.0.0):
+    - React
+    - RNZipArchive/Core (= 5.0.0)
+    - SSZipArchive (= 2.2.2)
+  - RNZipArchive/Core (5.0.0):
+    - React
+    - SSZipArchive (= 2.2.2)
   - SDWebImage (5.2.3):
     - SDWebImage/Core (= 5.2.3)
   - SDWebImage/Core (5.2.3)
   - SDWebImageWebPCoder (0.2.5):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.0)
+  - SSZipArchive (2.2.2)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -320,13 +334,17 @@ DEPENDENCIES:
   - "RNCAsyncStorage (from `../node_modules/@react-native-community/async-storage`)"
   - "RNCMaskedView (from `../node_modules/@react-native-community/masked-view`)"
   - RNFastImage (from `../node_modules/react-native-fast-image`)
+  - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNReactNativeHapticFeedback (from `../node_modules/react-native-haptic-feedback`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
+  - RNShare (from `../node_modules/react-native-share`)
   - RNStaticSafeAreaInsets (from `../node_modules/react-native-static-safe-area-insets`)
   - RNSVG (from `../node_modules/react-native-svg`)
+  - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
+  - RNZipArchive (from `../node_modules/react-native-zip-archive`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -336,6 +354,7 @@ SPEC REPOS:
     - libwebp
     - SDWebImage
     - SDWebImageWebPCoder
+    - SSZipArchive
 
 EXTERNAL SOURCES:
   BVLinearGradient:
@@ -410,6 +429,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/masked-view"
   RNFastImage:
     :path: "../node_modules/react-native-fast-image"
+  RNFS:
+    :path: "../node_modules/react-native-fs"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
   RNPermissions:
@@ -420,10 +441,16 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
     :path: "../node_modules/react-native-screens"
+  RNShare:
+    :path: "../node_modules/react-native-share"
   RNStaticSafeAreaInsets:
     :path: "../node_modules/react-native-static-safe-area-insets"
   RNSVG:
     :path: "../node_modules/react-native-svg"
+  RNVectorIcons:
+    :path: "../node_modules/react-native-vector-icons"
+  RNZipArchive:
+    :path: "../node_modules/react-native-zip-archive"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -450,7 +477,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: d5525f9ed5f782fdbacb64b9b01a43a9323d2386
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
   react-native-app-auth: 40f06f24fd0ff00d5258b8b4cd5436fe64c9edc3
-  react-native-safe-area-context: d227bd5ef6776683c330f44187351dc138b2a4cb
+  react-native-safe-area-context: 8260e5157617df4b72865f44006797f895b2ada7
   react-native-segmented-control: d957a684d2dda51282245071203f46938f13dcd9
   react-native-spinkit: da294fd828216ad211fe36a5c14c1e09f09e62db
   react-native-sqlite-storage: bb10beb2407e5fc21f3f1bcd86bacbfd6edcc818
@@ -467,15 +494,20 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 8539fc80a0075fcc9c8e2dff84cd22dc5bf1dacf
   RNCMaskedView: e5b99bc191945f157adeede68da9d424462de177
   RNFastImage: 9b0c22643872bb7494c8d87bbbb66cc4c0d9e7a2
-  RNGestureHandler: 911d3b110a7a233a34c4f800e7188a84b75319c6
+  RNFS: 90d1a32d3bc8f75cc7fc3dd2f67506049664346b
+  RNGestureHandler: dde546180bf24af0b5f737c8ad04b6f3fa51609a
   RNPermissions: 6db7e0a4d94c9c02390d11020b1d3d187aaf77e5
   RNReactNativeHapticFeedback: 2566b468cc8d0e7bb2f84b23adc0f4614594d071
   RNReanimated: 031fe8d9ea93c2bd689a40f05320ef9d96f74d7f
   RNScreens: 9d8a2900cd4f967af70dbfed74b64f77fbb6600a
+  RNShare: 0e19ddb0bf338b62702ce1d9e001ee14effa68a8
   RNStaticSafeAreaInsets: e4450176adbf197061543e4a4aa82036b3d7abe0
   RNSVG: 67f1f12dae2cef6ed59a42cae74a6b8f5a9e7b46
+  RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
+  RNZipArchive: 5ec612981549e645d2dc11a6b79ca3806299b479
   SDWebImage: 46a7f73228f84ce80990c786e4372cf4db5875ce
   SDWebImageWebPCoder: 947093edd1349d820c40afbd9f42acb6cdecd987
+  SSZipArchive: fa16b8cc4cdeceb698e5e5d9f67e9558532fbf23
   Yoga: f2a7cd4280bfe2cca5a7aed98ba0eb3d1310f18b
 
 PODFILE CHECKSUM: 097a22002062cfe96f40494e3870c117f1da411d

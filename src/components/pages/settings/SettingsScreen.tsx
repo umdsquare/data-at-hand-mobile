@@ -97,7 +97,7 @@ class SettingsScreen extends React.PureComponent<Props, State>{
                     for (const service of services) {
                         await service.clearAllCache()
                     }
-                    await DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).activateInSystem((progressInfo) => {})
+                    await DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).activateInSystem((progressInfo) => { })
                 }
             },
             {
@@ -109,14 +109,18 @@ class SettingsScreen extends React.PureComponent<Props, State>{
         })
     }
 
+    onPressExportAllData = async () => {
+        await DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).exportData()
+    }
+
     render() {
         return <View>
-
             <SettingsRow title="Service" value={DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).name}
                 onClick={this.onPressServiceButton} />
             <SettingsRow title="Unit" value={SettingsScreen.UnitTypes.find(t => t.key === this.props.selectedUnitType).label}
                 onClick={this.onPressUnitRow} />
             <SettingsRow title="Refresh all cache" onClick={this.onPressRefreshAllCache} showArrow={false} />
+            <SettingsRow title={"Export " + DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).name + " data"} onClick={this.onPressExportAllData} showArrow={false} />
         </View>
     }
 }

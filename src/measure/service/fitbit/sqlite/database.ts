@@ -3,6 +3,9 @@ import { SQLiteHelper } from '../../../../database/sqlite/sqlite-helper';
 import stringFormat from 'string-format';
 import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension } from '../../../../core/exploration/cyclic_time';
 import { IIntraDayHeartRatePoint, BoxPlotInfo } from '../../../../core/exploration/data/types';
+import Papa from 'papaparse';
+import { DateTimeHelper } from '../../../../time';
+
 SQLite.DEBUG(false);
 SQLite.enablePromise(true);
 
@@ -528,5 +531,34 @@ export class FitbitLocalDbManager {
       const obj = result.rows.item(0);
       return obj[Object.keys(obj)[0]];
     } else return null;
+  }
+
+  async exportToCsv(schemas = [
+    StepCountSchema,
+    RestingHeartRateSchema,
+    WeightTrendSchema,
+    WeightLogSchema,
+    MainSleepLogSchema,
+    IntraDayStepCountSchema,
+    IntraDayHeartRateInfoSchema]): Promise<Array<{ name: string, csv: string }>> {
+
+    const result = []
+    for (const schema of schemas) {
+      const [queryResult] = await (await this.open()).executeSql(`SELECT * FROM ${schema.name}`)
+      if (queryResult) {
+        if (queryResult.rows) {
+          if (queryResult.rows.length > 0) {
+            const rows = queryResult.rows.raw()
+            if (schema.columns.numberedDate) {
+              rows.forEach(row => {
+                row["date"] = DateTimeHelper.toFormattedString(row["numberedDate"])
+              })
+            }
+            result.push({name: schema.name, csv: Papa.unparse(rows)})
+          }
+        }
+      }
+    }
+    return result
   }
 }

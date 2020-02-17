@@ -14,31 +14,30 @@ import { FitbitSleepMeasure } from './FitbitSleepMeasure';
 import { FitbitIntraDayStepMeasure } from './FitbitIntraDayStepMeasure';
 import { IntraDayDataSourceType } from '../../../core/exploration/types';
 import { FitbitIntraDayHeartRateMeasure } from './FitbitIntraDayHeartRateMeasure';
-import {
-  GroupedData,
-  GroupedRangeData,
-  IAggregatedValue,
-  IAggregatedRangeValue,
-  FilteredDailyValues,
-  BoxPlotInfo,
-} from '../../../core/exploration/data/types';
+import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, FilteredDailyValues, BoxPlotInfo } from '../../../core/exploration/data/types';
 import { CyclicTimeFrame, CycleDimension } from '../../../core/exploration/cyclic_time';
 
 
 export class FitbitService extends DataService {
-  key: string = 'fitbit';
-  name: string = 'Fitbit';
-  description: string = 'Fitbit Fitness Tracker';
-  thumbnail = require('../../../../assets/images/services/service_fitbit.jpg');
+  readonly key: string
+  readonly name: string
+  readonly description: string
+  readonly thumbnail: any
 
   private _core: FitbitServiceCore
   get core(): FitbitServiceCore {
     return this._core
   }
 
-  constructor(core: FitbitServiceCore){
+  constructor(core: FitbitServiceCore) {
     super()
     this._core = core
+
+    this.key = core.keyOverride || 'fitbit'
+    this.name = core.nameOverride || 'Fitbit'
+    this.description = core.descriptionOverride || 'Fitbit Fitness Tracker'
+    this.thumbnail = core.thumbnailOverride || require('../../../../assets/images/services/service_fitbit.jpg')
+
   }
 
   isDataSourceSupported(dataSource: DataSourceType): boolean {
@@ -290,5 +289,8 @@ export class FitbitService extends DataService {
     this.core.fitbitLocalDbManager.deleteDatabase()
   }
 
+  async exportToCsv(): Promise<Array<{ name: string, csv: string }>>{
+    return this.core.fitbitLocalDbManager.exportToCsv()
+  }
 
 }
