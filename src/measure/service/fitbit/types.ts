@@ -150,6 +150,15 @@ export interface FitbitIntradayHeartRateResult {
   };
 }
 
+export type FitbitDeviceListQueryResult = Array<{
+      battery: "High",
+      batteryLevel: number,
+      deviceVersion: "MobileTrack" | string,
+      id: string,
+      lastSyncTime: string, //ISO8601
+      type: "TRACKER" | "SCALE"
+  }>
+
 export interface FitbitServiceCore {
 
   keyOverride?: string
@@ -178,6 +187,10 @@ export interface FitbitServiceCore {
 
   fetchIntradayStepCount(date: number): Promise<FitbitIntradayStepDayQueryResult>
   fetchIntradayHeartRate(date: number): Promise<FitbitHeartRateIntraDayQueryResult>
+
+  fetchLastSyncTime(): Promise<{tracker?: Date, scale?: Date}>
+
+
   fitbitLocalDbManager: FitbitLocalDbManager
 
   getToday(): Date

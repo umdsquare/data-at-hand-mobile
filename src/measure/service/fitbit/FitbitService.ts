@@ -274,6 +274,17 @@ export class FitbitService extends DataService {
     await this.core.fitbitLocalDbManager.close();
   }
 
+  private _lastSyncTimePromise?: Promise<{tracker?: Date, scale?: Date}> = null
+  private _lastSyncTimeInvokedAt?: number = null
+
+  async getLastSyncTime(): Promise<{tracker?: Date, scale?: Date}>{
+    if(this._lastSyncTimePromise == null || (Date.now() - this._lastSyncTimeInvokedAt) > 5*60*1000){
+      this._lastSyncTimePromise = this.core.fetchLastSyncTime()
+      this._lastSyncTimeInvokedAt = Date.now()
+    }
+    return this._lastSyncTimePromise
+  }
+
   getMembershipStartDate(): Promise<number> {
     return this.core.getMembershipStartDate()
   }

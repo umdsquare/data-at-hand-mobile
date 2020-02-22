@@ -16,7 +16,9 @@ export class DateTimeHelper {
     }
 
     static toNumberedDateFromDate(date: Date): number {
-        return this.toNumberedDateFromValues(getYear(date), getMonth(date) + 1, getDate(date))
+        if (date != null)
+            return this.toNumberedDateFromValues(getYear(date), getMonth(date) + 1, getDate(date))
+        else return null
     }
 
     static getYear(numberedDate: number): number {
@@ -32,9 +34,9 @@ export class DateTimeHelper {
     }
 
     static toFormattedString(numberedDate: number): string {
-        if(numberedDate){
+        if (numberedDate) {
             return pad(this.getYear(numberedDate), 4) + "-" + pad(this.getMonth(numberedDate), 2) + "-" + pad(this.getDayOfMonth(numberedDate), 2)
-        }else return null
+        } else return null
     }
 
     static fromFormattedString(str: string): number {
@@ -160,9 +162,9 @@ export class DateTimeHelper {
         } else if (isSameMonth(startDate, endDate) && DateTimeHelper.toNumberedDateFromDate(startOfMonth(startDate)) === range[0] && DateTimeHelper.toNumberedDateFromDate(endOfMonth(endDate)) === range[1]) {
             return [format(startDate, "MMMM yyyy")]
         } else if (isSameYear(startDate, endDate) === true) {
-            if (isSameMonth(startDate, endDate) === true){
+            if (isSameMonth(startDate, endDate) === true) {
                 return singleLine === true ? [`${format(startDate, "MMM dd")} - ${format(endDate, "dd")}, ${format(endDate, "yyyy")}`]
-                : [`${format(startDate, "MMM dd")} - ${format(endDate, "dd")}`, format(endDate, "yyyy")]
+                    : [`${format(startDate, "MMM dd")} - ${format(endDate, "dd")}`, format(endDate, "yyyy")]
             } else return singleLine === true ? [`${format(startDate, "MMM dd")} - ${format(endDate, "MMM dd")}, ${format(endDate, "yyyy")}`]
                 : [`${format(startDate, "MMM dd")} - ${format(endDate, "MMM dd")}`, format(endDate, "yyyy")]
         } else return singleLine === true ? [`${format(startDate, "MMM dd, yyyy")} - ${format(endDate, "MMM dd, yyyy")}`]
@@ -182,10 +184,10 @@ export function pad(n, len) {
 
 }
 
-export function isToday(date: Date, today: Date = new Date()): boolean{
+export function isToday(date: Date, today: Date = new Date()): boolean {
     return isSameDay(date, today)
 }
 
-export function isYesterday(date: Date, today: Date = new Date()): boolean{
+export function isYesterday(date: Date, today: Date = new Date()): boolean {
     return differenceInDays(today, date) === 1
 }

@@ -1,11 +1,12 @@
 import { refresh, authorize, revoke } from 'react-native-app-auth';
-import { FitbitServiceCore, FitbitDailyActivityHeartRateQueryResult, FitbitDailyActivityStepsQueryResult, FitbitWeightTrendQueryResult, FitbitWeightQueryResult, FitbitSleepQueryResult, FitbitIntradayStepDayQueryResult, FitbitHeartRateIntraDayQueryResult, FitbitUserProfile } from "../types";
-import { makeFitbitIntradayActivityApiUrl, makeFitbitHeartRateIntraDayLogApiUrl, makeFitbitWeightTrendApiUrl, makeFitbitWeightLogApiUrl, makeFitbitDayLevelActivityLogsUrl, makeFitbitSleepApiUrl, FITBIT_PROFILE_URL } from "../api";
+import { FitbitServiceCore, FitbitDailyActivityHeartRateQueryResult, FitbitDailyActivityStepsQueryResult, FitbitWeightTrendQueryResult, FitbitWeightQueryResult, FitbitSleepQueryResult, FitbitIntradayStepDayQueryResult, FitbitHeartRateIntraDayQueryResult, FitbitUserProfile, FitbitDeviceListQueryResult } from "../types";
+import { makeFitbitIntradayActivityApiUrl, makeFitbitHeartRateIntraDayLogApiUrl, makeFitbitWeightTrendApiUrl, makeFitbitWeightLogApiUrl, makeFitbitDayLevelActivityLogsUrl, makeFitbitSleepApiUrl, FITBIT_PROFILE_URL, FITBIT_DEVICES_URL } from "../api";
 import { AsyncStorageHelper } from "../../../../system/AsyncStorageHelper";
 import { DataService, UnSupportedReason } from "../../DataService";
 import { DateTimeHelper } from "../../../../time";
 import { FitbitLocalDbManager } from '../sqlite/database';
 import { DatabaseParams } from 'react-native-sqlite-storage';
+import { toDate, parse, parseISO, max } from 'date-fns';
 
 
 interface FitbitCredential {
@@ -102,7 +103,7 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
         try {
             this._credential = require('../../../../../credentials/fitbit.json');
             this._authConfig = {
-                scopes: ['profile', 'activity', 'weight', 'sleep', 'heartrate'],
+                scopes: ['profile', 'activity', 'weight', 'sleep', 'heartrate', 'settings'],
                 clientId: this._credential.client_id,
                 clientSecret: this._credential.client_secret,
                 redirectUrl: this._credential.redirect_uri,
@@ -236,5 +237,15 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
 
     getToday(){
         return new Date()
+    }
+
+    async fetchLastSyncTime(): Promise<{tracker?: Date, scale?: Date}> {
+        const devices: FitbitDeviceListQueryResult = await this.fetchFitbitQuery(FITBIT_DEVICES_URL)
+        const trackerTimes = devices.filter(d => d.type === 'TRACKER').map(d => parseISO(d.lastSyncTime))
+        const scaleTimes = devices.filter(d => d.type === 'SCALE').map(d => parseISO(d.lastSyncTime))
+        return {
+            tracker: max(trackerTimes),
+            scale: max(scaleTimes)
+        }
     }
 }

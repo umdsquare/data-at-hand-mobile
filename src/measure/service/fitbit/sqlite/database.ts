@@ -14,6 +14,7 @@ SQLite.enablePromise(true);
 export interface ICachedRangeEntry {
   measureKey: string;
   endDate?: number;
+  lastFitbitSyncAt?: Date;
   queriedAt?: Date;
 }
 
@@ -274,6 +275,7 @@ const CachedRangeSchema = {
   columns: {
     measureKey: { type: SQLiteHelper.SQLiteColumnType.TEXT, primary: true },
     endDate: { type: SQLiteHelper.SQLiteColumnType.INTEGER },
+    lastFitbitSyncAt: { type: SQLiteHelper.SQLiteColumnType.TEXT },
     queriedAt: { type: SQLiteHelper.SQLiteColumnType.TEXT },
   },
 };
@@ -311,10 +313,10 @@ export class FitbitLocalDbManager {
   }
 
   async deleteDatabase(): Promise<void> {
-    try{
+    try {
       await SQLite.deleteDatabase(this._dbConfig);
       this._dbInitPromise = null
-    }catch(e){
+    } catch (e) {
       console.log(e)
       return
     }
@@ -404,6 +406,7 @@ export class FitbitLocalDbManager {
     if (result.rows.length > 0) {
       const entry = result.rows.item(0);
       entry.queriedAt = new Date(entry.queriedAt);
+      entry.lastFitbitSyncAt = new Date(entry.lastFitbitSyncAt)
       return entry;
     } else {
       return null;
@@ -413,6 +416,9 @@ export class FitbitLocalDbManager {
   async upsertCachedRange(obj: ICachedRangeEntry): Promise<void> {
     if (obj.queriedAt) {
       obj.queriedAt = obj.queriedAt.toString() as any;
+    }
+    if (obj.lastFitbitSyncAt) {
+      obj.lastFitbitSyncAt = obj.lastFitbitSyncAt.toString() as any;
     }
     return this.insert(FitbitLocalTableName.CachedRange, [obj]);
   }
@@ -542,7 +548,7 @@ export class FitbitLocalDbManager {
   }
 
 
-  private async exportDailySummaryColumn(...tableInfos: Array<{ schema: SQLiteHelper.TableSchema, exportedValueColumns: { [key: string]: string } }>): Promise<{fields: Array<string>, data: Array<any>}> {
+  private async exportDailySummaryColumn(...tableInfos: Array<{ schema: SQLiteHelper.TableSchema, exportedValueColumns: { [key: string]: string } }>): Promise<{ fields: Array<string>, data: Array<any> }> {
 
     if (tableInfos.length > 0) {
 
@@ -575,7 +581,7 @@ export class FitbitLocalDbManager {
       for (const numberedDate of uniqueDates) {
         const matchedElements = rowsPerTable.map(entry => entry.queriedRows.find(elm => elm.numberedDate === numberedDate))
         let merged = matchedElements[0]
-        
+
         if (matchedElements.length > 1) {
           for (let i = 1; i < matchedElements.length; i++) {
             merged = merge(merged, matchedElements[i])
@@ -587,12 +593,12 @@ export class FitbitLocalDbManager {
         joinedRows.push(merged)
       }
 
-      joinedRows.sort((a, b)=> {
-        if(a.numberedDate > b.numberedDate){
+      joinedRows.sort((a, b) => {
+        if (a.numberedDate > b.numberedDate) {
           return -1
-        }else if(a.numberedDate === b.numberedDate){
+        } else if (a.numberedDate === b.numberedDate) {
           return 0
-        }else{
+        } else {
           return 1
         }
       })
@@ -640,7 +646,7 @@ export class FitbitLocalDbManager {
       }
     )
 
-    const result = [{name: "daily_summary", csv: Papa.unparse(joinedTable)}]
+    const result = [{ name: "daily_summary", csv: Papa.unparse(joinedTable) }]
 
     const schemas = [
       StepCountSchema,
@@ -651,7 +657,7 @@ export class FitbitLocalDbManager {
       IntraDayStepCountSchema,
       IntraDayHeartRateInfoSchema,
     ]
-    
+
     for (const schema of schemas) {
       const [queryResult] = await (await this.open()).executeSql(`SELECT * FROM ${schema.name}`)
       if (queryResult) {

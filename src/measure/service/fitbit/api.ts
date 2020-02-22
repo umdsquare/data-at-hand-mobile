@@ -26,6 +26,8 @@ const FITBIT_HEARTRATE_INTRADAY_URL =
 export const FITBIT_PROFILE_URL =
   'https://api.fitbit.com/1/user/-/profile.json';
 
+export const FITBIT_DEVICES_URL = "https://api.fitbit.com/1/user/-/devices.json"
+
 /**
  *
  *

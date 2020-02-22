@@ -4,6 +4,7 @@ import { FitbitServiceMeasureBase } from './FitbitServiceMeasureBase';
 import { DataSourceSpec, DataSourceCategory } from '../../DataSourceSpec'
 import { BoxPlotInfo } from '../../../core/exploration/data/types';
 import { AsyncStorageHelper } from '../../../system/AsyncStorageHelper';
+import { DateTimeHelper } from '../../../time';
 
 export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
   abstract key: string;
@@ -30,41 +31,45 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
       if (endDate < cachedRange.endDate) {
         console.log("Don't need to cache again for", this.key);
         return { success: true, skipped: true };
-      } else if (endDate === cachedRange.endDate) {
-        //if same, check how old after the last day was logged.
-        const now = this.service.core.getToday()
-        if (differenceInMinutes(now, cachedRange.queriedAt) > 15) {
-          console.log('Recache the recent day for ', this.key);
-          await this.fetchAndCacheFitbitData(endDate, endDate);
-          await this.service.core.fitbitLocalDbManager.upsertCachedRange({
-            measureKey: this.key,
-            endDate,
-            queriedAt: now,
-          } as ICachedRangeEntry);
-          await this.invalidateBoxPlotInfoCache()
-        } else {
-          console.log("Don't need to cache again for", this.key);
-        }
       } else {
         const now = this.service.core.getToday();
-        await this.fetchAndCacheFitbitData(cachedRange.endDate, endDate);
-        await this.service.core.fitbitLocalDbManager.upsertCachedRange({
-          measureKey: this.key,
-          endDate,
-          queriedAt: now,
-        } as ICachedRangeEntry);
+        if (differenceInMinutes(now, cachedRange.queriedAt) > 15) { //check with 15 minute gap
+          const lastFitbitSyncTime = await this.service.getLastSyncTime()
+          if ((lastFitbitSyncTime.tracker || lastFitbitSyncTime.scale || Number.MAX_SAFE_INTEGER) > cachedRange.lastFitbitSyncAt) {
+            console.log("Fitbit server data was updated after the last caching.")
+            const queryEndDate = DateTimeHelper.toNumberedDateFromDate(lastFitbitSyncTime.tracker || lastFitbitSyncTime.scale) || endDate
 
-        await this.invalidateBoxPlotInfoCache()
+            await this.fetchAndCacheFitbitData(cachedRange.endDate, endDate);
+            await this.service.core.fitbitLocalDbManager.upsertCachedRange({
+              measureKey: this.key,
+              endDate: queryEndDate,
+              queriedAt: now,
+              lastFitbitSyncAt: lastFitbitSyncTime.tracker || lastFitbitSyncTime.scale,
+            } as ICachedRangeEntry);
+            await this.invalidateBoxPlotInfoCache()
+          } else {
+            console.log("No difference in Fitbit server. Don't need to cache again for", this.key);
+            return { success: true, skipped: true };
+          }
+        }else{
+          console.log("Too early since the last check. Don't need to cache again for", this.key);
+          return { success: true, skipped: true };
+        }
       }
     } else {
       //cache the full region
       console.log('no cache. should cache the full region.');
       const startDate = await this.service.getMembershipStartDate();
+      const lastFitbitSyncTime = await this.service.getLastSyncTime();
+
+      const queryEndDate = DateTimeHelper.toNumberedDateFromDate(lastFitbitSyncTime.tracker || lastFitbitSyncTime.scale) || endDate
+
       const queriedAt = this.service.core.getToday()
-      await this.fetchAndCacheFitbitData(startDate, endDate);
+      await this.fetchAndCacheFitbitData(startDate, queryEndDate);
       await this.service.core.fitbitLocalDbManager.upsertCachedRange({
         measureKey: this.key,
-        endDate,
+        endDate: queryEndDate,
+        lastFitbitSyncAt: lastFitbitSyncTime.tracker || lastFitbitSyncTime.scale,
         queriedAt,
       } as ICachedRangeEntry)
       await this.invalidateBoxPlotInfoCache()

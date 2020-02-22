@@ -153,7 +153,7 @@ export class FitbitExampleServiceCore implements FitbitServiceCore {
                 startTime: format(addSeconds(DateTimeHelper.toDate(e.numberedDate), e.bedTimeDiffSeconds), "yyyy-MM-dd'T'HH:mm:ss"),
                 endTime: format(addSeconds(DateTimeHelper.toDate(e.numberedDate), e.wakeTimeDiffSeconds), "yyyy-MM-dd'T'HH:mm:ss"),
                 type: 'stages' as any,
-                levels: {data: []},
+                levels: { data: [] },
                 summary: {},
                 efficiency: 100,
                 logId: e.index
@@ -177,5 +177,12 @@ export class FitbitExampleServiceCore implements FitbitServiceCore {
 
     getToday() {
         return this._latestDate || new Date()
+    }
+
+    async fetchLastSyncTime(): Promise<{tracker?: Date, scale?: Date}>{
+        return {
+            tracker: this._latestDate,
+            scale: this._latestDate
+        }
     }
 }
