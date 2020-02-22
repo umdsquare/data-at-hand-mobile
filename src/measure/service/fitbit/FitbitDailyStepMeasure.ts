@@ -13,8 +13,8 @@ export class FitbitDailyStepMeasure extends FitbitSummaryLogMeasure<FitbitDailyA
 
   protected resourcePropertyKey: string = "activities-steps"
 
-  protected queryFunc(): (startDate: number, endDate: number) => Promise<FitbitDailyActivityStepsQueryResult> {
-    return this.service.core.fetchStepDailySummary
+  protected queryFunc(startDate: number, endDate: number): Promise<FitbitDailyActivityStepsQueryResult> {
+    return this.service.core.fetchStepDailySummary(startDate, endDate)
   }
 
   protected shouldReject(rowValue: number): boolean {

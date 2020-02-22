@@ -6,7 +6,7 @@ export abstract class FitbitRangeMeasure<
 
   protected abstract resourcePropertyKey: string;
   protected abstract maxQueryRangeLength: number;
-  protected abstract queryFunc(): (startDate: number, endDate: number) => Promise<QueryResultType>
+  protected abstract queryFunc(startDate: number, endDate: number): Promise<QueryResultType>
 
   protected abstract handleQueryResultEntry(entries: any[], now: Date): Promise<void>
 
@@ -26,7 +26,7 @@ export abstract class FitbitRangeMeasure<
     const chunks = DateTimeHelper.splitRange(startDate, endDate, this.maxQueryRangeLength);
 
     const queryResult: Array<QueryResultType> = await Promise.all(
-      chunks.map(chunk => this.queryFunc()(chunk[0], chunk[1]))
+      chunks.map(chunk => this.queryFunc(chunk[0], chunk[1]))
     );
 
     const result: QueryResultType = {} as any;
@@ -45,7 +45,7 @@ export abstract class FitbitRangeMeasure<
       'millis.',
     );
 
-    const now = new Date();
+    const now = this.service.core.getToday()
 
     /*
     this.service.realm.write(() => {
@@ -56,6 +56,6 @@ export abstract class FitbitRangeMeasure<
 
     this.handleQueryResultEntry(result[this.resourcePropertyKey], now)
 
-    console.log('Finish storing data into Realm.');
+    console.log('Finish storing data into DB.');
   }
 }

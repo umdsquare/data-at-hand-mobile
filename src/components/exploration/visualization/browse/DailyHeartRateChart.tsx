@@ -11,9 +11,15 @@ import * as d3Array from 'd3-array';
 import * as d3Shape from 'd3-shape';
 import Colors from '../../../../style/Colors';
 import { GroupWithTouchInteraction } from './GroupWithTouchInteraction';
+import { useSelector } from 'react-redux';
+import { ReduxAppState } from '../../../../state/types';
+import { DataServiceManager } from '../../../../system/DataServiceManager';
 
 
 export const DailyHeartRateChart = (prop: ChartProps) => {
+
+    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+    const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
 
     const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
 
@@ -23,7 +29,7 @@ export const DailyHeartRateChart = (prop: ChartProps) => {
         .range([0, chartArea.width])
 
 
-    const today = DateTimeHelper.toNumberedDateFromDate(new Date())
+    const today = DateTimeHelper.toNumberedDateFromDate(getToday())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
     const valueMin = Math.min(d3Array.min(prop.data, d => d.value), prop.preferredValueRange[0] || Number.MAX_SAFE_INTEGER)

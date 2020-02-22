@@ -179,4 +179,6 @@ export interface FitbitServiceCore {
   fetchIntradayStepCount(date: number): Promise<FitbitIntradayStepDayQueryResult>
   fetchIntradayHeartRate(date: number): Promise<FitbitHeartRateIntraDayQueryResult>
   fitbitLocalDbManager: FitbitLocalDbManager
+
+  getToday(): Date
 }

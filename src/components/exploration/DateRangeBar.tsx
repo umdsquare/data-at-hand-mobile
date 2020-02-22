@@ -5,14 +5,17 @@ import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
 import { Sizes } from "../../style/Sizes";
 import Dash from 'react-native-dash';
 import { Button } from "react-native-elements";
-import { format, isToday, isYesterday, differenceInCalendarDays, isFirstDayOfMonth, isLastDayOfMonth, isMonday, isSunday, addDays, subDays, startOfMonth, endOfMonth, subMonths, addMonths } from "date-fns";
+import { format, differenceInCalendarDays, isFirstDayOfMonth, isLastDayOfMonth, isMonday, isSunday, addDays, subDays, startOfMonth, endOfMonth, subMonths, addMonths, differenceInDays } from "date-fns";
 import GestureRecognizer from 'react-native-swipe-gestures';
 import { DatePicker, WeekPicker, MonthPicker } from "../common/CalendarPickers";
 import { InteractionType } from "../../state/exploration/interaction/actions";
-import { DateTimeHelper } from "../../time";
+import { DateTimeHelper, isToday, isYesterday } from "../../time";
 import { SwipedFeedback } from "../common/SwipedFeedback";
 import { BottomSheet } from "../common/BottomSheet";
 import Haptic from "react-native-haptic-feedback";
+import { useSelector } from "react-redux";
+import { ReduxAppState } from "../../state/types";
+import { DataServiceManager } from "../../system/DataServiceManager";
 
 const dateButtonWidth = 140
 const barHeight = 60
@@ -150,11 +153,14 @@ const DateButton = (props: {
     isLightMode?: boolean
 }) => {
 
+    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+    const today = DataServiceManager.instance.getServiceByKey(serviceKey).getToday()
+
     const [isLongPressed, setIsLongPressed] = useState(false)
 
     const date = DateTimeHelper.toDate(props.date)
     const dateString = format(date, props.overrideFormat || "MMM dd, yyyy")
-    const subText = isToday(date) === true ? 'Today' : (isYesterday(date) === true ? "Yesterday" : format(date, "EEEE"))
+    const subText = isToday(date, today) === true ? 'Today' : (isYesterday(date, today) === true ? "Yesterday" : format(date, "EEEE"))
     return <TouchableOpacity
         onPress={props.onPress}
         onLongPress={() => {
@@ -463,9 +469,12 @@ export const DateBar = (props: {
 
     const [date, setDate] = useState(props.date)
 
+    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+    const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
+
     const shiftDay = (amount: number) => {
         const newDate = addDays(DateTimeHelper.toDate(date), amount)
-        if (differenceInCalendarDays(newDate, new Date()) < 1) {
+        if (differenceInCalendarDays(newDate, getToday()) < 1) {
             const newNumberedDate = DateTimeHelper.toNumberedDateFromDate(newDate)
             setDate(newNumberedDate)
             props.onDateChanged && props.onDateChanged(newNumberedDate, InteractionType.TouchOnly)
@@ -489,7 +498,7 @@ export const DateBar = (props: {
 
         <BottomSheet ref={ref => { bottomSheetRef = ref }}>
             <DatePicker selectedDay={DateTimeHelper.toDate(date)}
-                latestPossibleDay={new Date()}
+                latestPossibleDay={getToday()}
                 onDayPress={(d) => {
                     const newDate = DateTimeHelper.toNumberedDateFromDate(d)
                     setDate(newDate)

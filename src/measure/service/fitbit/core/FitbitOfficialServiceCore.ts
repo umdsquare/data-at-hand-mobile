@@ -233,4 +233,8 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
     fetchIntradayHeartRate(date: number): Promise<FitbitHeartRateIntraDayQueryResult> {
         return this.fetchFitbitQuery(makeFitbitHeartRateIntraDayLogApiUrl(date))
     }
+
+    getToday(){
+        return new Date()
+    }
 }

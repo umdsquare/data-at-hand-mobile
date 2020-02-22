@@ -19,6 +19,8 @@ import commaNumber from 'comma-number';
 import unitConvert from 'convert-units';
 import { TouchableHighlight } from "react-native-gesture-handler";
 import { SvgIcon, SvgIconType } from "../../../../common/svg/SvgIcon";
+import { DataSourceManager } from "../../../../../system/DataSourceManager";
+import { DataServiceManager } from "../../../../../system/DataServiceManager";
 
 const styles = StyleSheet.create({
     listItemStyle: {
@@ -77,6 +79,7 @@ interface Props {
     data?: any,
     measureUnitType?: MeasureUnitType,
     touchingElementInfo?: TouchingElementInfo,
+    getToday?: ()=>Date,
     dispatchExplorationAction?: (action: ExplorationAction) => void
 }
 
@@ -102,7 +105,7 @@ class BrowseRangeMainPanel extends React.Component<Props>{
 
     render() {
         if (this.props.data != null) {
-            const today = DateTimeHelper.toNumberedDateFromDate(new Date())
+            const today = DateTimeHelper.toNumberedDateFromDate(this.props.getToday())
             const sourceRangedData = this.props.data as OverviewSourceRow
             const dataList: Array<any> = (this.props.source === DataSourceType.Weight ? sourceRangedData.data.logs : sourceRangedData.data).slice(0)
             dataList.sort((a: any, b: any) => b["numberedDate"] - a["numberedDate"])
@@ -163,7 +166,8 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
         data: appState.explorationDataState.data,
         measureUnitType: appState.settingsState.unit,
         isLoadingData: appState.explorationDataState.isBusy,
-        touchingElementInfo: appState.explorationState.touchingElement
+        touchingElementInfo: appState.explorationState.touchingElement,
+        getToday: DataServiceManager.instance.getServiceByKey(appState.settingsState.serviceKey).getToday
     }
 }
 

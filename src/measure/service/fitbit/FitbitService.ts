@@ -106,7 +106,7 @@ export class FitbitService extends DataService {
     intraDayDataSource: IntraDayDataSourceType,
     date: number,
   ): Promise<any> {
-    const now = DateTimeHelper.toNumberedDateFromDate(new Date());
+    const now = DateTimeHelper.toNumberedDateFromDate(this.core.getToday());
     if (date <= now) {
       switch (intraDayDataSource) {
         case IntraDayDataSourceType.StepCount:
@@ -236,7 +236,7 @@ export class FitbitService extends DataService {
       const accessToken = await this.authenticate();
       if (accessToken != null) {
         const initialDate = await this.getMembershipStartDate();
-        const now = DateTimeHelper.toNumberedDateFromDate(new Date());
+        const now = DateTimeHelper.toNumberedDateFromDate(this.core.getToday());
 
         for (const measure of this.preloadableMeasures) {
           progressHandler({
@@ -286,11 +286,14 @@ export class FitbitService extends DataService {
   }
 
   async clearAllCache(): Promise<void> {
-    this.core.fitbitLocalDbManager.deleteDatabase()
+    await this.core.fitbitLocalDbManager.deleteDatabase()
   }
 
-  async exportToCsv(): Promise<Array<{ name: string, csv: string }>>{
+  async exportToCsv(): Promise<Array<{ name: string, csv: string }>> {
     return this.core.fitbitLocalDbManager.exportToCsv()
   }
 
+  getToday = () => {
+    return this.core.getToday()
+  }
 }

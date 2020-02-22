@@ -53,16 +53,16 @@ const aggregationSelectClause =
 export class FitbitSleepMeasure extends FitbitRangeMeasure<
   FitbitSleepQueryResult
   > {
-  
+
   key: string = 'sleep';
   displayName = "Sleep"
 
   protected resourcePropertyKey: string = 'sleep';
   protected maxQueryRangeLength: number = 101;
-  protected queryFunc(): (startDate: number, endDate: number) => Promise<FitbitSleepQueryResult>{
-    return this.service.core.fetchSleepLogs
+  protected queryFunc(startDate: number, endDate: number): Promise<FitbitSleepQueryResult> {
+    return this.service.core.fetchSleepLogs(startDate, endDate)
   }
-  
+
   protected async getBoxPlotInfoOfDatasetFromDb(key: "range" | "length"): Promise<BoxPlotInfo> {
     switch (key) {
       case 'length':
@@ -128,7 +128,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
         } else return null;
       })
       .filter(e => e != null);
-
+      
     return this.service.core.fitbitLocalDbManager.insert(
       FitbitLocalTableName.SleepLog,
       entriesReady,
@@ -164,7 +164,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
     >(
       FitbitLocalTableName.SleepLog,
       '`numberedDate` = ? LIMIT 1',
-      [DateTimeHelper.toNumberedDateFromDate(new Date())],
+      [DateTimeHelper.toNumberedDateFromDate(this.service.core.getToday())],
       columnNamesForRangeData,
     );
 

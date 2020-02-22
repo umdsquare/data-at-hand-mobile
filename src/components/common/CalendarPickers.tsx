@@ -6,6 +6,10 @@ import { View, StyleSheet, Text } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Sizes } from '../../style/Sizes';
 import { SvgIcon, SvgIconType } from './svg/SvgIcon';
+import { useSelector, connect } from 'react-redux';
+import { ReduxAppState } from '../../state/types';
+import { DataServiceManager } from '../../system/DataServiceManager';
+import { Dispatch } from 'redux';
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
@@ -50,6 +54,10 @@ function formatDate(date: Date): string { return format(date, "yyyy-MM-dd") }
 function parseDate(calendarPickerDateObject: any): Date { return set(new Date(), { year: calendarPickerDateObject.year, month: calendarPickerDateObject.month - 1, date: calendarPickerDateObject.day }) }
 
 export const DatePicker = (props: { selectedDay?: Date, earliedPossibleDay?: Date, latestPossibleDay?: Date, ghostRange?: [Date, Date], onDayPress?: (date: Date) => void }) => {
+    
+    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+    const today = DataServiceManager.instance.getServiceByKey(serviceKey).getToday()
+
     const markedDates = {}
     if (props.selectedDay) {
         markedDates[formatDate(props.selectedDay)] = { selected: true }
@@ -64,7 +72,7 @@ export const DatePicker = (props: { selectedDay?: Date, earliedPossibleDay?: Dat
 
     return <Calendar
         {...calendarProps}
-        current={props.selectedDay || new Date()}
+        current={props.selectedDay || today}
         markedDates={markedDates}
         minDate={props.earliedPossibleDay}
         maxDate={props.latestPossibleDay}
@@ -80,6 +88,9 @@ const selectedWeekRangeMarkInfoBase = {
 }
 
 export const WeekPicker = (props: { selectedWeekFirstDay?: Date, onWeekSelected?: (weekFirstDay: Date, weekEndDay: Date) => void }) => {
+    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+    const today = DataServiceManager.instance.getServiceByKey(serviceKey).getToday()
+    
     const markedDates = {}
 
     if (props.selectedWeekFirstDay) {
@@ -98,7 +109,7 @@ export const WeekPicker = (props: { selectedWeekFirstDay?: Date, onWeekSelected?
 
     return <Calendar
         {...calendarProps}
-        current={props.selectedWeekFirstDay || new Date()}
+        current={props.selectedWeekFirstDay || today}
         markedDates={markedDates}
         markingType={'period'}
         onDayPress={(d) => {
@@ -160,6 +171,7 @@ const monthPickerStyle = StyleSheet.create({
 })
 
 interface MonthPickerProps {
+    getToday?: ()=>Date,
     selectedMonth: Date,
     onMonthSelected?: (month: Date) => void
 }
@@ -169,12 +181,12 @@ interface MonthPickerState {
     selectedMonth: Date
 }
 
-export class MonthPicker extends React.Component<MonthPickerProps, MonthPickerState>{
+class MonthPicker extends React.Component<MonthPickerProps, MonthPickerState>{
 
     constructor(props: MonthPickerProps) {
         super(props)
 
-        const selectedMonth = props.selectedMonth || new Date()
+        const selectedMonth = props.selectedMonth || props.getToday()
 
         this.state = {
             currentYear: getYear(selectedMonth),
@@ -197,7 +209,7 @@ export class MonthPicker extends React.Component<MonthPickerProps, MonthPickerSt
     }
 
     onMonthPressed = (month: number) => {
-        const monthDate = set(new Date(), { year: this.state.currentYear, month: month })
+        const monthDate = set(this.props.getToday(), { year: this.state.currentYear, month: month })
         this.setState({
             ...this.state,
             selectedMonth: monthDate
@@ -246,3 +258,22 @@ export class MonthPicker extends React.Component<MonthPickerProps, MonthPickerSt
         </View>
     }
 }
+
+
+function mapDispatchToProps(dispatch: Dispatch, ownProps: MonthPickerProps): MonthPickerProps {
+    return {
+        ...ownProps,
+    }
+}
+
+function mapStateToProps(appState: ReduxAppState, ownProps: MonthPickerProps): MonthPickerProps {
+    return {
+        ...ownProps,
+        getToday: DataServiceManager.instance.getServiceByKey(appState.settingsState.serviceKey).getToday
+    }
+}
+
+
+const connected = connect(mapStateToProps, mapDispatchToProps)(MonthPicker)
+
+export { connected as MonthPicker }

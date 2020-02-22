@@ -1,4 +1,4 @@
-import { getYear, getMonth, getDate, differenceInDays, subDays, addDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, addMonths, lastDayOfMonth, isSameYear, startOfMonth, endOfMonth, format } from "date-fns"
+import { getYear, getMonth, getDate, differenceInDays, subDays, addDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, addMonths, lastDayOfMonth, isSameYear, startOfMonth, endOfMonth, format, isSameDay } from "date-fns"
 import { toDate } from "date-fns-tz"
 
 /**
@@ -180,4 +180,12 @@ export function pad(n, len) {
 
     return s;
 
+}
+
+export function isToday(date: Date, today: Date = new Date()): boolean{
+    return isSameDay(date, today)
+}
+
+export function isYesterday(date: Date, today: Date = new Date()): boolean{
+    return differenceInDays(today, date) === 1
 }

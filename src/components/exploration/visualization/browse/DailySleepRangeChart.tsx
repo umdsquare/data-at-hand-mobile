@@ -11,6 +11,9 @@ import * as d3Array from 'd3-array';
 import Colors from '../../../../style/Colors';
 import { startOfDay, addSeconds, format } from 'date-fns';
 import { GroupWithTouchInteraction } from './GroupWithTouchInteraction';
+import { useSelector } from 'react-redux';
+import { ReduxAppState } from '../../../../state/types';
+import { DataServiceManager } from '../../../../system/DataServiceManager';
 
 interface Props extends ChartProps {
     data: Array<{ numberedDate: number, value: number, bedTimeDiffSeconds: number, wakeTimeDiffSeconds: number }>
@@ -27,6 +30,9 @@ const tickFormat = (tick: number) => {
 
 export const DailySleepRangeChart = (prop: Props) => {
 
+    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+    const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
+
     const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
 
     const scaleX = CommonBrowsingChartStyles
@@ -35,7 +41,7 @@ export const DailySleepRangeChart = (prop: Props) => {
         .range([0, chartArea.width])
 
 
-    const today = DateTimeHelper.toNumberedDateFromDate(new Date())
+    const today = DateTimeHelper.toNumberedDateFromDate(getToday())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
     const latestTimeDiff = Math.max(d3Array.max(prop.data, d => d.wakeTimeDiffSeconds), d3Array.max(prop.data, d => d.bedTimeDiffSeconds), prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)

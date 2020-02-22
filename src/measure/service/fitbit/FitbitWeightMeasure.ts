@@ -119,8 +119,8 @@ class FitbitWeightTrendMeasure extends FitbitSummaryLogMeasure<FitbitWeightTrend
   key: string = 'weight_trend';
   displayName = "Weight Trend"
 
-  protected queryFunc(): (startDate: number, endDate: number) => Promise<FitbitWeightTrendQueryResult> {
-    return this.service.core.fetchWeightTrend
+  protected queryFunc(startDate: number, endDate: number): Promise<FitbitWeightTrendQueryResult> {
+    return this.service.core.fetchWeightTrend(startDate, endDate)
   }
 
   protected dbTableName = FitbitLocalTableName.WeightTrend
@@ -154,8 +154,8 @@ class FitbitWeightLogMeasure extends FitbitRangeMeasure<
   protected maxQueryRangeLength: number = 32;
 
 
-  protected queryFunc(): (startDate: number, endDate: number) => Promise<FitbitWeightQueryResult> {
-    return this.service.core.fetchWeightLogs
+  protected queryFunc(startDate: number, endDate: number): Promise<FitbitWeightQueryResult> {
+    return this.service.core.fetchWeightLogs(startDate, endDate)
   }
 
   protected handleQueryResultEntry(entries: Array<any>, now: Date): Promise<void> {

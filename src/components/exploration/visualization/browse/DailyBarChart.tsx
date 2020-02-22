@@ -11,6 +11,9 @@ import * as d3Array from 'd3-array';
 import Colors from '../../../../style/Colors';
 import { GroupWithTouchInteraction } from './GroupWithTouchInteraction';
 import { UIManager } from 'react-native';
+import { useSelector } from 'react-redux';
+import { ReduxAppState } from '../../../../state/types';
+import { DataServiceManager } from '../../../../system/DataServiceManager';
 
 interface Props extends ChartProps {
     valueTickFormat?: (number) => string,
@@ -20,6 +23,9 @@ interface Props extends ChartProps {
 }
 
 export const DailyBarChart = (prop: Props) => {
+
+    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+    const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
 
     const [chartLayout, setChartLayout] = useState({ x: 0, y: 0, width: 0, height: 0 })
 
@@ -31,7 +37,7 @@ export const DailyBarChart = (prop: Props) => {
         .range([0, chartArea.width])
 
 
-    const today = DateTimeHelper.toNumberedDateFromDate(new Date())
+    const today = DateTimeHelper.toNumberedDateFromDate(getToday())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
     const scaleY = scaleLinear()

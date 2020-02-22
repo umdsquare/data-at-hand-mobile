@@ -32,7 +32,7 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
         return { success: true, skipped: true };
       } else if (endDate === cachedRange.endDate) {
         //if same, check how old after the last day was logged.
-        const now = new Date();
+        const now = this.service.core.getToday()
         if (differenceInMinutes(now, cachedRange.queriedAt) > 15) {
           console.log('Recache the recent day for ', this.key);
           await this.fetchAndCacheFitbitData(endDate, endDate);
@@ -46,7 +46,7 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
           console.log("Don't need to cache again for", this.key);
         }
       } else {
-        const now = new Date();
+        const now = this.service.core.getToday();
         await this.fetchAndCacheFitbitData(cachedRange.endDate, endDate);
         await this.service.core.fitbitLocalDbManager.upsertCachedRange({
           measureKey: this.key,
@@ -60,7 +60,7 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
       //cache the full region
       console.log('no cache. should cache the full region.');
       const startDate = await this.service.getMembershipStartDate();
-      const queriedAt = new Date();
+      const queriedAt = this.service.core.getToday()
       await this.fetchAndCacheFitbitData(startDate, endDate);
       await this.service.core.fitbitLocalDbManager.upsertCachedRange({
         measureKey: this.key,

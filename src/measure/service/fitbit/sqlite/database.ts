@@ -310,8 +310,14 @@ export class FitbitLocalDbManager {
     console.log('initialize Fitbit Local DB Manager');
   }
 
-  deleteDatabase(): Promise<void> {
-    return SQLite.deleteDatabase(this._dbConfig);
+  async deleteDatabase(): Promise<void> {
+    try{
+      await SQLite.deleteDatabase(this._dbConfig);
+      this._dbInitPromise = null
+    }catch(e){
+      console.log(e)
+      return
+    }
   }
 
   open(): Promise<SQLite.SQLiteDatabase> {
@@ -558,7 +564,7 @@ export class FitbitLocalDbManager {
         }
       }))
 
-      const headers = ["numberedDate", "year", "month", "dayOfWeek"].concat([].concat.apply([], tableInfos.map(info => Object.keys(info.exportedValueColumns).map(key => info.exportedValueColumns[key] || key))))
+      const headers = ["index", "date", "numberedDate", "year", "month", "dayOfWeek"].concat([].concat.apply([], tableInfos.map(info => Object.keys(info.exportedValueColumns).map(key => info.exportedValueColumns[key] || key))))
 
       const uniqueDates = new Set([].concat.apply([], rowsPerTable.map(entry => entry.queriedRows.map(r => r.numberedDate))))
       console.log("Total ", uniqueDates.size, " days of data.")
@@ -569,6 +575,7 @@ export class FitbitLocalDbManager {
       for (const numberedDate of uniqueDates) {
         const matchedElements = rowsPerTable.map(entry => entry.queriedRows.find(elm => elm.numberedDate === numberedDate))
         let merged = matchedElements[0]
+        
         if (matchedElements.length > 1) {
           for (let i = 1; i < matchedElements.length; i++) {
             merged = merge(merged, matchedElements[i])
@@ -579,6 +586,20 @@ export class FitbitLocalDbManager {
 
         joinedRows.push(merged)
       }
+
+      joinedRows.sort((a, b)=> {
+        if(a.numberedDate > b.numberedDate){
+          return -1
+        }else if(a.numberedDate === b.numberedDate){
+          return 0
+        }else{
+          return 1
+        }
+      })
+
+      joinedRows.forEach((row, i) => {
+        row["index"] = i
+      })
 
       return {
         fields: headers,

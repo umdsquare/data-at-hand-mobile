@@ -125,6 +125,10 @@ export abstract class DataService {
   abstract async activateInSystem(progressHandler: (progressInfo: { progress: number /*0 - 1*/, message: string }) => void): Promise<ServiceActivationResult>
   abstract async deactivatedInSystem(): Promise<boolean>
 
+  getToday = (): Date => {
+    return new Date()
+  }
+
   abstract async clearAllCache(): Promise<void>
 
   abstract onSystemExit()

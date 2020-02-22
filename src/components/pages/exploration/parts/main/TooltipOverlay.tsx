@@ -5,8 +5,8 @@ import { TouchingElementInfo, TouchingElementValueType, ParameterType, Explorati
 import { ReduxAppState } from '../../../../../state/types'
 import { connect } from 'react-redux'
 import { explorationInfoHelper } from '../../../../../core/exploration/ExplorationInfoHelper'
-import { DateTimeHelper } from '../../../../../time'
-import { format, startOfDay, isToday, isYesterday, differenceInDays } from 'date-fns'
+import { DateTimeHelper, isToday, isYesterday } from '../../../../../time'
+import { format, startOfDay, differenceInDays } from 'date-fns'
 import { Sizes } from '../../../../../style/Sizes'
 import { DataSourceType, MeasureUnitType } from '../../../../../measure/DataSourceSpec'
 import commaNumber from 'comma-number';
@@ -22,6 +22,7 @@ import Haptic from 'react-native-haptic-feedback';
 import Insets from 'react-native-static-safe-area-insets';
 import { ZIndices } from '../zIndices'
 import { SpeechContext, SpeechContextHelper } from '../../../../../state/speech/context'
+import { DataServiceManager } from '../../../../../system/DataServiceManager'
 
 const borderRadius = 8
 
@@ -112,6 +113,7 @@ interface Props {
     touchingInfo?: TouchingElementInfo,
     measureUnitType?: MeasureUnitType,
     explorationType?: ExplorationType,
+    getToday?: ()=>Date,
     dispatchStartSpeechSession?: (sessionId: string, context: SpeechContext) => void,
     dispatchStopDictation?: (sessionId: string) => void,
 }
@@ -410,9 +412,9 @@ class TooltipOverlay extends React.Component<Props, State>{
                     }
 
                     let dayOfWeekLabel = format(date, "EEEE")
-                    if (isToday(date) === true) {
+                    if (isToday(date, this.props.getToday()) === true) {
                         dayOfWeekLabel += " (Today)"
-                    } else if (isYesterday(date) === true) {
+                    } else if (isYesterday(date, this.props.getToday()) === true) {
                         dayOfWeekLabel += " (Yesterday)"
                     }
 
@@ -546,7 +548,8 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
         ...ownProps,
         touchingInfo: appState.explorationState.touchingElement,
         measureUnitType: appState.settingsState.unit,
-        explorationType: appState.explorationState.info.type
+        explorationType: appState.explorationState.info.type,
+        getToday: DataServiceManager.instance.getServiceByKey(appState.settingsState.serviceKey).getToday
     }
 }
 

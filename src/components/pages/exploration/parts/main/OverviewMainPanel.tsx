@@ -10,6 +10,7 @@ import { Dispatch } from "redux";
 import { Sizes } from "../../../../../style/Sizes";
 import { DateTimeHelper } from "../../../../../time";
 import { inferIntraDayDataSourceType } from "../../../../../core/exploration/types";
+import { DataServiceManager } from "../../../../../system/DataServiceManager";
 
 const separatorStyle = {height: Sizes.verticalPadding}
 
@@ -19,6 +20,7 @@ interface Props {
     measureUnitType?: MeasureUnitType,
     uiStatus?: any,
     isTouchingChartElement?: boolean,
+    getToday?: ()=>Date,
     dispatchAction?: (action: ExplorationAction) => void
 }
 
@@ -74,7 +76,8 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
                             this.props.dispatchAction(createGoToBrowseRangeAction(InteractionType.TouchOnly, item.source))
                         }}
                         onTodayPressed={inferIntraDayDataSourceType(item.source) != null ? ()=>{
-                            this.props.dispatchAction(createGoToBrowseDayAction(InteractionType.TouchOnly, inferIntraDayDataSourceType(item.source), DateTimeHelper.toNumberedDateFromDate(new Date())))
+                            this.props.dispatchAction(createGoToBrowseDayAction(InteractionType.TouchOnly, 
+                                inferIntraDayDataSourceType(item.source), DateTimeHelper.toNumberedDateFromDate(this.props.getToday())))
                         } : null}
                     />}
 
@@ -110,7 +113,8 @@ function mapStateToProps(state: ReduxAppState, ownProps: Props): Props {
         data: state.explorationDataState.data,
         measureUnitType: state.settingsState.unit,
         uiStatus: state.explorationState.uiStatus,
-        isTouchingChartElement: state.explorationState.touchingElement != null
+        isTouchingChartElement: state.explorationState.touchingElement != null,
+        getToday: DataServiceManager.instance.getServiceByKey(state.settingsState.serviceKey).getToday
     }
 }
 

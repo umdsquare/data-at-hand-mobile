@@ -67,7 +67,7 @@ export abstract class FitbitSummaryLogMeasure<
   }
 
   async  fetchTodayValue(): Promise<number> {
-    const today = DateTimeHelper.toNumberedDateFromDate(new Date());
+    const today = DateTimeHelper.toNumberedDateFromDate(this.service.core.getToday());
 
     const todayResult = await this.service.core.fitbitLocalDbManager.fetchData(this.dbTableName, "`numberedDate` = ?", [today])
 

@@ -13,6 +13,9 @@ import { IIntraDayLogEntry, IWeightIntraDayLogEntry } from '../../../../core/exp
 import { MeasureUnitType } from '../../../../measure/DataSourceSpec';
 import unitConvert from 'convert-units';
 import { noop } from '../../../../utils';
+import { useSelector } from 'react-redux';
+import { ReduxAppState } from '../../../../state/types';
+import { DataServiceManager } from '../../../../system/DataServiceManager';
 
 
 export const DailyWeightChart = (prop: {
@@ -29,6 +32,9 @@ export const DailyWeightChart = (prop: {
     measureUnitType: MeasureUnitType
 }) => {
 
+    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+    const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
+
     const convert = prop.measureUnitType === MeasureUnitType.Metric ? noop : (n) => unitConvert(n).from('kg').to('lb')
 
     const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
@@ -39,7 +45,7 @@ export const DailyWeightChart = (prop: {
         .range([0, chartArea.width])
 
 
-    const today = DateTimeHelper.toNumberedDateFromDate(new Date())
+    const today = DateTimeHelper.toNumberedDateFromDate(getToday())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
     const trendMin = prop.data.trend.length > 0 ? d3Array.min(prop.data.trend, d => convert(d.value)) : Number.MAX_SAFE_INTEGER
