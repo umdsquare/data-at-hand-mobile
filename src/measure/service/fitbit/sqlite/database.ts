@@ -5,7 +5,6 @@ import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOf
 import { IIntraDayHeartRatePoint, BoxPlotInfo } from '../../../../core/exploration/data/types';
 import Papa from 'papaparse';
 import { DateTimeHelper } from '../../../../time';
-import d3Array from 'd3-array';
 import merge from 'merge';
 
 SQLite.DEBUG(false);
@@ -314,10 +313,14 @@ export class FitbitLocalDbManager {
 
   async deleteDatabase(): Promise<void> {
     try {
+      if(this._dbInitPromise != null){
+        await this._dbInitPromise
+
+      }
       await SQLite.deleteDatabase(this._dbConfig);
       this._dbInitPromise = null
     } catch (e) {
-      console.log(e)
+      this._dbInitPromise = null
       return
     }
   }

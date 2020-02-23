@@ -1,17 +1,26 @@
 import React from "react";
 import { PropsWithNavigation } from "../../../PropsWithNavigation";
-import { View, Text, StyleSheet, StatusBar, TouchableHighlight, Alert } from "react-native";
+import { View, Text, StyleSheet, TouchableHighlight, Alert } from "react-native";
 import { MeasureUnitType } from "../../../measure/DataSourceSpec";
 import { Dispatch } from "redux";
 import { ReduxAppState } from "../../../state/types";
 import { connect } from "react-redux";
 import { setUnit } from '../../../state/settings/actions';
 import { Sizes } from "../../../style/Sizes";
-import { Icon } from "react-native-elements";
 import Colors from "../../../style/Colors";
 import { DataServiceManager } from "../../../system/DataServiceManager";
 import { connectActionSheet } from '@expo/react-native-action-sheet'
 import { SvgIcon, SvgIconType } from "../../common/svg/SvgIcon";
+import { InitialLoadingIndicator } from "../exploration/parts/main/InitialLoadingIndicator";
+
+
+const unitTypes = [{
+    key: MeasureUnitType.Metric,
+    label: 'Metric'
+}, {
+    key: MeasureUnitType.US,
+    label: "US Standard"
+}]
 
 const styles = StyleSheet.create({
     rowContainerStyle: {
@@ -56,24 +65,25 @@ interface Props extends PropsWithNavigation {
 }
 
 interface State {
-    isLoading: boolean
+    isLoading: boolean,
+    loadingMessage?: string
 }
 
 
 class SettingsScreen extends React.PureComponent<Props, State>{
 
 
-    static UnitTypes = [{
-        key: MeasureUnitType.Metric,
-        label: 'Metric'
-    }, {
-        key: MeasureUnitType.US,
-        label: "US Standard"
-    }]
+    constructor(props: Props) {
+        super(props)
 
+        this.state = {
+            isLoading: false,
+            loadingMessage: null
+        }
+    }
 
     onPressUnitRow = () => {
-        const selections = SettingsScreen.UnitTypes.map(t => t.label)
+        const selections = unitTypes.map(t => t.label)
         selections.push("Cancel")
         this.props.showActionSheetWithOptions({
             options: selections,
@@ -85,6 +95,7 @@ class SettingsScreen extends React.PureComponent<Props, State>{
             }
         })
     }
+
     onPressServiceButton = () => { this.props.navigation.navigate("ServiceWizardModal") }
 
     onPressRefreshAllCache = () => {
@@ -93,11 +104,27 @@ class SettingsScreen extends React.PureComponent<Props, State>{
                 text: "Refresh all",
                 style: 'destructive',
                 onPress: async () => {
+                    this.setState({
+                        ...this.state,
+                        isLoading: true,
+                        loadingMessage: 'Refreshing...'
+                    })
                     const services = await DataServiceManager.instance.getServicesSupportedInThisSystem()
                     for (const service of services) {
                         await service.clearAllCache()
                     }
-                    await DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).activateInSystem((progressInfo) => { })
+                    await DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).activateInSystem((progressInfo) => {
+                        this.setState({
+                            ...this.state,
+                            loadingMessage: progressInfo.message
+                        })
+                    })
+
+                    this.setState({
+                        ...this.state,
+                        isLoading: false,
+                        loadingMessage: null
+                    })
                 }
             },
             {
@@ -117,10 +144,14 @@ class SettingsScreen extends React.PureComponent<Props, State>{
         return <View>
             <SettingsRow title="Service" value={DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).name}
                 onClick={this.onPressServiceButton} />
-            <SettingsRow title="Unit" value={SettingsScreen.UnitTypes.find(t => t.key === this.props.selectedUnitType).label}
+            <SettingsRow title="Unit" value={unitTypes.find(t => t.key === this.props.selectedUnitType).label}
                 onClick={this.onPressUnitRow} />
             <SettingsRow title="Refresh all cache" onClick={this.onPressRefreshAllCache} showArrow={false} />
             <SettingsRow title={"Export " + DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).name + " data"} onClick={this.onPressExportAllData} showArrow={false} />
+
+            {
+                this.state.isLoading === true? <InitialLoadingIndicator loadingMessage={this.state.loadingMessage}/> : null
+            }
         </View>
     }
 }
@@ -129,7 +160,7 @@ class SettingsScreen extends React.PureComponent<Props, State>{
 function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props {
     return {
         ...ownProps,
-        setUnitType: (index) => dispatch(setUnit(SettingsScreen.UnitTypes[index].key)),
+        setUnitType: (index) => dispatch(setUnit(unitTypes[index].key)),
     }
 }
 
