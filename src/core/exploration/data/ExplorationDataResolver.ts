@@ -1,23 +1,35 @@
 import { ExplorationInfo, ExplorationType, ParameterType, IntraDayDataSourceType, ParameterKey } from '../types';
-import { OverviewData, OverviewSourceRow, GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData, FilteredDailyValues } from './types';
+import { OverviewData, OverviewSourceRow, GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData, FilteredDailyValues, StepCountRangedData, WeightRangedData } from './types';
 import { explorationInfoHelper } from '../ExplorationInfoHelper';
 import { DataSourceManager } from '../../../system/DataSourceManager';
 import { DataServiceManager } from '../../../system/DataServiceManager';
 import { DataSourceType } from '../../../measure/DataSourceSpec';
 import { CyclicTimeFrame, CycleDimension } from '../cyclic_time';
+import { DateTimeHelper } from '../../../time';
+import { DataService } from '../../../measure/service/DataService';
+import { sum, mean, min, max } from 'd3-array';
+
+
+const dateSortFunc = (a, b) => {
+  if (a.numberedDate > b.numberedDate) {
+    return 1
+  } else if (a.numberedDate === b.numberedDate) {
+    return 0
+  } else return -1
+}
 
 class ExplorationDataResolver {
   loadData(
     explorationInfo: ExplorationInfo,
-    prevInfo: ExplorationInfo,
     selectedServiceKey: string,
+    prevInfo?: ExplorationInfo,
     prevData?: any,
   ): Promise<any> {
     switch (explorationInfo.type) {
       case ExplorationType.B_Overview:
-        return this.loadOverviewData(explorationInfo, selectedServiceKey);
+        return this.loadOverviewData(explorationInfo, selectedServiceKey, prevInfo, prevData);
       case ExplorationType.B_Range:
-        return this.loadBrowseRangeData(explorationInfo, selectedServiceKey)
+        return this.loadBrowseRangeData(explorationInfo, selectedServiceKey, prevInfo, prevData);
       case ExplorationType.B_Day:
         return this.loadIntraDayData(explorationInfo, selectedServiceKey)
       case ExplorationType.C_Cyclic:
@@ -33,8 +45,8 @@ class ExplorationDataResolver {
     }
   }
 
-  private async loadBrowseRangeData(info: ExplorationInfo, selectedServiceKey: string): Promise<OverviewSourceRow> {
-    const range = explorationInfoHelper.getParameterValue(
+  private async loadBrowseRangeData(info: ExplorationInfo, selectedServiceKey: string, prevInfo?: ExplorationInfo, prevData?: any): Promise<OverviewSourceRow> {
+    const range = explorationInfoHelper.getParameterValue<[number, number]>(
       info,
       ParameterType.Range,
     );
@@ -44,13 +56,166 @@ class ExplorationDataResolver {
       selectedServiceKey,
     );
 
-    const data = await selectedService.fetchData(source, range[0], range[1])
-    data.preferredValueRange = await selectedService.getPreferredValueRange(source)
+    let prevSourceRowData: OverviewSourceRow = null
+    if (prevInfo != null && prevData != null) {
+      if (prevInfo.type === ExplorationType.B_Overview) {
+        prevSourceRowData = (prevData as OverviewData).sourceDataList.find(e => e.source === source)
+      } else if (prevInfo.type === ExplorationType.B_Range) {
+        const prevSource = explorationInfoHelper.getParameterValue<DataSourceType>(prevInfo, ParameterType.DataSource)
+        if (prevSource === source) {
+          prevSourceRowData = prevData
+        }
+      }
+    }
+
+    const data = await this.loadBrowseRangeDataImpl(range, source, selectedService, prevSourceRowData)
     return data
   }
 
-  private loadOverviewData(info: ExplorationInfo, selectedServiceKey: string, ): Promise<OverviewData> {
-    const range = explorationInfoHelper.getParameterValue(
+  private async loadBrowseRangeDataImpl(range: [number, number], source: DataSourceType, service: DataService, prevData?: OverviewSourceRow): Promise<OverviewSourceRow> {
+    if (prevData) {
+      const benchmarkStart = Date.now()
+      const newQueryRegion = DateTimeHelper.subtract(range, prevData.range as [number, number])
+      if (newQueryRegion.overlap === true && newQueryRegion.rest.length < 2) {
+        //get partial part of the data
+        const newData: OverviewSourceRow = {
+          ...prevData,
+          range,
+        }
+
+        //Filter prev data
+        //Query new parts to query
+        let newPart: OverviewSourceRow
+        if (newQueryRegion.rest.length > 0) {
+          newPart = await service.fetchData(source, newQueryRegion.rest[0][0], newQueryRegion.rest[0][1], false, false)
+        }
+
+        switch (source) {
+          case DataSourceType.StepCount:
+          case DataSourceType.HeartRate:
+          case DataSourceType.SleepRange:
+          case DataSourceType.HoursSlept:
+            {
+              newData.data = prevData.data.filter(datum => datum.numberedDate <= range[1] && datum.numberedDate >= range[0])
+              if (newPart) {
+                newData.data = newData.data.concat(newPart.data)
+              }
+              newData.data.sort(dateSortFunc)
+            }
+            break;
+          case DataSourceType.Weight:
+            {
+              const casted = prevData as WeightRangedData
+              newData.data = {
+                trend: casted.data.trend.filter(datum => datum.numberedDate <= range[1] && datum.numberedDate >= range[0]),
+                logs: casted.data.logs.filter(datum => datum.numberedDate <= range[1] && datum.numberedDate >= range[0])
+              }
+
+              if (newPart) {
+                newData.data.trend = newData.data.trend.concat(newPart.data.trend)
+                newData.data.logs = newData.data.logs.concat(newPart.data.logs)
+              }
+
+              newData.data.logs.sort(dateSortFunc)
+              newData.data.trend.sort(dateSortFunc)
+            }
+            break;
+        }
+
+        switch (source) {
+          case DataSourceType.StepCount:
+          case DataSourceType.HeartRate:
+            newData.statistics.forEach(statistic => {
+              switch (statistic.type) {
+                case "avg":
+                  {
+                    statistic.value = mean(newData.data, d => d["value"])
+                  }
+                  break;
+                case 'range':
+                  {
+                    statistic.value = [min(newData.data, d => d["value"]), max(newData.data, d => d["value"])]
+                  }
+                  break;
+                case 'total':
+                  {
+                    statistic.value = sum(newData.data, d => d["value"])
+                  }
+                  break;
+              }
+            })
+            break;
+          case DataSourceType.Weight:
+            newData.statistics.forEach(statistic => {
+              switch (statistic.type) {
+                case "avg":
+                  {
+                    statistic.value = mean(newData.data.trend, d => d["value"])
+                  }
+                  break;
+                case 'range':
+                  {
+                    statistic.value = [min(newData.data.trend, d => d["value"]), max(newData.data.trend, d => d["value"])]
+                  }
+                  break;
+              }
+            })
+            break;
+
+
+          case DataSourceType.HoursSlept:
+            newData.statistics.forEach(statistic => {
+              switch (statistic.type) {
+                case "avg":
+                  {
+                    statistic.value = mean(newData.data, d => d["lengthInSeconds"])
+                  }
+                  break;
+                case 'range':
+                  {
+                    statistic.value = [min(newData.data, d => d["lengthInSeconds"]), max(newData.data, d => d["lengthInSeconds"])]
+                  }
+                  break;
+                case 'total':
+                  {
+                    statistic.value = sum(newData.data, d => d["lengthInSeconds"])
+                  }
+                  break;
+              }
+            })
+            break;
+
+          case DataSourceType.SleepRange:
+            newData.statistics.forEach(statistic => {
+              switch (statistic.type) {
+                case 'waketime':
+                  {
+                    statistic.value = mean(newData.data, d => d["wakeTimeDiffSeconds"])
+                  }
+                  break;
+                case 'bedtime':
+                  {
+                    statistic.value = mean(newData.data, d => d["bedTimeDiffSeconds"])
+                  }
+                  break;
+              }
+            })
+            break;
+        }
+
+
+        console.log("Reusing prevData for rangeData took ", Date.now() - benchmarkStart, "millis.")
+        return newData
+      }
+    }
+
+    const data = await service.fetchData(source, range[0], range[1])
+    data.preferredValueRange = await service.getPreferredValueRange(source)
+    return data
+  }
+
+  private loadOverviewData(info: ExplorationInfo, selectedServiceKey: string, prevInfo?: ExplorationInfo, prevData?: any): Promise<OverviewData> {
+    const range = explorationInfoHelper.getParameterValue<[number, number]>(
       info,
       ParameterType.Range,
     );
@@ -60,13 +225,22 @@ class ExplorationDataResolver {
     );
 
     return Promise.all(
-      DataSourceManager.instance.supportedDataSources.map(source =>
-        selectedService.fetchData(source.type, range[0], range[1])
-          .then(result => result != null ? (selectedService.getPreferredValueRange(source.type).then(range => {
-            result.preferredValueRange = range
-            return result
-          })) : { source: source.type } as any)
-      )).then(dataPerSource => ({ sourceDataList: dataPerSource }));
+      DataSourceManager.instance.supportedDataSources.map(source => {
+        let prevSourceRowData: OverviewSourceRow = null
+        if (prevInfo != null && prevData != null) {
+          if (prevInfo.type === ExplorationType.B_Overview) {
+            prevSourceRowData = (prevData as OverviewData).sourceDataList.find(e => e.source === source.type)
+          } else if (prevInfo.type === ExplorationType.B_Range) {
+            const prevSource = explorationInfoHelper.getParameterValue<DataSourceType>(prevInfo, ParameterType.DataSource)
+            if (prevSource === source.type) {
+              prevSourceRowData = prevData
+            }
+          }
+        }
+
+        return this.loadBrowseRangeDataImpl(range, source.type, selectedService, prevSourceRowData)
+      }))
+      .then(dataPerSource => ({ sourceDataList: dataPerSource }));
   }
 
   private loadIntraDayData(

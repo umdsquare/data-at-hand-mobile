@@ -526,24 +526,21 @@ export class FitbitLocalDbManager {
 
   async getAggregatedValue(
     tableName: FitbitLocalTableName,
-    type: SQLiteHelper.AggregationType,
-    aggregatedColumnName: string,
+    aggregatedColumnInfos: Array<{
+      type: SQLiteHelper.AggregationType,
+      aggregatedColumnName: string,
+      as: string
+    }>,
     condition: string,
     parameters: any[],
-  ): Promise<number> {
+  ): Promise<{ [key: string]: number }> {
     const query =
-      'SELECT ' +
-      type +
-      '(' +
-      aggregatedColumnName +
-      ') FROM ' +
-      tableName +
-      ' WHERE ' +
-      condition;
+      `SELECT 
+      ${aggregatedColumnInfos.map(info => `${info.type}(${info.aggregatedColumnName}) as ${info.as}`).join(',')}
+       FROM ${tableName} WHERE ${condition}`;
     const [result] = await (await this.open()).executeSql(query, parameters);
     if (result.rows.length > 0) {
-      const obj = result.rows.item(0);
-      return obj[Object.keys(obj)[0]];
+      return result.rows.item(0);
     } else return null;
   }
 
@@ -574,8 +571,7 @@ export class FitbitLocalDbManager {
 
       const uniqueDates = new Set([].concat.apply([], rowsPerTable.map(entry => entry.queriedRows.map(r => r.numberedDate))))
       console.log("Total ", uniqueDates.size, " days of data.")
-      console.log(headers)
-
+      
       const joinedRows = []
 
       for (const numberedDate of uniqueDates) {

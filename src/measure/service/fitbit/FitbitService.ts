@@ -87,18 +87,19 @@ export class FitbitService extends DataService {
     dataSource: DataSourceType,
     start: number,
     end: number,
+    includeStatistics: boolean,
+    includeToday: boolean,
   ): Promise<any> {
     switch (dataSource) {
       case DataSourceType.StepCount:
-        return await this.dailyStepMeasure.fetchData(start, end);
-
+        return await this.dailyStepMeasure.fetchData(start, end, includeStatistics, includeToday);
       case DataSourceType.HeartRate:
-        return await this.dailyHeartRateMeasure.fetchData(start, end);
+        return await this.dailyHeartRateMeasure.fetchData(start, end, includeStatistics, includeToday);
       case DataSourceType.HoursSlept:
       case DataSourceType.SleepRange:
-        return await this.sleepMeasure.fetchData(dataSource, start, end);
+        return await this.sleepMeasure.fetchData(dataSource, start, end, includeStatistics, includeToday);
       case DataSourceType.Weight:
-        return await this.weightLogMeasure.fetchData(start, end);
+        return await this.weightLogMeasure.fetchData(start, end, includeStatistics, includeToday);
     }
   }
 

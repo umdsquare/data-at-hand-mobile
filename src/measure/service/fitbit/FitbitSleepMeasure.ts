@@ -128,7 +128,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
         } else return null;
       })
       .filter(e => e != null);
-      
+
     return this.service.core.fitbitLocalDbManager.insert(
       FitbitLocalTableName.SleepLog,
       entriesReady,
@@ -139,6 +139,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
     sourceType: DataSourceType.SleepRange | DataSourceType.HoursSlept,
     startDate: number,
     endDate: number,
+    includeStatistics: boolean, includeToday: boolean
   ): Promise<SleepRangedData> {
     const condition = '`numberedDate` BETWEEN ? AND ? ORDER BY `numberedDate`';
     const params = [startDate, endDate];
@@ -159,50 +160,42 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
       statistics: null,
     } as OverviewSourceRow;
 
-    const todayLogs = await this.service.core.fitbitLocalDbManager.fetchData<
-      IDailySleepSummaryEntry
-    >(
-      FitbitLocalTableName.SleepLog,
-      '`numberedDate` = ? LIMIT 1',
-      [DateTimeHelper.toNumberedDateFromDate(this.service.core.getToday())],
-      columnNamesForRangeData,
-    );
+    let todayLog
+    if (includeToday === true) {
+      const todayLogs = await this.service.core.fitbitLocalDbManager.fetchData<
+        IDailySleepSummaryEntry
+      >(
+        FitbitLocalTableName.SleepLog,
+        '`numberedDate` = ? LIMIT 1',
+        [DateTimeHelper.toNumberedDateFromDate(this.service.core.getToday())],
+        columnNamesForRangeData,
+      );
 
-    const todayLog = todayLogs.length > 0 ? todayLogs[0] : null;
+      todayLog = todayLogs.length > 0 ? todayLogs[0] : null;
+    }
 
     switch (sourceType) {
       case DataSourceType.HoursSlept:
         {
           base.today = todayLog != null ? todayLog.lengthInSeconds : null;
+
+          let statistics
+          if (includeStatistics === true) {
+            statistics = await this.service.core.fitbitLocalDbManager.getAggregatedValue(FitbitLocalTableName.SleepLog, [
+              { type: SQLiteHelper.AggregationType.AVG, aggregatedColumnName: 'lengthInSeconds', as: 'avg' },
+              { type: SQLiteHelper.AggregationType.MIN, aggregatedColumnName: 'lengthInSeconds', as: 'min' },
+              { type: SQLiteHelper.AggregationType.MAX, aggregatedColumnName: 'lengthInSeconds', as: 'max' }
+            ], condition, params)
+          }
+
           base.statistics = [
             {
               type: 'avg',
-              value: await this.service.core.fitbitLocalDbManager.getAggregatedValue(
-                FitbitLocalTableName.SleepLog,
-                SQLiteHelper.AggregationType.AVG,
-                'lengthInSeconds',
-                condition,
-                params,
-              ),
+              value: statistics != null ? statistics["avg"] : null
             },
             {
               type: 'range',
-              value: [
-                await this.service.core.fitbitLocalDbManager.getAggregatedValue(
-                  FitbitLocalTableName.SleepLog,
-                  SQLiteHelper.AggregationType.MIN,
-                  'lengthInSeconds',
-                  condition,
-                  params,
-                ),
-                await this.service.core.fitbitLocalDbManager.getAggregatedValue(
-                  FitbitLocalTableName.SleepLog,
-                  SQLiteHelper.AggregationType.MAX,
-                  'lengthInSeconds',
-                  condition,
-                  params,
-                ),
-              ],
+              value: statistics != null ? [statistics["min"], statistics["max"]] : null
             },
           ];
         }
@@ -215,28 +208,25 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
               ? [todayLog.bedTimeDiffSeconds, todayLog.wakeTimeDiffSeconds]
               : null;
 
-          base.statistics = [
-            {
-              type: 'waketime',
-              value: await this.service.core.fitbitLocalDbManager.getAggregatedValue(
-                FitbitLocalTableName.SleepLog,
-                SQLiteHelper.AggregationType.AVG,
-                'wakeTimeDiffSeconds',
-                condition,
-                params,
-              ),
-            },
-            {
-              type: 'bedtime',
-              value: await this.service.core.fitbitLocalDbManager.getAggregatedValue(
-                FitbitLocalTableName.SleepLog,
-                SQLiteHelper.AggregationType.AVG,
-                'bedTimeDiffSeconds',
-                condition,
-                params,
-              ),
-            },
-          ];
+          if (includeStatistics === true) {
+            const statistics = await this.service.core.fitbitLocalDbManager.getAggregatedValue(FitbitLocalTableName.SleepLog, [
+              { type: SQLiteHelper.AggregationType.AVG, aggregatedColumnName: 'wakeTimeDiffSeconds', as: 'wakeTime' },
+              { type: SQLiteHelper.AggregationType.AVG, aggregatedColumnName: 'bedTimeDiffSeconds', as: 'bedTime' }
+            ], condition, params)
+
+            base.statistics = [
+              {
+                type: 'waketime',
+                value: statistics['wakeTime']
+              },
+              {
+                type: 'bedtime',
+                value: statistics['bedTime']
+              },
+            ];
+          }
+
+          
         }
         break;
     }

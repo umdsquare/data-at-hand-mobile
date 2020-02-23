@@ -47,7 +47,7 @@ export abstract class DataService {
 
   abstract isDataSourceSupported(dataSource: DataSourceType): boolean
 
-  fetchData(dataSource: DataSourceType, start: number, end: number): Promise<OverviewSourceRow> {
+  fetchData(dataSource: DataSourceType, start: number, end: number, includeStatistics: boolean = true, includeToday: boolean = true): Promise<OverviewSourceRow> {
     /*
     const today = DateTimeHelper.toNumberedDateFromDate(new Date())
     if(start > today) {
@@ -55,14 +55,14 @@ export abstract class DataService {
     }else{
       return this.fetchDataImpl(dataSource, level, start, Math.min(end, today))
     }*/
-    return this.fetchDataImpl(dataSource, start, end)
+    return this.fetchDataImpl(dataSource, start, end, includeStatistics, includeToday)
   }
 
   abstract getPreferredValueRange(dataSource: DataSourceType): Promise<[number, number]>
 
   abstract fetchIntraDayData(intraDayDataSource: IntraDayDataSourceType, date: number): Promise<any>
 
-  protected abstract fetchDataImpl(dataSource: DataSourceType, start: number, end: number): Promise<any>
+  protected abstract fetchDataImpl(dataSource: DataSourceType, start: number, end: number, includeStatistics: boolean, includeToday: boolean): Promise<any>
 
   abstract fetchCyclicAggregatedData(dataSource: DataSourceType, start: number, end: number, cycle: CyclicTimeFrame): Promise<GroupedData | GroupedRangeData>
 

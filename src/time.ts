@@ -170,6 +170,45 @@ export class DateTimeHelper {
         } else return singleLine === true ? [`${format(startDate, "MMM dd, yyyy")} - ${format(endDate, "MMM dd, yyyy")}`]
             : [format(startDate, "MMM dd, yyyy -"), format(endDate, "MMM dd, yyyy")]
     }
+
+    static subtract(left: [number, number], right: [number, number]): { overlap: boolean, rest: Array<[number, number]> } {
+        if (left[0] <= right[1] && left[1] >= right[0]) {
+            //overlaps
+            if (left[0] < right[0] && left[1] > right[1]) {
+                return {
+                    overlap: true,
+                    rest: [
+                        [left[0], DateTimeHelper.toNumberedDateFromDate(subDays(DateTimeHelper.toDate(right[0]), 1))],
+                        [DateTimeHelper.toNumberedDateFromDate(addDays(DateTimeHelper.toDate(right[1]), 1)), left[1]]
+                    ]
+                }
+            } else if (left[0] < right[0] && left[1] <= right[1]) {
+                return {
+                    overlap: true,
+                    rest: [
+                        [left[0], DateTimeHelper.toNumberedDateFromDate(subDays(DateTimeHelper.toDate(right[0]), 1))]
+                    ]
+                }
+            } else if (left[0] >= right[0] && left[1] > right[1]) {
+                return {
+                    overlap: true,
+                    rest: [
+                        [DateTimeHelper.toNumberedDateFromDate(addDays(DateTimeHelper.toDate(right[1]), 1)), left[1]]
+                    ]
+                }
+            } else {
+                return {
+                    overlap: true,
+                    rest: []
+                }
+            }
+        } else {
+            return {
+                overlap: false,
+                rest: [left]
+            }
+        }
+    }
 }
 
 

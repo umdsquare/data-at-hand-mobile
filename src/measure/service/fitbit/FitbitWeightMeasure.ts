@@ -1,17 +1,17 @@
-import {FitbitService} from './FitbitService';
-import {FitbitWeightQueryResult, FitbitWeightTrendQueryResult} from './types';
-import {FitbitServiceMeasure} from './FitbitServiceMeasure';
-import {FitbitSummaryLogMeasure} from './FitbitSummaryLogMeasure';
+import { FitbitService } from './FitbitService';
+import { FitbitWeightQueryResult, FitbitWeightTrendQueryResult } from './types';
+import { FitbitServiceMeasure } from './FitbitServiceMeasure';
+import { FitbitSummaryLogMeasure } from './FitbitSummaryLogMeasure';
 import {
   makeFitbitWeightTrendApiUrl,
   makeFitbitWeightLogApiUrl,
   FITBIT_DATE_FORMAT,
 } from './api';
-import {FitbitRangeMeasure} from './FitbitRangeMeasure';
-import {DateTimeHelper} from '../../../time';
-import {parse, getDay} from 'date-fns';
-import {WeightRangedData, GroupedData, IAggregatedValue, FilteredDailyValues, BoxPlotInfo} from '../../../core/exploration/data/types';
-import {DataSourceType} from '../../DataSourceSpec';
+import { FitbitRangeMeasure } from './FitbitRangeMeasure';
+import { DateTimeHelper } from '../../../time';
+import { parse, getDay } from 'date-fns';
+import { WeightRangedData, GroupedData, IAggregatedValue, FilteredDailyValues, BoxPlotInfo } from '../../../core/exploration/data/types';
+import { DataSourceType } from '../../DataSourceSpec';
 import { FitbitLocalTableName } from './sqlite/database';
 import { CyclicTimeFrame, CycleDimension } from '../../../core/exploration/cyclic_time';
 
@@ -35,7 +35,7 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
 
   async cacheServerData(
     endDate: number,
-  ): Promise<{success: boolean; skipped?: boolean}> {
+  ): Promise<{ success: boolean; skipped?: boolean }> {
     const trendResult = await this.trendMeasure.cacheServerData(endDate);
     const logResult = await this.logMeasure.cacheServerData(endDate);
 
@@ -55,10 +55,13 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
   async fetchData(
     startDate: number,
     endDate: number,
+    includeStatistics: boolean,
+    includeToday: boolean
   ): Promise<WeightRangedData> {
     const trendData = await this.trendMeasure.fetchPreliminaryData(
       startDate,
       endDate,
+      includeStatistics
     );
     const logData = await this.logMeasure.fetchData(startDate, endDate);
     const latestLog = await this.logMeasure.fetchLatestLog(startDate);
@@ -73,10 +76,10 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
       },
       pastNearestLog: latestLog,
       futureNearestLog: futureNearestLog,
-      today: await this.fetchTodayValue(),
+      today: includeToday === true ? await this.fetchTodayValue() : null,
       statistics: [
-        {type: 'avg', value: trendData.avg},
-        {type: 'range', value: [trendData.min, trendData.max]},
+        { type: 'avg', value: trendData.avg },
+        { type: 'range', value: [trendData.min, trendData.max] },
         /*
         {label: STATISTICS_LABEL_AVERAGE + " ", valueText: trendData.avg.toFixed(1) + " kg"},
         {label: STATISTICS_LABEL_RANGE + " ", valueText: trendData.min.toFixed(1) + " - " + trendData.max.toFixed(1)}*/
@@ -95,11 +98,11 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
   }
 
 
-  async fetchCyclicGroupedData(start: number, end: number, cycleType: CyclicTimeFrame): Promise<GroupedData>{
+  async fetchCyclicGroupedData(start: number, end: number, cycleType: CyclicTimeFrame): Promise<GroupedData> {
     return this.trendMeasure.fetchCyclicGroupedData(start, end, cycleType)
   }
 
-  async fetchRangeGroupedData(start: number, end: number): Promise<IAggregatedValue>{
+  async fetchRangeGroupedData(start: number, end: number): Promise<IAggregatedValue> {
     return this.trendMeasure.fetchRangeGroupedData(start, end)
   }
 
@@ -115,7 +118,7 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
 }
 
 class FitbitWeightTrendMeasure extends FitbitSummaryLogMeasure<FitbitWeightTrendQueryResult> {
-  
+
   key: string = 'weight_trend';
   displayName = "Weight Trend"
 
@@ -141,8 +144,8 @@ class FitbitWeightTrendMeasure extends FitbitSummaryLogMeasure<FitbitWeightTrend
 
 class FitbitWeightLogMeasure extends FitbitRangeMeasure<
   FitbitWeightQueryResult
-> {
-  
+  > {
+
 
   protected getBoxPlotInfoOfDatasetFromDb(): Promise<BoxPlotInfo> {
     return null
@@ -163,12 +166,12 @@ class FitbitWeightLogMeasure extends FitbitRangeMeasure<
       if (entry.weight != null) {
         const numberedDate = DateTimeHelper.fromFormattedString(entry.date);
         const date = parse(entry.date, FITBIT_DATE_FORMAT, now);
-  
+
         const timeSplit = entry.time.split(':');
         const hour = Number.parseInt(timeSplit[0]);
         const minute = Number.parseInt(timeSplit[1]);
         const second = Number.parseInt(timeSplit[2]);
-  
+
         return {
           id: entry.date + 'T' + entry.time,
           value: entry.weight,
@@ -179,7 +182,7 @@ class FitbitWeightLogMeasure extends FitbitRangeMeasure<
           month: DateTimeHelper.getMonth(numberedDate),
           dayOfWeek: getDay(date),
         }
-      }else null
+      } else null
     }).filter(e => e != null)
 
     return this.service.core.fitbitLocalDbManager.insert(FitbitLocalTableName.WeightLog, entriesReady)
@@ -187,13 +190,13 @@ class FitbitWeightLogMeasure extends FitbitRangeMeasure<
 
   fetchData(startDate: number, endDate: number): Promise<any> {
     return this.service.core.fitbitLocalDbManager
-      .fetchData(FitbitLocalTableName.WeightLog, "`numberedDate` BETWEEN ? AND ? ORDER BY `numberedDate` ASC, `secondsOfDay` ASC", [startDate, endDate]) 
+      .fetchData(FitbitLocalTableName.WeightLog, "`numberedDate` BETWEEN ? AND ? ORDER BY `numberedDate` ASC, `secondsOfDay` ASC", [startDate, endDate])
   }
 
   async fetchLatestLog(before: number): Promise<any> {
     const filtered = await this.service.core.fitbitLocalDbManager.fetchData(FitbitLocalTableName.WeightLog,
       "`numberedDate` < ? ORDER BY `numberedDate` DESC, `secondsOfDay` DESC LIMIT 1", [before])
-    
+
     if (filtered.length > 0) {
       return filtered[0];
     } else return null;

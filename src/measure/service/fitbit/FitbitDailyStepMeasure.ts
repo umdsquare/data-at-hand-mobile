@@ -5,9 +5,9 @@ import { DataSourceType } from "../../DataSourceSpec";
 import { FitbitLocalTableName } from "./sqlite/database";
 
 export class FitbitDailyStepMeasure extends FitbitSummaryLogMeasure<FitbitDailyActivityStepsQueryResult> {
-  
+
   protected dbTableName = FitbitLocalTableName.StepCount;
-  
+
   key = 'daily_step'
   displayName = "Step Count"
 
@@ -21,7 +21,7 @@ export class FitbitDailyStepMeasure extends FitbitSummaryLogMeasure<FitbitDailyA
     return rowValue === 0
   }
 
-  protected getLocalRangeQueryCondition(startDate: number, endDate: number): string{
+  protected getLocalRangeQueryCondition(startDate: number, endDate: number): string {
     return super.getLocalRangeQueryCondition(startDate, endDate) + ' AND value > 25'
   }
 
@@ -29,17 +29,17 @@ export class FitbitDailyStepMeasure extends FitbitSummaryLogMeasure<FitbitDailyA
     return Number.parseInt(queryResultEntry.value)
   }
 
-  async fetchData(startDate: number, endDate: number): Promise<StepCountRangedData>{
-    const rangedData = await super.fetchPreliminaryData(startDate, endDate)
+  async fetchData(startDate: number, endDate: number, includeStatistics: boolean, includeToday: boolean): Promise<StepCountRangedData> {
+    const rangedData = await super.fetchPreliminaryData(startDate, endDate, includeStatistics)
     const base = {
       source: DataSourceType.StepCount,
       data: rangedData.list,
       range: [startDate, endDate],
-      today: await this.fetchTodayValue(),
+      today: includeToday === true ? await this.fetchTodayValue() : null,
       statistics: [
-        {type: 'avg', value: rangedData.avg},
-        {type: 'total', value: rangedData.sum},
-        {type: 'range', value: [rangedData.min, rangedData.max]}
+        { type: 'avg', value: rangedData.avg },
+        { type: 'total', value: rangedData.sum },
+        { type: 'range', value: [rangedData.min, rangedData.max] }
         /*
         {label: STATISTICS_LABEL_AVERAGE + " ", valueText: commaNumber(Math.round(rangedData.avg))},
         {label: STATISTICS_LABEL_TOTAL + " ", valueText: commaNumber(rangedData.sum)},

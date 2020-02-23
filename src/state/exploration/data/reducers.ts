@@ -79,8 +79,8 @@ export function startLoadingForInfo(explorationInfo: ExplorationInfo) {
 
       const data = await explorationDataResolver.loadData(
         explorationInfo,
-        currentAppState.explorationDataState.info,
         currentAppState.settingsState.serviceKey,
+        currentAppState.explorationDataState.info,
         currentAppState.explorationDataState.data,
       );
 

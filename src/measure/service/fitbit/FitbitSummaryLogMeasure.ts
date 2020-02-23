@@ -24,13 +24,14 @@ export abstract class FitbitSummaryLogMeasure<
 
   protected shouldReject(rowValue: number): boolean { return false }
 
-  protected getBoxPlotInfoOfDatasetFromDb(): Promise<BoxPlotInfo>{
+  protected getBoxPlotInfoOfDatasetFromDb(): Promise<BoxPlotInfo> {
     return this.service.core.fitbitLocalDbManager.getBoxplotInfo(this.dbTableName)
   }
 
   async fetchPreliminaryData(
     startDate: number,
     endDate: number,
+    includeStatistics: boolean
   ): Promise<{
     list: Array<any>;
     avg: number;
@@ -55,13 +56,22 @@ export abstract class FitbitSummaryLogMeasure<
         const min = filtered.min('value') as number;
         const max = filtered.max('value') as number;
         const sum = filtered.sum('value') as number;*/
+    let statistics
+    if (includeStatistics === true) {
+      statistics = await this.service.core.fitbitLocalDbManager.getAggregatedValue(this.dbTableName, [
+        {type: SQLiteHelper.AggregationType.AVG, aggregatedColumnName: 'value', as: 'avg'},
+        {type: SQLiteHelper.AggregationType.MIN, aggregatedColumnName: 'value', as: 'min'},
+        {type: SQLiteHelper.AggregationType.MAX, aggregatedColumnName: 'value', as: 'max'},
+        {type: SQLiteHelper.AggregationType.SUM, aggregatedColumnName: 'value', as: 'sum'},
+      ], condition, params)
+    }
 
     return Promise.resolve({
       list,
-      avg: await this.service.core.fitbitLocalDbManager.getAggregatedValue(this.dbTableName, SQLiteHelper.AggregationType.AVG, 'value', condition, params),
-      min: await this.service.core.fitbitLocalDbManager.getAggregatedValue(this.dbTableName, SQLiteHelper.AggregationType.MIN, 'value', condition, params),
-      max: await this.service.core.fitbitLocalDbManager.getAggregatedValue(this.dbTableName, SQLiteHelper.AggregationType.MAX, 'value', condition, params),
-      sum: await this.service.core.fitbitLocalDbManager.getAggregatedValue(this.dbTableName, SQLiteHelper.AggregationType.SUM, 'value', condition, params),
+      avg: statistics != null ? statistics['avg'] : null,
+      min: statistics != null ? statistics['min'] : null,
+      max: statistics != null ? statistics['max'] : null,
+      sum: statistics != null ? statistics['sum'] : null,
       valueRange: [boxPlotInfo.minWithoutOutlier, boxPlotInfo.maxWithoutOutlier]
     });
   }
