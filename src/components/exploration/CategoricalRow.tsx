@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, FlatList } from 'react-native';
 import { Sizes } from '../../style/Sizes';
 import { SpeechAffordanceIndicator } from './SpeechAffordanceIndicator';
@@ -78,9 +78,8 @@ export const CategoricalRow = (prop: {
     onPress?: () => void,
     onValueChange?: (newValue: string, newIndex: number) => void,
 }) => {
-    let swipedFeedbackRef: SwipedFeedback
-
-    let bottomSheetRef: BottomSheet
+    const swipedFeedbackRef = useRef<SwipedFeedback>(null)
+    const bottomSheetRef = useRef<BottomSheet>(null)
 
     return <GestureRecognizer
         onSwipeLeft={prop.values ? () => {
@@ -92,7 +91,7 @@ export const CategoricalRow = (prop: {
             if (prop.onValueChange) {
                 prop.onValueChange(prop.values[currentIndex], currentIndex)
             }
-            swipedFeedbackRef.startFeedback('left')
+            swipedFeedbackRef.current?.startFeedback('left')
         } : null}
         onSwipeRight={prop.values ? () => {
             let currentIndex = prop.values.indexOf(prop.value)
@@ -101,15 +100,15 @@ export const CategoricalRow = (prop: {
             if (prop.onValueChange) {
                 prop.onValueChange(prop.values[currentIndex], currentIndex)
             }
-            swipedFeedbackRef.startFeedback('right')
+            swipedFeedbackRef.current?.startFeedback('right')
         } : null}
         style={prop.showBorder === true ? styles.containerStyleWithBorder : styles.containerStyleWithoutBorder}>
         {
-            prop.values != null ? <SwipedFeedback ref={ref => swipedFeedbackRef = ref} /> : null
+            prop.values != null ? <SwipedFeedback ref={swipedFeedbackRef} /> : null
         }
         <Text style={prop.isLightMode === true ? styles.titleStyleLight : styles.titleStyle}>{prop.title}</Text>
         <TouchableOpacity style={styles.buttonStyle} onPress={prop.values ? () => {
-            bottomSheetRef.open()
+            bottomSheetRef.current?.open()
             if (prop.onPress)
                 prop.onPress()
         } : prop.onPress}>
@@ -125,9 +124,9 @@ export const CategoricalRow = (prop: {
 
         {
             prop.values &&
-            <BottomSheet ref={ref => { bottomSheetRef = ref }}>
+            <BottomSheet ref={bottomSheetRef}>
                 <View style={{ justifyContent: 'flex-end', flexDirection: 'row', paddingRight: Sizes.horizontalPadding, borderBottomColor: Colors.textGray, borderBottomWidth: 1 }}>
-                    <Button type="clear" title="Close" buttonStyle={{ padding: Sizes.horizontalPadding }} onPress={() => { bottomSheetRef?.close() }} />
+                    <Button type="clear" title="Close" buttonStyle={{ padding: Sizes.horizontalPadding }} onPress={() => { bottomSheetRef.current?.close() }} />
                 </View>
                 <FlatList
                     style={{ flexGrow: 0 }}
@@ -141,7 +140,7 @@ export const CategoricalRow = (prop: {
                                     if (prop.onValueChange) {
                                         prop.onValueChange(prop.values[entry.index], entry.index)
                                     }
-                                    bottomSheetRef?.close()
+                                    bottomSheetRef.current?.close()
                                 }
                             }
                             style={{

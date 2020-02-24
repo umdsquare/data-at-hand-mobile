@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { View, StyleSheet, Text, ViewStyle, TextStyle, TouchableOpacity } from "react-native";
 import Colors from "../../style/Colors";
 import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
@@ -477,31 +477,29 @@ export const DateBar = (props: {
             const newNumberedDate = DateTimeHelper.toNumberedDateFromDate(newDate)
             setDate(newNumberedDate)
             props.onDateChanged && props.onDateChanged(newNumberedDate, InteractionType.TouchOnly)
-            if (swipedFeedbackRef != null) {
-                swipedFeedbackRef.startFeedback(amount > 0 ? 'left' : 'right')
-            }
+            swipedFeedbackRef.current?.startFeedback(amount > 0 ? 'left' : 'right')
         }
     }
 
-    let bottomSheetRef: BottomSheet
+    const bottomSheetRef = useRef<BottomSheet>(null)
 
-    let swipedFeedbackRef: SwipedFeedback
+    const swipedFeedbackRef =useRef<SwipedFeedback>(null)
 
     return <GestureRecognizer onSwipeLeft={() => shiftDay(1)} onSwipeRight={() => shiftDay(-1)} style={styles.containerStyle}>
-        <SwipedFeedback ref={ref => swipedFeedbackRef = ref} />
+        <SwipedFeedback ref={swipedFeedbackRef} />
         <DateButton date={date} overrideFormat="MMMM dd, yyyy" freeWidth={true}
-            onPress={() => { bottomSheetRef.open() }}
+            onPress={() => { bottomSheetRef.current?.open() }}
             onLongPressIn={props.onLongPressIn}
             onLongPressOut={props.onLongPressOut}
         />
 
-        <BottomSheet ref={ref => { bottomSheetRef = ref }}>
+        <BottomSheet ref={bottomSheetRef}>
             <DatePicker selectedDay={DateTimeHelper.toDate(date)}
                 latestPossibleDay={getToday()}
                 onDayPress={(d) => {
                     const newDate = DateTimeHelper.toNumberedDateFromDate(d)
                     setDate(newDate)
-                    bottomSheetRef.close()
+                    bottomSheetRef.current?.close()
                     props.onDateChanged && props.onDateChanged(newDate, InteractionType.TouchOnly)
                 }} />
         </BottomSheet>

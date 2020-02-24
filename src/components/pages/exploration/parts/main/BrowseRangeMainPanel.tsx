@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { View, FlatList, Text, StyleSheet, ActivityIndicator, LayoutAnimation, UIManager, findNodeHandle } from 'react-native';
 import { MeasureUnitType, DataSourceType } from "../../../../../measure/DataSourceSpec";
 import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, InteractionType } from "../../../../../state/exploration/interaction/actions";
@@ -272,13 +272,13 @@ const Item = (prop: {
 
     const [isInLongPress, setInLongPress] = useState(false)
 
-    let elmRef
+    const elmRef = useRef(null)
 
     return <TouchableHighlight activeOpacity={0.95}
-        ref={ref => elmRef = ref}
+        ref={elmRef}
         onLongPress={(event) => {
             if (prop.onLongPressIn) {
-                UIManager.measureInWindow(findNodeHandle(elmRef), (x, y, width, height) => {
+                UIManager.measureInWindow(findNodeHandle(elmRef.current), (x, y, width, height) => {
                     setInLongPress(true);
                     prop.onLongPressIn(prop.date, {
                         touchId: Date.now().toString(),
