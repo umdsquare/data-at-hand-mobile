@@ -392,7 +392,6 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
     }
 
     render() {
-
         var modalPickerView
         if (this.state.clickedElementType) {
 

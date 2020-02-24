@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ExplorationType, ParameterKey, ParameterType, IntraDayDataSourceType, getIntraDayDataSourceName, inferIntraDayDataSourceType, inferDataSource } from "../../../../core/exploration/types";
 import { SafeAreaView, View, Text, StyleSheet, TextStyle, ViewStyle, LayoutAnimation } from 'react-native';
 import { CategoricalRow } from '../../../exploration/CategoricalRow';
@@ -154,33 +154,40 @@ const HeaderContainer = (prop: { children?: any, }) => {
     </SafeAreaView>
 }
 
-const HeaderRangeBar = (props: { parameterKey?: ParameterKey, showBorder?: boolean }) => {
-
+const HeaderRangeBar = React.memo((props: { parameterKey?: ParameterKey, showBorder?: boolean }) => {
+    
     const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
     const dispatch = useDispatch()
     const [speechSessionId, setSpeechSessionId] = useState<string>(null)
 
     const range = explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range, props.parameterKey)
-    return <DateRangeBar from={range && range[0]} to={range && range[1]}
-        onRangeChanged={(from, to, xType) => {
-            dispatch(createSetRangeAction(xType, [from, to], props.parameterKey))
-        }}
-        onLongPressIn={(position) => {
+
+    const onRangeChanged = useCallback((from, to, xType) => {
+        dispatch(createSetRangeAction(xType, [from, to], props.parameterKey))
+    }, [dispatch, props.parameterKey])
+
+    const onLongPressIn = useCallback((position) => {
             const sessionId = makeNewSessionId()
             setSpeechSessionId(sessionId)
             dispatch(startSpeechSession(sessionId, SpeechContextHelper.makeTimeSpeechContext(position)))
             dispatch(createSetShowGlobalPopupAction(true, sessionId))
-        }}
-        onLongPressOut={(position) => {
+        }, [dispatch, setSpeechSessionId])
+
+    const onLongPressOut = useCallback((position) => {
             if (speechSessionId != null) {
                 console.log("request stop dictation")
                 dispatch(requestStopDictation(speechSessionId))
                 dispatch(createSetShowGlobalPopupAction(false, speechSessionId))
             }
             setSpeechSessionId(null)
-        }}
+        }, [dispatch, speechSessionId, setSpeechSessionId])
+
+    return <DateRangeBar from={range && range[0]} to={range && range[1]}
+        onRangeChanged={onRangeChanged}
+        onLongPressIn={onLongPressIn}
+        onLongPressOut={onLongPressOut}
         showBorder={props.showBorder} />
-}
+})
 
 const HeaderDateBar = () => {
     const [speechSessionId, setSpeechSessionId] = useState<string>(null)

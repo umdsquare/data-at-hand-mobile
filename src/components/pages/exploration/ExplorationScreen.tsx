@@ -35,7 +35,6 @@ import { ZIndices } from "./parts/zIndices";
 import { DataBusyOverlay } from "./parts/main/DataBusyOverlay";
 import { sleep } from "../../../utils";
 import { InitialLoadingIndicator } from "./parts/main/InitialLoadingIndicator";
-import uuid from 'uuid/v4';
 import { createSetShowGlobalPopupAction } from "../../../state/speech/actions";
 import { SpeechContextHelper } from "../../../state/speech/context";
 
