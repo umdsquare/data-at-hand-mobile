@@ -4,13 +4,13 @@ import { createBootstrapAction, createTerminateSessionAction, createUpdateDictat
 import { VoiceDictator } from "../../core/speech/VoiceDictator";
 import { DictationResult } from "../../core/speech/types";
 import { SpeechRecognizerSessionStatus } from "./types";
-import { BehaviorSubject } from 'rxjs';
-import { filter, first, ignoreElements } from 'rxjs/operators';
 import { sleep } from "../../utils";
 import { SpeechContext } from "./context";
 import { NLUCommandResolver } from "./nlp/nlu";
+import { Mutex } from 'async-mutex';
 
-const sessionRunning = new BehaviorSubject<boolean>(false)
+const sessionMutex = new Mutex()
+
 
 export function startSpeechSession(sessionId: string, context: SpeechContext): (dispatch: Dispatch, getState: () => ReduxAppState) => void {
     return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
@@ -28,22 +28,19 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
         //wait until the previous session stops.
         console.log(sessionId, "Wait until the previous session stops.")
         dispatch(createWaitAction(sessionId))
-        await sessionRunning.pipe(
-            filter(running => running === false),
-            first(),
-            ignoreElements()
-        ).toPromise()
+
+
+        const releaseMutex = await sessionMutex.acquire()
 
         //check whether the current session is already terminated.
         const stateAfterWait = getState()
         if (stateAfterWait.speechRecognizerState.currentSessionId !== sessionId) {
             console.log(sessionId, "This session is already canceled. terminate now.")
-            sessionRunning.next(false)
+            releaseMutex()
             return
         }
 
         console.log(sessionId, "Start speech session")
-        sessionRunning.next(true)
         dispatch(createBootstrapAction(sessionId))
 
         try {
@@ -75,9 +72,10 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
 
             VoiceDictator.instance.registerStopEventListener(async error => {
                 console.log(sessionId, "dictator stop event")
+
                 if (error) {
                     console.log(sessionId, "Finish without dictation")
-                    terminate(dispatch, TerminationReason.Fail, sessionId, error)
+                    terminate(releaseMutex, dispatch, TerminationReason.Fail, sessionId, error)
                 } else {
                     const currentState = getState()
                     const dictationResult = currentState.speechRecognizerState.dictationResult
@@ -89,10 +87,10 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
                         await NLUCommandResolver.instance.resolveSpeechCommand(dictationResult.text, context, dispatch)
 
                         console.log(sessionId, "Finished analyzing.")
-                        terminate(dispatch, TerminationReason.Success, sessionId)
+                        terminate(releaseMutex, dispatch, TerminationReason.Success, sessionId)
                     } else {
                         //not enough dictation result. finish.
-                        terminate(dispatch, TerminationReason.Cancel, sessionId)
+                        terminate(releaseMutex, dispatch, TerminationReason.Cancel, sessionId)
                     }
                 }
             })
@@ -102,16 +100,16 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
 
         } catch (startError) {
             console.log(startError)
-            terminate(dispatch, TerminationReason.Fail, sessionId)
+            terminate(releaseMutex, dispatch, TerminationReason.Fail, sessionId)
         }
     }
 }
 
-function terminate(dispatch: Dispatch, reason: TerminationReason, sessionId: string, data?: any) {
+function terminate(releaseMutex: Function, dispatch: Dispatch, reason: TerminationReason, sessionId: string, data?: any) {
     console.log(sessionId, "terminated speech session.")
     dispatch(createTerminateSessionAction(reason, sessionId, data))
     VoiceDictator.instance.clearAllListeners()
-    sessionRunning.next(false)
+    releaseMutex()
 }
 
 export function requestStopDictation(sessionId: string): (dispatch: Dispatch, getState: () => ReduxAppState) => void {

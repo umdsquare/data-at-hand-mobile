@@ -14,6 +14,7 @@
     "@react-native-community/masked-view": "^0.1.6",
     "@react-native-community/segmented-control": "^1.1.1",
     "@types/react-native-sqlite-storage": "^3.3.2",
+    "async-mutex": "^0.1.4",
     "chrono-node": "^1.4.3",
     "comma-number": "^2.0.1",
     "compromise": "^13.1.0",

@@ -11,33 +11,14 @@ export class VoiceDictator {
         if (this._instance == null) {
             this._instance = new VoiceDictator()
         }
-        
+
         return this._instance
     }
 
     private voiceDictatorNative: IVoiceDictatorNative
 
     private constructor() {
-
         this.voiceDictatorNative = Platform.OS === 'ios' ? new IOSDictatorImpl() : new AndroidDictatorImpl()
-
-        this.voiceDictatorNative.registerReceivedEventListener((received) => {
-            if (this.receivedEventListener) {
-                this.receivedEventListener(received)
-            }
-        })
-
-        this.voiceDictatorNative.registerStartEventListener(() => {
-            if (this.startEventListener) {
-                this.startEventListener()
-            }
-        })
-
-        this.voiceDictatorNative.registerStopEventListener((error: any) => {
-            if (this.stopEventListener) {
-                this.stopEventListener(error)
-            }
-        })
     }
 
     private readonly statusSubject = new BehaviorSubject<VoiceDictatorStatus>(VoiceDictatorStatus.INITIAL)
@@ -52,7 +33,27 @@ export class VoiceDictator {
     async install(): Promise<boolean> {
         this.statusSubject.next(VoiceDictatorStatus.INSTALLING)
         const installed = await this.voiceDictatorNative.install()
+
         if (installed === true) {
+
+            this.voiceDictatorNative.registerReceivedEventListener((received) => {
+                if (this.receivedEventListener) {
+                    this.receivedEventListener(received)
+                }
+            })
+
+            this.voiceDictatorNative.registerStartEventListener(() => {
+                if (this.startEventListener) {
+                    this.startEventListener()
+                }
+            })
+
+            this.voiceDictatorNative.registerStopEventListener((error: any) => {
+                if (this.stopEventListener) {
+                    this.stopEventListener(error)
+                }
+            })
+
             this.statusSubject.next(VoiceDictatorStatus.IDLE)
             return true
         } else {
