@@ -104,7 +104,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
 
           return {
             quality: entry.efficiency,
-            lengthInSeconds: entry.duration / 1000,
+            lengthInSeconds: /*entry.duration / 1000*/ entry.minutesAsleep * 60,
             bedTimeDiffSeconds: bedTimeDiff,
             wakeTimeDiffSeconds: wakeTimeDiff,
             stageType: entry.type === 'classic' ? 'simple' : entry.type,
@@ -216,12 +216,12 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
 
             base.statistics = [
               {
-                type: 'waketime',
-                value: statistics['wakeTime']
-              },
-              {
                 type: 'bedtime',
                 value: statistics['bedTime']
+              },
+              {
+                type: 'waketime',
+                value: statistics['wakeTime']
               },
             ];
           }
