@@ -23,6 +23,7 @@ import { theme } from './src/style/Theme';
 import { Platform, UIManager } from 'react-native';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { NavigationContainer } from '@react-navigation/native';
 
 if (
   Platform.OS === 'android' &&
@@ -70,35 +71,37 @@ class App extends React.Component<any, State> {
     }
   }
 
-  async componentWillUnmount(){
+  async componentWillUnmount() {
     await VoiceDictator.instance.uninstall()
   }
 
   render() {
-    return <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <SafeAreaProvider>
-          <ThemeProvider theme={theme}>
-            <ActionSheetProvider>
-              <AppNavigator />
-            </ActionSheetProvider>
-          </ThemeProvider>
-        </SafeAreaProvider>
-        {<FadeView
-          visible={this.state.isLoading}
-          fadeDuration={500}
-          style={{
-            position: 'absolute',
-            left: 0, right: 0, top: 0, bottom: 0,
-            backgroundColor: 'rgba(255,255,255, 0.4)',
-            justifyContent: 'center', alignItems: 'center'
-          }}>
-          <LottieView
-            source={require("./assets/lottie/109-bouncy-loader.json")} autoPlay loop
-          />
-        </FadeView>}
-      </PersistGate>
-    </Provider>
+    return <NavigationContainer>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <SafeAreaProvider>
+            <ThemeProvider theme={theme}>
+              <ActionSheetProvider>
+                <AppNavigator />
+              </ActionSheetProvider>
+            </ThemeProvider>
+          </SafeAreaProvider>
+          {<FadeView
+            visible={this.state.isLoading}
+            fadeDuration={500}
+            style={{
+              position: 'absolute',
+              left: 0, right: 0, top: 0, bottom: 0,
+              backgroundColor: 'rgba(255,255,255, 0.4)',
+              justifyContent: 'center', alignItems: 'center'
+            }}>
+            <LottieView
+              source={require("./assets/lottie/109-bouncy-loader.json")} autoPlay loop
+            />
+          </FadeView>}
+        </PersistGate>
+      </Provider>
+    </NavigationContainer>
   }
 };
 
