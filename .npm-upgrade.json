@@ -1,0 +1,8 @@
+{
+  "ignore": {
+    "uuid": {
+      "versions": "^7.0.0",
+      "reason": "7.0.0 requires crypto."
+    }
+  }
+}

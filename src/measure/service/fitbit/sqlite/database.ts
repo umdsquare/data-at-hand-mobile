@@ -330,6 +330,8 @@ export class FitbitLocalDbManager {
       return this._dbInitPromise
     }
 
+    console.log("try open the database:", this._dbConfig)
+
     this._dbInitPromise = SQLite.openDatabase(this._dbConfig)
       .then(db => {
         return db
@@ -349,7 +351,7 @@ export class FitbitLocalDbManager {
               }
             }
           }).then(tx => db)
-      });
+      })
 
     return this._dbInitPromise
   }

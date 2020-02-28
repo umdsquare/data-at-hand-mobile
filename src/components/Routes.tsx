@@ -1,10 +1,19 @@
-import { createStackNavigator, HeaderBackButton, TransitionPresets } from '@react-navigation/stack';
+import { createStackNavigator, HeaderBackButton, TransitionPresets, StackNavigationProp } from '@react-navigation/stack';
 import { ExplorationScreen } from './pages/exploration/ExplorationScreen';
 import { SettingsScreen } from './pages/settings/SettingsScreen';
 import { ServiceSelectionScreen } from './pages/sources/service-wizard/ServiceSelectionScreen';
 import React, { useMemo } from 'react';
 import { Platform } from 'react-native';
 
+export type RootStackParamList = {
+  Exploration: undefined,
+  Settings: undefined
+}
+
+export type SettingsSteckParamList = {
+  Main: undefined,
+  ServiceWizardModal: undefined
+}
 
 const Stack = createStackNavigator()
 
@@ -36,10 +45,10 @@ const SettingsNavigator = () => {
 }
 
 export default () => {
-  return <Stack.Navigator initialRouteName="Home" headerMode='none'
+  return <Stack.Navigator initialRouteName="Exploration" headerMode='none'
     screenOptions={TransitionPresets.ModalPresentationIOS}>
     <Stack.Screen
-      name="Home"
+      name="Exploration"
       options={{ headerShown: false }}
       component={ExplorationScreen}
     />

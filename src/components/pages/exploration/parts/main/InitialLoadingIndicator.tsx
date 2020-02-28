@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
         ...StyleTemplates.contentVerticalCenteredContainer,
         ...StyleTemplates.flexHorizontalCenteredListContainer,
         backgroundColor: '#ffffff50',
-        zIndex: 2000,
+        zIndex: ZIndices.TooltipOverlay,
     },
 
     popup: {

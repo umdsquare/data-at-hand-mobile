@@ -1,4 +1,3 @@
-import { PropsWithNavigation } from "../../../PropsWithNavigation";
 import React from "react";
 import { StatusBar, View, StyleSheet, Platform, BackHandler, Text, Alert, AppState, AppStateStatus, Vibration } from "react-native";
 import Colors from "../../../style/Colors";
@@ -37,6 +36,8 @@ import { sleep } from "../../../utils";
 import { InitialLoadingIndicator } from "./parts/main/InitialLoadingIndicator";
 import { createSetShowGlobalPopupAction } from "../../../state/speech/actions";
 import { SpeechContextHelper } from "../../../state/speech/context";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../../Routes";
 
 var deepEqual = require('deep-equal');
 
@@ -89,7 +90,8 @@ const styles = StyleSheet.create({
 const undoIconStyle = <SvgIcon type={SvgIconType.Reset} size={20} />
 
 
-export interface ExplorationProps extends PropsWithNavigation {
+export interface ExplorationProps {
+    navigation: StackNavigationProp<RootStackParamList, 'Exploration'>,
     explorationState: ExplorationState,
     explorationDataState: ExplorationDataState,
     selectedServiceKey: string,
@@ -205,11 +207,22 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
     }
 
     async componentDidUpdate(prevProps: ExplorationProps) {
+        
+        let dataReloadNeeded = false
+        
         if (this.props.explorationState.info.type !== prevProps.explorationState.info.type || deepEqual(prevProps.explorationState.info.values, this.props.explorationState.info.values) === false) {
             if (this.state.initialLoadingFinished === true) {
-                console.log("should reload data")
-                this.props.dispatchDataReload(this.props.explorationState.info)
+                dataReloadNeeded = true
             }
+        }
+
+        if(this.props.selectedServiceKey !== prevProps.selectedServiceKey){
+            dataReloadNeeded =  true
+        }
+
+        if(dataReloadNeeded===true){
+            console.log("should reload data")
+            this.props.dispatchDataReload(this.props.explorationState.info)
         }
     }
 

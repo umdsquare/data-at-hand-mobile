@@ -256,6 +256,7 @@ export class FitbitService extends DataService {
           success: false,
         };
     } catch (ex) {
+      console.log("activation error:")
       console.log(ex);
       return { success: false, error: ex };
     }

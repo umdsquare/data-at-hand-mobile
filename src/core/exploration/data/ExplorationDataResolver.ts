@@ -23,13 +23,15 @@ class ExplorationDataResolver {
     explorationInfo: ExplorationInfo,
     selectedServiceKey: string,
     prevInfo?: ExplorationInfo,
+    prevServiceKey?: string,
     prevData?: any,
   ): Promise<any> {
+    const usePrevData = selectedServiceKey === prevServiceKey
     switch (explorationInfo.type) {
       case ExplorationType.B_Overview:
-        return this.loadOverviewData(explorationInfo, selectedServiceKey, prevInfo, prevData);
+        return this.loadOverviewData(explorationInfo, selectedServiceKey, usePrevData===true? prevInfo : null, usePrevData===true? prevData: null);
       case ExplorationType.B_Range:
-        return this.loadBrowseRangeData(explorationInfo, selectedServiceKey, prevInfo, prevData);
+        return this.loadBrowseRangeData(explorationInfo, selectedServiceKey, usePrevData === true? prevInfo : null, usePrevData===true? prevData: null);
       case ExplorationType.B_Day:
         return this.loadIntraDayData(explorationInfo, selectedServiceKey)
       case ExplorationType.C_Cyclic:

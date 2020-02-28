@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, ImageBackground, ScrollView, SafeAreaView, TouchableOpacity } from "react-native";
-import { PropsWithNavigation } from "../../../../PropsWithNavigation";
 import { Sizes } from "../../../../style/Sizes";
 import { StyleTemplates } from "../../../../style/Styles";
 import { DataService } from "../../../../measure/service/DataService";
@@ -10,14 +9,20 @@ import { Dispatch } from "redux";
 import { connect } from "react-redux";
 import { ReduxAppState } from "../../../../state/types";
 import { setService } from "../../../../state/settings/actions";
+import { InitialLoadingIndicator } from "../../exploration/parts/main/InitialLoadingIndicator";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { SettingsSteckParamList } from "../../../Routes";
 
-interface Prop extends PropsWithNavigation {
+interface Prop {
+    navigation: StackNavigationProp<SettingsSteckParamList, "ServiceWizardModal">,
     selectService: (key: string, initialDate: number) => void,
     selectedServiceKey: string,
 }
 
 interface State {
-    services: ReadonlyArray<DataService>
+    services: ReadonlyArray<DataService>,
+    isLoading: boolean,
+    loadingMessage?: string
 }
 
 class ServiceSelectionScreen extends React.Component<Prop, State>{
@@ -26,7 +31,9 @@ class ServiceSelectionScreen extends React.Component<Prop, State>{
         super(props)
 
         this.state = {
-            services: []
+            services: [],
+            isLoading: false,
+            loadingMessage: null
         }
     }
 
@@ -55,28 +62,49 @@ class ServiceSelectionScreen extends React.Component<Prop, State>{
                                 }
                                 source={service}
                                 onSelected={
-                                    () => {
+                                    async () => {
                                         if (this.props.selectedServiceKey != service.key) {
-                                            DataServiceManager.instance.getServiceByKey(service.key).activateInSystem((progressInfo)=>{})
-                                                .then(result => {
-                                                    if (result.success === true) {
-                                                        return DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey)
-                                                            .deactivatedInSystem().then(deactivated => {
-                                                                this.props.selectService(service.key, result.serviceInitialDate)
-                                                                this.props.navigation.goBack()
-                                                            }).catch(err => {
-                                                                this.props.selectService(service.key, result.serviceInitialDate)
-                                                                this.props.navigation.goBack()
-                                                            })
-                                                    }
-                                                }).catch(err => {
-                                                    console.error("Failed to sign in to ", service.key, err)
+                                            console.log("start loading")
+                                            this.setState({
+                                                ...this.state,
+                                                isLoading: true
+                                            })
+
+                                            try {
+                                                console.log("start activation of new service..")
+                                                const activationResult = await DataServiceManager.instance.getServiceByKey(service.key).activateInSystem((progressInfo) => {
+                                                    this.setState({
+                                                        ...this.state,
+                                                        loadingMessage: progressInfo.message
+                                                    })
                                                 })
+                                                console.log("finished the activation of new service.")
+
+                                                if (activationResult.success === true) {
+                                                    //await DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).deactivatedInSystem()
+
+                                                    this.props.selectService(service.key, activationResult.serviceInitialDate)
+
+                                                }
+                                            } catch (err) {
+                                                console.error("Failed to sign in to ", service.key, err)
+                                            } finally {
+                                                console.log("finish loading")
+                                                this.setState({
+                                                    ...this.state,
+                                                    isLoading: false,
+                                                    loadingMessage: null
+                                                })
+                                                this.props.navigation.goBack()
+                                            }
                                         }
                                     }
                                 } />)
                     }
                 </ScrollView>
+                {
+                    this.state.isLoading === true ? <InitialLoadingIndicator loadingMessage={this.state.loadingMessage} /> : null
+                }
             </SafeAreaView>
         );
     }

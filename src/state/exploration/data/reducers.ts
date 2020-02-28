@@ -11,6 +11,7 @@ import { explorationDataResolver } from '../../../core/exploration/data/Explorat
 
 export interface ExplorationDataState {
   info: ExplorationInfo;
+  serviceKey: string;
   isBusy: boolean;
   error?: any;
   data: any;
@@ -19,6 +20,7 @@ export interface ExplorationDataState {
 
 const INITIAL_STATE = {
   info: null,
+  serviceKey: null,
   isBusy: false,
   error: null,
   data: null,
@@ -39,6 +41,7 @@ export const explorationDataStateReducer = (
       const startAction = action as StartLoadingData;
       newState.isBusy = true;
       newState.ongoingTaskId = startAction.taskId;
+      newState.serviceKey = startAction.serviceKey
       return newState;
     case ExplorationDataActionType.FinishLoadingDataAction:
       const finishAction = action as FinishLoadingData;
@@ -62,9 +65,13 @@ export function startLoadingForInfo(explorationInfo: ExplorationInfo) {
   return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
     const taskId = uuid();
     //set to loading status
+
+    var currentAppState = getState();
+
     dispatch({
       type: ExplorationDataActionType.StartLoadingDataAction,
       taskId: taskId,
+      serviceKey: currentAppState.settingsState.serviceKey
     } as StartLoadingData);
 
     console.log('Start data load');
@@ -75,12 +82,11 @@ export function startLoadingForInfo(explorationInfo: ExplorationInfo) {
 
       console.log('Process data load');
 
-      var currentAppState = getState();
-
       const data = await explorationDataResolver.loadData(
         explorationInfo,
         currentAppState.settingsState.serviceKey,
         currentAppState.explorationDataState.info,
+        currentAppState.explorationDataState.serviceKey,
         currentAppState.explorationDataState.data,
       );
 

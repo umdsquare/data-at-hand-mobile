@@ -143,8 +143,10 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
             STORAGE_KEY_USER_MEMBER_SINCE,
         );
         if (cached) {
+            console.log("use cached membership start date")
             return cached;
         } else {
+            console.log("no cached membership info. update profile.")
             const updated = await this.updateUserProfile();
             if (updated === true) {
                 return this.getMembershipStartDate();

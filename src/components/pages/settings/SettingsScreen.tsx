@@ -1,5 +1,4 @@
 import React from "react";
-import { PropsWithNavigation } from "../../../PropsWithNavigation";
 import { View, Text, StyleSheet, TouchableHighlight, Alert } from "react-native";
 import { MeasureUnitType } from "../../../measure/DataSourceSpec";
 import { Dispatch } from "redux";
@@ -12,6 +11,8 @@ import { DataServiceManager } from "../../../system/DataServiceManager";
 import { connectActionSheet } from '@expo/react-native-action-sheet'
 import { SvgIcon, SvgIconType } from "../../common/svg/SvgIcon";
 import { InitialLoadingIndicator } from "../exploration/parts/main/InitialLoadingIndicator";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { SettingsSteckParamList } from "../../Routes";
 
 
 const unitTypes = [{
@@ -57,7 +58,8 @@ const SettingsRow = (props: { title: string, value?: string, showArrow?: boolean
 }
 
 
-interface Props extends PropsWithNavigation {
+interface Props {
+    navigation: StackNavigationProp<SettingsSteckParamList, "Main">,
     selectedUnitType: MeasureUnitType,
     setUnitType: (index) => void,
     selectedServiceKey: string,
