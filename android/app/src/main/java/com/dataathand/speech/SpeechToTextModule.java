@@ -27,6 +27,7 @@ import com.facebook.react.modules.core.PermissionAwareActivity;
 import com.facebook.react.modules.core.PermissionListener;
 
 import java.util.ArrayList;;
+import java.util.Locale;
 import java.util.Objects;
 
 public class SpeechToTextModule extends ReactContextBaseJavaModule implements PermissionListener, RecognitionListener {
@@ -80,38 +81,46 @@ public class SpeechToTextModule extends ReactContextBaseJavaModule implements Pe
 
     @ReactMethod
     public void start(Promise promise) {
-        getCurrentActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                hasResultReceived = false;
-                pendingError = null;
+        Activity activity = getCurrentActivity();
+        if(activity != null) {
+            getCurrentActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    hasResultReceived = false;
+                    pendingError = null;
 
-                recognizer = SpeechRecognizer.createSpeechRecognizer(getCurrentActivity());
-                recognizer.setRecognitionListener(SpeechToTextModule.this);
-                Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
-                intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
-                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "en");
+                    recognizer = SpeechRecognizer.createSpeechRecognizer(getCurrentActivity());
+                    recognizer.setRecognitionListener(SpeechToTextModule.this);
+                    Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                    intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+                    intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "en_US");
+                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "en_US");
 
-                intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 100000);
-                intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 100000);
-                intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 200000);
+                    intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 100000);
+                    intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 100000);
+                    intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 200000);
 
-                intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+
 
                 /*
                 if(Build.VERSION.SDK_INT >= 23){
                     intent.putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true);
                 }*/
 
-                recognizer.startListening(intent);
+                    recognizer.startListening(intent);
 
-                Log.d("Speech", "Start requested.");
-                promise.resolve(true);
-            }
-        });
+                    Log.d("Speech", "Start requested.");
+                    promise.resolve(true);
+                }
+            });
+        }else{
+            promise.resolve(false);
+        }
     }
 
+    @SuppressWarnings("WeakerAccess")
     @ReactMethod
     public void stop(Promise promise) {
         stopImpl(promise);
@@ -171,6 +180,7 @@ public class SpeechToTextModule extends ReactContextBaseJavaModule implements Pe
         ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
         float[] confidence = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
         WritableMap resultParams = Arguments.createMap();
+        assert matches != null;
         resultParams.putString("text", matches.get(0));
         getDeviceEmitter().emit(EVENT_RECEIVED, resultParams);
     }
@@ -212,7 +222,6 @@ public class SpeechToTextModule extends ReactContextBaseJavaModule implements Pe
 
     @Override
     public void onReadyForSpeech(Bundle params) {
-
         Log.d("Speech", "Ready of Speech");
         getDeviceEmitter().emit(EVENT_STARTED, null);
     }
