@@ -24,6 +24,7 @@ import { Platform, UIManager } from 'react-native';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
+import Spinner from 'react-native-spinkit';
 
 if (
   Platform.OS === 'android' &&
@@ -61,14 +62,8 @@ class App extends React.Component<any, State> {
         console.log("Speech recognition is available on this system.")
       }
     }
-
-    try {
-      //await naturalLanguageRecognizer.initialize()
-      this.setState({ isLoading: false })
-      console.log("initial loading finished in ", Date.now() - loadingStartTime, "milis.")
-    } catch (err) {
-      console.error(err)
-    }
+    console.log("initial loading finished in ", Date.now() - loadingStartTime, "milis.")
+    this.setState({ isLoading: false })
   }
 
   async componentWillUnmount() {
@@ -86,19 +81,6 @@ class App extends React.Component<any, State> {
               </ActionSheetProvider>
             </ThemeProvider>
           </SafeAreaProvider>
-          {<FadeView
-            visible={this.state.isLoading}
-            fadeDuration={500}
-            style={{
-              position: 'absolute',
-              left: 0, right: 0, top: 0, bottom: 0,
-              backgroundColor: 'rgba(255,255,255, 0.4)',
-              justifyContent: 'center', alignItems: 'center'
-            }}>
-            <LottieView
-              source={require("./assets/lottie/109-bouncy-loader.json")} autoPlay loop
-            />
-          </FadeView>}
         </PersistGate>
       </Provider>
     </NavigationContainer>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -14,15 +14,15 @@
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
                 <imageView opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="logo" translatesAutoresizingMaskIntoConstraints="NO" id="ZER-Al-lp1">
-                    <rect key="frame" x="80" y="33" width="126" height="395"/>
+                    <rect key="frame" x="40" y="33" width="206" height="395"/>
                     <edgeInsets key="layoutMargins" top="16" left="42" bottom="16" right="42"/>
                     <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="default"/>
                 </imageView>
             </subviews>
-            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color key="backgroundColor" red="0.17687877038082583" green="0.1917378205318675" blue="0.22895154588580746" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <constraints>
-                <constraint firstItem="ZER-Al-lp1" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="80" id="1Vj-Qn-BsU"/>
-                <constraint firstAttribute="trailing" secondItem="ZER-Al-lp1" secondAttribute="trailing" constant="80" id="Am7-xI-MY6"/>
+                <constraint firstItem="ZER-Al-lp1" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="40" id="1Vj-Qn-BsU"/>
+                <constraint firstAttribute="trailing" secondItem="ZER-Al-lp1" secondAttribute="trailing" constant="40" id="Am7-xI-MY6"/>
                 <constraint firstAttribute="bottom" secondItem="ZER-Al-lp1" secondAttribute="bottom" constant="52" id="l1g-DF-C9S"/>
                 <constraint firstItem="ZER-Al-lp1" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="33" id="x5G-Ix-5nb"/>
             </constraints>
@@ -32,6 +32,6 @@
         </view>
     </objects>
     <resources>
-        <image name="logo" width="800" height="144"/>
+        <image name="logo" width="778.33331298828125" height="152"/>
     </resources>
 </document>
