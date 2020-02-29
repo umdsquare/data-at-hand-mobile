@@ -149,6 +149,7 @@ export class FitbitExampleServiceCore implements FitbitServiceCore {
             sleep: this.filterRowsWithinRange(start, end).map(e => ({
                 isMainSleep: true,
                 dateOfSleep: DateTimeHelper.toFormattedString(e.numberedDate),
+                minutesAsleep: e.sleepLengthSeconds/60,
                 duration: e.sleepLengthSeconds * 1000,
                 startTime: format(addSeconds(DateTimeHelper.toDate(e.numberedDate), e.bedTimeDiffSeconds), "yyyy-MM-dd'T'HH:mm:ss"),
                 endTime: format(addSeconds(DateTimeHelper.toDate(e.numberedDate), e.wakeTimeDiffSeconds), "yyyy-MM-dd'T'HH:mm:ss"),

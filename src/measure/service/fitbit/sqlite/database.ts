@@ -313,11 +313,11 @@ export class FitbitLocalDbManager {
 
   async deleteDatabase(): Promise<void> {
     try {
-      if(this._dbInitPromise != null){
+      if (this._dbInitPromise != null) {
         await this._dbInitPromise
 
       }
-      await SQLite.deleteDatabase(this._dbConfig);
+      await SQLite.deleteDatabase({ ...this._dbConfig });
       this._dbInitPromise = null
     } catch (e) {
       this._dbInitPromise = null
@@ -332,8 +332,9 @@ export class FitbitLocalDbManager {
 
     console.log("try open the database:", this._dbConfig)
 
-    this._dbInitPromise = SQLite.openDatabase(this._dbConfig)
+    this._dbInitPromise = SQLite.openDatabase({...this._dbConfig})
       .then(db => {
+        console.log("db opened.")
         return db
           .transaction(tx => {
             //initialize tables
@@ -576,7 +577,7 @@ export class FitbitLocalDbManager {
 
       const uniqueDates = new Set([].concat.apply([], rowsPerTable.map(entry => entry.queriedRows.map(r => r.numberedDate))))
       console.log("Total ", uniqueDates.size, " days of data.")
-      
+
       const joinedRows = []
 
       for (const numberedDate of uniqueDates) {
