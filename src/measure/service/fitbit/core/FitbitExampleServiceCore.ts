@@ -149,7 +149,7 @@ export class FitbitExampleServiceCore implements FitbitServiceCore {
             sleep: this.filterRowsWithinRange(start, end).map(e => ({
                 isMainSleep: true,
                 dateOfSleep: DateTimeHelper.toFormattedString(e.numberedDate),
-                minutesAsleep: e.sleepLengthSeconds/60,
+                minutesAsleep: e.sleepLengthSeconds / 60,
                 duration: e.sleepLengthSeconds * 1000,
                 startTime: format(addSeconds(DateTimeHelper.toDate(e.numberedDate), e.bedTimeDiffSeconds), "yyyy-MM-dd'T'HH:mm:ss"),
                 endTime: format(addSeconds(DateTimeHelper.toDate(e.numberedDate), e.wakeTimeDiffSeconds), "yyyy-MM-dd'T'HH:mm:ss"),
@@ -173,14 +173,19 @@ export class FitbitExampleServiceCore implements FitbitServiceCore {
     }
 
     async fetchIntradayHeartRate(date: number): Promise<FitbitHeartRateIntraDayQueryResult> {
-        throw new Error("Method not implemented.");
+        return {
+            "activities-heart-intraday": {
+                dataset: []
+            },
+            "activities-heart": []
+        }
     }
 
     getToday() {
         return this._latestDate || new Date()
     }
 
-    async fetchLastSyncTime(): Promise<{tracker?: Date, scale?: Date}>{
+    async fetchLastSyncTime(): Promise<{ tracker?: Date, scale?: Date }> {
         return {
             tracker: this._latestDate,
             scale: this._latestDate
