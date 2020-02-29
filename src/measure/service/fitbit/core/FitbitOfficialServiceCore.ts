@@ -103,6 +103,7 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
         try {
             this._credential = require('../../../../../credentials/fitbit.json');
             this._authConfig = {
+                issuer: '',
                 scopes: ['profile', 'activity', 'weight', 'sleep', 'heartrate', 'settings'],
                 clientId: this._credential.client_id,
                 clientSecret: this._credential.client_secret,
