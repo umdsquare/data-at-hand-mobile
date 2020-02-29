@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { ExplorationType, ParameterKey, ParameterType, IntraDayDataSourceType, getIntraDayDataSourceName, inferIntraDayDataSourceType, inferDataSource } from "../../../../core/exploration/types";
 import { SafeAreaView, View, Text, StyleSheet, TextStyle, ViewStyle, LayoutAnimation } from 'react-native';
 import { CategoricalRow } from '../../../exploration/CategoricalRow';
@@ -20,6 +20,9 @@ import { SvgIcon, SvgIconType } from '../../../common/svg/SvgIcon';
 import { makeNewSessionId, startSpeechSession, requestStopDictation } from '../../../../state/speech/commands';
 import { createSetShowGlobalPopupAction } from '../../../../state/speech/actions';
 import { SpeechContextHelper } from '../../../../state/speech/context';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../../../Routes';
 
 const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={'white'} />
 
@@ -72,20 +75,20 @@ const backButtonProps = {
     } as TextStyle
 }
 
-export const ExplorationViewHeader = (props: ExplorationProps) => {
+export const ExplorationViewHeader = () => {
+
+    const explorationType = useSelector((appState: ReduxAppState) => appState.explorationState.info.type)
+
     useEffect(() => {
         LayoutAnimation.configureNext(
             LayoutAnimation.create(
                 500, LayoutAnimation.Types.easeInEaseOut, "opacity")
         )
+    }, [explorationType])
 
-    }, [props.explorationState.info.type])
+    const navigation = useNavigation<StackNavigationProp<RootStackParamList, "Exploration">>()
 
-    return generateHeaderView(props)
-}
-
-export function generateHeaderView(props: ExplorationProps): any {
-    switch (props.explorationState.info.type) {
+    switch (explorationType) {
         case ExplorationType.B_Overview:
             return <HeaderContainer>
                 <View style={styles.titleBarStyle}>
@@ -95,41 +98,40 @@ export function generateHeaderView(props: ExplorationProps): any {
                         containerStyle={styles.titleBarButtonContainerStyle}
                         icon={titleBarOptionButtonIconInfo}
                         onPress={() => {
-                            props.navigation.navigate("Settings")
+                            navigation.navigate("Settings")
                         }} />
                 </View>
-                {<HeaderRangeBar />}
+                <HeaderRangeBar />
             </HeaderContainer>
         case ExplorationType.B_Range:
             return <HeaderContainer>
-                {generateDataSourceRow(props, false)}
-                {<HeaderRangeBar />}
+                <DataSourceBar showBorder={false} />
+                <HeaderRangeBar />
             </HeaderContainer>
         case ExplorationType.B_Day:
             return <HeaderContainer>
-                {generateIntraDayDataSourceRow(props)}
-                {<HeaderDateBar />}
+                <IntraDayDataSourceBar showBorder={true} />
+                <HeaderDateBar />
 
             </HeaderContainer>
         case ExplorationType.C_Cyclic:
             return <HeaderContainer>
-                {generateDataSourceRow(props, true)}
-                {generateCyclicComparisonTypeRow(props, false)}
-                {<HeaderRangeBar />}
+                <DataSourceBar showBorder={true} />
+                <CyclicComparisonTypeBar showBorder={false} />
+                <HeaderRangeBar />
             </HeaderContainer>
-            break;
         case ExplorationType.C_CyclicDetail_Daily:
         case ExplorationType.C_CyclicDetail_Range:
             return <HeaderContainer>
-                {generateDataSourceRow(props, true)}
-                {generateCycleDimensionRow(props, false)}
-                {<HeaderRangeBar />}
+                <DataSourceBar showBorder={true} />
+                <CycleDimensionBar showBorder={false} />
+                <HeaderRangeBar />
             </HeaderContainer>
         case ExplorationType.C_TwoRanges:
             return <HeaderContainer>
-                {generateDataSourceRow(props, false)}
-                {<HeaderRangeBar showBorder={true} parameterKey={ParameterKey.RangeA} />}
-                {<HeaderRangeBar parameterKey={ParameterKey.RangeB} />}
+                <DataSourceBar showBorder={false} />
+                <HeaderRangeBar showBorder={true} parameterKey={ParameterKey.RangeA} />
+                <HeaderRangeBar parameterKey={ParameterKey.RangeB} />
             </HeaderContainer>
     }
 }
@@ -155,7 +157,7 @@ const HeaderContainer = (prop: { children?: any, }) => {
 }
 
 const HeaderRangeBar = React.memo((props: { parameterKey?: ParameterKey, showBorder?: boolean }) => {
-    
+
     const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
     const dispatch = useDispatch()
     const [speechSessionId, setSpeechSessionId] = useState<string>(null)
@@ -167,20 +169,20 @@ const HeaderRangeBar = React.memo((props: { parameterKey?: ParameterKey, showBor
     }, [dispatch, props.parameterKey])
 
     const onLongPressIn = useCallback((position) => {
-            const sessionId = makeNewSessionId()
-            setSpeechSessionId(sessionId)
-            dispatch(startSpeechSession(sessionId, SpeechContextHelper.makeTimeSpeechContext(position)))
-            dispatch(createSetShowGlobalPopupAction(true, sessionId))
-        }, [dispatch, setSpeechSessionId])
+        const sessionId = makeNewSessionId()
+        setSpeechSessionId(sessionId)
+        dispatch(startSpeechSession(sessionId, SpeechContextHelper.makeTimeSpeechContext(position)))
+        dispatch(createSetShowGlobalPopupAction(true, sessionId))
+    }, [dispatch, setSpeechSessionId])
 
     const onLongPressOut = useCallback((position) => {
-            if (speechSessionId != null) {
-                console.log("request stop dictation")
-                dispatch(requestStopDictation(speechSessionId))
-                dispatch(createSetShowGlobalPopupAction(false, speechSessionId))
-            }
-            setSpeechSessionId(null)
-        }, [dispatch, speechSessionId, setSpeechSessionId])
+        if (speechSessionId != null) {
+            console.log("request stop dictation")
+            dispatch(requestStopDictation(speechSessionId))
+            dispatch(createSetShowGlobalPopupAction(false, speechSessionId))
+        }
+        setSpeechSessionId(null)
+    }, [dispatch, speechSessionId, setSpeechSessionId])
 
     return <DateRangeBar from={range && range[0]} to={range && range[1]}
         onRangeChanged={onRangeChanged}
@@ -205,7 +207,7 @@ const HeaderDateBar = () => {
             setSpeechSessionId(newSessionId)
         }}
         onLongPressOut={() => {
-            if(speechSessionId != null){
+            if (speechSessionId != null) {
                 dispatch(createSetShowGlobalPopupAction(false, speechSessionId))
                 dispatch(requestStopDictation(speechSessionId))
             }
@@ -214,10 +216,12 @@ const HeaderDateBar = () => {
     />
 }
 
-function generateDataSourceRow(props: ExplorationProps, showBorder: boolean): any {
-    const sourceType = explorationInfoHelper.getParameterValue(props.explorationState.info, ParameterType.DataSource) as DataSourceType
+const DataSourceBar = (props: { showBorder: boolean }) => {
+    const dispatch = useDispatch()
+    const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
+    const sourceType = explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource) as DataSourceType
     const sourceSpec = DataSourceManager.instance.getSpec(sourceType)
-    return <CategoricalRow title="Data Source" showBorder={showBorder} value={sourceSpec.name}
+    return <CategoricalRow title="Data Source" showBorder={props.showBorder} value={sourceSpec.name}
         IconComponent={DataSourceIcon}
         iconProps={(index) => {
             return {
@@ -226,22 +230,31 @@ function generateDataSourceRow(props: ExplorationProps, showBorder: boolean): an
         }}
         values={DataSourceManager.instance.supportedDataSources.map(spec => spec.name)}
         onValueChange={(newValue, newIndex) =>
-            props.dispatchCommand(setDataSourceAction(InteractionType.TouchOnly, DataSourceManager.instance.supportedDataSources[newIndex].type))
+            dispatch(setDataSourceAction(InteractionType.TouchOnly, DataSourceManager.instance.supportedDataSources[newIndex].type))
         }
     />
 }
 
-function generateIntraDayDataSourceRow(props: ExplorationProps): any {
-    const intraDaySourceType = explorationInfoHelper.getParameterValue<IntraDayDataSourceType>(props.explorationState.info, ParameterType.IntraDayDataSource)
+const IntraDayDataSourceBar = (props: { showBorder: boolean }) => {
+    const dispatch = useDispatch()
+    const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
+
+    const intraDaySourceType = explorationInfoHelper.getParameterValue<IntraDayDataSourceType>(explorationInfo, ParameterType.IntraDayDataSource)
     const sourceTypeName = getIntraDayDataSourceName(intraDaySourceType)
-    const supportedIntraDayDataSourceTypes = []
-    DataSourceManager.instance.supportedDataSources.forEach(s => {
-        const inferred = inferIntraDayDataSourceType(s.type)
-        if (supportedIntraDayDataSourceTypes.indexOf(inferred) === -1 && inferred != null) {
-            supportedIntraDayDataSourceTypes.push(inferred)
-        }
-    })
-    const values = supportedIntraDayDataSourceTypes.map(type => getIntraDayDataSourceName(type))
+
+    const supportedIntraDayDataSourceTypes = useMemo(() => {
+        const result = []
+        DataSourceManager.instance.supportedDataSources.forEach(s => {
+            const inferred = inferIntraDayDataSourceType(s.type)
+            if (result.indexOf(inferred) === -1 && inferred != null) {
+                result.push(inferred)
+            }
+        })
+        return result
+    }, [])
+
+    const values = useMemo(() => supportedIntraDayDataSourceTypes.map(type => getIntraDayDataSourceName(type)),
+        [supportedIntraDayDataSourceTypes])
 
     return <CategoricalRow title="Data Source" showBorder={false} value={sourceTypeName}
         IconComponent={DataSourceIcon}
@@ -252,33 +265,37 @@ function generateIntraDayDataSourceRow(props: ExplorationProps): any {
         }}
         values={values}
         onValueChange={(value, index) => {
-            props.dispatchCommand(setIntraDayDataSourceAction(InteractionType.TouchOnly, supportedIntraDayDataSourceTypes[index]))
+            dispatch(setIntraDayDataSourceAction(InteractionType.TouchOnly, supportedIntraDayDataSourceTypes[index]))
         }}
     />
 }
 
-function generateCyclicComparisonTypeRow(props: ExplorationProps, showBorder: boolean): any {
-    const cycleType = explorationInfoHelper.getParameterValue<CyclicTimeFrame>(props.explorationState.info, ParameterType.CycleType)
-    const cycles = Object.keys(cyclicTimeFrameSpecs)
+const CyclicComparisonTypeBar = (props: { showBorder: boolean }) => {
+    const dispatch = useDispatch()
+    const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
+    const cycleType = explorationInfoHelper.getParameterValue<CyclicTimeFrame>(explorationInfo, ParameterType.CycleType)
+    const cycles = useMemo(() => Object.keys(cyclicTimeFrameSpecs), [])
 
-    return <CategoricalRow title="Group By" showBorder={showBorder} value={cyclicTimeFrameSpecs[cycleType].name}
+    return <CategoricalRow title="Group By" showBorder={props.showBorder} value={cyclicTimeFrameSpecs[cycleType].name}
         values={cycles.map(key => cyclicTimeFrameSpecs[key].name)}
         onValueChange={(value, index) => {
-            props.dispatchCommand(setCycleTypeAction(InteractionType.TouchOnly, cycles[index] as any))
+            dispatch(setCycleTypeAction(InteractionType.TouchOnly, cycles[index] as any))
         }}
     />
 }
 
-function generateCycleDimensionRow(props: ExplorationProps, showBorder: boolean): any {
-    const cycleDimension = explorationInfoHelper.getParameterValue<CycleDimension>(props.explorationState.info, ParameterType.CycleDimension)
-    const spec = getCycleDimensionSpec(cycleDimension)
-    const selectableDimensions = getHomogeneousCycleDimensionList(cycleDimension)
+const CycleDimensionBar = (props: { showBorder: boolean }) => {
+    const dispatch = useDispatch()
+    const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
+    const cycleDimension = explorationInfoHelper.getParameterValue<CycleDimension>(explorationInfo, ParameterType.CycleDimension)
+    const spec = useMemo(() => getCycleDimensionSpec(cycleDimension), [cycleDimension])
+    const selectableDimensions = useMemo(() => getHomogeneousCycleDimensionList(cycleDimension), [cycleDimension])
+    const dimensionNames = useMemo(() => selectableDimensions.map(spec => spec.name), [selectableDimensions])
 
-    return <CategoricalRow title="Cycle Filter" showBorder={showBorder} value={spec.name}
-        values={selectableDimensions.map(spec => spec.name)}
+    return <CategoricalRow title="Cycle Filter" showBorder={props.showBorder} value={spec.name}
+        values={dimensionNames}
         onValueChange={(value, index) => {
-            props.dispatchCommand(setCycleDimensionAction(InteractionType.TouchOnly, selectableDimensions[index].dimension))
+            dispatch(setCycleDimensionAction(InteractionType.TouchOnly, selectableDimensions[index].dimension))
         }}
     />
-
 }

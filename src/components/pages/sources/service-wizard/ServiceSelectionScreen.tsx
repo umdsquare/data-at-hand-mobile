@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, ImageBackground, ScrollView, SafeAreaView, TouchableOpacity } from "react-native";
+import { View, Text, ImageBackground, ScrollView, SafeAreaView, TouchableOpacity, InteractionManager } from "react-native";
 import { Sizes } from "../../../../style/Sizes";
 import { StyleTemplates } from "../../../../style/Styles";
 import { DataService } from "../../../../measure/service/DataService";
@@ -65,9 +65,14 @@ class ServiceSelectionScreen extends React.Component<Prop, State>{
                                     async () => {
                                         if (this.props.selectedServiceKey != service.key) {
                                             console.log("start loading")
-                                            this.setState({
-                                                ...this.state,
-                                                isLoading: true
+                                            InteractionManager.runAfterInteractions(()=>{
+                                                
+                                            })
+                                            requestAnimationFrame(()=>{
+                                                this.setState({
+                                                    ...this.state,
+                                                    isLoading: true
+                                                })
                                             })
 
                                             try {

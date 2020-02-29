@@ -207,22 +207,24 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
     }
 
     async componentDidUpdate(prevProps: ExplorationProps) {
-        
+
         let dataReloadNeeded = false
-        
+
         if (this.props.explorationState.info.type !== prevProps.explorationState.info.type || deepEqual(prevProps.explorationState.info.values, this.props.explorationState.info.values) === false) {
             if (this.state.initialLoadingFinished === true) {
                 dataReloadNeeded = true
             }
         }
 
-        if(this.props.selectedServiceKey !== prevProps.selectedServiceKey){
-            dataReloadNeeded =  true
+        if (this.props.selectedServiceKey !== prevProps.selectedServiceKey) {
+            dataReloadNeeded = true
         }
 
-        if(dataReloadNeeded===true){
+        if (dataReloadNeeded === true) {
             console.log("should reload data")
-            this.props.dispatchDataReload(this.props.explorationState.info)
+            requestAnimationFrame(() => {
+                this.props.dispatchDataReload(this.props.explorationState.info)
+            })
         }
     }
 
@@ -278,7 +280,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
         return <View style={StyleTemplates.screenDefaultStyle}>
             <StatusBar barStyle="light-content" backgroundColor={Colors.headerBackground} />
             <View style={styles.headerContainerStyle}>
-                <ExplorationViewHeader {...this.props} />
+                <ExplorationViewHeader />
             </View>
             <View style={styles.mainContainerStyle}>
                 {/* main data panel ===================================================================*/}
