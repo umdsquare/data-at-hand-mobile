@@ -53,15 +53,32 @@ const calendarProps = {
 function formatDate(date: Date): string { return format(date, "yyyy-MM-dd") }
 function parseDate(calendarPickerDateObject: any): Date { return set(new Date(), { year: calendarPickerDateObject.year, month: calendarPickerDateObject.month - 1, date: calendarPickerDateObject.day }) }
 
-export const DatePicker = (props: { selectedDay?: Date, earliedPossibleDay?: Date, latestPossibleDay?: Date, ghostRange?: [Date, Date], onDayPress?: (date: Date) => void }) => {
-    
-    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+export const DatePicker = (props: {
+    selectedDay?: Date,
+    earliedPossibleDay?: Date,
+    latestPossibleDay?: Date,
+    disabledDates?: Date[],
+    ghostRange?: [Date, Date], onDayPress?: (date: Date) => void
+}) => {
+
+    const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const today = DataServiceManager.instance.getServiceByKey(serviceKey).getToday()
 
     const markedDates = {}
     if (props.selectedDay) {
         markedDates[formatDate(props.selectedDay)] = { selected: true }
     }
+
+    props.disabledDates?.forEach(date => {
+        markedDates[formatDate(date)] = { 
+            disabled: true, 
+            disableTouchEvent: true,
+            selected: true, 
+            selectedColor: 'lightgray'
+         }
+    })
+    console.log(markedDates)
+
 
     /*
     if(props.ghostRange){
@@ -88,9 +105,9 @@ const selectedWeekRangeMarkInfoBase = {
 }
 
 export const WeekPicker = (props: { selectedWeekFirstDay?: Date, onWeekSelected?: (weekFirstDay: Date, weekEndDay: Date) => void }) => {
-    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+    const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const today = DataServiceManager.instance.getServiceByKey(serviceKey).getToday()
-    
+
     const markedDates = {}
 
     if (props.selectedWeekFirstDay) {
@@ -171,7 +188,7 @@ const monthPickerStyle = StyleSheet.create({
 })
 
 interface MonthPickerProps {
-    getToday?: ()=>Date,
+    getToday?: () => Date,
     selectedMonth: Date,
     onMonthSelected?: (month: Date) => void
 }

@@ -193,6 +193,12 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
     static deriveState(from: number, to: number, prevState: State): State {
 
+        if(to < from){
+            const fromTemp = from
+            from = to
+            to = fromTemp
+        }
+
         const fromDate = DateTimeHelper.toDate(from)
         const toDate = DateTimeHelper.toDate(to)
         const numDays = -differenceInCalendarDays(fromDate, toDate) + 1
@@ -308,16 +314,19 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
     }
 
     setRange = (from: number, to: number, interactionType: InteractionType = InteractionType.TouchOnly) => {
-        this.setState(DateRangeBar.deriveState(
+        
+        const newState = DateRangeBar.deriveState(
             from,
             to,
             { ...this.state, clickedElementType: null }
-        ))
+        )
+
+        this.setState(newState)
 
         this.bottomSheetRef?.close()
 
         if (this.props.onRangeChanged) {
-            this.props.onRangeChanged(from, to, interactionType)
+            this.props.onRangeChanged(newState.from, newState.to, interactionType)
         }
     }
 
@@ -407,10 +416,15 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                     }
                     break;
                 case 'from':
-                    modalPickerView = <DatePicker selectedDay={this.state.fromDate} earliedPossibleDay={undefined} latestPossibleDay={subDays(this.state.toDate, 1)} onDayPress={this.setFromDate} ghostRange={[this.state.fromDate, this.state.toDate]} />
+                    modalPickerView = <DatePicker selectedDay={this.state.fromDate} 
+                    disabledDates={[this.state.toDate]}
+                    onDayPress={this.setFromDate} ghostRange={[this.state.fromDate, this.state.toDate]} />
                     break;
                 case 'to':
-                    modalPickerView = <DatePicker selectedDay={this.state.toDate} earliedPossibleDay={addDays(this.state.fromDate, 1)} latestPossibleDay={undefined} onDayPress={this.setToDate} ghostRange={[this.state.fromDate, this.state.toDate]} />
+                    modalPickerView = <DatePicker selectedDay={this.state.toDate} 
+                    disabledDates={[this.state.fromDate]}
+                    onDayPress={this.setToDate} 
+                    ghostRange={[this.state.fromDate, this.state.toDate]} />
                     break;
             }
         }
