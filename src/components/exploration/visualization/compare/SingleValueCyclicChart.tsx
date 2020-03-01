@@ -32,6 +32,7 @@ export const SingleValueCyclicChart = (props: {
     cycleType: CyclicTimeFrame,
     yTickFormat?: (number) => string,
     startFromZero?: boolean,
+    preferredValueRange?: number[],
     ticksOverride?: (min: number, max: number) => number[],
     valueConverter?: (number) => number
 }) => {
@@ -54,7 +55,12 @@ export const SingleValueCyclicChart = (props: {
 
     const scaleX = scaleBand<number>().domain(domain).range([0, chartArea.width]).padding(0.35)
     const scaleY = scaleLinear()
-        .domain([props.startFromZero === true ? 0 : min(props.values, v => convert(v.min)), max(props.values, v => convert(v.max))])
+        .domain([
+            props.startFromZero === true ? 0 :
+                Math.min(min(props.values, v => convert(v.min)),
+                    props.preferredValueRange ? convert(props.preferredValueRange[0]) : Number.MAX_VALUE),
+            Math.max(max(props.values, v => convert(v.max)),
+                props.preferredValueRange ? convert(props.preferredValueRange[1]) : Number.MIN_VALUE)])
         .range([chartArea.height, 0]).nice()
 
 
@@ -103,8 +109,8 @@ export const SingleValueCyclicChart = (props: {
                                     props.dataSource,
                                     props.cycleType,
                                     scaleX, chartArea, x, y, screenX, screenY, touchId, (timeKey) => {
-                                    return props.values.find(v => v.timeKey === timeKey)
-                                })))
+                                        return props.values.find(v => v.timeKey === timeKey)
+                                    })))
                             }}
                             onLongPressOut={(timeKey, x, y, screenX, screenY) => {
                                 dispatch(setTouchElementInfo(null))

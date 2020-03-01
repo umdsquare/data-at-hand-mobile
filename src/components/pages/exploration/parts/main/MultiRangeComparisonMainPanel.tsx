@@ -182,25 +182,27 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
         this.props.data.data.forEach((d, i) => indices.push(i))
 
         const scaleX = scaleBand<number>().domain(indices).range([0, chartArea.width]).padding(0.55).paddingOuter(0.25)
-
+        
         const scaleY = scaleLinear().range([chartArea.height, 0])
-        const availableData = this.props.data.data.filter(d => d.value != null)
+        const availableData = this.props.data.data.filter(d => d.value != null && d.value.n > 0)
         if (aggregationSettingIndex === INDEX_AGGREGATED) {
-            scaleY.domain([startFromZero === true ? 0 : min(availableData, d => {
+            scaleY.domain([startFromZero === true ? 0 : Math.min(min(availableData, d => {
                 if (isRanged === true) {
                     //range
                     return Math.min(valueConverter(d.value["minA"]), valueConverter(d.value["minB"]))
                 } else {
                     return valueConverter(d.value["min"])
                 }
-            }), max(availableData, d => {
+            }), this.props.data.preferredValueRange? valueConverter(this.props.data.preferredValueRange[0]) : Number.MAX_VALUE), 
+            
+            Math.max(max(availableData, d => {
                 if (isRanged === true) {
                     //range
                     return Math.max(valueConverter(d.value["maxA"]), valueConverter(d.value["maxB"]))
                 } else {
                     return valueConverter(d.value["max"])
                 }
-            })])
+            }), this.props.data.preferredValueRange? valueConverter(this.props.data.preferredValueRange[1]) : Number.MIN_VALUE)])
         } else if (aggregationSettingIndex === INDEX_SUM) {
 
             scaleY.domain([0, max(availableData, d => {

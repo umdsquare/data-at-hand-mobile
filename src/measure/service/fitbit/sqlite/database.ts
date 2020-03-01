@@ -486,6 +486,7 @@ export class FitbitLocalDbManager {
     LIMIT 1\
     OFFSET ROUND((SELECT COUNT(*) FROM ${tableName}) * ${ratio.toFixed(2)}) - 1\
     `
+
     const result = await this.selectQuery<any>(query)
     if (result.length > 0) {
       return result[0].value
@@ -517,8 +518,10 @@ export class FitbitLocalDbManager {
     const percentile25 = await this.findPercentileValue(0.25, tableName, valueColumnName)
     const percentile75 = await this.findPercentileValue(0.75, tableName, valueColumnName)
     const iqr = percentile75 - percentile25
-    const minWithoutOutlier = await this.findValueClosestTo(median - 1 * iqr, tableName, 'larger', valueColumnName)
-    const maxWithoutOutlier = await this.findValueClosestTo(median + 1 * iqr, tableName, 'smaller', valueColumnName)
+    const minWithoutOutlier = await this.findValueClosestTo(percentile25 - 1 * iqr, tableName, 'larger', valueColumnName)
+    const maxWithoutOutlier = await this.findValueClosestTo(percentile75 + 1 * iqr, tableName, 'smaller', valueColumnName)
+    //const minWithoutOutlier = percentile25 - 2 * iqr
+    //const maxWithoutOutlier = percentile75 + 2 * iqr
 
     return {
       median,

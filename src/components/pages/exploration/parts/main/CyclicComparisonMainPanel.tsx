@@ -47,11 +47,11 @@ class CyclicComparisonMainPanel extends React.Component<Props> {
     private makeMainView(): any {
         switch (this.props.source) {
             case DataSourceType.StepCount:
-                return <SingleValueCyclicChart dataSource={this.props.source} values={this.props.data.data as any} cycleType={this.props.cycleType} startFromZero={true} yTickFormat={commaNumber} />
+                return <SingleValueCyclicChart dataSource={this.props.source} values={this.props.data.data as any} preferredValueRange={this.props.data.preferredValueRange} cycleType={this.props.cycleType} startFromZero={true} yTickFormat={commaNumber} />
             case DataSourceType.HeartRate:
-                return <SingleValueCyclicChart dataSource={this.props.source} values={this.props.data.data as any} cycleType={this.props.cycleType} startFromZero={false} />
+                return <SingleValueCyclicChart dataSource={this.props.source} values={this.props.data.data as any} preferredValueRange={this.props.data.preferredValueRange} cycleType={this.props.cycleType} startFromZero={false} />
             case DataSourceType.HoursSlept:
-                return <SingleValueCyclicChart dataSource={this.props.source} values={this.props.data.data as any} cycleType={this.props.cycleType} startFromZero={true}
+                return <SingleValueCyclicChart dataSource={this.props.source} values={this.props.data.data as any} preferredValueRange={this.props.data.preferredValueRange} cycleType={this.props.cycleType} startFromZero={true}
                     yTickFormat={v => DateTimeHelper.formatDuration(v, true)}
                     ticksOverride={(min, max) => {
                         const scale = scaleLinear().domain([min / 3600, max / 3600]).nice()
@@ -62,6 +62,7 @@ class CyclicComparisonMainPanel extends React.Component<Props> {
                 return <SingleValueCyclicChart
                     dataSource={this.props.source}
                     values={this.props.data.data as any}
+                    preferredValueRange={this.props.data.preferredValueRange}
                     cycleType={this.props.cycleType}
                     startFromZero={false}
                     valueConverter={
@@ -79,6 +80,7 @@ class CyclicComparisonMainPanel extends React.Component<Props> {
                 return <RangeValueCyclicChart
                     dataSource={this.props.source}
                     values={this.props.data.data as any}
+                    preferredValueRange={this.props.data.preferredValueRange as [number, number]}
                     cycleType={this.props.cycleType}
                     startFromZero={false}
                     ticksOverride={(min, max) => {

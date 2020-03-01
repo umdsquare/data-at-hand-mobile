@@ -5,6 +5,7 @@ import { UnSupportedReason } from "../../DataService";
 import { max, min } from "d3-array";
 import { DateTimeHelper } from "../../../../time";
 import { getDay, differenceInDays, startOfDay, addSeconds, format } from "date-fns";
+import { LocalAsyncStorageHelper } from "../../../../system/AsyncStorageHelper";
 
 interface ExampleDayRow {
     index: number,
@@ -71,6 +72,8 @@ export class FitbitExampleServiceCore implements FitbitServiceCore {
 
     private _fitbitLocalDbManager: FitbitLocalDbManager = null
 
+    private _asyncStorage: LocalAsyncStorageHelper = null
+
     get fitbitLocalDbManager(): FitbitLocalDbManager {
         if (this._fitbitLocalDbManager == null) {
             this._fitbitLocalDbManager = new FitbitLocalDbManager({
@@ -79,6 +82,13 @@ export class FitbitExampleServiceCore implements FitbitServiceCore {
             } as DatabaseParams);
         }
         return this._fitbitLocalDbManager;
+    }
+
+    get localAsyncStorage(): LocalAsyncStorageHelper {
+        if(this._asyncStorage == null){
+            this._asyncStorage = new LocalAsyncStorageHelper("fitbit:official")
+        }
+        return this._asyncStorage
     }
 
     private _latestDate: Date = null

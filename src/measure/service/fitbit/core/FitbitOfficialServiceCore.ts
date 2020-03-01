@@ -1,7 +1,7 @@
 import { refresh, authorize, revoke } from 'react-native-app-auth';
 import { FitbitServiceCore, FitbitDailyActivityHeartRateQueryResult, FitbitDailyActivityStepsQueryResult, FitbitWeightTrendQueryResult, FitbitWeightQueryResult, FitbitSleepQueryResult, FitbitIntradayStepDayQueryResult, FitbitHeartRateIntraDayQueryResult, FitbitUserProfile, FitbitDeviceListQueryResult } from "../types";
 import { makeFitbitIntradayActivityApiUrl, makeFitbitHeartRateIntraDayLogApiUrl, makeFitbitWeightTrendApiUrl, makeFitbitWeightLogApiUrl, makeFitbitDayLevelActivityLogsUrl, makeFitbitSleepApiUrl, FITBIT_PROFILE_URL, FITBIT_DEVICES_URL } from "../api";
-import { AsyncStorageHelper } from "../../../../system/AsyncStorageHelper";
+import { LocalAsyncStorageHelper } from "../../../../system/AsyncStorageHelper";
 import { DataService, UnSupportedReason } from "../../DataService";
 import { DateTimeHelper } from "../../../../time";
 import { FitbitLocalDbManager } from '../sqlite/database';
@@ -28,6 +28,7 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
     private _authConfig = null;
 
     private _fitbitLocalDbManager: FitbitLocalDbManager = null
+    private _asyncStorage: LocalAsyncStorageHelper = null
 
     get fitbitLocalDbManager(): FitbitLocalDbManager {
         if (this._fitbitLocalDbManager == null) {
@@ -39,12 +40,19 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
         return this._fitbitLocalDbManager;
     }
 
+    get localAsyncStorage(): LocalAsyncStorageHelper {
+        if(this._asyncStorage == null){
+            this._asyncStorage = new LocalAsyncStorageHelper("fitbit:official")
+        }
+        return this._asyncStorage
+    }
+
     private get credential(): FitbitCredential {
         return this._credential;
     }
 
     private async checkTokenValid(): Promise<boolean> {
-        const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
+        const state = await this.localAsyncStorage.getObject(STORAGE_KEY_AUTH_STATE);
         return (
             state != null &&
             new Date(state.accessTokenExpirationDate).getTime() > Date.now()
@@ -56,11 +64,11 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
             FITBIT_PROFILE_URL,
         );
         if (profile != null) {
-            await AsyncStorageHelper.set(
+            await this.localAsyncStorage.set(
                 STORAGE_KEY_USER_TIMEZONE,
                 profile.user.timezone,
             );
-            await AsyncStorageHelper.set(
+            await this.localAsyncStorage.set(
                 STORAGE_KEY_USER_MEMBER_SINCE,
                 DateTimeHelper.fromFormattedString(profile.user.memberSince),
             );
@@ -69,7 +77,7 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
     }
 
     async authenticate(): Promise<string> {
-        const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
+        const state = await this.localAsyncStorage.getObject(STORAGE_KEY_AUTH_STATE);
         if (state) {
             try {
                 console.log("refresh token found. try refreshing it with token...")
@@ -78,7 +86,7 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
                 });
                 if (newState) {
                     console.log("token refresh succeeded.")
-                    await AsyncStorageHelper.set(STORAGE_KEY_AUTH_STATE, newState);
+                    await this.localAsyncStorage.set(STORAGE_KEY_AUTH_STATE, newState);
                     return newState.accessToken;
                 }
             } catch (e) {
@@ -90,7 +98,7 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
         try {
             console.log("try re-authorization.")
             const newState = await authorize(this._authConfig);
-            await AsyncStorageHelper.set(STORAGE_KEY_AUTH_STATE, newState);
+            await this.localAsyncStorage.set(STORAGE_KEY_AUTH_STATE, newState);
             return newState.accessToken;
         } catch (e) {
             console.log("Authorization failed.")
@@ -126,21 +134,21 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
 
     async signOut(): Promise<void> {
         console.log('try fitbit sign out');
-        const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
+        const state = await this.localAsyncStorage.getObject(STORAGE_KEY_AUTH_STATE);
         if (state) {
             await revoke(this._authConfig, {
                 tokenToRevoke: state.refreshToken,
                 includeBasicAuth: true,
             } as any);
-            await AsyncStorageHelper.remove(STORAGE_KEY_AUTH_STATE);
-            await AsyncStorageHelper.remove(STORAGE_KEY_USER_TIMEZONE);
-            await AsyncStorageHelper.remove(STORAGE_KEY_USER_MEMBER_SINCE);
+            await this.localAsyncStorage.remove(STORAGE_KEY_AUTH_STATE);
+            await this.localAsyncStorage.remove(STORAGE_KEY_USER_TIMEZONE);
+            await this.localAsyncStorage.remove(STORAGE_KEY_USER_MEMBER_SINCE);
         }
     }
 
     async getMembershipStartDate(): Promise<number> {
         console.log('get membership start date');
-        const cached = await AsyncStorageHelper.getLong(
+        const cached = await this.localAsyncStorage.getLong(
             STORAGE_KEY_USER_MEMBER_SINCE,
         );
         if (cached) {
@@ -157,7 +165,7 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
 
     async fetchFitbitQuery(url: string): Promise<any> {
         console.log('fetch query for ', url);
-        const state = await AsyncStorageHelper.getObject(STORAGE_KEY_AUTH_STATE);
+        const state = await this.localAsyncStorage.getObject(STORAGE_KEY_AUTH_STATE);
         var accessToken;
         if (state == null || state.accessToken == null) {
             accessToken = await this.authenticate();

@@ -77,8 +77,6 @@ export const DatePicker = (props: {
             selectedColor: 'lightgray'
          }
     })
-    console.log(markedDates)
-
 
     /*
     if(props.ghostRange){

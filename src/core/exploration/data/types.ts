@@ -147,16 +147,18 @@ export interface SleepRangedData extends OverviewSourceRow {
   data: Array<IDailySleepSummaryEntry>;
 }
 
-export interface GroupedData {
-  data: Array<IAggregatedValue>
+interface IGroupedData<T>{
+  data: Array<T>
+  preferredValueRange?: number[],
 }
 
-export interface GroupedRangeData {
-  data: Array<IAggregatedRangeValue>
-}
+export type GroupedData = IGroupedData<IAggregatedValue>
+
+export type GroupedRangeData = IGroupedData<IAggregatedRangeValue>
 
 export interface RangeAggregatedComparisonData<T> {
   data: Array<{ range: [number, number], value: T }>
+  preferredValueRange?: number[],
 }
 
 export interface FilteredDailyValues {

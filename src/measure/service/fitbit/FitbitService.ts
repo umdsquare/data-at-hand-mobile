@@ -299,7 +299,9 @@ export class FitbitService extends DataService {
   }
 
   async clearAllCache(): Promise<void> {
-    await this.core.fitbitLocalDbManager.deleteDatabase()
+    await Promise.all(
+      this.preloadableMeasures.map(measure => measure.clearLocalCache()).concat(this.core.fitbitLocalDbManager.deleteDatabase())
+    )
   }
 
   async exportToCsv(): Promise<Array<{ name: string, csv: string }>> {

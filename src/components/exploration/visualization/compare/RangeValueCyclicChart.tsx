@@ -29,6 +29,7 @@ export const RangeValueCyclicChart = (props: {
     values: Array<IAggregatedRangeValue>,
     dataSource: DataSourceType,
     cycleType: CyclicTimeFrame,
+    preferredValueRange?: [number, number],
     yTickFormat?: (number) => string,
     startFromZero?: boolean,
     ticksOverride?: (min: number, max: number) => number[],
@@ -51,8 +52,11 @@ export const RangeValueCyclicChart = (props: {
     const dispatch = useDispatch()
 
     const scaleX = scaleBand<number>().domain(domain).range([0, chartArea.width]).padding(0.35)
+
     let scaleY = scaleLinear()
-        .domain([props.startFromZero === true ? 0 : Math.min(min(props.values, v => (v.minA)), min(props.values, v => (v.minB))), Math.max(max(props.values, v => (v.maxA)), max(props.values, v => (v.maxB)))])
+        .domain([props.startFromZero === true ? 0 : 
+            Math.min(min(props.values, v => (v.minA)), min(props.values, v => (v.minB)), (props.preferredValueRange? props.preferredValueRange[0] : Number.MAX_VALUE)), 
+            Math.max(max(props.values, v => (v.maxA)), max(props.values, v => (v.maxB)), (props.preferredValueRange? props.preferredValueRange[1]: Number.MIN_VALUE))])
         .range([0, chartArea.height]).nice()
 
     let ticks

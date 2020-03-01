@@ -29,9 +29,9 @@ class ExplorationDataResolver {
     const usePrevData = selectedServiceKey === prevServiceKey
     switch (explorationInfo.type) {
       case ExplorationType.B_Overview:
-        return this.loadOverviewData(explorationInfo, selectedServiceKey, usePrevData===true? prevInfo : null, usePrevData===true? prevData: null);
+        return this.loadOverviewData(explorationInfo, selectedServiceKey, usePrevData === true ? prevInfo : null, usePrevData === true ? prevData : null);
       case ExplorationType.B_Range:
-        return this.loadBrowseRangeData(explorationInfo, selectedServiceKey, usePrevData === true? prevInfo : null, usePrevData===true? prevData: null);
+        return this.loadBrowseRangeData(explorationInfo, selectedServiceKey, usePrevData === true ? prevInfo : null, usePrevData === true ? prevData : null);
       case ExplorationType.B_Day:
         return this.loadIntraDayData(explorationInfo, selectedServiceKey)
       case ExplorationType.C_Cyclic:
@@ -258,7 +258,7 @@ class ExplorationDataResolver {
     return selectedService.fetchIntraDayData(source, date)
   }
 
-  private loadCyclicComparisonData(info: ExplorationInfo, selectedServiceKey: string): Promise<GroupedData | GroupedRangeData> {
+  private async loadCyclicComparisonData(info: ExplorationInfo, selectedServiceKey: string): Promise<GroupedData | GroupedRangeData> {
 
     const selectedService = DataServiceManager.instance.getServiceByKey(
       selectedServiceKey,
@@ -270,10 +270,12 @@ class ExplorationDataResolver {
     );
     const cycleType = explorationInfoHelper.getParameterValue<CyclicTimeFrame>(info, ParameterType.CycleType)
 
-    return selectedService.fetchCyclicAggregatedData(source, range[0], range[1], cycleType)
+    const data = await selectedService.fetchCyclicAggregatedData(source, range[0], range[1], cycleType)
+    data.preferredValueRange = await selectedService.getPreferredValueRange(source)
+    return data
   }
 
-  private loadCyclicRangeDetailData(info: ExplorationInfo, selectedServiceKey: string): Promise<RangeAggregatedComparisonData<IAggregatedValue | IAggregatedRangeValue>> {
+  private async loadCyclicRangeDetailData(info: ExplorationInfo, selectedServiceKey: string): Promise<RangeAggregatedComparisonData<IAggregatedValue | IAggregatedRangeValue>> {
     const selectedService = DataServiceManager.instance.getServiceByKey(
       selectedServiceKey,
     );
@@ -290,7 +292,9 @@ class ExplorationDataResolver {
       ParameterType.CycleDimension,
     );
 
-    return selectedService.fetchCycleRangeDimensionData(source, range[0], range[1], cycleDimension)
+    const data = await selectedService.fetchCycleRangeDimensionData(source, range[0], range[1], cycleDimension)
+    data.preferredValueRange = await selectedService.getPreferredValueRange(source)
+    return data
   }
 
   private loadCyclicDailyDetailData(info: ExplorationInfo, selectedServiceKey: string): Promise<FilteredDailyValues> {
@@ -337,7 +341,8 @@ class ExplorationDataResolver {
       data: [
         { range: rangeA, value: dataA },
         { range: rangeB, value: dataB }
-      ]
+      ],
+      preferredValueRange: await selectedService.getPreferredValueRange(source)
     }
   }
 }

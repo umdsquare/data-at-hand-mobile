@@ -1,5 +1,5 @@
 import React from "react";
-import { StatusBar, View, StyleSheet, Platform, BackHandler, Text, Alert, AppState, AppStateStatus, Vibration } from "react-native";
+import { StatusBar, View, StyleSheet, Platform, BackHandler, Text, Alert, AppState, AppStateStatus } from "react-native";
 import Colors from "../../../style/Colors";
 import { StyleTemplates } from "../../../style/Styles";
 import { ExplorationState } from "../../../state/exploration/interaction/reducers";
@@ -32,7 +32,6 @@ import { startSpeechSession, requestStopDictation, makeNewSessionId } from "../.
 import { SvgIcon, SvgIconType } from "../../common/svg/SvgIcon";
 import { ZIndices } from "./parts/zIndices";
 import { DataBusyOverlay } from "./parts/main/DataBusyOverlay";
-import { sleep } from "../../../utils";
 import { InitialLoadingIndicator } from "./parts/main/InitialLoadingIndicator";
 import { createSetShowGlobalPopupAction } from "../../../state/speech/actions";
 import { SpeechContextHelper } from "../../../state/speech/context";
@@ -222,7 +221,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
         if (dataReloadNeeded === true) {
             console.log("should reload data")
-            requestAnimationFrame(() => {
+            requestAnimationFrame((time: number) => {
                 this.props.dispatchDataReload(this.props.explorationState.info)
             })
         }

@@ -1,9 +1,7 @@
 import { differenceInMinutes } from 'date-fns';
 import { ICachedRangeEntry } from './sqlite/database';
 import { FitbitServiceMeasureBase } from './FitbitServiceMeasureBase';
-import { DataSourceSpec, DataSourceCategory } from '../../DataSourceSpec'
 import { BoxPlotInfo } from '../../../core/exploration/data/types';
-import { AsyncStorageHelper } from '../../../system/AsyncStorageHelper';
 import { DateTimeHelper } from '../../../time';
 
 export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
@@ -51,7 +49,7 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
             console.log("No difference in Fitbit server. Don't need to cache again for", this.key);
             return { success: true, skipped: true };
           }
-        }else{
+        } else {
           console.log("Too early since the last check. Don't need to cache again for", this.key);
           return { success: true, skipped: true };
         }
@@ -78,19 +76,26 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
   }
 
   private async invalidateBoxPlotInfoCache(key: string = null): Promise<void> {
-    return AsyncStorageHelper.remove("fitbit:value_range:" + this.key + ":" + key)
+    return this.service.core.localAsyncStorage.remove("fitbit:value_range:" + this.key + ":" + key)
   }
 
   async getBoxPlotInfoOfDataset(key: string = null): Promise<BoxPlotInfo> {
     const cacheKey = "fitbit:value_range:" + this.key + ":" + key
-    const cached = await AsyncStorageHelper.getObject(cacheKey)
+    const cached = await this.service.core.localAsyncStorage.getObject(cacheKey)
     if (cached) {
       return cached
     } else {
       const result = await this.getBoxPlotInfoOfDatasetFromDb(key)
-      AsyncStorageHelper.set(cacheKey, result)
+      if (result.median != null) {
+        this.service.core.localAsyncStorage.set(cacheKey, result)
+      }
       return result
     }
+  }
+
+  async clearLocalCache() {
+    await super.clearLocalCache()
+    await this.service.core.localAsyncStorage.clear()
   }
 
   protected abstract getBoxPlotInfoOfDatasetFromDb(key: string): Promise<BoxPlotInfo>
