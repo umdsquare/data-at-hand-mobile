@@ -33,23 +33,29 @@ interface Props {
 }
 interface State {
     touchedDate: number,
-    touchStartX: number,
-    touchStartY: number,
-    touchStartedAt: number
 }
 class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
 
     private chartAreaResponder: PanResponderInstance
+
+    private touchStartX: number
+    private touchStartY: number
+    private touchStartedAt: number
 
     constructor(props) {
         super(props)
 
         this.chartAreaResponder = PanResponder.create({
             onPanResponderTerminationRequest: () => false,
+
+
+            // - Does this view want to become responder on the start of a touch?
             onStartShouldSetPanResponder: (ev, gestureState) => true,
+            // Should child views be prevented from becoming responder on first touch?
+            onStartShouldSetPanResponderCapture: (ev, gestureState) => true,
+
             onMoveShouldSetPanResponder: (ev, gestureState) => true,
             onMoveShouldSetPanResponderCapture: (ev, state) => true,
-            onStartShouldSetPanResponderCapture: (ev, state) => true,
             onPanResponderMove: (ev, gestureState) => {
                 this.onTouchChartArea(ev.nativeEvent.locationX, ev.nativeEvent.locationY, "move", ev.nativeEvent.pageX, ev.nativeEvent.pageY, gestureState)
             },
@@ -69,22 +75,13 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
 
         this.state = {
             touchedDate: null,
-            touchStartX: null,
-            touchStartY: null,
-            touchStartedAt: null,
         }
     }
 
-    onTouchChartArea = (x: number, y: number, type: "start" | "move" | "end", screenX: number, screenY: number, gestureState: PanResponderGestureState) => {
-        const localX = CommonBrowsingChartStyles.transformViewXToChartAreaLocalX(x)
-        const localY = CommonBrowsingChartStyles.transformViewYToChartAreaLocalY(y)
+    private makeTouchingInfo(date: number, x: number, y: number, screenX: number, screenY: number, gestureState: PanResponderGestureState) {
 
         const dX = screenX - x
         const dY = screenY - y
-
-        const domains = this.props.scaleX.domain()
-        let index = Math.max(0, Math.min(domains.length - 1, Math.floor(localX / this.props.scaleX.step())))
-        const date = domains[index]
 
         const touchingInfo = {
             touchId: gestureState.stateID.toString(),
@@ -103,45 +100,56 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
             touchingInfo.value = null
         }
 
+        return touchingInfo
+    }
+
+    onTouchChartArea = (x: number, y: number, type: "start" | "move" | "end", screenX: number, screenY: number, gestureState: PanResponderGestureState) => {
+        const localX = CommonBrowsingChartStyles.transformViewXToChartAreaLocalX(x)
+
+        const domains = this.props.scaleX.domain()
+        let index = Math.max(0, Math.min(domains.length - 1, Math.floor(localX / this.props.scaleX.step())))
+        const date = domains[index]
+
+        const isTouchPointStable = Math.abs(gestureState.dy) < 5 && Math.abs(gestureState.vy) < 0.1
+
         switch (type) {
             case "start":
 
                 this.setState({
                     ...this.state,
-                    touchStartX: x,
-                    touchStartY: y,
-                    touchStartedAt: Date.now(),
                     touchedDate: date
                 })
+                this.touchStartX = x,
+                    this.touchStartY = y,
+                    this.touchStartedAt = Date.now(),
 
-                console.log("touch start")
+                    console.log("touch start")
                 setTimeout(() => {
-                    if (this.state.touchStartX != null && this.props.isContainerScrolling !== true) {
+                    if (this.touchStartX != null && this.props.isContainerScrolling !== true && isTouchPointStable === true) {
                         this.props.onDateTouchStart && this.props.onDateTouchStart(date)
-                        this.props.setTouchingInfo(touchingInfo)
+                        this.props.setTouchingInfo(this.makeTouchingInfo(date, x, y, screenX, screenY, gestureState))
                     }
                 }, CLICK_THRESHOLD_MILLIS + 10)
                 break;
             case "move":
-                if (this.state.touchedDate !== date) {
+                if (this.state.touchedDate !== date && this.props.linkedDate != null) {
                     //date changed
                     this.setState({
                         ...this.state,
                         touchedDate: date
                     })
                     this.props.onDateTouchMove && this.props.onDateTouchMove(date)
-                    this.props.setTouchingInfo(touchingInfo)
+                    this.props.setTouchingInfo(this.makeTouchingInfo(date, x, y, screenX, screenY, gestureState))
                 }
                 break;
             case "end":
-
-                if (this.state.touchStartedAt != null && Date.now() - this.state.touchStartedAt < CLICK_THRESHOLD_MILLIS && this.state.touchedDate === date) {
+                if (this.touchStartedAt != null && Date.now() - this.touchStartedAt < CLICK_THRESHOLD_MILLIS && this.state.touchedDate === date && isTouchPointStable === true) {
                     this.props.onDateClick && this.props.onDateClick(date)
-                    try{
+                    try {
                         if (this.props.getValueOfDate(date)) {
                             this.props.goToDayDetail(date)
-                        }    
-                    }catch (e){
+                        }
+                    } catch (e) {
 
                     }
                     console.log("click")
@@ -149,11 +157,12 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
 
                 this.setState({
                     ...this.state,
-                    touchStartX: null,
-                    touchStartY: null,
-                    touchStartedAt: null,
                     touchedDate: null
                 })
+                this.touchStartX = null
+                this.touchStartY = null
+                this.touchStartedAt = null
+
                 this.props.onDateTouchEnd && this.props.onDateTouchEnd(date)
                 this.props.setTouchingInfo(null)
                 break;
@@ -189,7 +198,10 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
 
     let linkedDate: number
     if (appState.explorationState.touchingElement != null) {
-        linkedDate = explorationInfoHelper.getParameterValueOfParams<number>(appState.explorationState.touchingElement.params, ParameterType.Date)
+        const selectedDataSource = explorationInfoHelper.getParameterValueOfParams<DataSourceType>(appState.explorationState.touchingElement.params, ParameterType.DataSource)
+        if (selectedDataSource === ownProps.dataSource) {
+            linkedDate = explorationInfoHelper.getParameterValueOfParams<number>(appState.explorationState.touchingElement.params, ParameterType.Date)
+        }
     }
 
     return {
