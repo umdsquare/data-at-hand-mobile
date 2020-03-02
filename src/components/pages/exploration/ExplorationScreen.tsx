@@ -1,8 +1,7 @@
 import React from "react";
-import { StatusBar, View, StyleSheet, Platform, BackHandler, Text, Alert, AppState, AppStateStatus } from "react-native";
+import { StatusBar, View, StyleSheet, Platform, BackHandler, Alert, AppState, AppStateStatus } from "react-native";
 import Colors from "../../../style/Colors";
 import { StyleTemplates } from "../../../style/Styles";
-import { ExplorationState } from "../../../state/exploration/interaction/reducers";
 import { ThunkDispatch } from "redux-thunk";
 import { ReduxAppState } from "../../../state/types";
 import { connect } from "react-redux";
@@ -91,8 +90,11 @@ const undoIconStyle = <SvgIcon type={SvgIconType.Reset} size={20} />
 
 export interface ExplorationProps {
     navigation: StackNavigationProp<RootStackParamList, 'Exploration'>,
-    explorationState: ExplorationState,
-    explorationDataState: ExplorationDataState,
+    explorationInfo: ExplorationInfo,
+    isUndoAvailable: boolean,
+    backNavStackSize: number, 
+    loadedDataInfo: ExplorationInfo,
+    isDataLoading: boolean,
     selectedServiceKey: string,
     showGlobalSpeechPopup: boolean,
     dispatchCommand: (command: ExplorationAction) => void,
@@ -110,7 +112,7 @@ interface State {
 }
 
 
-class ExplorationScreen extends React.Component<ExplorationProps, State> {
+class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
 
     private comparisonBottomSheetRef: BottomSheet
 
@@ -126,7 +128,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
     }
 
     private onHardwareBackPress = () => {
-        if (this.props.explorationState.backNavStack.length > 0) {
+        if (this.props.backNavStackSize > 0) {
             this.props.dispatchCommand(goBackAction())
             return true
         } else return false
@@ -188,7 +190,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                     loadingMessage: null
                 })
                 console.log("activated ", this.props.selectedServiceKey, "successfully.")
-                this.props.dispatchDataReload(this.props.explorationState.info)
+                this.props.dispatchDataReload(this.props.explorationInfo)
             } catch (error) {
                 console.log("service activation error: ", this.props.selectedServiceKey, error)
             }
@@ -209,7 +211,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
         let dataReloadNeeded = false
 
-        if (this.props.explorationState.info.type !== prevProps.explorationState.info.type || deepEqual(prevProps.explorationState.info.values, this.props.explorationState.info.values) === false) {
+        if (this.props.explorationInfo.type !== prevProps.explorationInfo.type || deepEqual(prevProps.explorationInfo.values, this.props.explorationInfo.values) === false) {
             if (this.state.initialLoadingFinished === true) {
                 dataReloadNeeded = true
             }
@@ -221,7 +223,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
         if (dataReloadNeeded === true) {
             console.log("should reload data")
-            this.props.dispatchDataReload(this.props.explorationState.info)
+            this.props.dispatchDataReload(this.props.explorationInfo)
         }
     }
 
@@ -253,7 +255,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
         const sessionId = makeNewSessionId()
         this.props.dispatchSetShowGlobalPopup(true, sessionId)
-        this.props.dispatchStartSpeechSession(sessionId, this.props.explorationState.info.type)
+        this.props.dispatchStartSpeechSession(sessionId, this.props.explorationInfo.type)
 
         this.setState({
             ...this.state,
@@ -283,16 +285,16 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 {/* main data panel ===================================================================*/}
 
                 {
-                    this.props.explorationDataState.isBusy === true && <BusyHorizontalIndicator />
+                    this.props.isDataLoading === true && <BusyHorizontalIndicator />
                 }
 
                 {
-                    this.props.explorationDataState.info != null ?
-                        this.makeMainPanel(this.props.explorationDataState.info.type) : <></>
+                    this.props.loadedDataInfo != null ?
+                        this.makeMainPanel(this.props.loadedDataInfo.type) : <></>
                 }
 
                 {/* history panel ===================================================================*/}
-                {this.props.explorationState.prevInfo != null && <View style={styles.historyPanelStyle}>
+                {this.props.isUndoAvailable === true && <View style={styles.historyPanelStyle}>
                     <Button
                         containerStyle={styles.historyButtonContainerStyle}
                         buttonStyle={styles.historyButtonStyle}
@@ -304,20 +306,20 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
                 }
             </View>
 
-            <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationState.info)}
+            <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationInfo)}
                 onModePress={this.onBottomBarButtonPress}
                 onVoiceButtonPressIn={this.onGlobalSpeechInputPressIn}
                 onVoiceButtonPressOut={this.onGlobalSpeechInputPressOut}
             />
 
             <BottomSheet ref={ref => { this.comparisonBottomSheetRef = ref }}>
-                <ComparisonInitPanel info={this.props.explorationState.info} onCompleted={() => { this.comparisonBottomSheetRef.close() }} />
+                <ComparisonInitPanel info={this.props.explorationInfo} onCompleted={() => { this.comparisonBottomSheetRef.close() }} />
             </BottomSheet>
 
             <TooltipOverlay />
             <GlobalSpeechOverlay isGlobalSpeechButtonPressed={this.props.showGlobalSpeechPopup} />
 
-            <DataBusyOverlay isBusy={this.props.explorationDataState.isBusy === true || this.state.initialLoadingFinished === false} />
+            <DataBusyOverlay isBusy={this.props.isDataLoading === true || this.state.initialLoadingFinished === false} />
             {
                 this.state.initialLoadingFinished === false ? <InitialLoadingIndicator loadingMessage={this.state.loadingMessage} /> : <></>
             }
@@ -332,7 +334,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
             case ExplorationType.B_Range:
                 return <BrowseRangeMainPanel />
             case ExplorationType.B_Day:
-                return getIntraDayMainPanel(this.props.explorationDataState.info)
+                return getIntraDayMainPanel(this.props.loadedDataInfo)
             case ExplorationType.C_Cyclic:
                 return <CyclicComparisonMainPanel />
             case ExplorationType.C_TwoRanges:
@@ -361,8 +363,11 @@ function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Expl
 function mapStateToProps(appState: ReduxAppState, ownProps: ExplorationProps): ExplorationProps {
     return {
         ...ownProps,
-        explorationState: appState.explorationState,
-        explorationDataState: appState.explorationDataState,
+        explorationInfo: appState.explorationState.info,
+        backNavStackSize: appState.explorationState.backNavStack.length,
+        isUndoAvailable: appState.explorationState.prevInfo != null,
+        loadedDataInfo: appState.explorationDataState.info,
+        isDataLoading: appState.explorationDataState.isBusy,
         selectedServiceKey: appState.settingsState.serviceKey,
         showGlobalSpeechPopup: appState.speechRecognizerState.showGlobalPopup
     }
