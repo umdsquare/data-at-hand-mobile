@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Colors from '../../style/Colors';
 import { Sizes } from '../../style/Sizes';
@@ -319,18 +319,25 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, width
     }
 }
 
-export const DataSourceChartFrame = (props: {
+export const DataSourceChartFrame = React.memo((props: {
     data: OverviewSourceRow
     measureUnitType: MeasureUnitType
     showToday?: boolean
     flat?: boolean
     showHeader?: boolean
-    onHeaderPressed?: () => void
-    onTodayPressed?: () => void
+    onHeaderPressed?: (source: DataSourceType) => void
+    onTodayPressed?: (source: DataSourceType) => void
 }) => {
 
     const [chartContainerWidth, setChartContainerWidth] = useState(-1)
     const [chartContainerHeight, setChartContainerHeight] = useState(-1)
+
+    const onSizeChanged = useCallback((width, height) => { setChartContainerWidth(width); setChartContainerHeight(height) }, 
+    [setChartContainerWidth, setChartContainerHeight])
+    
+    const onHeaderPress = useCallback(()=> props.onHeaderPressed && props.onHeaderPressed(props.data.source), [props.onHeaderPressed, props.data.source])
+    const onTodayPress = useCallback(()=> props.onTodayPressed && props.onTodayPressed(props.data.source), [props.onTodayPressed, props.data.source])
+    
 
     const spec = DataSourceManager.instance.getSpec(props.data.source)
     const todayInfo = formatTodayValue(props.data, props.measureUnitType)
@@ -338,7 +345,7 @@ export const DataSourceChartFrame = (props: {
     return <View style={props.flat === true ? styles.containerStyleFlat : styles.containerStyle}>
         {props.showHeader !== false && <View style={styles.headerStyle}>
             <View style={styles.headerClickRegionWrapperStyle}>
-                <TouchableOpacity onPress={props.onHeaderPressed} disabled={props.onHeaderPressed == null} activeOpacity={0.7} style={styles.headerClickRegionStyle}>
+                <TouchableOpacity onPress={onHeaderPress} disabled={props.onHeaderPressed == null} activeOpacity={0.7} style={styles.headerClickRegionStyle}>
                     <View style={styles.iconContainerStyle}>
                         <DataSourceIcon size={18} type={props.data.source} color={Colors.accent} />
                     </View>
@@ -349,7 +356,7 @@ export const DataSourceChartFrame = (props: {
             {
                 props.showToday !== false && props.data.today != null ?
                     <TouchableOpacity style={styles.todayButtonStyle}
-                        onPress={props.onTodayPressed} disabled={props.onTodayPressed == null}><Text style={styles.headerDescriptionTextStyle}>
+                        onPress={onTodayPress} disabled={props.onTodayPressed == null}><Text style={styles.headerDescriptionTextStyle}>
                             <Text>{todayInfo.label + ": "}</Text>
                             {
                                 todayInfo.formatted != null ? todayInfo.formatted.map((chunk, index) =>
@@ -361,7 +368,7 @@ export const DataSourceChartFrame = (props: {
             }
         </View>}
         <View style={styles.chartAreaStyle}>
-            <SizeWatcher containerStyle={{ aspectRatio: 3 }} onSizeChange={(width, height) => { setChartContainerWidth(width); setChartContainerHeight(height) }}>
+            <SizeWatcher containerStyle={{ aspectRatio: 3 }} onSizeChange={onSizeChanged}>
                 {
                     getChartView(spec.type, props.data, chartContainerWidth, chartContainerHeight, props.measureUnitType)
                 }
@@ -378,4 +385,4 @@ export const DataSourceChartFrame = (props: {
         }
         </View>
     </View >
-}
+})

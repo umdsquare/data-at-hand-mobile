@@ -22,12 +22,10 @@ interface Props extends ChartProps {
         ticks: number[]}
 }
 
-export const DailyBarChart = (prop: Props) => {
+export const DailyBarChart = React.memo((prop: Props) => {
 
     const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
-
-    const [chartLayout, setChartLayout] = useState({ x: 0, y: 0, width: 0, height: 0 })
 
     const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
 
@@ -57,7 +55,7 @@ export const DailyBarChart = (prop: Props) => {
         ticks = scaleY.ticks(5)
     }
 
-    return <Svg width={prop.containerWidth} height={prop.containerHeight} onLayout={(layout) => { setChartLayout(layout.nativeEvent.layout) }}>
+    return <Svg width={prop.containerWidth} height={prop.containerHeight}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={prop.valueTickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
 
@@ -82,4 +80,4 @@ export const DailyBarChart = (prop: Props) => {
         </GroupWithTouchInteraction>
     </Svg>
 
-}
+})

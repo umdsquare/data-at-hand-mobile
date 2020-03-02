@@ -16,7 +16,7 @@ import { ReduxAppState } from '../../../../state/types';
 import { DataServiceManager } from '../../../../system/DataServiceManager';
 
 
-export const DailyHeartRateChart = (prop: ChartProps) => {
+export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
 
     const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
@@ -78,4 +78,4 @@ export const DailyHeartRateChart = (prop: ChartProps) => {
         </GroupWithTouchInteraction>
     </Svg>
 
-}
+})

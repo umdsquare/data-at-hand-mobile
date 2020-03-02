@@ -254,6 +254,8 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
     private swipedFeedbackRef: SwipedFeedback
     private bottomSheetRef: BottomSheet
 
+    private setRangeDebounceTimer: any
+
     constructor(props: Props) {
         super(props)
         this.state = DateRangeBar.deriveState(props.from, props.to, { isBottomSheetOpen: false, isPeriodButtonLongPressed: false } as any)
@@ -326,7 +328,14 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         this.bottomSheetRef?.close()
 
         if (this.props.onRangeChanged) {
+
             this.props.onRangeChanged(newState.from, newState.to, interactionType)
+            if(this.setRangeDebounceTimer){
+                cancelAnimationFrame(this.setRangeDebounceTimer)
+            }
+            this.setRangeDebounceTimer = requestAnimationFrame(()=>{
+                this.props.onRangeChanged(newState.from, newState.to, interactionType)
+            })
         }
     }
 

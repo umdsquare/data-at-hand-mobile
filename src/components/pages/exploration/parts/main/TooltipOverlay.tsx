@@ -129,7 +129,7 @@ interface State {
     tooltipInterpPosition: Animated.ValueXY
 }
 
-class TooltipOverlay extends React.Component<Props, State>{
+class TooltipOverlay extends React.PureComponent<Props, State>{
 
     private speechInputPanelRef = null
 

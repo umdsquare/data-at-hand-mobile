@@ -26,8 +26,7 @@ interface Props {
     onDateClick?: (date: number) => void,
 
     getValueOfDate: (date: number) => any,
-
-    currentTouchingInfo?: TouchingElementInfo,
+    linkedDate?: number,
     isContainerScrolling?: boolean,
     setTouchingInfo?: (info: TouchingElementInfo) => void,
     goToDayDetail?: (date: number) => void
@@ -38,7 +37,7 @@ interface State {
     touchStartY: number,
     touchStartedAt: number
 }
-class GroupWithTouchInteraction extends React.Component<Props, State>{
+class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
 
     private chartAreaResponder: PanResponderInstance
 
@@ -163,23 +162,14 @@ class GroupWithTouchInteraction extends React.Component<Props, State>{
 
     render() {
 
-        let linkedDate: number
-        if (this.props.currentTouchingInfo != null) {
-            const dataSource = explorationInfoHelper.getParameterValueOfParams(this.props.currentTouchingInfo.params, ParameterType.DataSource)
-            const date = explorationInfoHelper.getParameterValueOfParams<number>(this.props.currentTouchingInfo.params, ParameterType.Date)
-            if (dataSource === this.props.dataSource && date != null) {
-                linkedDate = date
-            }
-        }
-
         return <G {...this.props.chartArea} {...this.chartAreaResponder.panHandlers}>
 
             <Rect x={0} y={0} width={this.props.chartArea.width} height={this.props.chartArea.height} fill="transparent" />
             {
-                this.state.touchedDate && !linkedDate && <Rect fill="#00000015" x={this.props.scaleX(this.state.touchedDate)} width={this.props.scaleX.bandwidth()} height={this.props.chartArea.height} />
+                this.state.touchedDate && !this.props.linkedDate && <Rect fill="#00000015" x={this.props.scaleX(this.state.touchedDate)} width={this.props.scaleX.bandwidth()} height={this.props.chartArea.height} />
             }
             {
-                linkedDate && <Rect fill="#00000010" strokeWidth={1} stroke={Colors.accent} x={this.props.scaleX(linkedDate)} width={this.props.scaleX.bandwidth()} height={this.props.chartArea.height} />
+                this.props.linkedDate && <Rect fill="#00000010" strokeWidth={1} stroke={Colors.accent} x={this.props.scaleX(this.props.linkedDate)} width={this.props.scaleX.bandwidth()} height={this.props.chartArea.height} />
             }
             {this.props.children}
         </G>
@@ -195,9 +185,16 @@ function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props {
 }
 
 function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
+
+
+    let linkedDate: number
+    if (appState.explorationState.touchingElement != null) {
+        linkedDate = explorationInfoHelper.getParameterValueOfParams<number>(appState.explorationState.touchingElement.params, ParameterType.Date)
+    }
+
     return {
         ...ownProps,
-        currentTouchingInfo: appState.explorationState.touchingElement,
+        linkedDate,
         isContainerScrolling: appState.explorationState.uiStatus.overviewScrolling
     }
 }

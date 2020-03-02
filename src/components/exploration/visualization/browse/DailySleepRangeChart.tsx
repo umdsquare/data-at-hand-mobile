@@ -28,7 +28,7 @@ const tickFormat = (tick: number) => {
     else return format(addSeconds(pivot, tick), "h a").toLowerCase()
 }
 
-export const DailySleepRangeChart = (prop: Props) => {
+export const DailySleepRangeChart = React.memo((prop: Props) => {
 
     const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
@@ -94,4 +94,4 @@ export const DailySleepRangeChart = (prop: Props) => {
         </GroupWithTouchInteraction>
     </Svg>
 
-}
+})

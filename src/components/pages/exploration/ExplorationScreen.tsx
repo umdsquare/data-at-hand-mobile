@@ -221,9 +221,7 @@ class ExplorationScreen extends React.Component<ExplorationProps, State> {
 
         if (dataReloadNeeded === true) {
             console.log("should reload data")
-            requestAnimationFrame((time: number) => {
-                this.props.dispatchDataReload(this.props.explorationState.info)
-            })
+            this.props.dispatchDataReload(this.props.explorationState.info)
         }
     }
 

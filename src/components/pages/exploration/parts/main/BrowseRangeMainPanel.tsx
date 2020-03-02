@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback, useMemo } from "react";
 import { View, FlatList, Text, StyleSheet, ActivityIndicator, LayoutAnimation, UIManager, findNodeHandle } from 'react-native';
 import { MeasureUnitType, DataSourceType } from "../../../../../measure/DataSourceSpec";
 import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, InteractionType } from "../../../../../state/exploration/interaction/actions";
@@ -22,10 +22,12 @@ import { SvgIcon, SvgIconType } from "../../../../common/svg/SvgIcon";
 import { DataSourceManager } from "../../../../../system/DataSourceManager";
 import { DataServiceManager } from "../../../../../system/DataServiceManager";
 
+const listItemHeightNormal = 52
+const listItemHeightTall = 70
+
 const styles = StyleSheet.create({
     listItemStyle: {
         ...StyleTemplates.flexHorizontalCenteredListContainer,
-        minHeight: 52,
         backgroundColor: '#fdfdfd',
         paddingLeft: Sizes.horizontalPadding,
         paddingRight: Sizes.horizontalPadding,
@@ -78,12 +80,25 @@ interface Props {
     source?: DataSourceType,
     data?: any,
     measureUnitType?: MeasureUnitType,
-    touchingElementInfo?: TouchingElementInfo,
-    getToday?: ()=>Date,
+    highlightedDate?: number,
+    getToday?: () => Date,
     dispatchExplorationAction?: (action: ExplorationAction) => void
 }
 
-class BrowseRangeMainPanel extends React.Component<Props>{
+interface State {
+    today: number,
+}
+
+class BrowseRangeMainPanel extends React.PureComponent<Props, State>{
+
+    constructor(props: Props) {
+        super(props)
+
+        this.state = {
+            today: DateTimeHelper.toNumberedDateFromDate(props.getToday())
+        }
+    }
+
 
     componentDidUpdate(prevProps: Props) {
         if (prevProps.isLoadingData !== this.props.isLoadingData) {
@@ -103,21 +118,25 @@ class BrowseRangeMainPanel extends React.Component<Props>{
         this.props.dispatchExplorationAction(setTouchElementInfo(null))
     }
 
+    private getItemLayout = (_, index) => {
+        const height = (this.props.source === DataSourceType.HoursSlept || this.props.source === DataSourceType.SleepRange) ? listItemHeightTall : listItemHeightNormal
+        return { length: height, offset: height * index, index }
+    }
+
+    private renderItem = (entry) => <Item date={entry.item["numberedDate"]}
+        today={this.state.today} item={entry.item} type={this.props.source}
+        unitType={this.props.measureUnitType}
+        isHighlighted={entry.item["numberedDate"] === this.props.highlightedDate}
+        onClick={this.onListElementClick}
+        onLongPressIn={this.onListElementLongPressIn}
+        onLongPressOut={this.onListElementLongPressOut}
+    />
+
     render() {
         if (this.props.data != null) {
-            const today = DateTimeHelper.toNumberedDateFromDate(this.props.getToday())
             const sourceRangedData = this.props.data as OverviewSourceRow
             const dataList: Array<any> = (this.props.source === DataSourceType.Weight ? sourceRangedData.data.logs : sourceRangedData.data).slice(0)
             dataList.sort((a: any, b: any) => b["numberedDate"] - a["numberedDate"])
-
-            let highlightedDate: number = null
-            if (this.props.touchingElementInfo) {
-                const dataSource = explorationInfoHelper.getParameterValueOfParams<DataSourceType>(this.props.touchingElementInfo.params, ParameterType.DataSource)
-                const date = explorationInfoHelper.getParameterValueOfParams<number>(this.props.touchingElementInfo.params, ParameterType.Date)
-                if (dataSource === this.props.source && date != null) {
-                    highlightedDate = date
-                }
-            }
 
             return <View style={StyleTemplates.fillFlex}>
                 <DataSourceChartFrame data={sourceRangedData}
@@ -127,15 +146,10 @@ class BrowseRangeMainPanel extends React.Component<Props>{
                     showHeader={false}
                 />
                 {
-                    dataList.length > 0 && <FlatList style={StyleTemplates.fillFlex} data={dataList}
-                        renderItem={(entry) => <Item date={entry.item["numberedDate"]}
-                            today={today} item={entry.item} type={this.props.source}
-                            unitType={this.props.measureUnitType}
-                            isHighlighted={entry.item["numberedDate"] === highlightedDate}
-                            onClick={this.onListElementClick}
-                            onLongPressIn={this.onListElementLongPressIn}
-                            onLongPressOut={this.onListElementLongPressOut}
-                        />}
+                    dataList.length > 0 && <FlatList style={StyleTemplates.fillFlex}
+                        data={dataList}
+                        renderItem={this.renderItem}
+                        getItemLayout={this.getItemLayout}
                         keyExtractor={item => item["id"] || item["numberedDate"].toString()}
                     />
                 }
@@ -160,13 +174,22 @@ function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props {
 }
 
 function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
+
+    let highlightedDate: number = null
+    if (appState.explorationState.touchingElement) {
+        const date = explorationInfoHelper.getParameterValueOfParams<number>(appState.explorationState.touchingElement.params, ParameterType.Date)
+        if (date != null) {
+            highlightedDate = date
+        }
+    }
+
     return {
         ...ownProps,
         source: explorationInfoHelper.getParameterValue(appState.explorationDataState.info, ParameterType.DataSource),
         data: appState.explorationDataState.data,
         measureUnitType: appState.settingsState.unit,
         isLoadingData: appState.explorationDataState.isBusy,
-        touchingElementInfo: appState.explorationState.touchingElement,
+        highlightedDate,
         getToday: DataServiceManager.instance.getServiceByKey(appState.settingsState.serviceKey).getToday
     }
 }
@@ -177,7 +200,7 @@ const connected = connect(mapStateToProps, mapDispatchToProps)(BrowseRangeMainPa
 export { connected as BrowseRangeMainPanel }
 
 
-const Item = (prop: {
+const Item = React.memo((prop: {
     date: number,
     item: any,
     today: number,
@@ -195,124 +218,143 @@ const Item = (prop: {
         dateString = 'Yesterday'
     } else dateString = format(DateTimeHelper.toDate(prop.date), "MMM dd, eee")
 
-    let valueElement: any
-    switch (prop.type) {
-        case DataSourceType.StepCount:
-            valueElement = <Text style={styles.listItemValueContainerStyle}>
-                <Text style={styles.listItemValueDigitStyle}>{commaNumber(prop.item.value)}</Text>
-                <Text style={styles.listItemValueUnitStyle}> steps</Text>
-            </Text>
-            break;
-        case DataSourceType.HeartRate:
-            valueElement = <Text style={styles.listItemValueContainerStyle}>
-                <Text style={styles.listItemValueDigitStyle}>{prop.item.value}</Text>
-                <Text style={styles.listItemValueUnitStyle}> bpm</Text>
-            </Text>
-            break;
-        case DataSourceType.Weight:
-            let valueText
-            let unit
-            switch (prop.unitType) {
-                case MeasureUnitType.US:
-                    valueText = unitConvert(prop.item.value).from('kg').to('lb').toFixed(1)
-                    unit = ' lb'
-                    break;
+    const listItemStyle = useMemo(() => {
+        if (prop.type === DataSourceType.SleepRange || prop.type === DataSourceType.HoursSlept) return { ...styles.listItemStyle, height: listItemHeightTall }
+        else return { ...styles.listItemStyle, height: listItemHeightNormal }
+    }, [prop.type])
 
-                case MeasureUnitType.Metric:
-                default:
-                    valueText = prop.item.value.toFixed(1)
-                    unit = ' kg'
-                    break;
-            }
-
-            valueElement = <Text style={styles.listItemValueContainerStyle}>
-                <Text style={styles.listItemValueDigitStyle}>{valueText}</Text>
-                <Text style={styles.listItemValueUnitStyle}>{unit}</Text>
-            </Text>
-            break;
-
-        case DataSourceType.HoursSlept:
-        case DataSourceType.SleepRange:
-            const pivot = startOfDay(DateTimeHelper.toDate(prop.date))
-
-            const actualBedTime = addSeconds(pivot, Math.round(prop.item.bedTimeDiffSeconds))
-            const actualWakeTime = addSeconds(pivot, Math.round(prop.item.wakeTimeDiffSeconds))
-
-            const rangeText = format(actualBedTime, 'hh:mm a').toLowerCase() + " - " + format(actualWakeTime, 'hh:mm a').toLowerCase()
-
-            const lengthHr = Math.floor(prop.item.lengthInSeconds / 3600)
-            let lengthMin = Math.floor((prop.item.lengthInSeconds % 3600) / 60)
-            const lengthSec = prop.item.lengthInSeconds % 60
-            if (lengthSec > 30) {
-                lengthMin++
-            }
-
-            const durationFormat = []
-            if (lengthHr > 0) {
-                durationFormat.push({ type: 'value', text: lengthHr })
-                durationFormat.push({ type: 'unit', text: " hr" })
-            }
-            durationFormat.push({ type: "value", text: lengthHr > 0 ? (" " + lengthMin) : lengthMin })
-            durationFormat.push({ type: "unit", text: " min" })
-
-
-            valueElement = <View style={styles.listItemValueContainerStyle}>
-                <Text style={{ marginBottom: 8, fontSize: Sizes.smallFontSize, color: Colors.textColorLight }}>{rangeText}</Text>
-                <Text>
-                    {
-                        durationFormat.map((f, i) => <Text key={i}
-                            style={f.type === 'value' ? styles.listItemValueDigitStyle : styles.listItemValueUnitStyle}>
-                            {f.text}
-                        </Text>)
-                    }
+    const valueView = useMemo(() => {
+        let valueElement: any
+        switch (prop.type) {
+            case DataSourceType.StepCount:
+                valueElement = <Text style={styles.listItemValueContainerStyle}>
+                    <Text style={styles.listItemValueDigitStyle}>{commaNumber(prop.item.value)}</Text>
+                    <Text style={styles.listItemValueUnitStyle}> steps</Text>
                 </Text>
-            </View>
-            break;
-    }
+                break;
+            case DataSourceType.HeartRate:
+                valueElement = <Text style={styles.listItemValueContainerStyle}>
+                    <Text style={styles.listItemValueDigitStyle}>{prop.item.value}</Text>
+                    <Text style={styles.listItemValueUnitStyle}> bpm</Text>
+                </Text>
+                break;
+            case DataSourceType.Weight:
+                let valueText
+                let unit
+                switch (prop.unitType) {
+                    case MeasureUnitType.US:
+                        valueText = unitConvert(prop.item.value).from('kg').to('lb').toFixed(1)
+                        unit = ' lb'
+                        break;
+
+                    case MeasureUnitType.Metric:
+                    default:
+                        valueText = prop.item.value.toFixed(1)
+                        unit = ' kg'
+                        break;
+                }
+
+                valueElement = <Text style={styles.listItemValueContainerStyle}>
+                    <Text style={styles.listItemValueDigitStyle}>{valueText}</Text>
+                    <Text style={styles.listItemValueUnitStyle}>{unit}</Text>
+                </Text>
+                break;
+
+            case DataSourceType.HoursSlept:
+            case DataSourceType.SleepRange:
+                const pivot = startOfDay(DateTimeHelper.toDate(prop.date))
+
+                const actualBedTime = addSeconds(pivot, Math.round(prop.item.bedTimeDiffSeconds))
+                const actualWakeTime = addSeconds(pivot, Math.round(prop.item.wakeTimeDiffSeconds))
+
+                const rangeText = format(actualBedTime, 'hh:mm a').toLowerCase() + " - " + format(actualWakeTime, 'hh:mm a').toLowerCase()
+
+                const lengthHr = Math.floor(prop.item.lengthInSeconds / 3600)
+                let lengthMin = Math.floor((prop.item.lengthInSeconds % 3600) / 60)
+                const lengthSec = prop.item.lengthInSeconds % 60
+                if (lengthSec > 30) {
+                    lengthMin++
+                }
+
+                const durationFormat = []
+                if (lengthHr > 0) {
+                    durationFormat.push({ type: 'value', text: lengthHr })
+                    durationFormat.push({ type: 'unit', text: " hr" })
+                }
+                durationFormat.push({ type: "value", text: lengthHr > 0 ? (" " + lengthMin) : lengthMin })
+                durationFormat.push({ type: "unit", text: " min" })
+
+
+                valueElement = <View style={styles.listItemValueContainerStyle}>
+                    <Text style={{ marginBottom: 8, fontSize: Sizes.smallFontSize, color: Colors.textColorLight }}>{rangeText}</Text>
+                    <Text>
+                        {
+                            durationFormat.map((f, i) => <Text key={i}
+                                style={f.type === 'value' ? styles.listItemValueDigitStyle : styles.listItemValueUnitStyle}>
+                                {f.text}
+                            </Text>)
+                        }
+                    </Text>
+                </View>
+                break;
+        }
+        return valueElement
+    }, [prop.type, prop.item.bedTimeDiffSeconds, prop.item.wakeTimeDiffSeconds, prop.item.value])
+
 
     const [isInLongPress, setInLongPress] = useState(false)
 
     const elmRef = useRef(null)
 
+    const onLongPress = useCallback((event) => {
+        if (prop.onLongPressIn) {
+            UIManager.measureInWindow(findNodeHandle(elmRef.current), (x, y, width, height) => {
+                setInLongPress(true);
+                prop.onLongPressIn(prop.date, {
+                    touchId: Date.now().toString(),
+                    elementBoundInScreen: { x, y, width, height },
+                    params: [
+                        { parameter: ParameterType.DataSource, value: prop.type },
+                        { parameter: ParameterType.Date, value: prop.date }
+                    ],
+                    valueType: TouchingElementValueType.DayValue,
+                    value: prop.type === DataSourceType.SleepRange ? { value: prop.item.bedTimeDiffSeconds, value2: prop.item.wakeTimeDiffSeconds }
+                        : (prop.type === DataSourceType.HoursSlept ? prop.item.lengthInSeconds : prop.item.value)
+                })
+            })
+        } else {
+            setInLongPress(true);
+        }
+    }, [elmRef.current, prop.onLongPressIn, setInLongPress, prop.type, prop.date, prop.item])
+
+    const onPress = useCallback(() => {
+        prop.onClick(prop.date)
+    }, [prop.onClick, prop.date])
+
+    const onPressOut = useCallback(() => {
+        if (isInLongPress === true) {
+            console.log("long press out")
+            setInLongPress(false)
+            prop.onLongPressOut && prop.onLongPressOut(prop.date)
+        } else {
+            console.log("click press out")
+        }
+    }, [isInLongPress, setInLongPress, prop.onLongPressOut, prop.date])
+
     return <TouchableHighlight activeOpacity={0.95}
         ref={elmRef}
-        onLongPress={(event) => {
-            if (prop.onLongPressIn) {
-                UIManager.measureInWindow(findNodeHandle(elmRef.current), (x, y, width, height) => {
-                    setInLongPress(true);
-                    prop.onLongPressIn(prop.date, {
-                        touchId: Date.now().toString(),
-                        elementBoundInScreen: { x, y, width, height },
-                        params: [
-                            { parameter: ParameterType.DataSource, value: prop.type },
-                            { parameter: ParameterType.Date, value: prop.date }
-                        ],
-                        valueType: TouchingElementValueType.DayValue,
-                        value: prop.type === DataSourceType.SleepRange ? { value: prop.item.bedTimeDiffSeconds, value2: prop.item.wakeTimeDiffSeconds }
-                            : (prop.type === DataSourceType.HoursSlept ? prop.item.lengthInSeconds : prop.item.value)
-                    })
-                })
-            } else {
-                setInLongPress(true);
-            }
-        }}
-        onPress={(ev) => { console.log("click"); prop.onClick(prop.date) }}
-        onPressOut={(ev) => {
-            if (isInLongPress === true) {
-                console.log("long press out")
-                setInLongPress(false)
-                prop.onLongPressOut && prop.onLongPressOut(prop.date)
-            } else {
-                console.log("click press out")
-            }
-        }}><View style={styles.listItemStyle}>
+        onLongPress={onLongPress}
+        onPress={onPress}
+        onPressOut={onPressOut}>
+
+        <View style={listItemStyle}>
             <Text style={prop.today === prop.date ? styles.listItemDateTodayStyle : styles.listItemDateStyle}>{dateString}</Text>
             {
-                valueElement
+                valueView
             }
-            <SvgIcon type={SvgIconType.ArrowRight} color={Colors.textGray}/>
+            <SvgIcon type={SvgIconType.ArrowRight} color={Colors.textGray} />
             {
                 prop.isHighlighted === true && <View style={styles.listItemHighlightStyle} />
             }
         </View></TouchableHighlight>
-}
+})

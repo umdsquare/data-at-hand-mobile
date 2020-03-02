@@ -18,7 +18,7 @@ import { ReduxAppState } from '../../../../state/types';
 import { DataServiceManager } from '../../../../system/DataServiceManager';
 
 
-export const DailyWeightChart = (prop: {
+export const DailyWeightChart = React.memo((prop: {
     dateRange: number[],
     data: {
         trend: Array<{ numberedDate: number, value: number }>,
@@ -110,4 +110,4 @@ export const DailyWeightChart = (prop: {
         </G>
     </Svg>
 
-}
+})
