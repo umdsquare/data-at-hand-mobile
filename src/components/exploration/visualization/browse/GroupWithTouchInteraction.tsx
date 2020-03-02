@@ -42,6 +42,8 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
     private touchStartY: number
     private touchStartedAt: number
 
+    private longClickTimeoutHandle?: NodeJS.Timeout
+
     constructor(props) {
         super(props)
 
@@ -75,6 +77,12 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
 
         this.state = {
             touchedDate: null,
+        }
+    }
+
+    componentWillUnmount(){
+        if(this.longClickTimeoutHandle){
+            clearTimeout(this.longClickTimeoutHandle)
         }
     }
 
@@ -119,12 +127,14 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
                     ...this.state,
                     touchedDate: date
                 })
-                this.touchStartX = x,
-                    this.touchStartY = y,
-                    this.touchStartedAt = Date.now(),
+                this.touchStartX = x
+                this.touchStartY = y
+                this.touchStartedAt = Date.now()
 
-                    console.log("touch start")
-                setTimeout(() => {
+                if (this.longClickTimeoutHandle) {
+                    clearTimeout(this.longClickTimeoutHandle)
+                }
+                this.longClickTimeoutHandle = setTimeout(() => {
                     if (this.touchStartX != null && this.props.isContainerScrolling !== true && isTouchPointStable === true) {
                         this.props.onDateTouchStart && this.props.onDateTouchStart(date)
                         this.props.setTouchingInfo(this.makeTouchingInfo(date, x, y, screenX, screenY, gestureState))
@@ -152,7 +162,6 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
                     } catch (e) {
 
                     }
-                    console.log("click")
                 }
 
                 this.setState({
