@@ -36,7 +36,7 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
     const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
 
     const scaleX = CommonBrowsingChartStyles
-        .makeDateScale(null, prop.dateRange[0], prop.dateRange[1])
+        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
         .padding(0.2)
         .range([0, chartArea.width])
 
@@ -44,8 +44,8 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
     const today = DateTimeHelper.toNumberedDateFromDate(getToday())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
-    const latestTimeDiff = Math.max(d3Array.max(prop.data, d => d.wakeTimeDiffSeconds), d3Array.max(prop.data, d => d.bedTimeDiffSeconds), prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)
-    const earliestTimeDiff = Math.min(d3Array.min(prop.data, d => d.wakeTimeDiffSeconds), d3Array.min(prop.data, d => d.bedTimeDiffSeconds), prop.preferredValueRange[0] || Number.MAX_SAFE_INTEGER)
+    const latestTimeDiff = Math.max(d3Array.max(prop.data, d => d.wakeTimeDiffSeconds)!, d3Array.max(prop.data, d => d.bedTimeDiffSeconds)!, prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)
+    const earliestTimeDiff = Math.min(d3Array.min(prop.data, d => d.wakeTimeDiffSeconds)!, d3Array.min(prop.data, d => d.bedTimeDiffSeconds)!, prop.preferredValueRange[0] || Number.MAX_SAFE_INTEGER)
 
     const scaleForNice = scaleLinear()
         .domain([Math.floor(earliestTimeDiff / 3600), Math.ceil(latestTimeDiff / 3600)])
@@ -59,8 +59,8 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
         .domain(niceDomain)
         .range([0, chartArea.height])
 
-    const bedTimeAvg = d3Array.mean(prop.data, d => d.bedTimeDiffSeconds)
-    const wakeTimeAvg = d3Array.mean(prop.data, d => d.wakeTimeDiffSeconds)
+    const bedTimeAvg = d3Array.mean(prop.data, d => d.bedTimeDiffSeconds)!
+    const wakeTimeAvg = d3Array.mean(prop.data, d => d.wakeTimeDiffSeconds)!
 
     return <Svg width={prop.containerWidth} height={prop.containerHeight}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
@@ -77,7 +77,7 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
                     const barWidth = Math.min(scaleX.bandwidth(), 20)
                     return <Rect key={d.numberedDate}
                         width={barWidth} height={barHeight}
-                        x={scaleX(d.numberedDate) + (scaleX.bandwidth() - barWidth) * 0.5}
+                        x={scaleX(d.numberedDate)! + (scaleX.bandwidth() - barWidth) * 0.5}
                         y={scaleY(d.bedTimeDiffSeconds)}
                         rx={2}
                         fill={today === d.numberedDate ? Colors.today : Colors.chartElementDefault}

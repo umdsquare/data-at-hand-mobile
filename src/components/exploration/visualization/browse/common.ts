@@ -31,7 +31,7 @@ export namespace CommonBrowsingChartStyles {
   }
 
   export function makeDateScale(
-    base: ScaleBand<number>,
+    base: ScaleBand<number>|undefined,
     startDate: number,
     endDate: number,
   ): ScaleBand<number> {

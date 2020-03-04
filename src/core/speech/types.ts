@@ -17,7 +17,7 @@ export interface IVoiceDictatorNative{
     isAvailableInSystem(): Promise<boolean>
     registerStartEventListener(listener: ()=>void): EventSubscription
     registerReceivedEventListener(listener: (result: DictationResult) => void): EventSubscription
-    registerStopEventListener(listener: (error)=>void): EventSubscription
+    registerStopEventListener(listener: (error: any)=>void): EventSubscription
     start(): Promise<boolean>
     stop(): Promise<boolean>
 }

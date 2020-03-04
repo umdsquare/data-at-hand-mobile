@@ -26,25 +26,25 @@ interface Props {
     onDateClick?: (date: number) => void,
 
     getValueOfDate: (date: number) => any,
-    linkedDate?: number,
+    linkedDate?: number | null,
     isContainerScrolling?: boolean,
-    setTouchingInfo?: (info: TouchingElementInfo) => void,
+    setTouchingInfo?: (info: TouchingElementInfo|null) => void,
     goToDayDetail?: (date: number) => void
 }
 interface State {
-    touchedDate: number,
+    touchedDate: number | null,
 }
 class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
 
     private chartAreaResponder: PanResponderInstance
 
-    private touchStartX: number
-    private touchStartY: number
-    private touchStartedAt: number
+    private touchStartX: number | null = null
+    private touchStartY: number | null = null
+    private touchStartedAt: number | null = null
 
     private longClickTimeoutHandle?: NodeJS.Timeout
 
-    constructor(props) {
+    constructor(props: Props) {
         super(props)
 
         this.chartAreaResponder = PanResponder.create({
@@ -93,7 +93,7 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
 
         const touchingInfo = {
             touchId: gestureState.stateID.toString(),
-            elementBoundInScreen: { x: dX + this.props.chartArea.x + this.props.scaleX(date), y: dY + this.props.chartArea.y, width: this.props.scaleX.bandwidth(), height: this.props.chartArea.height },
+            elementBoundInScreen: { x: dX + this.props.chartArea.x + this.props.scaleX(date)!, y: dY + this.props.chartArea.y, width: this.props.scaleX.bandwidth(), height: this.props.chartArea.height },
             params: [
                 { parameter: ParameterType.DataSource, value: this.props.dataSource },
                 { parameter: ParameterType.Date, value: date }
@@ -137,7 +137,7 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
                 this.longClickTimeoutHandle = setTimeout(() => {
                     if (this.touchStartX != null && this.props.isContainerScrolling !== true && isTouchPointStable === true) {
                         this.props.onDateTouchStart && this.props.onDateTouchStart(date)
-                        this.props.setTouchingInfo(this.makeTouchingInfo(date, x, y, screenX, screenY, gestureState))
+                        this.props.setTouchingInfo!(this.makeTouchingInfo(date, x, y, screenX, screenY, gestureState))
                     }
                 }, CLICK_THRESHOLD_MILLIS + 10)
                 break;
@@ -149,7 +149,7 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
                         touchedDate: date
                     })
                     this.props.onDateTouchMove && this.props.onDateTouchMove(date)
-                    this.props.setTouchingInfo(this.makeTouchingInfo(date, x, y, screenX, screenY, gestureState))
+                    this.props.setTouchingInfo!(this.makeTouchingInfo(date, x, y, screenX, screenY, gestureState))
                 }
                 break;
             case "end":
@@ -157,7 +157,7 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
                     this.props.onDateClick && this.props.onDateClick(date)
                     try {
                         if (this.props.getValueOfDate(date)) {
-                            this.props.goToDayDetail(date)
+                            this.props.goToDayDetail!(date)
                         }
                     } catch (e) {
 
@@ -173,7 +173,7 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
                 this.touchStartedAt = null
 
                 this.props.onDateTouchEnd && this.props.onDateTouchEnd(date)
-                this.props.setTouchingInfo(null)
+                this.props.setTouchingInfo!(null)
                 break;
         }
     }
@@ -205,7 +205,7 @@ function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props {
 function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
 
 
-    let linkedDate: number
+    let linkedDate: number | null = null
     if (appState.explorationState.touchingElement != null) {
         const selectedDataSource = explorationInfoHelper.getParameterValueOfParams<DataSourceType>(appState.explorationState.touchingElement.params, ParameterType.DataSource)
         if (selectedDataSource === ownProps.dataSource) {

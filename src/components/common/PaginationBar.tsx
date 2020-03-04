@@ -24,7 +24,7 @@ interface Props {
     orientedAtEnd?: boolean,
     containerStyle?: any,
     buttonStyle?: any,
-    index?: number
+    index: number
 }
 
 interface State {
@@ -93,7 +93,7 @@ export class PaginationBar extends React.PureComponent<Props, State>{
         }
     }
 
-    private generateBallInfoList(currentIndex, relativeWindowPointer): Array<BallInfo> {
+    private generateBallInfoList(currentIndex: number, relativeWindowPointer: number): Array<BallInfo> {
         const currentWindowAbsolutePointer = currentIndex + relativeWindowPointer
         const ballInformations: Array<BallInfo> = []
 

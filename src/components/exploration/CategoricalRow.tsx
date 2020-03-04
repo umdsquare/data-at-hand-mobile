@@ -67,13 +67,13 @@ const styles = StyleSheet.create({
 export const CategoricalRow = (prop: {
     title: string,
     showSpeechAffordance?: boolean,
-    value?: string,
+    value: string,
     IconComponent?: any,
     iconProps?: (index: number) => any,
     showBorder?: boolean,
     children?: any,
     isLightMode?: boolean,
-    values?: string[],
+    values: string[],
     useSpeechIndicator?: boolean,
     onPress?: () => void,
     onValueChange?: (newValue: string, newIndex: number) => void,
@@ -92,7 +92,8 @@ export const CategoricalRow = (prop: {
                 prop.onValueChange(prop.values[currentIndex], currentIndex)
             }
             swipedFeedbackRef.current?.startFeedback('left')
-        } : null}
+        } : undefined}
+        
         onSwipeRight={prop.values ? () => {
             let currentIndex = prop.values.indexOf(prop.value)
             currentIndex = (currentIndex + 1) % prop.values.length
@@ -101,7 +102,7 @@ export const CategoricalRow = (prop: {
                 prop.onValueChange(prop.values[currentIndex], currentIndex)
             }
             swipedFeedbackRef.current?.startFeedback('right')
-        } : null}
+        } : undefined}
         style={prop.showBorder === true ? styles.containerStyleWithBorder : styles.containerStyleWithoutBorder}>
         {
             prop.values != null ? <SwipedFeedback ref={swipedFeedbackRef} /> : null

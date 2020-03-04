@@ -150,6 +150,7 @@ class FitbitWeightLogMeasure extends FitbitRangeMeasure<
   protected getBoxPlotInfoOfDatasetFromDb(): Promise<BoxPlotInfo> {
     return null
   }
+
   key: string = 'weight_log';
   displayName = "Weight Log"
 

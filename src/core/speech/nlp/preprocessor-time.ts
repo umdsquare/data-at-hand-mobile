@@ -1,6 +1,7 @@
 import { VariableType } from "./types";
 import { DateTimeHelper } from "../../../time";
 import { startOfMonth, startOfYear, endOfMonth, endOfYear } from "date-fns";
+import { chrono } from "src/types/chrono";
 
 export function parseTimeText(text: string): { type: VariableType.Date | VariableType.Period, value: number | [number, number] } {
     var chrono = require('chrono-node');

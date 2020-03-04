@@ -46,7 +46,7 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
         try {
             console.log(sessionId, "Setup speech components")
 
-            let previousDictationResult: DictationResult = null
+            let previousDictationResult: DictationResult | null = null
 
             VoiceDictator.instance.registerStartEventListener(() => {
                 console.log(sessionId, "dictator start event")
@@ -55,7 +55,7 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
 
             VoiceDictator.instance.registerReceivedEventListener(result => {
                 //calculate diff
-                let resultReturn: DictationResult = null
+                let resultReturn: DictationResult | null = null
                 if (previousDictationResult) {
                     const Diff = require('diff');
                     resultReturn = {

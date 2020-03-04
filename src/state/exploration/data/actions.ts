@@ -8,7 +8,7 @@ export enum ExplorationDataActionType{
  
 export interface StartLoadingData extends ActionTypeBase{
     taskId: string,
-    serviceKey?: string,
+    serviceKey: string,
 }
 
 export interface FinishLoadingData extends ActionTypeBase{

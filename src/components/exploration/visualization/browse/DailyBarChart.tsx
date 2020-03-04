@@ -10,13 +10,12 @@ import { scaleLinear } from 'd3-scale';
 import * as d3Array from 'd3-array';
 import Colors from '../../../../style/Colors';
 import { GroupWithTouchInteraction } from './GroupWithTouchInteraction';
-import { UIManager } from 'react-native';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '../../../../state/types';
 import { DataServiceManager } from '../../../../system/DataServiceManager';
 
 interface Props extends ChartProps {
-    valueTickFormat?: (number) => string,
+    valueTickFormat?: (num: number) => string,
     valueTicksOverride?: (maxValue: number) => {
         newDomain: number[],
         ticks: number[]}
@@ -30,7 +29,7 @@ export const DailyBarChart = React.memo((prop: Props) => {
     const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
 
     const scaleX = CommonBrowsingChartStyles
-        .makeDateScale(null, prop.dateRange[0], prop.dateRange[1])
+        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
         .padding(0.2)
         .range([0, chartArea.width])
 
@@ -39,7 +38,7 @@ export const DailyBarChart = React.memo((prop: Props) => {
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
     const scaleY = scaleLinear()
-        .domain([0, Math.max(d3Array.max(prop.data, d => d.value), prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)])
+        .domain([0, Math.max(d3Array.max(prop.data, d => d.value)!, prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)])
         .range([chartArea.height, 0])
         .nice()
 
@@ -59,14 +58,14 @@ export const DailyBarChart = React.memo((prop: Props) => {
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={prop.valueTickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
 
-        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date).value}>
+        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date)!.value}>
             {
                 prop.data.map(d => {
                     const barHeight = scaleY(0) - scaleY(d.value)
                     const barWidth = Math.min(scaleX.bandwidth(), 25)
                     return <Rect key={d.numberedDate}
                         width={barWidth} height={barHeight}
-                        x={scaleX(d.numberedDate) + (scaleX.bandwidth() - barWidth) * 0.5}
+                        x={scaleX(d.numberedDate)! + (scaleX.bandwidth() - barWidth) * 0.5}
                         y={scaleY(d.value)}
 
                         fill={today === d.numberedDate ? Colors.today : Colors.chartElementDefault}

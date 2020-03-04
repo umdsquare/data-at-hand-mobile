@@ -33,10 +33,10 @@ const styles = StyleSheet.create({
     containerStyle: containerStyle,
     containerStyleFlat: {
         ...containerStyle,
-        shadowOffset: null,
-        shadowColor: null,
-        shadowRadius: null,
-        shadowOpacity: null,
+        shadowOffset: undefined,
+        shadowColor: undefined,
+        shadowRadius: undefined,
+        shadowOpacity: undefined,
         borderBottomColor: 'gray',
         borderBottomWidth: 1,
         paddingBottom: 6,
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
 
 export interface TodayInfo {
     label: string;
-    formatted: Array<{ text: string; type: 'unit' | 'value' }>;
+    formatted: Array<{ text: string; type: 'unit' | 'value' }> | null;
 }
 
 function formatTodayValue(data: OverviewSourceRow, unitType: MeasureUnitType): TodayInfo {

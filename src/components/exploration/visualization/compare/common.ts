@@ -37,7 +37,7 @@ export function getDomainAndTickFormat(
   tickFormat: (num: number) => string;
 } {
   let domain: number[];
-  let tickFormat: (number) => string;
+  let tickFormat: (num: number) => string;
   switch (cycleType) {
     case CyclicTimeFrame.DayOfWeek:
       domain = [0, 1, 2, 3, 4, 5, 6];
@@ -85,7 +85,7 @@ export function makeTouchingInfoForCycle(
   const info = {
     touchId,
     elementBoundInScreen: {
-      x: touchScreenX - touchX + chartArea.x + (scaleX(timeKey) + scaleX.bandwidth() * .5 - scaleX.step() * .5),
+      x: touchScreenX - touchX + chartArea.x + (scaleX(timeKey)! + scaleX.bandwidth() * .5 - scaleX.step() * .5),
       y: touchScreenY - touchY + chartArea.y,
       width: scaleX.step(),
       height: chartArea.height

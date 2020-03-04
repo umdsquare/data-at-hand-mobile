@@ -15,7 +15,7 @@ export const DurationText = (props: {durationMinutes: number, containerTextStyle
         ...props.containerTextStyle,
     }}>
         {
-            schema.map((entity, i) => <Text key={i.toString()}
+            schema.map((entity: { type: string; value: React.ReactNode; }, i: number) => <Text key={i.toString()}
                 style={entity.type === 'unit' ? props.unitStyle : props.digitStyle}>{entity.value}</Text>)
         }
     </Text>

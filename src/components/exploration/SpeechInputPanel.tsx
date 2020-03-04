@@ -1,10 +1,9 @@
 import React from 'react';
-import { ViewStyle, View, Text, StyleSheet, Dimensions, LayoutAnimation, Animated, Easing } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Sizes } from '../../style/Sizes';
 import { connect } from 'react-redux';
 import { ReduxAppState } from '../../state/types';
 import { SpeechRecognizerState, SpeechRecognizerSessionStatus } from '../../state/speech/types';
-import { ThunkDispatch } from 'redux-thunk';
 import Colors from '../../style/Colors';
 import Spinner from 'react-native-spinkit';
 
@@ -61,37 +60,19 @@ interface Props {
     recognizerState?: SpeechRecognizerState,
     exampleSentences?: string[],
 }
-
-interface State {
-}
-
-class SpeechInputPanel extends React.Component<Props, State>{
-
-    constructor(props) {
-        super(props)
-
-        this.state = {
-        }
-    }
+class SpeechInputPanel extends React.Component<Props>{
 
     private isRecognizedTextExists(state: SpeechRecognizerState): boolean {
         return !(state.dictationResult == null
-            || state.dictationResult.text == null
-            || state.dictationResult.text.length === 0)
-    }
-
-    componentDidUpdate(prevProps: Props) {
-        if (this.isRecognizedTextExists(prevProps.recognizerState) === false && this.isRecognizedTextExists(this.props.recognizerState) === true) {
-            /*LayoutAnimation.configureNext(
-                LayoutAnimation.create(
-                    500, LayoutAnimation.Types.easeInEaseOut, "opacity")
-            )*/
-        }
+            || state!.dictationResult.text == null
+            || state!.dictationResult!.text!.length === 0)
     }
 
     render() {
 
-        switch (this.props.recognizerState.status) {
+        const recognizerState = this.props.recognizerState!
+
+        switch (recognizerState.status) {
             case SpeechRecognizerSessionStatus.Waiting:
                 return <View style={styles.containerStyle}>
                     <View style={styles.titleContainerStyle}>
@@ -108,16 +89,16 @@ class SpeechInputPanel extends React.Component<Props, State>{
                 </View>
     
                 {
-                    this.isRecognizedTextExists(this.props.recognizerState) === true ? <Text style={styles.dictatedMessageStyle}>
+                    this.isRecognizedTextExists(recognizerState) === true ? <Text style={styles.dictatedMessageStyle}>
                         {
-                            this.props.recognizerState.dictationResult ? (this.props.recognizerState.dictationResult.diffResult ?
-                                this.props.recognizerState.dictationResult.diffResult.map((diffElm, i) => {
+                            recognizerState.dictationResult ? (recognizerState.dictationResult.diffResult ?
+                                recognizerState.dictationResult.diffResult.map((diffElm, i) => {
                                     if (diffElm.added == null && diffElm.removed == null) {
                                         return <Text key={i} >{diffElm.value}</Text>
                                     } else if (diffElm.added === true) {
                                         return <Text key={i} style={{ color: Colors.accent }}>{diffElm.value}</Text>
                                     }
-                                }) : this.props.recognizerState.dictationResult.text) : null
+                                }) : recognizerState.dictationResult.text) : undefined
                         }
                         _</Text>
                         : <View style={{
@@ -140,13 +121,6 @@ class SpeechInputPanel extends React.Component<Props, State>{
 }
 
 
-
-function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Props): Props {
-    return {
-        ...ownProps,
-    }
-}
-
 function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
     return {
         ...ownProps,
@@ -155,6 +129,6 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
 }
 
 
-const connected = connect(mapStateToProps, mapDispatchToProps)(SpeechInputPanel)
+const connected = connect(mapStateToProps, undefined)(SpeechInputPanel)
 
 export { connected as SpeechInputPanel }

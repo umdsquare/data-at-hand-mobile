@@ -14,7 +14,7 @@ export const CycleChartFrame = (props:{
     scaleX: ScaleBand<number>,
     scaleY: ScaleLinear<number, number>,
     ticks?: number[],
-    yTickFormat?: (number) => string,
+    yTickFormat?: (num: number) => string,
     children?: any
 })=>{
 
@@ -25,12 +25,12 @@ export const CycleChartFrame = (props:{
             props.cycleDomain.map(dimension => <G 
                 key={dimension}
                 y={12}
-                x={props.scaleX(dimension) + props.scaleX.bandwidth() * .5}><SvgText
+                x={props.scaleX(dimension)! + props.scaleX.bandwidth() * .5}><SvgText
                 textAnchor={props.cycleDomain.length > 10? "end" : "middle"}
                 alignmentBaseline="hanging"
                 fontSize={Sizes.smallFontSize}
                 fill={Colors.textColorLight}
-                transform={props.cycleDomain.length > 10? "rotate(-90)translate(0," + -(Sizes.smallFontSize/2) +")" : null}
+                transform={props.cycleDomain.length > 10? "rotate(-90)translate(0," + -(Sizes.smallFontSize/2) +")" : undefined}
                 >{props.xTickFormat(dimension)}</SvgText></G>)
         }
     </G>
