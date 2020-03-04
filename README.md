@@ -1,5 +1,6 @@
 # Data@Hand
 
+This project is being developed.
 
 ### How to build & run
 
