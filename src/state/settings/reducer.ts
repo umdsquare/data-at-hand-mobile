@@ -5,6 +5,7 @@ import {
   SetUnitTypeAction,
 } from './actions';
 import {MeasureUnitType} from '../../measure/DataSourceSpec';
+import { ActionTypeBase } from '../types';
 
 export interface SettingsState {
   serviceKey: string,
@@ -20,7 +21,7 @@ const INITIAL_STATE = {
 
 export const settingsStateReducer = (
   state: SettingsState = INITIAL_STATE,
-  action: SettingsAction,
+  action: ActionTypeBase,
 ): SettingsState => {
   const newState: SettingsState = JSON.parse(JSON.stringify(state));
   switch (action.type) {

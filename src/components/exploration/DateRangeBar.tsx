@@ -484,7 +484,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
 export const DateBar = (props: {
     date: number,
-    onDateChanged?: (date: number, interactionType?: InteractionType) => void,
+    onDateChanged?: (date: number, interactionType: InteractionType) => void,
     onLongPressIn: () => void,
     onLongPressOut: () => void
 }) => {

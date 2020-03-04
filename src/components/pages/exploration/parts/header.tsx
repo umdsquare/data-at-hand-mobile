@@ -160,9 +160,9 @@ const HeaderRangeBar = React.memo((props: { parameterKey?: ParameterKey, showBor
 
     const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
     const dispatch = useDispatch()
-    const [speechSessionId, setSpeechSessionId] = useState<string>(null)
+    const [speechSessionId, setSpeechSessionId] = useState<string|null>(null)
 
-    const range = explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range, props.parameterKey)
+    const range = explorationInfoHelper.getParameterValue<[number, number]>(explorationInfo, ParameterType.Range, props.parameterKey)!
 
     const onRangeChanged = useCallback((from, to, xType) => {
         dispatch(createSetRangeAction(xType, [from, to], props.parameterKey))
@@ -192,11 +192,11 @@ const HeaderRangeBar = React.memo((props: { parameterKey?: ParameterKey, showBor
 })
 
 const HeaderDateBar = () => {
-    const [speechSessionId, setSpeechSessionId] = useState<string>(null)
+    const [speechSessionId, setSpeechSessionId] = useState<string|null>(null)
     const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
     const dispatch = useDispatch()
-    const date = explorationInfoHelper.getParameterValue<number>(explorationInfo, ParameterType.Date)
-    return <DateBar date={date != null ? date : null}
+    const date = explorationInfoHelper.getParameterValue<number>(explorationInfo, ParameterType.Date)!
+    return <DateBar date={date}
         onDateChanged={(date: number, interactionType: InteractionType) => {
             dispatch(setDateAction(interactionType, date))
         }}
@@ -239,11 +239,11 @@ const IntraDayDataSourceBar = (props: { showBorder: boolean }) => {
     const dispatch = useDispatch()
     const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
 
-    const intraDaySourceType = explorationInfoHelper.getParameterValue<IntraDayDataSourceType>(explorationInfo, ParameterType.IntraDayDataSource)
+    const intraDaySourceType = explorationInfoHelper.getParameterValue<IntraDayDataSourceType>(explorationInfo, ParameterType.IntraDayDataSource)!
     const sourceTypeName = getIntraDayDataSourceName(intraDaySourceType)
 
     const supportedIntraDayDataSourceTypes = useMemo(() => {
-        const result = []
+        const result: Array<IntraDayDataSourceType> = []
         DataSourceManager.instance.supportedDataSources.forEach(s => {
             const inferred = inferIntraDayDataSourceType(s.type)
             if (result.indexOf(inferred) === -1 && inferred != null) {
@@ -273,7 +273,7 @@ const IntraDayDataSourceBar = (props: { showBorder: boolean }) => {
 const CyclicComparisonTypeBar = (props: { showBorder: boolean }) => {
     const dispatch = useDispatch()
     const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
-    const cycleType = explorationInfoHelper.getParameterValue<CyclicTimeFrame>(explorationInfo, ParameterType.CycleType)
+    const cycleType = explorationInfoHelper.getParameterValue<CyclicTimeFrame>(explorationInfo, ParameterType.CycleType)!
     const cycles = useMemo(() => Object.keys(cyclicTimeFrameSpecs), [])
 
     return <CategoricalRow title="Group By" showBorder={props.showBorder} value={cyclicTimeFrameSpecs[cycleType].name}
@@ -287,7 +287,7 @@ const CyclicComparisonTypeBar = (props: { showBorder: boolean }) => {
 const CycleDimensionBar = (props: { showBorder: boolean }) => {
     const dispatch = useDispatch()
     const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
-    const cycleDimension = explorationInfoHelper.getParameterValue<CycleDimension>(explorationInfo, ParameterType.CycleDimension)
+    const cycleDimension = explorationInfoHelper.getParameterValue<CycleDimension>(explorationInfo, ParameterType.CycleDimension)!
     const spec = useMemo(() => getCycleDimensionSpec(cycleDimension), [cycleDimension])
     const selectableDimensions = useMemo(() => getHomogeneousCycleDimensionList(cycleDimension), [cycleDimension])
     const dimensionNames = useMemo(() => selectableDimensions.map(spec => spec.name), [selectableDimensions])

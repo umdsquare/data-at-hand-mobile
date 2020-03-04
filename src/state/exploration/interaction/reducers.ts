@@ -28,6 +28,7 @@ import {
 import {explorationInfoHelper} from '../../../core/exploration/ExplorationInfoHelper';
 import {startOfDay, subDays, endOfDay, startOfWeek, endOfWeek} from 'date-fns';
 import {DateTimeHelper} from '../../../time';
+import { DataSourceType } from '../../../measure/DataSourceSpec';
 
 var deepEqual = require('deep-equal');
 
@@ -210,7 +211,7 @@ export const explorationStateReducer = (
               explorationInfoHelper.getParameterValue(
                 state.info,
                 ParameterType.DataSource,
-              ),
+              ) || DataSourceType.StepCount,
             );
 
           const date =

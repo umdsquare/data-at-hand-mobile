@@ -1,9 +1,9 @@
 import { VariableType } from "./types";
 import { DateTimeHelper } from "../../../time";
 import { startOfMonth, startOfYear, endOfMonth, endOfYear } from "date-fns";
-import { chrono } from "src/types/chrono";
+import { chrono } from "../../../types/chrono";
 
-export function parseTimeText(text: string): { type: VariableType.Date | VariableType.Period, value: number | [number, number] } {
+export function parseTimeText(text: string): { type: VariableType.Date | VariableType.Period, value: number | [number, number] } | null {
     var chrono = require('chrono-node');
     const chronoResult: chrono.ParsedResult[] = chrono.parse(text)
     if(chronoResult.length > 0){
@@ -46,7 +46,7 @@ export function parseTimeText(text: string): { type: VariableType.Date | Variabl
     return null
 }
 
-export function parseDateTextToNumberedDate(text: string): number {
+export function parseDateTextToNumberedDate(text: string): number | null {
     var chrono = require('chrono-node');
     const chronoResult: chrono.ParsedResult[] = chrono.parse(text)
     if(chronoResult.length > 0){

@@ -12,7 +12,7 @@ class ExplorationInfoHelper {
     stateInfo: ExplorationInfo,
     parameter: ParameterType,
     key?: ParameterKey,
-  ): T {
+  ): T|null {
     return this.getParameterValueOfParams<T>(stateInfo.values, parameter, key);
   }
 
@@ -20,7 +20,7 @@ class ExplorationInfoHelper {
     paramSet: Array<ExplorationInfoParameter>,
     parameter: ParameterType,
     key?: ParameterKey,
-  ): T {
+  ): T|null {
     const found = paramSet.find(
       v => v.parameter === parameter && (key == null || v.key === key),
     );
