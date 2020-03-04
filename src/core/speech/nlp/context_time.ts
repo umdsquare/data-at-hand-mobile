@@ -1,4 +1,4 @@
-import { TimeSpeechContext } from "../context";
+import { TimeSpeechContext } from "./context";
 import compromise from 'compromise';
 var chrono = require('chrono-node');
 import { Dispatch } from "redux";

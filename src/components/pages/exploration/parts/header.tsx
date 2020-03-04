@@ -19,10 +19,10 @@ import { CyclicTimeFrame, cyclicTimeFrameSpecs, CycleDimension, getFilteredCycle
 import { SvgIcon, SvgIconType } from '../../../common/svg/SvgIcon';
 import { makeNewSessionId, startSpeechSession, requestStopDictation } from '../../../../state/speech/commands';
 import { createSetShowGlobalPopupAction } from '../../../../state/speech/actions';
-import { SpeechContextHelper } from '../../../../state/speech/context';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../../Routes';
+import { SpeechContextHelper } from '../../../../core/speech/nlp/context';
 
 const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={'white'} />
 

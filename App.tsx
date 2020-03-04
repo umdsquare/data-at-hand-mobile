@@ -13,18 +13,14 @@ import AppNavigator from './src/components/Routes';
 import CreateStore from './src/state/store';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react'
-import LottieView from 'lottie-react-native';
 import { DataServiceManager } from './src/system/DataServiceManager';
-import { FadeView } from './src/components/common/FadeView';
 import { VoiceDictator } from './src/core/speech/VoiceDictator';
-import { naturalLanguageRecognizer } from './src/core/speech/NaturalLanguageRecognizer';
 import { ThemeProvider } from 'react-native-elements';
 import { theme } from './src/style/Theme';
 import { Platform, UIManager } from 'react-native';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
-import Spinner from 'react-native-spinkit';
 
 if (
   Platform.OS === 'android' &&

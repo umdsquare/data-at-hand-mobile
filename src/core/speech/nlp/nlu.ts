@@ -1,4 +1,4 @@
-import { SpeechContext, SpeechContextType, TimeSpeechContext } from "../context"
+import { SpeechContext, SpeechContextType, TimeSpeechContext } from "./context"
 import { Dispatch } from "redux"
 
 import compromise from 'compromise';
@@ -6,6 +6,7 @@ compromise.extend(require('compromise-numbers'))
 compromise.extend(require('compromise-dates'))
 
 import {resolveTimeContextSpeech} from './context_time';
+import { preprocess } from "./preprocessor";
 
 export class NLUCommandResolver {
 
@@ -21,6 +22,8 @@ export class NLUCommandResolver {
     private constructor() { }
 
     async resolveSpeechCommand(speech: string, context: SpeechContext, dispatch: Dispatch): Promise<void> {
+        const preprocessed = await preprocess(speech)
+        console.log(preprocessed)
         if (speech != null && speech.length > 0) {
             switch(context.type){
                 case SpeechContextType.Time:

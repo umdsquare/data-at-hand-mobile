@@ -31,21 +31,6 @@ export enum VoiceDictatorStatus{
     STOPPING,
 }
 
-export interface NLUResult{
-    utterance: string,
-    intent: string,
-    confidence: number,
-    parameters: any
-}
-
-export interface INaturalLanguageAnalyzer{
-    initialize(): Promise<void>
-    dispose(): Promise<void>
-
-    process(text): Promise<{result: NLUResult, error: any}>
-}
-
-
 export enum SpeechRecognitionEventType {
     EVENT_STARTED = "speech.started",
     EVENT_STOPPED = "speech.stopped",

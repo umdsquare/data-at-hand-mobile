@@ -1,7 +1,7 @@
-import { ElementType } from "../../components/exploration/DateRangeBar";
-import { ParameterKey, ExplorationType } from "../../core/exploration/types";
-import { DataSourceType } from "../../measure/DataSourceSpec";
-import { CycleDimension } from "../../core/exploration/cyclic_time";
+import { ExplorationType } from "../../exploration/types"
+import { ElementType } from "../../../components/exploration/DateRangeBar"
+import { DataSourceType } from "../../../measure/DataSourceSpec"
+import { CycleDimension } from "../../exploration/cyclic_time"
 
 export enum SpeechContextType {
     Global = "global",
