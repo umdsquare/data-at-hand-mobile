@@ -21,6 +21,19 @@ Install dependencies
   ```
 
 #### Run on IOS:
+
+  If you have not used Cocoapods before, install it once:
+  ```sh
+  > sudo gem install cocoapods
+  ```
+  
+  Install iOS project dependencies.
+  ```sh
+  > cd ios
+  > pod install
+  ```
+
+  Run on iOS.
   ```sh
   > react-native run-ios
   ```
