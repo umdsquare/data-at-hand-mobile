@@ -84,7 +84,7 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
                         //TODO start analysis
                         console.log(sessionId, "Analyze the phrase, ", dictationResult.text, "with context: ", context)
                         
-                        await NLUCommandResolver.instance.resolveSpeechCommand(dictationResult.text, context, dispatch)
+                        await NLUCommandResolver.instance.resolveSpeechCommand(dictationResult.text, context, currentState.explorationState.info, dispatch)
 
                         console.log(sessionId, "Finished analyzing.")
                         terminate(releaseMutex, dispatch, TerminationReason.Success, sessionId)

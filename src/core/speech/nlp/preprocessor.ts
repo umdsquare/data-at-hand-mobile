@@ -1,4 +1,4 @@
-import { PreProcessedInputText, VariableType, VariableInfo, VariableInfoDict } from "./types";
+import { PreProcessedInputText, VariableType, VariableInfo, VariableInfoDict, VerbInfo } from "./types";
 import compromise from 'compromise';
 import { DataSourceType } from "../../../measure/DataSourceSpec";
 import { parseTimeText, parseDateTextToNumberedDate } from "./preprocessor-time";
@@ -9,6 +9,8 @@ const alphabets = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 function makeId(): string {
     return [1, 2, 3, 4, 5].map(n => alphabets.charAt(Math.random() * (alphabets.length - 1))).join('')
 }
+
+const MONTH_NAMES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
 
 const DATASOURCE_VARIABLE_RULES = [
     {
@@ -76,6 +78,12 @@ const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (o
             } else return null
         }
     },
+    {
+        matchSyntax: `from? #Determiner? [<fromMonth>(last|past|this)? (${MONTH_NAMES.join("|")})] (to|through) #Determiner? [<toMonth>(last|past|this)? (${MONTH_NAMES.join("|")})]`,
+        valueParser: (obj: {fromMonth: string, toMonth: string}) => {
+            return parseTimeText(obj.fromMonth + " to " + obj.toMonth)
+        }
+    }
 ]
 
 export async function preprocess(speech: string): Promise<PreProcessedInputText> {
@@ -105,8 +113,6 @@ export async function preprocess(speech: string): Promise<PreProcessedInputText>
 
     nlpCasted.numbers().toCardinal().toNumber()
 
-    console.log(nlp.termList())
-
     TIME_EXPRESSION_MATCH_SYNTAX.forEach(matchSyntaxElm => {
         const matches = nlp.match(matchSyntaxElm.matchSyntax)
         matches.forEach(match => {
@@ -134,7 +140,6 @@ export async function preprocess(speech: string): Promise<PreProcessedInputText>
             }
         })
     })
-
 
     const timeExpressionDict: {
         [id: string]: {
@@ -168,11 +173,26 @@ export async function preprocess(speech: string): Promise<PreProcessedInputText>
         }
     })
 
+    //Find Verb========================================================
+    const verbs = nlp.verbs().match("!#Modal").first().toLowerCase().verbs().toInfinitive()
+    const verbsJson = verbs.json()
+    if(verbsJson.length > 0){
+        const id = makeId()
+        variables[id] = {
+            value: {
+                root: verbsJson[0].text
+            } as VerbInfo,
+            type: VariableType.Verb,
+            originalText: verbsJson[0].text,
+            id
+        }
+
+        verbs.replaceWith(id)
+    }
+
     //====================================================================================================
+    console.log("Preprocessing: elapsed - ", Date.now() - t)
 
-    console.log(timeExpressionDict)
-
-    console.log("Preprocessing:", nlp.text(), " elapsed - ", Date.now() - t)
     return {
         processed: nlp.text(),
         original: speech,
@@ -181,11 +201,13 @@ export async function preprocess(speech: string): Promise<PreProcessedInputText>
 }
 
 export async function test() {
-
+/*
     await preprocess("Show my resting heart rate from the last sunday to February 5")
     await preprocess("Show my resting heart rate for recent tenth days")
     await preprocess("Show my resting heart rate since the last Thanksgiving")
     await preprocess("Step count of the last Martin Luther King day")
-    await preprocess("From March to May")
-    
+    await preprocess("May I go to the step count from March to May")
+    await preprocess("May I go to the step count from March to June")
+    await preprocess("Went to the step count from the last March through May")
+    */
 }
