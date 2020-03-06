@@ -3,7 +3,7 @@ import compromise from 'compromise';
 import { DataSourceType } from "../../../measure/DataSourceSpec";
 import { parseTimeText, parseDateTextToNumberedDate } from "./preprocessor-time";
 import { DateTimeHelper } from "../../../time";
-import { subDays, subWeeks, subMonths, addDays, subYears } from "date-fns";
+import { subDays, subWeeks, subMonths, addDays, subYears, isSameMonth, getMonth, setMonth, startOfMonth, endOfMonth, endOfWeek, startOfWeek } from "date-fns";
 
 const alphabets = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 function makeId(): string {
@@ -11,6 +11,7 @@ function makeId(): string {
 }
 
 const MONTH_NAMES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
+const MONTH_NAMES_REGEX = new RegExp(`^(${MONTH_NAMES.join("|")})$`, 'gi')
 
 const DATASOURCE_VARIABLE_RULES = [
     {
@@ -41,6 +42,39 @@ const DATASOURCE_VARIABLE_RULES = [
 ]
 
 const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (obj: any) => { type: VariableType.Date | VariableType.Period, value: number | [number, number] } | null }> = [
+
+    {
+        matchSyntax: "[<relative>(last|past|previous|this)+] week",
+        valueParser: (obj: { relative: string }) => {
+            console.log(obj)
+            const relatives = obj.relative.replace(",", " ").toLowerCase().split(" ")
+            const today = new Date() //TODO reflect today func
+
+            if (relatives.length === 1 || relatives.every(v => v === 'last') === false) {
+                switch (relatives[0]) {
+                    case "this":
+                        return {
+                            type: VariableType.Period,
+                            value: [DateTimeHelper.toNumberedDateFromDate(startOfWeek(today, { weekStartsOn: 1 })),
+                            DateTimeHelper.toNumberedDateFromDate(endOfWeek(today, { weekStartsOn: 1 }))]
+                        }
+                    default:
+                        return {
+                            type: VariableType.Period,
+                            value: [DateTimeHelper.toNumberedDateFromDate(subDays(startOfWeek(today, { weekStartsOn: 1 }), 7)),
+                            DateTimeHelper.toNumberedDateFromDate(subDays(endOfWeek(today, { weekStartsOn: 1 }), 7))]
+                        }
+                }
+            } else {
+                const numberOfLast = relatives.filter(r => r === 'last').length
+                return {
+                    type: VariableType.Period,
+                    value: [DateTimeHelper.toNumberedDateFromDate(subDays(startOfWeek(today, { weekStartsOn: 1 }), 7 * numberOfLast)),
+                    DateTimeHelper.toNumberedDateFromDate(subDays(endOfWeek(today, { weekStartsOn: 1 }), 7 * numberOfLast))]
+                }
+            }
+        }
+    },
     {
         matchSyntax: "since [<date>#Date+]",
         valueParser: (obj: { date: string }) => {
@@ -55,7 +89,7 @@ const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (o
         }
     },
     {
-        matchSyntax: "recent .? [<n>#Value] [<durationUnit>#Duration]",
+        matchSyntax: "(recent|resent|resend) [<n>#Value] [<durationUnit>#Duration]",
         valueParser: (obj: { n: string, durationUnit: string }) => {
             const n = Number.parseInt(obj.n)
             if (n > 0) {
@@ -79,8 +113,8 @@ const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (o
         }
     },
     {
-        matchSyntax: `from? #Determiner? [<fromMonth>(last|past|this)? (${MONTH_NAMES.join("|")})] (to|through) #Determiner? [<toMonth>(last|past|this)? (${MONTH_NAMES.join("|")})]`,
-        valueParser: (obj: {fromMonth: string, toMonth: string}) => {
+        matchSyntax: `from? #Determiner? [<fromMonth>(last|past|previous|this)? (${MONTH_NAMES.join("|")})] (to|through) #Determiner? [<toMonth>(last|past|previous|this)? (${MONTH_NAMES.join("|")})]`,
+        valueParser: (obj: { fromMonth: string, toMonth: string }) => {
             return parseTimeText(obj.fromMonth + " to " + obj.toMonth)
         }
     }
@@ -91,123 +125,161 @@ export async function preprocess(speech: string): Promise<PreProcessedInputText>
 
     const variables: VariableInfoDict = {}
 
-    //Find data source=================================================================================
-    let processedSpeech = speech
-    DATASOURCE_VARIABLE_RULES.forEach(rule => {
-        processedSpeech = processedSpeech.replace(rule.regex, (match) => {
+    let quickPass = false
+
+    let processedText: string | undefined = undefined
+
+    //Check for quickpass=================================================
+    {
+        if (MONTH_NAMES_REGEX.test(speech)) {
+            //month
+            const month = MONTH_NAMES.indexOf(speech.toLowerCase())
+            //TODO today
+            const today = new Date()
+            const todayMonth = getMonth(today)
+            let monthDate: Date
+
+            if (month <= todayMonth) {
+                //same year
+                monthDate = setMonth(today, month)
+            } else {
+                monthDate = subYears(setMonth(today, month), 1)
+            }
+
             const id = makeId()
+            processedText = id
             variables[id] = {
                 id,
-                originalText: match,
-                type: rule.variableType,
-                value: rule.value
+                originalText: speech,
+                type: VariableType.Period,
+                value: [DateTimeHelper.toNumberedDateFromDate(startOfMonth(monthDate)), DateTimeHelper.toNumberedDateFromDate(endOfMonth(monthDate))]
             }
+
+            quickPass = true
+        }
+    }
+    //=======================================
+    if (quickPass === false) {
+        //Find data source=================================================================================
+        let processedSpeech = speech
+        DATASOURCE_VARIABLE_RULES.forEach(rule => {
+            processedSpeech = processedSpeech.replace(rule.regex, (match) => {
+                const id = makeId()
+                variables[id] = {
+                    id,
+                    originalText: match,
+                    type: rule.variableType,
+                    value: rule.value
+                }
+                return id
+            })
+        })
+
+        //Find date and period==================================================================================
+        const nlp = compromise(processedSpeech)
+
+        const nlpCasted = (nlp as any)
+
+        nlpCasted.numbers().toCardinal().toNumber()
+
+        TIME_EXPRESSION_MATCH_SYNTAX.forEach(matchSyntaxElm => {
+            const matches = nlp.match(matchSyntaxElm.matchSyntax)
+            matches.forEach(match => {
+                const matchedGroup = match.groups()
+                const groupNames = Object.keys(matchedGroup)
+                if (groupNames.length > 0) {
+                    const obj: any = {}
+                    groupNames.forEach(groupName => {
+
+                        const phrase = matchedGroup[groupName].list[0]
+                        const originalText = phrase.terms().map(t => t.text).join(" ")
+                        obj[groupName] = originalText
+                    })
+                    const id = makeId()
+                    const parseResult = matchSyntaxElm.valueParser(obj)
+                    if (parseResult) {
+                        variables[id] = {
+                            value: parseResult.value,
+                            type: parseResult.type,
+                            id,
+                            originalText: match.text()
+                        }
+                        match.replaceWith(id)
+                    }
+                }
+            })
+        })
+
+        const timeExpressionDict: {
+            [id: string]: {
+                value: any,
+                originalText: string,
+                id: string
+            }
+        } = {}
+
+        nlpCasted.dates().replaceWith((match: compromise.Phrase) => {
+            const id = makeId()
+            timeExpressionDict[id] = {
+                value: null,
+                originalText: match.terms().map(t => t.text).join(" "),
+                id
+            }
+            nlp.find
             return id
         })
-    })
 
-    //Find date and period==================================================================================
-    const nlp = compromise(processedSpeech)
-
-    const nlpCasted = (nlp as any)
-
-    nlpCasted.numbers().toCardinal().toNumber()
-
-    TIME_EXPRESSION_MATCH_SYNTAX.forEach(matchSyntaxElm => {
-        const matches = nlp.match(matchSyntaxElm.matchSyntax)
-        matches.forEach(match => {
-            const matchedGroup = match.groups()
-            const groupNames = Object.keys(matchedGroup)
-            if (groupNames.length > 0) {
-                const obj: any = {}
-                groupNames.forEach(groupName => {
-
-                    const phrase = matchedGroup[groupName].list[0]
-                    const originalText = phrase.terms().map(t => t.text).join(" ")
-                    obj[groupName] = originalText
-                })
-                const id = makeId()
-                const parseResult = matchSyntaxElm.valueParser(obj)
-                if (parseResult) {
-                    variables[id] = {
-                        value: parseResult.value,
-                        type: parseResult.type,
-                        id,
-                        originalText: match.text()
-                    }
-                    match.replaceWith(id)
+        Object.keys(timeExpressionDict).forEach(id => {
+            const elm = timeExpressionDict[id]
+            const parseResult = parseTimeText(elm.originalText)
+            if (parseResult) {
+                variables[id] = {
+                    value: parseResult.value,
+                    type: parseResult.type,
+                    originalText: elm.originalText,
+                    id
                 }
             }
         })
-    })
 
-    const timeExpressionDict: {
-        [id: string]: {
-            value: any,
-            originalText: string,
-            id: string
-        }
-    } = {}
-
-    nlpCasted.dates().replaceWith((match: compromise.Phrase) => {
-        const id = makeId()
-        timeExpressionDict[id] = {
-            value: null,
-            originalText: match.terms().map(t => t.text).join(" "),
-            id
-        }
-        nlp.find
-        return id
-    })
-
-    Object.keys(timeExpressionDict).forEach(id => {
-        const elm = timeExpressionDict[id]
-        const parseResult = parseTimeText(elm.originalText)
-        if (parseResult) {
+        //Find Verb========================================================
+        const verbs = nlp.verbs().match("!#Modal").first().toLowerCase().verbs().toInfinitive()
+        const verbsJson = verbs.json()
+        if (verbsJson.length > 0) {
+            const id = makeId()
             variables[id] = {
-                value: parseResult.value,
-                type: parseResult.type,
-                originalText: elm.originalText,
+                value: {
+                    root: verbsJson[0].text
+                } as VerbInfo,
+                type: VariableType.Verb,
+                originalText: verbsJson[0].text,
                 id
             }
-        }
-    })
 
-    //Find Verb========================================================
-    const verbs = nlp.verbs().match("!#Modal").first().toLowerCase().verbs().toInfinitive()
-    const verbsJson = verbs.json()
-    if(verbsJson.length > 0){
-        const id = makeId()
-        variables[id] = {
-            value: {
-                root: verbsJson[0].text
-            } as VerbInfo,
-            type: VariableType.Verb,
-            originalText: verbsJson[0].text,
-            id
+            verbs.replaceWith(id)
         }
 
-        verbs.replaceWith(id)
+        processedText = nlp.text()
     }
 
     //====================================================================================================
     console.log("Preprocessing: elapsed - ", Date.now() - t)
 
     return {
-        processed: nlp.text(),
+        processed: processedText,
         original: speech,
         variables
     }
 }
 
 export async function test() {
-/*
-    await preprocess("Show my resting heart rate from the last sunday to February 5")
-    await preprocess("Show my resting heart rate for recent tenth days")
-    await preprocess("Show my resting heart rate since the last Thanksgiving")
-    await preprocess("Step count of the last Martin Luther King day")
-    await preprocess("May I go to the step count from March to May")
-    await preprocess("May I go to the step count from March to June")
-    await preprocess("Went to the step count from the last March through May")
-    */
+    /*
+        await preprocess("Show my resting heart rate from the last sunday to February 5")
+        await preprocess("Show my resting heart rate for recent tenth days")
+        await preprocess("Show my resting heart rate since the last Thanksgiving")
+        await preprocess("Step count of the last Martin Luther King day")
+        await preprocess("May I go to the step count from March to May")
+        await preprocess("May I go to the step count from March to June")
+        await preprocess("Went to the step count from the last March through May")
+        */
 }

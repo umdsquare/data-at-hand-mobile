@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     }
 })
 
-const undoIconStyle = <SvgIcon type={SvgIconType.Reset} size={20} />
+const undoIconStyle = <SvgIcon type={SvgIconType.Reset} size={20} color={'white'} />
 
 
 export interface ExplorationProps {
