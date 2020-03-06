@@ -6,6 +6,7 @@ import {
   TouchingElementInfo,
   inferIntraDayDataSourceType,
   ParameterKey,
+  shallowCopyExplorationInfo,
 } from '../../../core/exploration/types';
 import {
   ExplorationAction,
@@ -53,7 +54,7 @@ export const explorationStateReducer = (
   action: ExplorationAction,
 ): ExplorationState => {
   const newState: ExplorationState = {
-    info: JSON.parse(JSON.stringify(state.info)),
+    info: shallowCopyExplorationInfo(state.info),
     prevInfo: null,
     backNavStack: state.backNavStack.slice(0),
     uiStatus: state.uiStatus,
@@ -102,7 +103,7 @@ export const explorationStateReducer = (
     }
   } else {
     if ((action as any)['interactionType'] === InteractionType.Multimodal) {
-      newState.prevInfo = JSON.parse(JSON.stringify(newState.info));
+      newState.prevInfo = shallowCopyExplorationInfo(newState.info);
     }
 
     switch (action.type) {
@@ -424,7 +425,7 @@ export const explorationStateReducer = (
     }
 
     if (newState.info.type != state.info.type) {
-      newState.backNavStack.push(JSON.parse(JSON.stringify(state.info)));
+      newState.backNavStack.push(shallowCopyExplorationInfo(state.info));
     }
 
     return newState;

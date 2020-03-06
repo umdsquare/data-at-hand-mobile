@@ -64,6 +64,12 @@ export enum IntraDayDataSourceType {
     Sleep="sleep"
 }
 
+export function shallowCopyExplorationInfo(original: ExplorationInfo): ExplorationInfo{
+  return {
+    ...original,
+    values: original.values.map(v => ({...v}))
+  }
+}
 
 export function getIntraDayDataSourceName(type: IntraDayDataSourceType): string{
     switch(type){

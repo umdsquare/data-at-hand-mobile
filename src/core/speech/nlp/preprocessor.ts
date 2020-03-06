@@ -20,7 +20,7 @@ const DATASOURCE_VARIABLE_RULES = [
         value: DataSourceType.StepCount
     },
     {
-        regex: /((resting)? heart rate)|(bpm)|(beats? per minutes?)/gi,
+        regex: /((resting\s+)?heart rate)|(bpm)|(beats? per minutes?)/gi,
         variableType: VariableType.DataSource,
         value: DataSourceType.HeartRate
     },

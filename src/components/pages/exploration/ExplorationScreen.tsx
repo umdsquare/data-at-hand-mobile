@@ -120,6 +120,8 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
 
     private comparisonBottomSheetRef = React.createRef<BottomSheet>()
     private speechUndoButtonRef = React.createRef<Button>()
+
+    private undoHideTimeout: NodeJS.Timeout | null = null
     
     private onAppStateChange = (nextAppState: AppStateStatus) => {
         if (
@@ -241,6 +243,16 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
                     ...this.state,
                     undoIgnored: false
                 })
+                if(this.undoHideTimeout){
+                    clearTimeout(this.undoHideTimeout)
+                }
+                this.undoHideTimeout = setTimeout(()=>{
+                    this.setState({
+                        ...this.state,
+                        undoIgnored: true
+                    }),
+                    this.undoHideTimeout = null
+                }, 5000)
             })
         }
     }
@@ -296,6 +308,9 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
         if (evt.currentTarget !== findNodeHandle(this.speechUndoButtonRef.current)) {
             if (this.state.undoIgnored === false) {
                 requestAnimationFrame(() => {
+                    if(this.undoHideTimeout){
+                        clearTimeout(this.undoHideTimeout)
+                    }
                     this.setState({
                         ...this.state,
                         undoIgnored: true
