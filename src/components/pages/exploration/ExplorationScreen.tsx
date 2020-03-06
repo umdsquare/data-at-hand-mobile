@@ -1,5 +1,5 @@
 import React from "react";
-import { StatusBar, View, StyleSheet, Platform, BackHandler, Alert, AppState, AppStateStatus } from "react-native";
+import { StatusBar, View, StyleSheet, Platform, BackHandler, Alert, AppState, AppStateStatus, GestureResponderEvent, InteractionManager, findNodeHandle } from "react-native";
 import Colors from "../../../style/Colors";
 import { StyleTemplates } from "../../../style/Styles";
 import { ThunkDispatch } from "redux-thunk";
@@ -95,7 +95,7 @@ export interface ExplorationProps {
     navigation: StackNavigationProp<RootStackParamList, 'Exploration'>,
     explorationInfo: ExplorationInfo,
     isUndoAvailable: boolean,
-    backNavStackSize: number, 
+    backNavStackSize: number,
     loadedDataInfo: ExplorationInfo,
     isDataLoading: boolean,
     selectedServiceKey: string,
@@ -111,14 +111,16 @@ interface State {
     appState: AppStateStatus,
     initialLoadingFinished: boolean,
     loadingMessage: string,
-    globalSpeechSessionId: string
+    globalSpeechSessionId: string,
+    undoIgnored: boolean
 }
 
 
 class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
 
-    private comparisonBottomSheetRef: BottomSheet
-
+    private comparisonBottomSheetRef = React.createRef<BottomSheet>()
+    private speechUndoButtonRef = React.createRef<Button>()
+    
     private onAppStateChange = (nextAppState: AppStateStatus) => {
         if (
             this.state.appState.match(/inactive|background/) &&
@@ -143,7 +145,8 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
             appState: AppState.currentState,
             initialLoadingFinished: false,
             loadingMessage: null,
-            globalSpeechSessionId: null
+            globalSpeechSessionId: null,
+            undoIgnored: false
         }
     }
 
@@ -210,11 +213,13 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
         })
     }
 
-    async componentDidUpdate(prevProps: ExplorationProps) {
+    async componentDidUpdate(prevProps: ExplorationProps, prevState: State) {
 
         let dataReloadNeeded = false
 
-        if (this.props.explorationInfo.type !== prevProps.explorationInfo.type || deepEqual(prevProps.explorationInfo.values, this.props.explorationInfo.values) === false) {
+        const isExplorationInfoChanged = deepEqual(prevProps.explorationInfo.values, this.props.explorationInfo.values) === false
+
+        if (this.props.explorationInfo.type !== prevProps.explorationInfo.type || isExplorationInfoChanged === true) {
             if (this.state.initialLoadingFinished === true) {
                 dataReloadNeeded = true
             }
@@ -227,6 +232,16 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
         if (dataReloadNeeded === true) {
             console.log("should reload data")
             this.props.dispatchDataReload(this.props.explorationInfo)
+        }
+
+        if (isExplorationInfoChanged === true && this.props.isUndoAvailable) {
+            //new undoable condition
+            requestAnimationFrame(() => {
+                this.setState({
+                    ...this.state,
+                    undoIgnored: false
+                })
+            })
         }
     }
 
@@ -241,7 +256,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
                 this.props.dispatchCommand(createGoToBrowseOverviewAction(InteractionType.TouchOnly))
                 break;
             case ExplorationMode.Compare:
-                this.comparisonBottomSheetRef?.open()
+                this.comparisonBottomSheetRef.current?.open()
                 break;
         }
     }
@@ -277,9 +292,27 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
         })
     }
 
+    private handleScreenTouchEvent = (evt: GestureResponderEvent) => {
+        if (evt.currentTarget !== findNodeHandle(this.speechUndoButtonRef.current)) {
+            if (this.state.undoIgnored === false) {
+                requestAnimationFrame(() => {
+                    this.setState({
+                        ...this.state,
+                        undoIgnored: true
+                    })
+                })
+            }
+        }
+        return false
+    }
+
     render() {
 
-        return <View style={StyleTemplates.screenDefaultStyle}>
+        return <View style={StyleTemplates.screenDefaultStyle}
+
+            onStartShouldSetResponder={this.handleScreenTouchEvent}
+            onMoveShouldSetResponder={this.handleScreenTouchEvent}
+        >
             <StatusBar barStyle="light-content" backgroundColor={Colors.headerBackground} />
             <View style={styles.headerContainerStyle}>
                 <ExplorationViewHeader />
@@ -297,8 +330,10 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
                 }
 
                 {/* history panel ===================================================================*/}
-                {this.props.isUndoAvailable === true && <View style={styles.historyPanelStyle}>
+                {this.props.isUndoAvailable === true && this.state.undoIgnored === false && <View style={styles.historyPanelStyle}>
                     <Button
+                        ref={this.speechUndoButtonRef}
+                        key="undo"
                         containerStyle={styles.historyButtonContainerStyle}
                         buttonStyle={styles.historyButtonStyle}
                         icon={undoIconStyle} onPress={this.undo}
@@ -315,8 +350,8 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
                 onVoiceButtonPressOut={this.onGlobalSpeechInputPressOut}
             />
 
-            <BottomSheet ref={ref => { this.comparisonBottomSheetRef = ref }}>
-                <ComparisonInitPanel info={this.props.explorationInfo} onCompleted={() => { this.comparisonBottomSheetRef.close() }} />
+            <BottomSheet ref={this.comparisonBottomSheetRef}>
+                <ComparisonInitPanel info={this.props.explorationInfo} onCompleted={() => { this.comparisonBottomSheetRef.current?.close() }} />
             </BottomSheet>
 
             <TooltipOverlay />

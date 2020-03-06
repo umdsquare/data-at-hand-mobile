@@ -54,7 +54,7 @@ export const explorationStateReducer = (
 ): ExplorationState => {
   const newState: ExplorationState = {
     info: JSON.parse(JSON.stringify(state.info)),
-    prevInfo: state.prevInfo,
+    prevInfo: null,
     backNavStack: state.backNavStack.slice(0),
     uiStatus: state.uiStatus,
     touchingElement: state.touchingElement,
