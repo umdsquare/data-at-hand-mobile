@@ -16,7 +16,7 @@ export const DateBandAxis = (props: { scale: ScaleBand<number>, chartArea: Layou
         {
             props.dateSequence.map((date, i) => {
                 const tickFormatted = props.tickFormat(date)
-                return <G key={date.toString()} x={props.scale(date) + props.scale.bandwidth() / 2}>
+                return <G key={date.toString()} x={props.scale(date)! + props.scale.bandwidth() / 2}>
                     {
                         (i % divider === 0 && divider > 1) && <Line x1={0} x2={0} y1={0} y2={7} stroke={Colors.chartLightText}/>
                     }

@@ -10,21 +10,18 @@ import uuid from 'uuid/v4';
 import { explorationDataResolver } from '../../../core/exploration/data/ExplorationDataResolver';
 
 export interface ExplorationDataState {
-  info: ExplorationInfo;
-  serviceKey: string;
+  info?: ExplorationInfo;
+  serviceKey?: string;
   isBusy: boolean;
   error?: any;
-  data: any;
+  data?: any;
   ongoingTaskId?: string;
 }
 
+uuid
+
 const INITIAL_STATE = {
-  info: null,
-  serviceKey: null,
   isBusy: false,
-  error: null,
-  data: null,
-  ongoingTaskId: null,
 } as ExplorationDataState;
 
 export const explorationDataStateReducer = (
@@ -46,7 +43,7 @@ export const explorationDataStateReducer = (
     case ExplorationDataActionType.FinishLoadingDataAction:
       const finishAction = action as FinishLoadingData;
       newState.isBusy = false;
-      newState.ongoingTaskId = null;
+      newState.ongoingTaskId = undefined;
       newState.info = finishAction.info;
         
       if (finishAction.error) {

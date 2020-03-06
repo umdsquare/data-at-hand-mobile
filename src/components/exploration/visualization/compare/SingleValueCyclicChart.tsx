@@ -30,11 +30,11 @@ export const SingleValueCyclicChart = (props: {
     values: Array<IAggregatedValue>,
     dataSource: DataSourceType,
     cycleType: CyclicTimeFrame,
-    yTickFormat?: (number) => string,
+    yTickFormat?: (num: number) => string,
     startFromZero?: boolean,
     preferredValueRange?: number[],
     ticksOverride?: (min: number, max: number) => number[],
-    valueConverter?: (number) => number
+    valueConverter?: (num: number) => number
 }) => {
 
     const convert = props.valueConverter || dummyConverter
@@ -57,9 +57,9 @@ export const SingleValueCyclicChart = (props: {
     const scaleY = scaleLinear()
         .domain([
             props.startFromZero === true ? 0 :
-                Math.min(min(props.values, v => convert(v.min)),
+                Math.min(min(props.values, v => convert(v.min))!,
                     props.preferredValueRange ? convert(props.preferredValueRange[0]) : Number.MAX_VALUE),
-            Math.max(max(props.values, v => convert(v.max)),
+            Math.max(max(props.values, v => convert(v.max))!,
                 props.preferredValueRange ? convert(props.preferredValueRange[1]) : Number.MIN_VALUE)])
         .range([chartArea.height, 0]).nice()
 
@@ -98,9 +98,9 @@ export const SingleValueCyclicChart = (props: {
                             onClick={(timeKey: number) => {
                                 const dimension = getCycleDimensionWithTimeKey(props.cycleType, timeKey)
                                 if (getCycleLevelOfDimension(dimension) === 'day') {
-                                    dispatch(createGoToCyclicDetailDailyAction(InteractionType.TouchOnly, null, null, dimension))
+                                    dispatch(createGoToCyclicDetailDailyAction(InteractionType.TouchOnly, undefined, undefined, dimension))
                                 } else {
-                                    dispatch(createGoToCyclicDetailRangeAction(InteractionType.TouchOnly, null, null, dimension))
+                                    dispatch(createGoToCyclicDetailRangeAction(InteractionType.TouchOnly, undefined, undefined, dimension))
                                 }
                             }}
 

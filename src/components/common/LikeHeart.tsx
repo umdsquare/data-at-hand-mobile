@@ -24,9 +24,9 @@ interface State {
 
 export class LikeHeart extends React.PureComponent<Props, State>{
 
-    private currentAnimation: Animated.CompositeAnimation
+    private currentAnimation: Animated.CompositeAnimation | null = null
 
-    constructor(props) {
+    constructor(props: Props) {
         super(props)
         this.state = {
             valence: props.valence || 0,

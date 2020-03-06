@@ -15,7 +15,7 @@ interface State {
 
 export class BookmarkToggle extends React.PureComponent<Props, State> {
 
-    private currentAnimation: Animated.CompositeAnimation
+    private currentAnimation: Animated.CompositeAnimation|null = null
 
     constructor(props: Props) {
         super(props)
@@ -26,9 +26,7 @@ export class BookmarkToggle extends React.PureComponent<Props, State> {
 
     componentDidUpdate(prevProp: Props){
         if(prevProp.isBookmarked != this.props.isBookmarked) {
-            if (this.currentAnimation) {
-                this.currentAnimation.stop()
-            }
+            this.currentAnimation?.stop()
             this.state.animationTransition.setValue(0)
             this.currentAnimation = Animated.timing(this.state.animationTransition, {
                 toValue: 1,

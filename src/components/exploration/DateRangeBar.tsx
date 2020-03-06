@@ -130,7 +130,7 @@ interface Props {
     onLongPressIn?: (position: ElementType) => void,
     onLongPressOut?: (porition: ElementType) => void,
     showBorder?: boolean,
-    isLightMode?: boolean
+    isLightMode?: boolean,
 }
 
 interface State {
@@ -142,7 +142,7 @@ interface State {
     numDays: number,
     level?: "day" | "week" | "month",
     periodName?: string,
-    clickedElementType?: ElementType,
+    clickedElementType?: ElementType | null,
     isPeriodButtonLongPressed: boolean
 }
 
@@ -238,12 +238,12 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                 semanticPeriodCaptured: false,
                 numDays: numDays,
                 level: "day",
-                periodName: null
+                periodName: undefined
             }
         }
     }
 
-    static getDerivedStateFromProps(nextProps: Props, currentState: State): State {
+    static getDerivedStateFromProps(nextProps: Props, currentState: State): State|null {
         if (currentState.from !== nextProps.from ||
             currentState.to !== nextProps.to) {
             return DateRangeBar.deriveState(nextProps.from, nextProps.to, currentState)
@@ -251,8 +251,8 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         return null
     }
 
-    private swipedFeedbackRef: SwipedFeedback
-    private bottomSheetRef: BottomSheet
+    private swipedFeedbackRef: SwipedFeedback | null = null
+    private bottomSheetRef: BottomSheet | null = null
 
     private setRangeDebounceTimer: any
 
@@ -266,7 +266,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             ...this.state,
             clickedElementType: type,
         })
-        this.bottomSheetRef.open()
+        this.bottomSheetRef?.open()
     }
 
     onFromDatePressed = () => {
@@ -295,7 +295,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             to = lastMonthLast
         }
         this.setRange(DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to), InteractionType.TouchOnly)
-        this.swipedFeedbackRef.startFeedback('left')
+        this.swipedFeedbackRef?.startFeedback('left')
     }
 
     onSwipeRight = () => {
@@ -312,7 +312,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             to = lastMonthLast
         }
         this.setRange(DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to), InteractionType.TouchOnly)
-        this.swipedFeedbackRef.startFeedback('right')
+        this.swipedFeedbackRef?.startFeedback('right')
     }
 
     setRange = (from: number, to: number, interactionType: InteractionType = InteractionType.TouchOnly) => {
@@ -329,12 +329,12 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
         if (this.props.onRangeChanged) {
 
-            this.props.onRangeChanged(newState.from, newState.to, interactionType)
+            this.props.onRangeChanged!(newState.from, newState.to, interactionType)
             if(this.setRangeDebounceTimer){
                 cancelAnimationFrame(this.setRangeDebounceTimer)
             }
             this.setRangeDebounceTimer = requestAnimationFrame(()=>{
-                this.props.onRangeChanged(newState.from, newState.to, interactionType)
+                this.props.onRangeChanged!(newState.from, newState.to, interactionType)
             })
         }
     }
@@ -444,7 +444,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             style={{
                 ...(this.props.showBorder === true ? styles.conatainerWithBorder : styles.containerStyle),
                 backgroundColor: this.props.isLightMode ? null : styles.containerStyle.backgroundColor
-            }}>
+            } as ViewStyle}>
             <SwipedFeedback ref={ref => this.swipedFeedbackRef = ref} />
 
             <DateButton date={this.state.from} onPress={this.onFromDatePressed} isLightMode={this.props.isLightMode}
@@ -484,7 +484,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
 export const DateBar = (props: {
     date: number,
-    onDateChanged?: (date: number, interactionType?: InteractionType) => void,
+    onDateChanged?: (date: number, interactionType: InteractionType) => void,
     onLongPressIn: () => void,
     onLongPressOut: () => void
 }) => {

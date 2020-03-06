@@ -6,8 +6,8 @@ const AnimatedRect = Animated.createAnimatedComponent(Rect)
 
 export const TouchableGroup = (prop: {
     onClick: () => void,
-    onLongPressIn: (x,y, screenX, screenY, touchId) => void,
-    onLongPressOut: (x,y, screenX, screnY) => void,
+    onLongPressIn: (x: number,y: number, screenX: number, screenY: number, touchId: string) => void,
+    onLongPressOut: (x: number,y: number, screenX: number, screenY: number) => void,
     children?: any,
     feedbackArea?: LayoutRectangle
 }) => {

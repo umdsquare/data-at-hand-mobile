@@ -1,10 +1,10 @@
-import {ActionTypeBase} from '../../types';
-import {DataSourceType} from '../../../measure/DataSourceSpec';
+import { ActionTypeBase } from '../../types';
+import { DataSourceType } from '../../../measure/DataSourceSpec';
 import {
   TouchingElementInfo,
   IntraDayDataSourceType,
 } from '../../../core/exploration/types';
-import { CyclicTimeFrame, CycleDimension} from '../../../core/exploration/cyclic_time';
+import { CyclicTimeFrame, CycleDimension } from '../../../core/exploration/cyclic_time';
 
 export enum ExplorationActionType {
   MemoUiStatus = 'exploration:interaction:memoUIStatus',
@@ -22,7 +22,7 @@ export enum ExplorationActionType {
   GoToComparisonToRanges = 'exploration:interaction:goToComparisonTwoRanges',
   GoToCyclicDetailDaily = "exploration:interaction:goToCyclicDetailDaily",
   GoToCyclicDetailRange = "exploration:interaction:goToCyclicDetailRange",
-  
+
   //History
   RestorePreviousInfo = 'exploration:interaction:restorePreviousInfo',
   GoBack = 'exploration:interaction:goBack',
@@ -94,12 +94,12 @@ export interface GoToCyclicDetailAction extends ExplorationActionBase {
   cycleDimension?: CycleDimension;
 }
 
-export interface SetCycleDimensionAction extends ExplorationActionBase { 
+export interface SetCycleDimensionAction extends ExplorationActionBase {
   cycleDimension: CycleDimension;
 }
 
 export interface SetTouchingElementInfoAction extends ActionTypeBase {
-  info: TouchingElementInfo;
+  info: TouchingElementInfo | null;
 }
 
 export type ExplorationAction =
@@ -187,14 +187,14 @@ export function createGoToComparisonTwoRangesAction(
   dataSource?: DataSourceType,
   rangeA?: [number, number],
   rangeB?: [number, number],
-){
-    return {
-        type: ExplorationActionType.GoToComparisonToRanges,
-        interactionType,
-        dataSource,
-        rangeA,
-        rangeB
-    }
+) {
+  return {
+    type: ExplorationActionType.GoToComparisonToRanges,
+    interactionType,
+    dataSource,
+    rangeA,
+    rangeB
+  }
 }
 
 export function createRestorePreviousInfoAction(): ActionTypeBase {
@@ -204,9 +204,9 @@ export function createRestorePreviousInfoAction(): ActionTypeBase {
 }
 
 export function createGoToCyclicDetailDailyAction(
-  interactionType: InteractionType, 
-  dataSource?: DataSourceType, 
-  range?: [number, number], 
+  interactionType: InteractionType,
+  dataSource?: DataSourceType,
+  range?: [number, number],
   cycleDimension?: CycleDimension): GoToCyclicDetailAction {
   return {
     type: ExplorationActionType.GoToCyclicDetailDaily,
@@ -218,9 +218,9 @@ export function createGoToCyclicDetailDailyAction(
 }
 
 export function createGoToCyclicDetailRangeAction(
-  interactionType: InteractionType, 
-  dataSource?: DataSourceType, 
-  range?: [number, number], 
+  interactionType: InteractionType,
+  dataSource?: DataSourceType,
+  range?: [number, number],
   cycleDimension?: CycleDimension): GoToCyclicDetailAction {
   return {
     type: ExplorationActionType.GoToCyclicDetailRange,
@@ -292,7 +292,7 @@ export function setCycleDimensionAction(interactionType: InteractionType, cycleD
 }
 
 export function setTouchElementInfo(
-  info: TouchingElementInfo,
+  info: TouchingElementInfo | null,
 ): SetTouchingElementInfoAction {
   return {
     type: ExplorationActionType.SetTouchElementInfo,

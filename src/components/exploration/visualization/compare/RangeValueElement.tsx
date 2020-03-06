@@ -1,6 +1,6 @@
 import React from 'react';
-import { IAggregatedValue, IAggregatedRangeValue } from '../../../../core/exploration/data/types';
-import { G, Rect, Line } from 'react-native-svg';
+import { IAggregatedRangeValue } from '../../../../core/exploration/data/types';
+import { Rect } from 'react-native-svg';
 import { ScaleBand, ScaleLinear } from 'd3-scale';
 import Colors from '../../../../style/Colors';
 import { SingleValueElement } from './SingleValueElement';
@@ -18,7 +18,7 @@ export const RangeValueElement = (props: {
     let connectionWidth = Math.min(40, props.scaleX.bandwidth())
 
     const feedbackArea = {
-        x: props.scaleX(props.value.timeKey) + props.scaleX.bandwidth() * .5 - props.scaleX.step() * .5,
+        x: props.scaleX(props.value.timeKey)! + props.scaleX.bandwidth() * .5 - props.scaleX.step() * .5,
         y: 0,
         width: props.scaleX.step(),
         height: Math.abs(props.scaleY(props.scaleY.domain()[0]) - props.scaleY(props.scaleY.domain()[1]))
@@ -31,7 +31,7 @@ export const RangeValueElement = (props: {
         feedbackArea={feedbackArea}>
 
         <Rect fill="#BEBEBE50" rx={connectionWidth * 0.1}
-            x={props.scaleX(props.value.timeKey) + (props.scaleX.bandwidth() - connectionWidth) * 0.5}
+            x={props.scaleX(props.value.timeKey)! + (props.scaleX.bandwidth() - connectionWidth) * 0.5}
             y={props.scaleY(Math.min(props.value.avgA, props.value.avgB))}
             width={connectionWidth}
             height={Math.abs(props.scaleY(props.value.avgA) - props.scaleY(props.value.avgB))}

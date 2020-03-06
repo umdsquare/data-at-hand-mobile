@@ -15,7 +15,7 @@ interface State {
 
 export class BottomSheet extends React.Component<Props, State>{
 
-    constructor(props) {
+    constructor(props: Props) {
         super(props)
 
         this.state = {
@@ -53,7 +53,7 @@ export class BottomSheet extends React.Component<Props, State>{
             <SafeAreaConsumer>
                 {
                     insets => <View style={{
-                        ...StyleTemplates.bottomSheetModalViewStyle, paddingBottom: Math.max(20, insets.bottom)
+                        ...StyleTemplates.bottomSheetModalViewStyle, paddingBottom: Math.max(20, insets!.bottom)
                     }}>
                         {
                             this.props.children

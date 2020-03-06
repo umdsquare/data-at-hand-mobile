@@ -119,19 +119,19 @@ export class DateTimeHelper {
         const minutes = Math.floor((usedDuration % 3600) / 60)
         const seconds = usedDuration % 60
 
-        const result = []
+        const result: Array<{ type: "unit" | "digit", text: string }> = []
         if (hours > 0) {
-            result.push({ type: 'digit', text: hours })
+            result.push({ type: 'digit', text: hours.toString() })
             result.push({ type: 'unit', text: "hr" })
         }
 
         if (minutes > 0) {
-            result.push({ type: "digit", text: minutes })
+            result.push({ type: "digit", text: minutes.toString() })
             result.push({ type: "unit", text: "min" })
         }
 
         if (seconds > 0) {
-            result.push({ type: "digit", text: seconds })
+            result.push({ type: "digit", text: seconds.toString() })
             result.push({ type: "unit", text: "sec" })
         }
 

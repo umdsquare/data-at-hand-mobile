@@ -28,15 +28,16 @@ import {
 import {explorationInfoHelper} from '../../../core/exploration/ExplorationInfoHelper';
 import {startOfDay, subDays, endOfDay, startOfWeek, endOfWeek} from 'date-fns';
 import {DateTimeHelper} from '../../../time';
+import { DataSourceType } from '../../../measure/DataSourceSpec';
 
 var deepEqual = require('deep-equal');
 
 export interface ExplorationState {
   info: ExplorationInfo;
-  prevInfo: ExplorationInfo;
+  prevInfo: ExplorationInfo | null | undefined;
   backNavStack: Array<ExplorationInfo>;
   uiStatus: {[key: string]: any};
-  touchingElement: TouchingElementInfo;
+  touchingElement: TouchingElementInfo | null | undefined;
 }
 
 const INITIAL_STATE = {
@@ -68,7 +69,7 @@ export const explorationStateReducer = (
     switch (action.type) {
       case ExplorationActionType.RestorePreviousInfo:
         if (state.prevInfo) {
-          newState.info = newState.prevInfo;
+          newState.info = newState.prevInfo!;
           newState.prevInfo = null;
           if (newState.backNavStack.length > 0) {
             if (
@@ -85,7 +86,7 @@ export const explorationStateReducer = (
 
       case ExplorationActionType.GoBack:
         if (state.backNavStack.length > 0) {
-          newState.info = newState.backNavStack.pop();
+          newState.info = newState.backNavStack.pop()!;
           newState.prevInfo = null;
           return newState;
         } else return state;
@@ -100,7 +101,7 @@ export const explorationStateReducer = (
         return newState;
     }
   } else {
-    if (action['interactionType'] === InteractionType.Multimodal) {
+    if ((action as any)['interactionType'] === InteractionType.Multimodal) {
       newState.prevInfo = JSON.parse(JSON.stringify(newState.info));
     }
 
@@ -210,7 +211,7 @@ export const explorationStateReducer = (
               explorationInfoHelper.getParameterValue(
                 state.info,
                 ParameterType.DataSource,
-              ),
+              ) || DataSourceType.StepCount,
             );
 
           const date =

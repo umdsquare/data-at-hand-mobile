@@ -33,9 +33,12 @@ import { ZIndices } from "./parts/zIndices";
 import { DataBusyOverlay } from "./parts/main/DataBusyOverlay";
 import { InitialLoadingIndicator } from "./parts/main/InitialLoadingIndicator";
 import { createSetShowGlobalPopupAction } from "../../../state/speech/actions";
-import { SpeechContextHelper } from "../../../state/speech/context";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Routes";
+import { SpeechContextHelper } from "../../../core/speech/nlp/context";
+import { test } from "../../../core/speech/nlp/preprocessor";
+
+test().then()
 
 var deepEqual = require('deep-equal');
 
@@ -85,7 +88,7 @@ const styles = StyleSheet.create({
     }
 })
 
-const undoIconStyle = <SvgIcon type={SvgIconType.Reset} size={20} />
+const undoIconStyle = <SvgIcon type={SvgIconType.Reset} size={20} color={'white'} />
 
 
 export interface ExplorationProps {

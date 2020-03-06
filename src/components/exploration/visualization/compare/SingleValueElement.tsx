@@ -18,7 +18,7 @@ export const SingleValueElement = (props: {
 }) => {
 
     const bandPadding = props.additionalPadding || 0
-    let x1 = props.scaleX(props.value.timeKey) + bandPadding * props.scaleX.bandwidth()
+    let x1 = props.scaleX(props.value.timeKey)! + bandPadding * props.scaleX.bandwidth()
     let x2 = x1 + props.scaleX.bandwidth() - 2 * bandPadding * props.scaleX.bandwidth()
 
     if (props.maxWidth && props.maxWidth < x2 - x1) {
@@ -32,7 +32,7 @@ export const SingleValueElement = (props: {
             onLongPressIn={(x, y, screenX, screenY, touchId) => props.onLongPressIn && props.onLongPressIn(props.value.timeKey, x, y, screenX, screenY, touchId)}
             onLongPressOut={(x, y, screenX, screenY) => props.onLongPressOut && props.onLongPressOut(props.value.timeKey, x, y, screenX, screenY)}
             feedbackArea={{
-                x: props.scaleX(props.value.timeKey) + props.scaleX.bandwidth() * .5 - props.scaleX.step() * .5,
+                x: props.scaleX(props.value.timeKey)! + props.scaleX.bandwidth() * .5 - props.scaleX.step() * .5,
                 y: props.scaleY(Math.max(props.scaleY.domain()[0], props.scaleY.domain()[1])),
                 width: props.scaleX.step(),
                 height: Math.abs(props.scaleY(props.scaleY.domain()[0]) - props.scaleY(props.scaleY.domain()[1]))

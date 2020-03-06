@@ -43,6 +43,7 @@ export const AxisSvg = (props: Props<any>) => {
                 })
             }
         </G>
+        default: return <></>
     }
 
 }

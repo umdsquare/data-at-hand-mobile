@@ -10,7 +10,7 @@ import { DataService } from '../../../measure/service/DataService';
 import { sum, mean, min, max } from 'd3-array';
 
 
-const dateSortFunc = (a, b) => {
+const dateSortFunc = (a: { numberedDate: number; }, b: { numberedDate: number; }) => {
   if (a.numberedDate > b.numberedDate) {
     return 1
   } else if (a.numberedDate === b.numberedDate) {
@@ -19,6 +19,7 @@ const dateSortFunc = (a, b) => {
 }
 
 class ExplorationDataResolver {
+
   loadData(
     explorationInfo: ExplorationInfo,
     selectedServiceKey: string,
@@ -29,9 +30,9 @@ class ExplorationDataResolver {
     const usePrevData = selectedServiceKey === prevServiceKey
     switch (explorationInfo.type) {
       case ExplorationType.B_Overview:
-        return this.loadOverviewData(explorationInfo, selectedServiceKey, usePrevData === true ? prevInfo : null, usePrevData === true ? prevData : null);
+        return this.loadOverviewData(explorationInfo, selectedServiceKey, usePrevData === true ? prevInfo : undefined, usePrevData === true ? prevData : null);
       case ExplorationType.B_Range:
-        return this.loadBrowseRangeData(explorationInfo, selectedServiceKey, usePrevData === true ? prevInfo : null, usePrevData === true ? prevData : null);
+        return this.loadBrowseRangeData(explorationInfo, selectedServiceKey, usePrevData === true ? prevInfo : undefined, usePrevData === true ? prevData : null);
       case ExplorationType.B_Day:
         return this.loadIntraDayData(explorationInfo, selectedServiceKey)
       case ExplorationType.C_Cyclic:
@@ -45,6 +46,8 @@ class ExplorationDataResolver {
       default:
         Promise.reject({ error: 'Unsupported exploration type.' });
     }
+
+    return Promise.resolve(null)
   }
 
   private async loadBrowseRangeData(info: ExplorationInfo, selectedServiceKey: string, prevInfo?: ExplorationInfo, prevData?: any): Promise<OverviewSourceRow> {
@@ -58,10 +61,10 @@ class ExplorationDataResolver {
       selectedServiceKey,
     );
 
-    let prevSourceRowData: OverviewSourceRow = null
+    let prevSourceRowData: OverviewSourceRow
     if (prevInfo != null && prevData != null) {
       if (prevInfo.type === ExplorationType.B_Overview) {
-        prevSourceRowData = (prevData as OverviewData).sourceDataList.find(e => e.source === source)
+        prevSourceRowData = (prevData as OverviewData).sourceDataList.find(e => e.source === source)!
       } else if (prevInfo.type === ExplorationType.B_Range) {
         const prevSource = explorationInfoHelper.getParameterValue<DataSourceType>(prevInfo, ParameterType.DataSource)
         if (prevSource === source) {
@@ -70,7 +73,7 @@ class ExplorationDataResolver {
       }
     }
 
-    const data = await this.loadBrowseRangeDataImpl(range, source, selectedService, prevSourceRowData)
+    const data = await this.loadBrowseRangeDataImpl(range, source, selectedService, prevSourceRowData!)
     return data
   }
 
@@ -87,7 +90,7 @@ class ExplorationDataResolver {
 
         //Filter prev data
         //Query new parts to query
-        let newPart: OverviewSourceRow
+        let newPart: OverviewSourceRow | null = null
         if (newQueryRegion.rest.length > 0) {
           newPart = await service.fetchData(source, newQueryRegion.rest[0][0], newQueryRegion.rest[0][1], false, false)
         }
@@ -98,7 +101,7 @@ class ExplorationDataResolver {
           case DataSourceType.SleepRange:
           case DataSourceType.HoursSlept:
             {
-              newData.data = prevData.data.filter(datum => datum.numberedDate <= range[1] && datum.numberedDate >= range[0])
+              newData.data = prevData.data.filter((datum: { numberedDate: number; }) => datum.numberedDate <= range[1] && datum.numberedDate >= range[0])
               if (newPart) {
                 newData.data = newData.data.concat(newPart.data)
               }
@@ -228,10 +231,10 @@ class ExplorationDataResolver {
 
     return Promise.all(
       DataSourceManager.instance.supportedDataSources.map(source => {
-        let prevSourceRowData: OverviewSourceRow = null
+        let prevSourceRowData: OverviewSourceRow
         if (prevInfo != null && prevData != null) {
           if (prevInfo.type === ExplorationType.B_Overview) {
-            prevSourceRowData = (prevData as OverviewData).sourceDataList.find(e => e.source === source.type)
+            prevSourceRowData = (prevData as OverviewData).sourceDataList.find(e => e.source === source.type)!
           } else if (prevInfo.type === ExplorationType.B_Range) {
             const prevSource = explorationInfoHelper.getParameterValue<DataSourceType>(prevInfo, ParameterType.DataSource)
             if (prevSource === source.type) {
@@ -240,7 +243,7 @@ class ExplorationDataResolver {
           }
         }
 
-        return this.loadBrowseRangeDataImpl(range, source.type, selectedService, prevSourceRowData)
+        return this.loadBrowseRangeDataImpl(range, source.type, selectedService, prevSourceRowData!)
       }))
       .then(dataPerSource => ({ sourceDataList: dataPerSource }));
   }
@@ -264,7 +267,7 @@ class ExplorationDataResolver {
       selectedServiceKey,
     );
     const source = explorationInfoHelper.getParameterValue<DataSourceType>(info, ParameterType.DataSource)
-    const range = explorationInfoHelper.getParameterValue(
+    const range = explorationInfoHelper.getParameterValue<[number, number]>(
       info,
       ParameterType.Range,
     );
@@ -283,7 +286,7 @@ class ExplorationDataResolver {
       info,
       ParameterType.DataSource,
     );
-    const range = explorationInfoHelper.getParameterValue(
+    const range = explorationInfoHelper.getParameterValue<[number, number]>(
       info,
       ParameterType.Range,
     );
@@ -305,7 +308,7 @@ class ExplorationDataResolver {
       info,
       ParameterType.DataSource,
     );
-    const range = explorationInfoHelper.getParameterValue(
+    const range = explorationInfoHelper.getParameterValue<[number, number]>(
       info,
       ParameterType.Range,
     );

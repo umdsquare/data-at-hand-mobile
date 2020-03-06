@@ -9,7 +9,7 @@ import { scaleLinear } from 'd3-scale';
 import * as d3Array from 'd3-array';
 import * as d3Shape from 'd3-shape';
 import Colors from '../../../../style/Colors';
-import { IIntraDayLogEntry, IWeightIntraDayLogEntry } from '../../../../core/exploration/data/types';
+import { IWeightIntraDayLogEntry } from '../../../../core/exploration/data/types';
 import { MeasureUnitType } from '../../../../measure/DataSourceSpec';
 import unitConvert from 'convert-units';
 import { noop } from '../../../../utils';
@@ -35,12 +35,12 @@ export const DailyWeightChart = React.memo((prop: {
     const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
 
-    const convert = prop.measureUnitType === MeasureUnitType.Metric ? noop : (n) => unitConvert(n).from('kg').to('lb')
+    const convert = prop.measureUnitType === MeasureUnitType.Metric ? noop : (n: number) => unitConvert(n).from('kg').to('lb')
 
     const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
 
     const scaleX = CommonBrowsingChartStyles
-        .makeDateScale(null, prop.dateRange[0], prop.dateRange[1])
+        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
         .padding(0.2)
         .range([0, chartArea.width])
 
@@ -67,7 +67,7 @@ export const DailyWeightChart = React.memo((prop: {
         .nice()
 
     const trendLine = d3Shape.line<{ value: number, numberedDate: number }>()
-        .x((d) => scaleX(d.numberedDate) + scaleX.bandwidth() * 0.5)
+        .x((d) => scaleX(d.numberedDate)! + scaleX.bandwidth() * 0.5)
         .y((d) => scaleY(convert(d.value)))
 
 
@@ -80,7 +80,7 @@ export const DailyWeightChart = React.memo((prop: {
             {
                 prop.data.logs.map(d => {
                     return <Circle key={d.numberedDate}
-                        x={scaleX(d.numberedDate) + scaleX.bandwidth() * 0.5}
+                        x={scaleX(d.numberedDate)! + scaleX.bandwidth() * 0.5}
                         y={scaleY(convert(d.value))}
                         r={Math.min(scaleX.bandwidth(), 8) / 2}
                         strokeWidth={2}
@@ -91,7 +91,7 @@ export const DailyWeightChart = React.memo((prop: {
                 })
             }
             {
-                <Path d={trendLine(prop.data.trend)}
+                <Path d={trendLine(prop.data.trend)!}
                     strokeWidth={2.5}
                     fill="transparent"
                     stroke={Colors.chartElementDefault}

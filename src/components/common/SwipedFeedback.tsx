@@ -17,7 +17,7 @@ interface State {
 
 export class SwipedFeedback extends React.PureComponent<any, State>{
 
-    constructor(props) {
+    constructor(props: any) {
         super(props)
 
         this.state = {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar } from 'react-native-calendars';
+import { Calendar, CalendarTheme } from 'react-native-calendars'
 import Colors from '../../style/Colors';
 import { format, set, addDays, getDay, startOfWeek, endOfWeek, getMonth, getYear } from 'date-fns';
 import { View, StyleSheet, Text } from 'react-native';
@@ -13,7 +13,7 @@ import { Dispatch } from 'redux';
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
-const calendarTheme = {
+const calendarTheme: CalendarTheme = {
     selectedDayBackgroundColor: Colors.accent,
     selectedDayTextColor: 'white',
     arrowColor: Colors.textColorLight,
@@ -64,7 +64,7 @@ export const DatePicker = (props: {
     const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const today = DataServiceManager.instance.getServiceByKey(serviceKey).getToday()
 
-    const markedDates = {}
+    const markedDates: any = {}
     if (props.selectedDay) {
         markedDates[formatDate(props.selectedDay)] = { selected: true }
     }
@@ -92,7 +92,7 @@ export const DatePicker = (props: {
         minDate={props.earliedPossibleDay}
         maxDate={props.latestPossibleDay}
         onDayPress={(d) => {
-            props.onDayPress(parseDate(d))
+            props.onDayPress && props.onDayPress(parseDate(d))
         }}
     />
 }
@@ -102,11 +102,11 @@ const selectedWeekRangeMarkInfoBase = {
     color: Colors.accent
 }
 
-export const WeekPicker = (props: { selectedWeekFirstDay?: Date, onWeekSelected?: (weekFirstDay: Date, weekEndDay: Date) => void }) => {
+export const WeekPicker = (props: { selectedWeekFirstDay: Date, onWeekSelected?: (weekFirstDay: Date, weekEndDay: Date) => void }) => {
     const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const today = DataServiceManager.instance.getServiceByKey(serviceKey).getToday()
 
-    const markedDates = {}
+    const markedDates: any = {}
 
     if (props.selectedWeekFirstDay) {
         for (let i = 0; i < 7; i++) {
@@ -186,8 +186,8 @@ const monthPickerStyle = StyleSheet.create({
 })
 
 interface MonthPickerProps {
-    getToday?: () => Date,
     selectedMonth: Date,
+    getToday?: () => Date,
     onMonthSelected?: (month: Date) => void
 }
 
@@ -201,7 +201,7 @@ class MonthPicker extends React.Component<MonthPickerProps, MonthPickerState>{
     constructor(props: MonthPickerProps) {
         super(props)
 
-        const selectedMonth = props.selectedMonth || props.getToday()
+        const selectedMonth = props.selectedMonth || props.getToday!()
 
         this.state = {
             currentYear: getYear(selectedMonth),
@@ -224,7 +224,7 @@ class MonthPicker extends React.Component<MonthPickerProps, MonthPickerState>{
     }
 
     onMonthPressed = (month: number) => {
-        const monthDate = set(this.props.getToday(), { year: this.state.currentYear, month: month })
+        const monthDate = set(this.props.getToday!(), { year: this.state.currentYear, month: month })
         this.setState({
             ...this.state,
             selectedMonth: monthDate

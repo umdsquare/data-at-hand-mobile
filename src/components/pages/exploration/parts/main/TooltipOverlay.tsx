@@ -21,8 +21,8 @@ import { startSpeechSession, requestStopDictation, makeNewSessionId } from '../.
 import Haptic from 'react-native-haptic-feedback';
 import Insets from 'react-native-static-safe-area-insets';
 import { ZIndices } from '../zIndices'
-import { SpeechContext, SpeechContextHelper } from '../../../../../state/speech/context'
 import { DataServiceManager } from '../../../../../system/DataServiceManager'
+import { SpeechContext, SpeechContextHelper } from '../../../../../core/speech/nlp/context'
 
 const borderRadius = 8
 

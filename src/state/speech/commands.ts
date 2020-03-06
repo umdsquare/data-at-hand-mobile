@@ -5,9 +5,9 @@ import { VoiceDictator } from "../../core/speech/VoiceDictator";
 import { DictationResult } from "../../core/speech/types";
 import { SpeechRecognizerSessionStatus } from "./types";
 import { sleep } from "../../utils";
-import { SpeechContext } from "./context";
-import { NLUCommandResolver } from "./nlp/nlu";
 import { Mutex } from 'async-mutex';
+import { SpeechContext } from "../../core/speech/nlp/context";
+import { NLUCommandResolver } from "../../core/speech/nlp/nlu";
 
 const sessionMutex = new Mutex()
 
@@ -46,7 +46,7 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
         try {
             console.log(sessionId, "Setup speech components")
 
-            let previousDictationResult: DictationResult = null
+            let previousDictationResult: DictationResult | null = null
 
             VoiceDictator.instance.registerStartEventListener(() => {
                 console.log(sessionId, "dictator start event")
@@ -55,7 +55,7 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
 
             VoiceDictator.instance.registerReceivedEventListener(result => {
                 //calculate diff
-                let resultReturn: DictationResult = null
+                let resultReturn: DictationResult | null = null
                 if (previousDictationResult) {
                     const Diff = require('diff');
                     resultReturn = {
@@ -84,7 +84,7 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
                         //TODO start analysis
                         console.log(sessionId, "Analyze the phrase, ", dictationResult.text, "with context: ", context)
                         
-                        await NLUCommandResolver.instance.resolveSpeechCommand(dictationResult.text, context, dispatch)
+                        await NLUCommandResolver.instance.resolveSpeechCommand(dictationResult.text, context, currentState.explorationState.info, dispatch)
 
                         console.log(sessionId, "Finished analyzing.")
                         terminate(releaseMutex, dispatch, TerminationReason.Success, sessionId)

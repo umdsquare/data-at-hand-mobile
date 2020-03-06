@@ -5,22 +5,23 @@ import {
   SetUnitTypeAction,
 } from './actions';
 import {MeasureUnitType} from '../../measure/DataSourceSpec';
+import { ActionTypeBase } from '../types';
 
 export interface SettingsState {
   serviceKey: string,
-  serviceInitialDate: number,
+  serviceInitialDate?: number,
   unit: MeasureUnitType
 }
 
 const INITIAL_STATE = {
   serviceKey: 'fitbit',
-  serviceInitialDate: null,
+  serviceInitialDate: undefined,
   unit: MeasureUnitType.Metric
 } as SettingsState;
 
 export const settingsStateReducer = (
   state: SettingsState = INITIAL_STATE,
-  action: SettingsAction,
+  action: ActionTypeBase,
 ): SettingsState => {
   const newState: SettingsState = JSON.parse(JSON.stringify(state));
   switch (action.type) {

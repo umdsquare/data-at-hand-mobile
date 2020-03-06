@@ -274,8 +274,9 @@ PODS:
     - React
   - RNStaticSafeAreaInsets (2.0.0):
     - React
-  - RNSVG (11.0.1):
+  - RNSVG (12.0.0):
     - React
+    - React-RCTImage
   - RNVectorIcons (6.6.0):
     - React
   - RNZipArchive (5.0.1):
@@ -502,7 +503,7 @@ SPEC CHECKSUMS:
   RNScreens: 812b79d384e2bea7eebc4ec981469160d4948fd5
   RNShare: 0e19ddb0bf338b62702ce1d9e001ee14effa68a8
   RNStaticSafeAreaInsets: e4450176adbf197061543e4a4aa82036b3d7abe0
-  RNSVG: 67f1f12dae2cef6ed59a42cae74a6b8f5a9e7b46
+  RNSVG: e06eb87ed992232097735185d3d148e8b4e8e1a9
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   RNZipArchive: eb4ccf13ab4d8e3e114b8182046b19f10d2ff52e
   SDWebImage: 4d5c027c935438f341ed33dbac53ff9f479922ca
