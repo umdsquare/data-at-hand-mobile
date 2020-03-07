@@ -35,6 +35,7 @@ export const CategoricalTouchableSvg = React.memo((props: {
         return (viewX: number) => {
             const localX = viewX - props.chartArea.x
             const index = Math.max(0, Math.min(props.scaleX.domain().length - 1, Math.floor(localX / props.scaleX.step())))
+            console.log(index)
             if (index !== currentTouchedIndex) {
                 setCurrentTouchedIndex(index)
             }
@@ -51,7 +52,7 @@ export const CategoricalTouchableSvg = React.memo((props: {
         console.log("update: ", updateTouchedIndex)
         if (ev.nativeEvent.state === State.ACTIVE) {
             updateTouchedIndex(ev.nativeEvent.x)
-            props.onLongPressIn(currentTouchedIndex,
+            props.onLongPressIn(props.scaleX.domain()[currentTouchedIndex],
                 ev.nativeEvent.x, ev.nativeEvent.y, ev.nativeEvent.absoluteX, ev.nativeEvent.absoluteY,
                 ev.nativeEvent.handlerTag.toString())
         }
@@ -59,18 +60,17 @@ export const CategoricalTouchableSvg = React.memo((props: {
             releaseTooltipTouch()
             props.onLongPressOut()
         }
-    }, [updateTouchedIndex, props.onLongPressIn, currentTouchedIndex, releaseTooltipTouch, props.onLongPressOut])
+    }, [updateTouchedIndex, props.scaleX, props.onLongPressIn, currentTouchedIndex, releaseTooltipTouch, props.onLongPressOut])
 
     const onTapHandlerStateChange = useCallback((ev: TapGestureHandlerStateChangeEvent) => {
         if (ev.nativeEvent.state === State.BEGAN) {
             updateTouchedIndex(ev.nativeEvent.x)
         }
         if (ev.nativeEvent.state === State.ACTIVE) {
-            console.log("tabbed! at ", ev.nativeEvent.absoluteX, ev.nativeEvent.absoluteY)
-            props.onClickElement(currentTouchedIndex)
+            props.onClickElement(props.scaleX.domain()[currentTouchedIndex])
             setCurrentTouchedIndex(null)
         }
-    }, [updateTouchedIndex, props.onClickElement, currentTouchedIndex, setCurrentTouchedIndex])
+    }, [updateTouchedIndex, props.scaleX, props.onClickElement, currentTouchedIndex, setCurrentTouchedIndex])
 
     return <TapGestureHandler
         onHandlerStateChange={onTapHandlerStateChange}
@@ -86,7 +86,7 @@ export const CategoricalTouchableSvg = React.memo((props: {
                 const index = Math.max(0, Math.min(props.scaleX.domain().length - 1, Math.floor(localX / props.scaleX.step())))
                 if (currentTouchedIndex != index) {
                     setCurrentTouchedIndex(index)
-                    props.onLongPressMove(index,
+                    props.onLongPressMove(props.scaleX.domain()[index],
                         ev.nativeEvent.x, ev.nativeEvent.y, ev.nativeEvent.absoluteX, ev.nativeEvent.absoluteY,
                         ev.nativeEvent.handlerTag.toString())
                 }
@@ -98,7 +98,7 @@ export const CategoricalTouchableSvg = React.memo((props: {
                     {
                         currentTouchedIndex != null ?
                             <Rect fill="rgba(0,0,0,0.07)"
-                                x={props.scaleX(currentTouchedIndex) + props.scaleX.bandwidth() * .5 - props.scaleX.step() * .5}
+                                x={props.scaleX(props.scaleX.domain()[currentTouchedIndex]) + props.scaleX.bandwidth() * .5 - props.scaleX.step() * .5}
                                 width={props.scaleX.step()}
                                 height={props.chartArea.height} /> : null
                     }

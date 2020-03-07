@@ -103,12 +103,16 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
     }
 
     private onElementClick = (timeKey: number) => {
+        console.log("timeKey:", timeKey, "Tapped")
         this.props.dispatchExplorationAction(createGoToBrowseRangeAction(InteractionType.TouchOnly, null,
             this.props.data.data[timeKey].range
         ))
     }
 
     private onElementLongPress = (timeKey: number, x: number, y: number, screenX: number, screenY: number, scaleX: ScaleBand<number>, chartArea: LayoutRectangle, touchId: string) => {
+
+        console.log("timeKey:", timeKey, "dataPoint:", this.props.data.data[timeKey])
+
         const dataPoint = this.props.data.data[timeKey]
         const touchingInfo = {
             touchId,
@@ -137,6 +141,7 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
 
 
     render() {
+        console.log("data:", this.props.data.data)
         const aggregationSettingIndex = this.props.sumSupported === true ? this.state.aggregationSettingIndex : INDEX_AGGREGATED
 
         let isRanged = false
@@ -299,41 +304,43 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                     </G>
                     <G x={chartArea.x} y={chartArea.y}>
                         {
-                            aggregationSettingIndex === INDEX_AGGREGATED ? availableData.map((d, i) => {
-                                if (isRanged === true) {
-                                    return <RangeValueElement key={i}
+                            aggregationSettingIndex === INDEX_AGGREGATED ? this.props.data.data.map((d, i) => {
+                                if (d.value != null) {
+                                    if (isRanged === true) {
+                                        return <RangeValueElement key={i}
+                                            value={{
+                                                ...d.value,
+                                                timeKey: i,
+                                                avgA: valueConverter(d.value["avgA"]),
+                                                avgB: valueConverter(d.value["avgB"]),
+                                                minA: valueConverter(d.value["minA"]),
+                                                minB: valueConverter(d.value["minB"]),
+                                                maxA: valueConverter(d.value["maxA"]),
+                                                maxB: valueConverter(d.value["maxB"]),
+                                            }}
+                                            scaleX={scaleX} scaleY={scaleY}
+                                        />
+                                    } else return <SingleValueElement key={i}
                                         value={{
                                             ...d.value,
                                             timeKey: i,
-                                            avgA: valueConverter(d.value["avgA"]),
-                                            avgB: valueConverter(d.value["avgB"]),
-                                            minA: valueConverter(d.value["minA"]),
-                                            minB: valueConverter(d.value["minB"]),
-                                            maxA: valueConverter(d.value["maxA"]),
-                                            maxB: valueConverter(d.value["maxB"]),
+                                            avg: valueConverter(d.value["avg"]),
+                                            max: valueConverter(d.value["max"]),
+                                            min: valueConverter(d.value["min"]),
+                                            sum: valueConverter(d.value["sum"])
                                         }}
-                                        scaleX={scaleX} scaleY={scaleY}
+                                        scaleX={scaleX} scaleY={scaleY} maxWidth={40}
                                     />
-                                } else return <SingleValueElement key={i}
-                                    value={{
-                                        ...d.value,
-                                        timeKey: i,
-                                        avg: valueConverter(d.value["avg"]),
-                                        max: valueConverter(d.value["max"]),
-                                        min: valueConverter(d.value["min"]),
-                                        sum: valueConverter(d.value["sum"])
-                                    }}
-                                    scaleX={scaleX} scaleY={scaleY} maxWidth={40}
-                                />
-                            }) : availableData.map((d, i) => {
-                                return <Rect
+                                } else return null
+                            }) : this.props.data.data.map((d, i) => {
+                                return d.value ? <Rect
                                     key={i}
                                     x={scaleX(i)}
                                     y={scaleY(valueConverter(d.value["sum"]))}
                                     width={scaleX.bandwidth()}
                                     height={scaleY(valueConverter(0)) - scaleY(valueConverter(d.value["sum"]))}
                                     fill={Colors.chartElementDefault + "aa"}
-                                />
+                                /> : null
                             })
                         }
                     </G>
