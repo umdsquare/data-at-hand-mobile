@@ -1,5 +1,5 @@
-import React, { useState, useRef } from "react";
-import { View, StyleSheet, Text, ViewStyle, TextStyle, TouchableOpacity } from "react-native";
+import React, { useState, useRef, useCallback } from "react";
+import { View, StyleSheet, Text, ViewStyle, TextStyle } from "react-native";
 import Colors from "../../style/Colors";
 import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
 import { Sizes } from "../../style/Sizes";
@@ -16,6 +16,7 @@ import Haptic from "react-native-haptic-feedback";
 import { useSelector } from "react-redux";
 import { ReduxAppState } from "../../state/types";
 import { DataServiceManager } from "../../system/DataServiceManager";
+import { BorderlessButton, LongPressGestureHandler, State as GestureState, LongPressGestureHandlerStateChangeEvent, RectButton, TouchableOpacity } from "react-native-gesture-handler";
 
 const dateButtonWidth = 140
 const barHeight = 60
@@ -143,7 +144,6 @@ interface State {
     level?: "day" | "week" | "month",
     periodName?: string,
     clickedElementType?: ElementType | null,
-    isPeriodButtonLongPressed: boolean
 }
 
 const DateButton = (props: {
@@ -153,47 +153,44 @@ const DateButton = (props: {
     isLightMode?: boolean
 }) => {
 
-    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+    const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const today = DataServiceManager.instance.getServiceByKey(serviceKey).getToday()
-
-    const [isLongPressed, setIsLongPressed] = useState(false)
 
     const date = DateTimeHelper.toDate(props.date)
     const dateString = format(date, props.overrideFormat || "MMM dd, yyyy")
     const subText = isToday(date, today) === true ? 'Today' : (isYesterday(date, today) === true ? "Yesterday" : format(date, "EEEE"))
-    return <TouchableOpacity
-        onPress={props.onPress}
-        onLongPress={() => {
-            setIsLongPressed(true)
-            if (props.onLongPressIn) {
-                props.onLongPressIn()
-            }
-        }}
-        onPressOut={() => {
-            if (isLongPressed === true && props.onLongPressOut) {
-                props.onLongPressOut()
-            }
-            setIsLongPressed(false)
-        }}
-    >
-        <View style={props.freeWidth === true ? styles.dateButtonContainerStyleFreeWidth : styles.dateButtonContainerStyle}>
-            <View style={styles.dateButtonDatePartStyle}>
-                <Text style={props.isLightMode === true ? styles.dateButtonDateTextStyleLight : styles.dateButtonDateTextStyle}>{dateString}</Text>
-                <View style={styles.dateButtonIndicatorContainerStyle}>
-                    <SpeechAffordanceIndicator />
+
+    const onLongPressStateChange = useCallback((ev: LongPressGestureHandlerStateChangeEvent) => {
+        if (ev.nativeEvent.state === GestureState.ACTIVE) {
+            props.onLongPressIn && props.onLongPressIn()
+        } else if (ev.nativeEvent.state === GestureState.END) {
+            props.onLongPressOut && props.onLongPressOut()
+        }
+    }, [props.onLongPressIn, props.onLongPressOut])
+
+    return <LongPressGestureHandler onHandlerStateChange={onLongPressStateChange}
+        shouldCancelWhenOutside={false}
+        maxDist={Number.MAX_VALUE}>
+        <BorderlessButton onPress={props.onPress} shouldCancelWhenOutside={false} rippleColor={"rgba(255,255,255,0.2)"}>
+            <View style={props.freeWidth === true ? styles.dateButtonContainerStyleFreeWidth : styles.dateButtonContainerStyle}>
+                <View style={styles.dateButtonDatePartStyle}>
+                    <Text style={props.isLightMode === true ? styles.dateButtonDateTextStyleLight : styles.dateButtonDateTextStyle}>{dateString}</Text>
+                    <View style={styles.dateButtonIndicatorContainerStyle}>
+                        <SpeechAffordanceIndicator />
+                    </View>
                 </View>
-            </View>
-            <Text style={styles.midViewDescriptionTextStyle}>
-                {subText}
-            </Text></View>
-    </TouchableOpacity>
+                <Text style={styles.midViewDescriptionTextStyle}>
+                    {subText}
+                </Text></View>
+        </BorderlessButton>
+    </LongPressGestureHandler>
 }
 
 export class DateRangeBar extends React.PureComponent<Props, State> {
 
     static deriveState(from: number, to: number, prevState: State): State {
 
-        if(to < from){
+        if (to < from) {
             const fromTemp = from
             from = to
             to = fromTemp
@@ -243,7 +240,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         }
     }
 
-    static getDerivedStateFromProps(nextProps: Props, currentState: State): State|null {
+    static getDerivedStateFromProps(nextProps: Props, currentState: State): State | null {
         if (currentState.from !== nextProps.from ||
             currentState.to !== nextProps.to) {
             return DateRangeBar.deriveState(nextProps.from, nextProps.to, currentState)
@@ -258,7 +255,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
     constructor(props: Props) {
         super(props)
-        this.state = DateRangeBar.deriveState(props.from, props.to, { isBottomSheetOpen: false, isPeriodButtonLongPressed: false } as any)
+        this.state = DateRangeBar.deriveState(props.from, props.to, { isBottomSheetOpen: false, } as any)
     }
 
     private onClickedElement(type: ElementType) {
@@ -316,7 +313,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
     }
 
     setRange = (from: number, to: number, interactionType: InteractionType = InteractionType.TouchOnly) => {
-        
+
         const newState = DateRangeBar.deriveState(
             from,
             to,
@@ -330,10 +327,10 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         if (this.props.onRangeChanged) {
 
             this.props.onRangeChanged!(newState.from, newState.to, interactionType)
-            if(this.setRangeDebounceTimer){
+            if (this.setRangeDebounceTimer) {
                 cancelAnimationFrame(this.setRangeDebounceTimer)
             }
-            this.setRangeDebounceTimer = requestAnimationFrame(()=>{
+            this.setRangeDebounceTimer = requestAnimationFrame(() => {
                 this.props.onRangeChanged!(newState.from, newState.to, interactionType)
             })
         }
@@ -383,27 +380,18 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         this.props.onLongPressOut && this.props.onLongPressOut('to')
     }
 
-    onPeriodButtonLongPress = () => {
-        Haptic.trigger("impactHeavy", {
-            enableVibrateFallback: true,
-            ignoreAndroidSystemSettings: true
-        })
-        this.props.onLongPressIn && this.props.onLongPressIn('period')
-        this.setState({
-            ...this.state,
-            isPeriodButtonLongPressed: true
-        })
-    }
+    onPeriodButtonLongPress = (ev: LongPressGestureHandlerStateChangeEvent) => {
 
-    onPeriodButtonPressOut = () => {
-        if (this.state.isPeriodButtonLongPressed === true) {
+        if (ev.nativeEvent.state === GestureState.ACTIVE) {
+            Haptic.trigger("impactHeavy", {
+                enableVibrateFallback: true,
+                ignoreAndroidSystemSettings: true
+            })
+            this.props.onLongPressIn && this.props.onLongPressIn('period')
+
+        } else if (ev.nativeEvent.state === GestureState.END) {
             this.props.onLongPressOut && this.props.onLongPressOut('period')
         }
-
-        this.setState({
-            ...this.state,
-            isPeriodButtonLongPressed: false
-        })
     }
 
     componentDidUpdate() {
@@ -425,15 +413,15 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                     }
                     break;
                 case 'from':
-                    modalPickerView = <DatePicker selectedDay={this.state.fromDate} 
-                    disabledDates={[this.state.toDate]}
-                    onDayPress={this.setFromDate} ghostRange={[this.state.fromDate, this.state.toDate]} />
+                    modalPickerView = <DatePicker selectedDay={this.state.fromDate}
+                        disabledDates={[this.state.toDate]}
+                        onDayPress={this.setFromDate} ghostRange={[this.state.fromDate, this.state.toDate]} />
                     break;
                 case 'to':
-                    modalPickerView = <DatePicker selectedDay={this.state.toDate} 
-                    disabledDates={[this.state.fromDate]}
-                    onDayPress={this.setToDate} 
-                    ghostRange={[this.state.fromDate, this.state.toDate]} />
+                    modalPickerView = <DatePicker selectedDay={this.state.toDate}
+                        disabledDates={[this.state.fromDate]}
+                        onDayPress={this.setToDate}
+                        ghostRange={[this.state.fromDate, this.state.toDate]} />
                     break;
             }
         }
@@ -456,11 +444,18 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
                     {
                         this.state.semanticPeriodCaptured === true ? (
-                            <Button onPress={this.onPeriodPressed} title={this.state.periodName}
-                                buttonStyle={styles.periodButtonStyle} titleStyle={styles.periodButtonTitleStyle}
-                                onLongPress={this.onPeriodButtonLongPress}
-                                onPressOut={this.onPeriodButtonPressOut}
-                            />
+                            <LongPressGestureHandler
+                                maxDist={Number.MAX_VALUE}
+                                shouldCancelWhenOutside={false}
+                                onHandlerStateChange={this.onPeriodButtonLongPress}
+                            ><BorderlessButton onPress={this.onPeriodPressed}
+                            >
+                                    <View style={styles.periodButtonStyle}
+                                        hitSlop={{ top: 10, bottom: 10 }}>
+                                        <Text style={styles.periodButtonTitleStyle}>{this.state.periodName}</Text>
+                                    </View>
+
+                                </BorderlessButton></LongPressGestureHandler>
                         ) : (
                                 <Text style={styles.midViewDescriptionTextStyle}>{this.state.numDays} Days</Text>
                             )
@@ -491,7 +486,7 @@ export const DateBar = (props: {
 
     const [date, setDate] = useState(props.date)
 
-    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+    const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
 
     const shiftDay = (amount: number) => {
@@ -506,7 +501,7 @@ export const DateBar = (props: {
 
     const bottomSheetRef = useRef<BottomSheet>(null)
 
-    const swipedFeedbackRef =useRef<SwipedFeedback>(null)
+    const swipedFeedbackRef = useRef<SwipedFeedback>(null)
 
     return <GestureRecognizer onSwipeLeft={() => shiftDay(1)} onSwipeRight={() => shiftDay(-1)} style={styles.containerStyle}>
         <SwipedFeedback ref={swipedFeedbackRef} />
