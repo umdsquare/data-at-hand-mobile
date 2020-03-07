@@ -25,6 +25,7 @@ import {
   GoToComparisonTwoRangesAction,
   GoToCyclicDetailAction,
   SetCycleDimensionAction,
+  ShiftAllRangesAction,
 } from './actions';
 import { explorationInfoHelper } from '../../../core/exploration/ExplorationInfoHelper';
 import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
@@ -69,7 +70,6 @@ export const explorationStateReducer = (
   ) {
     switch (action.type) {
       case ExplorationActionType.RestorePreviousInfo:
-        console.log("restore prevInfo: ", state.prevInfo)
         if (state.prevInfo) {
           newState.info = shallowCopyExplorationInfo(state.prevInfo)!;
           newState.prevInfo = null;
@@ -166,6 +166,40 @@ export const explorationStateReducer = (
           setCycleDimensionAction.cycleDimension,
           ParameterType.CycleDimension
         )
+        break;
+
+      case ExplorationActionType.ShiftAllRanges:
+        {
+          const a = action as ShiftAllRangesAction
+          
+          if (newState.info.type === ExplorationType.C_TwoRanges) {
+
+            const rangeA = explorationInfoHelper.getParameterValue<[number, number]>(
+              newState.info,
+              ParameterType.Range,
+              ParameterKey.RangeA,
+            );
+            if (rangeA != null) {
+              explorationInfoHelper.setParameterValue(newState.info, DateTimeHelper.pageRange(rangeA, a.direction === 'future' ? 1 : -1), ParameterType.Range, ParameterKey.RangeA)
+            }
+
+            const rangeB =
+              explorationInfoHelper.getParameterValue<[number, number]>(
+                newState.info,
+                ParameterType.Range,
+                ParameterKey.RangeB,
+              );
+            if (rangeB != null) {
+              explorationInfoHelper.setParameterValue(newState.info, DateTimeHelper.pageRange(rangeB, a.direction === 'future' ? 1 : -1), ParameterType.Range, ParameterKey.RangeB)
+            }
+          }else{
+            const range = explorationInfoHelper.getParameterValue<[number, number]>(newState.info, ParameterType.Range, null)
+            if (range != null) {
+              explorationInfoHelper.setParameterValue(newState.info, DateTimeHelper.pageRange(range, a.direction === 'future' ? 1 : -1), ParameterType.Range)
+            }  
+          }
+
+        }
         break;
 
       case ExplorationActionType.GoToBrowseRange:

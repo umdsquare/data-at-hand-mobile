@@ -122,7 +122,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
     private speechUndoButtonRef = React.createRef<Button>()
 
     private undoHideTimeout: NodeJS.Timeout | null = null
-    
+
     private onAppStateChange = (nextAppState: AppStateStatus) => {
         if (
             this.state.appState.match(/inactive|background/) &&
@@ -243,15 +243,15 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
                     ...this.state,
                     undoIgnored: false
                 })
-                if(this.undoHideTimeout){
+                if (this.undoHideTimeout) {
                     clearTimeout(this.undoHideTimeout)
                 }
-                this.undoHideTimeout = setTimeout(()=>{
+                this.undoHideTimeout = setTimeout(() => {
                     this.setState({
                         ...this.state,
                         undoIgnored: true
                     }),
-                    this.undoHideTimeout = null
+                        this.undoHideTimeout = null
                 }, 8000)
             })
         }
@@ -371,9 +371,9 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
             case ExplorationType.C_Cyclic:
                 return <CyclicComparisonMainPanel />
             case ExplorationType.C_TwoRanges:
-                return <MultiRangeComparisonMainPanel />
+                return <MultiRangeComparisonMainPanel/>
             case ExplorationType.C_CyclicDetail_Range:
-                return <MultiRangeComparisonMainPanel />
+                return <MultiRangeComparisonMainPanel/>
             case ExplorationType.C_CyclicDetail_Daily:
                 return <FilteredDatesChartMainPanel />
         }

@@ -15,6 +15,8 @@ export enum ExplorationActionType {
   SetCycleType = 'exploration:interaction:setCycleType',
   SetCycleDimension = 'exploration:interaction:setCycleDimension',
 
+  ShiftAllRanges = 'exploration:interaction:shiftAllRanges',
+
   GoToBrowseRange = 'exploration:interaction:goToBrowseRange',
   GoToBrowseOverview = 'exploration:interaction:goToBrowseOverview',
   GoToBrowseDay = 'exploration:interaction:goToBrowseDay',
@@ -102,6 +104,10 @@ export interface SetTouchingElementInfoAction extends ActionTypeBase {
   info: TouchingElementInfo | null;
 }
 
+export interface ShiftAllRangesAction extends ExplorationActionBase {
+  direction: 'past' | 'future'
+}
+
 export type ExplorationAction =
   | ActionTypeBase
   | ExplorationActionBase
@@ -117,6 +123,7 @@ export type ExplorationAction =
   | SetDataSourceAction
   | SetTouchingElementInfoAction
   | SetCycleDimensionAction
+  | ShiftAllRangesAction
 
 
 export function createSetRangeAction(
@@ -298,6 +305,14 @@ export function setTouchElementInfo(
     type: ExplorationActionType.SetTouchElementInfo,
     info,
   };
+}
+
+export function shiftAllRanges(interactionType: InteractionType, direction: 'past' | 'future'): ShiftAllRangesAction {
+  return {
+    interactionType,
+    type: ExplorationActionType.ShiftAllRanges,
+    direction
+  }
 }
 
 export function goBackAction(): ActionTypeBase {

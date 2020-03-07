@@ -55,20 +55,23 @@ export const CategoricalTouchableSvg = React.memo((props: {
                 ev.nativeEvent.x, ev.nativeEvent.y, ev.nativeEvent.absoluteX, ev.nativeEvent.absoluteY,
                 ev.nativeEvent.handlerTag.toString())
         }
-        if (ev.nativeEvent.state === State.END) {
+        if (ev.nativeEvent.state === State.END || ev.nativeEvent.state === State.CANCELLED) {
             releaseTooltipTouch()
             props.onLongPressOut()
         }
+
     }, [updateTouchedIndex, props.scaleX, props.onLongPressIn, currentTouchedIndex, releaseTooltipTouch, props.onLongPressOut])
 
     const onTapHandlerStateChange = useCallback((ev: TapGestureHandlerStateChangeEvent) => {
         if (ev.nativeEvent.state === State.BEGAN) {
             updateTouchedIndex(ev.nativeEvent.x)
-        }
-        if (ev.nativeEvent.state === State.ACTIVE) {
+        }else if (ev.nativeEvent.state === State.ACTIVE) {
             props.onClickElement(props.scaleX.domain()[currentTouchedIndex])
             setCurrentTouchedIndex(null)
+        }else if(ev.nativeEvent.state === State.FAILED) {
+            setCurrentTouchedIndex(null)
         }
+
     }, [updateTouchedIndex, props.scaleX, props.onClickElement, currentTouchedIndex, setCurrentTouchedIndex])
 
     return <TapGestureHandler

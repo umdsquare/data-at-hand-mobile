@@ -24,9 +24,10 @@ import { timeTickFormat } from '../../../../exploration/visualization/compare/co
 import { min, max } from 'd3-array'
 import { SingleValueElement } from '../../../../exploration/visualization/compare/SingleValueElement'
 import { RangeValueElement } from '../../../../exploration/visualization/compare/RangeValueElement'
-import { ExplorationAction, createGoToBrowseRangeAction, InteractionType, setTouchElementInfo } from '../../../../../state/exploration/interaction/actions'
+import { ExplorationAction, createGoToBrowseRangeAction, InteractionType, setTouchElementInfo, shiftAllRanges } from '../../../../../state/exploration/interaction/actions'
 import { noop } from '../../../../../utils'
 import { CategoricalTouchableSvg } from '../../../../exploration/visualization/compare/CategoricalTouchableSvg'
+import { HorizontalPullToActionContainer } from '../../../../common/HorizontalPullToActionContainer'
 
 const INDEX_AGGREGATED = 0
 const INDEX_SUM = 1
@@ -67,7 +68,7 @@ interface Props {
     source?: DataSourceType,
     sumSupported?: boolean,
     measureUnitType?: MeasureUnitType,
-    dispatchExplorationAction?: (ExplorationAction) => void
+    dispatchExplorationAction?: (ExplorationAction) => void,
 }
 
 interface State {
@@ -132,8 +133,12 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
         this.props.dispatchExplorationAction(setTouchElementInfo(touchingInfo))
     }
 
-    private onElementLongPressOut = () => {
+    private readonly onElementLongPressOut = () => {
         this.props.dispatchExplorationAction(setTouchElementInfo(null))
+    }
+
+    private readonly onPulledFromSide = (from: 'left' | 'right') => {
+        this.props.dispatchExplorationAction(shiftAllRanges(InteractionType.TouchOnly, from === 'left' ? 'past' : 'future'))
     }
 
 
@@ -224,8 +229,10 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
             ticks = scale.ticks().map(t => t * 3600)
         }
 
-        return <View style={styles.containerStyle}>
-            {
+        return <HorizontalPullToActionContainer
+            style={styles.containerStyle}
+            onPulled={this.onPulledFromSide}
+        >{
                 this.props.sumSupported === true ? (Platform.OS === 'ios' ?
                     <SegmentedControlIOS values={SEGEMENTED_VALUES}
                         selectedIndex={this.state.aggregationSettingIndex}
@@ -250,14 +257,14 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                         <RangeValueElementLegend rangeALabel="Bedtime Range" rangeBLabel="Wake Time Range" />
                     </View> : <View style={styles.singleLegendContainerStyle}><SingleValueElementLegend /></View>) : null
             }
-
-            <SizeWatcher containerStyle={aggregationSettingIndex === INDEX_AGGREGATED ? StyleTemplates.fillFlex : styles.chartContainerStyleWithoutLegend} onSizeChange={(width, height) => {
-                this.setState({
-                    ...this.state,
-                    chartContainerWidth: width,
-                    chartContainerHeight: height
-                })
-            }}>
+            <SizeWatcher containerStyle={aggregationSettingIndex === INDEX_AGGREGATED ? StyleTemplates.fillFlex : styles.chartContainerStyleWithoutLegend}
+                onSizeChange={(width, height) => {
+                    this.setState({
+                        ...this.state,
+                        chartContainerWidth: width,
+                        chartContainerHeight: height
+                    })
+                }}>
                 <CategoricalTouchableSvg
                     chartContainerWidth={this.state.chartContainerWidth}
                     chartContainerHeight={this.state.chartContainerHeight}
@@ -301,7 +308,7 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                     <G x={chartArea.x} y={chartArea.y}>
                         {
                             aggregationSettingIndex === INDEX_AGGREGATED ? this.props.data.data.map((d, i) => {
-                                if (d.value != null) {
+                                if (d.value != null && d.value.n > 0) {
                                     if (isRanged === true) {
                                         return <RangeValueElement key={i}
                                             value={{
@@ -329,7 +336,7 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                                     />
                                 } else return null
                             }) : this.props.data.data.map((d, i) => {
-                                return d.value ? <Rect
+                                return d.value && d.value.n > 0 ? <Rect
                                     key={i}
                                     x={scaleX(i)}
                                     y={scaleY(valueConverter(d.value["sum"]))}
@@ -341,9 +348,8 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                         }
                     </G>
                 </CategoricalTouchableSvg>
-
             </SizeWatcher>
-        </View>
+        </HorizontalPullToActionContainer>
     }
 }
 
