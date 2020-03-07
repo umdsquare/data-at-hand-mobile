@@ -54,7 +54,7 @@ export class NLUCommandResolver {
         switch (explorationInfo.type) {
             case ExplorationType.B_Day:
                 if (dates.length > 0) {
-                    return setDateAction(InteractionType.Multimodal, dates[0].value as number)
+                    return setDateAction(InteractionType.Speech, dates[0].value as number)
                 }
             case ExplorationType.B_Overview:
             case ExplorationType.B_Range:
@@ -62,7 +62,7 @@ export class NLUCommandResolver {
             case ExplorationType.C_CyclicDetail_Daily:
             case ExplorationType.C_CyclicDetail_Range:
                 if (ranges.length > 0) {
-                    return createSetRangeAction(InteractionType.Multimodal, ranges[0].value as [number, number])
+                    return createSetRangeAction(InteractionType.Speech, ranges[0].value as [number, number])
                 }
                 if (dates.length > 0) {
                     const date = dates[0].value
@@ -76,23 +76,23 @@ export class NLUCommandResolver {
                         const timeContext = context as TimeSpeechContext
 
                         if (timeContext.timeElementType === 'from') {
-                            return createSetRangeAction(InteractionType.Multimodal, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])])
+                            return createSetRangeAction(InteractionType.Speech, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])])
                         } else if (timeContext.timeElementType === 'to') {
-                            return createSetRangeAction(InteractionType.Multimodal, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])])
+                            return createSetRangeAction(InteractionType.Speech, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])])
                         }
                     }
 
                     if (date < currentRange[0]) {
-                        return createSetRangeAction(InteractionType.Multimodal, [date, currentRange[1]])
+                        return createSetRangeAction(InteractionType.Speech, [date, currentRange[1]])
                     } else if (date > currentRange[1]) {
-                        return createSetRangeAction(InteractionType.Multimodal, [currentRange[0], date])
+                        return createSetRangeAction(InteractionType.Speech, [currentRange[0], date])
                     } else {
                         //middle. change more near one
                         const differLeft = differenceInDays(DateTimeHelper.toDate(date), DateTimeHelper.toDate(currentRange[0]))
                         const differRight = differenceInDays(DateTimeHelper.toDate(currentRange[1]), DateTimeHelper.toDate(date))
                         if (differLeft <= differRight) {
-                            return createSetRangeAction(InteractionType.Multimodal, [date, currentRange[1]])
-                        } else return createSetRangeAction(InteractionType.Multimodal, [currentRange[0], date])
+                            return createSetRangeAction(InteractionType.Speech, [date, currentRange[1]])
+                        } else return createSetRangeAction(InteractionType.Speech, [currentRange[0], date])
                     }
                 }
                 break;

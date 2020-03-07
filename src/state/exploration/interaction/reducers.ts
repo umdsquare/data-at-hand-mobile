@@ -103,7 +103,7 @@ export const explorationStateReducer = (
         return newState;
     }
   } else {
-    if ((action as any)['interactionType'] === InteractionType.Multimodal) {
+    if ((action as any)['interactionType'] === InteractionType.Speech) {
       newState.prevInfo = shallowCopyExplorationInfo(newState.info);
     }
 

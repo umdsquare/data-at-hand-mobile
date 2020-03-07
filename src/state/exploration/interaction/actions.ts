@@ -33,7 +33,7 @@ export enum ExplorationActionType {
 
 export enum InteractionType {
   TouchOnly = 'touchonly',
-  Multimodal = 'multimodal',
+  Speech = 'speech',
 }
 
 interface ExplorationActionBase extends ActionTypeBase {
