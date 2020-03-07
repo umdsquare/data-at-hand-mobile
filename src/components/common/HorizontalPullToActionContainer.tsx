@@ -73,7 +73,7 @@ export const HorizontalPullToActionContainer = (props: {
                     setPullingOrigin(from)
                 }
 
-                if (ev.nativeEvent.state === State.END && Math.abs(ev.nativeEvent.translationX) >= minDragAmount) {
+                if (ev.nativeEvent.state === State.END && (Math.abs(ev.nativeEvent.translationX) >= minDragAmount || Math.abs(ev.nativeEvent.velocityX) > 300)) {
                     props.onPulled(from)
                 }
 
@@ -101,6 +101,7 @@ export const HorizontalPullToActionContainer = (props: {
     >
         <Animated.View style={props.style}>
             <PanGestureHandler
+                
                 {...defaultProps}
                 hitSlop={{ right: bezelRegion }}
                 onHandlerStateChange={fromLeftHandlerStateChange}
