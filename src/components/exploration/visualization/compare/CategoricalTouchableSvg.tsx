@@ -19,10 +19,10 @@ export const CategoricalTouchableSvg = React.memo((props: {
 
     const hitSlop = useMemo(() => {
         return {
-            left: props.chartArea.x,
-            right: props.chartContainerWidth - props.chartArea.x - props.chartArea.width,
-            top: props.chartArea.y,
-            bottom: props.chartContainerHeight - props.chartArea.height - props.chartArea.y
+            left: -props.chartArea.x,
+            right: -(props.chartContainerWidth - props.chartArea.x - props.chartArea.width),
+            top: -props.chartArea.y,
+            bottom: -(props.chartContainerHeight - props.chartArea.height - props.chartArea.y)
         }
     }, [props.chartArea, props.chartContainerWidth, props.chartContainerHeight])
 
@@ -35,7 +35,7 @@ export const CategoricalTouchableSvg = React.memo((props: {
         return (viewX: number) => {
             const localX = viewX - props.chartArea.x
             const index = Math.max(0, Math.min(props.scaleX.domain().length - 1, Math.floor(localX / props.scaleX.step())))
-            console.log(index)
+            
             if (index !== currentTouchedIndex) {
                 setCurrentTouchedIndex(index)
             }
@@ -49,7 +49,6 @@ export const CategoricalTouchableSvg = React.memo((props: {
     }, [setCurrentTouchedIndex])
 
     const onLongPressHandlerStateChange = useCallback((ev: LongPressGestureHandlerStateChangeEvent) => {
-        console.log("update: ", updateTouchedIndex)
         if (ev.nativeEvent.state === State.ACTIVE) {
             updateTouchedIndex(ev.nativeEvent.x)
             props.onLongPressIn(props.scaleX.domain()[currentTouchedIndex],
@@ -80,6 +79,8 @@ export const CategoricalTouchableSvg = React.memo((props: {
         <LongPressGestureHandler
             ref={longPressRef}
             maxDist={Number.MAX_VALUE}
+            shouldCancelWhenOutside={false}
+            hitSlop={hitSlop}
             onHandlerStateChange={onLongPressHandlerStateChange}
             onGestureEvent={(ev) => {
                 const localX = ev.nativeEvent.x - props.chartArea.x

@@ -103,15 +103,12 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
     }
 
     private onElementClick = (timeKey: number) => {
-        console.log("timeKey:", timeKey, "Tapped")
         this.props.dispatchExplorationAction(createGoToBrowseRangeAction(InteractionType.TouchOnly, null,
             this.props.data.data[timeKey].range
         ))
     }
 
     private onElementLongPress = (timeKey: number, x: number, y: number, screenX: number, screenY: number, scaleX: ScaleBand<number>, chartArea: LayoutRectangle, touchId: string) => {
-
-        console.log("timeKey:", timeKey, "dataPoint:", this.props.data.data[timeKey])
 
         const dataPoint = this.props.data.data[timeKey]
         const touchingInfo = {
@@ -141,7 +138,6 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
 
 
     render() {
-        console.log("data:", this.props.data.data)
         const aggregationSettingIndex = this.props.sumSupported === true ? this.state.aggregationSettingIndex : INDEX_AGGREGATED
 
         let isRanged = false

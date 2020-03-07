@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { ExplorationType, ParameterKey, ParameterType, IntraDayDataSourceType, getIntraDayDataSourceName, inferIntraDayDataSourceType, inferDataSource } from "../../../../core/exploration/types";
-import { SafeAreaView, View, Text, StyleSheet, TextStyle, ViewStyle, LayoutAnimation } from 'react-native';
+import { SafeAreaView, View, Text, StyleSheet, TextStyle, ViewStyle, LayoutAnimation, ViewProps } from 'react-native';
 import { CategoricalRow } from '../../../exploration/CategoricalRow';
 import { DataSourceIcon } from '../../../common/DataSourceIcon';
 import { ExplorationProps } from '../ExplorationScreen';
@@ -68,12 +68,18 @@ const backButtonProps = {
         borderRadius: 50,
         backgroundColor: '#FFFFFFdd'
     },
+
+    hitSlop: {
+        top: 10,
+        bottom: 10
+    },
+
     titleStyle: {
         color: Colors.headerBackground,
         fontSize: Sizes.tinyFontSize,
         fontWeight: 'bold'
     } as TextStyle
-}
+} as ViewProps
 
 export const ExplorationViewHeader = () => {
 
