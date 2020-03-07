@@ -4,8 +4,7 @@ import Colors from "../../style/Colors";
 import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
 import { Sizes } from "../../style/Sizes";
 import Dash from 'react-native-dash';
-import { Button } from "react-native-elements";
-import { format, differenceInCalendarDays, isFirstDayOfMonth, isLastDayOfMonth, isMonday, isSunday, addDays, subDays, startOfMonth, endOfMonth, subMonths, addMonths, differenceInDays } from "date-fns";
+import { format, differenceInCalendarDays, isFirstDayOfMonth, isLastDayOfMonth, isMonday, isSunday, addDays, subDays, startOfMonth, endOfMonth, subMonths, addMonths } from "date-fns";
 import GestureRecognizer from 'react-native-swipe-gestures';
 import { DatePicker, WeekPicker, MonthPicker } from "../common/CalendarPickers";
 import { InteractionType } from "../../state/exploration/interaction/actions";
@@ -16,7 +15,7 @@ import Haptic from "react-native-haptic-feedback";
 import { useSelector } from "react-redux";
 import { ReduxAppState } from "../../state/types";
 import { DataServiceManager } from "../../system/DataServiceManager";
-import { BorderlessButton, LongPressGestureHandler, State as GestureState, LongPressGestureHandlerStateChangeEvent, RectButton, TouchableOpacity } from "react-native-gesture-handler";
+import { BorderlessButton, LongPressGestureHandler, State as GestureState, LongPressGestureHandlerStateChangeEvent, FlingGestureHandler, Directions, FlingGestureHandlerStateChangeEvent } from "react-native-gesture-handler";
 
 const dateButtonWidth = 140
 const barHeight = 60
@@ -150,7 +149,8 @@ const DateButton = (props: {
     date: number, overrideFormat?: string, freeWidth?: boolean, onPress: () => void,
     onLongPressIn?: () => void,
     onLongPressOut?: () => void,
-    isLightMode?: boolean
+    isLightMode?: boolean,
+    waitFor?: React.Ref<any> | Array<React.Ref<any>>
 }) => {
 
     const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
@@ -170,8 +170,9 @@ const DateButton = (props: {
 
     return <LongPressGestureHandler onHandlerStateChange={onLongPressStateChange}
         shouldCancelWhenOutside={false}
-        maxDist={Number.MAX_VALUE}>
-        <BorderlessButton onPress={props.onPress} shouldCancelWhenOutside={false} rippleColor={"rgba(255,255,255,0.2)"}>
+        maxDist={Number.MAX_VALUE}
+        waitFor={props.waitFor}>
+        <BorderlessButton waitFor={props.waitFor} onPress={props.onPress} shouldCancelWhenOutside={false} rippleColor={"rgba(255,255,255,0.2)"}>
             <View style={props.freeWidth === true ? styles.dateButtonContainerStyleFreeWidth : styles.dateButtonContainerStyle}>
                 <View style={styles.dateButtonDatePartStyle}>
                     <Text style={props.isLightMode === true ? styles.dateButtonDateTextStyleLight : styles.dateButtonDateTextStyle}>{dateString}</Text>
@@ -248,8 +249,9 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         return null
     }
 
-    private swipedFeedbackRef: SwipedFeedback | null = null
-    private bottomSheetRef: BottomSheet | null = null
+    private swipedFeedbackRef = React.createRef<SwipedFeedback>()
+    private bottomSheetRef = React.createRef<BottomSheet>()
+    private flingGestureHandlerRef = [React.createRef<FlingGestureHandler>(), React.createRef<FlingGestureHandler>()]
 
     private setRangeDebounceTimer: any
 
@@ -263,7 +265,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             ...this.state,
             clickedElementType: type,
         })
-        this.bottomSheetRef?.open()
+        this.bottomSheetRef.current?.open()
     }
 
     onFromDatePressed = () => {
@@ -278,38 +280,33 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         this.onClickedElement('period')
     }
 
-    onSwipeLeft = () => {
-
+    private readonly handleSwipe = (direction: 'left'|'right') => {
+        const sign = direction === 'left'? 1 : -1
         var from: Date
         var to: Date
         if (this.state.level !== 'month') {
-            from = addDays(this.state.fromDate, this.state.numDays)
-            to = addDays(this.state.toDate, this.state.numDays)
+            from = addDays(this.state.fromDate, sign * this.state.numDays)
+            to = addDays(this.state.toDate, sign * this.state.numDays)
         } else {
-            const lastMonthFirst = addMonths(this.state.fromDate, 1)
-            const lastMonthLast = endOfMonth(lastMonthFirst)
-            from = lastMonthFirst
-            to = lastMonthLast
+            const newMonthFirst = addMonths(this.state.fromDate, sign)
+            const newMonthLast = endOfMonth(newMonthFirst)
+            from = newMonthFirst
+            to = newMonthLast
         }
         this.setRange(DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to), InteractionType.TouchOnly)
-        this.swipedFeedbackRef?.startFeedback('left')
+        this.swipedFeedbackRef.current?.startFeedback(direction)
     }
 
-    onSwipeRight = () => {
-
-        var from: Date
-        var to: Date
-        if (this.state.level !== 'month') {
-            from = subDays(this.state.fromDate, this.state.numDays)
-            to = subDays(this.state.toDate, this.state.numDays)
-        } else {
-            const lastMonthFirst = subMonths(this.state.fromDate, 1)
-            const lastMonthLast = endOfMonth(lastMonthFirst)
-            from = lastMonthFirst
-            to = lastMonthLast
+    private readonly onSwipeLeft = (ev: FlingGestureHandlerStateChangeEvent) => {
+        if(ev.nativeEvent.state === GestureState.ACTIVE){
+            this.handleSwipe('left')
         }
-        this.setRange(DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to), InteractionType.TouchOnly)
-        this.swipedFeedbackRef?.startFeedback('right')
+    }
+
+    private readonly onSwipeRight = (ev: FlingGestureHandlerStateChangeEvent) => {
+        if(ev.nativeEvent.state === GestureState.ACTIVE){
+            this.handleSwipe('right')
+        }
     }
 
     setRange = (from: number, to: number, interactionType: InteractionType = InteractionType.TouchOnly) => {
@@ -322,7 +319,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
         this.setState(newState)
 
-        this.bottomSheetRef?.close()
+        this.bottomSheetRef.current?.close()
 
         if (this.props.onRangeChanged) {
 
@@ -426,52 +423,61 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             }
         }
 
-        return <GestureRecognizer
-            onSwipeLeft={this.onSwipeLeft}
-            onSwipeRight={this.onSwipeRight}
-            style={{
-                ...(this.props.showBorder === true ? styles.conatainerWithBorder : styles.containerStyle),
-                backgroundColor: this.props.isLightMode ? null : styles.containerStyle.backgroundColor
-            } as ViewStyle}>
-            <SwipedFeedback ref={ref => this.swipedFeedbackRef = ref} />
+        return <FlingGestureHandler
+            ref={this.flingGestureHandlerRef[0]}
+            direction={Directions.LEFT}
+            onHandlerStateChange={this.onSwipeLeft}
+        >
+            <FlingGestureHandler
+                ref={this.flingGestureHandlerRef[1]}
+                direction={Directions.RIGHT}
+                onHandlerStateChange={this.onSwipeRight}
+            >
+                <View style={{
+                    ...(this.props.showBorder === true ? styles.conatainerWithBorder : styles.containerStyle),
+                    backgroundColor: this.props.isLightMode ? null : styles.containerStyle.backgroundColor
+                } as ViewStyle}>
+                    <SwipedFeedback ref={this.swipedFeedbackRef} />
 
-            <DateButton date={this.state.from} onPress={this.onFromDatePressed} isLightMode={this.props.isLightMode}
-                onLongPressIn={this.onFromButtonLongPressIn} onLongPressOut={this.onFromButtonLongPressOut} />
+                    <DateButton waitFor={this.flingGestureHandlerRef} date={this.state.from} onPress={this.onFromDatePressed} isLightMode={this.props.isLightMode}
+                        onLongPressIn={this.onFromButtonLongPressIn} onLongPressOut={this.onFromButtonLongPressOut} />
 
-            <View style={styles.midViewContainerStyle} >
-                <Dash style={styles.dashViewStyle} dashGap={4} dashColor="gray" dashLength={3} dashThickness={3} dashStyle={styles.dashLineStyle} />
-                <View style={styles.midViewFooterContainerStyle}>
+                    <View style={styles.midViewContainerStyle} >
+                        <Dash style={styles.dashViewStyle} dashGap={4} dashColor="gray" dashLength={3} dashThickness={3} dashStyle={styles.dashLineStyle} />
+                        <View style={styles.midViewFooterContainerStyle}>
 
-                    {
-                        this.state.semanticPeriodCaptured === true ? (
-                            <LongPressGestureHandler
-                                maxDist={Number.MAX_VALUE}
-                                shouldCancelWhenOutside={false}
-                                onHandlerStateChange={this.onPeriodButtonLongPress}
-                            ><BorderlessButton onPress={this.onPeriodPressed}
-                            >
-                                    <View style={styles.periodButtonStyle}
-                                        hitSlop={{ top: 10, bottom: 10 }}>
-                                        <Text style={styles.periodButtonTitleStyle}>{this.state.periodName}</Text>
-                                    </View>
+                            {
+                                this.state.semanticPeriodCaptured === true ? (
+                                    <LongPressGestureHandler
+                                        maxDist={Number.MAX_VALUE}
+                                        shouldCancelWhenOutside={false}
+                                        onHandlerStateChange={this.onPeriodButtonLongPress}
+                                    ><BorderlessButton onPress={this.onPeriodPressed}
+                                    >
+                                            <View style={styles.periodButtonStyle}
+                                                hitSlop={{ top: 10, bottom: 10 }}>
+                                                <Text style={styles.periodButtonTitleStyle}>{this.state.periodName}</Text>
+                                            </View>
 
-                                </BorderlessButton></LongPressGestureHandler>
-                        ) : (
-                                <Text style={styles.midViewDescriptionTextStyle}>{this.state.numDays} Days</Text>
-                            )
-                    }
+                                        </BorderlessButton></LongPressGestureHandler>
+                                ) : (
+                                        <Text style={styles.midViewDescriptionTextStyle}>{this.state.numDays} Days</Text>
+                                    )
+                            }
+
+                        </View>
+                    </View>
+
+                    <DateButton waitFor={this.flingGestureHandlerRef} date={this.state.to} onPress={this.onToDatePressed} isLightMode={this.props.isLightMode}
+                        onLongPressIn={this.onToButtonLongPressIn} onLongPressOut={this.onToButtonLongPressOut} />
+
+                    <BottomSheet ref={this.bottomSheetRef}>
+                        {modalPickerView}
+                    </BottomSheet>
 
                 </View>
-            </View>
-
-            <DateButton date={this.state.to} onPress={this.onToDatePressed} isLightMode={this.props.isLightMode}
-                onLongPressIn={this.onToButtonLongPressIn} onLongPressOut={this.onToButtonLongPressOut} />
-
-            <BottomSheet ref={ref => { this.bottomSheetRef = ref }}>
-                {modalPickerView}
-            </BottomSheet>
-
-        </GestureRecognizer>
+            </FlingGestureHandler>
+        </FlingGestureHandler>
     }
 }
 
