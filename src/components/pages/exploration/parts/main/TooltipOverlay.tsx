@@ -515,7 +515,7 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
                         return <View style={styles.tooltipContentContainerStyle}>
                             <Text style={styles.tooltipTimeMainLabelStyle}>{pluralize(getCycleDimensionSpec(cycleDimension).name)}</Text>
                             {valueView}
-                            <Text style={{ ...styles.tooltipTimeSubLabelStyle, marginTop: 12 }}>{touchingInfo.value.n} items</Text>
+                            <Text style={{ ...styles.tooltipTimeSubLabelStyle, marginTop: 12 }}>{touchingInfo.value ? touchingInfo.value.n : 0} items</Text>
                         </View>
                     } else if (touchingInfo.valueType === TouchingElementValueType.RangeAggregated) {
                         const range = explorationInfoHelper.getParameterValueOfParams<[number, number]>(touchingInfo.params, ParameterType.Range)
@@ -526,7 +526,7 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
                         return <View style={styles.tooltipContentContainerStyle}>
                             <Text style={styles.tooltipTimeMainLabelStyle}>{DateTimeHelper.formatRange(range, true)}</Text>
                             {valueView}
-                            {<Text style={{ ...styles.tooltipTimeSubLabelStyle, marginTop: 12 }}> {touchingInfo.value.n} / {numDays} days</Text>}
+                            {<Text style={{ ...styles.tooltipTimeSubLabelStyle, marginTop: 12 }}> {touchingInfo.value ? touchingInfo.value.n : 0} / {numDays} days</Text>}
                         </View>
                     }
                 }

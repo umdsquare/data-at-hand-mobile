@@ -15,7 +15,7 @@ import Colors from '../../../../../style/Colors'
 import { SizeWatcher } from '../../../../visualization/SizeWatcher'
 import { RangeValueElementLegend } from '../../../../exploration/visualization/compare/RangeValueElementLegend'
 import { SingleValueElementLegend } from '../../../../exploration/visualization/compare/SingleValueElementLegend'
-import Svg, { G, Line, Text as SvgText, Rect } from 'react-native-svg'
+import { G, Line, Text as SvgText, Rect } from 'react-native-svg'
 import { scaleBand, scaleLinear, ScaleBand } from 'd3-scale'
 import commaNumber from 'comma-number';
 import { DateTimeHelper } from '../../../../../time'
@@ -26,7 +26,7 @@ import { SingleValueElement } from '../../../../exploration/visualization/compar
 import { RangeValueElement } from '../../../../exploration/visualization/compare/RangeValueElement'
 import { ExplorationAction, createGoToBrowseRangeAction, InteractionType, setTouchElementInfo } from '../../../../../state/exploration/interaction/actions'
 import { noop } from '../../../../../utils'
-import { TouchableGroup } from '../../../../exploration/visualization/compare/TouchableGroup'
+import { CategoricalTouchableSvg } from '../../../../exploration/visualization/compare/CategoricalTouchableSvg'
 
 const INDEX_AGGREGATED = 0
 const INDEX_SUM = 1
@@ -108,20 +108,20 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
         ))
     }
 
-    private onElementLongPressIn = (timeKey: number, dX: number, dY: number, scaleX: ScaleBand<number>, chartArea: LayoutRectangle, touchId: string) => {
+    private onElementLongPress = (timeKey: number, x: number, y: number, screenX: number, screenY: number, scaleX: ScaleBand<number>, chartArea: LayoutRectangle, touchId: string) => {
         const dataPoint = this.props.data.data[timeKey]
         const touchingInfo = {
             touchId,
             elementBoundInScreen: {
-                x: dX + chartArea.x + (scaleX(timeKey) + scaleX.bandwidth() * .5 - scaleX.step() * .5),
-                y: dY + chartArea.y,
+                x: screenX - x + chartArea.x + (scaleX(timeKey) + scaleX.bandwidth() * .5 - scaleX.step() * .5),
+                y: screenY - y + chartArea.y,
                 width: scaleX.step(),
                 height: chartArea.height
             },
             valueType: TouchingElementValueType.RangeAggregated,
             params: [
-                {parameter: ParameterType.DataSource, value: this.props.source},
-                {parameter: ParameterType.Range, value: dataPoint.range}
+                { parameter: ParameterType.DataSource, value: this.props.source },
+                { parameter: ParameterType.Range, value: dataPoint.range }
             ],
             value: dataPoint.value
         } as TouchingElementInfo
@@ -131,7 +131,7 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
         this.props.dispatchExplorationAction(setTouchElementInfo(touchingInfo))
     }
 
-    private onElementLongPressOut = (timeKey: number) => {
+    private onElementLongPressOut = () => {
         this.props.dispatchExplorationAction(setTouchElementInfo(null))
     }
 
@@ -182,7 +182,6 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
         this.props.data.data.forEach((d, i) => indices.push(i))
 
         const scaleX = scaleBand<number>().domain(indices).range([0, chartArea.width]).padding(0.55).paddingOuter(0.25)
-        
         const scaleY = scaleLinear().range([chartArea.height, 0])
         const availableData = this.props.data.data.filter(d => d.value != null && d.value.n > 0)
         if (aggregationSettingIndex === INDEX_AGGREGATED) {
@@ -193,8 +192,8 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                 } else {
                     return valueConverter(d.value["min"])
                 }
-            }), this.props.data.preferredValueRange? valueConverter(this.props.data.preferredValueRange[0]) : Number.MAX_VALUE), 
-            
+            }), this.props.data.preferredValueRange ? valueConverter(this.props.data.preferredValueRange[0]) : Number.MAX_VALUE),
+
             Math.max(max(availableData, d => {
                 if (isRanged === true) {
                     //range
@@ -202,7 +201,7 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                 } else {
                     return valueConverter(d.value["max"])
                 }
-            }), this.props.data.preferredValueRange? valueConverter(this.props.data.preferredValueRange[1]) : Number.MIN_VALUE)])
+            }), this.props.data.preferredValueRange ? valueConverter(this.props.data.preferredValueRange[1]) : Number.MIN_VALUE)])
         } else if (aggregationSettingIndex === INDEX_SUM) {
 
             scaleY.domain([0, max(availableData, d => {
@@ -258,8 +257,16 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                     chartContainerHeight: height
                 })
             }}>
-
-                <Svg width={this.state.chartContainerWidth} height={this.state.chartContainerHeight}>
+                <CategoricalTouchableSvg
+                    chartContainerWidth={this.state.chartContainerWidth}
+                    chartContainerHeight={this.state.chartContainerHeight}
+                    chartArea={chartArea}
+                    scaleX={scaleX}
+                    onClickElement={this.onElementClick}
+                    onLongPressIn={(timeKey, x, y, sX, sY, touchId) => this.onElementLongPress(timeKey, x, y, sX, sY, scaleX, chartArea, touchId)}
+                    onLongPressMove={(timeKey, x, y, sX, sY, touchId) => this.onElementLongPress(timeKey, x, y, sX, sY, scaleX, chartArea, touchId)}
+                    onLongPressOut={this.onElementLongPressOut}
+                >
                     <G x={chartArea.x} y={chartArea.y + chartArea.height}>
                         <Line x1={0} x2={chartArea.width} y={0} stroke={Colors.textColorDark} strokeWidth={0.5} />
                         {
@@ -306,9 +313,6 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                                             maxB: valueConverter(d.value["maxB"]),
                                         }}
                                         scaleX={scaleX} scaleY={scaleY}
-                                        onClick={this.onElementClick}
-                                        onLongPressIn={(timeKey, x, y, sX, sY, touchId) => this.onElementLongPressIn(i, sX - x, sY - y, scaleX, chartArea, touchId)}
-                                        onLongPressOut={this.onElementLongPressOut}
                                     />
                                 } else return <SingleValueElement key={i}
                                     value={{
@@ -320,35 +324,20 @@ class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
                                         sum: valueConverter(d.value["sum"])
                                     }}
                                     scaleX={scaleX} scaleY={scaleY} maxWidth={40}
-
-                                    onClick={this.onElementClick}
-                                    onLongPressIn={(timeKey, x, y, sX, sY, touchId) => this.onElementLongPressIn(i, sX - x, sY - y, scaleX, chartArea, touchId)}
-                                    onLongPressOut={this.onElementLongPressOut}
-
                                 />
                             }) : availableData.map((d, i) => {
-                                return <TouchableGroup
+                                return <Rect
                                     key={i}
-                                    onClick={() => this.onElementClick(i)}
-                                    onLongPressIn={(x, y, screenX, screenY, touchId) => this.onElementLongPressIn(i, screenX - x, screenY - y, scaleX, chartArea, touchId)}
-                                    onLongPressOut={() => this.onElementLongPressOut(i)}
-                                    feedbackArea={{
-                                        x: scaleX(i) + scaleX.bandwidth() * .5 - scaleX.step() * .5,
-                                        y: 0,
-                                        height: chartArea.height,
-                                        width: scaleX.step()
-                                    }}
-                                ><Rect
-                                        x={scaleX(i)}
-                                        y={scaleY(valueConverter(d.value["sum"]))}
-                                        width={scaleX.bandwidth()}
-                                        height={scaleY(valueConverter(0)) - scaleY(valueConverter(d.value["sum"]))}
-                                        fill={Colors.chartElementDefault + "aa"}
-                                    /></TouchableGroup>
+                                    x={scaleX(i)}
+                                    y={scaleY(valueConverter(d.value["sum"]))}
+                                    width={scaleX.bandwidth()}
+                                    height={scaleY(valueConverter(0)) - scaleY(valueConverter(d.value["sum"]))}
+                                    fill={Colors.chartElementDefault + "aa"}
+                                />
                             })
                         }
                     </G>
-                </Svg>
+                </CategoricalTouchableSvg>
 
             </SizeWatcher>
         </View>
