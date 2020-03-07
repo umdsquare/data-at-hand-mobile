@@ -252,7 +252,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
                         undoIgnored: true
                     }),
                     this.undoHideTimeout = null
-                }, 5000)
+                }, 8000)
             })
         }
     }
@@ -274,6 +274,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
     }
 
     undo = () => {
+        console.log("undo speech command")
         this.props.dispatchCommand(createRestorePreviousInfoAction())
     }
 
@@ -304,30 +305,9 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
         })
     }
 
-    private handleScreenTouchEvent = (evt: GestureResponderEvent) => {
-        if (evt.currentTarget !== findNodeHandle(this.speechUndoButtonRef.current)) {
-            if (this.state.undoIgnored === false) {
-                requestAnimationFrame(() => {
-                    if(this.undoHideTimeout){
-                        clearTimeout(this.undoHideTimeout)
-                    }
-                    this.setState({
-                        ...this.state,
-                        undoIgnored: true
-                    })
-                })
-            }
-        }
-        return false
-    }
-
     render() {
 
-        return <View style={StyleTemplates.screenDefaultStyle}
-
-            onStartShouldSetResponder={this.handleScreenTouchEvent}
-            onMoveShouldSetResponder={this.handleScreenTouchEvent}
-        >
+        return <View style={StyleTemplates.screenDefaultStyle}>
             <StatusBar barStyle="light-content" backgroundColor={Colors.headerBackground} />
             <View style={styles.headerContainerStyle}>
                 <ExplorationViewHeader />

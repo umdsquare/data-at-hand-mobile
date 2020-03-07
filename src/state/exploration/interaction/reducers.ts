@@ -26,9 +26,9 @@ import {
   GoToCyclicDetailAction,
   SetCycleDimensionAction,
 } from './actions';
-import {explorationInfoHelper} from '../../../core/exploration/ExplorationInfoHelper';
-import {startOfDay, subDays, endOfDay, startOfWeek, endOfWeek} from 'date-fns';
-import {DateTimeHelper} from '../../../time';
+import { explorationInfoHelper } from '../../../core/exploration/ExplorationInfoHelper';
+import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
+import { DateTimeHelper } from '../../../time';
 import { DataSourceType } from '../../../measure/DataSourceSpec';
 
 var deepEqual = require('deep-equal');
@@ -37,7 +37,7 @@ export interface ExplorationState {
   info: ExplorationInfo;
   prevInfo: ExplorationInfo | null | undefined;
   backNavStack: Array<ExplorationInfo>;
-  uiStatus: {[key: string]: any};
+  uiStatus: { [key: string]: any };
   touchingElement: TouchingElementInfo | null | undefined;
 }
 
@@ -69,8 +69,9 @@ export const explorationStateReducer = (
   ) {
     switch (action.type) {
       case ExplorationActionType.RestorePreviousInfo:
+        console.log("restore prevInfo: ", state.prevInfo)
         if (state.prevInfo) {
-          newState.info = newState.prevInfo!;
+          newState.info = shallowCopyExplorationInfo(state.prevInfo)!;
           newState.prevInfo = null;
           if (newState.backNavStack.length > 0) {
             if (
@@ -93,7 +94,7 @@ export const explorationStateReducer = (
         } else return state;
       case ExplorationActionType.MemoUiStatus:
         const memoUiStatusAction = action as MemoUIStatusAction;
-        newState.uiStatus = {...state.uiStatus};
+        newState.uiStatus = { ...state.uiStatus };
         newState.uiStatus[memoUiStatusAction.key] = memoUiStatusAction.value;
         return newState;
       case ExplorationActionType.SetTouchElementInfo:

@@ -68,6 +68,10 @@ export class NLUCommandResolver {
                     const date = dates[0].value
                     const currentRange = explorationInfoHelper.getParameterValue<[number, number]>(explorationInfo, ParameterType.Range)
 
+                    if (currentRange[0] === date || currentRange[1] === date) {
+                        return null
+                    }
+
                     if (context.type === SpeechContextType.Time) {
                         const timeContext = context as TimeSpeechContext
 
@@ -78,9 +82,7 @@ export class NLUCommandResolver {
                         }
                     }
 
-                    if (currentRange[0] === date || currentRange[0] === date) {
-                        return null
-                    } else if (date < currentRange[0]) {
+                    if (date < currentRange[0]) {
                         return createSetRangeAction(InteractionType.Multimodal, [date, currentRange[1]])
                     } else if (date > currentRange[1]) {
                         return createSetRangeAction(InteractionType.Multimodal, [currentRange[0], date])
