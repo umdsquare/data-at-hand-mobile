@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { IAggregatedValue } from "../../../../core/exploration/data/types";
 import { View, LayoutRectangle, ViewStyle } from "react-native";
 import { SizeWatcher } from "../../../visualization/SizeWatcher";
@@ -70,6 +70,28 @@ export const SingleValueCyclicChart = (props: {
         scaleY.domain([ticks[0], ticks[ticks.length - 1]])
     }
 
+    const onClickElement = useCallback((timeKey: number) => {
+        const dimension = getCycleDimensionWithTimeKey(props.cycleType, timeKey)
+        if (getCycleLevelOfDimension(dimension) === 'day') {
+            dispatch(createGoToCyclicDetailDailyAction(InteractionType.TouchOnly, undefined, undefined, dimension))
+        } else {
+            dispatch(createGoToCyclicDetailRangeAction(InteractionType.TouchOnly, undefined, undefined, dimension))
+        }
+    }, [props.cycleType])
+
+    const onLongPress = useCallback((timeKey, x, y, screenX, screenY, touchId) => {
+        dispatch(setTouchElementInfo(makeTouchingInfoForCycle(timeKey,
+            props.dataSource,
+            props.cycleType,
+            scaleX, chartArea, x, y, screenX, screenY, touchId, (timeKey) => {
+                return props.values.find(v => v.timeKey === timeKey)
+            })))
+    }, [props.dataSource, props.cycleType, chartArea, scaleX, props.values])
+
+    const onLongPressOut = useCallback(() => {
+        dispatch(setTouchElementInfo(null))
+    }, [])
+
     return <View style={StyleTemplates.fillFlex}>
         <View style={legendContainerStyle}>
 
@@ -89,33 +111,16 @@ export const SingleValueCyclicChart = (props: {
                 scaleX={scaleX}
                 scaleY={scaleY}
                 ticks={ticks}
+                onClickElement={onClickElement}
+                onLongPressIn={onLongPress}
+                onLongPressMove={onLongPress}
+                onLongPressOut={onLongPressOut}
             >
                 <G x={chartArea.x} y={chartArea.y}>
                     {
                         props.values.map(value => <SingleValueElement key={value.timeKey}
                             value={{ ...value, avg: convert(value.avg), max: convert(value.max), min: convert(value.min), sum: convert(value.sum) }}
                             scaleX={scaleX} scaleY={scaleY} maxWidth={40}
-                            onClick={(timeKey: number) => {
-                                const dimension = getCycleDimensionWithTimeKey(props.cycleType, timeKey)
-                                if (getCycleLevelOfDimension(dimension) === 'day') {
-                                    dispatch(createGoToCyclicDetailDailyAction(InteractionType.TouchOnly, undefined, undefined, dimension))
-                                } else {
-                                    dispatch(createGoToCyclicDetailRangeAction(InteractionType.TouchOnly, undefined, undefined, dimension))
-                                }
-                            }}
-
-                            onLongPressIn={(timeKey, x, y, screenX, screenY, touchId) => {
-                                dispatch(setTouchElementInfo(makeTouchingInfoForCycle(timeKey,
-                                    props.dataSource,
-                                    props.cycleType,
-                                    scaleX, chartArea, x, y, screenX, screenY, touchId, (timeKey) => {
-                                        return props.values.find(v => v.timeKey === timeKey)
-                                    })))
-                            }}
-                            onLongPressOut={(timeKey, x, y, screenX, screenY) => {
-                                dispatch(setTouchElementInfo(null))
-                            }}
-
                         />)
                     }
                 </G>

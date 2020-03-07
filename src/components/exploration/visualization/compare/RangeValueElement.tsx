@@ -1,18 +1,14 @@
 import React from 'react';
 import { IAggregatedRangeValue } from '../../../../core/exploration/data/types';
-import { Rect } from 'react-native-svg';
+import { Rect, G } from 'react-native-svg';
 import { ScaleBand, ScaleLinear } from 'd3-scale';
 import Colors from '../../../../style/Colors';
 import { SingleValueElement } from './SingleValueElement';
-import { TouchableGroup } from './TouchableGroup';
 
 export const RangeValueElement = (props: {
     scaleY: ScaleLinear<number, number>,
     scaleX: ScaleBand<number>,
     value: IAggregatedRangeValue,
-    onClick?: (timeKey: number) => void,
-    onLongPressIn?: (timeKey: number, x: number, y: number, screenX: number, screenY: number, touchId: string) => void,
-    onLongPressOut?: (timeKey: number, x: number, y: number, screenX: number, screenY: number) => void
 }) => {
 
     let connectionWidth = Math.min(40, props.scaleX.bandwidth())
@@ -24,11 +20,7 @@ export const RangeValueElement = (props: {
         height: Math.abs(props.scaleY(props.scaleY.domain()[0]) - props.scaleY(props.scaleY.domain()[1]))
     }
 
-    return <TouchableGroup
-        onClick={() => props.onClick && props.onClick(props.value.timeKey)}
-        onLongPressIn={(x, y, screenX, screenY, touchId) => props.onLongPressIn && props.onLongPressIn(props.value.timeKey, x, y, screenX, screenY, touchId)}
-        onLongPressOut={(x, y, screenX, screenY) => props.onLongPressOut && props.onLongPressOut(props.value.timeKey, x, y, screenX, screenY)}
-        feedbackArea={feedbackArea}>
+    return <G>
 
         <Rect fill="#BEBEBE50" rx={connectionWidth * 0.1}
             x={props.scaleX(props.value.timeKey)! + (props.scaleX.bandwidth() - connectionWidth) * 0.5}
@@ -61,5 +53,5 @@ export const RangeValueElement = (props: {
             }
         } additionalPadding={0.1} maxWidth={30} rangeColor={Colors.chartRangeBColor} />
 
-    </TouchableGroup >
+    </G>
 }

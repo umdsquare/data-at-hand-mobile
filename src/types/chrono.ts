@@ -2,7 +2,7 @@
 // chrono-node type definitions
 // Forked from https://github.com/Microsoft/BotBuilder
 
-export declare module chrono {
+export declare module Chrono {
     export type ComponentName = "year"|"month"|"day"
 
     export class ParsedResult {

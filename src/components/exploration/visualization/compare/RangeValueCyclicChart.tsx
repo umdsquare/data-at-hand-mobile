@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { IAggregatedRangeValue } from "../../../../core/exploration/data/types";
 import { View, LayoutRectangle, ViewStyle } from "react-native";
 import { SizeWatcher } from "../../../visualization/SizeWatcher";
@@ -54,9 +54,9 @@ export const RangeValueCyclicChart = (props: {
     const scaleX = scaleBand<number>().domain(domain).range([0, chartArea.width]).padding(0.35)
 
     let scaleY = scaleLinear()
-        .domain([props.startFromZero === true ? 0 : 
-            Math.min(min(props.values, v => (v.minA))!, min(props.values, v => (v.minB))!, (props.preferredValueRange? props.preferredValueRange[0] : Number.MAX_VALUE)), 
-            Math.max(max(props.values, v => (v.maxA))!, max(props.values, v => (v.maxB))!, (props.preferredValueRange? props.preferredValueRange[1]: Number.MIN_VALUE))])
+        .domain([props.startFromZero === true ? 0 :
+            Math.min(min(props.values, v => (v.minA))!, min(props.values, v => (v.minB))!, (props.preferredValueRange ? props.preferredValueRange[0] : Number.MAX_VALUE)),
+        Math.max(max(props.values, v => (v.maxA))!, max(props.values, v => (v.maxB))!, (props.preferredValueRange ? props.preferredValueRange[1] : Number.MIN_VALUE))])
         .range([0, chartArea.height]).nice()
 
     let ticks
@@ -64,6 +64,28 @@ export const RangeValueCyclicChart = (props: {
         ticks = props.ticksOverride(scaleY.domain()[0], scaleY.domain()[1])
         scaleY = scaleY.domain([ticks[0], ticks[ticks.length - 1]])
     }
+
+    const onClickElement = useCallback((timeKey: number) => {
+        const dimension = getCycleDimensionWithTimeKey(props.cycleType, timeKey)
+        if (getCycleLevelOfDimension(dimension) === 'day') {
+            dispatch(createGoToCyclicDetailDailyAction(InteractionType.TouchOnly, undefined, undefined, dimension))
+        } else {
+            dispatch(createGoToCyclicDetailRangeAction(InteractionType.TouchOnly, undefined, undefined, dimension))
+        }
+    }, [props.cycleType])
+
+    const onLongPress = useCallback((timeKey, x, y, screenX, screenY, touchId) => {
+        dispatch(setTouchElementInfo(makeTouchingInfoForCycle(timeKey,
+            props.dataSource,
+            props.cycleType,
+            scaleX, chartArea, x, y, screenX, screenY, touchId, (timeKey) => {
+                return props.values.find(v => v.timeKey === timeKey)
+            })))
+    }, [props.dataSource, props.cycleType, scaleX, chartArea, props.values])
+
+    const onLongPressOut = useCallback(() => {
+        dispatch(setTouchElementInfo(null))
+    }, [])
 
     return <View style={StyleTemplates.fillFlex}>
         <View style={legendContainerStyle}>
@@ -83,31 +105,15 @@ export const RangeValueCyclicChart = (props: {
                 scaleX={scaleX}
                 scaleY={scaleY}
                 ticks={ticks}
+                onClickElement={onClickElement}
+                onLongPressIn={onLongPress}
+                onLongPressMove={onLongPress}
+                onLongPressOut={onLongPressOut}
             >
                 <G x={chartArea.x} y={chartArea.y}>
                     {
                         props.values.map(value =>
-                            <RangeValueElement key={value.timeKey} scaleX={scaleX} scaleY={scaleY} value={value}
-                                onClick={(timeKey: number) => {
-                                    const dimension = getCycleDimensionWithTimeKey(props.cycleType, timeKey)
-                                    if (getCycleLevelOfDimension(dimension) === 'day') {
-                                        dispatch(createGoToCyclicDetailDailyAction(InteractionType.TouchOnly, undefined, undefined, dimension))
-                                    } else {
-                                        dispatch(createGoToCyclicDetailRangeAction(InteractionType.TouchOnly, undefined, undefined, dimension))
-                                    }
-                                }}
-                                onLongPressIn={(timeKey, x, y, screenX, screenY, touchId) => {
-                                    dispatch(setTouchElementInfo(makeTouchingInfoForCycle(timeKey,
-                                        props.dataSource,
-                                        props.cycleType,
-                                        scaleX, chartArea, x, y, screenX, screenY, touchId, (timeKey) => {
-                                            return props.values.find(v => v.timeKey === timeKey)
-                                        })))
-                                }}
-                                onLongPressOut={(timeKey, x, y, screenX, screenY) => {
-                                    dispatch(setTouchElementInfo(null))
-                                }}
-                            />)
+                            <RangeValueElement key={value.timeKey} scaleX={scaleX} scaleY={scaleY} value={value} />)
                     }
                 </G>
             </CycleChartFrame>

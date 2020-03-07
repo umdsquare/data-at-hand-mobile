@@ -1,12 +1,12 @@
 import { VariableType } from "./types";
 import { DateTimeHelper } from "../../../time";
 import { startOfMonth, startOfYear, endOfMonth, endOfYear } from "date-fns";
-import { chrono } from "../../../types/chrono";
+import { Chrono } from "../../../types/chrono";
 
 export function parseTimeText(text: string): { type: VariableType.Date | VariableType.Period, value: number | [number, number] } | null {
     console.log("try parsing time text: ", text)
     var chrono = require('chrono-node');
-    const chronoResult: chrono.ParsedResult[] = chrono.parse(text)
+    const chronoResult: Chrono.ParsedResult[] = chrono.parse(text)
     console.log(JSON.stringify(chronoResult))
     if (chronoResult.length > 0) {
         const bestResult = chronoResult[0]
@@ -57,7 +57,7 @@ export function parseTimeText(text: string): { type: VariableType.Date | Variabl
 
 export function parseDateTextToNumberedDate(text: string): number | null {
     var chrono = require('chrono-node');
-    const chronoResult: chrono.ParsedResult[] = chrono.parse(text)
+    const chronoResult: Chrono.ParsedResult[] = chrono.parse(text)
     if (chronoResult.length > 0) {
         const bestResult = chronoResult[0]
         if (bestResult.start.isCertain('day')) {
