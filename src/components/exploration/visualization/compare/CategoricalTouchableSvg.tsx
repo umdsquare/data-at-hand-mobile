@@ -30,12 +30,14 @@ export const CategoricalTouchableSvg = React.memo((props: {
     const longPressRef = useRef<LongPressGestureHandler>()
 
     const [currentTouchedIndex, setCurrentTouchedIndex] = useState<number | null>(null)
+    const [isLongPressHolding, setIsLongPressHolding] = useState<boolean>(false)
+
 
     const updateTouchedIndex = useMemo(() => {
         return (viewX: number) => {
             const localX = viewX - props.chartArea.x
             const index = Math.max(0, Math.min(props.scaleX.domain().length - 1, Math.floor(localX / props.scaleX.step())))
-            
+
             if (index !== currentTouchedIndex) {
                 setCurrentTouchedIndex(index)
             }
@@ -49,30 +51,38 @@ export const CategoricalTouchableSvg = React.memo((props: {
     }, [setCurrentTouchedIndex])
 
     const onLongPressHandlerStateChange = useCallback((ev: LongPressGestureHandlerStateChangeEvent) => {
-        if (ev.nativeEvent.state === State.ACTIVE) {
-            updateTouchedIndex(ev.nativeEvent.x)
-            props.onLongPressIn(props.scaleX.domain()[currentTouchedIndex],
-                ev.nativeEvent.x, ev.nativeEvent.y, ev.nativeEvent.absoluteX, ev.nativeEvent.absoluteY,
-                ev.nativeEvent.handlerTag.toString())
-        }
-        if (ev.nativeEvent.state === State.END || ev.nativeEvent.state === State.CANCELLED) {
-            releaseTooltipTouch()
-            props.onLongPressOut()
+        
+        switch (ev.nativeEvent.state) {
+            case State.BEGAN:
+                break;
+            case State.ACTIVE:
+                setIsLongPressHolding(true)
+                updateTouchedIndex(ev.nativeEvent.x)
+                props.onLongPressIn(props.scaleX.domain()[currentTouchedIndex],
+                    ev.nativeEvent.x, ev.nativeEvent.y, ev.nativeEvent.absoluteX, ev.nativeEvent.absoluteY,
+                    ev.nativeEvent.handlerTag.toString())
+                break;
+            case State.END:
+            case State.CANCELLED:
+                setIsLongPressHolding(false)
+                releaseTooltipTouch()
+                props.onLongPressOut()
+                break;
         }
 
-    }, [updateTouchedIndex, props.scaleX, props.onLongPressIn, currentTouchedIndex, releaseTooltipTouch, props.onLongPressOut])
+    }, [updateTouchedIndex, props.scaleX, props.onLongPressIn, currentTouchedIndex, releaseTooltipTouch, props.onLongPressOut, setIsLongPressHolding, isLongPressHolding])
 
     const onTapHandlerStateChange = useCallback((ev: TapGestureHandlerStateChangeEvent) => {
         if (ev.nativeEvent.state === State.BEGAN) {
             updateTouchedIndex(ev.nativeEvent.x)
-        }else if (ev.nativeEvent.state === State.ACTIVE) {
+        } else if (ev.nativeEvent.state === State.ACTIVE) {
             props.onClickElement(props.scaleX.domain()[currentTouchedIndex])
             setCurrentTouchedIndex(null)
-        }else if(ev.nativeEvent.state === State.FAILED) {
+        } else if (ev.nativeEvent.state === State.FAILED && isLongPressHolding === false) {
             setCurrentTouchedIndex(null)
         }
 
-    }, [updateTouchedIndex, props.scaleX, props.onClickElement, currentTouchedIndex, setCurrentTouchedIndex])
+    }, [updateTouchedIndex, props.scaleX, props.onClickElement, currentTouchedIndex, setCurrentTouchedIndex, setIsLongPressHolding, isLongPressHolding])
 
     return <TapGestureHandler
         onHandlerStateChange={onTapHandlerStateChange}
@@ -86,6 +96,7 @@ export const CategoricalTouchableSvg = React.memo((props: {
             hitSlop={hitSlop}
             onHandlerStateChange={onLongPressHandlerStateChange}
             onGestureEvent={(ev) => {
+
                 const localX = ev.nativeEvent.x - props.chartArea.x
                 const index = Math.max(0, Math.min(props.scaleX.domain().length - 1, Math.floor(localX / props.scaleX.step())))
                 if (currentTouchedIndex != index) {

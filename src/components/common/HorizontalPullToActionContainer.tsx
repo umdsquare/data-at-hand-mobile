@@ -132,7 +132,7 @@ export const HorizontalPullToActionContainer = (props: {
                                 left: currentPullingOrigin === 'left' ? undefined : 0,
                                 right: currentPullingOrigin === 'right' ? undefined : 0,
                             }}>
-                                <Svg width="30" height="30">
+                                <Svg width="30" height="30" pointerEvents="none">
                                     <Circle stroke={"white"} strokeWidth={1} x={15} y={15} r={14.5} />
                                     <AnimatedSvgCircle fill='white' x={15} y={15} r={Animated.multiply(14, pullIndicatorTransformAmount.interpolate({
                                         inputRange: currentPullingOrigin === 'left' ? [0, minDragAmount] : [-minDragAmount, 0],
