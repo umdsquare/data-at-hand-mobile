@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useMemo } from "react";
 import { View, StyleSheet, Text, ViewStyle, TextStyle } from "react-native";
 import Colors from "../../style/Colors";
 import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
@@ -145,12 +145,11 @@ interface State {
     clickedElementType?: ElementType | null,
 }
 
-const DateButton = (props: {
+const DateButton = React.memo((props: {
     date: number, overrideFormat?: string, freeWidth?: boolean, onPress: () => void,
     onLongPressIn?: () => void,
     onLongPressOut?: () => void,
     isLightMode?: boolean,
-    waitFor?: React.Ref<any> | Array<React.Ref<any>>
 }) => {
 
     const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
@@ -161,6 +160,7 @@ const DateButton = (props: {
     const subText = isToday(date, today) === true ? 'Today' : (isYesterday(date, today) === true ? "Yesterday" : format(date, "EEEE"))
 
     const onLongPressStateChange = useCallback((ev: LongPressGestureHandlerStateChangeEvent) => {
+        console.log("state: ", ev.nativeEvent.state)
         if (ev.nativeEvent.state === GestureState.ACTIVE) {
             props.onLongPressIn && props.onLongPressIn()
         } else if (ev.nativeEvent.state === GestureState.END) {
@@ -170,9 +170,8 @@ const DateButton = (props: {
 
     return <LongPressGestureHandler onHandlerStateChange={onLongPressStateChange}
         shouldCancelWhenOutside={false}
-        maxDist={Number.MAX_VALUE}
-        waitFor={props.waitFor}>
-        <BorderlessButton waitFor={props.waitFor} onPress={props.onPress} shouldCancelWhenOutside={false} rippleColor={"rgba(255,255,255,0.2)"}>
+        maxDist={150}>
+        <BorderlessButton onPress={props.onPress} shouldCancelWhenOutside={false} rippleColor={"rgba(255,255,255,0.2)"}>
             <View style={props.freeWidth === true ? styles.dateButtonContainerStyleFreeWidth : styles.dateButtonContainerStyle}>
                 <View style={styles.dateButtonDatePartStyle}>
                     <Text style={props.isLightMode === true ? styles.dateButtonDateTextStyleLight : styles.dateButtonDateTextStyle}>{dateString}</Text>
@@ -185,7 +184,7 @@ const DateButton = (props: {
                 </Text></View>
         </BorderlessButton>
     </LongPressGestureHandler>
-}
+})
 
 export class DateRangeBar extends React.PureComponent<Props, State> {
 
@@ -251,7 +250,6 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
     private swipedFeedbackRef = React.createRef<SwipedFeedback>()
     private bottomSheetRef = React.createRef<BottomSheet>()
-    private flingGestureHandlerRef = [React.createRef<FlingGestureHandler>(), React.createRef<FlingGestureHandler>()]
 
     private setRangeDebounceTimer: any
 
@@ -280,8 +278,8 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         this.onClickedElement('period')
     }
 
-    private readonly handleSwipe = (direction: 'left'|'right') => {
-        const sign = direction === 'left'? 1 : -1
+    private readonly handleSwipe = (direction: 'left' | 'right') => {
+        const sign = direction === 'left' ? 1 : -1
         var from: Date
         var to: Date
         if (this.state.level !== 'month') {
@@ -298,13 +296,13 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
     }
 
     private readonly onSwipeLeft = (ev: FlingGestureHandlerStateChangeEvent) => {
-        if(ev.nativeEvent.state === GestureState.ACTIVE){
+        if (ev.nativeEvent.state === GestureState.ACTIVE) {
             this.handleSwipe('left')
         }
     }
 
     private readonly onSwipeRight = (ev: FlingGestureHandlerStateChangeEvent) => {
-        if(ev.nativeEvent.state === GestureState.ACTIVE){
+        if (ev.nativeEvent.state === GestureState.ACTIVE) {
             this.handleSwipe('right')
         }
     }
@@ -424,12 +422,10 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         }
 
         return <FlingGestureHandler
-            ref={this.flingGestureHandlerRef[0]}
             direction={Directions.LEFT}
             onHandlerStateChange={this.onSwipeLeft}
         >
             <FlingGestureHandler
-                ref={this.flingGestureHandlerRef[1]}
                 direction={Directions.RIGHT}
                 onHandlerStateChange={this.onSwipeRight}
             >
@@ -439,7 +435,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                 } as ViewStyle}>
                     <SwipedFeedback ref={this.swipedFeedbackRef} />
 
-                    <DateButton waitFor={this.flingGestureHandlerRef} date={this.state.from} onPress={this.onFromDatePressed} isLightMode={this.props.isLightMode}
+                    <DateButton date={this.state.from} onPress={this.onFromDatePressed} isLightMode={this.props.isLightMode}
                         onLongPressIn={this.onFromButtonLongPressIn} onLongPressOut={this.onFromButtonLongPressOut} />
 
                     <View style={styles.midViewContainerStyle} >
@@ -468,7 +464,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                         </View>
                     </View>
 
-                    <DateButton waitFor={this.flingGestureHandlerRef} date={this.state.to} onPress={this.onToDatePressed} isLightMode={this.props.isLightMode}
+                    <DateButton date={this.state.to} onPress={this.onToDatePressed} isLightMode={this.props.isLightMode}
                         onLongPressIn={this.onToButtonLongPressIn} onLongPressOut={this.onToButtonLongPressOut} />
 
                     <BottomSheet ref={this.bottomSheetRef}>
