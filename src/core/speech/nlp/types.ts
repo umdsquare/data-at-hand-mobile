@@ -1,9 +1,9 @@
 export enum VariableType{
-    DataSource="datasource",
-    Date="date",
-    Period="period",
-    Verb="verb",
-    TimeCycle="cyclicTime",
+    DataSource="DataSource",
+    Date="Date",
+    Period="Period",
+    Verb="Verb",
+    TimeCycle="CyclicTime",
 }
 
 export interface VariableInfo{
@@ -24,10 +24,10 @@ export interface PreProcessedInputText{
 }
 
 export enum VerbType{
-    AssignTrivial="assign",
-    Browse="browse",
-    Compare="compare",
-    Highlight="highlight"
+    AssignTrivial="Assign",
+    Browse="Browse",
+    Compare="Compare",
+    Highlight="Highlight"
 }
 
 export interface VerbInfo{

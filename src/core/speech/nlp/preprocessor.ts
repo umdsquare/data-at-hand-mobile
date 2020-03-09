@@ -198,8 +198,6 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
 
         nlpCasted.numbers().toCardinal().toNumber()
 
-        console.log(nlp.termList())
-
         TIME_EXPRESSION_MATCH_SYNTAX.forEach(matchSyntaxElm => {
             const matches = nlp.match(matchSyntaxElm.matchSyntax)
             matches.forEach(match => {
@@ -222,7 +220,7 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
                             id,
                             originalText: match.text()
                         }
-                        match.replaceWith(id)
+                        match.replaceWith(id).tag(parseResult.type).tag("Date")
                     }
                 }
             })
@@ -244,12 +242,11 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
                 id
             }
             return id
-        })
+        }).tag("Date")
 
         if(MONTH_NAMES_REGEX.test(nlp.text()) === true){
             //month name was not parsed.
             nlp.replace(`(${MONTH_NAMES_REGEX.source})`, (match: compromise.Phrase) => {
-                console.log(match)
                 const id = makeId()
                 timeExpressionDict[id] = {
                     value: null,
@@ -257,7 +254,7 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
                     id
                 }
                 return id
-            })
+            }).tag("Date").tag("Month").tag(VariableType.Period)
         }
 
         Object.keys(timeExpressionDict).forEach(id => {
@@ -270,6 +267,7 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
                     originalText: elm.originalText,
                     id
                 }
+                nlp.match(id).tag(parseResult.type)
             }
         })
 
@@ -288,10 +286,11 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
                 id
             }
 
-            verbs.replaceWith(id)
+            verbs.replaceWith(id).tag(VariableType.Verb)
         }
 
         processedText = nlp.text()
+
     }
 
     //====================================================================================================
