@@ -5,7 +5,7 @@ compromise.extend(require('compromise-numbers'))
 compromise.extend(require('compromise-dates'))
 import { preprocess } from "./preprocessor";
 import { ActionTypeBase } from "../../../state/types";
-import { VariableType, VariableInfo, PreProcessedInputText, VerbInfo, VerbType } from "./types";
+import { VariableType, VariableInfo, PreProcessedInputText, VerbInfo, VerbType, NLUOptions } from "./types";
 import { ExplorationInfo, ExplorationType, ParameterType, inferIntraDayDataSourceType, IntraDayDataSourceType } from "../../exploration/types";
 import { setDateAction, InteractionType, createSetRangeAction, setDataSourceAction, setIntraDayDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, setParametersAction, createGoToComparisonCyclicAction } from "../../../state/exploration/interaction/actions";
 import { explorationInfoHelper } from "../../exploration/ExplorationInfoHelper";
@@ -26,8 +26,9 @@ export class NLUCommandResolver {
 
     private constructor() { }
 
-    async resolveSpeechCommand(speech: string, context: SpeechContext, explorationInfo: ExplorationInfo): Promise<ActionTypeBase> {
-        const preprocessed = await preprocess(speech)
+    async resolveSpeechCommand(speech: string, context: SpeechContext, explorationInfo: ExplorationInfo, options: NLUOptions): Promise<ActionTypeBase> {
+
+        const preprocessed = await preprocess(speech, options)
 
         const verbs = this.extractVariablesWithType(preprocessed, VariableType.Verb)
         const dataSources = this.extractVariablesWithType(preprocessed, VariableType.DataSource)

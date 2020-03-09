@@ -1,4 +1,4 @@
-import { PreProcessedInputText, VariableType, VariableInfo, VariableInfoDict, VerbInfo } from "./types";
+import { PreProcessedInputText, VariableType, VariableInfo, VariableInfoDict, VerbInfo, NLUOptions } from "./types";
 import compromise from 'compromise';
 import { DataSourceType } from "../../../measure/DataSourceSpec";
 import { parseTimeText, parseDateTextToNumberedDate } from "./preprocessors/preprocessor-time";
@@ -59,13 +59,13 @@ const CYCLIC_TIME_RULES: Rules = [
     }
 ]
 
-const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (obj: any) => { type: VariableType.Date | VariableType.Period, value: number | [number, number] } | null }> = [
+const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (obj: any, options: NLUOptions) => { type: VariableType.Date | VariableType.Period, value: number | [number, number] } | null }> = [
 
     {
         matchSyntax: "[<relative>(last|past|previous|this)+] week",
-        valueParser: (obj: { relative: string }) => {
+        valueParser: (obj: { relative: string }, options) => {
             const relatives = obj.relative.replace(",", " ").toLowerCase().split(" ")
-            const today = new Date() //TODO reflect today func
+            const today = options.getToday()
 
             if (relatives.length === 1 || relatives.every(v => v === 'last') === false) {
                 switch (relatives[0]) {
@@ -94,10 +94,10 @@ const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (o
     },
     {
         matchSyntax: "since [<date>#Date+]",
-        valueParser: (obj: { date: string }) => {
-            const parsedDate = parseDateTextToNumberedDate(obj.date)
+        valueParser: (obj: { date: string }, options) => {
+            const parsedDate = parseDateTextToNumberedDate(obj.date, options.getToday())
             if (parsedDate) {
-                const today = new Date() //TODO reflect today func
+                const today = options.getToday()
                 return {
                     type: VariableType.Period,
                     value: [parsedDate, DateTimeHelper.toNumberedDateFromDate(today)]
@@ -107,10 +107,10 @@ const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (o
     },
     {
         matchSyntax: "(recent|resent|resend|past|last) [<n>#Value] [<durationUnit>#Duration]",
-        valueParser: (obj: { n: string, durationUnit: string }) => {
+        valueParser: (obj: { n: string, durationUnit: string }, options) => {
             const n = Number.parseInt(obj.n)
             if (n > 0) {
-                const todayDate = new Date() //TODO reflect today func
+                const todayDate = options.getToday()
                 let startDate
                 if (/days?/gi.test(obj.durationUnit)) {
                     startDate = subDays(todayDate, n - 1)
@@ -131,13 +131,13 @@ const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (o
     },
     {
         matchSyntax: `from? #Determiner? [<fromMonth>(last|past|previous|this)? (${MONTH_NAMES.join("|")})] (to|through) #Determiner? [<toMonth>(last|past|previous|this)? (${MONTH_NAMES.join("|")})]`,
-        valueParser: (obj: { fromMonth: string, toMonth: string }) => {
-            return parseTimeText(obj.fromMonth + " to " + obj.toMonth)
+        valueParser: (obj: { fromMonth: string, toMonth: string }, options) => {
+            return parseTimeText(obj.fromMonth + " to " + obj.toMonth, options.getToday())
         }
     }
 ]
 
-export async function preprocess(speech: string): Promise<PreProcessedInputText> {
+export async function preprocess(speech: string, options: NLUOptions): Promise<PreProcessedInputText> {
     const t = Date.now()
 
     const variables: VariableInfoDict = {}
@@ -151,8 +151,7 @@ export async function preprocess(speech: string): Promise<PreProcessedInputText>
         if (MONTH_NAMES_WHOLE_REGEX.test(speech)) {
             //month
             const month = MONTH_NAMES.indexOf(speech.toLowerCase())
-            //TODO today
-            const today = new Date()
+            const today = options.getToday()
             const todayMonth = getMonth(today)
             let monthDate: Date
 
@@ -215,7 +214,7 @@ export async function preprocess(speech: string): Promise<PreProcessedInputText>
                         obj[groupName] = originalText
                     })
                     const id = makeId()
-                    const parseResult = matchSyntaxElm.valueParser(obj)
+                    const parseResult = matchSyntaxElm.valueParser(obj, options)
                     if (parseResult) {
                         variables[id] = {
                             value: parseResult.value,
@@ -263,7 +262,7 @@ export async function preprocess(speech: string): Promise<PreProcessedInputText>
 
         Object.keys(timeExpressionDict).forEach(id => {
             const elm = timeExpressionDict[id]
-            const parseResult = parseTimeText(elm.originalText)
+            const parseResult = parseTimeText(elm.originalText, options.getToday())
             if (parseResult) {
                 variables[id] = {
                     value: parseResult.value,

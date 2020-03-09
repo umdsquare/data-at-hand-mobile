@@ -8,6 +8,7 @@ import { sleep } from "../../utils";
 import { Mutex } from 'async-mutex';
 import { SpeechContext } from "../../core/speech/nlp/context";
 import { NLUCommandResolver } from "../../core/speech/nlp/nlu";
+import { DataServiceManager } from "../../system/DataServiceManager";
 
 const sessionMutex = new Mutex()
 
@@ -81,12 +82,18 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
                     const dictationResult = currentState.speechRecognizerState.dictationResult
                     if (dictationResult != null && dictationResult.text != null && dictationResult.text.length > 0) {
                         //can start analyzing
-                        //TODO start analysis
                         console.log(sessionId, "Analyze the phrase, ", dictationResult.text, "with context: ", context)
 
-
                         try {
-                            const inferredAction = await NLUCommandResolver.instance.resolveSpeechCommand(dictationResult.text, context, currentState.explorationState.info)
+                            const inferredAction = await NLUCommandResolver.instance.resolveSpeechCommand(
+                                dictationResult.text,
+                                context,
+                                currentState.explorationState.info,
+                                {
+                                    getToday: DataServiceManager.instance.getServiceByKey(currentState.settingsState.serviceKey).getToday
+                                }
+                            )
+
                             if (inferredAction != null) {
                                 dispatch(inferredAction)
                             }

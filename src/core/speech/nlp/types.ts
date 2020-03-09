@@ -34,3 +34,7 @@ export interface VerbInfo{
     root: string,
     type: VerbType
 }
+
+export interface NLUOptions{
+    getToday: ()=>Date,
+}
