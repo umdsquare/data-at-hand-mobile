@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useMemo } from "react";
+import React, { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import { View, StyleSheet, Text, ViewStyle, TextStyle } from "react-native";
 import Colors from "../../style/Colors";
 import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
@@ -479,7 +479,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
 
 
-export const DateBar = (props: {
+export const DateBar = React.memo((props: {
     date: number,
     onDateChanged?: (date: number, interactionType: InteractionType) => void,
     onLongPressIn: () => void,
@@ -488,10 +488,17 @@ export const DateBar = (props: {
 
     const [date, setDate] = useState(props.date)
 
+    useEffect(() => {
+        setDate(props.date)
+    }, [props.date])
+
+    const bottomSheetRef = useRef<BottomSheet>(null)
+    const swipedFeedbackRef = useRef<SwipedFeedback>(null)
+
     const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
 
-    const shiftDay = (amount: number) => {
+    const shiftDay = useCallback((amount: number) => {
         const newDate = addDays(DateTimeHelper.toDate(date), amount)
         if (differenceInCalendarDays(newDate, getToday()) < 1) {
             const newNumberedDate = DateTimeHelper.toNumberedDateFromDate(newDate)
@@ -499,16 +506,21 @@ export const DateBar = (props: {
             props.onDateChanged && props.onDateChanged(newNumberedDate, InteractionType.TouchOnly)
             swipedFeedbackRef.current?.startFeedback(amount > 0 ? 'left' : 'right')
         }
-    }
+    }, [setDate, props.onDateChanged, swipedFeedbackRef])
 
-    const bottomSheetRef = useRef<BottomSheet>(null)
+    const onPress = useCallback(() => { bottomSheetRef.current?.open() }, [bottomSheetRef])
 
-    const swipedFeedbackRef = useRef<SwipedFeedback>(null)
+    const onCalendarDayPress = useCallback((d) => {
+        const newDate = DateTimeHelper.toNumberedDateFromDate(d)
+        setDate(newDate)
+        bottomSheetRef.current?.close()
+        props.onDateChanged && props.onDateChanged(newDate, InteractionType.TouchOnly)
+    }, [setDate, bottomSheetRef, props.onDateChanged])
 
     return <GestureRecognizer onSwipeLeft={() => shiftDay(1)} onSwipeRight={() => shiftDay(-1)} style={styles.containerStyle}>
         <SwipedFeedback ref={swipedFeedbackRef} />
         <DateButton date={date} overrideFormat="MMMM dd, yyyy" freeWidth={true}
-            onPress={() => { bottomSheetRef.current?.open() }}
+            onPress={onPress}
             onLongPressIn={props.onLongPressIn}
             onLongPressOut={props.onLongPressOut}
         />
@@ -516,12 +528,7 @@ export const DateBar = (props: {
         <BottomSheet ref={bottomSheetRef}>
             <DatePicker selectedDay={DateTimeHelper.toDate(date)}
                 latestPossibleDay={getToday()}
-                onDayPress={(d) => {
-                    const newDate = DateTimeHelper.toNumberedDateFromDate(d)
-                    setDate(newDate)
-                    bottomSheetRef.current?.close()
-                    props.onDateChanged && props.onDateChanged(newDate, InteractionType.TouchOnly)
-                }} />
+                onDayPress={onCalendarDayPress} />
         </BottomSheet>
     </GestureRecognizer>
-}
+})

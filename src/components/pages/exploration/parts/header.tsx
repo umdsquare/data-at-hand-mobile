@@ -197,32 +197,39 @@ const HeaderRangeBar = React.memo((props: { parameterKey?: ParameterKey, showBor
         showBorder={props.showBorder} />
 })
 
-const HeaderDateBar = () => {
+const HeaderDateBar = React.memo(() => {
     const [speechSessionId, setSpeechSessionId] = useState<string|null>(null)
     const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
     const dispatch = useDispatch()
     const date = explorationInfoHelper.getParameterValue<number>(explorationInfo, ParameterType.Date)!
-    return <DateBar date={date}
-        onDateChanged={(date: number, interactionType: InteractionType) => {
-            dispatch(setDateAction(interactionType, date))
-        }}
-        onLongPressIn={() => {
-            const newSessionId = makeNewSessionId()
-            dispatch(createSetShowGlobalPopupAction(true, newSessionId))
-            dispatch(startSpeechSession(newSessionId, SpeechContextHelper.makeTimeSpeechContext('date')))
-            setSpeechSessionId(newSessionId)
-        }}
-        onLongPressOut={() => {
-            if (speechSessionId != null) {
-                dispatch(createSetShowGlobalPopupAction(false, speechSessionId))
-                dispatch(requestStopDictation(speechSessionId))
-            }
-            setSpeechSessionId(null)
-        }}
-    />
-}
 
-const DataSourceBar = (props: { showBorder: boolean }) => {
+    const onDateChanged = useCallback((date: number, interactionType: InteractionType) => {
+        dispatch(setDateAction(interactionType, date))
+    }, [dispatch])
+
+    const onLongPressIn = useCallback(() => {
+        const newSessionId = makeNewSessionId()
+        dispatch(createSetShowGlobalPopupAction(true, newSessionId))
+        dispatch(startSpeechSession(newSessionId, SpeechContextHelper.makeTimeSpeechContext('date')))
+        setSpeechSessionId(newSessionId)
+    }, [dispatch, setSpeechSessionId])
+
+    const onLongPressOut = useCallback(() => {
+        if (speechSessionId != null) {
+            dispatch(createSetShowGlobalPopupAction(false, speechSessionId))
+            dispatch(requestStopDictation(speechSessionId))
+        }
+        setSpeechSessionId(null)
+    }, [speechSessionId, setSpeechSessionId, dispatch])
+
+    return <DateBar date={date}
+        onDateChanged={onDateChanged}
+        onLongPressIn={onLongPressIn}
+        onLongPressOut={onLongPressOut}
+    />
+})
+
+const DataSourceBar = React.memo((props: { showBorder: boolean }) => {
     const dispatch = useDispatch()
     const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
     const sourceType = explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource) as DataSourceType
@@ -239,9 +246,9 @@ const DataSourceBar = (props: { showBorder: boolean }) => {
             dispatch(setDataSourceAction(InteractionType.TouchOnly, DataSourceManager.instance.supportedDataSources[newIndex].type))
         }
     />
-}
+})
 
-const IntraDayDataSourceBar = (props: { showBorder: boolean }) => {
+const IntraDayDataSourceBar = React.memo((props: { showBorder: boolean }) => {
     const dispatch = useDispatch()
     const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
 
@@ -274,7 +281,7 @@ const IntraDayDataSourceBar = (props: { showBorder: boolean }) => {
             dispatch(setIntraDayDataSourceAction(InteractionType.TouchOnly, supportedIntraDayDataSourceTypes[index]))
         }}
     />
-}
+})
 
 const CyclicComparisonTypeBar = (props: { showBorder: boolean }) => {
     const dispatch = useDispatch()
