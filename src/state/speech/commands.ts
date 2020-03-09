@@ -83,11 +83,20 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
                         //can start analyzing
                         //TODO start analysis
                         console.log(sessionId, "Analyze the phrase, ", dictationResult.text, "with context: ", context)
-                        
-                        await NLUCommandResolver.instance.resolveSpeechCommand(dictationResult.text, context, currentState.explorationState.info, dispatch)
 
-                        console.log(sessionId, "Finished analyzing.")
-                        terminate(releaseMutex, dispatch, TerminationReason.Success, sessionId)
+
+                        try {
+                            const inferredAction = await NLUCommandResolver.instance.resolveSpeechCommand(dictationResult.text, context, currentState.explorationState.info)
+                            if (inferredAction != null) {
+                                dispatch(inferredAction)
+                            }
+                            console.log(sessionId, "Finished analyzing.")
+                            terminate(releaseMutex, dispatch, TerminationReason.Success, sessionId)
+                        } catch (err) {
+                            console.log("speech analyze error - ", dictationResult.text)
+                            console.log(err)
+                            terminate(releaseMutex, dispatch, TerminationReason.Fail, sessionId)
+                        }
                     } else {
                         //not enough dictation result. finish.
                         terminate(releaseMutex, dispatch, TerminationReason.Cancel, sessionId)
@@ -116,7 +125,7 @@ export function requestStopDictation(sessionId: string): (dispatch: Dispatch, ge
     return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
         const initialState = getState()
         console.log("request stop on session status:", initialState.speechRecognizerState.status)
-        if (initialState.speechRecognizerState.status === SpeechRecognizerSessionStatus.Listening || 
+        if (initialState.speechRecognizerState.status === SpeechRecognizerSessionStatus.Listening ||
             initialState.speechRecognizerState.status === SpeechRecognizerSessionStatus.Starting
             && initialState.speechRecognizerState.currentSessionId === sessionId
         ) {
@@ -128,6 +137,6 @@ export function requestStopDictation(sessionId: string): (dispatch: Dispatch, ge
     }
 }
 
-export function makeNewSessionId(): string{
+export function makeNewSessionId(): string {
     return require('uuid/v4')()
 }

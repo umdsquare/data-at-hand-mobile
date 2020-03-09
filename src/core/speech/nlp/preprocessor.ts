@@ -1,19 +1,24 @@
 import { PreProcessedInputText, VariableType, VariableInfo, VariableInfoDict, VerbInfo } from "./types";
 import compromise from 'compromise';
 import { DataSourceType } from "../../../measure/DataSourceSpec";
-import { parseTimeText, parseDateTextToNumberedDate } from "./preprocessor-time";
+import { parseTimeText, parseDateTextToNumberedDate } from "./preprocessors/preprocessor-time";
 import { DateTimeHelper } from "../../../time";
 import { subDays, subWeeks, subMonths, addDays, subYears, isSameMonth, getMonth, setMonth, startOfMonth, endOfMonth, endOfWeek, startOfWeek } from "date-fns";
 import { randomString } from "../../../utils";
+import { inferVerbType } from "./preprocessors/preprocessor-verb";
+import { CyclicTimeFrame } from "../../exploration/cyclic_time";
 
 function makeId(){
     return randomString(5)
 }
 
 const MONTH_NAMES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
-const MONTH_NAMES_REGEX = new RegExp(`^(${MONTH_NAMES.join("|")})$`, 'gi')
+const MONTH_NAMES_WHOLE_REGEX = new RegExp(`^(${MONTH_NAMES.join("|")})$`, 'gi')
+const MONTH_NAMES_REGEX = new RegExp(`${MONTH_NAMES.join("|")}`, 'gi')
 
-const DATASOURCE_VARIABLE_RULES = [
+type Rules = Array<{regex: RegExp, variableType: VariableType, value: any}>
+
+const DATASOURCE_VARIABLE_RULES: Rules = [
     {
         regex: /(step count(s|er)?)|(steps?)/gi,
         variableType: VariableType.DataSource,
@@ -41,12 +46,24 @@ const DATASOURCE_VARIABLE_RULES = [
     }
 ]
 
+const CYCLIC_TIME_RULES: Rules = [
+    {
+        regex: /days?\s+of\s+(the\s+)?weeks?/gi,
+        variableType: VariableType.TimeCycle,
+        value: CyclicTimeFrame.DayOfWeek
+    },
+    {
+        regex: /(months?\s+of\s+(the\s+)?years?)|(monthly pattern)|(by months?)/gi,
+        variableType: VariableType.TimeCycle,
+        value: CyclicTimeFrame.MonthOfYear
+    }
+]
+
 const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (obj: any) => { type: VariableType.Date | VariableType.Period, value: number | [number, number] } | null }> = [
 
     {
         matchSyntax: "[<relative>(last|past|previous|this)+] week",
         valueParser: (obj: { relative: string }) => {
-            console.log(obj)
             const relatives = obj.relative.replace(",", " ").toLowerCase().split(" ")
             const today = new Date() //TODO reflect today func
 
@@ -89,7 +106,7 @@ const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (o
         }
     },
     {
-        matchSyntax: "(recent|resent|resend) [<n>#Value] [<durationUnit>#Duration]",
+        matchSyntax: "(recent|resent|resend|past|last) [<n>#Value] [<durationUnit>#Duration]",
         valueParser: (obj: { n: string, durationUnit: string }) => {
             const n = Number.parseInt(obj.n)
             if (n > 0) {
@@ -131,7 +148,7 @@ export async function preprocess(speech: string): Promise<PreProcessedInputText>
 
     //Check for quickpass=================================================
     {
-        if (MONTH_NAMES_REGEX.test(speech)) {
+        if (MONTH_NAMES_WHOLE_REGEX.test(speech)) {
             //month
             const month = MONTH_NAMES.indexOf(speech.toLowerCase())
             //TODO today
@@ -162,7 +179,7 @@ export async function preprocess(speech: string): Promise<PreProcessedInputText>
     if (quickPass === false) {
         //Find data source=================================================================================
         let processedSpeech = speech
-        DATASOURCE_VARIABLE_RULES.forEach(rule => {
+        DATASOURCE_VARIABLE_RULES.concat(CYCLIC_TIME_RULES).forEach(rule => {
             processedSpeech = processedSpeech.replace(rule.regex, (match) => {
                 const id = makeId()
                 variables[id] = {
@@ -181,6 +198,8 @@ export async function preprocess(speech: string): Promise<PreProcessedInputText>
         const nlpCasted = (nlp as any)
 
         nlpCasted.numbers().toCardinal().toNumber()
+
+        console.log(nlp.termList())
 
         TIME_EXPRESSION_MATCH_SYNTAX.forEach(matchSyntaxElm => {
             const matches = nlp.match(matchSyntaxElm.matchSyntax)
@@ -225,9 +244,22 @@ export async function preprocess(speech: string): Promise<PreProcessedInputText>
                 originalText: match.terms().map(t => t.text).join(" "),
                 id
             }
-            nlp.find
             return id
         })
+
+        if(MONTH_NAMES_REGEX.test(nlp.text()) === true){
+            //month name was not parsed.
+            nlp.replace(`(${MONTH_NAMES_REGEX.source})`, (match: compromise.Phrase) => {
+                console.log(match)
+                const id = makeId()
+                timeExpressionDict[id] = {
+                    value: null,
+                    originalText: match.terms().map(t => t.text).join(" "),
+                    id
+                }
+                return id
+            })
+        }
 
         Object.keys(timeExpressionDict).forEach(id => {
             const elm = timeExpressionDict[id]
@@ -249,7 +281,8 @@ export async function preprocess(speech: string): Promise<PreProcessedInputText>
             const id = makeId()
             variables[id] = {
                 value: {
-                    root: verbsJson[0].text
+                    root: verbsJson[0].text,
+                    type: inferVerbType(verbsJson[0].text)
                 } as VerbInfo,
                 type: VariableType.Verb,
                 originalText: verbsJson[0].text,

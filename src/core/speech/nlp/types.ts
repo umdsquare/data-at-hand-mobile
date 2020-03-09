@@ -2,7 +2,8 @@ export enum VariableType{
     DataSource="datasource",
     Date="date",
     Period="period",
-    Verb="verb"
+    Verb="verb",
+    TimeCycle="cyclicTime",
 }
 
 export interface VariableInfo{
@@ -22,6 +23,14 @@ export interface PreProcessedInputText{
     variables: VariableInfoDict
 }
 
+export enum VerbType{
+    AssignTrivial="assign",
+    Browse="browse",
+    Compare="compare",
+    Highlight="highlight"
+}
+
 export interface VerbInfo{
-    root: string
+    root: string,
+    type: VerbType
 }

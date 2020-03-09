@@ -3,6 +3,7 @@ import { DataSourceType } from '../../../measure/DataSourceSpec';
 import {
   TouchingElementInfo,
   IntraDayDataSourceType,
+  ExplorationInfoParameter,
 } from '../../../core/exploration/types';
 import { CyclicTimeFrame, CycleDimension } from '../../../core/exploration/cyclic_time';
 
@@ -14,6 +15,7 @@ export enum ExplorationActionType {
   SetDate = 'exploration:interaction:setDate',
   SetCycleType = 'exploration:interaction:setCycleType',
   SetCycleDimension = 'exploration:interaction:setCycleDimension',
+  SetParameters = "exploration:interaction:setParameters",
 
   ShiftAllRanges = 'exploration:interaction:shiftAllRanges',
 
@@ -108,6 +110,10 @@ export interface ShiftAllRangesAction extends ExplorationActionBase {
   direction: 'past' | 'future'
 }
 
+export interface SetParametersAction extends ExplorationActionBase {
+  parameters: ExplorationInfoParameter[]
+}
+
 export type ExplorationAction =
   | ActionTypeBase
   | ExplorationActionBase
@@ -124,6 +130,7 @@ export type ExplorationAction =
   | SetTouchingElementInfoAction
   | SetCycleDimensionAction
   | ShiftAllRangesAction
+  | SetParametersAction
 
 
 export function createSetRangeAction(
@@ -288,6 +295,17 @@ export function setDateAction(
     interactionType,
     date,
   };
+}
+
+export function setParametersAction(
+  interactionType: InteractionType,
+  ...parameters: ExplorationInfoParameter[]
+): SetParametersAction{
+  return {
+    type: ExplorationActionType.SetParameters,
+    interactionType,
+    parameters
+  }
 }
 
 export function setCycleDimensionAction(interactionType: InteractionType, cycleDimension: CycleDimension): SetCycleDimensionAction {

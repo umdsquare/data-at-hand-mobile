@@ -26,6 +26,7 @@ import {
   GoToCyclicDetailAction,
   SetCycleDimensionAction,
   ShiftAllRangesAction,
+  SetParametersAction,
 } from './actions';
 import { explorationInfoHelper } from '../../../core/exploration/ExplorationInfoHelper';
 import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
@@ -166,10 +167,19 @@ export const explorationStateReducer = (
         )
         break;
 
+      case ExplorationActionType.SetParameters:
+        {
+          const a = action as SetParametersAction
+          a.parameters.forEach(parameter => {
+            explorationInfoHelper.setParameterValue(newState.info, parameter.value, parameter.parameter, parameter.key)
+          })
+        }
+        break;
+
       case ExplorationActionType.ShiftAllRanges:
         {
           const a = action as ShiftAllRangesAction
-          
+
           if (newState.info.type === ExplorationType.C_TwoRanges) {
 
             const rangeA = explorationInfoHelper.getParameterValue<[number, number]>(
@@ -190,11 +200,11 @@ export const explorationStateReducer = (
             if (rangeB != null) {
               explorationInfoHelper.setParameterValue(newState.info, DateTimeHelper.pageRange(rangeB, a.direction === 'future' ? 1 : -1), ParameterType.Range, ParameterKey.RangeB)
             }
-          }else{
+          } else {
             const range = explorationInfoHelper.getParameterValue<[number, number]>(newState.info, ParameterType.Range, null)
             if (range != null) {
               explorationInfoHelper.setParameterValue(newState.info, DateTimeHelper.pageRange(range, a.direction === 'future' ? 1 : -1), ParameterType.Range)
-            }  
+            }
           }
 
         }
