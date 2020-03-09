@@ -40,8 +40,6 @@ import { test } from "../../../core/speech/nlp/preprocessor";
 
 test().then()
 
-var deepEqual = require('deep-equal');
-
 const styles = StyleSheet.create({
 
     headerContainerStyle: {
@@ -219,7 +217,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
 
         let dataReloadNeeded = false
 
-        const isExplorationInfoChanged = deepEqual(prevProps.explorationInfo.values, this.props.explorationInfo.values) === false
+        const isExplorationInfoChanged = explorationInfoHelper.equals(prevProps.explorationInfo, this.props.explorationInfo) === false
 
         if (this.props.explorationInfo.type !== prevProps.explorationInfo.type || isExplorationInfoChanged === true) {
             if (this.state.initialLoadingFinished === true) {

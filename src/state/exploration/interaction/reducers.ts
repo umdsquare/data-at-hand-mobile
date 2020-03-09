@@ -32,8 +32,6 @@ import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns'
 import { DateTimeHelper } from '../../../time';
 import { DataSourceType } from '../../../measure/DataSourceSpec';
 
-var deepEqual = require('deep-equal');
-
 export interface ExplorationState {
   info: ExplorationInfo;
   prevInfo: ExplorationInfo | null | undefined;
@@ -75,7 +73,7 @@ export const explorationStateReducer = (
           newState.prevInfo = null;
           if (newState.backNavStack.length > 0) {
             if (
-              deepEqual(
+              explorationInfoHelper.equals(
                 newState.info,
                 newState.backNavStack[newState.backNavStack.length - 1],
               ) === true

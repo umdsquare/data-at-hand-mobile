@@ -4,10 +4,10 @@ import { DataSourceType } from "../../../measure/DataSourceSpec";
 import { parseTimeText, parseDateTextToNumberedDate } from "./preprocessor-time";
 import { DateTimeHelper } from "../../../time";
 import { subDays, subWeeks, subMonths, addDays, subYears, isSameMonth, getMonth, setMonth, startOfMonth, endOfMonth, endOfWeek, startOfWeek } from "date-fns";
+import { randomString } from "../../../utils";
 
-const alphabets = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-function makeId(): string {
-    return [1, 2, 3, 4, 5].map(n => alphabets.charAt(Math.random() * (alphabets.length - 1))).join('')
+function makeId(){
+    return randomString(5)
 }
 
 const MONTH_NAMES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]

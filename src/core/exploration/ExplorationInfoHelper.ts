@@ -5,6 +5,7 @@ import {
   ExplorationType,
   ExplorationMode,
   ExplorationInfoParameter,
+  ExplorationInfoParams,
 } from './types';
 
 class ExplorationInfoHelper {
@@ -12,15 +13,15 @@ class ExplorationInfoHelper {
     stateInfo: ExplorationInfo,
     parameter: ParameterType,
     key?: ParameterKey,
-  ): T|null {
+  ): T | null {
     return this.getParameterValueOfParams<T>(stateInfo.values, parameter, key);
   }
 
   getParameterValueOfParams<T>(
-    paramSet: Array<ExplorationInfoParameter>,
+    paramSet: ExplorationInfoParams,
     parameter: ParameterType,
     key?: ParameterKey,
-  ): T|null {
+  ): T | null {
     const found = paramSet.find(
       v => v.parameter === parameter && (key == null || v.key === key),
     );
@@ -72,8 +73,28 @@ class ExplorationInfoHelper {
         return ExplorationMode.Compare;
     }
   }
+
+  equals(a: ExplorationInfo, b: ExplorationInfo) {
+    if (a === b) {
+      return true
+    } else {
+      if (a.type === b.type && a.values.length === b.values.length) {
+        var deepEqual = require('deep-equal');
+        for (const aParameter of a.values) {
+          const bParameter = b.values.find(bParameter => 
+            bParameter.key === aParameter.key 
+            && bParameter.parameter === aParameter.parameter 
+            && deepEqual(bParameter.value, aParameter.value)===true)
+          if(bParameter == null){
+            return false
+          }
+        }
+        return true
+      } else return false
+    }
+  }
 }
 
 const explorationInfoHelper = new ExplorationInfoHelper();
 
-export {explorationInfoHelper};
+export { explorationInfoHelper };

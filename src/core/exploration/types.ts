@@ -45,17 +45,19 @@ export enum TouchingElementValueType{
   CycleDimension="cycleDimension"
 }
 
+export type ExplorationInfoParams = Array<ExplorationInfoParameter>
+
 export interface TouchingElementInfo {
   touchId: string;
   elementBoundInScreen: LayoutRectangle;
-  params: Array<ExplorationInfoParameter>;
+  params: ExplorationInfoParams;
   value?: any
   valueType?: TouchingElementValueType
 }
 
 export interface ExplorationInfo {
   type: ExplorationType;
-  values: Array<ExplorationInfoParameter>;
+  values: ExplorationInfoParams;
 }
 
 export enum IntraDayDataSourceType {
