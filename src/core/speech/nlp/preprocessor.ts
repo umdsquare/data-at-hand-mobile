@@ -174,6 +174,8 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
 
     let intent: Intent | undefined = undefined
 
+    console.log("preprocess", speech)
+
     //Check for quickpass=================================================
     {
         if (MONTH_NAMES_WHOLE_REGEX.test(speech)) {
@@ -202,6 +204,7 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
             intent = Intent.AssignTrivial
 
             quickPass = true
+            console.log("Took a quick path")
         }
     }
     //=======================================
@@ -460,5 +463,8 @@ export async function test() {
     await preprocess("What's the days I woke up earlier than half past ten", { getToday: () => new Date() })
     await preprocess("What's the day with the maximum step count", { getToday: () => new Date() })
     */
+   await preprocess("step count by day of the week", { getToday: () => new Date() })
+    
+
 
 }

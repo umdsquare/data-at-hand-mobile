@@ -50,6 +50,15 @@ export class NLUCommandResolver {
         const toldCyclicTimeFrames = cyclicTimeFrames.length > 0
         const toldConditions = conditions.length > 0
 
+        //Cover cyclic time frame first
+        if (cyclicTimeFrames.length > 0) {
+            const guaranteedDataSource: DataSourceType = dataSources.length > 0 ? dataSources[0].value : (context["dataSource"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
+            if (guaranteedDataSource) {
+                const guaranteedRange = ranges.length > 0 ? ranges[0].value : (context.type === SpeechContextType.RangeElement ? (context as RangeElementSpeechContext).range : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range))
+                return createGoToComparisonCyclicAction(InteractionType.Speech, guaranteedDataSource, guaranteedRange, cyclicTimeFrames[0].value)
+            }
+        }
+
         //First, cover the cases with a reliable intent======================================================================================================
         switch (preprocessed.intent) {
 
@@ -167,15 +176,6 @@ export class NLUCommandResolver {
                 break;
         }
 
-
-        //Cover cyclic time frame first
-        if (cyclicTimeFrames.length > 0) {
-            const guaranteedDataSource: DataSourceType = dataSources.length > 0 ? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
-            if (guaranteedDataSource) {
-                const guaranteedRange = ranges.length > 0 ? ranges[0].value : (context.type === SpeechContextType.RangeElement ? (context as RangeElementSpeechContext).range : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range))
-                return createGoToComparisonCyclicAction(InteractionType.Speech, guaranteedDataSource, guaranteedRange, cyclicTimeFrames[0].value)
-            }
-        }
         //=====================================================================================================================================================
 
         //Cover cases with trivial intent
