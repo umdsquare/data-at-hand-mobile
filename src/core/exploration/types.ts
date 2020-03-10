@@ -1,16 +1,17 @@
-import {startOfDay, subDays, endOfDay} from 'date-fns';
-import {DateTimeHelper} from '../../time';
+import { startOfDay, subDays, endOfDay } from 'date-fns';
+import { DateTimeHelper } from '../../time';
 import { LayoutRectangle } from 'react-native';
 import { DataSourceType } from '../../measure/DataSourceSpec';
+import { ConditionInfo } from '../speech/nlp/types';
 
 export enum ExplorationType {
-  B_Overview="b_overview",
-  B_Range="b_range",
-  B_Day="b_day",
-  C_Cyclic="c_cyclic",
-  C_CyclicDetail_Daily="c_cyclic_detail_daily",
-  C_CyclicDetail_Range="c_cyclic_detail_range",
-  C_TwoRanges="c_two_ranges",
+  B_Overview = "b_overview",
+  B_Range = "b_range",
+  B_Day = "b_day",
+  C_Cyclic = "c_cyclic",
+  C_CyclicDetail_Daily = "c_cyclic_detail_daily",
+  C_CyclicDetail_Range = "c_cyclic_detail_range",
+  C_TwoRanges = "c_two_ranges",
 }
 
 export enum ExplorationMode {
@@ -28,9 +29,9 @@ export enum ParameterType {
 }
 
 export enum ParameterKey {
-    RangeA ='rangeA',
-    RangeB = 'rangeB',
-    Pivot = 'pivot'
+  RangeA = 'rangeA',
+  RangeB = 'rangeB',
+  Pivot = 'pivot'
 }
 
 export interface ExplorationInfoParameter {
@@ -39,10 +40,10 @@ export interface ExplorationInfoParameter {
   value: any;
 }
 
-export enum TouchingElementValueType{
-  DayValue="day",
-  RangeAggregated="rangeA",
-  CycleDimension="cycleDimension"
+export enum TouchingElementValueType {
+  DayValue = "day",
+  RangeAggregated = "rangeA",
+  CycleDimension = "cycleDimension"
 }
 
 export type ExplorationInfoParams = Array<ExplorationInfoParameter>
@@ -58,54 +59,70 @@ export interface TouchingElementInfo {
 export interface ExplorationInfo {
   type: ExplorationType;
   values: ExplorationInfoParams;
+  highlightFilter?: HighlightFilter
+}
+
+export enum NumericConditionType {
+  Min="min",
+  Max="max",
+  Less="less",
+  More="more"
+}
+
+export interface HighlightFilter {
+  dataSource: DataSourceType,
+  type: NumericConditionType,
+  propertyKey?: string,
+  ref?: number
 }
 
 export enum IntraDayDataSourceType {
-    StepCount="step",
-    HeartRate="heart_rate",
-    Sleep="sleep"
+  StepCount = "step",
+  HeartRate = "heart_rate",
+  Sleep = "sleep"
 }
 
-export function shallowCopyExplorationInfo(original: ExplorationInfo): ExplorationInfo{
+export function shallowCopyExplorationInfo(original: ExplorationInfo): ExplorationInfo {
   return {
     ...original,
-    values: original.values.map(v => ({...v}))
+    values: original.values.map(v => ({ ...v })),
+    highlightFilter: original.highlightFilter
   }
 }
 
-export function getIntraDayDataSourceName(type: IntraDayDataSourceType): string{
-    switch(type){
-        case IntraDayDataSourceType.StepCount:
-            return "Step Count"
-        case IntraDayDataSourceType.Sleep:
-            return "Main Sleep"
-        case IntraDayDataSourceType.HeartRate:
-            return "Heart Rate"
-    }
+export function getIntraDayDataSourceName(type: IntraDayDataSourceType): string {
+  switch (type) {
+    case IntraDayDataSourceType.StepCount:
+      return "Step Count"
+    case IntraDayDataSourceType.Sleep:
+      return "Main Sleep"
+    case IntraDayDataSourceType.HeartRate:
+      return "Heart Rate"
+  }
 }
 
-export function inferIntraDayDataSourceType(dataSource: DataSourceType): IntraDayDataSourceType{
-    switch(dataSource){
-        case DataSourceType.StepCount:
-            return IntraDayDataSourceType.StepCount
-        case DataSourceType.HeartRate:
-            return IntraDayDataSourceType.HeartRate
-        case DataSourceType.HoursSlept:
-        case DataSourceType.SleepRange:
-            return IntraDayDataSourceType.Sleep
-        default: return null
-    }
+export function inferIntraDayDataSourceType(dataSource: DataSourceType): IntraDayDataSourceType {
+  switch (dataSource) {
+    case DataSourceType.StepCount:
+      return IntraDayDataSourceType.StepCount
+    case DataSourceType.HeartRate:
+      return IntraDayDataSourceType.HeartRate
+    case DataSourceType.HoursSlept:
+    case DataSourceType.SleepRange:
+      return IntraDayDataSourceType.Sleep
+    default: return null
+  }
 }
 
-export function inferDataSource(intraDayDataSource: IntraDayDataSourceType): DataSourceType{
-    switch(intraDayDataSource){
-        case IntraDayDataSourceType.StepCount:
-            return DataSourceType.StepCount
-        case IntraDayDataSourceType.Sleep:
-            return DataSourceType.SleepRange
-        case IntraDayDataSourceType.HeartRate:
-            return DataSourceType.HeartRate
-    }
+export function inferDataSource(intraDayDataSource: IntraDayDataSourceType): DataSourceType {
+  switch (intraDayDataSource) {
+    case IntraDayDataSourceType.StepCount:
+      return DataSourceType.StepCount
+    case IntraDayDataSourceType.Sleep:
+      return DataSourceType.SleepRange
+    case IntraDayDataSourceType.HeartRate:
+      return DataSourceType.HeartRate
+  }
 }
 
 export function makeInitialStateInfo(): ExplorationInfo {

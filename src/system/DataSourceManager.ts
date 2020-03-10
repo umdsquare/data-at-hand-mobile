@@ -6,14 +6,14 @@ export class DataSourceManager {
   private static _instance: DataSourceManager
 
   static get instance(): DataSourceManager {
-    if(this._instance == null){
+    if (this._instance == null) {
       this._instance = new DataSourceManager()
     }
     return this._instance
   }
 
   readonly supportedDataSources: ReadonlyArray<DataSourceSpec> = [
-    
+
     {
       type: DataSourceType.StepCount,
       category: DataSourceCategory.Step,
@@ -27,18 +27,19 @@ export class DataSourceManager {
       description:
         'Heart Rate BPM (Beats per Minute) measured at a specific moment',
     },
-    {
-      type: DataSourceType.HoursSlept,
-      category: DataSourceCategory.Sleep,
-      name: 'Hours Slept',
-      description: 'A length of sleep of the day',
-    },
 
     {
       type: DataSourceType.SleepRange,
       category: DataSourceCategory.Sleep,
       name: 'Sleep Range',
       description: "Bedtime and Wake time of the day\'s sleep",
+    },
+
+    {
+      type: DataSourceType.HoursSlept,
+      category: DataSourceCategory.Sleep,
+      name: 'Hours Slept',
+      description: 'A length of sleep of the day',
     },
     {
       type: DataSourceType.Weight,
@@ -48,7 +49,7 @@ export class DataSourceManager {
     },
   ];
 
-  readonly dataSourceCategorySpecs: {[key:string]: DataSourceCategorySpec} = {}
+  readonly dataSourceCategorySpecs: { [key: string]: DataSourceCategorySpec } = {}
 
   private specMap: Map<DataSourceType, DataSourceSpec>;
 
@@ -84,8 +85,8 @@ export class DataSourceManager {
     return this.specMap[key];
   }
 
-  formatValue(value: any, type: DataSourceType): string{
-    switch(type){
+  formatValue(value: any, type: DataSourceType): string {
+    switch (type) {
       case DataSourceType.StepCount:
         return commaNumber(Math.round(value))
       default:

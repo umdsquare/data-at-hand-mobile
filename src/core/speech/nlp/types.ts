@@ -1,3 +1,5 @@
+import { NumericConditionType } from "../../exploration/types";
+
 export enum VariableType {
     DataSource = "DataSource",
     Date = "Date",
@@ -38,8 +40,8 @@ export interface VerbInfo {
 }
 
 export interface ConditionInfo {
-    type: "less" | "more" | "max" | "min",
-    property: "waketime" | "bedtime" | undefined | null
+    type: NumericConditionType,
+    property?: "waketime" | "bedtime" | undefined | null
     unit?: string
     ref?: number
 }

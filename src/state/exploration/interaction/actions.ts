@@ -4,6 +4,7 @@ import {
   TouchingElementInfo,
   IntraDayDataSourceType,
   ExplorationInfoParameter,
+  HighlightFilter,
 } from '../../../core/exploration/types';
 import { CyclicTimeFrame, CycleDimension } from '../../../core/exploration/cyclic_time';
 
@@ -15,6 +16,8 @@ export enum ExplorationActionType {
   SetDate = 'exploration:interaction:setDate',
   SetCycleType = 'exploration:interaction:setCycleType',
   SetCycleDimension = 'exploration:interaction:setCycleDimension',
+
+  SetHighlightFilter = 'exploration:interaction:setHighlightFilter',
 
   ShiftAllRanges = 'exploration:interaction:shiftAllRanges',
 
@@ -67,6 +70,10 @@ export interface SetIntraDayDataSourceAction extends ExplorationActionBase {
 
 export interface SetCycleTypeAction extends ExplorationActionBase {
   cycleType: CyclicTimeFrame;
+}
+
+export interface SetHighlightFilterAction extends ExplorationActionBase {
+  highlightFilter: HighlightFilter | null
 }
 
 export interface GoToBrowseRangeAction extends ExplorationActionBase {
@@ -125,6 +132,7 @@ export type ExplorationAction =
   | SetTouchingElementInfoAction
   | SetCycleDimensionAction
   | ShiftAllRangesAction
+  | SetHighlightFilterAction
 
 export function createSetRangeAction(
   interactionType: InteractionType,
@@ -312,6 +320,14 @@ export function shiftAllRanges(interactionType: InteractionType, direction: 'pas
     interactionType,
     type: ExplorationActionType.ShiftAllRanges,
     direction
+  }
+}
+
+export function setHighlightFilter(interactionType: InteractionType, highlightFilter?: HighlightFilter | null): SetHighlightFilterAction{
+  return {
+    interactionType,
+    type: ExplorationActionType.SetHighlightFilter,
+    highlightFilter: highlightFilter
   }
 }
 

@@ -45,5 +45,7 @@ export default {
   sleepColor: "#D08E65",
   weightColor: "#72A5D1",
 
-  lightBorderColor: "#90909040"
+  lightBorderColor: "#90909040",
+
+  highlightPanelBackground: "#F58674",
 };

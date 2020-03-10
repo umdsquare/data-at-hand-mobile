@@ -1,27 +1,36 @@
-const comparisonCategories = {
-    'less': ['earl', 'low', 'small', 'short', 'less', 'slow'],
-    'more': ['late', 'high', 'big', 'large', 'long', 'more', 'fast']
-}
+import { NumericConditionType } from "../../../exploration/types"
+import { DataSourceType } from "../../../../measure/DataSourceSpec"
 
-const comparisonTermDict: { [key: string]: string } = {}
+type TermInfo = { term: string, conditionType: NumericConditionType, valueType: Array<"scalar" | "duration" | "time"> | null, impliedSource: DataSourceType | null }
 
-Object.keys(comparisonCategories).forEach(category => {
-    comparisonCategories[category].forEach(word => {
-        comparisonTermDict[word] = category
-    })
-})
+const lexicon: Array<TermInfo> = [
+    { term: 'earl', conditionType: NumericConditionType.Less, valueType: ["time"], impliedSource: DataSourceType.SleepRange },
+    { term: 'late', conditionType: NumericConditionType.More, valueType: ["time"], impliedSource: DataSourceType.SleepRange },
+    
+    { term: 'low', conditionType: NumericConditionType.Less, valueType: ["scalar"], impliedSource: null,},
+    { term: 'high', conditionType: NumericConditionType.More, valueType: ["scalar"], impliedSource: null,},
+    
+    { term: 'short', conditionType: NumericConditionType.Less, valueType: ["duration"], impliedSource: DataSourceType.HoursSlept},
+    { term: 'long', conditionType: NumericConditionType.More, valueType: ["duration"], impliedSource: DataSourceType.HoursSlept},
+    
+    { term: 'less', conditionType: NumericConditionType.Less, valueType: ["duration", "scalar"], impliedSource: null},
+    { term: 'more', conditionType: NumericConditionType.More, valueType: ["duration", "scalar"], impliedSource: null},
+    
+    { term: 'slow', conditionType: NumericConditionType.Less, valueType: ["scalar"], impliedSource: DataSourceType.HeartRate},
+    { term: 'fast', conditionType: NumericConditionType.More, valueType: ["scalar"], impliedSource: DataSourceType.HeartRate},
+    
+    { term: 'heav', conditionType: NumericConditionType.Less, valueType: ["scalar"], impliedSource: DataSourceType.Weight},
+    { term: 'light', conditionType: NumericConditionType.More, valueType: ["scalar"], impliedSource: DataSourceType.Weight},
+]
 
-export function categorizeExtreme(extreme: string): "min" | "max" | null {
+export function categorizeExtreme(extreme: string): NumericConditionType.Max | NumericConditionType.Min | null {
     if (/(max)|(maximum)|(latest)|(fastest)|(most)/gi.test(extreme)) {
-        return "max"
+        return NumericConditionType.Max
     } else if (/(min)|(minimum)|(earliest)|(slowest)|(least)/gi) {
-        return "min"
+        return NumericConditionType.Min
     } else return null
 }
 
-export function categorizeComparison(comparison: string): 'less' | 'more' | null {
-    const matchedTerm = Object.keys(comparisonTermDict).find(term => comparison.search(term) != -1)
-    if(matchedTerm){
-        return comparisonTermDict[matchedTerm] as any
-    }else return null
+export function findComparisonTermInfo(comparison: string): TermInfo | null {
+    return lexicon.find(l => comparison.search(l.term) != -1)
 }

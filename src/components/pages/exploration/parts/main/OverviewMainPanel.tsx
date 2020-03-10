@@ -1,4 +1,4 @@
-import { createGoToBrowseRangeAction, InteractionType, memoUIStatus, ExplorationAction, createGoToBrowseDayAction } from "../../../../../state/exploration/interaction/actions";
+import { createGoToBrowseRangeAction, InteractionType, memoUIStatus, ExplorationAction, createGoToBrowseDayAction, setHighlightFilter } from "../../../../../state/exploration/interaction/actions";
 import React from "react";
 import { connect } from "react-redux";
 import { ReduxAppState } from "../../../../../state/types";
@@ -9,8 +9,9 @@ import { MeasureUnitType, DataSourceType } from "../../../../../measure/DataSour
 import { Dispatch } from "redux";
 import { Sizes } from "../../../../../style/Sizes";
 import { DateTimeHelper } from "../../../../../time";
-import { inferIntraDayDataSourceType } from "../../../../../core/exploration/types";
+import { inferIntraDayDataSourceType, HighlightFilter } from "../../../../../core/exploration/types";
 import { DataServiceManager } from "../../../../../system/DataServiceManager";
+import { HighlightFilterPanel } from "../../../../exploration/HighlightFilterPanel";
 
 const separatorStyle = { height: Sizes.verticalPadding }
 
@@ -20,6 +21,7 @@ interface Props {
     measureUnitType?: MeasureUnitType,
     overviewScrollY?: any,
     isTouchingChartElement?: boolean,
+    highlightFilter?: HighlightFilter,
     getToday?: () => Date,
     dispatchAction?: (action: ExplorationAction) => void
 }
@@ -47,6 +49,11 @@ class OverviewMainPanel extends React.PureComponent<Props> {
         console.log("unmount overview main panel.")
         this.props.dispatchAction(memoUIStatus("overviewScrollY", this.currentListScrollOffset))
     }
+
+    private readonly onDiscardFilter = () => {
+        this.props.dispatchAction(setHighlightFilter(InteractionType.TouchOnly, null))
+    }
+
 
     private Separator = () => {
         return <View style={separatorStyle} />
@@ -85,19 +92,26 @@ class OverviewMainPanel extends React.PureComponent<Props> {
         if (this.props.data != null) {
             const overviewData = this.props.data as OverviewData
 
-            return <FlatList
-                nestedScrollEnabled={true}
-                ref={this._listRef}
-                data={overviewData.sourceDataList}
-                keyExtractor={item => item.source}
-                ItemSeparatorComponent={this.Separator}
-                renderItem={this.renderItem}
-                onScroll={this.onScroll}
-                onScrollBeginDrag={this.onScrollBegin}
-                onScrollEndDrag={this.onScrollEnd}
-                scrollEnabled={this.props.isTouchingChartElement === false}
+            return <View>
+                {
+                    this.props.highlightFilter != null? <HighlightFilterPanel 
+                    filter={this.props.highlightFilter}
+                    onDiscardFilterPressed={this.onDiscardFilter}
+                    />:<></>
+                }
+                <FlatList
+                    nestedScrollEnabled={true}
+                    ref={this._listRef}
+                    data={overviewData.sourceDataList}
+                    keyExtractor={item => item.source}
+                    ItemSeparatorComponent={this.Separator}
+                    renderItem={this.renderItem}
+                    onScroll={this.onScroll}
+                    onScrollBeginDrag={this.onScrollBegin}
+                    onScrollEndDrag={this.onScrollEnd}
+                    scrollEnabled={this.props.isTouchingChartElement === false}
 
-            />
+                /></View>
         } else return <></>
     }
 }
@@ -112,6 +126,7 @@ function mapStateToProps(state: ReduxAppState, ownProps: Props): Props {
         measureUnitType: state.settingsState.unit,
         overviewScrollY: state.explorationState.uiStatus.overviewScrollY,
         isTouchingChartElement: state.explorationState.touchingElement != null,
+        highlightFilter: state.explorationState.info.highlightFilter,
         getToday: DataServiceManager.instance.getServiceByKey(state.settingsState.serviceKey).getToday
     }
 }

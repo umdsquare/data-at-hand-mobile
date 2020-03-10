@@ -26,6 +26,7 @@ import {
   GoToCyclicDetailAction,
   SetCycleDimensionAction,
   ShiftAllRangesAction,
+  SetHighlightFilterAction,
 } from './actions';
 import { explorationInfoHelper } from '../../../core/exploration/ExplorationInfoHelper';
 import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
@@ -164,6 +165,13 @@ export const explorationStateReducer = (
           setCycleDimensionAction.cycleDimension,
           ParameterType.CycleDimension
         )
+        break;
+
+      case ExplorationActionType.SetHighlightFilter:
+        {
+          const a = action as SetHighlightFilterAction
+          newState.info.highlightFilter = a.highlightFilter
+        }
         break;
 
       case ExplorationActionType.ShiftAllRanges:

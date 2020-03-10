@@ -4,11 +4,11 @@ compromise.extend(require('compromise-numbers'))
 compromise.extend(require('compromise-dates'))
 import { preprocess } from "./preprocessor";
 import { ActionTypeBase } from "../../../state/types";
-import { VariableType, VariableInfo, PreProcessedInputText, VerbInfo, Intent, NLUOptions } from "./types";
-import { ExplorationInfo, ExplorationType, ParameterType, inferIntraDayDataSourceType, inferDataSource } from "../../exploration/types";
-import { setDateAction, InteractionType, createSetRangeAction, setDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, createGoToComparisonCyclicAction, setCycleTypeAction } from "../../../state/exploration/interaction/actions";
+import { VariableType, VariableInfo, PreProcessedInputText, VerbInfo, Intent, NLUOptions, ConditionInfo } from "./types";
+import { ExplorationInfo, ExplorationType, ParameterType, inferIntraDayDataSourceType, inferDataSource, HighlightFilter, NumericConditionType } from "../../exploration/types";
+import { setDateAction, InteractionType, createSetRangeAction, setDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, createGoToComparisonCyclicAction, setCycleTypeAction, setHighlightFilter } from "../../../state/exploration/interaction/actions";
 import { explorationInfoHelper } from "../../exploration/ExplorationInfoHelper";
-import { differenceInDays } from "date-fns";
+import { differenceInDays, isLastDayOfMonth } from "date-fns";
 import { DateTimeHelper } from "../../../time";
 import { DataSourceType } from "../../../measure/DataSourceSpec";
 
@@ -40,6 +40,7 @@ export class NLUCommandResolver {
         const dates = this.extractVariablesWithType(preprocessed, VariableType.Date)
         const ranges = this.extractVariablesWithType(preprocessed, VariableType.Period)
         const cyclicTimeFrames = this.extractVariablesWithType(preprocessed, VariableType.TimeCycle)
+        const conditions = this.extractVariablesWithType(preprocessed, VariableType.Condition)
 
         console.log(preprocessed)
 
@@ -47,6 +48,7 @@ export class NLUCommandResolver {
         const toldDates = dates.length > 0
         const toldRanges = ranges.length > 0
         const toldCyclicTimeFrames = cyclicTimeFrames.length > 0
+        const toldConditions = conditions.length > 0
 
         //First, cover the cases with a reliable intent======================================================================================================
         switch (preprocessed.intent) {
@@ -75,10 +77,10 @@ export class NLUCommandResolver {
             case Intent.AssignTrivial:
 
                 console.log("Assign intent")
-                if (!toldDataSources && !toldCyclicTimeFrames && (toldDates || toldRanges)) {
+                if (!toldDataSources && !toldCyclicTimeFrames && !toldConditions && (toldDates || toldRanges)) {
                     //only time expression
                     return this.processTimeOnlyExpressions(dates, ranges, explorationInfo, context)
-                } else if (toldDataSources && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
+                } else if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
                     //only data source
                     //only if the exploration info supports the data source
                     if (explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource) === dataSources[0].value) {
@@ -90,7 +92,7 @@ export class NLUCommandResolver {
                         return setCycleTypeAction(InteractionType.Speech, cyclicTimeFrames[0].value)
                     }
                 }
-                //Don't break here. The browse intent logic will cover the rest. 
+            //Don't break here. The browse intent logic will cover the rest. 
             case Intent.Browse:
                 {
                     console.log("Browse intent")
@@ -140,6 +142,29 @@ export class NLUCommandResolver {
                     }
                 }
                 break;
+            case Intent.Highlight:
+                console.log("Highlight intent")
+                const conditionInfo = conditions[0].value as ConditionInfo
+                let cascadedDataSource: DataSourceType = toldDataSources? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
+
+                if (!cascadedDataSource) {
+                    console.log("Failed to initialize the highlight intent.")
+                    //TODO infer data source implied by the adverb or adjective, such as "heavier".
+                }
+
+                if (conditionInfo.property == "waketime" || conditionInfo.property == 'bedtime') {
+                    cascadedDataSource = DataSourceType.SleepRange
+                }
+
+                if (cascadedDataSource) {
+                    const highlightFilter: HighlightFilter = {
+                        ...conditionInfo,
+                        dataSource: cascadedDataSource
+                    }
+                    console.log("set highlight filter")
+                    return setHighlightFilter(InteractionType.Speech, highlightFilter)
+                }
+                break;
         }
 
 
@@ -168,9 +193,9 @@ export class NLUCommandResolver {
             case ExplorationType.B_Day:
                 if (dates.length > 0) {
                     return setDateAction(InteractionType.Speech, dates[0].value as number)
-                }else if(ranges.length > 0){
+                } else if (ranges.length > 0) {
                     return createGoToBrowseRangeAction(InteractionType.Speech, inferDataSource(explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.IntraDayDataSource))
-                    , ranges[0].value)
+                        , ranges[0].value)
                 }
             case ExplorationType.B_Overview:
             case ExplorationType.B_Range:

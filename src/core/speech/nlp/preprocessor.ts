@@ -1,17 +1,17 @@
 import { PreProcessedInputText, VariableType, VariableInfo, VariableInfoDict, VerbInfo, NLUOptions, Intent, ConditionInfo } from "./types";
 import compromise from 'compromise';
 import { DataSourceType } from "../../../measure/DataSourceSpec";
-import { parseTimeText, parseDateTextToNumberedDate, parseTimeOfTheDayTextToDiffSeconds } from "./preprocessors/preprocessor-time";
+import { parseTimeText, parseDateTextToNumberedDate, parseTimeOfTheDayTextToDiffSeconds, parseDurationTextToSeconds } from "./preprocessors/preprocessor-time";
 import { DateTimeHelper } from "../../../time";
 import { subDays, subWeeks, subMonths, addDays, subYears, isSameMonth, getMonth, setMonth, startOfMonth, endOfMonth, endOfWeek, startOfWeek } from "date-fns";
 import { randomString } from "../../../utils";
 import { inferVerbType } from "./preprocessors/preprocessor-verb";
 import { CyclicTimeFrame } from "../../exploration/cyclic_time";
-import { categorizeExtreme, categorizeComparison } from "./preprocessors/preprocessor-condition";
+import { categorizeExtreme, findComparisonTermInfo } from "./preprocessors/preprocessor-condition";
 
 const PARSED_TAG = "ReplacedId"
 
-function tag(doc: compromise.Document, variableType: VariableType): compromise.Document{
+function tag(doc: compromise.Document, variableType: VariableType): compromise.Document {
     return doc.tag(variableType).tag(PARSED_TAG)
 }
 
@@ -54,7 +54,7 @@ const DATASOURCE_VARIABLE_RULES: Rules = [
         value: DataSourceType.HeartRate
     },
     {
-        regex: /(hours i? slept)|(sleep length)|((length|duration) of ([a-z]+\s)?sleep)|(sleep duration)|(how (long|much) i (slept|sleep))/gi,
+        regex: /(hours i? slept)|(sleep length)|((length|duration) of ([a-z]+\s)?sleep)|(sleep duration)|(i (slept|sleep))/gi,
         variableType: VariableType.DataSource,
         value: DataSourceType.HoursSlept
     },
@@ -324,26 +324,23 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
         }
 
         //Infer highlight======================================================
-        if (nlp.match("(number of)? (the)? days?").json().length > 0 || intent === Intent.Highlight) {
+        //if (nlp.match("(number of)? (the)? days?").json().length > 0 || intent === Intent.Highlight) {
 
-            const inferredConditionInfoResult = inferHighlight(nlp, speech)
-            if(inferredConditionInfoResult){
-                const id = makeId()
-                variables[id] = {
-                    id,
-                    originalText: inferredConditionInfoResult.match.text(),
-                    type: VariableType.Condition,
-                    value: inferredConditionInfoResult.conditionInfo
-                }
-                tag(inferredConditionInfoResult.match.replaceWith(id), VariableType.Condition)
-                intent = Intent.Highlight
-            }else{
-                intent = Intent.AssignTrivial
+        const inferredConditionInfoResult = inferHighlight(nlp, speech)
+        if (inferredConditionInfoResult) {
+            const id = makeId()
+            variables[id] = {
+                id,
+                originalText: inferredConditionInfoResult.match.text(),
+                type: VariableType.Condition,
+                value: inferredConditionInfoResult.conditionInfo
             }
+            tag(inferredConditionInfoResult.match.replaceWith(id), VariableType.Condition)
+            intent = Intent.Highlight
+        } else {
+            intent = Intent.AssignTrivial
         }
-
-
-        console.log(nlp.termList())
+        //}
 
         processedText = nlp.text()
 
@@ -362,50 +359,66 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
     }
 }
 
-function isBedtimeReferred(speech: string): boolean{
+function isBedtimeReferred(speech: string): boolean {
     return /(bed)|(asleep)|(start)/gi.test(speech)
 }
 
-function isWaketimeReferred(speech: string): boolean{
+function isWaketimeReferred(speech: string): boolean {
     return /(wake)|(woke)|(g(o|e)t(ting)?\s+up)/gi.test(speech)
 }
 
 function inferHighlight(nlp: compromise.Document, original: string): { conditionInfo: ConditionInfo, match: compromise.Document } | null {
     //try to find the condition
-    const numericComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<number>#Value] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
-    const numericComparisonInfo = normalizeCompromiseGroup(numericComparisonMatch.groups())
-    if (numericComparisonInfo) {
-        numericComparisonInfo.number = Number.parseInt(numericComparisonInfo.number.replace(",", ""))
-        //numeric condition
-        console.log("numeric comparison info found.", numericComparisonInfo)
-        const id = makeId()
-        return {
-            conditionInfo: {
-                type: categorizeComparison(numericComparisonInfo.comparison),
-                ref: numericComparisonInfo.number,
-                unit: numericComparisonInfo.unit
-            } as ConditionInfo,
-            match: numericComparisonMatch
-        }
-    } else {
-        const match = nlp.match("[<comparison>(#Adverb|#Adjective)] than [<time>#Time+]")
-        const timeOfTheDayComparisonInfo = normalizeCompromiseGroup(match.groups())
-        if (timeOfTheDayComparisonInfo) {
-            console.log("time comparison info found.", timeOfTheDayComparisonInfo);
-            const category = categorizeComparison(timeOfTheDayComparisonInfo.comparison)
-            if (category) {
-                //find if the comparison is for wake time or bed time
+
+    const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time)+]`)
+    const durationComparisonInfo = normalizeCompromiseGroup(durationComparisonMatch.groups())
+    if (durationComparisonInfo) {
+        console.log("duration comparison info found:", durationComparisonInfo)
+        const comparisonTermInfo = findComparisonTermInfo(durationComparisonInfo.comparison)
+        if (comparisonTermInfo) {
+            if (comparisonTermInfo.valueType.indexOf("duration") !== -1) {
+                console.log("Treat as a duration")
+                return {
+                    conditionInfo: {
+                        type: comparisonTermInfo.conditionType,
+                        ref: parseDurationTextToSeconds(durationComparisonInfo.duration),
+                    },
+                    match: durationComparisonMatch
+                }
+            } else if (comparisonTermInfo.valueType.indexOf("time") !== -1) {
+                console.log("Treat as a time")
                 const isBedtimePassed = isBedtimeReferred(original)
                 const isWakeTimePassed = isWaketimeReferred(original)
                 if (isBedtimePassed || isWakeTimePassed) {
                     return {
                         conditionInfo: {
-                            type: category,
+                            type: comparisonTermInfo.conditionType,
                             property: isBedtimePassed === true ? 'bedtime' : (isWakeTimePassed === true ? 'waketime' : undefined),
-                            ref: parseTimeOfTheDayTextToDiffSeconds(timeOfTheDayComparisonInfo.time, isBedtimePassed === true ? 'night' : (isWakeTimePassed === true ? 'day' : undefined)),
+                            ref: parseTimeOfTheDayTextToDiffSeconds(durationComparisonInfo.duration, isBedtimePassed === true ? 'night' : (isWakeTimePassed === true ? 'day' : undefined)),
                         },
-                        match
+                        match: durationComparisonMatch
                     }
+                }
+            }
+
+        }
+    }
+    else {
+        const numericComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<number>#Value] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
+        const numericComparisonInfo = normalizeCompromiseGroup(numericComparisonMatch.groups())
+        if (numericComparisonInfo) {
+            numericComparisonInfo.number = Number.parseInt(numericComparisonInfo.number.replace(",", ""))
+            //numeric condition
+            console.log("numeric comparison info found.", numericComparisonInfo)
+            const comparisonTermInfo = findComparisonTermInfo(numericComparisonInfo.comparison)
+            if (comparisonTermInfo) {
+                return {
+                    conditionInfo: {
+                        type: comparisonTermInfo.conditionType,
+                        ref: numericComparisonInfo.number,
+                        unit: numericComparisonInfo.unit
+                    } as ConditionInfo,
+                    match: numericComparisonMatch
                 }
             }
         } else {
@@ -441,9 +454,9 @@ export async function test() {
     await preprocess("May I go to the step count from March to May")
     await preprocess("May I go to the step count from March to June")
     await preprocess("Went to the step count from the last March through May")*/
-    //await preprocess("What's the days I walked more than ten thousand steps", { getToday: () => new Date() })
-    await preprocess("What's the days I slept shorter than 8 hours", {getToday: () => new Date()})
-    //await preprocess("What's the days I woke up earlier than half past ten", { getToday: () => new Date() })
-    //await preprocess("What's the day with the maximum step count", { getToday: () => new Date() })
+    await preprocess("I want more than 10,000 steps", { getToday: () => new Date() })
+    await preprocess("What's the days I slept shorter than 8 and a half hours", { getToday: () => new Date() })
+    await preprocess("What's the days I woke up earlier than half past ten", { getToday: () => new Date() })
+    await preprocess("What's the day with the maximum step count", { getToday: () => new Date() })
 
 }

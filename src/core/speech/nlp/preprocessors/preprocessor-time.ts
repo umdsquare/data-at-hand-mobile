@@ -74,6 +74,14 @@ export function parseTimeOfTheDayTextToDiffSeconds(text: string, preferred: "day
     //8 am
     //7 pm
     //7:30 am
-    
+
+    return 0
+}
+
+export function parseDurationTextToSeconds(text: string): number{
+    //Test set
+    //10 hours
+    //4 and a half hours
+    //4 hours and 30 minutes
     return 0
 }
