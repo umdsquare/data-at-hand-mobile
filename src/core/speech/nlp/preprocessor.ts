@@ -56,7 +56,7 @@ const DATASOURCE_VARIABLE_RULES: Rules = [
         value: DataSourceType.HeartRate
     },
     {
-        regex: /(hours i? slept)|(sleep length)|((length|duration) of ([a-z]+\s)?sleep)|(sleep duration)|(i (slept|sleep))/gi,
+        regex: /(h?ours?(\s?)+(i|(of))?(\s?)+((slept)|(sleep)))|(sleep length)|((length|duration) of ([a-z]+\s)?sleep)|(sleep duration)|(sleep h?ours?)|(i (slept|sleep))/gi,
         variableType: VariableType.DataSource,
         value: DataSourceType.HoursSlept
     },
