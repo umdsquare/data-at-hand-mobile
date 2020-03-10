@@ -1,7 +1,7 @@
 import { VerbType } from "../types";
 
 const verbTypes: {[verbType: string]: Array<string>} = {}
-verbTypes[VerbType.AssignTrivial]=["set", "assign", "put"]
+verbTypes[VerbType.AssignTrivial]=["set", "assign", "put", "change", "modify", "edit", "replace"]
 verbTypes[VerbType.Browse]=["browse", "go", "show", "explore"]
 verbTypes[VerbType.Compare]=["compare"]
 verbTypes[VerbType.Highlight]=["highlight", "count"]

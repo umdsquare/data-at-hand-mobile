@@ -1,17 +1,23 @@
 import { SpeechContext, SpeechContextType, TimeSpeechContext, RangeElementSpeechContext } from "./context"
-import { Dispatch } from "redux"
 import compromise from 'compromise';
 compromise.extend(require('compromise-numbers'))
 compromise.extend(require('compromise-dates'))
 import { preprocess } from "./preprocessor";
 import { ActionTypeBase } from "../../../state/types";
 import { VariableType, VariableInfo, PreProcessedInputText, VerbInfo, VerbType, NLUOptions } from "./types";
-import { ExplorationInfo, ExplorationType, ParameterType, inferIntraDayDataSourceType, IntraDayDataSourceType } from "../../exploration/types";
-import { setDateAction, InteractionType, createSetRangeAction, setDataSourceAction, setIntraDayDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, setParametersAction, createGoToComparisonCyclicAction } from "../../../state/exploration/interaction/actions";
+import { ExplorationInfo, ExplorationType, ParameterType, inferIntraDayDataSourceType } from "../../exploration/types";
+import { setDateAction, InteractionType, createSetRangeAction, setDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, createGoToComparisonCyclicAction, setCycleTypeAction } from "../../../state/exploration/interaction/actions";
 import { explorationInfoHelper } from "../../exploration/ExplorationInfoHelper";
 import { differenceInDays } from "date-fns";
 import { DateTimeHelper } from "../../../time";
 import { DataSourceType } from "../../../measure/DataSourceSpec";
+
+enum EntityPriority {
+    None = 0,
+    Implied = 1,
+    Touched = 2,
+    Spoken = 3
+}
 
 export class NLUCommandResolver {
 
@@ -35,109 +41,123 @@ export class NLUCommandResolver {
         const dates = this.extractVariablesWithType(preprocessed, VariableType.Date)
         const ranges = this.extractVariablesWithType(preprocessed, VariableType.Period)
         const cyclicTimeFrames = this.extractVariablesWithType(preprocessed, VariableType.TimeCycle)
+
         console.log(preprocessed)
+
+        const toldDataSources = dataSources.length > 0
+        const toldDates = dates.length > 0
+        const toldRanges = ranges.length > 0
+        const toldCyclicTimeFrames = cyclicTimeFrames.length > 0
 
         const mainVerb: VerbInfo = verbs.length > 0 ? verbs[0].value : null
         const mainVerbType = mainVerb != null ? mainVerb.type : VerbType.AssignTrivial
 
-        if ((mainVerb == null || mainVerbType === VerbType.AssignTrivial)) {
-            //change time expression.
-            if (dataSources.length === 0 && cyclicTimeFrames.length === 0 && (dates.length > 0 || ranges.length > 0)) {
-                return this.processTimeOnlyExpressions(dates, ranges, explorationInfo, context)
-            }
+        //First, cover the cases with a reliable intent======================================================================================================
+        switch (mainVerbType) {//TODO in the future, the intent will be implemented.
+
+            case VerbType.Compare:
+                {
+                    console.log("Comparison intent")
+                    const cascadedDataSource: DataSourceType = toldDataSources === true ? dataSources[0].value :
+                        (context["dataSource"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
+                    if (toldRanges) {
+                        let rangeA, rangeB
+                        if (ranges.length > 1) {
+                            rangeA = ranges[0]
+                            rangeB = ranges[1]
+                        } else {
+                            rangeA = context["range"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range)
+                            rangeB = ranges[0].value
+                        }
+
+                        if (cascadedDataSource && rangeA && rangeB) {
+                            return createGoToComparisonTwoRangesAction(InteractionType.Speech, cascadedDataSource, rangeA, rangeB)
+                        }
+                    }//Todo cover before and after cases
+                }
+                break;
+            case VerbType.AssignTrivial:
+                if (!toldDataSources && !toldCyclicTimeFrames && (toldDates || toldRanges)) {
+                    //only time expression
+                    return this.processTimeOnlyExpressions(dates, ranges, explorationInfo, context)
+                } else if (toldDataSources && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
+                    //only data source
+                    //only if the exploration info supports the data source
+                    if (explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource) === dataSources[0].value) {
+                        return setDataSourceAction(InteractionType.Speech, dataSources[0].value)
+                    }
+                } else if (!toldDataSources && toldCyclicTimeFrames && toldDates === false && toldRanges === false) {
+                    //only time cycle
+                    if (explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.CycleType) === cyclicTimeFrames[0].value) {
+                        return setCycleTypeAction(InteractionType.Speech, cyclicTimeFrames[0].value)
+                    }
+                }
+                //Don't break here. The browse intent logic will cover the rest. 
+            case VerbType.Browse:
+                {
+                    console.log("Browse intent")
+                    const cascadedDataSource: DataSourceType = toldDataSources === true ? dataSources[0].value :
+                        (context["dataSource"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
+
+                    let rangePriority: EntityPriority = EntityPriority.None
+                    let datePriority: EntityPriority = EntityPriority.None
+                    let cascadedRange: [number, number]
+                    let cascadedDate: number
+
+                    if (toldRanges) {
+                        cascadedRange = ranges[0].value
+                        rangePriority = EntityPriority.Spoken
+                    } else if (context["range"]) {
+                        cascadedRange = context["range"]
+                        rangePriority = EntityPriority.Touched
+                    } else {
+                        cascadedRange = explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range)
+                        if (cascadedRange) {
+                            rangePriority = EntityPriority.Implied
+                        }
+                    }
+
+                    if (toldDates) {
+                        cascadedDate = dates[0].value
+                        datePriority = EntityPriority.Spoken
+                    } else if (context["date"]) {
+                        cascadedDate = context["date"]
+                        datePriority = EntityPriority.Touched
+                    } else {
+                        cascadedDate = explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Date)
+                        if (cascadedDate) {
+                            datePriority = EntityPriority.Implied
+                        }
+                    }
+
+                    if (cascadedRange || cascadedDate) {
+                        if (rangePriority >= datePriority) {
+                            return createGoToBrowseRangeAction(InteractionType.Speech, cascadedDataSource, cascadedRange)
+                        } else {
+                            const inferredIntraDayDataSourceType = inferIntraDayDataSourceType(cascadedDataSource)
+                            if (inferredIntraDayDataSourceType) {
+                                return createGoToBrowseDayAction(InteractionType.Speech, inferredIntraDayDataSourceType, cascadedDate)
+                            }
+                        }
+                    }
+                }
+                break;
         }
+
 
         //Cover cyclic time frame first
         if (cyclicTimeFrames.length > 0) {
             const guaranteedDataSource: DataSourceType = dataSources.length > 0 ? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
-            const guaranteedRange = ranges.length > 0 ? ranges[0].value : (context.type === SpeechContextType.RangeElement ? (context as RangeElementSpeechContext).range : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.CycleType))
-            return createGoToComparisonCyclicAction(InteractionType.Speech, guaranteedDataSource, guaranteedRange, cyclicTimeFrames[0].value)
+            if (guaranteedDataSource) {
+                const guaranteedRange = ranges.length > 0 ? ranges[0].value : (context.type === SpeechContextType.RangeElement ? (context as RangeElementSpeechContext).range : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range))
+                console.log("go to cyclic comparison ", guaranteedDataSource, guaranteedRange, cyclicTimeFrames[0].value)
+                return createGoToComparisonCyclicAction(InteractionType.Speech, guaranteedDataSource, guaranteedRange, cyclicTimeFrames[0].value)
+            }
         }
+        //=====================================================================================================================================================
 
-        switch (explorationInfo.type) {
-            case ExplorationType.B_Overview:
-                //no data source available. access the data source range detail page.
-                if (dataSources.length > 0) {
-                    const dataSource = dataSources[0].value as DataSourceType
-                    if (ranges.length == 1) {
-                        if (mainVerbType === VerbType.Compare) {
-                            //compare data source with the range
-                            return createGoToComparisonTwoRangesAction(InteractionType.Speech,
-                                dataSource,
-                                explorationInfoHelper.getParameterValue<[number, number]>(explorationInfo, ParameterType.Range),
-                                ranges[0].value
-                            )
-                        } else if (mainVerbType !== VerbType.Highlight) {
-                            return createGoToBrowseRangeAction(InteractionType.Speech, dataSource, ranges[0].value as [number, number])
-                        }
-                    } else if (ranges.length > 1) {
-                        //compare
-                        return createGoToComparisonTwoRangesAction(InteractionType.Speech, dataSource, ranges[0].value, ranges[1].value)
-                    } else if (dates.length > 0) {
-                        //TODO cover before/after
-                        const intraDayDataSource = inferIntraDayDataSourceType(dataSource)
-                        if (intraDayDataSource) {
-                            return createGoToBrowseDayAction(InteractionType.Speech, intraDayDataSource, dates[0].value)
-                        }
-                    } else return createGoToBrowseRangeAction(InteractionType.Speech, dataSource)
-                }
-                break;
-            case ExplorationType.B_Range:
-                {
-                    const guaranteedDataSource: DataSourceType = dataSources.length > 0 ? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
-
-                    if (mainVerbType === VerbType.Compare) {
-                        if(ranges.length > 1){
-                            return createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, ranges[0].value, ranges[1].value)
-                        }else if(ranges.length === 1){
-                            return createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range), ranges[0].value)
-                        }
-                    } else {
-                        if (ranges.length === 1) {
-                            const range = ranges[0].value as [number, number]
-                            return setParametersAction(InteractionType.Speech,
-                                { parameter: ParameterType.Range, value: range },
-                                { parameter: ParameterType.DataSource, value: guaranteedDataSource }
-                            )
-                        } else if (ranges.length > 1) {
-                            //compare two ranges
-                            return createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, ranges[0].value, ranges[1].value)
-                        } else if (dates.length > 0) {
-                            //go to the daily data
-                            const intraDayDataSource = inferIntraDayDataSourceType(guaranteedDataSource)
-                            if (intraDayDataSource) {
-                                return createGoToBrowseDayAction(InteractionType.Speech, intraDayDataSource, dates[0].value)
-                            }
-                        } else {
-                            return setDataSourceAction(InteractionType.Speech, guaranteedDataSource)
-                        }
-                    }
-                }
-                break;
-            case ExplorationType.B_Day:
-                {//get intraday data source.
-                    if (dataSources.length > 0) {
-                        if (ranges.length === 0) {
-                            const dataSource = dataSources[0].value as DataSourceType
-                            const intraDayDataSource = inferIntraDayDataSourceType(dataSource)
-                            if (intraDayDataSource != null) {
-                                if (dates.length > 0) {
-                                    return setParametersAction(InteractionType.Speech, {
-                                        parameter: ParameterType.IntraDayDataSource,
-                                        value: intraDayDataSource
-                                    }, {
-                                        parameter: ParameterType.Date,
-                                        value: dates[0].value
-                                    })
-                                } else return setIntraDayDataSourceAction(InteractionType.Speech, intraDayDataSource)
-                            } else return null
-                        }
-                    } else {
-
-                    }
-                }
-                break;
-        }
+        //Cover cases with trivial intent
+        console.log("this is a corner case.")
 
     }
 
@@ -193,7 +213,19 @@ export class NLUCommandResolver {
                 }
                 break;
             case ExplorationType.C_TwoRanges:
-                //TODO implement the two ranges case.    
+
+                console.log("current context:", context)
+                if (context != null && context.type === SpeechContextType.RangeElement) {
+                    const c = context as RangeElementSpeechContext
+                    if (ranges.length > 0) {
+                        const parameter = explorationInfo.values.find(parameter => parameter.parameter === ParameterType.Range && parameter.value[0] === c.range[0] && parameter.value[1] === c.range[1])
+
+                        console.log("found parameter:", parameter)
+                        if (parameter) {
+                            return createSetRangeAction(InteractionType.Speech, ranges[0].value, parameter.key)
+                        }
+                    }
+                }
                 break;
         }
     }

@@ -26,7 +26,6 @@ import {
   GoToCyclicDetailAction,
   SetCycleDimensionAction,
   ShiftAllRangesAction,
-  SetParametersAction,
 } from './actions';
 import { explorationInfoHelper } from '../../../core/exploration/ExplorationInfoHelper';
 import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
@@ -165,15 +164,6 @@ export const explorationStateReducer = (
           setCycleDimensionAction.cycleDimension,
           ParameterType.CycleDimension
         )
-        break;
-
-      case ExplorationActionType.SetParameters:
-        {
-          const a = action as SetParametersAction
-          a.parameters.forEach(parameter => {
-            explorationInfoHelper.setParameterValue(newState.info, parameter.value, parameter.parameter, parameter.key)
-          })
-        }
         break;
 
       case ExplorationActionType.ShiftAllRanges:
@@ -465,6 +455,10 @@ export const explorationStateReducer = (
 
       default:
         return state;
+    }
+
+    if(explorationInfoHelper.equals(newState.info, state.info)){
+      newState.prevInfo = null
     }
 
     if (newState.info.type != state.info.type) {

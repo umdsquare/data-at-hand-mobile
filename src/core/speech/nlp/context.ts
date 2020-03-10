@@ -66,7 +66,7 @@ export namespace SpeechContextHelper {
 
     export function makeRangeElementSpeechContext(explorationType: ExplorationType, range: [number, number], dataSource: DataSourceType): RangeElementSpeechContext {
         return {
-            type: SpeechContextType.DateElement,
+            type: SpeechContextType.RangeElement,
             explorationType,
             range,
             dataSource
@@ -76,7 +76,7 @@ export namespace SpeechContextHelper {
 
     export function makeCycleDimentionElementSpeechContext(cycleDimension: CycleDimension, dataSource: DataSourceType): CycleDimensionElementSpeechContext {
         return {
-            type: SpeechContextType.DateElement,
+            type: SpeechContextType.CycleDimensionElement,
             cycleDimension,
             dataSource
         }

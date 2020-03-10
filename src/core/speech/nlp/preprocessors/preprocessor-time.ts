@@ -4,10 +4,8 @@ import { startOfMonth, startOfYear, endOfMonth, endOfYear } from "date-fns";
 import { Chrono } from "../../../../types/chrono";
 
 export function parseTimeText(text: string, today: Date): { type: VariableType.Date | VariableType.Period, value: number | [number, number] } | null {
-    console.log("try parsing time text: ", text)
     var chrono = require('chrono-node');
     const chronoResult: Chrono.ParsedResult[] = chrono.parse(text, today)
-    console.log(JSON.stringify(chronoResult))
     if (chronoResult.length > 0) {
         const bestResult = chronoResult[0]
         if (bestResult.end) {
