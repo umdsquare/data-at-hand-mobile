@@ -1,4 +1,4 @@
-import { ExplorationType } from "../../exploration/types"
+import { ExplorationType, ParameterKey } from "../../exploration/types"
 import { ElementType } from "../../../components/exploration/DateRangeBar"
 import { DataSourceType } from "../../../measure/DataSourceSpec"
 import { CycleDimension } from "../../exploration/cyclic_time"
@@ -20,7 +20,8 @@ export interface GlobalSpeechContext extends SpeechContext {
 }
 
 export interface TimeSpeechContext extends SpeechContext {
-    timeElementType: ElementType | 'date'
+    timeElementType: ElementType | 'date',
+    parameterKey?: ParameterKey
 }
 
 export interface DateElementSpeechContext extends SpeechContext {
@@ -48,10 +49,11 @@ export namespace SpeechContextHelper {
         }
     }
 
-    export function makeTimeSpeechContext(timeElementType: ElementType | 'date'): TimeSpeechContext {
+    export function makeTimeSpeechContext(timeElementType: ElementType | 'date', parameterKey:ParameterKey = undefined): TimeSpeechContext {
         return {
             type: SpeechContextType.Time,
             timeElementType,
+            parameterKey
         }
     }
 

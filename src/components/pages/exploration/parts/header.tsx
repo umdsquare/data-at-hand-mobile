@@ -177,9 +177,9 @@ const HeaderRangeBar = React.memo((props: { parameterKey?: ParameterKey, showBor
     const onLongPressIn = useCallback((position) => {
         const sessionId = makeNewSessionId()
         setSpeechSessionId(sessionId)
-        dispatch(startSpeechSession(sessionId, SpeechContextHelper.makeTimeSpeechContext(position)))
+        dispatch(startSpeechSession(sessionId, SpeechContextHelper.makeTimeSpeechContext(position, props.parameterKey)))
         dispatch(createSetShowGlobalPopupAction(true, sessionId))
-    }, [dispatch, setSpeechSessionId])
+    }, [dispatch, setSpeechSessionId, props.parameterKey])
 
     const onLongPressOut = useCallback((position) => {
         if (speechSessionId != null) {

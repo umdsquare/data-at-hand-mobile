@@ -145,7 +145,7 @@ export class NLUCommandResolver {
             case Intent.Highlight:
                 console.log("Highlight intent")
                 const conditionInfo = conditions[0].value as ConditionInfo
-                let cascadedDataSource: DataSourceType = toldDataSources? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
+                let cascadedDataSource: DataSourceType = toldDataSources ? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
 
                 if (!cascadedDataSource) {
                     console.log("Failed to initialize the highlight intent.")
@@ -238,15 +238,33 @@ export class NLUCommandResolver {
                 }
                 break;
             case ExplorationType.C_TwoRanges:
-                if (context != null && context.type === SpeechContextType.RangeElement) {
-                    const c = context as RangeElementSpeechContext
-                    if (ranges.length > 0) {
-                        const parameter = explorationInfo.values.find(parameter => parameter.parameter === ParameterType.Range && parameter.value[0] === c.range[0] && parameter.value[1] === c.range[1])
+                switch (context.type) {
+                    case SpeechContextType.RangeElement:
+                        {
+                            const c = context as RangeElementSpeechContext
+                            if (ranges.length > 0) {
+                                const parameter = explorationInfo.values.find(parameter => parameter.parameter === ParameterType.Range && parameter.value[0] === c.range[0] && parameter.value[1] === c.range[1])
 
-                        if (parameter) {
-                            return createSetRangeAction(InteractionType.Speech, ranges[0].value, parameter.key)
+                                if (parameter) {
+                                    return createSetRangeAction(InteractionType.Speech, ranges[0].value, parameter.key)
+                                }
+                            }
                         }
-                    }
+                        break;
+                    case SpeechContextType.Time:
+                        {
+                            const timeContext = context as TimeSpeechContext
+                            const currentRange = explorationInfoHelper.getParameterValue<[number, number]>(explorationInfo, ParameterType.Range, timeContext.parameterKey)
+                            if (dates.length > 0) {
+                                const date = dates[0].value
+                                if (timeContext.timeElementType === 'from') {
+                                    return createSetRangeAction(InteractionType.Speech, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])], timeContext.parameterKey)
+                                } else if (timeContext.timeElementType === 'to') {
+                                    return createSetRangeAction(InteractionType.Speech, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])], timeContext.parameterKey)
+                                }
+                            }
+                        }
+                        break;
                 }
                 break;
         }

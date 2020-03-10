@@ -454,10 +454,11 @@ export async function test() {
     await preprocess("Step count of the last Martin Luther King day")
     await preprocess("May I go to the step count from March to May")
     await preprocess("May I go to the step count from March to June")
-    await preprocess("Went to the step count from the last March through May")*/
+    await preprocess("Went to the step count from the last March through May")
     await preprocess("I want more than 10,000 steps", { getToday: () => new Date() })
     await preprocess("What's the days I slept shorter than 8 and a half hours", { getToday: () => new Date() })
     await preprocess("What's the days I woke up earlier than half past ten", { getToday: () => new Date() })
     await preprocess("What's the day with the maximum step count", { getToday: () => new Date() })
+    */
 
 }

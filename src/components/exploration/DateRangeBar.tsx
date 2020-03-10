@@ -393,7 +393,6 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
     }
 
     render() {
-        console.log("current range:", this.state.from, this.state.to)
         var modalPickerView
         if (this.state.clickedElementType) {
 
