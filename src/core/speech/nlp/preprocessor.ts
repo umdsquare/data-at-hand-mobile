@@ -33,7 +33,9 @@ function normalizeCompromiseGroup(groups: { [groupName: string]: compromise.Docu
 }
 
 const lexicon = {
-    'highlight': 'Verb'
+    'highlight': 'Verb',
+    'compare': 'Verb',
+    'compared': 'Verb'
 }
 
 const MONTH_NAMES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
@@ -222,6 +224,8 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
         //Find date and period==================================================================================
         const nlp = compromise(processedSpeech, lexicon)
 
+        nlp.match("compare").unTag("Date").unTag("Time").unTag("Duration").tag("Verb")
+
         //Tag all the inferred variables
         Object.keys(variables).forEach(id => {
             tag(nlp.match(id), variables[id].type)
@@ -337,9 +341,8 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
             }
             tag(inferredConditionInfoResult.match.replaceWith(id), VariableType.Condition)
             intent = Intent.Highlight
-        } else {
-            intent = Intent.AssignTrivial
         }
+
         //}
 
         processedText = nlp.text()
@@ -348,8 +351,6 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
 
     //====================================================================================================
     console.log("Preprocessing: elapsed - ", Date.now() - t)
-
-    console.log(variables)
 
     return {
         processed: processedText,

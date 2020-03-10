@@ -14,6 +14,6 @@ Object.keys(verbTypes).forEach(verbType => {
 })
 
 export function inferVerbType(root: string): Intent{
-    console.log("infer verb type of ", root)
+    console.log("infer verb type of ", root, " - ", dict[root])
     return dict[root] || Intent.AssignTrivial
 }
