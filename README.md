@@ -42,3 +42,21 @@ Install dependencies
   ```sh
   > react-native run-android
   ```
+  
+  
+  
+## Author
+
+#### Young-Ho Kim (yghokim@umd.edu)
+http://younghokim.net
+University of Maryland, College Park, MD, USA
+
+----
+
+## License
+
+### Source Code
+MIT License
+
+### Original Design Resources including Logos and Assets
+CC BY 4.0
