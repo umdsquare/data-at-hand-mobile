@@ -1,26 +1,50 @@
-import { PreProcessedInputText, VariableType, VariableInfo, VariableInfoDict, VerbInfo, NLUOptions } from "./types";
+import { PreProcessedInputText, VariableType, VariableInfo, VariableInfoDict, VerbInfo, NLUOptions, Intent, ConditionInfo } from "./types";
 import compromise from 'compromise';
 import { DataSourceType } from "../../../measure/DataSourceSpec";
-import { parseTimeText, parseDateTextToNumberedDate } from "./preprocessors/preprocessor-time";
+import { parseTimeText, parseDateTextToNumberedDate, parseTimeOfTheDayTextToDiffSeconds } from "./preprocessors/preprocessor-time";
 import { DateTimeHelper } from "../../../time";
 import { subDays, subWeeks, subMonths, addDays, subYears, isSameMonth, getMonth, setMonth, startOfMonth, endOfMonth, endOfWeek, startOfWeek } from "date-fns";
 import { randomString } from "../../../utils";
 import { inferVerbType } from "./preprocessors/preprocessor-verb";
 import { CyclicTimeFrame } from "../../exploration/cyclic_time";
+import { categorizeExtreme, categorizeComparison } from "./preprocessors/preprocessor-condition";
 
-function makeId(){
+const PARSED_TAG = "ReplacedId"
+
+function tag(doc: compromise.Document, variableType: VariableType): compromise.Document{
+    return doc.tag(variableType).tag(PARSED_TAG)
+}
+
+function makeId() {
     return randomString(5)
+}
+
+function normalizeCompromiseGroup(groups: { [groupName: string]: compromise.Document }): any | null {
+    const keyNames = Object.keys(groups)
+    if (keyNames.length > 0) {
+        const obj: any = {}
+        keyNames.forEach(keyName => {
+            const phrase = groups[keyName].list[0]
+            const originalText = phrase.terms().map(t => t.text).join(" ")
+            obj[keyName] = originalText
+        })
+        return obj
+    } else return null
+}
+
+const lexicon = {
+    'highlight': 'Verb'
 }
 
 const MONTH_NAMES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
 const MONTH_NAMES_WHOLE_REGEX = new RegExp(`^(${MONTH_NAMES.join("|")})$`, 'gi')
 const MONTH_NAMES_REGEX = new RegExp(`${MONTH_NAMES.join("|")}`, 'gi')
 
-type Rules = Array<{regex: RegExp, variableType: VariableType, value: any}>
+type Rules = Array<{ regex: RegExp, variableType: VariableType, value: any }>
 
 const DATASOURCE_VARIABLE_RULES: Rules = [
     {
-        regex: /(step count(s|er)?)|(steps?)/gi,
+        regex: /(step count(s|er)?)|(steps?)|(walk)/gi,
         variableType: VariableType.DataSource,
         value: DataSourceType.StepCount
     },
@@ -146,6 +170,8 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
 
     let processedText: string | undefined = undefined
 
+    let intent: Intent | undefined = undefined
+
     //Check for quickpass=================================================
     {
         if (MONTH_NAMES_WHOLE_REGEX.test(speech)) {
@@ -171,6 +197,8 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
                 value: [DateTimeHelper.toNumberedDateFromDate(startOfMonth(monthDate)), DateTimeHelper.toNumberedDateFromDate(endOfMonth(monthDate))]
             }
 
+            intent = Intent.AssignTrivial
+
             quickPass = true
         }
     }
@@ -192,7 +220,12 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
         })
 
         //Find date and period==================================================================================
-        const nlp = compromise(processedSpeech)
+        const nlp = compromise(processedSpeech, lexicon)
+
+        //Tag all the inferred variables
+        Object.keys(variables).forEach(id => {
+            tag(nlp.match(id), variables[id].type)
+        })
 
         const nlpCasted = (nlp as any)
 
@@ -202,15 +235,8 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
             const matches = nlp.match(matchSyntaxElm.matchSyntax)
             matches.forEach(match => {
                 const matchedGroup = match.groups()
-                const groupNames = Object.keys(matchedGroup)
-                if (groupNames.length > 0) {
-                    const obj: any = {}
-                    groupNames.forEach(groupName => {
-
-                        const phrase = matchedGroup[groupName].list[0]
-                        const originalText = phrase.terms().map(t => t.text).join(" ")
-                        obj[groupName] = originalText
-                    })
+                const obj = normalizeCompromiseGroup(matchedGroup)
+                if (obj) {
                     const id = makeId()
                     const parseResult = matchSyntaxElm.valueParser(obj, options)
                     if (parseResult) {
@@ -220,7 +246,7 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
                             id,
                             originalText: match.text()
                         }
-                        match.replaceWith(id).tag(parseResult.type).tag("Date")
+                        tag(match.replaceWith(id), parseResult.type).tag("Date")
                     }
                 }
             })
@@ -234,19 +260,25 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
             }
         } = {}
 
-        nlpCasted.dates().replaceWith((match: compromise.Phrase) => {
-            const id = makeId()
-            timeExpressionDict[id] = {
-                value: null,
-                originalText: match.terms().map(t => t.text).join(" "),
-                id
+        nlpCasted.dates().forEach(match => {
+            const text = match.text()
+            const parseResult = parseTimeText(text, options.getToday())
+            if (parseResult) {
+                const id = makeId()
+                variables[id] = {
+                    value: parseResult.value,
+                    type: parseResult.type,
+                    originalText: text,
+                    id
+                }
+                tag(match.replaceWith(id), parseResult.type)
             }
-            return id
-        }).tag("Date")
+        })
 
-        if(MONTH_NAMES_REGEX.test(nlp.text()) === true){
+
+        if (MONTH_NAMES_REGEX.test(nlp.text()) === true) {
             //month name was not parsed.
-            nlp.replace(`(${MONTH_NAMES_REGEX.source})`, (match: compromise.Phrase) => {
+            tag(nlp.replace(`(${MONTH_NAMES_REGEX.source})`, (match: compromise.Phrase) => {
                 const id = makeId()
                 timeExpressionDict[id] = {
                     value: null,
@@ -254,7 +286,7 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
                     id
                 }
                 return id
-            }).tag("Date").tag("Month").tag(VariableType.Period)
+            }).tag("Date").tag("Month"), VariableType.Period)
         }
 
         Object.keys(timeExpressionDict).forEach(id => {
@@ -267,7 +299,7 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
                     originalText: elm.originalText,
                     id
                 }
-                nlp.match(id).tag(parseResult.type)
+                tag(nlp.match(id), parseResult.type)
             }
         })
 
@@ -286,8 +318,32 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
                 id
             }
 
-            verbs.replaceWith(id).tag(VariableType.Verb)
+            tag(verbs.replaceWith(id), VariableType.Verb)
+
+            intent = variables[id].value.type
         }
+
+        //Infer highlight======================================================
+        if (nlp.match("(number of)? (the)? days?").json().length > 0 || intent === Intent.Highlight) {
+
+            const inferredConditionInfoResult = inferHighlight(nlp, speech)
+            if(inferredConditionInfoResult){
+                const id = makeId()
+                variables[id] = {
+                    id,
+                    originalText: inferredConditionInfoResult.match.text(),
+                    type: VariableType.Condition,
+                    value: inferredConditionInfoResult.conditionInfo
+                }
+                tag(inferredConditionInfoResult.match.replaceWith(id), VariableType.Condition)
+                intent = Intent.Highlight
+            }else{
+                intent = Intent.AssignTrivial
+            }
+        }
+
+
+        console.log(nlp.termList())
 
         processedText = nlp.text()
 
@@ -296,21 +352,98 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
     //====================================================================================================
     console.log("Preprocessing: elapsed - ", Date.now() - t)
 
+    console.log(variables)
+
     return {
         processed: processedText,
         original: speech,
-        variables
+        variables,
+        intent: intent || Intent.AssignTrivial
     }
 }
 
+function isBedtimeReferred(speech: string): boolean{
+    return /(bed)|(asleep)|(start)/gi.test(speech)
+}
+
+function isWaketimeReferred(speech: string): boolean{
+    return /(wake)|(woke)|(g(o|e)t(ting)?\s+up)/gi.test(speech)
+}
+
+function inferHighlight(nlp: compromise.Document, original: string): { conditionInfo: ConditionInfo, match: compromise.Document } | null {
+    //try to find the condition
+    const numericComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<number>#Value] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
+    const numericComparisonInfo = normalizeCompromiseGroup(numericComparisonMatch.groups())
+    if (numericComparisonInfo) {
+        numericComparisonInfo.number = Number.parseInt(numericComparisonInfo.number.replace(",", ""))
+        //numeric condition
+        console.log("numeric comparison info found.", numericComparisonInfo)
+        const id = makeId()
+        return {
+            conditionInfo: {
+                type: categorizeComparison(numericComparisonInfo.comparison),
+                ref: numericComparisonInfo.number,
+                unit: numericComparisonInfo.unit
+            } as ConditionInfo,
+            match: numericComparisonMatch
+        }
+    } else {
+        const match = nlp.match("[<comparison>(#Adverb|#Adjective)] than [<time>#Time+]")
+        const timeOfTheDayComparisonInfo = normalizeCompromiseGroup(match.groups())
+        if (timeOfTheDayComparisonInfo) {
+            console.log("time comparison info found.", timeOfTheDayComparisonInfo);
+            const category = categorizeComparison(timeOfTheDayComparisonInfo.comparison)
+            if (category) {
+                //find if the comparison is for wake time or bed time
+                const isBedtimePassed = isBedtimeReferred(original)
+                const isWakeTimePassed = isWaketimeReferred(original)
+                if (isBedtimePassed || isWakeTimePassed) {
+                    return {
+                        conditionInfo: {
+                            type: category,
+                            property: isBedtimePassed === true ? 'bedtime' : (isWakeTimePassed === true ? 'waketime' : undefined),
+                            ref: parseTimeOfTheDayTextToDiffSeconds(timeOfTheDayComparisonInfo.time, isBedtimePassed === true ? 'night' : (isWakeTimePassed === true ? 'day' : undefined)),
+                        },
+                        match
+                    }
+                }
+            }
+        } else {
+            const match = nlp.match("[<extreme>(max|maximum|min|minimum|earliest|latest|slowest|fastest|most|least)]")
+            const extremeInfo = normalizeCompromiseGroup(match.groups())
+            if (extremeInfo) {
+                const category = categorizeExtreme(extremeInfo.extreme)
+                if (category) {
+
+                    const isBedtimePassed = isBedtimeReferred(original)
+                    const isWakeTimePassed = isWaketimeReferred(original)
+
+                    return {
+                        conditionInfo: {
+                            type: category,
+                            property: isBedtimePassed === true ? 'bedtime' : (isWakeTimePassed === true ? 'waketime' : undefined)
+                        } as ConditionInfo,
+                        match
+                    }
+                }
+            }
+        }
+    }
+    return null
+}
+
 export async function test() {
-    /*
-        await preprocess("Show my resting heart rate from the last sunday to February 5")
-        await preprocess("Show my resting heart rate for recent tenth days")
-        await preprocess("Show my resting heart rate since the last Thanksgiving")
-        await preprocess("Step count of the last Martin Luther King day")
-        await preprocess("May I go to the step count from March to May")
-        await preprocess("May I go to the step count from March to June")
-        await preprocess("Went to the step count from the last March through May")
-        */
+
+    /*await preprocess("Show my resting heart rate from the last sunday to February 5")
+    await preprocess("Show my resting heart rate for recent tenth days")
+    await preprocess("Show my resting heart rate since the last Thanksgiving")
+    await preprocess("Step count of the last Martin Luther King day")
+    await preprocess("May I go to the step count from March to May")
+    await preprocess("May I go to the step count from March to June")
+    await preprocess("Went to the step count from the last March through May")*/
+    //await preprocess("What's the days I walked more than ten thousand steps", { getToday: () => new Date() })
+    await preprocess("What's the days I slept shorter than 8 hours", {getToday: () => new Date()})
+    //await preprocess("What's the days I woke up earlier than half past ten", { getToday: () => new Date() })
+    //await preprocess("What's the day with the maximum step count", { getToday: () => new Date() })
+
 }

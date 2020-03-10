@@ -1,40 +1,49 @@
-export enum VariableType{
-    DataSource="DataSource",
-    Date="Date",
-    Period="Period",
-    Verb="Verb",
-    TimeCycle="CyclicTime",
+export enum VariableType {
+    DataSource = "DataSource",
+    Date = "Date",
+    Period = "Period",
+    Verb = "Verb",
+    TimeCycle = "CyclicTime",
+    Condition = "Condition"
 }
 
-export interface VariableInfo{
-    type: VariableType, 
-    value: any, 
-    originalText: string, 
+export interface VariableInfo {
+    type: VariableType,
+    value: any,
+    originalText: string,
     id: string
 }
 
 export type VariableInfoDict = {
-    [id:string]: VariableInfo
+    [id: string]: VariableInfo
 }
 
-export interface PreProcessedInputText{
+export interface PreProcessedInputText {
     processed: string,
     original: string,
-    variables: VariableInfoDict
+    variables: VariableInfoDict,
+    intent: Intent
 }
 
-export enum VerbType{
-    AssignTrivial="Assign",
-    Browse="Browse",
-    Compare="Compare",
-    Highlight="Highlight"
+export enum Intent {
+    AssignTrivial = "Assign",
+    Browse = "Browse",
+    Compare = "Compare",
+    Highlight = "Highlight"
 }
 
-export interface VerbInfo{
+export interface VerbInfo {
     root: string,
-    type: VerbType
+    type: Intent
 }
 
-export interface NLUOptions{
-    getToday: ()=>Date,
+export interface ConditionInfo {
+    type: "less" | "more" | "max" | "min",
+    property: "waketime" | "bedtime" | undefined | null
+    unit?: string
+    ref?: number
+}
+
+export interface NLUOptions {
+    getToday: () => Date,
 }

@@ -1,19 +1,19 @@
-import { VerbType } from "../types";
+import { Intent } from "../types";
 
 const verbTypes: {[verbType: string]: Array<string>} = {}
-verbTypes[VerbType.AssignTrivial]=["set", "assign", "put", "change", "modify", "edit", "replace"]
-verbTypes[VerbType.Browse]=["browse", "go", "show", "explore"]
-verbTypes[VerbType.Compare]=["compare"]
-verbTypes[VerbType.Highlight]=["highlight", "count"]
+verbTypes[Intent.AssignTrivial]=["set", "assign", "put", "change", "modify", "edit", "replace"]
+verbTypes[Intent.Browse]=["browse", "go", "show", "explore"]
+verbTypes[Intent.Compare]=["compare"]
+verbTypes[Intent.Highlight]=["highlight", "count"]
 
-const dict: {[verb:string]: VerbType} = {}
+const dict: {[verb:string]: Intent} = {}
 Object.keys(verbTypes).forEach(verbType => {
     verbTypes[verbType].forEach(verb=>{
-        dict[verb] = verbType as VerbType
+        dict[verb] = verbType as Intent
     })
 })
 
-export function inferVerbType(root: string): VerbType{
+export function inferVerbType(root: string): Intent{
     console.log("infer verb type of ", root)
-    return dict[root] || VerbType.AssignTrivial
+    return dict[root] || Intent.AssignTrivial
 }

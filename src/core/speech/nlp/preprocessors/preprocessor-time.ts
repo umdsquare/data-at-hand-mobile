@@ -65,3 +65,15 @@ export function parseDateTextToNumberedDate(text: string, today: Date): number |
     }
     return null
 }
+
+export function parseTimeOfTheDayTextToDiffSeconds(text: string, preferred: "day"|"night"): number{
+    //Test set
+    //half past eleven
+    //quarter to twelve
+    //10:30
+    //8 am
+    //7 pm
+    //7:30 am
+    
+    return 0
+}

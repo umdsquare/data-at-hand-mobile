@@ -4,8 +4,8 @@ compromise.extend(require('compromise-numbers'))
 compromise.extend(require('compromise-dates'))
 import { preprocess } from "./preprocessor";
 import { ActionTypeBase } from "../../../state/types";
-import { VariableType, VariableInfo, PreProcessedInputText, VerbInfo, VerbType, NLUOptions } from "./types";
-import { ExplorationInfo, ExplorationType, ParameterType, inferIntraDayDataSourceType } from "../../exploration/types";
+import { VariableType, VariableInfo, PreProcessedInputText, VerbInfo, Intent, NLUOptions } from "./types";
+import { ExplorationInfo, ExplorationType, ParameterType, inferIntraDayDataSourceType, inferDataSource } from "../../exploration/types";
 import { setDateAction, InteractionType, createSetRangeAction, setDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, createGoToComparisonCyclicAction, setCycleTypeAction } from "../../../state/exploration/interaction/actions";
 import { explorationInfoHelper } from "../../exploration/ExplorationInfoHelper";
 import { differenceInDays } from "date-fns";
@@ -36,7 +36,6 @@ export class NLUCommandResolver {
 
         const preprocessed = await preprocess(speech, options)
 
-        const verbs = this.extractVariablesWithType(preprocessed, VariableType.Verb)
         const dataSources = this.extractVariablesWithType(preprocessed, VariableType.DataSource)
         const dates = this.extractVariablesWithType(preprocessed, VariableType.Date)
         const ranges = this.extractVariablesWithType(preprocessed, VariableType.Period)
@@ -49,13 +48,10 @@ export class NLUCommandResolver {
         const toldRanges = ranges.length > 0
         const toldCyclicTimeFrames = cyclicTimeFrames.length > 0
 
-        const mainVerb: VerbInfo = verbs.length > 0 ? verbs[0].value : null
-        const mainVerbType = mainVerb != null ? mainVerb.type : VerbType.AssignTrivial
-
         //First, cover the cases with a reliable intent======================================================================================================
-        switch (mainVerbType) {//TODO in the future, the intent will be implemented.
+        switch (preprocessed.intent) {
 
-            case VerbType.Compare:
+            case Intent.Compare:
                 {
                     console.log("Comparison intent")
                     const cascadedDataSource: DataSourceType = toldDataSources === true ? dataSources[0].value :
@@ -76,7 +72,9 @@ export class NLUCommandResolver {
                     }//Todo cover before and after cases
                 }
                 break;
-            case VerbType.AssignTrivial:
+            case Intent.AssignTrivial:
+
+                console.log("Assign intent")
                 if (!toldDataSources && !toldCyclicTimeFrames && (toldDates || toldRanges)) {
                     //only time expression
                     return this.processTimeOnlyExpressions(dates, ranges, explorationInfo, context)
@@ -93,7 +91,7 @@ export class NLUCommandResolver {
                     }
                 }
                 //Don't break here. The browse intent logic will cover the rest. 
-            case VerbType.Browse:
+            case Intent.Browse:
                 {
                     console.log("Browse intent")
                     const cascadedDataSource: DataSourceType = toldDataSources === true ? dataSources[0].value :
@@ -150,7 +148,6 @@ export class NLUCommandResolver {
             const guaranteedDataSource: DataSourceType = dataSources.length > 0 ? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
             if (guaranteedDataSource) {
                 const guaranteedRange = ranges.length > 0 ? ranges[0].value : (context.type === SpeechContextType.RangeElement ? (context as RangeElementSpeechContext).range : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range))
-                console.log("go to cyclic comparison ", guaranteedDataSource, guaranteedRange, cyclicTimeFrames[0].value)
                 return createGoToComparisonCyclicAction(InteractionType.Speech, guaranteedDataSource, guaranteedRange, cyclicTimeFrames[0].value)
             }
         }
@@ -171,6 +168,9 @@ export class NLUCommandResolver {
             case ExplorationType.B_Day:
                 if (dates.length > 0) {
                     return setDateAction(InteractionType.Speech, dates[0].value as number)
+                }else if(ranges.length > 0){
+                    return createGoToBrowseRangeAction(InteractionType.Speech, inferDataSource(explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.IntraDayDataSource))
+                    , ranges[0].value)
                 }
             case ExplorationType.B_Overview:
             case ExplorationType.B_Range:
@@ -213,14 +213,11 @@ export class NLUCommandResolver {
                 }
                 break;
             case ExplorationType.C_TwoRanges:
-
-                console.log("current context:", context)
                 if (context != null && context.type === SpeechContextType.RangeElement) {
                     const c = context as RangeElementSpeechContext
                     if (ranges.length > 0) {
                         const parameter = explorationInfo.values.find(parameter => parameter.parameter === ParameterType.Range && parameter.value[0] === c.range[0] && parameter.value[1] === c.range[1])
 
-                        console.log("found parameter:", parameter)
                         if (parameter) {
                             return createSetRangeAction(InteractionType.Speech, ranges[0].value, parameter.key)
                         }
