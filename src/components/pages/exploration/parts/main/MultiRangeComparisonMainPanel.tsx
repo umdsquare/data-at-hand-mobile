@@ -77,7 +77,7 @@ interface State {
     chartContainerHeight: number
 }
 
-class MultiRangeComparisonMainPanel extends React.Component<Props, State>{
+class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
 
     constructor(props) {
         super(props)

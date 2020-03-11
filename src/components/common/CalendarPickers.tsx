@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, CalendarTheme } from 'react-native-calendars'
+import { Calendar, CalendarTheme, } from 'react-native-calendars'
 import Colors from '../../style/Colors';
 import { format, set, addDays, getDay, startOfWeek, endOfWeek, getMonth, getYear } from 'date-fns';
 import { View, StyleSheet, Text } from 'react-native';
@@ -39,6 +39,7 @@ const calendarTheme: CalendarTheme = {
 
 const calendarProps = {
     theme: calendarTheme,
+    style: {height: 400},
     renderArrow: (direction: 'left' | 'right') => {
         switch (direction) {
             default:

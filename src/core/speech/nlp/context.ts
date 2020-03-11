@@ -1,4 +1,4 @@
-import { ExplorationType, ParameterKey } from "../../exploration/types"
+import { ExplorationType, ParameterKey, ParameterType } from "../../exploration/types"
 import { ElementType } from "../../../components/exploration/DateRangeBar"
 import { DataSourceType } from "../../../measure/DataSourceSpec"
 import { CycleDimension } from "../../exploration/cyclic_time"
@@ -8,7 +8,8 @@ export enum SpeechContextType {
     Time = "time",
     DateElement = "dateElement",
     RangeElement = "rangeElement",
-    CycleDimensionElement = "cycleDimensionElement"
+    CycleDimensionElement = "cycleDimensionElement",
+    CategoricalRowElement = "categoricalRowElement"
 }
 
 export interface SpeechContext {
@@ -39,6 +40,10 @@ export interface RangeElementSpeechContext extends SpeechContext {
 export interface CycleDimensionElementSpeechContext extends SpeechContext {
     cycleDimension: CycleDimension,
     dataSource: DataSourceType
+}
+
+export interface CategoricalRowElementSpeechContext extends SpeechContext{
+    categoryType: ParameterType.DataSource | ParameterType.IntraDayDataSource | ParameterType.CycleDimension | ParameterType.CycleType
 }
 
 export namespace SpeechContextHelper {
@@ -81,6 +86,13 @@ export namespace SpeechContextHelper {
             type: SpeechContextType.CycleDimensionElement,
             cycleDimension,
             dataSource
+        }
+    }
+
+    export function makeCategoricalRowElementSpeechContext(categoryType: ParameterType.DataSource | ParameterType.IntraDayDataSource | ParameterType.CycleDimension | ParameterType.CycleType): CategoricalRowElementSpeechContext{
+        return {
+            type: SpeechContextType.CategoricalRowElement,
+            categoryType
         }
     }
 }
