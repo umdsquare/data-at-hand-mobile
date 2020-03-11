@@ -18,6 +18,8 @@ const Sizes = {
     smallFontSize: 14,
     tinyFontSize: 12,
 
+    tinyTextButtonHeight: 36,
+
     speechInputButtonSize: 58
 };
 

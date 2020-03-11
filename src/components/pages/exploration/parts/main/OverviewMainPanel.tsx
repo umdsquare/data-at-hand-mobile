@@ -54,6 +54,10 @@ class OverviewMainPanel extends React.PureComponent<Props> {
         this.props.dispatchAction(setHighlightFilter(InteractionType.TouchOnly, null))
     }
 
+    private readonly onFilterModified = (newFilter: HighlightFilter) => {
+        this.props.dispatchAction(setHighlightFilter(InteractionType.TouchOnly, newFilter))
+    }
+
 
     private Separator = () => {
         return <View style={separatorStyle} />
@@ -97,6 +101,7 @@ class OverviewMainPanel extends React.PureComponent<Props> {
                     this.props.highlightFilter != null? <HighlightFilterPanel 
                     filter={this.props.highlightFilter}
                     onDiscardFilterPressed={this.onDiscardFilter}
+                    onFilterModified={this.onFilterModified}
                     />:<></>
                 }
                 <FlatList

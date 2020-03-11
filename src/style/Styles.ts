@@ -1,7 +1,6 @@
 import {Sizes} from './Sizes';
 import {StyleSheet} from 'react-native';
 import Colors from './Colors';
-import { ZIndices } from '../components/pages/exploration/parts/zIndices';
 
 const StyleTemplates = StyleSheet.create({
   screenDefaultStyle: {

@@ -170,6 +170,7 @@ export const explorationStateReducer = (
       case ExplorationActionType.SetHighlightFilter:
         {
           const a = action as SetHighlightFilterAction
+          console.log("update filter:", a.highlightFilter)
           newState.info.highlightFilter = a.highlightFilter
         }
         break;
