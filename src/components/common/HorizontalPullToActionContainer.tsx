@@ -1,8 +1,9 @@
 import React, { useMemo, useCallback, useState } from 'react';
 import { PanGestureHandler, State, PanGestureHandlerStateChangeEvent } from "react-native-gesture-handler"
-import { Dimensions, Animated, View, ViewStyle, Easing, StyleSheet, Text } from "react-native"
+import { Dimensions, View, ViewStyle, StyleSheet, Text } from "react-native"
 import { Sizes } from '../../style/Sizes';
 import Svg, { Circle } from 'react-native-svg';
+import Animated, { Easing } from 'react-native-reanimated';
 
 const AnimatedSvgCircle = Animated.createAnimatedComponent(Circle)
 
@@ -38,7 +39,7 @@ const styles = StyleSheet.create({
     }
 })
 
-export const HorizontalPullToActionContainer = (props: {
+export const HorizontalPullToActionContainer = React.memo((props: {
     style: ViewStyle,
     onPulled: (from: 'left' | 'right') => void,
     enabled?: boolean,
@@ -50,13 +51,13 @@ export const HorizontalPullToActionContainer = (props: {
 
     const [currentPullingOrigin, setPullingOrigin] = useState<'left' | 'right' | null>(null)
 
-    const pullIndicatorTransformAmount = useMemo(() => new Animated.Value(0), [])
+    const pullIndicatorTransformAmount = useMemo(() => new Animated.Value<number>(0), [])
 
     const onPanGestureEvent = useCallback(Animated.event([{
-        nativeEvent: { translationX: pullIndicatorTransformAmount }
-    }], {
-        useNativeDriver: true
-    }), [])
+        nativeEvent: {
+            translationX: x => Animated.set(pullIndicatorTransformAmount, x)
+        }
+    }]), [])
 
     const defaultProps = useMemo(() => {
         return {
@@ -81,8 +82,7 @@ export const HorizontalPullToActionContainer = (props: {
                     Animated.timing(pullIndicatorTransformAmount, {
                         toValue: 0,
                         duration: 600,
-                        easing: Easing.out(Easing.cubic),
-                        useNativeDriver: true
+                        easing: Easing.out(Easing.cubic)
                     }).start(() => {
                         setPullingOrigin(null)
                     })
@@ -101,7 +101,7 @@ export const HorizontalPullToActionContainer = (props: {
     >
         <Animated.View style={props.style}>
             <PanGestureHandler
-                
+
                 {...defaultProps}
                 hitSlop={{ right: bezelRegion }}
                 onHandlerStateChange={fromLeftHandlerStateChange}
@@ -123,10 +123,11 @@ export const HorizontalPullToActionContainer = (props: {
                                 translateX: pullIndicatorTransformAmount.interpolate({
                                     inputRange: currentPullingOrigin === 'left' ? [0, minDragAmount] : [-minDragAmount, 0],
                                     outputRange: currentPullingOrigin === 'left' ? [0, styles.indicatorStyleBase.width * .5] : [-styles.indicatorStyleBase.width * .5, 0],
-                                    extrapolate: 'clamp'
+                                    extrapolateLeft: Animated.Extrapolate.CLAMP,
+                                    extrapolateRight: Animated.Extrapolate.CLAMP
                                 })
                             }]
-                        }}>
+                        } as any}>
                             <View style={{
                                 ...styles.indicatorContentContainer,
                                 left: currentPullingOrigin === 'left' ? undefined : 0,
@@ -137,7 +138,8 @@ export const HorizontalPullToActionContainer = (props: {
                                     <AnimatedSvgCircle fill='white' x={15} y={15} r={Animated.multiply(14, pullIndicatorTransformAmount.interpolate({
                                         inputRange: currentPullingOrigin === 'left' ? [0, minDragAmount] : [-minDragAmount, 0],
                                         outputRange: currentPullingOrigin === 'left' ? [0, 1] : [1, 0],
-                                        extrapolate: 'clamp'
+                                        extrapolateLeft: Animated.Extrapolate.CLAMP,
+                                        extrapolateRight: Animated.Extrapolate.CLAMP
                                     }))} />
                                 </Svg>
                                 <Text style={styles.indicatorTextStyle}>{currentPullingOrigin === 'left' ? "Shift to Past" : "Shift to Future"}</Text>
@@ -148,4 +150,4 @@ export const HorizontalPullToActionContainer = (props: {
             </PanGestureHandler>
         </Animated.View>
     </PanGestureHandler>
-}
+})

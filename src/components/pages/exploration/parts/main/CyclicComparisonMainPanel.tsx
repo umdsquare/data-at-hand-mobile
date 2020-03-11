@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { StyleTemplates } from '../../../../../style/Styles';
 import { GroupedData, GroupedRangeData } from '../../../../../core/exploration/data/types';
 import { Dispatch } from 'redux';
-import { ReduxAppState } from '../../../../../state/types';
+import { ReduxAppState, ActionTypeBase } from '../../../../../state/types';
 import { DataSourceType, MeasureUnitType } from '../../../../../measure/DataSourceSpec';
 import { explorationInfoHelper } from '../../../../../core/exploration/ExplorationInfoHelper';
 import { ParameterType } from '../../../../../core/exploration/types';
@@ -17,6 +17,8 @@ import { RangeValueCyclicChart } from '../../../../exploration/visualization/com
 import { startOfDay, format, addSeconds } from 'date-fns';
 import { timeTickFormat } from '../../../../exploration/visualization/compare/common';
 import { CyclicTimeFrame } from '../../../../../core/exploration/cyclic_time';
+import { HorizontalPullToActionContainer } from '../../../../common/HorizontalPullToActionContainer';
+import { shiftAllRanges, InteractionType } from '../../../../../state/exploration/interaction/actions';
 
 const styles = StyleSheet.create({
     containerStyle: {
@@ -29,18 +31,27 @@ interface Props {
     data?: GroupedData | GroupedRangeData,
     source?: DataSourceType,
     cycleType?: CyclicTimeFrame,
-    measureUnitType?: MeasureUnitType
+    measureUnitType?: MeasureUnitType,
+    dispatchAction?: (action: ActionTypeBase) => void
 }
 
-class CyclicComparisonMainPanel extends React.Component<Props> {
+class CyclicComparisonMainPanel extends React.PureComponent<Props> {
+
+    private readonly onPulledFromSide = (from: 'left' | 'right') => {
+        this.props.dispatchAction(shiftAllRanges(InteractionType.TouchOnly, from === 'left' ? 'past' : 'future'))
+    }
+
     render() {
 
         if (this.props.data != null) {
-            return <View style={styles.containerStyle}>
+            return <HorizontalPullToActionContainer
+                style={styles.containerStyle}
+                onPulled={this.onPulledFromSide}
+            >
                 {
                     this.makeMainView()
                 }
-            </View>
+            </HorizontalPullToActionContainer>
         } else return <></>
     }
 
@@ -99,6 +110,7 @@ class CyclicComparisonMainPanel extends React.Component<Props> {
 function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props {
     return {
         ...ownProps,
+        dispatchAction: (action) => dispatch(action)
     }
 }
 
