@@ -37,6 +37,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../../Routes";
 import { SpeechContextHelper } from "../../../core/speech/nlp/context";
 import { test } from "../../../core/speech/nlp/preprocessor";
+import { TouchSafeBottomSheet } from "../../common/TouchSafeBottomSheet";
 
 test().then()
 
@@ -116,7 +117,7 @@ interface State {
 
 class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
 
-    private comparisonBottomSheetRef = React.createRef<BottomSheet>()
+    private comparisonBottomSheetRef = React.createRef<TouchSafeBottomSheet>()
     private speechUndoButtonRef = React.createRef<Button>()
 
     private undoHideTimeout: NodeJS.Timeout | null = null
@@ -343,9 +344,9 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
                 onVoiceButtonPressOut={this.onGlobalSpeechInputPressOut}
             />
 
-            <BottomSheet ref={this.comparisonBottomSheetRef}>
+            <TouchSafeBottomSheet ref={this.comparisonBottomSheetRef}>
                 <ComparisonInitPanel info={this.props.explorationInfo} onCompleted={() => { this.comparisonBottomSheetRef.current?.close() }} />
-            </BottomSheet>
+            </TouchSafeBottomSheet>
 
             <TooltipOverlay />
             <GlobalSpeechOverlay isGlobalSpeechButtonPressed={this.props.showGlobalSpeechPopup} />
