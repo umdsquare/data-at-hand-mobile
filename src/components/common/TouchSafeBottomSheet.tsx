@@ -40,6 +40,8 @@ export class TouchSafeBottomSheet extends React.PureComponent<Props, State> {
 
     private appearProgress: Animated.Value = new Animated.Value(0)
 
+    private animation: Animated.CompositeAnimation | null = null
+
     constructor(props) {
         super(props)
 
@@ -53,22 +55,28 @@ export class TouchSafeBottomSheet extends React.PureComponent<Props, State> {
             ...this.state,
             isShown: true
         })
-        Animated.timing(this.appearProgress, {
+        this.animation?.stop()
+        this.animation = Animated.timing(this.appearProgress, {
             toValue: 1,
             duration: 400,
             easing: Easing.out(Easing.cubic),
             useNativeDriver: true
-        }).start()
+        })
+
+        this.animation.start()
     }
 
     public close() {
-
-        Animated.timing(this.appearProgress, {
+        this.animation?.stop()
+        
+        this.animation = Animated.timing(this.appearProgress, {
             toValue: 0,
             duration: 400,
             easing: Easing.out(Easing.cubic),
             useNativeDriver: true
-        }).start(() => {
+        })
+
+        this.animation.start(() => {
             this.setState({
                 ...this.state,
                 isShown: false
