@@ -74,6 +74,7 @@ export function parseTimeOfTheDayTextToDiffSeconds(text: string, preferred: "day
     //8 am
     //7 pm
     //7:30 am
+    //ten o'clock
 
     return 0
 }
