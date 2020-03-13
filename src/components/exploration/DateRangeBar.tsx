@@ -15,7 +15,7 @@ import Haptic from "react-native-haptic-feedback";
 import { useSelector } from "react-redux";
 import { ReduxAppState } from "../../state/types";
 import { DataServiceManager } from "../../system/DataServiceManager";
-import { BorderlessButton, LongPressGestureHandler, State as GestureState, LongPressGestureHandlerStateChangeEvent, FlingGestureHandler, Directions, FlingGestureHandlerStateChangeEvent } from "react-native-gesture-handler";
+import { BorderlessButton, LongPressGestureHandler, State as GestureState, LongPressGestureHandlerStateChangeEvent, FlingGestureHandler, Directions, FlingGestureHandlerStateChangeEvent, State } from "react-native-gesture-handler";
 
 const dateButtonWidth = 140
 const barHeight = 60
@@ -498,7 +498,7 @@ export const DateBar = React.memo((props: {
     const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
 
-    const shiftDay = useCallback((amount: number) => {
+    const makeShiftDay = useMemo(() => (amount: number) => () => {
         const newDate = addDays(DateTimeHelper.toDate(date), amount)
         if (differenceInCalendarDays(newDate, getToday()) < 1) {
             const newNumberedDate = DateTimeHelper.toNumberedDateFromDate(newDate)
@@ -506,7 +506,24 @@ export const DateBar = React.memo((props: {
             props.onDateChanged && props.onDateChanged(newNumberedDate, InteractionType.TouchOnly)
             swipedFeedbackRef.current?.startFeedback(amount > 0 ? 'left' : 'right')
         }
-    }, [setDate, props.onDateChanged, swipedFeedbackRef])
+    }, [date, setDate, props.onDateChanged, swipedFeedbackRef])
+
+    const shiftLeft = useMemo(() => makeShiftDay(1), [makeShiftDay])
+    const shiftRight = useMemo(() => makeShiftDay(-1), [makeShiftDay])
+
+    const swipeLeft = useCallback((ev: FlingGestureHandlerStateChangeEvent) => {
+        if (ev.nativeEvent.state === State.ACTIVE) {
+            shiftLeft()
+        }
+    }, [shiftLeft])
+
+    const swipeRight = useCallback((ev: FlingGestureHandlerStateChangeEvent) => {
+        if (ev.nativeEvent.state === State.ACTIVE) {
+            shiftRight()
+        }
+    }, [shiftRight])
+
+
 
     const onPress = useCallback(() => { bottomSheetRef.current?.open() }, [bottomSheetRef])
 
@@ -517,18 +534,29 @@ export const DateBar = React.memo((props: {
         props.onDateChanged && props.onDateChanged(newDate, InteractionType.TouchOnly)
     }, [setDate, bottomSheetRef, props.onDateChanged])
 
-    return <GestureRecognizer onSwipeLeft={() => shiftDay(1)} onSwipeRight={() => shiftDay(-1)} style={styles.containerStyle}>
-        <SwipedFeedback ref={swipedFeedbackRef} />
-        <DateButton date={date} overrideFormat="MMMM dd, yyyy" freeWidth={true}
-            onPress={onPress}
-            onLongPressIn={props.onLongPressIn}
-            onLongPressOut={props.onLongPressOut}
-        />
+    return <FlingGestureHandler
+        direction={Directions.LEFT}
+        onHandlerStateChange={swipeLeft}
+    >
+        <FlingGestureHandler
+            direction={Directions.RIGHT}
+            onHandlerStateChange={swipeRight}
+        >
+            <View style={styles.containerStyle}>
+                <SwipedFeedback ref={swipedFeedbackRef} />
 
-        <BottomSheet ref={bottomSheetRef}>
-            <DatePicker selectedDay={DateTimeHelper.toDate(date)}
-                latestPossibleDay={getToday()}
-                onDayPress={onCalendarDayPress} />
-        </BottomSheet>
-    </GestureRecognizer>
+                <DateButton date={date} overrideFormat="MMMM dd, yyyy" freeWidth={true}
+                    onPress={onPress}
+                    onLongPressIn={props.onLongPressIn}
+                    onLongPressOut={props.onLongPressOut}
+                />
+
+                <BottomSheet ref={bottomSheetRef}>
+                    <DatePicker selectedDay={DateTimeHelper.toDate(date)}
+                        latestPossibleDay={getToday()}
+                        onDayPress={onCalendarDayPress} />
+                </BottomSheet>
+            </View>
+
+        </FlingGestureHandler></FlingGestureHandler>
 })
