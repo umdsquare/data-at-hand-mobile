@@ -1,7 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { ChartProps } from '../types';
-import Svg, { G, Rect, Line } from 'react-native-svg';
-import { CommonBrowsingChartStyles } from './common';
+import React, { useMemo } from 'react';
+import Svg, { Rect, Line } from 'react-native-svg';
+import { CommonBrowsingChartStyles, ChartProps } from './common';
 import { AxisSvg } from '../../../visualization/axis';
 import { Padding } from '../../../visualization/types';
 import { DateTimeHelper } from '../../../../time';
@@ -13,23 +12,21 @@ import { GroupWithTouchInteraction } from './GroupWithTouchInteraction';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '../../../../state/types';
 import { DataServiceManager } from '../../../../system/DataServiceManager';
+import { NumericConditionType } from '../../../../core/exploration/types';
 
 interface Props extends ChartProps {
     valueTickFormat?: (num: number) => string,
     valueTicksOverride?: (maxValue: number) => {
         newDomain: number[],
-        ticks: number[]}
+        ticks: number[]
+    }
 }
 
 export const DailyBarChart = React.memo((prop: Props) => {
 
-    const shouldHighlightElements = useMemo(()=> prop.highlightFilter && prop.highlightFilter.dataSource === prop.dataSource && prop.highlightedDays, [
-        prop.highlightFilter,
-        prop.dataSource,
-        prop.highlightedDays
-    ])
+    const {shouldHighlightElements, highlightReference} = CommonBrowsingChartStyles.makeHighlightInformation(prop, prop.dataSource)
 
-    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+    const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
 
     const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
@@ -51,7 +48,7 @@ export const DailyBarChart = React.memo((prop: Props) => {
     const mean = prop.data.length > 0 ? d3Array.mean(prop.data, d => d.value) : null
 
     let ticks: number[]
-    if(prop.valueTicksOverride){
+    if (prop.valueTicksOverride) {
         const tickInfo = prop.valueTicksOverride(scaleY.domain()[1])
         scaleY.domain(tickInfo.newDomain)
         ticks = tickInfo.ticks
@@ -81,6 +78,9 @@ export const DailyBarChart = React.memo((prop: Props) => {
             }
             {
                 mean != null && <Line x1={0} x2={chartArea.width} y={scaleY(mean)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"} />
+            }
+            {
+                shouldHighlightElements === true ? <Line x1={0} x2={chartArea.width} y={scaleY(highlightReference)} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
             }
         </GroupWithTouchInteraction>
     </Svg>

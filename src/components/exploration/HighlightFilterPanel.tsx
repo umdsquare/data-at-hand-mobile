@@ -9,6 +9,7 @@ import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { RectButton } from 'react-native-gesture-handler'
 import { DataSourceType } from '../../measure/DataSourceSpec'
 import { useActionSheet } from '@expo/react-native-action-sheet'
+import pluralize from 'pluralize';
 import deepEqual from 'deep-equal';
 
 type SpecType = { dataSourceType: DataSourceType, propertyKey?: string | null, label: string }
@@ -104,11 +105,19 @@ const styles = StyleSheet.create({
 
     formButtonLabelStyle: {
         color: 'white'
+    },
+
+    numDaysLabelStyle: {
+        color: 'white',
+        fontWeight: 'bold',
+        flex: 1,
+        textAlign: 'right'
     }
 })
 
 export const HighlightFilterPanel = React.memo((props: {
     filter: HighlightFilter,
+    highlightedDays: { [key: number]: boolean | undefined },
     onDiscardFilterPressed: () => void,
     onFilterModified: (newFilter: HighlightFilter) => void
 }) => {
@@ -189,6 +198,8 @@ export const HighlightFilterPanel = React.memo((props: {
                 onChanged={onComparisonTypeChanged}
             />
             {props.filter.ref ? <FormButton onPress={() => { }} value={props.filter.ref.toFixed(0)} /> : null}
+
+            <Text style={styles.numDaysLabelStyle}>{pluralize('day', props.highlightedDays !=null? Object.keys(props.highlightedDays).length : 0, true)}</Text>
         </View>
     </Swipeable>
 })

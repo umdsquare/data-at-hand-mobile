@@ -1,6 +1,5 @@
-import React, { useState, RefObject } from "react";
-import { ChartState } from "../types";
-import { PanResponder, PanResponderInstance, PanResponderGestureState, UIManager, findNodeHandle, LayoutRectangle } from "react-native";
+import React from "react";
+import { PanResponder, PanResponderInstance, PanResponderGestureState, LayoutRectangle } from "react-native";
 import { CommonBrowsingChartStyles } from "./common";
 import { G, Rect } from "react-native-svg";
 import { ScaleBand } from "d3-scale";

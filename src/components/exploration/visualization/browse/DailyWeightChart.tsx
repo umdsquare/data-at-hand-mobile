@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
-import Svg, { G, Circle, Path, Line } from 'react-native-svg';
-import { CommonBrowsingChartStyles } from './common';
+import React from 'react';
+import Svg, { G, Circle, Path, Line, Rect } from 'react-native-svg';
+import { CommonBrowsingChartStyles, ChartPropsBase } from './common';
 import { AxisSvg } from '../../../visualization/axis';
 import { Padding } from '../../../visualization/types';
 import { DateTimeHelper } from '../../../../time';
@@ -16,30 +16,21 @@ import { noop } from '../../../../utils';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '../../../../state/types';
 import { DataServiceManager } from '../../../../system/DataServiceManager';
-import { HighlightFilter } from '../../../../core/exploration/types';
 
-
-export const DailyWeightChart = React.memo((prop: {
-    dateRange: number[],
-    data: {
-        trend: Array<{ numberedDate: number, value: number }>,
-        logs: Array<IWeightIntraDayLogEntry>
-    },
-    preferredValueRange: number[],
-    highlightFilter?: HighlightFilter,
-    highlightedDays?: { [key: number]: boolean | undefined },
+interface Props extends ChartPropsBase<{
+    trend: Array<{ numberedDate: number, value: number }>,
+    logs: Array<IWeightIntraDayLogEntry>
+}> {
+    measureUnitType: MeasureUnitType,
     futureNearestLog: IWeightIntraDayLogEntry,
     pastNearestLog: IWeightIntraDayLogEntry,
-    containerWidth: number,
-    containerHeight: number,
-    measureUnitType: MeasureUnitType
-}) => {
+
+}
+
+export const DailyWeightChart = React.memo((prop: Props) => {
 
 
-    const shouldHighlightElements = useMemo(() => prop.highlightFilter && prop.highlightFilter.dataSource === DataSourceType.Weight && prop.highlightedDays, [
-        prop.highlightFilter,
-        prop.highlightedDays
-    ])
+    const { shouldHighlightElements, highlightReference } = CommonBrowsingChartStyles.makeHighlightInformation(prop, DataSourceType.Weight)
 
     const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
@@ -87,6 +78,11 @@ export const DailyWeightChart = React.memo((prop: {
         <AxisSvg key="yAxis" tickMargin={0} ticks={scaleY.ticks(5)} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
         <G key="chart" {...chartArea}>
             {
+                prop.highlightedDays && Object.keys(prop.highlightedDays).map(date => {
+                    return <Rect key={date} fill={Colors.highlightElementBackground} opacity={0.2} x={scaleX(Number.parseInt(date)) + 0.5 * scaleX.bandwidth() - 0.5 * scaleX.step()} width={scaleX.step()} height={chartArea.height} />
+                })
+            }
+            {
                 prop.data.logs.map(d => {
                     return <Circle key={d.numberedDate}
                         x={scaleX(d.numberedDate)! + scaleX.bandwidth() * 0.5}
@@ -115,6 +111,9 @@ export const DailyWeightChart = React.memo((prop: {
                     stroke={Colors.today}
                     strokeWidth={2}
                 />
+            }
+            {
+                shouldHighlightElements === true ? <Line x1={0} x2={chartArea.width} y={scaleY(highlightReference)} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
             }
         </G>
     </Svg>

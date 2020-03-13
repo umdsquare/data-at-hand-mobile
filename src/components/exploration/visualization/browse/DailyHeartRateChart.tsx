@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
-import { ChartProps } from '../types';
 import Svg, { G, Rect, Circle, Line, Path } from 'react-native-svg';
-import { CommonBrowsingChartStyles } from './common';
+import { CommonBrowsingChartStyles, ChartProps } from './common';
 import { AxisSvg } from '../../../visualization/axis';
 import { Padding } from '../../../visualization/types';
 import { DateTimeHelper } from '../../../../time';
@@ -18,13 +17,9 @@ import { DataServiceManager } from '../../../../system/DataServiceManager';
 
 export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
 
-    const shouldHighlightElements = useMemo(()=> prop.highlightFilter && prop.highlightFilter.dataSource === prop.dataSource && prop.highlightedDays, [
-        prop.highlightFilter,
-        prop.dataSource,
-        prop.highlightedDays
-    ])
+    const {shouldHighlightElements, highlightReference} = CommonBrowsingChartStyles.makeHighlightInformation(prop, prop.dataSource)
 
-    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+    const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
 
     const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
@@ -46,7 +41,7 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
         .range([chartArea.height, 0])
         .nice()
 
-    const line = d3Shape.line<{value: number, numberedDate: number}>()
+    const line = d3Shape.line<{ value: number, numberedDate: number }>()
         .x((d) => scaleX(d.numberedDate)! + scaleX.bandwidth() * 0.5)
         .y((d) => scaleY(d.value))
         .curve(d3Shape.curveCardinal)
@@ -70,16 +65,19 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
                     return <Circle key={d.numberedDate}
                         x={scaleX(d.numberedDate)! + scaleX.bandwidth() * 0.5}
                         y={scaleY(d.value)}
-                        r={Math.min(scaleX.bandwidth(), 8)/2 }
+                        r={Math.min(scaleX.bandwidth(), 8) / 2}
                         strokeWidth={2}
                         fill='white'
-                        stroke={today === d.numberedDate ? Colors.today : (shouldHighlightElements && prop.highlightedDays[d.numberedDate] == true? Colors.highlightElementColor : Colors.chartElementDefault)}
+                        stroke={today === d.numberedDate ? Colors.today : (shouldHighlightElements && prop.highlightedDays[d.numberedDate] == true ? Colors.highlightElementColor : Colors.chartElementDefault)}
                         opacity={0.62}
                     />
                 })
             }
             {
-                Number.isNaN(avg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(avg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"}/>
+                Number.isNaN(avg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(avg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"} />
+            }
+            {
+                shouldHighlightElements === true ? <Line x1={0} x2={chartArea.width} y={scaleY(highlightReference)} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
             }
         </GroupWithTouchInteraction>
     </Svg>

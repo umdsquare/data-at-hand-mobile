@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
-import { ChartProps } from '../types';
 import Svg, { Rect, Line } from 'react-native-svg';
-import { CommonBrowsingChartStyles } from './common';
+import { CommonBrowsingChartStyles, ChartProps } from './common';
 import { AxisSvg } from '../../../visualization/axis';
 import { Padding } from '../../../visualization/types';
 import { DateTimeHelper } from '../../../../time';
@@ -31,13 +30,9 @@ const tickFormat = (tick: number) => {
 export const DailySleepRangeChart = React.memo((prop: Props) => {
 
 
-    const shouldHighlightElements = useMemo(()=> prop.highlightFilter && prop.highlightFilter.dataSource === prop.dataSource && prop.highlightedDays, [
-        prop.highlightFilter,
-        prop.dataSource,
-        prop.highlightedDays
-    ])
+    const { shouldHighlightElements, highlightReference } = CommonBrowsingChartStyles.makeHighlightInformation(prop, prop.dataSource)
 
-    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+    const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
 
     const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
@@ -76,7 +71,7 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
             const datum = prop.data ? prop.data.find(d => d.numberedDate === date) : null;
             if (datum) {
                 return { value: datum.bedTimeDiffSeconds, value2: datum.wakeTimeDiffSeconds }
-            }else return null
+            } else return null
         }} highlightedDays={prop.highlightedDays}>
             {
                 prop.data.map(d => {
@@ -87,7 +82,7 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
                         x={scaleX(d.numberedDate)! + (scaleX.bandwidth() - barWidth) * 0.5}
                         y={scaleY(d.bedTimeDiffSeconds)}
                         rx={2}
-                        fill={today === d.numberedDate ? Colors.today : (shouldHighlightElements && prop.highlightedDays[d.numberedDate] == true? Colors.highlightElementColor : Colors.chartElementDefault)}
+                        fill={today === d.numberedDate ? Colors.today : (shouldHighlightElements && prop.highlightedDays[d.numberedDate] == true ? Colors.highlightElementColor : Colors.chartElementDefault)}
                         opacity={0.62}
                     />
                 })
@@ -97,6 +92,9 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
             }
             {
                 Number.isNaN(wakeTimeAvg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(wakeTimeAvg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"} />
+            }
+            {
+                shouldHighlightElements === true ? <Line x1={0} x2={chartArea.width} y={scaleY(highlightReference)} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
             }
         </GroupWithTouchInteraction>
     </Svg>

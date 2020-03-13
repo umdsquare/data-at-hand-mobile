@@ -47,7 +47,7 @@ export default {
 
   lightBorderColor: "#90909040",
 
-  highlightPanelBackground: "#F48F70",
-  highlightElementColor: "#F48F70",
+  highlightPanelBackground: "#F2865F",
+  highlightElementColor: "#F2865F",
   highlightElementBackground: '#D66F5F'
 };

@@ -96,12 +96,11 @@ class OverviewMainPanel extends React.PureComponent<Props> {
 
     render() {
         if (this.props.data != null) {
-            const overviewData = this.props.data as OverviewData
-
             return <View>
                 {
                     this.props.highlightFilter != null? <HighlightFilterPanel 
                     filter={this.props.highlightFilter}
+                    highlightedDays={this.props.data.highlightedDays}
                     onDiscardFilterPressed={this.onDiscardFilter}
                     onFilterModified={this.onFilterModified}
                     />:<></>
@@ -109,7 +108,7 @@ class OverviewMainPanel extends React.PureComponent<Props> {
                 <FlatList
                     nestedScrollEnabled={true}
                     ref={this._listRef}
-                    data={overviewData.sourceDataList}
+                    data={this.props.data.sourceDataList}
                     keyExtractor={item => item.source}
                     ItemSeparatorComponent={this.Separator}
                     renderItem={this.renderItem}

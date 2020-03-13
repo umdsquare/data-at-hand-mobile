@@ -89,7 +89,7 @@ export class FitbitService extends DataService {
     let tableName
     let valueColumnName = 'value'
     let selectClause = 'SELECT numberedDate'
-    let whereClause = ''
+    let whereClause = null
 
     switch (filter.dataSource) {
       case DataSourceType.StepCount:
@@ -132,7 +132,7 @@ export class FitbitService extends DataService {
         break;
     }
 
-    const query = `${selectClause} from ${tableName} where ${whereClause} AND numberedDate BETWEEN ${start} AND ${end}`
+    const query = `${selectClause} from ${tableName} where ${whereClause!=null? `${whereClause} AND ` : ""} numberedDate BETWEEN ${start} AND ${end}`
     const queryResult = await this.core.fitbitLocalDbManager.selectQuery(query)
     if(queryResult.length > 0){
       const result = {}

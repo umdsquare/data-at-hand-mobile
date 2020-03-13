@@ -1,6 +1,24 @@
-import {ScaleBand, scaleBand} from 'd3-scale';
-import {DateTimeHelper} from '../../../../time';
+import { ScaleBand, scaleBand } from 'd3-scale';
+import { DateTimeHelper } from '../../../../time';
 import { LayoutRectangle } from 'react-native';
+import { DataSourceType } from '../../../../measure/DataSourceSpec';
+import { HighlightFilter, NumericConditionType } from '../../../../core/exploration/types';
+import { useMemo } from 'react';
+
+export interface ChartPropsBase<T> {
+  dateRange: number[],
+  preferredValueRange: number[],
+  data: T,
+  containerWidth: number,
+  containerHeight: number,
+  highlightFilter?: HighlightFilter,
+  highlightedDays?: { [key: number]: boolean | undefined }
+}
+
+export interface ChartProps extends ChartPropsBase<Array<{ value: number, numberedDate: number }>> {
+  dataSource: DataSourceType,
+}
+
 
 export namespace CommonBrowsingChartStyles {
   export const xAxisHeight = 26;
@@ -31,7 +49,7 @@ export namespace CommonBrowsingChartStyles {
   }
 
   export function makeDateScale(
-    base: ScaleBand<number>|undefined,
+    base: ScaleBand<number> | undefined,
     startDate: number,
     endDate: number,
   ): ScaleBand<number> {
@@ -50,5 +68,44 @@ export namespace CommonBrowsingChartStyles {
         return m + '/' + d;
       }
     };
+  }
+
+  export function makeHighlightInformation<T>(prop: ChartPropsBase<T>,
+    dataSource: DataSourceType,
+    getDataArray?: (data: T) => Array<{ numberedDate: number, value: number }>) {
+
+    const shouldHighlightElements = useMemo(() => prop.highlightFilter && prop.highlightFilter.dataSource === dataSource && prop.highlightedDays != null, [
+      prop.highlightFilter,
+      prop["dataSource"],
+      prop.highlightedDays
+    ])
+
+    const highlightReference = useMemo(() => {
+      if (shouldHighlightElements === true) {
+        switch (prop.highlightFilter.type) {
+          case NumericConditionType.Less:
+          case NumericConditionType.More:
+            return prop.highlightFilter.ref!
+          case NumericConditionType.Max:
+          case NumericConditionType.Min:
+            const array = getDataArray ? getDataArray(prop.data) : prop.data as any
+            if (array.length > 0 && prop.highlightedDays) {
+              const extremeDays = Object.keys(prop.highlightedDays)
+              if (extremeDays.length > 0) {
+                const extremeDatum = array.find(d => d.numberedDate === Number.parseInt(extremeDays[0]))
+                if (extremeDatum) {
+                  return extremeDatum.value
+                }
+              }
+            }
+        }
+        return null
+      } else return null
+    }, [shouldHighlightElements, prop.highlightFilter, prop.data])
+
+    return {
+      shouldHighlightElements,
+      highlightReference
+    }
   }
 }
