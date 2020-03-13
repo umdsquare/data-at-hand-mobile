@@ -15,7 +15,7 @@ import Haptic from "react-native-haptic-feedback";
 import { useSelector } from "react-redux";
 import { ReduxAppState } from "../../state/types";
 import { DataServiceManager } from "../../system/DataServiceManager";
-import { BorderlessButton, LongPressGestureHandler, State as GestureState, LongPressGestureHandlerStateChangeEvent, FlingGestureHandler, Directions, FlingGestureHandlerStateChangeEvent, State } from "react-native-gesture-handler";
+import { BorderlessButton, LongPressGestureHandler, State as GestureState, LongPressGestureHandlerStateChangeEvent, FlingGestureHandler, Directions, FlingGestureHandlerStateChangeEvent } from "react-native-gesture-handler";
 
 const dateButtonWidth = 140
 const barHeight = 60
@@ -512,13 +512,13 @@ export const DateBar = React.memo((props: {
     const shiftRight = useMemo(() => makeShiftDay(-1), [makeShiftDay])
 
     const swipeLeft = useCallback((ev: FlingGestureHandlerStateChangeEvent) => {
-        if (ev.nativeEvent.state === State.ACTIVE) {
+        if (ev.nativeEvent.state === GestureState.ACTIVE) {
             shiftLeft()
         }
     }, [shiftLeft])
 
     const swipeRight = useCallback((ev: FlingGestureHandlerStateChangeEvent) => {
-        if (ev.nativeEvent.state === State.ACTIVE) {
+        if (ev.nativeEvent.state === GestureState.ACTIVE) {
             shiftRight()
         }
     }, [shiftRight])
