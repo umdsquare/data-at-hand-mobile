@@ -5,10 +5,10 @@ import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, Inte
 import { connect } from "react-redux";
 import { ReduxAppState } from "../../../../../state/types";
 import { Dispatch } from "redux";
-import { OverviewSourceRow } from "../../../../../core/exploration/data/types";
+import { OverviewSourceRow, DataSourceBrowseData } from "../../../../../core/exploration/data/types";
 import { DataSourceChartFrame } from "../../../../exploration/DataSourceChartFrame";
 import { explorationInfoHelper } from "../../../../../core/exploration/ExplorationInfoHelper";
-import { ParameterType, TouchingElementInfo, inferIntraDayDataSourceType, TouchingElementValueType } from "../../../../../core/exploration/types";
+import { ParameterType, TouchingElementInfo, inferIntraDayDataSourceType, TouchingElementValueType, HighlightFilter } from "../../../../../core/exploration/types";
 import { DateTimeHelper } from "../../../../../time";
 import { format, startOfDay, addSeconds } from "date-fns";
 import { StyleTemplates } from "../../../../../style/Styles";
@@ -80,6 +80,7 @@ interface Props {
     source?: DataSourceType,
     data?: any,
     measureUnitType?: MeasureUnitType,
+    highlightFilter?: HighlightFilter,
     highlightedDate?: number,
     getToday?: () => Date,
     dispatchExplorationAction?: (action: ExplorationAction) => void
@@ -134,12 +135,14 @@ class BrowseRangeMainPanel extends React.PureComponent<Props, State>{
 
     render() {
         if (this.props.data != null) {
-            const sourceRangedData = this.props.data as OverviewSourceRow
+            const sourceRangedData = this.props.data as DataSourceBrowseData
             const dataList: Array<any> = (this.props.source === DataSourceType.Weight ? sourceRangedData.data.logs : sourceRangedData.data).slice(0)
             dataList.sort((a: any, b: any) => b["numberedDate"] - a["numberedDate"])
 
             return <View style={StyleTemplates.fillFlex}>
                 <DataSourceChartFrame data={sourceRangedData}
+                    filter={this.props.highlightFilter}
+                    highlightedDays={sourceRangedData.highlightedDays}
                     measureUnitType={this.props.measureUnitType}
                     showToday={false}
                     flat={true}
@@ -190,6 +193,7 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
         measureUnitType: appState.settingsState.unit,
         isLoadingData: appState.explorationDataState.isBusy,
         highlightedDate,
+        highlightFilter: appState.explorationState.info.highlightFilter,
         getToday: DataServiceManager.instance.getServiceByKey(appState.settingsState.serviceKey).getToday
     }
 }

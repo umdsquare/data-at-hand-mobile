@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Svg, { G, Circle, Path, Line } from 'react-native-svg';
 import { CommonBrowsingChartStyles } from './common';
 import { AxisSvg } from '../../../visualization/axis';
@@ -10,12 +10,13 @@ import * as d3Array from 'd3-array';
 import * as d3Shape from 'd3-shape';
 import Colors from '../../../../style/Colors';
 import { IWeightIntraDayLogEntry } from '../../../../core/exploration/data/types';
-import { MeasureUnitType } from '../../../../measure/DataSourceSpec';
+import { MeasureUnitType, DataSourceType } from '../../../../measure/DataSourceSpec';
 import unitConvert from 'convert-units';
 import { noop } from '../../../../utils';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '../../../../state/types';
 import { DataServiceManager } from '../../../../system/DataServiceManager';
+import { HighlightFilter } from '../../../../core/exploration/types';
 
 
 export const DailyWeightChart = React.memo((prop: {
@@ -25,6 +26,8 @@ export const DailyWeightChart = React.memo((prop: {
         logs: Array<IWeightIntraDayLogEntry>
     },
     preferredValueRange: number[],
+    highlightFilter?: HighlightFilter,
+    highlightedDays?: { [key: number]: boolean | undefined },
     futureNearestLog: IWeightIntraDayLogEntry,
     pastNearestLog: IWeightIntraDayLogEntry,
     containerWidth: number,
@@ -32,7 +35,13 @@ export const DailyWeightChart = React.memo((prop: {
     measureUnitType: MeasureUnitType
 }) => {
 
-    const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
+
+    const shouldHighlightElements = useMemo(() => prop.highlightFilter && prop.highlightFilter.dataSource === DataSourceType.Weight && prop.highlightedDays, [
+        prop.highlightFilter,
+        prop.highlightedDays
+    ])
+
+    const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
 
     const convert = prop.measureUnitType === MeasureUnitType.Metric ? noop : (n: number) => unitConvert(n).from('kg').to('lb')
@@ -85,7 +94,7 @@ export const DailyWeightChart = React.memo((prop: {
                         r={Math.min(scaleX.bandwidth(), 8) / 2}
                         strokeWidth={2}
                         fill='white'
-                        stroke={today === d.numberedDate ? Colors.today : Colors.chartElementDefault}
+                        stroke={today === d.numberedDate ? Colors.today : (shouldHighlightElements && prop.highlightedDays[d.numberedDate] == true ? Colors.highlightElementColor : Colors.chartElementDefault)}
                         opacity={0.62}
                     />
                 })

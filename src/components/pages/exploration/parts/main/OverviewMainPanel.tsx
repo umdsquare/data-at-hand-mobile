@@ -87,6 +87,8 @@ class OverviewMainPanel extends React.PureComponent<Props> {
 
     private renderItem = ({ item }) => <DataSourceChartFrame key={item.source.toString()}
         data={item}
+        filter={this.props.highlightFilter}
+        highlightedDays={this.props.data.highlightedDays}
         measureUnitType={this.props.measureUnitType}
         onHeaderPressed={this.onHeaderPressed}
         onTodayPressed={inferIntraDayDataSourceType(item.source) != null ? this.onTodayPressed : null}

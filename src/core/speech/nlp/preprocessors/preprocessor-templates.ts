@@ -14,7 +14,7 @@ const templates: Array<Template> = [
     {
         regex: new RegExp(`^(?<month>${MONTH_NAMES.join("|")})$`, 'i'),
         parse: (groups: { month: string }, options) => {
-            const month = MONTH_NAMES.indexOf(groups.month)
+            const month = MONTH_NAMES.indexOf(groups.month.toLowerCase())
             const today = options.getToday()
             const todayMonth = getMonth(today)
             let monthDate: Date

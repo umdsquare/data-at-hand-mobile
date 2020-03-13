@@ -12,10 +12,11 @@ import { FitbitServiceMeasure } from './FitbitServiceMeasure';
 import { FitbitWeightMeasure } from './FitbitWeightMeasure';
 import { FitbitSleepMeasure } from './FitbitSleepMeasure';
 import { FitbitIntraDayStepMeasure } from './FitbitIntraDayStepMeasure';
-import { IntraDayDataSourceType } from '../../../core/exploration/types';
+import { IntraDayDataSourceType, HighlightFilter, NumericConditionType } from '../../../core/exploration/types';
 import { FitbitIntraDayHeartRateMeasure } from './FitbitIntraDayHeartRateMeasure';
 import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, FilteredDailyValues, BoxPlotInfo } from '../../../core/exploration/data/types';
 import { CyclicTimeFrame, CycleDimension } from '../../../core/exploration/cyclic_time';
+import { FitbitLocalTableName } from './sqlite/database';
 
 
 export class FitbitService extends DataService {
@@ -81,6 +82,63 @@ export class FitbitService extends DataService {
     }
 
     return [boxPlotInfo.minWithoutOutlier, boxPlotInfo.maxWithoutOutlier]
+  }
+
+
+  async fetchFilteredDates(filter: HighlightFilter, start: number, end: number): Promise<{[key:number]:boolean|undefined}> {
+    let tableName
+    let valueColumnName = 'value'
+    let selectClause = 'SELECT numberedDate'
+    let whereClause = ''
+
+    switch (filter.dataSource) {
+      case DataSourceType.StepCount:
+        tableName = FitbitLocalTableName.StepCount
+        break;
+      case DataSourceType.HeartRate:
+        tableName = FitbitLocalTableName.RestingHeartRate
+        break;
+      case DataSourceType.Weight:
+        tableName = FitbitLocalTableName.WeightTrend
+        break;
+      case DataSourceType.HoursSlept:
+        tableName = FitbitLocalTableName.SleepLog
+        valueColumnName = 'lengthInSeconds'
+        break;
+      case DataSourceType.SleepRange:
+        switch (filter.propertyKey) {
+          case 'waketime':
+            valueColumnName = 'wakeTimeDiffSeconds'
+            break;
+          case 'bedtime':
+            valueColumnName = 'bedTimeDiffSeconds'
+            break;
+        }
+        break;
+    }
+
+    switch (filter.type) {
+      case NumericConditionType.Less:
+        whereClause = `${valueColumnName} <= ${filter.ref}`
+        break;
+      case NumericConditionType.More:
+        whereClause = `${valueColumnName} >= ${filter.ref}`
+        break;
+      case NumericConditionType.Max:
+        selectClause = `SELECT numberedDate, max(${valueColumnName})`
+        break;
+      case NumericConditionType.Min:
+        selectClause = `SELECT numberedDate, min(${valueColumnName})`
+        break;
+    }
+
+    const query = `${selectClause} from ${tableName} where ${whereClause} AND numberedDate BETWEEN ${start} AND ${end}`
+    const queryResult = await this.core.fitbitLocalDbManager.selectQuery(query)
+    if(queryResult.length > 0){
+      const result = {}
+      queryResult.forEach(v => result[v["numberedDate"]] = true)
+      return result
+    }else return null
   }
 
   protected async fetchDataImpl(
@@ -276,11 +334,11 @@ export class FitbitService extends DataService {
     await this.core.fitbitLocalDbManager.close();
   }
 
-  private _lastSyncTimePromise?: Promise<{tracker?: Date, scale?: Date}> = null
+  private _lastSyncTimePromise?: Promise<{ tracker?: Date, scale?: Date }> = null
   private _lastSyncTimeInvokedAt?: number = null
 
-  async getLastSyncTime(): Promise<{tracker?: Date, scale?: Date}>{
-    if(this._lastSyncTimePromise == null || (Date.now() - this._lastSyncTimeInvokedAt) > 5*60*1000){
+  async getLastSyncTime(): Promise<{ tracker?: Date, scale?: Date }> {
+    if (this._lastSyncTimePromise == null || (Date.now() - this._lastSyncTimeInvokedAt) > 5 * 60 * 1000) {
       this._lastSyncTimePromise = this.core.fetchLastSyncTime()
       this._lastSyncTimeInvokedAt = Date.now()
     }

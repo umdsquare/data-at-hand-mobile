@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ChartProps } from '../types';
 import Svg, { G, Rect, Line } from 'react-native-svg';
 import { CommonBrowsingChartStyles } from './common';
@@ -22,6 +22,12 @@ interface Props extends ChartProps {
 }
 
 export const DailyBarChart = React.memo((prop: Props) => {
+
+    const shouldHighlightElements = useMemo(()=> prop.highlightFilter && prop.highlightFilter.dataSource === prop.dataSource && prop.highlightedDays, [
+        prop.highlightFilter,
+        prop.dataSource,
+        prop.highlightedDays
+    ])
 
     const serviceKey = useSelector((appState:ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
@@ -58,7 +64,7 @@ export const DailyBarChart = React.memo((prop: Props) => {
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={prop.valueTickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
 
-        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date)!.value}>
+        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date)!.value} highlightedDays={prop.highlightedDays}>
             {
                 prop.data.map(d => {
                     const barHeight = scaleY(0) - scaleY(d.value)
@@ -68,7 +74,7 @@ export const DailyBarChart = React.memo((prop: Props) => {
                         x={scaleX(d.numberedDate)! + (scaleX.bandwidth() - barWidth) * 0.5}
                         y={scaleY(d.value)}
 
-                        fill={today === d.numberedDate ? Colors.today : Colors.chartElementDefault}
+                        fill={today === d.numberedDate ? Colors.today : (shouldHighlightElements && prop.highlightedDays[d.numberedDate] != null ? Colors.highlightElementColor : Colors.chartElementDefault)}
                         opacity={0.62}
                     />
                 })

@@ -1,5 +1,5 @@
 import { ExplorationInfo, ExplorationType, ParameterType, IntraDayDataSourceType, ParameterKey } from '../types';
-import { OverviewData, OverviewSourceRow, GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData, FilteredDailyValues, StepCountRangedData, WeightRangedData } from './types';
+import { OverviewData, OverviewSourceRow, GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData, FilteredDailyValues, StepCountRangedData, WeightRangedData, DataSourceBrowseData } from './types';
 import { explorationInfoHelper } from '../ExplorationInfoHelper';
 import { DataSourceManager } from '../../../system/DataSourceManager';
 import { DataServiceManager } from '../../../system/DataServiceManager';
@@ -50,7 +50,7 @@ class ExplorationDataResolver {
     return Promise.resolve(null)
   }
 
-  private async loadBrowseRangeData(info: ExplorationInfo, selectedServiceKey: string, prevInfo?: ExplorationInfo, prevData?: any): Promise<OverviewSourceRow> {
+  private async loadBrowseRangeData(info: ExplorationInfo, selectedServiceKey: string, prevInfo?: ExplorationInfo, prevData?: any): Promise<DataSourceBrowseData> {
     const range = explorationInfoHelper.getParameterValue<[number, number]>(
       info,
       ParameterType.Range,
@@ -74,7 +74,10 @@ class ExplorationDataResolver {
     }
 
     const data = await this.loadBrowseRangeDataImpl(range, source, selectedService, prevSourceRowData!)
-    return data
+    return {
+      ...data,
+      highlightedDays: info.highlightFilter ? (await selectedService.fetchFilteredDates(info.highlightFilter!, range[0], range[1])) : undefined
+    }
   }
 
   private async loadBrowseRangeDataImpl(range: [number, number], source: DataSourceType, service: DataService, prevData?: OverviewSourceRow): Promise<OverviewSourceRow> {
@@ -245,7 +248,7 @@ class ExplorationDataResolver {
 
         return this.loadBrowseRangeDataImpl(range, source.type, selectedService, prevSourceRowData!)
       }))
-      .then(dataPerSource => ({ sourceDataList: dataPerSource }));
+      .then(async dataPerSource => ({ sourceDataList: dataPerSource, highlightedDays: info.highlightFilter ? (await selectedService.fetchFilteredDates(info.highlightFilter!, range[0], range[1])) : undefined }));
   }
 
   private loadIntraDayData(

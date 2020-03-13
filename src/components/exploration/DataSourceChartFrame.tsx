@@ -15,6 +15,7 @@ import { scaleLinear } from 'd3-scale';
 import { DailyHeartRateChart } from './visualization/browse/DailyHeartRateChart';
 import { DailySleepRangeChart } from './visualization/browse/DailySleepRangeChart';
 import { DailyWeightChart } from './visualization/browse/DailyWeightChart';
+import { HighlightFilter } from '../../core/exploration/types';
 
 
 const lightTextColor = "#8b8b8b"
@@ -269,12 +270,14 @@ function formatStatistics(sourceType: DataSourceType, statisticsType: Statistics
     }
 }
 
-function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, width: number, height: number, measureUnitType: MeasureUnitType): any {
+function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filter: HighlightFilter | undefined, highlightedDays: {[key:number]:boolean|undefined} | undefined, width: number, height: number, measureUnitType: MeasureUnitType): any {
     switch (sourceType) {
         case DataSourceType.StepCount:
             return <DailyBarChart
                 dataSource={DataSourceType.StepCount}
                 preferredValueRange={data.preferredValueRange}
+                highlightFilter={filter}
+                highlightedDays={highlightedDays}
                 dateRange={data.range} data={data.data} containerHeight={height} containerWidth={width}
                 valueTickFormat={(tick: number) => { return (tick % 1000 === 0 && tick != 0) ? tick / 1000 + "k" : commaNumber(tick) }} />
         case DataSourceType.HoursSlept:
@@ -282,6 +285,8 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, width
 
                 dataSource={DataSourceType.HoursSlept}
                 preferredValueRange={data.preferredValueRange}
+                highlightFilter={filter}
+                highlightedDays={highlightedDays}
                 data={data.data.map(d => ({ numberedDate: d.numberedDate, value: d.lengthInSeconds }))}
                 containerHeight={height} containerWidth={width}
                 valueTickFormat={(tick: number) => { return DateTimeHelper.formatDuration(tick, true) }}
@@ -295,13 +300,16 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, width
             />
         case DataSourceType.HeartRate:
             return <DailyHeartRateChart
-
+                highlightedDays={highlightedDays}
+                highlightFilter={filter}
                 dataSource={DataSourceType.HeartRate}
                 preferredValueRange={data.preferredValueRange}
                 dateRange={data.range} data={data.data} containerWidth={width} containerHeight={height}
             />
         case DataSourceType.SleepRange:
             return <DailySleepRangeChart
+                highlightedDays={highlightedDays}
+                highlightFilter={filter}
                 dataSource={DataSourceType.SleepRange}
                 preferredValueRange={data.preferredValueRange}
                 dateRange={data.range} data={data.data}
@@ -310,6 +318,8 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, width
         case DataSourceType.Weight:
             const weightData = data as WeightRangedData
             return <DailyWeightChart dateRange={data.range} data={data.data}
+                highlightedDays={highlightedDays}
+                highlightFilter={filter}
                 preferredValueRange={data.preferredValueRange}
                 pastNearestLog={weightData.pastNearestLog}
                 futureNearestLog={weightData.futureNearestLog}
@@ -320,8 +330,10 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, width
 }
 
 export const DataSourceChartFrame = React.memo((props: {
-    data: OverviewSourceRow
-    measureUnitType: MeasureUnitType
+    data: OverviewSourceRow,
+    filter: HighlightFilter,
+    highlightedDays?: {[key:number]:boolean|undefined},
+    measureUnitType: MeasureUnitType,
     showToday?: boolean
     flat?: boolean
     showHeader?: boolean
@@ -332,12 +344,12 @@ export const DataSourceChartFrame = React.memo((props: {
     const [chartContainerWidth, setChartContainerWidth] = useState(-1)
     const [chartContainerHeight, setChartContainerHeight] = useState(-1)
 
-    const onSizeChanged = useCallback((width, height) => { setChartContainerWidth(width); setChartContainerHeight(height) }, 
-    [setChartContainerWidth, setChartContainerHeight])
-    
-    const onHeaderPress = useCallback(()=> props.onHeaderPressed && props.onHeaderPressed(props.data.source), [props.onHeaderPressed, props.data.source])
-    const onTodayPress = useCallback(()=> props.onTodayPressed && props.onTodayPressed(props.data.source), [props.onTodayPressed, props.data.source])
-    
+    const onSizeChanged = useCallback((width, height) => { setChartContainerWidth(width); setChartContainerHeight(height) },
+        [setChartContainerWidth, setChartContainerHeight])
+
+    const onHeaderPress = useCallback(() => props.onHeaderPressed && props.onHeaderPressed(props.data.source), [props.onHeaderPressed, props.data.source])
+    const onTodayPress = useCallback(() => props.onTodayPressed && props.onTodayPressed(props.data.source), [props.onTodayPressed, props.data.source])
+
 
     const spec = DataSourceManager.instance.getSpec(props.data.source)
     const todayInfo = formatTodayValue(props.data, props.measureUnitType)
@@ -370,7 +382,7 @@ export const DataSourceChartFrame = React.memo((props: {
         <View style={styles.chartAreaStyle}>
             <SizeWatcher containerStyle={{ aspectRatio: 3 }} onSizeChange={onSizeChanged}>
                 {
-                    getChartView(spec.type, props.data, chartContainerWidth, chartContainerHeight, props.measureUnitType)
+                    getChartView(spec.type, props.data, props.filter, props.highlightedDays, chartContainerWidth, chartContainerHeight, props.measureUnitType)
                 }
             </SizeWatcher>
         </View>

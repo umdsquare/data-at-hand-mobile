@@ -24,7 +24,7 @@ interface Props {
     onDateTouchMove?: (date: number) => void,
     onDateTouchEnd?: (date: number) => void,
     onDateClick?: (date: number) => void,
-
+    highlightedDays?: {[key:number]: boolean|undefined},
     getValueOfDate: (date: number) => any,
     linkedDate?: number | null,
     isContainerScrolling?: boolean,
@@ -188,6 +188,11 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
             }
             {
                 this.props.linkedDate && <Rect fill="#00000010" strokeWidth={1} stroke={Colors.accent} x={this.props.scaleX(this.props.linkedDate)} width={this.props.scaleX.bandwidth()} height={this.props.chartArea.height} />
+            }
+            {
+                this.props.highlightedDays && Object.keys(this.props.highlightedDays).map(date => {
+                    return <Rect key={date} fill={Colors.highlightElementBackground} opacity={0.2} x={this.props.scaleX(Number.parseInt(date)) + 0.5 * this.props.scaleX.bandwidth() - 0.5 * this.props.scaleX.step()} width={this.props.scaleX.step()} height={this.props.chartArea.height} />
+                }) 
             }
             {this.props.children}
         </G>
