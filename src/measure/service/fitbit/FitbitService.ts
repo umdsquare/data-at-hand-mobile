@@ -106,6 +106,7 @@ export class FitbitService extends DataService {
         valueColumnName = 'lengthInSeconds'
         break;
       case DataSourceType.SleepRange:
+        tableName = FitbitLocalTableName.SleepLog
         switch (filter.propertyKey) {
           case 'waketime':
             valueColumnName = 'wakeTimeDiffSeconds'

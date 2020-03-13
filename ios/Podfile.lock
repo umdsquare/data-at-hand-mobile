@@ -200,7 +200,7 @@ PODS:
     - React
   - react-native-safe-area-context (0.7.3):
     - React
-  - react-native-segmented-control (1.2.0):
+  - react-native-segmented-control (1.2.1):
     - React
   - react-native-spinkit (1.4.1):
     - React
@@ -246,6 +246,8 @@ PODS:
   - RNCAsyncStorage (1.8.1):
     - React
   - RNCMaskedView (0.1.7):
+    - React
+  - RNDateTimePicker (2.2.3):
     - React
   - RNFS (2.16.6):
     - React
@@ -317,6 +319,7 @@ DEPENDENCIES:
   - "ReactNativeART (from `../node_modules/@react-native-community/art`)"
   - "RNCAsyncStorage (from `../node_modules/@react-native-community/async-storage`)"
   - "RNCMaskedView (from `../node_modules/@react-native-community/masked-view`)"
+  - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
   - RNFS (from `../node_modules/react-native-fs`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
@@ -409,6 +412,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/async-storage"
   RNCMaskedView:
     :path: "../node_modules/@react-native-community/masked-view"
+  RNDateTimePicker:
+    :path: "../node_modules/@react-native-community/datetimepicker"
   RNFS:
     :path: "../node_modules/react-native-fs"
   RNGestureHandler:
@@ -457,7 +462,7 @@ SPEC CHECKSUMS:
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
   react-native-app-auth: 048f9ea8c2358ce1207207a0e74fb16563a3a2bd
   react-native-safe-area-context: 8260e5157617df4b72865f44006797f895b2ada7
-  react-native-segmented-control: 78d9a2204d6feb413a8945d951d4484086b1f2c0
+  react-native-segmented-control: ed19b78ec28ece7953088495cb9ba33cbafe2590
   react-native-spinkit: da294fd828216ad211fe36a5c14c1e09f09e62db
   react-native-sqlite-storage: bb10beb2407e5fc21f3f1bcd86bacbfd6edcc818
   React-RCTActionSheet: 600b4d10e3aea0913b5a92256d2719c0cdd26d76
@@ -473,6 +478,7 @@ SPEC CHECKSUMS:
   ReactNativeART: f003b07dfa7098aa419ed95b69560923440b1eee
   RNCAsyncStorage: 00bdf63f7f1e0f11d3323533dba4f222e58bf092
   RNCMaskedView: 90dd32f5b786bd562e876e1421ea77c700cbf71e
+  RNDateTimePicker: 647f891a27a68b44d012fd7c6183844268ab0342
   RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
   RNGestureHandler: dde546180bf24af0b5f737c8ad04b6f3fa51609a
   RNPermissions: 6db7e0a4d94c9c02390d11020b1d3d187aaf77e5

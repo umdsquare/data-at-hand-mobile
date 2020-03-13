@@ -82,6 +82,7 @@ export namespace CommonBrowsingChartStyles {
 
     const highlightReference = useMemo(() => {
       if (shouldHighlightElements === true) {
+
         switch (prop.highlightFilter.type) {
           case NumericConditionType.Less:
           case NumericConditionType.More:
@@ -94,7 +95,11 @@ export namespace CommonBrowsingChartStyles {
               if (extremeDays.length > 0) {
                 const extremeDatum = array.find(d => d.numberedDate === Number.parseInt(extremeDays[0]))
                 if (extremeDatum) {
-                  return extremeDatum.value
+                  if(dataSource === DataSourceType.SleepRange){
+                    if(prop.highlightFilter!.propertyKey === 'waketime'){
+                      return extremeDatum["wakeTimeDiffSeconds"]
+                    }else return extremeDatum["bedTimeDiffSeconds"]
+                  }else return extremeDatum.value
                 }
               }
             }
@@ -106,6 +111,7 @@ export namespace CommonBrowsingChartStyles {
     return {
       shouldHighlightElements,
       highlightReference
+      
     }
   }
 }
