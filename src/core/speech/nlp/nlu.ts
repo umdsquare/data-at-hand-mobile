@@ -263,6 +263,9 @@ export class NLUCommandResolver {
                                     return createSetRangeAction(InteractionType.Speech, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])], timeContext.parameterKey)
                                 }
                             }
+                            if(ranges.length > 0){
+                                return createSetRangeAction(InteractionType.Speech, ranges[0].value, timeContext.parameterKey)
+                            }
                         }
                         break;
                 }
