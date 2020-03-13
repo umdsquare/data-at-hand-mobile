@@ -1,4 +1,7 @@
-import { NumericConditionType } from "../../exploration/types";
+import { NumericConditionType } from "../../exploration/types"
+import { randomString } from "../../../utils"
+
+export const MONTH_NAMES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
 
 export enum VariableType {
     DataSource = "DataSource",
@@ -48,4 +51,8 @@ export interface ConditionInfo {
 
 export interface NLUOptions {
     getToday: () => Date,
+}
+
+export function makeVariableId() {
+    return randomString(5)
 }

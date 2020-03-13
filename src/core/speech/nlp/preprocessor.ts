@@ -1,4 +1,4 @@
-import { PreProcessedInputText, VariableType, VariableInfo, VariableInfoDict, VerbInfo, NLUOptions, Intent, ConditionInfo } from "./types";
+import { PreProcessedInputText, VariableType, VariableInfo, VariableInfoDict, VerbInfo, NLUOptions, Intent, ConditionInfo, MONTH_NAMES, makeVariableId } from "./types";
 import compromise from 'compromise';
 import { DataSourceType } from "../../../measure/DataSourceSpec";
 import { parseTimeText, parseDateTextToNumberedDate, parseTimeOfTheDayTextToDiffSeconds, parseDurationTextToSeconds } from "./preprocessors/preprocessor-time";
@@ -8,15 +8,12 @@ import { randomString } from "../../../utils";
 import { inferVerbType } from "./preprocessors/preprocessor-verb";
 import { CyclicTimeFrame } from "../../exploration/cyclic_time";
 import { categorizeExtreme, findComparisonTermInfo } from "./preprocessors/preprocessor-condition";
+import { tryPreprocessingByTemplates } from "./preprocessors/preprocessor-templates";
 
 const PARSED_TAG = "ReplacedId"
 
 function tag(doc: compromise.Document, variableType: VariableType): compromise.Document {
     return doc.tag(variableType).tag(PARSED_TAG)
-}
-
-function makeId() {
-    return randomString(5)
 }
 
 function normalizeCompromiseGroup(groups: { [groupName: string]: compromise.Document }): any | null {
@@ -38,8 +35,6 @@ const lexicon = {
     'compared': 'Verb'
 }
 
-const MONTH_NAMES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
-const MONTH_NAMES_WHOLE_REGEX = new RegExp(`^(${MONTH_NAMES.join("|")})$`, 'gi')
 const MONTH_NAMES_REGEX = new RegExp(`${MONTH_NAMES.join("|")}`, 'gi')
 
 type Rules = Array<{ regex: RegExp, variableType: VariableType, value: any }>
@@ -164,193 +159,160 @@ const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (o
 ]
 
 export async function preprocess(speech: string, options: NLUOptions): Promise<PreProcessedInputText> {
+    const quickPassWithTemplate = tryPreprocessingByTemplates(speech, options)
+    if(quickPassWithTemplate){
+        console.log("Quick passed : ", speech)
+        return quickPassWithTemplate
+    }
+    
     const t = Date.now()
 
     const variables: VariableInfoDict = {}
-
-    let quickPass = false
 
     let processedText: string | undefined = undefined
 
     let intent: Intent | undefined = undefined
 
-    console.log("preprocess", speech)
-
-    //Check for quickpass=================================================
-    {
-        if (MONTH_NAMES_WHOLE_REGEX.test(speech)) {
-            //month
-            const month = MONTH_NAMES.indexOf(speech.toLowerCase())
-            const today = options.getToday()
-            const todayMonth = getMonth(today)
-            let monthDate: Date
-
-            if (month <= todayMonth) {
-                //same year
-                monthDate = setMonth(today, month)
-            } else {
-                monthDate = subYears(setMonth(today, month), 1)
-            }
-
-            const id = makeId()
-            processedText = id
+    //Find data source=================================================================================
+    let processedSpeech = speech
+    DATASOURCE_VARIABLE_RULES.concat(CYCLIC_TIME_RULES).forEach(rule => {
+        processedSpeech = processedSpeech.replace(rule.regex, (match) => {
+            const id = makeVariableId()
             variables[id] = {
                 id,
-                originalText: speech,
-                type: VariableType.Period,
-                value: [DateTimeHelper.toNumberedDateFromDate(startOfMonth(monthDate)), DateTimeHelper.toNumberedDateFromDate(endOfMonth(monthDate))]
+                originalText: match,
+                type: rule.variableType,
+                value: rule.value
             }
-
-            intent = Intent.AssignTrivial
-
-            quickPass = true
-            console.log("Took a quick path")
-        }
-    }
-    //=======================================
-    if (quickPass === false) {
-        //Find data source=================================================================================
-        let processedSpeech = speech
-        DATASOURCE_VARIABLE_RULES.concat(CYCLIC_TIME_RULES).forEach(rule => {
-            processedSpeech = processedSpeech.replace(rule.regex, (match) => {
-                const id = makeId()
-                variables[id] = {
-                    id,
-                    originalText: match,
-                    type: rule.variableType,
-                    value: rule.value
-                }
-                return id
-            })
+            return id
         })
+    })
 
-        //Find date and period==================================================================================
-        const nlp = compromise(processedSpeech, lexicon)
+    //Find date and period==================================================================================
+    const nlp = compromise(processedSpeech, lexicon)
 
-        nlp.match("compare").unTag("Date").unTag("Time").unTag("Duration").tag("Verb")
+    nlp.match("compare").unTag("Date").unTag("Time").unTag("Duration").tag("Verb")
 
-        //Tag all the inferred variables
-        Object.keys(variables).forEach(id => {
-            tag(nlp.match(id), variables[id].type)
-        })
+    //Tag all the inferred variables
+    Object.keys(variables).forEach(id => {
+        tag(nlp.match(id), variables[id].type)
+    })
 
-        const nlpCasted = (nlp as any)
+    const nlpCasted = (nlp as any)
 
-        nlpCasted.numbers().toCardinal().toNumber()
+    nlpCasted.numbers().toCardinal().toNumber()
 
-        TIME_EXPRESSION_MATCH_SYNTAX.forEach(matchSyntaxElm => {
-            const matches = nlp.match(matchSyntaxElm.matchSyntax)
-            matches.forEach(match => {
-                const matchedGroup = match.groups()
-                const obj = normalizeCompromiseGroup(matchedGroup)
-                if (obj) {
-                    const id = makeId()
-                    const parseResult = matchSyntaxElm.valueParser(obj, options)
-                    if (parseResult) {
-                        variables[id] = {
-                            value: parseResult.value,
-                            type: parseResult.type,
-                            id,
-                            originalText: match.text()
-                        }
-                        tag(match.replaceWith(id), parseResult.type).tag("Date")
+    TIME_EXPRESSION_MATCH_SYNTAX.forEach(matchSyntaxElm => {
+        const matches = nlp.match(matchSyntaxElm.matchSyntax)
+        matches.forEach(match => {
+            const matchedGroup = match.groups()
+            const obj = normalizeCompromiseGroup(matchedGroup)
+            if (obj) {
+                const id = makeVariableId()
+                const parseResult = matchSyntaxElm.valueParser(obj, options)
+                if (parseResult) {
+                    variables[id] = {
+                        value: parseResult.value,
+                        type: parseResult.type,
+                        id,
+                        originalText: match.text()
                     }
+                    tag(match.replaceWith(id), parseResult.type).tag("Date")
                 }
-            })
-        })
-
-        const timeExpressionDict: {
-            [id: string]: {
-                value: any,
-                originalText: string,
-                id: string
-            }
-        } = {}
-
-        nlpCasted.dates().forEach(match => {
-            const text = match.text()
-            const parseResult = parseTimeText(text, options.getToday())
-            if (parseResult) {
-                const id = makeId()
-                variables[id] = {
-                    value: parseResult.value,
-                    type: parseResult.type,
-                    originalText: text,
-                    id
-                }
-                tag(match.replaceWith(id), parseResult.type)
             }
         })
+    })
 
-
-        if (MONTH_NAMES_REGEX.test(nlp.text()) === true) {
-            //month name was not parsed.
-            tag(nlp.replace(`(${MONTH_NAMES_REGEX.source})`, (match: compromise.Phrase) => {
-                const id = makeId()
-                timeExpressionDict[id] = {
-                    value: null,
-                    originalText: match.terms().map(t => t.text).join(" "),
-                    id
-                }
-                return id
-            }).tag("Date").tag("Month"), VariableType.Period)
+    const timeExpressionDict: {
+        [id: string]: {
+            value: any,
+            originalText: string,
+            id: string
         }
+    } = {}
 
-        Object.keys(timeExpressionDict).forEach(id => {
-            const elm = timeExpressionDict[id]
-            const parseResult = parseTimeText(elm.originalText, options.getToday())
-            if (parseResult) {
-                variables[id] = {
-                    value: parseResult.value,
-                    type: parseResult.type,
-                    originalText: elm.originalText,
-                    id
-                }
-                tag(nlp.match(id), parseResult.type)
-            }
-        })
-
-        //Find Verb========================================================
-        const verbs = nlp.verbs().match("!#Modal").first().toLowerCase().verbs().toInfinitive()
-        const verbsJson = verbs.json()
-        if (verbsJson.length > 0) {
-            const id = makeId()
+    nlpCasted.dates().forEach(match => {
+        const text = match.text()
+        const parseResult = parseTimeText(text, options.getToday())
+        if (parseResult) {
+            const id = makeVariableId()
             variables[id] = {
-                value: {
-                    root: verbsJson[0].text,
-                    type: inferVerbType(verbsJson[0].text)
-                } as VerbInfo,
-                type: VariableType.Verb,
-                originalText: verbsJson[0].text,
+                value: parseResult.value,
+                type: parseResult.type,
+                originalText: text,
                 id
             }
-
-            tag(verbs.replaceWith(id), VariableType.Verb)
-
-            intent = variables[id].value.type
+            tag(match.replaceWith(id), parseResult.type)
         }
+    })
 
-        //Infer highlight======================================================
-        //if (nlp.match("(number of)? (the)? days?").json().length > 0 || intent === Intent.Highlight) {
 
-        const inferredConditionInfoResult = inferHighlight(nlp, speech)
-        if (inferredConditionInfoResult) {
-            const id = makeId()
-            variables[id] = {
-                id,
-                originalText: inferredConditionInfoResult.match.text(),
-                type: VariableType.Condition,
-                value: inferredConditionInfoResult.conditionInfo
+    if (MONTH_NAMES_REGEX.test(nlp.text()) === true) {
+        //month name was not parsed.
+        tag(nlp.replace(`(${MONTH_NAMES_REGEX.source})`, (match: compromise.Phrase) => {
+            const id = makeVariableId()
+            timeExpressionDict[id] = {
+                value: null,
+                originalText: match.terms().map(t => t.text).join(" "),
+                id
             }
-            tag(inferredConditionInfoResult.match.replaceWith(id), VariableType.Condition)
-            intent = Intent.Highlight
+            return id
+        }).tag("Date").tag("Month"), VariableType.Period)
+    }
+
+    Object.keys(timeExpressionDict).forEach(id => {
+        const elm = timeExpressionDict[id]
+        const parseResult = parseTimeText(elm.originalText, options.getToday())
+        if (parseResult) {
+            variables[id] = {
+                value: parseResult.value,
+                type: parseResult.type,
+                originalText: elm.originalText,
+                id
+            }
+            tag(nlp.match(id), parseResult.type)
+        }
+    })
+
+    //Find Verb========================================================
+    const verbs = nlp.verbs().match("!#Modal").first().toLowerCase().verbs().toInfinitive()
+    const verbsJson = verbs.json()
+    if (verbsJson.length > 0) {
+        const id = makeVariableId()
+        variables[id] = {
+            value: {
+                root: verbsJson[0].text,
+                type: inferVerbType(verbsJson[0].text)
+            } as VerbInfo,
+            type: VariableType.Verb,
+            originalText: verbsJson[0].text,
+            id
         }
 
-        //}
+        tag(verbs.replaceWith(id), VariableType.Verb)
 
-        processedText = nlp.text()
-
+        intent = variables[id].value.type
     }
+
+    //Infer highlight======================================================
+    //if (nlp.match("(number of)? (the)? days?").json().length > 0 || intent === Intent.Highlight) {
+
+    const inferredConditionInfoResult = inferHighlight(nlp, speech)
+    if (inferredConditionInfoResult) {
+        const id = makeVariableId()
+        variables[id] = {
+            id,
+            originalText: inferredConditionInfoResult.match.text(),
+            type: VariableType.Condition,
+            value: inferredConditionInfoResult.conditionInfo
+        }
+        tag(inferredConditionInfoResult.match.replaceWith(id), VariableType.Condition)
+        intent = Intent.Highlight
+    }
+
+    //}
+
+    processedText = nlp.text()
 
     //====================================================================================================
     console.log("Preprocessing: elapsed - ", Date.now() - t)
@@ -463,8 +425,8 @@ export async function test() {
     await preprocess("What's the days I woke up earlier than half past ten", { getToday: () => new Date() })
     await preprocess("What's the day with the maximum step count", { getToday: () => new Date() })
     */
-   await preprocess("step count by day of the week", { getToday: () => new Date() })
-    
+    //await preprocess("step count by day of the week", { getToday: () => new Date() })
+    await preprocess("2019", { getToday: () => new Date() })
 
 
 }
