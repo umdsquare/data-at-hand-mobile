@@ -50,7 +50,9 @@ export class NLUCommandResolver {
         const toldCyclicTimeFrames = cyclicTimeFrames.length > 0
         const toldConditions = conditions.length > 0
 
-        if(preprocessed.intent === Intent.AssignTrivial && Object.keys(preprocessed.variables).length === 0){
+        const nonVerbVariableExists = Object.keys(preprocessed.variables).find(id => preprocessed.variables[id].type !== VariableType.Verb) != null
+        
+        if(nonVerbVariableExists === false){
             //reject
             return null
         }

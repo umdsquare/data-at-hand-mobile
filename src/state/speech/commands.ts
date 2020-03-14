@@ -96,6 +96,8 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
                             )
 
                             if (inferredAction != null) {
+                                console.log("resulting action:")
+                                console.log(inferredAction)
                                 dispatch(inferredAction)
                                 requestAnimationFrame(()=>{
                                     SpeechEventQueue.instance.push({
