@@ -202,7 +202,7 @@ export function createGoToComparisonTwoRangesAction(
   dataSource?: DataSourceType,
   rangeA?: [number, number],
   rangeB?: [number, number],
-) {
+): GoToComparisonTwoRangesAction {
   return {
     type: ExplorationActionType.GoToComparisonToRanges,
     interactionType,

@@ -89,7 +89,7 @@ const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (o
             const today = options.getToday()
 
             if (relatives.length === 1 || relatives.every(v => v === 'last') === false) {
-                switch (relatives[0]) {
+                switch (relatives[relatives.length - 1]) {
                     case "this":
                         return {
                             type: VariableType.Period,
@@ -159,6 +159,8 @@ const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (o
 ]
 
 export async function preprocess(speech: string, options: NLUOptions): Promise<PreProcessedInputText> {
+    speech = speech.replace("&", " ").replace(/[^a-zA-Z0-9\s]/gi, " ").toLowerCase()
+
     const quickPassWithTemplate = tryPreprocessingByTemplates(speech, options)
     if(quickPassWithTemplate){
         console.log("Quick passed : ", speech)
@@ -426,7 +428,7 @@ export async function test() {
     await preprocess("What's the day with the maximum step count", { getToday: () => new Date() })
     */
     //await preprocess("step count by day of the week", { getToday: () => new Date() })
-    await preprocess("2019", { getToday: () => new Date() })
-
+    //await preprocess("2019", { getToday: () => new Date() })
+    await preprocess("compare January with February",  { getToday: () => new Date() })
 
 }

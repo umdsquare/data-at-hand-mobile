@@ -70,8 +70,8 @@ export class NLUCommandResolver {
                     if (toldRanges) {
                         let rangeA, rangeB
                         if (ranges.length > 1) {
-                            rangeA = ranges[0]
-                            rangeB = ranges[1]
+                            rangeA = ranges[0].value
+                            rangeB = ranges[1].value
                         } else {
                             rangeA = context["range"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range)
                             rangeB = ranges[0].value

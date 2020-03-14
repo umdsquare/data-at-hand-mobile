@@ -2,13 +2,16 @@ import { PreProcessedInputText, Intent, MONTH_NAMES, VariableType, NLUOptions, m
 import { getMonth, setMonth, subYears, endOfMonth, startOfMonth } from "date-fns";
 import { DateTimeHelper } from "../../../../time";
 import NamedRegExp from 'named-regexp-groups'
+import { parseTimeText } from "./preprocessor-time";
+
+const REGEX_RANDOM_ELEMENT = "[a-zA-Z0-9\\s]+"
 
 interface Template {
     regex: NamedRegExp,
     parse: (groups: any, options: NLUOptions) => {
         intent: Intent,
         variables: Array<{ type: VariableType, value: any }>
-    }
+    } | null
 }
 
 const templates: Array<Template> = [
@@ -41,7 +44,7 @@ const templates: Array<Template> = [
         parse: (groups: { year: string }, options) => {
             const year = Number.parseInt(groups.year)
             return {
-                intent: Intent.AssignTrivial, 
+                intent: Intent.AssignTrivial,
                 variables: [{
                     type: VariableType.Period,
                     value: [
@@ -51,30 +54,52 @@ const templates: Array<Template> = [
                 }]
             }
         }
+    },
+    {
+        regex: new NamedRegExp(`^(compare|compel)\\s+(?<compareA>${REGEX_RANDOM_ELEMENT})\\s+(with|to|and)\\s+(?<compareB>${REGEX_RANDOM_ELEMENT})$`, 'i'),
+        parse: (groups: { compareA: string, compareB: string }, options) => {
+            const today = options.getToday()
+            const aParseResult = parseTimeText(groups.compareA, today)
+            const bParseResult = parseTimeText(groups.compareB, today)
+
+            const variables = []
+            if(aParseResult){
+                variables.push(aParseResult)
+            }
+            if(bParseResult){
+                variables.push(bParseResult)
+            }
+
+            return {
+                intent: Intent.Compare,
+                variables
+            }
+        }
     }
 ]
 
 export function tryPreprocessingByTemplates(speech: string, options: NLUOptions): PreProcessedInputText | null {
-    for(const template of templates){
+    for (const template of templates) {
 
         const parsed = template.regex.exec(speech)
-        console.log(template.regex, "\"" + speech + "\"", "parsed:", parsed)
-        if(parsed){
+        if (parsed) {
             const result = template.parse(parsed.groups, options)
-            const variables: any = {}
-            result.variables.forEach(v => {
-                const id = makeVariableId()
-                variables[id] = {
-                    ...v,
-                    id
-                }
-            })
+            if (result) {
+                const variables: any = {}
+                result.variables.forEach(v => {
+                    const id = makeVariableId()
+                    variables[id] = {
+                        ...v,
+                        id
+                    }
+                })
 
-            return {
-                intent: result.intent,
-                original: speech,
-                processed: speech,
-                variables
+                return {
+                    intent: result.intent,
+                    original: speech,
+                    processed: speech,
+                    variables
+                }
             }
         }
     }
