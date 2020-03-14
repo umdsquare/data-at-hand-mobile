@@ -20,6 +20,7 @@ import { ReduxAppState } from '../../state/types'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Button } from 'react-native-elements'
 import { TimePicker } from "react-native-wheel-picker-android";
+import { DurationWheelPicker } from '../common/DurationWheelPicker'
 
 type SpecType = { dataSourceType: DataSourceType, propertyKey?: string | null, label: string }
 const dataSourceSpecs: Array<SpecType> = [
@@ -253,21 +254,25 @@ export const HighlightFilterPanel = React.memo((props: {
             ref: inputReferenceValue
         }
         props.onFilterModified(newFilter)
-    }, [setShowReferenceEditView, inputReferenceValue, props.onFilterModified])
+    }, [inputReferenceValue, props.onFilterModified])
 
     const handleCancelReferenceEdit = useCallback(() => {
         setShowReferenceEditView(false)
-    }, [setShowReferenceEditView])
+    }, [])
 
     const onInputTextChange = useCallback((text: string) => {
         setInputReferenceValue(text.length > 0 ? Number.parseInt(text) : null)
-    }, [setInputReferenceValue])
+    }, [])
 
     const onTimePickerValueChange = Platform.OS === 'ios' ? useCallback((ev, value) => {
         setInputReferenceValue(getHours(value) * 3600 + getMinutes(value) * 60)
     }, [setInputReferenceValue]) : useCallback((value) => {
         setInputReferenceValue(getHours(value) * 3600 + getMinutes(value) * 60)
-    }, [setInputReferenceValue])
+    }, [])
+
+    const onDurationChange = useCallback((duration) => {
+        setInputReferenceValue(duration)
+    }, [])
 
     const inputView = useMemo(() => () => {
         switch (props.filter.dataSource) {
@@ -284,6 +289,8 @@ export const HighlightFilterPanel = React.memo((props: {
                         itemTextSize={18}
                         initDate={addSeconds(pivot, inputReferenceValue) as any}
                         onTimeSelected={onTimePickerValueChange as any} />
+            case DataSourceType.HoursSlept:
+                return <DurationWheelPicker durationSeconds={inputReferenceValue} onDurationChange={onDurationChange}/>
             default: return <Dialog.Input
                 style={Platform.OS === 'android' ? styles.textInputAndroidStyle : undefined}
                 autoFocus={true}
