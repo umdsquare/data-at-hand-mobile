@@ -1,14 +1,11 @@
-import { PreProcessedInputText, VariableType, VariableInfo, VariableInfoDict, VerbInfo, NLUOptions, Intent, ConditionInfo, MONTH_NAMES, makeVariableId } from "./types";
+import { PreProcessedInputText, VariableType, VariableInfoDict, VerbInfo, NLUOptions, Intent, ConditionInfo, MONTH_NAMES, makeVariableId } from "./types";
 import compromise from 'compromise';
-import { DataSourceType } from "../../../measure/DataSourceSpec";
 import { parseTimeText, parseDateTextToNumberedDate, parseTimeOfTheDayTextToDiffSeconds, parseDurationTextToSeconds } from "./preprocessors/preprocessor-time";
 import { DateTimeHelper } from "../../../time";
-import { subDays, subWeeks, subMonths, addDays, subYears, isSameMonth, getMonth, setMonth, startOfMonth, endOfMonth, endOfWeek, startOfWeek } from "date-fns";
-import { randomString } from "../../../utils";
+import { subDays, subWeeks, subMonths, addDays, subYears, endOfWeek, startOfWeek } from "date-fns";
 import { inferVerbType } from "./preprocessors/preprocessor-verb";
-import { CyclicTimeFrame } from "../../exploration/cyclic_time";
 import { categorizeExtreme, findComparisonTermInfo } from "./preprocessors/preprocessor-condition";
-import { tryPreprocessingByTemplates } from "./preprocessors/preprocessor-templates";
+import { tryPreprocessingByTemplates, DATASOURCE_VARIABLE_RULES, CYCLIC_TIME_RULES } from "./preprocessors/preprocessor-templates";
 
 const PARSED_TAG = "ReplacedId"
 
@@ -37,48 +34,6 @@ const lexicon = {
 
 const MONTH_NAMES_REGEX = new RegExp(`${MONTH_NAMES.join("|")}`, 'gi')
 
-type Rules = Array<{ regex: RegExp, variableType: VariableType, value: any }>
-
-const DATASOURCE_VARIABLE_RULES: Rules = [
-    {
-        regex: /(step count(s|er)?)|(steps?)|(walk)/gi,
-        variableType: VariableType.DataSource,
-        value: DataSourceType.StepCount
-    },
-    {
-        regex: /((resting\s+)?heart rate)|(bpm)|(beats? per minutes?)/gi,
-        variableType: VariableType.DataSource,
-        value: DataSourceType.HeartRate
-    },
-    {
-        regex: /(h?ours?(\s?)+(i|(of))?(\s?)+((slept)|(sleep)))|(sleep length)|((length|duration) of ([a-z]+\s)?sleep)|(sleep duration)|(sleep h?ours?)|(i (slept|sleep))/gi,
-        variableType: VariableType.DataSource,
-        value: DataSourceType.HoursSlept
-    },
-    {
-        regex: /(sleep(\srange)?)|(range of ([a-z]+\s)?sleep)|(sleep schedules?)/gi,
-        variableType: VariableType.DataSource,
-        value: DataSourceType.SleepRange,
-    },
-    {
-        regex: /((body\s+)?weight)|(how heavy i (was|am))/gi,
-        variableType: VariableType.DataSource,
-        value: DataSourceType.Weight
-    }
-]
-
-const CYCLIC_TIME_RULES: Rules = [
-    {
-        regex: /days?\s+of\s+(the\s+)?weeks?/gi,
-        variableType: VariableType.TimeCycle,
-        value: CyclicTimeFrame.DayOfWeek
-    },
-    {
-        regex: /(months?\s+of\s+(the\s+)?years?)|(monthly pattern)|(by months?)/gi,
-        variableType: VariableType.TimeCycle,
-        value: CyclicTimeFrame.MonthOfYear
-    }
-]
 
 const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (obj: any, options: NLUOptions) => { type: VariableType.Date | VariableType.Period, value: number | [number, number] } | null }> = [
 
@@ -159,6 +114,9 @@ const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (o
 ]
 
 export async function preprocess(speech: string, options: NLUOptions): Promise<PreProcessedInputText> {
+
+    const t = Date.now()
+    
     speech = speech.replace("&", " ").replace(/[^a-zA-Z0-9\s]/gi, " ").toLowerCase()
 
     const quickPassWithTemplate = tryPreprocessingByTemplates(speech, options)
@@ -167,7 +125,6 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
         return quickPassWithTemplate
     }
     
-    const t = Date.now()
 
     const variables: VariableInfoDict = {}
 
