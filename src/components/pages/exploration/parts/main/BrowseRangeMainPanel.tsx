@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useMemo } from "react";
 import { View, FlatList, Text, StyleSheet, ActivityIndicator, LayoutAnimation, UIManager, findNodeHandle } from 'react-native';
 import { MeasureUnitType, DataSourceType } from "../../../../../measure/DataSourceSpec";
-import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, InteractionType } from "../../../../../state/exploration/interaction/actions";
+import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, InteractionType, setHighlightFilter } from "../../../../../state/exploration/interaction/actions";
 import { connect } from "react-redux";
 import { ReduxAppState } from "../../../../../state/types";
 import { Dispatch } from "redux";
@@ -21,6 +21,7 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 import { SvgIcon, SvgIconType } from "../../../../common/svg/SvgIcon";
 import { DataSourceManager } from "../../../../../system/DataSourceManager";
 import { DataServiceManager } from "../../../../../system/DataServiceManager";
+import { HighlightFilterPanel } from "../../../../exploration/HighlightFilterPanel";
 
 const listItemHeightNormal = 52
 const listItemHeightTall = 70
@@ -107,16 +108,24 @@ class BrowseRangeMainPanel extends React.PureComponent<Props, State>{
         }
     }
 
-    onListElementClick = (date: number) => {
+    private readonly onListElementClick = (date: number) => {
         this.props.dispatchExplorationAction(createGoToBrowseDayAction(InteractionType.TouchOnly, inferIntraDayDataSourceType(this.props.source), date))
     }
 
-    onListElementLongPressIn = (date: number, element: TouchingElementInfo) => {
+    private readonly onListElementLongPressIn = (date: number, element: TouchingElementInfo) => {
         this.props.dispatchExplorationAction(setTouchElementInfo(element))
     }
 
-    onListElementLongPressOut = (date: number) => {
+    private readonly onListElementLongPressOut = (date: number) => {
         this.props.dispatchExplorationAction(setTouchElementInfo(null))
+    }
+
+    private readonly onDiscardFilter = () => {
+        this.props.dispatchExplorationAction(setHighlightFilter(InteractionType.TouchOnly, null))
+    }
+
+    private readonly onFilterModified = (newFilter: HighlightFilter) => {
+        this.props.dispatchExplorationAction(setHighlightFilter(InteractionType.TouchOnly, newFilter))
     }
 
     private getItemLayout = (_, index) => {
@@ -140,6 +149,14 @@ class BrowseRangeMainPanel extends React.PureComponent<Props, State>{
             dataList.sort((a: any, b: any) => b["numberedDate"] - a["numberedDate"])
 
             return <View style={StyleTemplates.fillFlex}>
+                {
+                    this.props.highlightFilter != null? <HighlightFilterPanel 
+                    filter={this.props.highlightFilter}
+                    highlightedDays={this.props.data.highlightedDays}
+                    onDiscardFilterPressed={this.onDiscardFilter}
+                    onFilterModified={this.onFilterModified}
+                    />:<></>
+                }
                 <DataSourceChartFrame data={sourceRangedData}
                     filter={this.props.highlightFilter}
                     highlightedDays={sourceRangedData.highlightedDays}
