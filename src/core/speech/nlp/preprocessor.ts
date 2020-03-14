@@ -116,8 +116,8 @@ const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (o
 export async function preprocess(speech: string, options: NLUOptions): Promise<PreProcessedInputText> {
 
     const t = Date.now()
-    
-    speech = speech.replace("&", " ").replace(/[^a-zA-Z0-9\s]/gi, " ").toLowerCase()
+
+    speech = speech.toLowerCase()
 
     const quickPassWithTemplate = tryPreprocessingByTemplates(speech, options)
     if(quickPassWithTemplate){

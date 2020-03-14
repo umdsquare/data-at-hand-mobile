@@ -81,7 +81,7 @@ export namespace CommonBrowsingChartStyles {
     ])
 
     const highlightReference = useMemo(() => {
-      if (shouldHighlightElements === true) {
+      if (prop.highlightFilter != null && prop.highlightFilter.dataSource === dataSource) {
 
         switch (prop.highlightFilter.type) {
           case NumericConditionType.Less:

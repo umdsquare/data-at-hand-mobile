@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import Svg, { Rect, Line } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartProps } from './common';
 import { AxisSvg } from '../../../visualization/axis';
@@ -12,7 +12,6 @@ import { GroupWithTouchInteraction } from './GroupWithTouchInteraction';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '../../../../state/types';
 import { DataServiceManager } from '../../../../system/DataServiceManager';
-import { NumericConditionType } from '../../../../core/exploration/types';
 
 interface Props extends ChartProps {
     valueTickFormat?: (num: number) => string,
@@ -80,7 +79,7 @@ export const DailyBarChart = React.memo((prop: Props) => {
                 mean != null && <Line x1={0} x2={chartArea.width} y={scaleY(mean)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"} />
             }
             {
-                shouldHighlightElements === true ? <Line x1={0} x2={chartArea.width} y={scaleY(highlightReference)} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
+                highlightReference != null ? <Line x1={0} x2={chartArea.width} y={scaleY(highlightReference)} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
             }
         </GroupWithTouchInteraction>
     </Svg>

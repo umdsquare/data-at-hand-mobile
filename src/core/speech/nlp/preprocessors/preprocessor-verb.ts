@@ -4,7 +4,7 @@ const verbTypes: {[verbType: string]: Array<string>} = {}
 verbTypes[Intent.AssignTrivial]=["set", "assign", "put", "change", "modify", "edit", "replace"]
 verbTypes[Intent.Browse]=["browse", "go", "show", "explore"]
 verbTypes[Intent.Compare]=["compare"]
-verbTypes[Intent.Highlight]=["highlight", "count"]
+verbTypes[Intent.Highlight]=["highlight", "count", "find"]
 
 const dict: {[verb:string]: Intent} = {}
 Object.keys(verbTypes).forEach(verbType => {
