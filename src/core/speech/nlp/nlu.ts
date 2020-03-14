@@ -146,7 +146,11 @@ export class NLUCommandResolver {
 
                     if (cascadedRange || cascadedDate) {
                         if (rangePriority >= datePriority) {
-                            return createGoToBrowseRangeAction(InteractionType.Speech, cascadedDataSource, cascadedRange)
+                            if(cascadedDataSource){
+                                return createGoToBrowseRangeAction(InteractionType.Speech, cascadedDataSource, cascadedRange)
+                            }else{
+                                return createSetRangeAction(InteractionType.Speech, cascadedRange)
+                            }
                         } else {
                             const inferredIntraDayDataSourceType = inferIntraDayDataSourceType(cascadedDataSource)
                             if (inferredIntraDayDataSourceType) {
