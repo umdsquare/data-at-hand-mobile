@@ -1,9 +1,10 @@
 import { PreProcessedInputText, Intent, MONTH_NAMES, VariableType, NLUOptions, makeVariableId } from "../types";
 import { getMonth, setMonth, subYears, endOfMonth, startOfMonth } from "date-fns";
 import { DateTimeHelper } from "../../../../time";
+import NamedRegExp from 'named-regexp-groups'
 
 interface Template {
-    regex: RegExp,
+    regex: NamedRegExp,
     parse: (groups: any, options: NLUOptions) => {
         intent: Intent,
         variables: Array<{ type: VariableType, value: any }>
@@ -12,7 +13,7 @@ interface Template {
 
 const templates: Array<Template> = [
     {
-        regex: new RegExp(`^(?<month>${MONTH_NAMES.join("|")})$`, 'i'),
+        regex: new NamedRegExp(`^(?<month>${MONTH_NAMES.join("|")})$`, 'i'),
         parse: (groups: { month: string }, options) => {
             const month = MONTH_NAMES.indexOf(groups.month.toLowerCase())
             const today = options.getToday()
@@ -36,7 +37,7 @@ const templates: Array<Template> = [
         }
     },
     {
-        regex: /^(year\s+)?(?<year>\d{4})$/i,
+        regex: new NamedRegExp("^(year\\s+)?(?<year>\\d{4})$", "i"),
         parse: (groups: { year: string }, options) => {
             const year = Number.parseInt(groups.year)
             return {
@@ -57,6 +58,7 @@ export function tryPreprocessingByTemplates(speech: string, options: NLUOptions)
     for(const template of templates){
 
         const parsed = template.regex.exec(speech)
+        console.log(template.regex, "\"" + speech + "\"", "parsed:", parsed)
         if(parsed){
             const result = template.parse(parsed.groups, options)
             const variables: any = {}
