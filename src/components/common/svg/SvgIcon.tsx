@@ -1,5 +1,5 @@
-import React from 'react';
-import Svg, { G, Path } from "react-native-svg"
+import React, { Fragment } from 'react';
+import Svg, { G, Path, Circle } from "react-native-svg"
 import { ViewStyle } from 'react-native';
 
 export enum SvgIconType {
@@ -8,7 +8,9 @@ export enum SvgIconType {
     ArrowForward,
     Settings,
     Reset,
-    Microphone
+    Microphone,
+    Check,
+    QuestionMark
 }
 
 export const SvgIcon = (props: {
@@ -32,6 +34,16 @@ export const SvgIcon = (props: {
         case SvgIconType.Reset: content = <Path fill={props.color} d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
             break;
         case SvgIconType.Microphone: content = <Path fill={props.color} d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z" />
+            break;
+        case SvgIconType.QuestionMark:
+            content = <>
+                <Path fill={props.color} d="M13.4,17.7h-3v-2.8c0-3.1,1.8-4.3,3-5.1c1-0.7,1.5-1,1.5-2.3c0-2.2-0.7-2.9-2.9-2.9c-2.7,0-3,0.9-3,3H6c0-2.6,0.6-6,6-6
+	c2.7,0,5.9,1,5.9,5.9c0,3-1.7,4.1-2.9,4.9c-1.1,0.7-1.6,1-1.6,2.5V17.7z" />
+                <Circle fill={props.color} cx="11.9" cy="21.1" r="1.9" />
+            </>
+            break;
+        case SvgIconType.Check:
+            content = <Path fill={props.color} d="M9.1,14.8l-3.5-3.5l-2.1,2.1L9,19L21,7l-2.1-2.1L9.1,14.8z" />
             break;
     }
 

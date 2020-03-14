@@ -38,6 +38,9 @@ import { RootStackParamList } from "../../Routes";
 import { SpeechContextHelper } from "../../../core/speech/nlp/context";
 import { test } from "../../../core/speech/nlp/preprocessor";
 import { TouchSafeBottomSheet } from "../../common/TouchSafeBottomSheet";
+import { Subscription, pipe, interval } from "rxjs";
+import { SpeechEventQueue } from "../../../core/speech/SpeechEventQueue";
+import { SpeechEventNotificationOverlay } from "./SpeechEventNotificationOverlay";
 
 test().then()
 
@@ -120,7 +123,11 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
     private comparisonBottomSheetRef = React.createRef<TouchSafeBottomSheet>()
     private speechUndoButtonRef = React.createRef<Button>()
 
+    private speechFeedbackRef = React.createRef<SpeechEventNotificationOverlay>()
+
     private undoHideTimeout: NodeJS.Timeout | null = null
+
+    private readonly subscriptions = new Subscription()
 
     private onAppStateChange = (nextAppState: AppStateStatus) => {
         if (
@@ -179,6 +186,16 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
     }
 
     async componentDidMount() {
+
+        this.subscriptions.add(SpeechEventQueue.instance.onNewEventPushed.subscribe(
+            (event) => {
+                this.speechFeedbackRef.current?.notify(event)
+            },
+            err => {
+
+            }, () => {
+
+            }))
 
         AppState.addEventListener('change', this.onAppStateChange)
 
@@ -259,6 +276,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
     componentWillUnmount() {
         AppState.removeEventListener('change', this.onAppStateChange)
         BackHandler.removeEventListener("hardwareBackPress", this.onHardwareBackPress)
+        this.subscriptions.unsubscribe()
     }
 
     onBottomBarButtonPress = (mode: ExplorationMode) => {
@@ -336,8 +354,9 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
                     />
                 </View>
                 }
-            </View>
 
+            </View>
+            
             <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationInfo)}
                 onModePress={this.onBottomBarButtonPress}
                 onVoiceButtonPressIn={this.onGlobalSpeechInputPressIn}
@@ -356,6 +375,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
                 this.state.initialLoadingFinished === false ? <InitialLoadingIndicator loadingMessage={this.state.loadingMessage} /> : <></>
             }
 
+            <SpeechEventNotificationOverlay ref={this.speechFeedbackRef} />
         </View>
     }
 
@@ -370,9 +390,9 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
             case ExplorationType.C_Cyclic:
                 return <CyclicComparisonMainPanel />
             case ExplorationType.C_TwoRanges:
-                return <MultiRangeComparisonMainPanel/>
+                return <MultiRangeComparisonMainPanel />
             case ExplorationType.C_CyclicDetail_Range:
-                return <MultiRangeComparisonMainPanel/>
+                return <MultiRangeComparisonMainPanel />
             case ExplorationType.C_CyclicDetail_Daily:
                 return <FilteredDatesChartMainPanel />
         }

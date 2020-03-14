@@ -9,6 +9,7 @@ import { Mutex } from 'async-mutex';
 import { SpeechContext } from "../../core/speech/nlp/context";
 import { NLUCommandResolver } from "../../core/speech/nlp/nlu";
 import { DataServiceManager } from "../../system/DataServiceManager";
+import { SpeechEventQueue } from "../../core/speech/SpeechEventQueue";
 
 const sessionMutex = new Mutex()
 
@@ -96,6 +97,19 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
 
                             if (inferredAction != null) {
                                 dispatch(inferredAction)
+                                requestAnimationFrame(()=>{
+                                    SpeechEventQueue.instance.push({
+                                        type: "success",
+                                        id: sessionId
+                                    })
+                                })
+                            }else{
+                                requestAnimationFrame(()=>{
+                                    SpeechEventQueue.instance.push({
+                                        type: "fail",
+                                        id: sessionId
+                                    })
+                                })
                             }
                             console.log(sessionId, "Finished analyzing.")
                             terminate(releaseMutex, dispatch, TerminationReason.Success, sessionId)

@@ -22,6 +22,9 @@ export default {
   speechAffordanceColorText: "#FFD258",
   speechAffordanceGradient: ["#FFCD0A", "#FFA01F"],
 
+  speechFailGradient: ["#F5A17C", "#D6376E"],
+  speechSuccessGradient: ["#A3E359", "#3DB4AB"],
+
   speechExampleTextColor: "#E568A2",
 
   tooltipGradient: ["#34425D", "#1D2C41"],
