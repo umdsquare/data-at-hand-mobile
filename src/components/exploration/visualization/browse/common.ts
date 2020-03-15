@@ -1,8 +1,8 @@
 import { ScaleBand, scaleBand } from 'd3-scale';
-import { DateTimeHelper } from '../../../../time';
+import { DateTimeHelper } from '@utils/time';
 import { LayoutRectangle } from 'react-native';
-import { DataSourceType } from '../../../../measure/DataSourceSpec';
-import { HighlightFilter, NumericConditionType } from '../../../../core/exploration/types';
+import { DataSourceType } from '@measure/DataSourceSpec';
+import { HighlightFilter, NumericConditionType } from '@core/exploration/types';
 import { useMemo } from 'react';
 
 export interface ChartPropsBase<T> {

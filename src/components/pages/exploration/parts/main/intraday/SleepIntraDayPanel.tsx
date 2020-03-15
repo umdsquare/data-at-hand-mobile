@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, LayoutRectangle, Platform } from 'react-native';
 import { useSelector } from 'react-redux';
-import { ReduxAppState } from '../../../../../../state/types';
-import { IDailySleepSummaryEntry, SleepStage } from '../../../../../../core/exploration/data/types';
+import { ReduxAppState } from '@state/types';
+import { IDailySleepSummaryEntry, SleepStage } from '@core/exploration/data/types';
 import { commonIntraDayPanelStyles, NoDataFallbackView } from './common';
-import { SizeWatcher } from '../../../../../visualization/SizeWatcher';
-import { Sizes } from '../../../../../../style/Sizes';
+import { SizeWatcher } from '@components/visualization/SizeWatcher';
+import { Sizes } from '@style/Sizes';
 import Svg, { G, Line, Text as SvgText, Rect } from 'react-native-svg';
 import { scaleLinear, scaleBand } from 'd3-scale';
 import { group, sum } from 'd3-array';
 import { format } from 'date-fns';
-import Colors from '../../../../../../style/Colors';
-import { DateTimeHelper } from '../../../../../../time';
-import { DurationText } from '../../../../../common/DurationText';
+import Colors from '@style/Colors';
+import { DateTimeHelper } from '@utils/time';
+import { DurationText } from '@components/common/DurationText';
 
 const xAxisHeight = 30
 const yAxisWidth = 80

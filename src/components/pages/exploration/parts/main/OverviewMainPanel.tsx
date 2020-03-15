@@ -7,10 +7,10 @@ import { DataSourceChartFrame } from "../../../../exploration/DataSourceChartFra
 import { OverviewData } from "../../../../../core/exploration/data/types";
 import { MeasureUnitType, DataSourceType } from "../../../../../measure/DataSourceSpec";
 import { Dispatch } from "redux";
-import { Sizes } from "../../../../../style/Sizes";
-import { DateTimeHelper } from "../../../../../time";
+import { Sizes } from "@style/Sizes";
+import { DateTimeHelper } from "@utils/time";
 import { inferIntraDayDataSourceType, HighlightFilter } from "../../../../../core/exploration/types";
-import { DataServiceManager } from "../../../../../system/DataServiceManager";
+import { DataServiceManager } from "@measure/DataServiceManager";
 import { HighlightFilterPanel } from "../../../../exploration/HighlightFilterPanel";
 
 const separatorStyle = { height: Sizes.verticalPadding }

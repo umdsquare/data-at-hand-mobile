@@ -1,7 +1,7 @@
 import React from 'react';
 import { Padding } from './types';
 import { G, Line, Circle, Text } from 'react-native-svg';
-import Colors from '../../style/Colors';
+import Colors from '@style/Colors';
 import { getHours, format } from 'date-fns';
 import { LayoutRectangle } from 'react-native';
 

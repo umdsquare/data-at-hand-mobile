@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, Icon } from 'react-native-elements';
-import Colors from '../../style/Colors';
+import Colors from '@style/Colors';
 import { Animated, Easing } from 'react-native';
 
 export enum Valence {

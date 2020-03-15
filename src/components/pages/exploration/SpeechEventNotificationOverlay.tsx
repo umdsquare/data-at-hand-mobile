@@ -1,12 +1,12 @@
 import React from 'react';
-import { SpeechNotificationEvent } from '../../../core/speech/SpeechEventQueue';
+import { SpeechNotificationEvent } from '@core/speech/SpeechEventQueue';
 import { View, Text, Animated, Easing, StyleSheet } from 'react-native';
 import { ZIndices } from './parts/zIndices';
-import { StyleTemplates } from '../../../style/Styles';
+import { StyleTemplates } from '@style/Styles';
 import { SvgIcon, SvgIconType } from '../../common/svg/SvgIcon';
-import { Sizes } from '../../../style/Sizes';
+import { Sizes } from '@style/Sizes';
 import LinearGradient from 'react-native-linear-gradient';
-import Colors from '../../../style/Colors';
+import Colors from '@style/Colors';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
 

@@ -1,11 +1,11 @@
 import {createStore, applyMiddleware} from 'redux';
 import {persistStore, persistCombineReducers} from 'redux-persist';
-import {settingsStateReducer} from './settings/reducer';
+import {settingsStateReducer} from '@state/settings/reducer';
 import AsyncStorage from '@react-native-community/async-storage';
-import { explorationStateReducer } from './exploration/interaction/reducers';
-import {explorationDataStateReducer} from './exploration/data/reducers';
+import { explorationStateReducer } from '@state/exploration/interaction/reducers';
+import {explorationDataStateReducer} from '@state/exploration/data/reducers';
 import thunk from 'redux-thunk';
-import { speechRecognizerStateReducer } from './speech/reducers';
+import { speechRecognizerStateReducer } from '@state/speech/reducers';
 
 const persistConfig = {
   key: 'root',

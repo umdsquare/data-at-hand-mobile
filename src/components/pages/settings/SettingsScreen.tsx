@@ -1,18 +1,18 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableHighlight, Alert } from "react-native";
-import { MeasureUnitType } from "../../../measure/DataSourceSpec";
+import { MeasureUnitType } from "@measure/DataSourceSpec";
 import { Dispatch } from "redux";
-import { ReduxAppState } from "../../../state/types";
+import { ReduxAppState } from "@state/types";
 import { connect } from "react-redux";
-import { setUnit } from '../../../state/settings/actions';
-import { Sizes } from "../../../style/Sizes";
-import Colors from "../../../style/Colors";
-import { DataServiceManager } from "../../../system/DataServiceManager";
+import { setUnit } from '@state/settings/actions';
+import { Sizes } from "@style/Sizes";
+import Colors from "@style/Colors";
+import { DataServiceManager } from "@measure/DataServiceManager";
 import { connectActionSheet } from '@expo/react-native-action-sheet'
-import { SvgIcon, SvgIconType } from "../../common/svg/SvgIcon";
-import { InitialLoadingIndicator } from "../exploration/parts/main/InitialLoadingIndicator";
+import { SvgIcon, SvgIconType } from "@components/common/svg/SvgIcon";
+import { InitialLoadingIndicator } from "@components/pages/exploration/parts/main/InitialLoadingIndicator";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { SettingsSteckParamList } from "../../Routes";
+import { SettingsSteckParamList } from "@components/Routes";
 
 
 const unitTypes = [{

@@ -9,8 +9,8 @@ import {
   IntraDayDataSourceType,
   getIntraDayDataSourceName,
 } from './types';
-import { DataSourceType, DataSourceSpec } from '../../measure/DataSourceSpec';
-import { DataSourceManager } from '../../system/DataSourceManager';
+import { DataSourceType, DataSourceSpec } from '@measure/DataSourceSpec';
+import { DataSourceManager } from '@measure/DataSourceManager';
 
 class ExplorationInfoHelper {
   getParameterValue<T>(

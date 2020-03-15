@@ -1,7 +1,7 @@
-import { SettingsState } from "./settings/reducer";
-import { ExplorationState } from "./exploration/interaction/reducers";
-import { ExplorationDataState } from "./exploration/data/reducers";
-import { SpeechRecognizerState } from "./speech/types";
+import { SettingsState } from "@state/settings/reducer";
+import { ExplorationState } from "@state/exploration/interaction/reducers";
+import { ExplorationDataState } from "@state/exploration/data/reducers";
+import { SpeechRecognizerState } from "@state/speech/types";
 
 
 export type ReduxAppState = {

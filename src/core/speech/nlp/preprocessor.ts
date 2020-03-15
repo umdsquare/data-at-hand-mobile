@@ -1,7 +1,7 @@
 import { PreProcessedInputText, VariableType, VariableInfoDict, VerbInfo, NLUOptions, Intent, ConditionInfo, MONTH_NAMES, makeVariableId } from "./types";
 import compromise from 'compromise';
 import { parseTimeText, parseDateTextToNumberedDate, parseTimeOfTheDayTextToDiffSeconds, parseDurationTextToSeconds } from "./preprocessors/preprocessor-time";
-import { DateTimeHelper } from "../../../time";
+import { DateTimeHelper } from "@utils/time";
 import { subDays, subWeeks, subMonths, addDays, subYears, endOfWeek, startOfWeek } from "date-fns";
 import { inferVerbType } from "./preprocessors/preprocessor-verb";
 import { categorizeExtreme, findComparisonTermInfo } from "./preprocessors/preprocessor-condition";

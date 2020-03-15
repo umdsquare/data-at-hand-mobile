@@ -1,22 +1,22 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react'
-import { HighlightFilter, NumericConditionType } from '../../core/exploration/types'
+import { HighlightFilter, NumericConditionType } from '@core/exploration/types'
 import { View, StyleSheet, Text, Animated, Platform } from 'react-native'
-import Colors from '../../style/Colors'
-import { DataSourceManager } from '../../system/DataSourceManager'
-import { StyleTemplates } from '../../style/Styles'
-import { Sizes } from '../../style/Sizes'
+import Colors from '@style/Colors'
+import { DataSourceManager } from '@measure/DataSourceManager'
+import { StyleTemplates } from '@style/Styles'
+import { Sizes } from '@style/Sizes'
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { RectButton } from 'react-native-gesture-handler'
-import { DataSourceType } from '../../measure/DataSourceSpec'
+import { DataSourceType } from '@measure/DataSourceSpec'
 import { useActionSheet } from '@expo/react-native-action-sheet'
 import pluralize from 'pluralize';
 import deepEqual from 'deep-equal';
 import Dialog from 'react-native-dialog'
-import { DateTimeHelper } from '../../time'
+import { DateTimeHelper } from '@utils/time'
 import { startOfDay, addSeconds, format, getHours, getSeconds, getMinutes } from 'date-fns'
 import commaNumber from 'comma-number'
 import { useSelector } from 'react-redux'
-import { ReduxAppState } from '../../state/types'
+import { ReduxAppState } from '@state/types'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Button } from 'react-native-elements'
 import { TimePicker } from "react-native-wheel-picker-android";
@@ -174,7 +174,7 @@ export const HighlightFilterPanel = React.memo((props: {
 
 
 
-    const renderRightActions = useCallback((progress: Animated.Value, dragX) => {
+    const renderRightActions = useCallback((progress: Animated.AnimatedInterpolation, dragX: Animated.AnimatedInterpolation) => {
         const scale = progress.interpolate({
             inputRange: [0, 1],
             outputRange: [0, 1],

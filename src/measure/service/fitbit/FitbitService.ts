@@ -7,15 +7,15 @@ import { FitbitServiceCore } from './types';
 import { DataSourceType } from '../../DataSourceSpec';
 import { FitbitDailyStepMeasure } from './FitbitDailyStepMeasure';
 import { FitbitDailyHeartRateMeasure } from './FitbitDailyHeartRateMeasure';
-import { DateTimeHelper } from '../../../time';
+import { DateTimeHelper } from '@utils/time';
 import { FitbitServiceMeasure } from './FitbitServiceMeasure';
 import { FitbitWeightMeasure } from './FitbitWeightMeasure';
 import { FitbitSleepMeasure } from './FitbitSleepMeasure';
 import { FitbitIntraDayStepMeasure } from './FitbitIntraDayStepMeasure';
-import { IntraDayDataSourceType, HighlightFilter, NumericConditionType } from '../../../core/exploration/types';
+import { IntraDayDataSourceType, HighlightFilter, NumericConditionType } from '@core/exploration/types';
 import { FitbitIntraDayHeartRateMeasure } from './FitbitIntraDayHeartRateMeasure';
-import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, FilteredDailyValues, BoxPlotInfo } from '../../../core/exploration/data/types';
-import { CyclicTimeFrame, CycleDimension } from '../../../core/exploration/cyclic_time';
+import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, FilteredDailyValues, BoxPlotInfo } from '@core/exploration/data/types';
+import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
 import { FitbitLocalTableName } from './sqlite/database';
 
 

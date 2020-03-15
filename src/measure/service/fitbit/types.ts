@@ -1,7 +1,7 @@
 import { SleepStage } from "../../../core/exploration/data/types";
 import { UnSupportedReason } from "../DataService";
 import { FitbitLocalDbManager } from "./sqlite/database";
-import { LocalAsyncStorageHelper } from "../../../system/AsyncStorageHelper";
+import { LocalAsyncStorageHelper } from "@utils/AsyncStorageHelper";
 
 export interface FitbitUserProfile {
   user: {

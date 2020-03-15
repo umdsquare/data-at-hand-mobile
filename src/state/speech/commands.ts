@@ -4,11 +4,11 @@ import { createBootstrapAction, createTerminateSessionAction, createUpdateDictat
 import { VoiceDictator } from "../../core/speech/VoiceDictator";
 import { DictationResult } from "../../core/speech/types";
 import { SpeechRecognizerSessionStatus } from "./types";
-import { sleep } from "../../utils";
+import { sleep } from "@utils/utils";
 import { Mutex } from 'async-mutex';
 import { SpeechContext } from "../../core/speech/nlp/context";
 import { NLUCommandResolver } from "../../core/speech/nlp/nlu";
-import { DataServiceManager } from "../../system/DataServiceManager";
+import { DataServiceManager } from "@measure/DataServiceManager";
 import { SpeechEventQueue } from "../../core/speech/SpeechEventQueue";
 
 const sessionMutex = new Mutex()

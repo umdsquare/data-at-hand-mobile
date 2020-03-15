@@ -1,28 +1,28 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { ExplorationType, ParameterKey, ParameterType, IntraDayDataSourceType, getIntraDayDataSourceName, inferIntraDayDataSourceType, inferDataSource } from "../../../../core/exploration/types";
+import { ExplorationType, ParameterKey, ParameterType, IntraDayDataSourceType, getIntraDayDataSourceName, inferIntraDayDataSourceType, inferDataSource } from "@core/exploration/types";
 import { SafeAreaView, View, Text, StyleSheet, TextStyle, ViewStyle, LayoutAnimation, ViewProps } from 'react-native';
 import { CategoricalRow, CategoricalRowProps } from '../../../exploration/CategoricalRow';
 import { DataSourceIcon } from '../../../common/DataSourceIcon';
 import { ExplorationProps } from '../ExplorationScreen';
 import { DateRangeBar, DateBar } from '../../../exploration/DateRangeBar';
-import { explorationInfoHelper } from '../../../../core/exploration/ExplorationInfoHelper';
+import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
 import { Button } from 'react-native-elements';
-import { Sizes } from '../../../../style/Sizes';
-import { StyleTemplates } from '../../../../style/Styles';
-import { DataSourceManager } from '../../../../system/DataSourceManager';
-import { DataSourceType } from '../../../../measure/DataSourceSpec';
-import { createSetRangeAction, setDataSourceAction, InteractionType, goBackAction, setDateAction, setIntraDayDataSourceAction, setCycleTypeAction, setCycleDimensionAction } from '../../../../state/exploration/interaction/actions';
-import Colors from '../../../../style/Colors';
+import { Sizes } from '@style/Sizes';
+import { StyleTemplates } from '@style/Styles';
+import { DataSourceManager } from '@measure/DataSourceManager';
+import { DataSourceType } from '@measure/DataSourceSpec';
+import { createSetRangeAction, setDataSourceAction, InteractionType, goBackAction, setDateAction, setIntraDayDataSourceAction, setCycleTypeAction, setCycleDimensionAction } from '@state/exploration/interaction/actions';
+import Colors from '@style/Colors';
 import { useDispatch, useSelector } from 'react-redux';
-import { ReduxAppState } from '../../../../state/types';
-import { CyclicTimeFrame, cyclicTimeFrameSpecs, CycleDimension, getFilteredCycleDimensionList, getHomogeneousCycleDimensionList, getCycleDimensionSpec } from '../../../../core/exploration/cyclic_time';
+import { ReduxAppState } from '@state/types';
+import { CyclicTimeFrame, cyclicTimeFrameSpecs, CycleDimension, getFilteredCycleDimensionList, getHomogeneousCycleDimensionList, getCycleDimensionSpec } from '@core/exploration/cyclic_time';
 import { SvgIcon, SvgIconType } from '../../../common/svg/SvgIcon';
-import { makeNewSessionId, startSpeechSession, requestStopDictation } from '../../../../state/speech/commands';
-import { createSetShowGlobalPopupAction } from '../../../../state/speech/actions';
+import { makeNewSessionId, startSpeechSession, requestStopDictation } from '@state/speech/commands';
+import { createSetShowGlobalPopupAction } from '@state/speech/actions';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '../../../Routes';
-import { SpeechContextHelper } from '../../../../core/speech/nlp/context';
+import { SpeechContextHelper } from '@core/speech/nlp/context';
 
 const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={'white'} />
 

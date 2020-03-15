@@ -1,8 +1,8 @@
 import React from 'react';
-import { IAggregatedValue } from '../../../../core/exploration/data/types';
+import { IAggregatedValue } from '@core/exploration/data/types';
 import { G, Rect, Line } from 'react-native-svg';
 import { ScaleBand, ScaleLinear } from 'd3-scale';
-import Colors from '../../../../style/Colors';
+import Colors from '@style/Colors';
 
 export const SingleValueElement = (props: {
     scaleY: ScaleLinear<number, number>,

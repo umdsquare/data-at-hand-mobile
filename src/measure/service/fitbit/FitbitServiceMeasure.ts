@@ -1,8 +1,8 @@
 import { differenceInMinutes } from 'date-fns';
 import { ICachedRangeEntry } from './sqlite/database';
 import { FitbitServiceMeasureBase } from './FitbitServiceMeasureBase';
-import { BoxPlotInfo } from '../../../core/exploration/data/types';
-import { DateTimeHelper } from '../../../time';
+import { BoxPlotInfo } from '@core/exploration/data/types';
+import { DateTimeHelper } from '@utils/time';
 
 export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
   abstract key: string;

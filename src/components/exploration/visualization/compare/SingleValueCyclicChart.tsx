@@ -1,21 +1,21 @@
 import React, { useCallback } from 'react';
-import { IAggregatedValue } from "../../../../core/exploration/data/types";
+import { IAggregatedValue } from "@core/exploration/data/types";
 import { View, LayoutRectangle, ViewStyle } from "react-native";
 import { SizeWatcher } from "../../../visualization/SizeWatcher";
 import { useState } from "react";
-import { StyleTemplates } from "../../../../style/Styles";
+import { StyleTemplates } from "@style/Styles";
 import { scaleBand, scaleLinear } from "d3-scale";
 import { min, max } from "d3-array";
 import { G } from "react-native-svg";
-import { Sizes } from '../../../../style/Sizes';
+import { Sizes } from '@style/Sizes';
 import { SingleValueElement } from './SingleValueElement';
 import { SingleValueElementLegend } from './SingleValueElementLegend';
 import { getDomainAndTickFormat, makeTouchingInfoForCycle } from './common';
 import { CycleChartFrame } from './CycleChartFrame';
 import { useDispatch } from 'react-redux';
-import { createGoToCyclicDetailDailyAction, InteractionType, createGoToCyclicDetailRangeAction, setTouchElementInfo } from '../../../../state/exploration/interaction/actions';
-import { CyclicTimeFrame, CycleDimension, getCycleDimensionWithTimeKey, getCycleLevelOfDimension } from '../../../../core/exploration/cyclic_time';
-import { DataSourceType } from '../../../../measure/DataSourceSpec';
+import { createGoToCyclicDetailDailyAction, InteractionType, createGoToCyclicDetailRangeAction, setTouchElementInfo } from '@state/exploration/interaction/actions';
+import { CyclicTimeFrame, CycleDimension, getCycleDimensionWithTimeKey, getCycleLevelOfDimension } from '@core/exploration/cyclic_time';
+import { DataSourceType } from '@measure/DataSourceSpec';
 
 const dummyConverter = (num: number) => num
 

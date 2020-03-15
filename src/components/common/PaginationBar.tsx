@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, LayoutAnimation } from 'react-native';
 import { Button } from 'react-native-elements';
-import Colors from '../../style/Colors';
+import Colors from '@style/Colors';
 
 const Sizes = {
     ballNormalSize: 8,

@@ -1,4 +1,4 @@
-import { StepCountIntraDayData, IIntraDayStepCountLog } from "../../../core/exploration/data/types";
+import { StepCountIntraDayData, IIntraDayStepCountLog } from "@core/exploration/data/types";
 import { FitbitIntraDayMeasure } from "./FitbitIntraDayMeasure";
 import { FitbitIntradayStepDayQueryResult } from "./types";
 import * as d3Array from 'd3-array';

@@ -1,8 +1,8 @@
 import React from 'react';
 import { LayoutRectangle } from "react-native"
 import { G, Line, Text as SvgText } from "react-native-svg"
-import Colors from "../../../../style/Colors"
-import { Sizes } from "../../../../style/Sizes"
+import Colors from "@style/Colors"
+import { Sizes } from "@style/Sizes"
 import { ScaleBand, ScaleLinear } from "d3-scale"
 import { CategoricalTouchableSvg } from './CategoricalTouchableSvg';
 

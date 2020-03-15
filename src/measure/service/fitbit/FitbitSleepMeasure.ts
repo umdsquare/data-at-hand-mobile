@@ -1,7 +1,7 @@
 import { FitbitSleepQueryResult } from './types';
 import { FitbitRangeMeasure } from './FitbitRangeMeasure';
 import { makeFitbitSleepApiUrl, FITBIT_DATE_FORMAT } from './api';
-import { DateTimeHelper } from '../../../time';
+import { DateTimeHelper } from '@utils/time';
 import {
   parse,
   getDay,
@@ -19,7 +19,7 @@ import {
   FilteredDailyValues,
   BoxPlotInfo,
   OverviewSourceRow,
-} from '../../../core/exploration/data/types';
+} from '@core/exploration/data/types';
 import { DataSourceType } from '../../DataSourceSpec';
 import {
   FitbitLocalTableName,
@@ -28,13 +28,13 @@ import {
   makeAggregatedQuery,
   makeCycleDimensionRangeQuery,
 } from './sqlite/database';
-import { SQLiteHelper } from '../../../database/sqlite/sqlite-helper';
+import { SQLiteHelper } from '@utils/sqlite-helper';
 import {
   CyclicTimeFrame,
   CycleDimension,
   getCycleTypeOfDimension,
   getTimeKeyOfDimension,
-} from '../../../core/exploration/cyclic_time';
+} from '@core/exploration/cyclic_time';
 
 const columnNamesForRangeData = [
   'numberedDate',

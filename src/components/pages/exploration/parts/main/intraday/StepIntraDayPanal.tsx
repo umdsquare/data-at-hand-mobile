@@ -1,19 +1,19 @@
 import React, { useState } from 'react'
 import { View, Text, LayoutRectangle, StyleSheet } from "react-native"
-import { StyleTemplates } from '../../../../../../style/Styles'
+import { StyleTemplates } from '@style/Styles'
 import { useSelector } from 'react-redux'
-import { ReduxAppState } from '../../../../../../state/types'
+import { ReduxAppState } from '@state/types'
 import { scaleLinear } from 'd3-scale'
-import { StepCountIntraDayData } from '../../../../../../core/exploration/data/types'
+import { StepCountIntraDayData } from '@core/exploration/data/types'
 import { max, sum } from 'd3-array'
-import { SizeWatcher } from '../../../../../visualization/SizeWatcher'
+import { SizeWatcher } from '@components/visualization/SizeWatcher'
 import Svg, { G, Rect } from 'react-native-svg'
-import { Sizes } from '../../../../../../style/Sizes'
-import Colors from '../../../../../../style/Colors'
-import { AxisSvg } from '../../../../../visualization/axis'
-import { Padding } from '../../../../../visualization/types'
+import { Sizes } from '@style/Sizes'
+import Colors from '@style/Colors'
+import { AxisSvg } from '@components/visualization/axis'
+import { Padding } from '@components/visualization/types'
 import commaNumber from 'comma-number';
-import { pad } from '../../../../../../time'
+import { pad } from '@utils/time'
 import { commonIntraDayPanelStyles, NoDataFallbackView } from './common'
 
 const xAxisHeight = 50

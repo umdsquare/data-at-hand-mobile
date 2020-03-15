@@ -1,6 +1,6 @@
 import { PreProcessedInputText, Intent, MONTH_NAMES, VariableType, NLUOptions, makeVariableId } from "../types";
 import { getMonth, setMonth, subYears, endOfMonth, startOfMonth } from "date-fns";
-import { DateTimeHelper } from "../../../../time";
+import { DateTimeHelper } from "@utils/time";
 import NamedRegExp from 'named-regexp-groups'
 import { parseTimeText } from "./preprocessor-time";
 import { DataSourceType } from "../../../../measure/DataSourceSpec";

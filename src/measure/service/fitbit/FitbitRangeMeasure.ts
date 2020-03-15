@@ -1,4 +1,4 @@
-import { DateTimeHelper } from '../../../time';
+import { DateTimeHelper } from '@utils/time';
 import { FitbitServiceMeasure } from './FitbitServiceMeasure';
 
 export abstract class FitbitRangeMeasure<

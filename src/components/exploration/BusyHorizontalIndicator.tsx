@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, ViewStyle } from 'react-native';
 import * as Progress from 'react-native-progress';
-import Colors from '../../style/Colors';
+import Colors from '@style/Colors';
 import { ZIndices } from '../pages/exploration/parts/zIndices';
 
 const constainerStyle = { position: 'absolute', top: 0, left: 0, right: 0, zIndex: ZIndices.dataBusyLoadingBar, elevation: 12 } as ViewStyle

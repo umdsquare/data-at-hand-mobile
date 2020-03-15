@@ -1,21 +1,21 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Colors from '../../style/Colors';
-import { Sizes } from '../../style/Sizes';
-import { DataSourceIcon } from '../common/DataSourceIcon';
-import { DataSourceType, MeasureUnitType } from '../../measure/DataSourceSpec';
-import { DataSourceManager } from '../../system/DataSourceManager';
-import { OverviewSourceRow, StatisticsType, WeightRangedData } from '../../core/exploration/data/types';
+import Colors from '@style/Colors';
+import { Sizes } from '@style/Sizes';
+import { DataSourceType, MeasureUnitType } from '@measure/DataSourceSpec';
+import { DataSourceManager } from '@measure/DataSourceManager';
+import { OverviewSourceRow, StatisticsType, WeightRangedData } from '@core/exploration/data/types';
 import commaNumber from 'comma-number';
-import { DateTimeHelper } from '../../time';
+import { DateTimeHelper } from '@utils/time';
 import { startOfDay, addSeconds, format } from 'date-fns';
-import { SizeWatcher } from '../visualization/SizeWatcher';
-import { DailyBarChart } from './visualization/browse/DailyBarChart';
 import { scaleLinear } from 'd3-scale';
+import { HighlightFilter } from '@core/exploration/types';
+import { SizeWatcher } from '@components/visualization/SizeWatcher';
+import { DataSourceIcon } from '@components/common/DataSourceIcon';
+import { DailyBarChart } from './visualization/browse/DailyBarChart';
 import { DailyHeartRateChart } from './visualization/browse/DailyHeartRateChart';
 import { DailySleepRangeChart } from './visualization/browse/DailySleepRangeChart';
 import { DailyWeightChart } from './visualization/browse/DailyWeightChart';
-import { HighlightFilter } from '../../core/exploration/types';
 
 
 const lightTextColor = "#8b8b8b"

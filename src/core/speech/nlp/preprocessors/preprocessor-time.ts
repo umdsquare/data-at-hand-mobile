@@ -1,5 +1,5 @@
 import { VariableType } from "../types";
-import { DateTimeHelper } from "../../../../time";
+import { DateTimeHelper } from "@utils/time";
 import { startOfMonth, startOfYear, endOfMonth, endOfYear, addYears, addMonths, startOfWeek, endOfWeek, addWeeks } from "date-fns";
 import { Chrono } from "../../../../types/chrono";
 import NamedRegExp from 'named-regexp-groups'

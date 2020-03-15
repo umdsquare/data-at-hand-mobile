@@ -3,8 +3,8 @@ import LinearGradient from "react-native-linear-gradient";
 import { TouchableHighlight, TapGestureHandler, TapGestureHandlerStateChangeEvent, State } from "react-native-gesture-handler";
 import LottieView from 'lottie-react-native';
 import { StyleSheet, View, LayoutAnimation } from "react-native";
-import Colors from "../../style/Colors";
-import { Sizes } from "../../style/Sizes";
+import Colors from "@style/Colors";
+import { Sizes } from "@style/Sizes";
 import { SvgIconType, SvgIcon } from "../common/svg/SvgIcon";
 
 const microphoneButtonIconSize = 32

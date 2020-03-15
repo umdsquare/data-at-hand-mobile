@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { StyleSheet, View, Text } from 'react-native'
-import { StyleTemplates } from '../../../../../../style/Styles'
-import { Sizes } from '../../../../../../style/Sizes'
-import Colors from '../../../../../../style/Colors'
+import { StyleTemplates } from '@style/Styles'
+import { Sizes } from '@style/Sizes'
+import Colors from '@style/Colors'
 
 export const commonIntraDayPanelStyles = StyleSheet.create({
     containerStyle: { ...StyleTemplates.fillFlex, backgroundColor: 'white' },

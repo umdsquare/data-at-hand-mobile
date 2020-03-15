@@ -3,7 +3,7 @@ import Animated, { Easing } from 'react-native-reanimated'
 
 import { SizeWatcher } from '../visualization/SizeWatcher'
 import LinearGradient from 'react-native-linear-gradient'
-import { StyleTemplates } from '../../style/Styles'
+import { StyleTemplates } from '@style/Styles'
 import { Platform } from 'react-native'
 
 interface State {

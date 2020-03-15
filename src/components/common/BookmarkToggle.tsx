@@ -1,7 +1,7 @@
 import React from 'react';
 import { Animated, Easing } from 'react-native';
 import { Button, Icon } from 'react-native-elements';
-import Colors from '../../style/Colors';
+import Colors from '@style/Colors';
 
 interface Props {
     isBookmarked: boolean,

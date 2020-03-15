@@ -9,18 +9,18 @@
  */
 
 import React from 'react';
-import AppNavigator from './src/components/Routes';
-import CreateStore from './src/state/store';
+import AppNavigator from '@components/Routes';
+import CreateStore from '@state/store';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react'
-import { DataServiceManager } from './src/system/DataServiceManager';
-import { VoiceDictator } from './src/core/speech/VoiceDictator';
+import { DataServiceManager } from '@measure/DataServiceManager';
+import { VoiceDictator } from '@core/speech/VoiceDictator';
 import { ThemeProvider } from 'react-native-elements';
-import { theme } from './src/style/Theme';
 import { Platform, UIManager } from 'react-native';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
+import { theme } from '@style/Theme';
 
 if (
   Platform.OS === 'android' &&

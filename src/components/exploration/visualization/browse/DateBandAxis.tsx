@@ -1,8 +1,8 @@
 import React from 'react'
 import { ScaleBand } from "d3-scale"
-import Colors from "../../../../style/Colors"
+import Colors from "@style/Colors"
 import { G, Circle, Text, Line } from "react-native-svg"
-import { Sizes } from '../../../../style/Sizes'
+import { Sizes } from '@style/Sizes'
 import { LayoutRectangle } from 'react-native'
 
 

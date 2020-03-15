@@ -1,7 +1,7 @@
 import { AppleHealthMeasureBase } from "./AppleHealthMeasureBase";
 import * as HK from "./HealthKitManager";
 import { MeasureSpec } from "../../MeasureSpec";
-import { measureService, MeasureSpecKey } from "../../../system/DataSourceManager";
+import { measureService, MeasureSpecKey } from "@measure/DataSourceManager";
 import { HKPointMeasure } from "./types";
 import { IHeartRatePoint } from "../../../database/types";
 

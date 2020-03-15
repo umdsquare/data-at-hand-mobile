@@ -1,8 +1,8 @@
 import React from 'react'
 import { View, Animated, StyleSheet, Easing, Platform } from 'react-native'
-import { StyleTemplates } from '../../../../../style/Styles'
+import { StyleTemplates } from '@style/Styles'
 import { SpeechInputPanel } from '../../../../exploration/SpeechInputPanel'
-import { Sizes } from '../../../../../style/Sizes'
+import { Sizes } from '@style/Sizes'
 import LinearGradient from 'react-native-linear-gradient'
 import { ZIndices } from '../zIndices'
 

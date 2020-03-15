@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, FlatList } from 'react-native';
-import { Sizes } from '../../style/Sizes';
+import { Sizes } from '@style/Sizes';
 import { SpeechAffordanceIndicator } from './SpeechAffordanceIndicator';
 import GestureRecognizer from 'react-native-swipe-gestures';
 import { SwipedFeedback } from '../common/SwipedFeedback';
-import Colors from '../../style/Colors';
+import Colors from '@style/Colors';
 import { BottomSheet } from '../common/BottomSheet';
 import { Button } from 'react-native-elements';
-import { StyleTemplates } from '../../style/Styles';
+import { StyleTemplates } from '@style/Styles';
 import Haptic from "react-native-haptic-feedback";
 
 import { FlingGestureHandler, Directions, FlingGestureHandlerStateChangeEvent, State, BorderlessButton, LongPressGestureHandler, LongPressGestureHandlerStateChangeEvent } from 'react-native-gesture-handler';

@@ -1,14 +1,14 @@
 import React from 'react';
 import { Calendar, CalendarTheme, } from 'react-native-calendars'
-import Colors from '../../style/Colors';
+import Colors from '@style/Colors';
 import { format, set, addDays, getDay, startOfWeek, endOfWeek, getMonth, getYear } from 'date-fns';
 import { View, StyleSheet, Text } from 'react-native';
 import { Button } from 'react-native-elements';
-import { Sizes } from '../../style/Sizes';
+import { Sizes } from '@style/Sizes';
 import { SvgIcon, SvgIconType } from './svg/SvgIcon';
 import { useSelector, connect } from 'react-redux';
-import { ReduxAppState } from '../../state/types';
-import { DataServiceManager } from '../../system/DataServiceManager';
+import { ReduxAppState } from '@state/types';
+import { DataServiceManager } from '@measure/DataServiceManager';
 import { Dispatch } from 'redux';
 
 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]

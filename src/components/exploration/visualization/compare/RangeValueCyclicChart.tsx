@@ -1,21 +1,21 @@
 import React, { useCallback } from 'react';
-import { IAggregatedRangeValue } from "../../../../core/exploration/data/types";
+import { IAggregatedRangeValue } from "@core/exploration/data/types";
 import { View, LayoutRectangle, ViewStyle } from "react-native";
 import { SizeWatcher } from "../../../visualization/SizeWatcher";
 import { useState } from "react";
-import { StyleTemplates } from "../../../../style/Styles";
+import { StyleTemplates } from "@style/Styles";
 import { scaleBand, scaleLinear } from "d3-scale";
 import { min, max } from "d3-array";
 import { G } from "react-native-svg";
-import { Sizes } from '../../../../style/Sizes';
+import { Sizes } from '@style/Sizes';
 import { getDomainAndTickFormat, makeTouchingInfoForCycle } from './common';
 import { CycleChartFrame } from './CycleChartFrame';
 import { RangeValueElement } from './RangeValueElement';
 import { RangeValueElementLegend } from './RangeValueElementLegend';
 import { useDispatch } from 'react-redux';
-import { createGoToBrowseRangeAction, createGoToCyclicDetailDailyAction, createGoToCyclicDetailRangeAction, InteractionType, setTouchElementInfo } from '../../../../state/exploration/interaction/actions';
-import { CyclicTimeFrame, getCycleDimensionWithTimeKey, getCycleLevelOfDimension } from '../../../../core/exploration/cyclic_time';
-import { DataSourceType } from '../../../../measure/DataSourceSpec';
+import { createGoToBrowseRangeAction, createGoToCyclicDetailDailyAction, createGoToCyclicDetailRangeAction, InteractionType, setTouchElementInfo } from '@state/exploration/interaction/actions';
+import { CyclicTimeFrame, getCycleDimensionWithTimeKey, getCycleLevelOfDimension } from '@core/exploration/cyclic_time';
+import { DataSourceType } from '@measure/DataSourceSpec';
 
 
 const xAxisHeight = 100

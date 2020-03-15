@@ -7,7 +7,7 @@ import {
   inferIntraDayDataSourceType,
   ParameterKey,
   shallowCopyExplorationInfo,
-} from '../../../core/exploration/types';
+} from '@core/exploration/types';
 import {
   ExplorationAction,
   ExplorationActionType,
@@ -27,11 +27,11 @@ import {
   SetCycleDimensionAction,
   ShiftAllRangesAction,
   SetHighlightFilterAction,
-} from './actions';
-import { explorationInfoHelper } from '../../../core/exploration/ExplorationInfoHelper';
+} from '@state/exploration/interaction/actions';
+import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
 import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
-import { DateTimeHelper } from '../../../time';
-import { DataSourceType } from '../../../measure/DataSourceSpec';
+import { DateTimeHelper } from '@utils/time';
+import { DataSourceType } from '@measure/DataSourceSpec';
 
 export interface ExplorationState {
   info: ExplorationInfo;

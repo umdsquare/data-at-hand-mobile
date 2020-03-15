@@ -9,7 +9,7 @@ import { ExplorationInfo, ExplorationType, ParameterType, inferIntraDayDataSourc
 import { setDateAction, InteractionType, createSetRangeAction, setDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, createGoToComparisonCyclicAction, setCycleTypeAction, setHighlightFilter } from "../../../state/exploration/interaction/actions";
 import { explorationInfoHelper } from "../../exploration/ExplorationInfoHelper";
 import { differenceInDays, isLastDayOfMonth } from "date-fns";
-import { DateTimeHelper } from "../../../time";
+import { DateTimeHelper } from "@utils/time";
 import { DataSourceType } from "../../../measure/DataSourceSpec";
 
 enum EntityPriority {

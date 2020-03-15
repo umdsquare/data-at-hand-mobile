@@ -1,8 +1,8 @@
 import React from 'react'
 import { View, Text, ViewStyle, StyleSheet } from 'react-native'
-import { StyleTemplates } from '../../../../style/Styles'
+import { StyleTemplates } from '@style/Styles'
 import Dash from 'react-native-dash';
-import Colors from '../../../../style/Colors';
+import Colors from '@style/Colors';
 
 const styles = StyleSheet.create({
     rangeStyle: {

@@ -1,7 +1,7 @@
 import { startOfDay, subDays, endOfDay } from 'date-fns';
-import { DateTimeHelper } from '../../time';
+import { DateTimeHelper } from '@utils/time';
 import { LayoutRectangle } from 'react-native';
-import { DataSourceType } from '../../measure/DataSourceSpec';
+import { DataSourceType } from '@measure/DataSourceSpec';
 import { ConditionInfo } from '../speech/nlp/types';
 
 export enum ExplorationType {

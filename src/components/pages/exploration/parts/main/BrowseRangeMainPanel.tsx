@@ -9,18 +9,18 @@ import { OverviewSourceRow, DataSourceBrowseData } from "../../../../../core/exp
 import { DataSourceChartFrame } from "../../../../exploration/DataSourceChartFrame";
 import { explorationInfoHelper } from "../../../../../core/exploration/ExplorationInfoHelper";
 import { ParameterType, TouchingElementInfo, inferIntraDayDataSourceType, TouchingElementValueType, HighlightFilter } from "../../../../../core/exploration/types";
-import { DateTimeHelper } from "../../../../../time";
+import { DateTimeHelper } from "@utils/time";
 import { format, startOfDay, addSeconds } from "date-fns";
-import { StyleTemplates } from "../../../../../style/Styles";
-import { Sizes } from "../../../../../style/Sizes";
-import Colors from "../../../../../style/Colors";
+import { StyleTemplates } from "@style/Styles";
+import { Sizes } from "@style/Sizes";
+import Colors from "@style/Colors";
 import { Icon } from "react-native-elements";
 import commaNumber from 'comma-number';
 import unitConvert from 'convert-units';
 import { TouchableHighlight } from "react-native-gesture-handler";
 import { SvgIcon, SvgIconType } from "../../../../common/svg/SvgIcon";
-import { DataSourceManager } from "../../../../../system/DataSourceManager";
-import { DataServiceManager } from "../../../../../system/DataServiceManager";
+import { DataSourceManager } from "@measure/DataSourceManager";
+import { DataServiceManager } from "@measure/DataServiceManager";
 import { HighlightFilterPanel } from "../../../../exploration/HighlightFilterPanel";
 
 const listItemHeightNormal = 52

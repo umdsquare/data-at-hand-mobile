@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleTemplates } from '../../../../../style/Styles';
+import { StyleTemplates } from '@style/Styles';
 import { ViewStyle, Animated, Easing} from 'react-native';
 import { ZIndices } from '../zIndices';
 

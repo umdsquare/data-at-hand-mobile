@@ -1,24 +1,24 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { StyleTemplates } from '../../../../../style/Styles';
-import { GroupedData, GroupedRangeData } from '../../../../../core/exploration/data/types';
+import { StyleTemplates } from '@style/Styles';
+import { GroupedData, GroupedRangeData } from '@core/exploration/data/types';
 import { Dispatch } from 'redux';
-import { ReduxAppState, ActionTypeBase } from '../../../../../state/types';
-import { DataSourceType, MeasureUnitType } from '../../../../../measure/DataSourceSpec';
-import { explorationInfoHelper } from '../../../../../core/exploration/ExplorationInfoHelper';
-import { ParameterType } from '../../../../../core/exploration/types';
+import { ReduxAppState, ActionTypeBase } from '@state/types';
+import { DataSourceType, MeasureUnitType } from '@measure/DataSourceSpec';
+import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
+import { ParameterType } from '@core/exploration/types';
 import { connect } from 'react-redux';
 import { SingleValueCyclicChart } from '../../../../exploration/visualization/compare/SingleValueCyclicChart';
 import commaNumber from 'comma-number';
-import { DateTimeHelper } from '../../../../../time';
+import { DateTimeHelper } from '@utils/time';
 import { scaleLinear } from 'd3-scale';
 import convertUnit from 'convert-units';
 import { RangeValueCyclicChart } from '../../../../exploration/visualization/compare/RangeValueCyclicChart';
 import { startOfDay, format, addSeconds } from 'date-fns';
 import { timeTickFormat } from '../../../../exploration/visualization/compare/common';
-import { CyclicTimeFrame } from '../../../../../core/exploration/cyclic_time';
+import { CyclicTimeFrame } from '@core/exploration/cyclic_time';
 import { HorizontalPullToActionContainer } from '../../../../common/HorizontalPullToActionContainer';
-import { shiftAllRanges, InteractionType } from '../../../../../state/exploration/interaction/actions';
+import { shiftAllRanges, InteractionType } from '@state/exploration/interaction/actions';
 
 const styles = StyleSheet.create({
     containerStyle: {

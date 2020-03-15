@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import { View, StyleSheet, Platform } from 'react-native'
 import { WheelPicker } from 'react-native-wheel-picker-android'
-import { getNumberSequence } from '../../utils'
+import { getNumberSequence } from '@utils/utils'
 import pluralize from 'pluralize'
 
 const hours = getNumberSequence(0, 24).map(n => pluralize("hour", n, true))

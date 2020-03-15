@@ -1,4 +1,4 @@
-import {DateTimeHelper} from '../../../time';
+import {DateTimeHelper} from '@utils/time';
 import stringFormat from 'string-format';
 
 export const FITBIT_DATE_FORMAT = 'yyyy-MM-dd';

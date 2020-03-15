@@ -1,6 +1,6 @@
 import { StyleSheet, ViewStyle } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import Colors from '../../style/Colors';
+import Colors from '@style/Colors';
 import React from "react";
 
 const style =  {

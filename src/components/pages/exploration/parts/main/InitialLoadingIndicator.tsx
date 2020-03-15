@@ -1,9 +1,9 @@
 import React from 'react';
 import { ViewStyle, View, Text, StyleSheet } from "react-native";
 import Spinner from 'react-native-spinkit';
-import Colors from '../../../../../style/Colors';
-import { StyleTemplates } from '../../../../../style/Styles';
-import { Sizes } from '../../../../../style/Sizes';
+import Colors from '@style/Colors';
+import { StyleTemplates } from '@style/Styles';
+import { Sizes } from '@style/Sizes';
 import { ZIndices } from '../zIndices';
 
 const styles = StyleSheet.create({

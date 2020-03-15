@@ -1,4 +1,4 @@
-import { DictationResult } from "../../core/speech/types";
+import { DictationResult } from '@core/speech/types';
 
 export enum SpeechRecognizerSessionStatus{
     Idle = "idle",

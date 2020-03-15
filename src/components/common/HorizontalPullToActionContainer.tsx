@@ -1,7 +1,7 @@
 import React, { useMemo, useCallback, useState } from 'react';
 import { PanGestureHandler, State, PanGestureHandlerStateChangeEvent } from "react-native-gesture-handler"
 import { Dimensions, View, ViewStyle, StyleSheet, Text } from "react-native"
-import { Sizes } from '../../style/Sizes';
+import { Sizes } from '@style/Sizes';
 import Svg, { Circle } from 'react-native-svg';
 import Animated, { Easing } from 'react-native-reanimated';
 

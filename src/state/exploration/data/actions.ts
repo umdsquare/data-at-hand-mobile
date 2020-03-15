@@ -1,5 +1,5 @@
-import { ActionTypeBase } from "../../types";
-import { ExplorationInfo } from "../../../core/exploration/types";
+import { ActionTypeBase } from "@state/types";
+import { ExplorationInfo } from "@core/exploration/types";
 
 export enum ExplorationDataActionType{
     StartLoadingDataAction="exploration:data:start_loading_data",

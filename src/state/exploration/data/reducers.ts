@@ -1,5 +1,5 @@
-import { ExplorationInfo } from '../../../core/exploration/types';
-import { ActionTypeBase, ReduxAppState } from '../../types';
+import { ExplorationInfo } from '@core/exploration/types';
+import { ActionTypeBase, ReduxAppState } from '@state/types';
 import {
   ExplorationDataActionType,
   StartLoadingData,
@@ -7,7 +7,7 @@ import {
 } from './actions';
 import { Dispatch } from 'redux';
 import uuid from 'uuid/v4';
-import { explorationDataResolver } from '../../../core/exploration/data/ExplorationDataResolver';
+import { explorationDataResolver } from '@core/exploration/data/ExplorationDataResolver';
 
 export interface ExplorationDataState {
   info?: ExplorationInfo;

@@ -1,9 +1,9 @@
 import { refresh, authorize, revoke } from 'react-native-app-auth';
 import { FitbitServiceCore, FitbitDailyActivityHeartRateQueryResult, FitbitDailyActivityStepsQueryResult, FitbitWeightTrendQueryResult, FitbitWeightQueryResult, FitbitSleepQueryResult, FitbitIntradayStepDayQueryResult, FitbitHeartRateIntraDayQueryResult, FitbitUserProfile, FitbitDeviceListQueryResult } from "../types";
 import { makeFitbitIntradayActivityApiUrl, makeFitbitHeartRateIntraDayLogApiUrl, makeFitbitWeightTrendApiUrl, makeFitbitWeightLogApiUrl, makeFitbitDayLevelActivityLogsUrl, makeFitbitSleepApiUrl, FITBIT_PROFILE_URL, FITBIT_DEVICES_URL } from "../api";
-import { LocalAsyncStorageHelper } from "../../../../system/AsyncStorageHelper";
+import { LocalAsyncStorageHelper } from "@utils/AsyncStorageHelper";
 import { DataService, UnSupportedReason } from "../../DataService";
-import { DateTimeHelper } from "../../../../time";
+import { DateTimeHelper } from "@utils/time";
 import { FitbitLocalDbManager } from '../sqlite/database';
 import { DatabaseParams } from 'react-native-sqlite-storage';
 import { toDate, parse, parseISO, max } from 'date-fns';
@@ -109,7 +109,7 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
 
     onCheckSupportedInSystem(): Promise<{ supported: boolean, reason?: UnSupportedReason }> {
         try {
-            this._credential = require('../../../../../credentials/fitbit.json');
+            this._credential = require('@credentials/fitbit.json');
             this._authConfig = {
                 issuer: '',
                 scopes: ['profile', 'activity', 'weight', 'sleep', 'heartrate', 'settings'],

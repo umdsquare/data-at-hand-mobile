@@ -1,28 +1,28 @@
 import React from 'react'
 import { Animated, View, Text, StyleSheet, TextStyle, LayoutAnimation, Dimensions, LayoutRectangle, Easing, LayoutChangeEvent, Platform } from 'react-native'
-import { StyleTemplates } from '../../../../../style/Styles'
-import { TouchingElementInfo, TouchingElementValueType, ParameterType, ExplorationType, ParameterKey } from '../../../../../core/exploration/types'
-import { ReduxAppState } from '../../../../../state/types'
+import { StyleTemplates } from '@style/Styles'
+import { TouchingElementInfo, TouchingElementValueType, ParameterType, ExplorationType, ParameterKey } from '@core/exploration/types'
+import { ReduxAppState } from '@state/types'
 import { connect } from 'react-redux'
-import { explorationInfoHelper } from '../../../../../core/exploration/ExplorationInfoHelper'
-import { DateTimeHelper, isToday, isYesterday } from '../../../../../time'
+import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper'
+import { DateTimeHelper, isToday, isYesterday } from '@utils/time'
 import { format, startOfDay, differenceInDays } from 'date-fns'
-import { Sizes } from '../../../../../style/Sizes'
-import { DataSourceType, MeasureUnitType } from '../../../../../measure/DataSourceSpec'
+import { Sizes } from '@style/Sizes'
+import { DataSourceType, MeasureUnitType } from '@measure/DataSourceSpec'
 import commaNumber from 'comma-number';
 import unitConvert from 'convert-units'
 import { addSeconds } from 'date-fns/esm'
 import LinearGradient from 'react-native-linear-gradient'
-import Colors from '../../../../../style/Colors'
-import { CycleDimension, getCycleDimensionSpec } from '../../../../../core/exploration/cyclic_time'
+import Colors from '@style/Colors'
+import { CycleDimension, getCycleDimensionSpec } from '@core/exploration/cyclic_time'
 import { SpeechInputPanel } from '../../../../exploration/SpeechInputPanel';
 import { ThunkDispatch } from 'redux-thunk'
-import { startSpeechSession, requestStopDictation, makeNewSessionId } from '../../../../../state/speech/commands';
+import { startSpeechSession, requestStopDictation, makeNewSessionId } from '@state/speech/commands';
 import Haptic from 'react-native-haptic-feedback';
 import Insets from 'react-native-static-safe-area-insets';
 import { ZIndices } from '../zIndices'
-import { DataServiceManager } from '../../../../../system/DataServiceManager'
-import { SpeechContext, SpeechContextHelper } from '../../../../../core/speech/nlp/context'
+import { DataServiceManager } from '@measure/DataServiceManager'
+import { SpeechContext, SpeechContextHelper } from '@core/speech/nlp/context'
 
 const borderRadius = 8
 

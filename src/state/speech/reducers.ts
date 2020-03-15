@@ -1,6 +1,6 @@
-import { SpeechRecognizerState, INITIAL_STATE, SpeechRecognizerSessionStatus } from "./types";
-import { ActionTypeBase } from "../types";
-import { SpeechRecognizerActionType, UpdateDictationResultAction, SpeechSessionAction, SetShowGlobalPopupAction } from "./actions";
+import { SpeechRecognizerState, INITIAL_STATE, SpeechRecognizerSessionStatus } from "@state/speech/types";
+import { ActionTypeBase } from "@state/types";
+import { SpeechRecognizerActionType, UpdateDictationResultAction, SpeechSessionAction, SetShowGlobalPopupAction } from "@state/speech/actions";
 
 
 export const speechRecognizerStateReducer = (state: SpeechRecognizerState = INITIAL_STATE, action: ActionTypeBase): SpeechRecognizerState => {

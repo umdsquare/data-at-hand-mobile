@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Animated, Easing } from 'react-native';
-import { StyleTemplates } from '../../style/Styles';
+import { StyleTemplates } from '@style/Styles';
 import { SafeAreaConsumer } from 'react-native-safe-area-context';
 import { TapGestureHandler, TapGestureHandlerStateChangeEvent, State as GestureState } from 'react-native-gesture-handler';
 import { ZIndices } from '../pages/exploration/parts/zIndices';

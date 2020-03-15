@@ -2,7 +2,7 @@ import {DataService, UnSupportedReason} from '../DataService';
 import {Platform} from 'react-native';
 import {AppleHealthStepMeasure} from './AppleHealthStepMeasure';
 import * as HK from './HealthKitManager';
-import {DataServiceManager} from '../../../system/DataServiceManager';
+import {DataServiceManager} from '@measure/DataServiceManager';
 import { DataSourceType } from '../../DataSourceSpec';
 import { DataLevel, IDatumBase } from '../../../database/types';
 

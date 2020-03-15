@@ -3,16 +3,16 @@ import Svg, { Rect, Line } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartProps } from './common';
 import { AxisSvg } from '../../../visualization/axis';
 import { Padding } from '../../../visualization/types';
-import { DateTimeHelper } from '../../../../time';
+import { DateTimeHelper } from '@utils/time';
 import { DateBandAxis } from './DateBandAxis';
 import { scaleLinear } from 'd3-scale';
 import * as d3Array from 'd3-array';
-import Colors from '../../../../style/Colors';
+import Colors from '@style/Colors';
 import { startOfDay, addSeconds, format } from 'date-fns';
 import { GroupWithTouchInteraction } from './GroupWithTouchInteraction';
 import { useSelector } from 'react-redux';
-import { ReduxAppState } from '../../../../state/types';
-import { DataServiceManager } from '../../../../system/DataServiceManager';
+import { ReduxAppState } from '@state/types';
+import { DataServiceManager } from '@measure/DataServiceManager';
 
 interface Props extends ChartProps {
     data: Array<{ numberedDate: number, value: number, bedTimeDiffSeconds: number, wakeTimeDiffSeconds: number }>

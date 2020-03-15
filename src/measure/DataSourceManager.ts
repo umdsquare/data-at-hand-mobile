@@ -1,4 +1,4 @@
-import { DataSourceSpec, DataSourceType, DataSourceCategory, DataSourceCategorySpec } from "../measure/DataSourceSpec";
+import { DataSourceSpec, DataSourceType, DataSourceCategory, DataSourceCategorySpec } from "@measure/DataSourceSpec";
 import commaNumber from 'comma-number';
 
 export class DataSourceManager {

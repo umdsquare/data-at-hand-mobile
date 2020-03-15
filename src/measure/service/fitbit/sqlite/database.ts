@@ -1,10 +1,10 @@
 import SQLite, { DatabaseParams } from 'react-native-sqlite-storage';
-import { SQLiteHelper } from '../../../../database/sqlite/sqlite-helper';
+import { SQLiteHelper } from '@utils/sqlite-helper';
 import stringFormat from 'string-format';
-import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension } from '../../../../core/exploration/cyclic_time';
-import { IIntraDayHeartRatePoint, BoxPlotInfo } from '../../../../core/exploration/data/types';
+import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension } from '@core/exploration/cyclic_time';
+import { IIntraDayHeartRatePoint, BoxPlotInfo } from '@core/exploration/data/types';
 import Papa from 'papaparse';
-import { DateTimeHelper } from '../../../../time';
+import { DateTimeHelper } from '@utils/time';
 import merge from 'merge';
 
 SQLite.DEBUG(false);
@@ -576,7 +576,7 @@ export class FitbitLocalDbManager {
         }
       }))
 
-      const headers = ["index", "date", "numberedDate", "year", "month", "dayOfWeek"].concat([].concat.apply([], tableInfos.map(info => Object.keys(info.exportedValueColumns).map(key => info.exportedValueColumns[key] || key))))
+      const headers = ["index", "date", "numberedDate", "year", "month", "dayOfWeek"].concat(new Array<string>().concat.apply([], tableInfos.map(info => Object.keys(info.exportedValueColumns).map(key => info.exportedValueColumns[key] || key))))
 
       const uniqueDates = new Set([].concat.apply([], rowsPerTable.map(entry => entry.queriedRows.map(r => r.numberedDate))))
       console.log("Total ", uniqueDates.size, " days of data.")

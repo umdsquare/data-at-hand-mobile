@@ -1,16 +1,16 @@
 import React from 'react';
 import { View, SafeAreaView, StyleSheet, Dimensions, TouchableOpacity, Text, Platform } from 'react-native';
-import Colors from '../../../../../style/Colors';
-import { Sizes } from '../../../../../style/Sizes';
-import { StyleTemplates } from '../../../../../style/Styles';
+import Colors from '@style/Colors';
+import { Sizes } from '@style/Sizes';
+import { StyleTemplates } from '@style/Styles';
 import Svg, { Path } from 'react-native-svg';
-import { VoiceInputButton } from '../../../../exploration/VoiceInputButton';
-import { ExplorationMode } from '../../../../../core/exploration/types';
+import { VoiceInputButton } from '@components/exploration/VoiceInputButton';
+import { ExplorationMode } from '@core/exploration/types';
 import { useSelector } from 'react-redux';
-import { ReduxAppState } from '../../../../../state/types';
-import { SpeechRecognizerSessionStatus } from '../../../../../state/speech/types';
+import { ReduxAppState } from '@state/types';
+import { SpeechRecognizerSessionStatus } from '@state/speech/types';
 import { useSafeArea } from 'react-native-safe-area-context';
-import { ZIndices } from '../zIndices';
+import { ZIndices } from '@components/pages/exploration/parts/zIndices';
 
 const bottomBarIconSize = 21
 

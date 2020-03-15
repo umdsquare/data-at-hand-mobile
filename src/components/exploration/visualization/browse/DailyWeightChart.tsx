@@ -3,19 +3,19 @@ import Svg, { G, Circle, Path, Line, Rect } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartPropsBase } from './common';
 import { AxisSvg } from '../../../visualization/axis';
 import { Padding } from '../../../visualization/types';
-import { DateTimeHelper } from '../../../../time';
+import { DateTimeHelper } from '@utils/time';
 import { DateBandAxis } from './DateBandAxis';
 import { scaleLinear } from 'd3-scale';
 import * as d3Array from 'd3-array';
 import * as d3Shape from 'd3-shape';
-import Colors from '../../../../style/Colors';
-import { IWeightIntraDayLogEntry } from '../../../../core/exploration/data/types';
-import { MeasureUnitType, DataSourceType } from '../../../../measure/DataSourceSpec';
+import Colors from '@style/Colors';
+import { IWeightIntraDayLogEntry } from '@core/exploration/data/types';
+import { MeasureUnitType, DataSourceType } from '@measure/DataSourceSpec';
 import unitConvert from 'convert-units';
-import { noop } from '../../../../utils';
+import { noop } from '@utils/utils';
 import { useSelector } from 'react-redux';
-import { ReduxAppState } from '../../../../state/types';
-import { DataServiceManager } from '../../../../system/DataServiceManager';
+import { ReduxAppState } from '@state/types';
+import { DataServiceManager } from '@measure/DataServiceManager';
 
 interface Props extends ChartPropsBase<{
     trend: Array<{ numberedDate: number, value: number }>,

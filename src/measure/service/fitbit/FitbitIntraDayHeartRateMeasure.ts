@@ -1,7 +1,7 @@
 import { FitbitIntraDayMeasure } from './FitbitIntraDayMeasure';
 import { FitbitHeartRateIntraDayQueryResult } from './types';
 import { FitbitLocalTableName, HeartRateIntraDayInfo } from './sqlite/database';
-import { IIntraDayHeartRatePoint, HeartRateIntraDayData, HeartRateZone } from '../../../core/exploration/data/types';
+import { IIntraDayHeartRatePoint, HeartRateIntraDayData, HeartRateZone } from '@core/exploration/data/types';
 
 export class FitbitIntraDayHeartRateMeasure extends FitbitIntraDayMeasure<HeartRateIntraDayData> {
   key = 'intraday-heartrate';

@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text, ImageBackground, ScrollView, SafeAreaView, TouchableOpacity, InteractionManager } from "react-native";
-import { Sizes } from "../../../../style/Sizes";
-import { StyleTemplates } from "../../../../style/Styles";
+import { Sizes } from "@style/Sizes";
+import { StyleTemplates } from "@style/Styles";
 import { DataService } from "../../../../measure/service/DataService";
-import { DataServiceManager } from "../../../../system/DataServiceManager";
-import Colors from "../../../../style/Colors";
+import { DataServiceManager } from "@measure/DataServiceManager";
+import Colors from "@style/Colors";
 import { Dispatch } from "redux";
 import { connect } from "react-redux";
 import { ReduxAppState } from "../../../../state/types";

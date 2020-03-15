@@ -1,6 +1,6 @@
 import React from 'react'
 import Modal from "react-native-modal";
-import { StyleTemplates } from '../../style/Styles';
+import { StyleTemplates } from '@style/Styles';
 import { View, ViewStyle } from 'react-native';
 import { SafeAreaConsumer } from 'react-native-safe-area-context';
 

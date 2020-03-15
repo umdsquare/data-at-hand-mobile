@@ -1,12 +1,12 @@
 import { ExplorationInfo, ExplorationType, ParameterType, IntraDayDataSourceType, ParameterKey } from '../types';
 import { OverviewData, OverviewSourceRow, GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData, FilteredDailyValues, StepCountRangedData, WeightRangedData, DataSourceBrowseData } from './types';
 import { explorationInfoHelper } from '../ExplorationInfoHelper';
-import { DataSourceManager } from '../../../system/DataSourceManager';
-import { DataServiceManager } from '../../../system/DataServiceManager';
-import { DataSourceType } from '../../../measure/DataSourceSpec';
+import { DataSourceManager } from '@measure/DataSourceManager';
+import { DataServiceManager } from '@measure/DataServiceManager';
+import { DataSourceType } from '@measure/DataSourceSpec';
 import { CyclicTimeFrame, CycleDimension } from '../cyclic_time';
-import { DateTimeHelper } from '../../../time';
-import { DataService } from '../../../measure/service/DataService';
+import { DateTimeHelper } from '@utils/time';
+import { DataService } from '@measure/service/DataService';
 import { sum, mean, min, max } from 'd3-array';
 
 

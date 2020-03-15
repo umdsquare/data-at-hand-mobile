@@ -1,12 +1,12 @@
-import { ActionTypeBase } from '../../types';
-import { DataSourceType } from '../../../measure/DataSourceSpec';
+import { ActionTypeBase } from '@state/types';
+import { DataSourceType } from '@measure/DataSourceSpec';
 import {
   TouchingElementInfo,
   IntraDayDataSourceType,
   ExplorationInfoParameter,
   HighlightFilter,
-} from '../../../core/exploration/types';
-import { CyclicTimeFrame, CycleDimension } from '../../../core/exploration/cyclic_time';
+} from '@core/exploration/types';
+import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
 
 export enum ExplorationActionType {
   MemoUiStatus = 'exploration:interaction:memoUIStatus',

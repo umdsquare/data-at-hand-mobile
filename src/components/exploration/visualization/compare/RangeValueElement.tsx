@@ -1,8 +1,8 @@
 import React from 'react';
-import { IAggregatedRangeValue } from '../../../../core/exploration/data/types';
+import { IAggregatedRangeValue } from '@core/exploration/data/types';
 import { Rect, G } from 'react-native-svg';
 import { ScaleBand, ScaleLinear } from 'd3-scale';
-import Colors from '../../../../style/Colors';
+import Colors from '@style/Colors';
 import { SingleValueElement } from './SingleValueElement';
 
 export const RangeValueElement = (props: {

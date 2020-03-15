@@ -1,11 +1,11 @@
-import { DateTimeHelper } from '../../../time';
+import { DateTimeHelper } from '@utils/time';
 import { parse, getDay } from 'date-fns';
 import { FITBIT_DATE_FORMAT } from './api';
 import { FitbitRangeMeasure } from './FitbitRangeMeasure';
 import { FitbitLocalTableName, makeCyclicGroupQuery, makeAggregatedQuery, makeCycleDimensionRangeQuery } from './sqlite/database';
-import { SQLiteHelper } from '../../../database/sqlite/sqlite-helper';
-import { GroupedData, IAggregatedValue, GroupedRangeData, FilteredDailyValues, BoxPlotInfo } from '../../../core/exploration/data/types';
-import { CyclicTimeFrame, CycleDimension, getCycleTypeOfDimension, getTimeKeyOfDimension } from '../../../core/exploration/cyclic_time';
+import { SQLiteHelper } from '@utils/sqlite-helper';
+import { GroupedData, IAggregatedValue, GroupedRangeData, FilteredDailyValues, BoxPlotInfo } from '@core/exploration/data/types';
+import { CyclicTimeFrame, CycleDimension, getCycleTypeOfDimension, getTimeKeyOfDimension } from '@core/exploration/cyclic_time';
 
 export abstract class FitbitSummaryLogMeasure<
   QueryResultType> extends FitbitRangeMeasure<QueryResultType> {

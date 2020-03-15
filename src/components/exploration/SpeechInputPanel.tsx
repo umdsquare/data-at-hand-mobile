@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Sizes } from '../../style/Sizes';
+import { Sizes } from '@style/Sizes';
 import { connect } from 'react-redux';
-import { ReduxAppState } from '../../state/types';
-import { SpeechRecognizerState, SpeechRecognizerSessionStatus } from '../../state/speech/types';
-import Colors from '../../style/Colors';
+import { ReduxAppState } from '@state/types';
+import { SpeechRecognizerState, SpeechRecognizerSessionStatus } from '@state/speech/types';
+import Colors from '@style/Colors';
 import Spinner from 'react-native-spinkit';
 
 const styles = StyleSheet.create({
