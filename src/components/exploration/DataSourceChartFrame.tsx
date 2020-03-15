@@ -236,25 +236,28 @@ function formatStatistics(sourceType: DataSourceType, statisticsType: Statistics
             }
         case DataSourceType.HeartRate:
             switch (statisticsType) {
-                case 'avg': return Math.round(value).toString()
-                case 'range': return value[0] + " - " + value[1]
+                case 'avg': return `${Math.round(value).toString()} bpm`
+                case 'range': return `${value[0]}  - ${value[1]} bpm`
             }
         case DataSourceType.Weight:
             switch (measureUnitType) {
                 case MeasureUnitType.Metric:
                     break;
                 case MeasureUnitType.US:
-                    const convert = require('convert-units')
-                    if (statisticsType == 'range') {
-                        value = [convert(value[0]).from('kg').to('lb'), convert(value[1]).from('kg').to('lb')]
-                    } else {
-                        value = convert(value).from('kg').to('lb')
+                    {
+                        const convert = require('convert-units')
+                        if (statisticsType == 'range') {
+                            value = [convert(value[0]).from('kg').to('lb'), convert(value[1]).from('kg').to('lb')]
+                        } else {
+                            value = convert(value).from('kg').to('lb')
+                        }
                     }
                     break;
             }
+            const unit = measureUnitType === MeasureUnitType.Metric? 'kg' : 'lb'
             switch (statisticsType) {
-                case 'avg': return value.toFixed(1)
-                case 'range': return value[0].toFixed(1) + " - " + value[1].toFixed(1)
+                case 'avg': return value.toFixed(1) + " " + unit
+                case 'range': return `${value[0].toFixed(1)} - ${value[1].toFixed(1)} ${unit}`
             }
 
         case DataSourceType.HoursSlept:
@@ -270,7 +273,7 @@ function formatStatistics(sourceType: DataSourceType, statisticsType: Statistics
     }
 }
 
-function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filter: HighlightFilter | undefined, highlightedDays: {[key:number]:boolean|undefined} | undefined, width: number, height: number, measureUnitType: MeasureUnitType): any {
+function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filter: HighlightFilter | undefined, highlightedDays: { [key: number]: boolean | undefined } | undefined, width: number, height: number, measureUnitType: MeasureUnitType): any {
     switch (sourceType) {
         case DataSourceType.StepCount:
             return <DailyBarChart
@@ -332,7 +335,7 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filte
 export const DataSourceChartFrame = React.memo((props: {
     data: OverviewSourceRow,
     filter: HighlightFilter,
-    highlightedDays?: {[key:number]:boolean|undefined},
+    highlightedDays?: { [key: number]: boolean | undefined },
     measureUnitType: MeasureUnitType,
     showToday?: boolean
     flat?: boolean

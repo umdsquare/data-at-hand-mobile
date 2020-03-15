@@ -63,7 +63,7 @@ const Styles = StyleSheet.create({
         top: -14,
         left: Math.round((Dimensions.get('window').width - Sizes.speechInputButtonSize) / 2),
         zIndex: ZIndices.Footer
-    }
+    },
 })
 
 interface Props {
@@ -96,19 +96,10 @@ const BottomBarButton = (prop: { isOn: boolean, mode: ExplorationMode, title: st
 
     const insets = useSafeArea()
 
-    return <View style={{
-        ...Styles.bottomBarButtonStyle,
+    return <View style={[Styles.bottomBarButtonStyle, {
         paddingTop: insets.bottom > 0 ? 12 : 0,
         height: insets.bottom > 0 ? 45 : 70,
-    }}>
-        {/*prop.isOn===true && <View style={{
-                    height: 2, 
-                    backgroundColor: Colors.primary, 
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    top: 0
-                }}/>*/}
+    }]}>
         <TouchableOpacity style={Styles.bottomBarButtonContainerStyle} onPress={prop.onPress}>
 
             {
@@ -132,7 +123,7 @@ const BottomBarButton = (prop: { isOn: boolean, mode: ExplorationMode, title: st
             <Text style={{
                 ...Styles.bottomBarButtonTextStyle,
                 color: color,
-                fontWeight: "bold" /*prop.isOn === true ? "bold" : "normal"*/
+                fontWeight: "bold"
             }}>{prop.title}</Text>
         </TouchableOpacity>
     </View>
