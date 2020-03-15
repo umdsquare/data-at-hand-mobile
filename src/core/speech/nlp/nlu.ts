@@ -99,7 +99,7 @@ export class NLUCommandResolver {
                 } else if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
                     //only data source
                     //only if the exploration info supports the data source
-                    if (explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource) === dataSources[0].value) {
+                    if (explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource) != null) {
                         return setDataSourceAction(InteractionType.Speech, dataSources[0].value)
                     }
                 } else if (!toldDataSources && toldCyclicTimeFrames && toldDates === false && toldRanges === false) {
