@@ -33,6 +33,11 @@ allprojects {
             url("$rootDir/../node_modules/jsc-android/dist")
         }
 
+        maven {
+            //Microsoft Speech service
+            url 'https://csspeechstorage.blob.core.windows.net/maven/'
+        }
+
         google()
         jcenter()
         maven { url 'https://jitpack.io' }

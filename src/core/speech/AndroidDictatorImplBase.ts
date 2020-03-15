@@ -4,27 +4,29 @@ import {
   SpeechRecognitionEventType,
 } from './types';
 import {
-  NativeModules,
   NativeEventEmitter,
   EventSubscription,
 } from 'react-native';
 
-export class AndroidDictatorImpl implements IVoiceDictatorNative {
-  private bridge = NativeModules.AndroidSpeechToText;
+export abstract class AndroidDictatorImplBase implements IVoiceDictatorNative {
+  constructor(protected readonly bridge) { }
+
   private eventEmitter = new NativeEventEmitter(this.bridge);
 
   private subscriptions = new Array<EventSubscription>();
 
+  protected abstract getInstallArgs(): { [key: string]: any } | null
+
   install(): Promise<boolean> {
-    return this.bridge.install();
+    return this.bridge.install(this.getInstallArgs());
   }
 
   uninstall(): Promise<boolean> {
-    return new Promise(resolve => {
+    return this.bridge.uninstall().then(new Promise(resolve => {
       this.subscriptions.forEach(s => s.remove());
       this.subscriptions = [];
       resolve(true);
-    });
+    }));
   }
   isAvailableInSystem(): Promise<boolean> {
     return this.bridge.isAvailableInSystem();
@@ -58,7 +60,7 @@ export class AndroidDictatorImpl implements IVoiceDictatorNative {
   start(): Promise<boolean> {
     return this.bridge.start()
   }
-  
+
   stop(): Promise<boolean> {
     return this.bridge.stop()
   }

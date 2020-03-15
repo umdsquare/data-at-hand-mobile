@@ -1,8 +1,8 @@
 import { IOSDictatorImpl } from "./IOSDictatorImpl";
 import { Platform } from "react-native";
-import { AndroidDictatorImpl } from "./AndroidDictatorImpl";
 import { DictationResult, VoiceDictatorStatus, IVoiceDictatorNative } from "./types";
 import { BehaviorSubject, Observable } from "rxjs";
+import { AndroidMicrosoftDictatorImpl } from "./AndroidMicrosoftDictatorImpl";
 
 export class VoiceDictator {
 
@@ -18,7 +18,7 @@ export class VoiceDictator {
     private voiceDictatorNative: IVoiceDictatorNative
 
     private constructor() {
-        this.voiceDictatorNative = Platform.OS === 'ios' ? new IOSDictatorImpl() : new AndroidDictatorImpl()
+        this.voiceDictatorNative = Platform.OS === 'ios' ? new IOSDictatorImpl() : new AndroidMicrosoftDictatorImpl()
     }
 
     private readonly statusSubject = new BehaviorSubject<VoiceDictatorStatus>(VoiceDictatorStatus.INITIAL)

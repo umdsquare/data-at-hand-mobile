@@ -16,7 +16,8 @@ public class SpeechToTextPackage implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(@NonNull ReactApplicationContext reactContext) {
         List<NativeModule> modules = new ArrayList<>();
-        modules.add(new SpeechToTextModule((reactContext)));
+        modules.add(new DefaultSpeechToTextModule(reactContext));
+        modules.add(new MicrosoftSpeechToTextModule(reactContext));
         return modules;
     }
 
