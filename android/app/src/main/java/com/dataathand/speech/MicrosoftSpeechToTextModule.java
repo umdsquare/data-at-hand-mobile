@@ -147,6 +147,12 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
             accumulatedTextToPrevCycle = joinTexts(accumulatedTextToPrevCycle, currentCycleRecognizedText);
         });
 
+
+        recognizer.canceled.addEventListener((o, eventArgs) -> {
+            Log.d(TAG, "Canceled.");
+            emitStopEvent(null);
+        });
+
         final Future<Void> startTask = recognizer.startContinuousRecognitionAsync();
 
         this.currentRecognizer = recognizer;
@@ -176,9 +182,10 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
             }catch(Exception e){
                 promise.reject(e);
             }
-        }else {
+        }else{
             promise.resolve(true);
         }
+        emitStopEvent(null);
     }
 
 
