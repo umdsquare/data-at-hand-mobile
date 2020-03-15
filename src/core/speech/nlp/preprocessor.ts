@@ -117,7 +117,7 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
 
     const t = Date.now()
 
-    speech = speech.toLowerCase()
+    speech = speech.replace(/(\d),(\d)/g, '$1$2').toLowerCase()
 
     const quickPassWithTemplate = tryPreprocessingByTemplates(speech, options)
     if(quickPassWithTemplate){
@@ -386,6 +386,6 @@ export async function test() {
     */
     //await preprocess("step count by day of the week", { getToday: () => new Date() })
     //await preprocess("2019", { getToday: () => new Date() })
-    await preprocess("compare January with February",  { getToday: () => new Date() })
+    await preprocess("days i walked more than 10,000 steps",  { getToday: () => new Date() })
 
 }

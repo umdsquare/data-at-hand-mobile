@@ -115,7 +115,7 @@ const templates: Array<Template> = [
         }
     },
     {
-        regex: new NamedRegExp(`(compare|compel)\\s+(?<compareA>${REGEX_RANDOM_ELEMENT})\\s+(with|to|and)\\s+(?<compareB>${REGEX_RANDOM_ELEMENT})`, 'i'),
+        regex: new NamedRegExp(`(compare|compel|(difference between))\\s+(?<compareA>${REGEX_RANDOM_ELEMENT})\\s+(with|to|and)\\s+(?<compareB>${REGEX_RANDOM_ELEMENT})`, 'i'),
         parse: (groups: { compareA: string, compareB: string }, options) => {
             const today = options.getToday()
 
