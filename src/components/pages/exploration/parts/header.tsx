@@ -145,13 +145,20 @@ export const ExplorationViewHeader = () => {
 const HeaderContainer = (prop: { children?: any, }) => {
 
     const dispatch = useDispatch()
-    const backStackSize = useSelector((appState: ReduxAppState) => {
-        return appState.explorationState.backNavStack.length
+    const {
+        backStackSize,
+        backTitle
+    } = useSelector((appState: ReduxAppState) => {
+        const backStackSize = appState.explorationState.backNavStack.length
+        return {
+            backStackSize,
+            backTitle: backStackSize > 0 ? (explorationInfoHelper.getTitleText(appState.explorationState.backNavStack[backStackSize-1])) : null
+        }
     })
 
     return <SafeAreaView>
         {backStackSize > 0 &&
-            <Button title="Back"
+            <Button title={backTitle || "Back"}
                 {...backButtonProps}
                 onPress={() => {
                     dispatch(goBackAction())
