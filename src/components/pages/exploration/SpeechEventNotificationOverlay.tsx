@@ -18,6 +18,7 @@ const styles = StyleSheet.create({
     containerStyle: {
         position: 'absolute',
         zIndex: ZIndices.TooltipOverlay,
+        elevation: 10,
         top: 0,
         bottom: 0,
         left: 0,

@@ -115,11 +115,20 @@ const templates: Array<Template> = [
         }
     },
     {
-        regex: new NamedRegExp(`(compare|compel|(difference between))\\s+(?<compareA>${REGEX_RANDOM_ELEMENT})\\s+(with|to|and)\\s+(?<compareB>${REGEX_RANDOM_ELEMENT})`, 'i'),
-        parse: (groups: { compareA: string, compareB: string }, options) => {
+        regex: new NamedRegExp(`(compare|compel|(difference between))\\s+((?<dataSource>[a-zA-Z0-9\\s]+)\\s+(?<dataSourcePreposition>of|in|on|at)\\s+)?(?<compareA>${REGEX_RANDOM_ELEMENT})\\s+(with|to|and)\\s+(?<compareB>${REGEX_RANDOM_ELEMENT})`, 'i'),
+        parse: (groups: { compareA: string, compareB: string, dataSource?: string }, options) => {
             const today = options.getToday()
-
+            
             const variables = []
+
+            if (groups.dataSource != null) {
+                const parsedDataSourceInfo = parseVariable(groups.dataSource, DATASOURCE_VARIABLE_RULES)
+                if (parsedDataSourceInfo) {
+                    variables.push(parsedDataSourceInfo)
+                }
+            }
+
+
             for (const elementText of [groups.compareA, groups.compareB]) {
                 const timeParsingResult = parseTimeText(elementText, today)
                 if (timeParsingResult) {
