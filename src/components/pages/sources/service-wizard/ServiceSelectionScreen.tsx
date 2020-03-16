@@ -2,16 +2,16 @@ import React from "react";
 import { View, Text, ImageBackground, ScrollView, SafeAreaView, TouchableOpacity, InteractionManager } from "react-native";
 import { Sizes } from "@style/Sizes";
 import { StyleTemplates } from "@style/Styles";
-import { DataService } from "../../../../measure/service/DataService";
+import { DataService } from "@measure/service/DataService";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import Colors from "@style/Colors";
 import { Dispatch } from "redux";
 import { connect } from "react-redux";
-import { ReduxAppState } from "../../../../state/types";
-import { setService } from "../../../../state/settings/actions";
-import { InitialLoadingIndicator } from "../../exploration/parts/main/InitialLoadingIndicator";
+import { ReduxAppState } from "@state/types";
+import { setService } from "@state/settings/actions";
+import { InitialLoadingIndicator } from "@components/pages/exploration/parts/main/InitialLoadingIndicator";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { SettingsSteckParamList } from "../../../Routes";
+import { SettingsSteckParamList } from "@components/Routes";
 
 interface Prop {
     navigation: StackNavigationProp<SettingsSteckParamList, "ServiceWizardModal">,

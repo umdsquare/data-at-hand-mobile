@@ -1,17 +1,17 @@
-import { createGoToBrowseRangeAction, InteractionType, memoUIStatus, ExplorationAction, createGoToBrowseDayAction, setHighlightFilter } from "../../../../../state/exploration/interaction/actions";
+import { createGoToBrowseRangeAction, InteractionType, memoUIStatus, ExplorationAction, createGoToBrowseDayAction, setHighlightFilter } from "@state/exploration/interaction/actions";
 import React from "react";
 import { connect } from "react-redux";
-import { ReduxAppState } from "../../../../../state/types";
+import { ReduxAppState } from "@state/types";
 import { FlatList, View } from "react-native";
-import { DataSourceChartFrame } from "../../../../exploration/DataSourceChartFrame";
-import { OverviewData } from "../../../../../core/exploration/data/types";
-import { MeasureUnitType, DataSourceType } from "../../../../../measure/DataSourceSpec";
+import { DataSourceChartFrame } from "@components/exploration/DataSourceChartFrame";
+import { OverviewData } from "@core/exploration/data/types";
+import { MeasureUnitType, DataSourceType } from "@measure/DataSourceSpec";
 import { Dispatch } from "redux";
 import { Sizes } from "@style/Sizes";
 import { DateTimeHelper } from "@utils/time";
-import { inferIntraDayDataSourceType, HighlightFilter } from "../../../../../core/exploration/types";
+import { inferIntraDayDataSourceType, HighlightFilter } from "@core/exploration/types";
 import { DataServiceManager } from "@measure/DataServiceManager";
-import { HighlightFilterPanel } from "../../../../exploration/HighlightFilterPanel";
+import { HighlightFilterPanel } from "@components/exploration/HighlightFilterPanel";
 
 const separatorStyle = { height: Sizes.verticalPadding }
 

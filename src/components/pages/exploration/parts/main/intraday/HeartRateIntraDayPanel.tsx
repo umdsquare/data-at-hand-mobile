@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
-import { StepCountIntraDayData, HeartRateIntraDayData, IIntraDayHeartRatePoint, HeartRateZone } from '@core/exploration/data/types';
+import { HeartRateIntraDayData, IIntraDayHeartRatePoint, HeartRateZone } from '@core/exploration/data/types';
 import { View, StyleSheet, LayoutRectangle, Text } from 'react-native';
-import { StyleTemplates } from '@style/Styles';
 import { Sizes } from '@style/Sizes';
 import Colors from '@style/Colors';
 import { scaleLinear } from 'd3-scale';
 import { max, min, sum } from 'd3-array';
 import { SizeWatcher } from '@components/visualization/SizeWatcher';
-import Svg, { G, Rect, Path, Circle, Line, Text as SvgText } from 'react-native-svg';
+import Svg, { G, Path, Line, Text as SvgText } from 'react-native-svg';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
 import { pad, DateTimeHelper } from '@utils/time';
@@ -143,7 +142,7 @@ export const HeartRateIntraDayPanel = () => {
                             flex: isMax===true ? 1 : null, 
                             width: isMax===false ? Math.max(1, zoneInfo.minutes/maxZoneLength * maxZoneBarWidth) : null,
                             backgroundColor: spec.color, alignSelf: 'stretch' }}
-                            onSizeChange={(width, height) => {
+                            onSizeChange={(width) => {
                                 if(isMax===true){
                                     setMaxZoneBarWidth(width)
                                 }

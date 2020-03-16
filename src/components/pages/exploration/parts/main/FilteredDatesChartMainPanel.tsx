@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, LayoutRectangle } from 'react-native';
 import { StyleTemplates } from '@style/Styles';
-import { SizeWatcher } from '../../../../visualization/SizeWatcher';
+import { SizeWatcher } from '@components/visualization/SizeWatcher';
 import Svg, { G, Line, Text as SvgText, Rect, Circle } from 'react-native-svg';
 import { Dispatch } from 'redux';
 import { ReduxAppState } from '@state/types';
@@ -18,10 +18,10 @@ import Colors from '@style/Colors';
 import { Sizes } from '@style/Sizes';
 import { format } from 'date-fns';
 import { DateTimeHelper } from '@utils/time';
-import { AxisSvg } from '../../../../visualization/axis';
-import { Padding } from '../../../../visualization/types';
-import { GroupWithTouchInteraction } from '../../../../exploration/visualization/browse/GroupWithTouchInteraction';
-import { timeTickFormat } from '../../../../exploration/visualization/compare/common';
+import { AxisSvg } from '@components/visualization/axis';
+import { Padding } from '@components/visualization/types';
+import { GroupWithTouchInteraction } from '@components/exploration/visualization/browse/GroupWithTouchInteraction';
+import { timeTickFormat } from '@components/exploration/visualization/compare/common';
 import commaNumber from 'comma-number';
 
 const xAxisHeight = 160

@@ -10,14 +10,14 @@ import { CyclicTimeFrame, cyclicTimeFrameSpecs } from '@core/exploration/cyclic_
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper'
 import { useDispatch } from 'react-redux'
 import { createGoToComparisonTwoRangesAction, InteractionType, createGoToComparisonCyclicAction } from '@state/exploration/interaction/actions'
-import { CategoricalRow } from '../../../../exploration/CategoricalRow'
+import { CategoricalRow } from '@components/exploration/CategoricalRow'
 import { DataSourceManager } from '@measure/DataSourceManager'
-import { DataSourceIcon } from '../../../../common/DataSourceIcon'
-import { DateRangeBar } from '../../../../exploration/DateRangeBar'
+import { DataSourceIcon } from '@components/common/DataSourceIcon'
+import { DateRangeBar } from '@components/exploration/DateRangeBar'
 import { StyleTemplates } from '@style/Styles'
 import { DateTimeHelper } from '@utils/time'
 import { subDays } from 'date-fns'
-import { SvgIcon, SvgIconType } from '../../../../common/svg/SvgIcon'
+import { SvgIcon, SvgIconType } from '@components/common/svg/SvgIcon'
 
 const styles = StyleSheet.create({
     containerStyle: { paddingLeft: Sizes.horizontalPadding * .5, paddingRight: Sizes.horizontalPadding * .5 },

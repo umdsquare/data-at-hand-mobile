@@ -1,27 +1,25 @@
 import React, { useState, useRef, useCallback, useMemo } from "react";
 import { View, FlatList, Text, StyleSheet, ActivityIndicator, LayoutAnimation, UIManager, findNodeHandle } from 'react-native';
-import { MeasureUnitType, DataSourceType } from "../../../../../measure/DataSourceSpec";
-import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, InteractionType, setHighlightFilter } from "../../../../../state/exploration/interaction/actions";
+import { MeasureUnitType, DataSourceType } from "@measure/DataSourceSpec";
+import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, InteractionType, setHighlightFilter } from "@state/exploration/interaction/actions";
 import { connect } from "react-redux";
-import { ReduxAppState } from "../../../../../state/types";
+import { ReduxAppState } from "@state/types";
 import { Dispatch } from "redux";
-import { OverviewSourceRow, DataSourceBrowseData } from "../../../../../core/exploration/data/types";
-import { DataSourceChartFrame } from "../../../../exploration/DataSourceChartFrame";
-import { explorationInfoHelper } from "../../../../../core/exploration/ExplorationInfoHelper";
-import { ParameterType, TouchingElementInfo, inferIntraDayDataSourceType, TouchingElementValueType, HighlightFilter } from "../../../../../core/exploration/types";
+import { OverviewSourceRow, DataSourceBrowseData } from "@core/exploration/data/types";
+import { DataSourceChartFrame } from "@components/exploration/DataSourceChartFrame";
+import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
+import { ParameterType, TouchingElementInfo, inferIntraDayDataSourceType, TouchingElementValueType, HighlightFilter } from "@core/exploration/types";
 import { DateTimeHelper } from "@utils/time";
 import { format, startOfDay, addSeconds } from "date-fns";
 import { StyleTemplates } from "@style/Styles";
 import { Sizes } from "@style/Sizes";
 import Colors from "@style/Colors";
-import { Icon } from "react-native-elements";
 import commaNumber from 'comma-number';
 import unitConvert from 'convert-units';
 import { TouchableHighlight } from "react-native-gesture-handler";
-import { SvgIcon, SvgIconType } from "../../../../common/svg/SvgIcon";
-import { DataSourceManager } from "@measure/DataSourceManager";
+import { SvgIcon, SvgIconType } from "@components/common/svg/SvgIcon";
 import { DataServiceManager } from "@measure/DataServiceManager";
-import { HighlightFilterPanel } from "../../../../exploration/HighlightFilterPanel";
+import { HighlightFilterPanel } from "@components/exploration/HighlightFilterPanel";
 
 const listItemHeightNormal = 52
 const listItemHeightTall = 70

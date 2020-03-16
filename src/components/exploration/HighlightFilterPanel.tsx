@@ -13,12 +13,9 @@ import pluralize from 'pluralize';
 import deepEqual from 'deep-equal';
 import Dialog from 'react-native-dialog'
 import { DateTimeHelper } from '@utils/time'
-import { startOfDay, addSeconds, format, getHours, getSeconds, getMinutes } from 'date-fns'
+import { startOfDay, addSeconds, format, getHours, getMinutes } from 'date-fns'
 import commaNumber from 'comma-number'
-import { useSelector } from 'react-redux'
-import { ReduxAppState } from '@state/types'
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Button } from 'react-native-elements'
 import { TimePicker } from "react-native-wheel-picker-android";
 import { DurationWheelPicker } from '../common/DurationWheelPicker'
 
@@ -32,7 +29,7 @@ const dataSourceSpecs: Array<SpecType> = [
     { dataSourceType: DataSourceType.Weight, propertyKey: undefined, label: DataSourceManager.instance.getSpec(DataSourceType.Weight).name },
 ]
 
-function getComparisonLabel(type: NumericConditionType, dataSource: DataSourceType, propertyKey?: string): string {
+function getComparisonLabel(type: NumericConditionType, dataSource: DataSourceType): string {
     switch (dataSource) {
         case DataSourceType.StepCount:
             switch (type) {
@@ -161,20 +158,19 @@ export const HighlightFilterPanel = React.memo((props: {
     onFilterModified: (newFilter: HighlightFilter) => void
 }) => {
 
-    const measureUnitType = useSelector((appState: ReduxAppState) => appState.settingsState.unit)
 
     const comparisonTypes = useMemo(() => {
         return [NumericConditionType.Less, NumericConditionType.More, NumericConditionType.Min, NumericConditionType.Max].map(type => {
             return {
                 type,
-                label: getComparisonLabel(type, props.filter.dataSource, props.filter.propertyKey)
+                label: getComparisonLabel(type, props.filter.dataSource)
             }
         })
     }, [props.filter.dataSource, props.filter.propertyKey])
 
 
 
-    const renderRightActions = useCallback((progress: Animated.AnimatedInterpolation, dragX: Animated.AnimatedInterpolation) => {
+    const renderRightActions = useCallback((progress: Animated.AnimatedInterpolation) => {
         const scale = progress.interpolate({
             inputRange: [0, 1],
             outputRange: [0, 1],

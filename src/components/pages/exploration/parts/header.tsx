@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { ExplorationType, ParameterKey, ParameterType, IntraDayDataSourceType, getIntraDayDataSourceName, inferIntraDayDataSourceType, inferDataSource } from "@core/exploration/types";
 import { SafeAreaView, View, Text, StyleSheet, TextStyle, ViewStyle, LayoutAnimation, ViewProps } from 'react-native';
-import { CategoricalRow, CategoricalRowProps } from '../../../exploration/CategoricalRow';
-import { DataSourceIcon } from '../../../common/DataSourceIcon';
-import { ExplorationProps } from '../ExplorationScreen';
-import { DateRangeBar, DateBar } from '../../../exploration/DateRangeBar';
+import { CategoricalRow, CategoricalRowProps } from '@components/exploration/CategoricalRow';
+import { DataSourceIcon } from '@components/common/DataSourceIcon';
+import { DateRangeBar, DateBar } from '@components/exploration/DateRangeBar';
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
 import { Button } from 'react-native-elements';
 import { Sizes } from '@style/Sizes';
@@ -15,13 +14,13 @@ import { createSetRangeAction, setDataSourceAction, InteractionType, goBackActio
 import Colors from '@style/Colors';
 import { useDispatch, useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
-import { CyclicTimeFrame, cyclicTimeFrameSpecs, CycleDimension, getFilteredCycleDimensionList, getHomogeneousCycleDimensionList, getCycleDimensionSpec } from '@core/exploration/cyclic_time';
-import { SvgIcon, SvgIconType } from '../../../common/svg/SvgIcon';
+import { CyclicTimeFrame, cyclicTimeFrameSpecs, CycleDimension, getHomogeneousCycleDimensionList, getCycleDimensionSpec } from '@core/exploration/cyclic_time';
+import { SvgIcon, SvgIconType } from '@components/common/svg/SvgIcon';
 import { makeNewSessionId, startSpeechSession, requestStopDictation } from '@state/speech/commands';
 import { createSetShowGlobalPopupAction } from '@state/speech/actions';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../../../Routes';
+import { RootStackParamList } from '@components/Routes';
 import { SpeechContextHelper } from '@core/speech/nlp/context';
 
 const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={'white'} />
@@ -188,7 +187,7 @@ const HeaderRangeBar = React.memo((props: { parameterKey?: ParameterKey, showBor
         dispatch(createSetShowGlobalPopupAction(true, sessionId))
     }, [dispatch, setSpeechSessionId, props.parameterKey])
 
-    const onLongPressOut = useCallback((position) => {
+    const onLongPressOut = useCallback(() => {
         if (speechSessionId != null) {
             console.log("request stop dictation")
             dispatch(requestStopDictation(speechSessionId))
@@ -286,7 +285,7 @@ const DataSourceBar = React.memo((props: { showBorder: boolean }) => {
     />
 })
 
-const IntraDayDataSourceBar = React.memo((props: { showBorder: boolean }) => {
+const IntraDayDataSourceBar = React.memo((props: {showBorder: boolean}) => {
     const dispatch = useDispatch()
     const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
 
@@ -308,7 +307,7 @@ const IntraDayDataSourceBar = React.memo((props: { showBorder: boolean }) => {
         [supportedIntraDayDataSourceTypes])
 
 
-    return <SpeechSupportedCategoricalRow parameterType={ParameterType.IntraDayDataSource} title="Data Source" showBorder={false} value={sourceTypeName}
+    return <SpeechSupportedCategoricalRow parameterType={ParameterType.IntraDayDataSource} title="Data Source" showBorder={props.showBorder} value={sourceTypeName}
         IconComponent={DataSourceIcon}
         iconProps={(index) => {
             return {

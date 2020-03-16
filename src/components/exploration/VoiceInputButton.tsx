@@ -5,7 +5,7 @@ import LottieView from 'lottie-react-native';
 import { StyleSheet, View, LayoutAnimation } from "react-native";
 import Colors from "@style/Colors";
 import { Sizes } from "@style/Sizes";
-import { SvgIconType, SvgIcon } from "../common/svg/SvgIcon";
+import { SvgIconType, SvgIcon } from "@components/common/svg/SvgIcon";
 
 const microphoneButtonIconSize = 32
 

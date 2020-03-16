@@ -1,9 +1,9 @@
 import React from 'react';
 import { SpeechNotificationEvent } from '@core/speech/SpeechEventQueue';
 import { View, Text, Animated, Easing, StyleSheet } from 'react-native';
-import { ZIndices } from './parts/zIndices';
+import { ZIndices } from '@components/pages/exploration/parts/zIndices';
 import { StyleTemplates } from '@style/Styles';
-import { SvgIcon, SvgIconType } from '../../common/svg/SvgIcon';
+import { SvgIcon, SvgIconType } from '@components/common/svg/SvgIcon';
 import { Sizes } from '@style/Sizes';
 import LinearGradient from 'react-native-linear-gradient';
 import Colors from '@style/Colors';

@@ -1,46 +1,45 @@
 import React from "react";
-import { StatusBar, View, StyleSheet, Platform, BackHandler, Alert, AppState, AppStateStatus, GestureResponderEvent, InteractionManager, findNodeHandle } from "react-native";
+import { StatusBar, View, StyleSheet, Platform, BackHandler, Alert, AppState, AppStateStatus } from "react-native";
 import Colors from "@style/Colors";
 import { StyleTemplates } from "@style/Styles";
 import { ThunkDispatch } from "redux-thunk";
-import { ReduxAppState } from "../../../state/types";
+import { ReduxAppState } from "@state/types";
 import { connect } from "react-redux";
-import { BottomBar } from "./parts/main/BottomBar";
-import { ExplorationViewHeader } from '../exploration/parts/header';
+import { BottomBar } from "@components/pages/exploration/parts/main/BottomBar";
+import { ExplorationViewHeader } from '@components/pages/exploration/parts/header';
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { ExplorationInfo, ExplorationType, ExplorationMode } from "@core/exploration/types";
-import { ExplorationDataState, startLoadingForInfo } from "../../../state/exploration/data/reducers";
-import { ExplorationAction, InteractionType, createGoToBrowseOverviewAction, createRestorePreviousInfoAction, goBackAction } from "../../../state/exploration/interaction/actions";
+import { startLoadingForInfo } from "@state/exploration/data/reducers";
+import { ExplorationAction, InteractionType, createGoToBrowseOverviewAction, createRestorePreviousInfoAction, goBackAction } from "@state/exploration/interaction/actions";
 import { Button } from "react-native-elements";
 import { Sizes } from "@style/Sizes";
-import { OverviewMainPanel } from "./parts/main/OverviewMainPanel";
-import { BrowseRangeMainPanel } from "./parts/main/BrowseRangeMainPanel";
-import { BusyHorizontalIndicator } from "../../exploration/BusyHorizontalIndicator";
-import { getIntraDayMainPanel } from "./parts/main/IntraDayMainPanel";
-import { CyclicComparisonMainPanel } from "./parts/main/CyclicComparisonMainPanel";
-import { MultiRangeComparisonMainPanel } from "./parts/main/MultiRangeComparisonMainPanel";
-import { FilteredDatesChartMainPanel } from "./parts/main/FilteredDatesChartMainPanel";
-import { BottomSheet } from "../../common/BottomSheet";
-import { ComparisonInitPanel } from "./parts/main/ComparisonInitPanel";
-import { TooltipOverlay } from "./parts/main/TooltipOverlay";
+import { OverviewMainPanel } from "@components/pages/exploration/parts/main/OverviewMainPanel";
+import { BrowseRangeMainPanel } from "@components/pages/exploration/parts/main/BrowseRangeMainPanel";
+import { BusyHorizontalIndicator } from "@components/exploration/BusyHorizontalIndicator";
+import { getIntraDayMainPanel } from "@components/pages/exploration/parts/main/IntraDayMainPanel";
+import { CyclicComparisonMainPanel } from "@components/pages/exploration/parts/main/CyclicComparisonMainPanel";
+import { MultiRangeComparisonMainPanel } from "@components/pages/exploration/parts/main/MultiRangeComparisonMainPanel";
+import { FilteredDatesChartMainPanel } from "@components/pages/exploration/parts/main/FilteredDatesChartMainPanel";
+import { ComparisonInitPanel } from "@components/pages/exploration/parts/main/ComparisonInitPanel";
+import { TooltipOverlay } from "@components/pages/exploration/parts/main/TooltipOverlay";
 import { check, PERMISSIONS, RESULTS, request, openSettings } from 'react-native-permissions';
-import { GlobalSpeechOverlay } from "./parts/main/GlobalSpeechOverlay";
+import { GlobalSpeechOverlay } from "@components/pages/exploration/parts/main/GlobalSpeechOverlay";
 import Haptic from "react-native-haptic-feedback";
-import { startSpeechSession, requestStopDictation, makeNewSessionId } from "../../../state/speech/commands";
-import { SvgIcon, SvgIconType } from "../../common/svg/SvgIcon";
-import { ZIndices } from "./parts/zIndices";
-import { DataBusyOverlay } from "./parts/main/DataBusyOverlay";
-import { InitialLoadingIndicator } from "./parts/main/InitialLoadingIndicator";
-import { createSetShowGlobalPopupAction } from "../../../state/speech/actions";
+import { startSpeechSession, requestStopDictation, makeNewSessionId } from "@state/speech/commands";
+import { SvgIcon, SvgIconType } from "@components/common/svg/SvgIcon";
+import { ZIndices } from "@components/pages/exploration/parts/zIndices";
+import { DataBusyOverlay } from "@components/pages/exploration/parts/main/DataBusyOverlay";
+import { InitialLoadingIndicator } from "@components/pages/exploration/parts/main/InitialLoadingIndicator";
+import { createSetShowGlobalPopupAction } from "@state/speech/actions";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../../Routes";
+import { RootStackParamList } from "@components/Routes";
 import { SpeechContextHelper } from "@core/speech/nlp/context";
 import { test } from "@core/speech/nlp/preprocessor";
-import { TouchSafeBottomSheet } from "../../common/TouchSafeBottomSheet";
-import { Subscription, pipe, interval } from "rxjs";
+import { TouchSafeBottomSheet } from "@components/common/TouchSafeBottomSheet";
+import { Subscription } from "rxjs";
 import { SpeechEventQueue } from "@core/speech/SpeechEventQueue";
-import { SpeechEventNotificationOverlay } from "./SpeechEventNotificationOverlay";
+import { SpeechEventNotificationOverlay } from "@components/pages/exploration/SpeechEventNotificationOverlay";
 
 test().then()
 
@@ -191,7 +190,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
             (event) => {
                 this.speechFeedbackRef.current?.notify(event)
             },
-            err => {
+            () => {
 
             }, () => {
 

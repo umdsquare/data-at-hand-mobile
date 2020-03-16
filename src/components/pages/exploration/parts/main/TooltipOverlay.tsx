@@ -15,7 +15,7 @@ import { addSeconds } from 'date-fns/esm'
 import LinearGradient from 'react-native-linear-gradient'
 import Colors from '@style/Colors'
 import { CycleDimension, getCycleDimensionSpec } from '@core/exploration/cyclic_time'
-import { SpeechInputPanel } from '../../../../exploration/SpeechInputPanel';
+import { SpeechInputPanel } from '@components/exploration/SpeechInputPanel';
 import { ThunkDispatch } from 'redux-thunk'
 import { startSpeechSession, requestStopDictation, makeNewSessionId } from '@state/speech/commands';
 import Haptic from 'react-native-haptic-feedback';

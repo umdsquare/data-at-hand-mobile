@@ -1,7 +1,7 @@
 import { createStackNavigator, HeaderBackButton, TransitionPresets, StackNavigationProp } from '@react-navigation/stack';
-import { ExplorationScreen } from './pages/exploration/ExplorationScreen';
-import { SettingsScreen } from './pages/settings/SettingsScreen';
-import { ServiceSelectionScreen } from './pages/sources/service-wizard/ServiceSelectionScreen';
+import { ExplorationScreen } from '@components/pages/exploration/ExplorationScreen';
+import { SettingsScreen } from '@components/pages/settings/SettingsScreen';
+import { ServiceSelectionScreen } from '@components/pages/sources/service-wizard/ServiceSelectionScreen';
 import React, { useMemo } from 'react';
 import { Platform } from 'react-native';
 

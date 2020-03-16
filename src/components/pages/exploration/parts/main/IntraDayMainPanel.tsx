@@ -1,6 +1,6 @@
 import React from 'react';
-import { ExplorationInfo, ParameterType, IntraDayDataSourceType } from "../../../../../core/exploration/types";
-import { explorationInfoHelper } from "../../../../../core/exploration/ExplorationInfoHelper";
+import { ExplorationInfo, ParameterType, IntraDayDataSourceType } from "@core/exploration/types";
+import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
 import { StepIntraDayPanel } from "./intraday/StepIntraDayPanal";
 import { HeartRateIntraDayPanel } from './intraday/HeartRateIntraDayPanel';
 import { SleepIntraDayPanel } from './intraday/SleepIntraDayPanel';

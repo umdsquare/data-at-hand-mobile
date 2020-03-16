@@ -1,8 +1,8 @@
 import React from 'react';
 import Svg, { G, Circle, Path, Line, Rect } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartPropsBase } from './common';
-import { AxisSvg } from '../../../visualization/axis';
-import { Padding } from '../../../visualization/types';
+import { AxisSvg } from '@components/visualization/axis';
+import { Padding } from '@components/visualization/types';
 import { DateTimeHelper } from '@utils/time';
 import { DateBandAxis } from './DateBandAxis';
 import { scaleLinear } from 'd3-scale';

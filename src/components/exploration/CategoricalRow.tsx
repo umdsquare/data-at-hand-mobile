@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, FlatLis
 import { Sizes } from '@style/Sizes';
 import { SpeechAffordanceIndicator } from './SpeechAffordanceIndicator';
 import GestureRecognizer from 'react-native-swipe-gestures';
-import { SwipedFeedback } from '../common/SwipedFeedback';
+import { SwipedFeedback } from '@components/common/SwipedFeedback';
 import Colors from '@style/Colors';
-import { BottomSheet } from '../common/BottomSheet';
+import { BottomSheet } from '@components/common/BottomSheet';
 import { Button } from 'react-native-elements';
 import { StyleTemplates } from '@style/Styles';
 import Haptic from "react-native-haptic-feedback";

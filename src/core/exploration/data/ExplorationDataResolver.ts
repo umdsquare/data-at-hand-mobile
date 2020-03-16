@@ -1,4 +1,4 @@
-import { ExplorationInfo, ExplorationType, ParameterType, IntraDayDataSourceType, ParameterKey } from '../types';
+import { ExplorationInfo, ExplorationType, ParameterType, IntraDayDataSourceType, ParameterKey } from '@core/exploration/types';
 import { OverviewData, OverviewSourceRow, GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData, FilteredDailyValues, StepCountRangedData, WeightRangedData, DataSourceBrowseData } from './types';
 import { explorationInfoHelper } from '../ExplorationInfoHelper';
 import { DataSourceManager } from '@measure/DataSourceManager';

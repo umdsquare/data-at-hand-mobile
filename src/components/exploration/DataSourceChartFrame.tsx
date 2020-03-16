@@ -12,10 +12,10 @@ import { scaleLinear } from 'd3-scale';
 import { HighlightFilter } from '@core/exploration/types';
 import { SizeWatcher } from '@components/visualization/SizeWatcher';
 import { DataSourceIcon } from '@components/common/DataSourceIcon';
-import { DailyBarChart } from './visualization/browse/DailyBarChart';
-import { DailyHeartRateChart } from './visualization/browse/DailyHeartRateChart';
-import { DailySleepRangeChart } from './visualization/browse/DailySleepRangeChart';
-import { DailyWeightChart } from './visualization/browse/DailyWeightChart';
+import { DailyBarChart } from '@components/exploration/visualization/browse/DailyBarChart';
+import { DailyHeartRateChart } from '@components/exploration/visualization/browse/DailyHeartRateChart';
+import { DailySleepRangeChart } from '@components/exploration/visualization/browse/DailySleepRangeChart';
+import { DailyWeightChart } from '@components/exploration/visualization/browse/DailyWeightChart';
 
 
 const lightTextColor = "#8b8b8b"
