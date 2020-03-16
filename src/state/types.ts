@@ -14,3 +14,8 @@ export type ReduxAppState = {
 export interface ActionTypeBase{
     type: string
 }
+
+export function setMetadataToAction(action: ActionTypeBase, metadata: Object | string | null): ActionTypeBase{
+    action["_metadata"] = metadata
+    return action
+  }

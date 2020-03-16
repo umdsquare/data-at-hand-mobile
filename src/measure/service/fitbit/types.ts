@@ -195,5 +195,5 @@ export interface FitbitServiceCore {
   fitbitLocalDbManager: FitbitLocalDbManager
   localAsyncStorage: LocalAsyncStorageHelper
 
-  getToday(): Date
+  getToday: () => Date
 }

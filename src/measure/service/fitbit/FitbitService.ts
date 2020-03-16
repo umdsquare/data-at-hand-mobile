@@ -367,7 +367,7 @@ export class FitbitService extends DataService {
     return this.core.fitbitLocalDbManager.exportToCsv()
   }
 
-  getToday = () => {
-    return this.core.getToday()
+  get getToday(){ 
+    return this.core.getToday
   }
 }

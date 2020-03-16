@@ -9,6 +9,7 @@ import { speechRecognizerStateReducer } from '@state/speech/reducers';
 import { SystemLogger } from '@core/logging/SystemLogger';
 import { resetAction } from './exploration/interaction/actions';
 import { DataServiceManager } from '@measure/DataServiceManager';
+import { makeLogger } from './logger';
 
 const persistConfig = {
   key: 'root',
@@ -25,7 +26,7 @@ export default () => {
       explorationDataState: explorationDataStateReducer,
       speechRecognizerState: speechRecognizerStateReducer
     }),
-    applyMiddleware(thunk)
+    applyMiddleware(thunk, makeLogger())
   );
 
 

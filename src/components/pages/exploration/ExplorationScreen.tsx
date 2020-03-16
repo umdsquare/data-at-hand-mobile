@@ -40,6 +40,7 @@ import { TouchSafeBottomSheet } from "@components/common/TouchSafeBottomSheet";
 import { Subscription } from "rxjs";
 import { SpeechEventQueue } from "@core/speech/SpeechEventQueue";
 import { SpeechEventNotificationOverlay } from "@components/pages/exploration/SpeechEventNotificationOverlay";
+import { SystemLogger } from "@core/logging/SystemLogger";
 
 test().then()
 

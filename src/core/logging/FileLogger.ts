@@ -34,10 +34,10 @@ export class FileLogger {
             }
 
             if (await exists(filePath) === false) {
-                await writeFile(filePath, line + "\n", 'utf8')
+                await writeFile(filePath, line, 'utf8')
             }else{
                 //exist. append
-                await appendFile(filePath, line + "\n", 'utf8')
+                await appendFile(filePath, "\n" + line, 'utf8')
             }
         } else {
             console.log("Something went wrong when directory creation for logger.: ", this.fullDirectoryPath)

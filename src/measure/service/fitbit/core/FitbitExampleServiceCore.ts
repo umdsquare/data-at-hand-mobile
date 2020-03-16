@@ -92,16 +92,19 @@ export class FitbitExampleServiceCore implements FitbitServiceCore {
     }
 
     private _latestDate: Date = null
+    private get latestDate(): Date {
+        if(this._latestDate == null){
+            this._latestDate = DateTimeHelper.toDate(max(this.exampleData, d => d.numberedDate))
+        }
+        return this._latestDate
+    }
+
+
     private _earliestNumberedDate: number = null
 
     async authenticate(): Promise<string> {
-        const latestDateInData = DateTimeHelper.toDate(max(this.exampleData, d => d.numberedDate))
-        this._latestDate = latestDateInData
         this._earliestNumberedDate = min(this.exampleData, d => d.numberedDate)
-        const latestDateDayOfWeek = getDay(latestDateInData)
-        const now = startOfDay(new Date())
-        const nowDayOfWeek = getDay(now)
-
+        
         //number of weeks to add to cover today. (To maintain Days of the week in the data)
         //const deltaDays = differenceInDays(now, latestDateInData) + ((7 + latestDateDayOfWeek - nowDayOfWeek)%7)
 
@@ -191,14 +194,14 @@ export class FitbitExampleServiceCore implements FitbitServiceCore {
         }
     }
 
-    getToday() {
-        return this._latestDate || new Date()
+    readonly getToday = () => {
+        return this.latestDate || new Date()
     }
 
     async fetchLastSyncTime(): Promise<{ tracker?: Date, scale?: Date }> {
         return {
-            tracker: this._latestDate,
-            scale: this._latestDate
+            tracker: this.latestDate,
+            scale: this.latestDate
         }
     }
 }

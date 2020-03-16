@@ -9,34 +9,37 @@ import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
 import { startOfDay, subDays, endOfDay } from 'date-fns';
 import { DateTimeHelper } from '@utils/time';
 
+export const USER_INTERACTION_ACTION_PREFIX = "exploration:interaction:user"
+
 export enum ExplorationActionType {
-  MemoUiStatus = 'exploration:interaction:memoUIStatus',
-  SetRange = 'exploration:interaction:setRange',
-  SetDataSource = 'exploration:interaction:setDataSource',
-  SetIntraDayDataSource = 'exploration:interaction:setIntraDayDataSource',
-  SetDate = 'exploration:interaction:setDate',
-  SetCycleType = 'exploration:interaction:setCycleType',
-  SetCycleDimension = 'exploration:interaction:setCycleDimension',
+  MemoUiStatus = 'exploration:interaction:system:memoUIStatus',
 
-  SetHighlightFilter = 'exploration:interaction:setHighlightFilter',
+  SetRange = 'exploration:interaction:user:setRange',
+  SetDataSource = 'exploration:interaction:user:setDataSource',
+  SetIntraDayDataSource = 'exploration:interaction:user:setIntraDayDataSource',
+  SetDate = 'exploration:interaction:user:setDate',
+  SetCycleType = 'exploration:interaction:user:etCycleType',
+  SetCycleDimension = 'exploration:interaction:user:setCycleDimension',
 
-  ShiftAllRanges = 'exploration:interaction:shiftAllRanges',
+  SetHighlightFilter = 'exploration:interaction:user:setHighlightFilter',
 
-  GoToBrowseRange = 'exploration:interaction:goToBrowseRange',
-  GoToBrowseOverview = 'exploration:interaction:goToBrowseOverview',
-  GoToBrowseDay = 'exploration:interaction:goToBrowseDay',
-  GoToComparisonCyclic = 'exploration:interaction:goToComparisonCyclic',
-  GoToComparisonToRanges = 'exploration:interaction:goToComparisonTwoRanges',
-  GoToCyclicDetailDaily = "exploration:interaction:goToCyclicDetailDaily",
-  GoToCyclicDetailRange = "exploration:interaction:goToCyclicDetailRange",
+  ShiftAllRanges = 'exploration:interaction:user:shiftAllRanges',
+
+  GoToBrowseRange = 'exploration:interaction:user:goToBrowseRange',
+  GoToBrowseOverview = 'exploration:interaction:user:goToBrowseOverview',
+  GoToBrowseDay = 'exploration:interaction:user:goToBrowseDay',
+  GoToComparisonCyclic = 'exploration:interaction:user:goToComparisonCyclic',
+  GoToComparisonToRanges = 'exploration:interaction:user:goToComparisonTwoRanges',
+  GoToCyclicDetailDaily = "exploration:interaction:user:goToCyclicDetailDaily",
+  GoToCyclicDetailRange = "exploration:interaction:user:goToCyclicDetailRange",
 
   //History
-  RestorePreviousInfo = 'exploration:interaction:restorePreviousInfo',
-  GoBack = 'exploration:interaction:goBack',
-  Reset = 'exploration:interaction:reset',
+  RestorePreviousInfo = 'exploration:interaction:user:restorePreviousInfo',
+  GoBack = 'exploration:interaction:user:goBack',
+  Reset = 'exploration:interaction:system:reset',
 
   //Touch
-  SetTouchElementInfo = 'exploration:interaction:setTouchElementInfo',
+  SetTouchElementInfo = 'exploration:interaction:user:setTouchElementInfo',
 }
 
 export enum InteractionType {
@@ -346,6 +349,7 @@ export function goBackAction(): ActionTypeBase {
 
 export function resetAction(today: Date): ResetAction {
   const now = startOfDay(today);
+  console.log("now:", now)
   return {
     type: ExplorationActionType.Reset,
     resetRange: [

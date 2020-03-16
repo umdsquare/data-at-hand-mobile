@@ -1,5 +1,5 @@
 import { Dispatch } from "redux";
-import { ReduxAppState } from "../types";
+import { ReduxAppState, setMetadataToAction } from "../types";
 import { createBootstrapAction, createTerminateSessionAction, createUpdateDictationResultAction, createStartDictationAction, TerminationReason, createWaitAction } from "./actions";
 import { VoiceDictator } from "../../core/speech/VoiceDictator";
 import { DictationResult } from "../../core/speech/types";
@@ -97,24 +97,29 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
                             )
 
                             SystemLogger.instance.logSpeechCommandResult(
-                                dictationResult.text, 
+                                dictationResult.text,
                                 currentState.explorationState.info,
                                 context,
                                 inferredAction
-                                ).then()
+                            ).then()
 
                             if (inferredAction != null) {
                                 console.log("resulting action:")
                                 console.log(inferredAction)
-                                dispatch(inferredAction)
-                                requestAnimationFrame(()=>{
+
+                                const inferredActionWithMetadata = setMetadataToAction(inferredAction, { speech: dictationResult.text })
+
+                                dispatch(inferredActionWithMetadata)
+                                requestAnimationFrame(() => {
                                     SpeechEventQueue.instance.push({
                                         type: "success",
                                         id: sessionId
                                     })
                                 })
-                            }else{
-                                requestAnimationFrame(()=>{
+                            } else {
+                                SystemLogger.instance.logVerboseToInteractionStateTransition("SpeechFail", {speech: dictationResult.text}).then()
+                                
+                                requestAnimationFrame(() => {
                                     SpeechEventQueue.instance.push({
                                         type: "fail",
                                         id: sessionId

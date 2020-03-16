@@ -159,7 +159,6 @@ const DateButton = React.memo((props: {
     const subText = isToday(date, today) === true ? 'Today' : (isYesterday(date, today) === true ? "Yesterday" : format(date, "EEEE"))
 
     const onLongPressStateChange = useCallback((ev: LongPressGestureHandlerStateChangeEvent) => {
-        console.log("state: ", ev.nativeEvent.state)
         if (ev.nativeEvent.state === GestureState.ACTIVE) {
             props.onLongPressIn && props.onLongPressIn()
         } else if (ev.nativeEvent.state === GestureState.END) {
@@ -249,9 +248,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
     private swipedFeedbackRef = React.createRef<SwipedFeedback>()
     private bottomSheetRef = React.createRef<BottomSheet>()
-
-    private setRangeDebounceTimer: any
-
+    
     constructor(props: Props) {
         super(props)
         this.state = DateRangeBar.deriveState(props.from, props.to, { isBottomSheetOpen: false, } as any)
@@ -319,14 +316,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         this.bottomSheetRef.current?.close()
 
         if (this.props.onRangeChanged) {
-
             this.props.onRangeChanged!(newState.from, newState.to, interactionType)
-            if (this.setRangeDebounceTimer) {
-                cancelAnimationFrame(this.setRangeDebounceTimer)
-            }
-            this.setRangeDebounceTimer = requestAnimationFrame(() => {
-                this.props.onRangeChanged!(newState.from, newState.to, interactionType)
-            })
         }
     }
 
