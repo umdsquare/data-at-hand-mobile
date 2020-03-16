@@ -1,11 +1,12 @@
-import {createStore, applyMiddleware} from 'redux';
-import {persistStore, persistCombineReducers} from 'redux-persist';
-import {settingsStateReducer} from '@state/settings/reducer';
+import { createStore, applyMiddleware } from 'redux';
+import { persistStore, persistCombineReducers } from 'redux-persist';
+import { settingsStateReducer, SettingsState } from '@state/settings/reducer';
 import AsyncStorage from '@react-native-community/async-storage';
 import { explorationStateReducer } from '@state/exploration/interaction/reducers';
-import {explorationDataStateReducer} from '@state/exploration/data/reducers';
+import { explorationDataStateReducer } from '@state/exploration/data/reducers';
 import thunk from 'redux-thunk';
 import { speechRecognizerStateReducer } from '@state/speech/reducers';
+import { SystemLogger } from '@core/logging/SystemLogger';
 
 const persistConfig = {
   key: 'root',
@@ -15,7 +16,7 @@ const persistConfig = {
 };
 
 export default () => {
-  let store = createStore(
+  const store = createStore(
     persistCombineReducers(persistConfig, {
       settingsState: settingsStateReducer,
       explorationState: explorationStateReducer,
@@ -24,6 +25,20 @@ export default () => {
     }),
     applyMiddleware(thunk)
   );
-  let persistor = persistStore(store, null, () => {});
-  return {store, persistor};
+
+
+  let currentSettingsState: SettingsState | undefined = undefined
+  store.subscribe(() => {
+    const prevSettingsState = currentSettingsState
+    currentSettingsState = store.getState().settingsState
+    if (prevSettingsState == null
+      || prevSettingsState.loggingSessionId !== currentSettingsState.loggingSessionId
+      || prevSettingsState.recordLogs !== currentSettingsState.recordLogs) {
+      SystemLogger.instance.sessionId = currentSettingsState.loggingSessionId
+      SystemLogger.instance.enabled = currentSettingsState.recordLogs
+    }
+  })
+
+  const persistor = persistStore(store, null, () => { });
+  return { store, persistor };
 };

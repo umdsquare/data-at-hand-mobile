@@ -10,6 +10,7 @@ import { SpeechContext } from "../../core/speech/nlp/context";
 import { NLUCommandResolver } from "../../core/speech/nlp/nlu";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { SpeechEventQueue } from "../../core/speech/SpeechEventQueue";
+import { SystemLogger } from "@core/logging/SystemLogger";
 
 const sessionMutex = new Mutex()
 
@@ -94,6 +95,13 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
                                     getToday: DataServiceManager.instance.getServiceByKey(currentState.settingsState.serviceKey).getToday
                                 }
                             )
+
+                            SystemLogger.instance.logSpeechCommandResult(
+                                dictationResult.text, 
+                                currentState.explorationState.info,
+                                context,
+                                inferredAction
+                                ).then()
 
                             if (inferredAction != null) {
                                 console.log("resulting action:")

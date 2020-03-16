@@ -20,12 +20,12 @@ export enum ExplorationMode {
 }
 
 export enum ParameterType {
-  DataSource,
-  IntraDayDataSource,
-  Date,
-  Range,
-  CycleType,
-  CycleDimension,
+  DataSource="src",
+  IntraDayDataSource="intra_day_src",
+  Date="date",
+  Range="range",
+  CycleType="cycle",
+  CycleDimension="cycle_dim",
 }
 
 export enum ParameterKey {
