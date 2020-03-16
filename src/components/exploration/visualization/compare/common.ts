@@ -4,6 +4,7 @@ import { ScaleBand } from 'd3-scale';
 import { LayoutRectangle } from 'react-native';
 import { TouchingElementInfo, TouchingElementValueType, ParameterType } from '@core/exploration/types';
 import { DataSourceType } from '@measure/DataSourceSpec';
+import { getScaleStepLeft } from '../d3-utils';
 
 const dowNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const monthNames = [
@@ -85,7 +86,7 @@ export function makeTouchingInfoForCycle(
   const info = {
     touchId,
     elementBoundInScreen: {
-      x: touchScreenX - touchX + chartArea.x + (scaleX(timeKey)! + scaleX.bandwidth() * .5 - scaleX.step() * .5),
+      x: touchScreenX - touchX + chartArea.x + getScaleStepLeft(scaleX, timeKey),
       y: touchScreenY - touchY + chartArea.y,
       width: scaleX.step(),
       height: chartArea.height

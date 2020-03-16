@@ -28,6 +28,7 @@ import { ExplorationAction, createGoToBrowseRangeAction, InteractionType, setTou
 import { noop } from '@utils/utils'
 import { CategoricalTouchableSvg } from '../../../../exploration/visualization/compare/CategoricalTouchableSvg'
 import { HorizontalPullToActionContainer } from '../../../../common/HorizontalPullToActionContainer'
+import { getScaleStepLeft } from '@components/exploration/visualization/d3-utils'
 
 const INDEX_AGGREGATED = 0
 const INDEX_SUM = 1
@@ -115,7 +116,7 @@ class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
         const touchingInfo = {
             touchId,
             elementBoundInScreen: {
-                x: screenX - x + chartArea.x + (scaleX(timeKey) + scaleX.bandwidth() * .5 - scaleX.step() * .5),
+                x: screenX - x + chartArea.x + getScaleStepLeft(scaleX, timeKey),
                 y: screenY - y + chartArea.y,
                 width: scaleX.step(),
                 height: chartArea.height

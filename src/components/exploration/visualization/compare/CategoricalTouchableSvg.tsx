@@ -4,6 +4,7 @@ import { ScaleBand } from "d3-scale";
 import { useMemo, useRef, useState, useCallback } from "react";
 import { LongPressGestureHandler, LongPressGestureHandlerStateChangeEvent, State, TapGestureHandlerStateChangeEvent, TapGestureHandler } from "react-native-gesture-handler";
 import Svg, { Rect, G } from "react-native-svg";
+import { getScaleStepLeft } from '@components/exploration/visualization/d3-utils';
 
 export const CategoricalTouchableSvg = React.memo((props: {
     chartContainerWidth: number,
@@ -113,7 +114,7 @@ export const CategoricalTouchableSvg = React.memo((props: {
                     {
                         currentTouchedIndex != null ?
                             <Rect fill="rgba(0,0,0,0.07)"
-                                x={props.scaleX(props.scaleX.domain()[currentTouchedIndex]) + props.scaleX.bandwidth() * .5 - props.scaleX.step() * .5}
+                                x={getScaleStepLeft(props.scaleX, props.scaleX.domain()[currentTouchedIndex])}
                                 width={props.scaleX.step()}
                                 height={props.chartArea.height} /> : null
                     }

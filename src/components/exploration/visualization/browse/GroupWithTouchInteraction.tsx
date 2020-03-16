@@ -11,6 +11,7 @@ import { ReduxAppState } from "../../../../state/types";
 import { connect } from "react-redux";
 import { DataSourceType } from "../../../../measure/DataSourceSpec";
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
+import { getScaleStepLeft } from '@components/exploration/visualization/d3-utils';
 
 const CLICK_THRESHOLD_MILLIS = 300
 
@@ -90,9 +91,10 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
         const dX = screenX - x
         const dY = screenY - y
 
+
         const touchingInfo = {
             touchId: gestureState.stateID.toString(),
-            elementBoundInScreen: { x: dX + this.props.chartArea.x + this.props.scaleX(date)!, y: dY + this.props.chartArea.y, width: this.props.scaleX.bandwidth(), height: this.props.chartArea.height },
+            elementBoundInScreen: { x: dX + this.props.chartArea.x + getScaleStepLeft(this.props.scaleX!, date), y: dY + this.props.chartArea.y, width: this.props.scaleX.step(), height: this.props.chartArea.height },
             params: [
                 { parameter: ParameterType.DataSource, value: this.props.dataSource },
                 { parameter: ParameterType.Date, value: date }
@@ -183,14 +185,17 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
 
             <Rect x={0} y={0} width={this.props.chartArea.width} height={this.props.chartArea.height} fill="transparent" />
             {
-                this.state.touchedDate && !this.props.linkedDate && <Rect fill="#00000015" x={this.props.scaleX(this.state.touchedDate)} width={this.props.scaleX.bandwidth()} height={this.props.chartArea.height} />
+                this.state.touchedDate && !this.props.linkedDate && <Rect fill="#00000015" 
+                x={getScaleStepLeft(this.props.scaleX, this.state.touchedDate)} 
+                width={this.props.scaleX.step()} height={this.props.chartArea.height} />
             }
             {
-                this.props.linkedDate && <Rect fill="#00000010" strokeWidth={1} stroke={Colors.accent} x={this.props.scaleX(this.props.linkedDate)} width={this.props.scaleX.bandwidth()} height={this.props.chartArea.height} />
+                this.props.linkedDate && <Rect fill="#00000010" strokeWidth={1} stroke={Colors.accent} x={getScaleStepLeft(this.props.scaleX, this.props.linkedDate)} 
+                width={this.props.scaleX.step()} height={this.props.chartArea.height} />
             }
             {
                 this.props.highlightedDays && Object.keys(this.props.highlightedDays).map(date => {
-                    return <Rect key={date} fill={Colors.highlightElementBackground} opacity={0.2} x={this.props.scaleX(Number.parseInt(date)) + 0.5 * this.props.scaleX.bandwidth() - 0.5 * this.props.scaleX.step()} width={this.props.scaleX.step()} height={this.props.chartArea.height} />
+                    return <Rect key={date} fill={Colors.highlightElementBackground} opacity={0.2} x={getScaleStepLeft(this.props.scaleX, Number.parseInt(date))} width={this.props.scaleX.step()} height={this.props.chartArea.height} />
                 }) 
             }
             {this.props.children}

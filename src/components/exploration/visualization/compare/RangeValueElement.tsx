@@ -13,13 +13,6 @@ export const RangeValueElement = (props: {
 
     let connectionWidth = Math.min(40, props.scaleX.bandwidth())
 
-    const feedbackArea = {
-        x: props.scaleX(props.value.timeKey)! + props.scaleX.bandwidth() * .5 - props.scaleX.step() * .5,
-        y: 0,
-        width: props.scaleX.step(),
-        height: Math.abs(props.scaleY(props.scaleY.domain()[0]) - props.scaleY(props.scaleY.domain()[1]))
-    }
-
     return <G>
 
         <Rect fill="#BEBEBE50" rx={connectionWidth * 0.1}

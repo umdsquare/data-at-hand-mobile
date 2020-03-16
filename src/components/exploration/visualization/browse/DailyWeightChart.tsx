@@ -16,6 +16,7 @@ import { noop } from '@utils/utils';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
 import { DataServiceManager } from '@measure/DataServiceManager';
+import { getScaleStepLeft } from '../d3-utils';
 
 interface Props extends ChartPropsBase<{
     trend: Array<{ numberedDate: number, value: number }>,
@@ -79,7 +80,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
         <G key="chart" {...chartArea}>
             {
                 prop.highlightedDays && Object.keys(prop.highlightedDays).map(date => {
-                    return <Rect key={date} fill={Colors.highlightElementBackground} opacity={0.2} x={scaleX(Number.parseInt(date)) + 0.5 * scaleX.bandwidth() - 0.5 * scaleX.step()} width={scaleX.step()} height={chartArea.height} />
+                    return <Rect key={date} fill={Colors.highlightElementBackground} opacity={0.2} x={getScaleStepLeft(scaleX, Number.parseInt(date))} width={scaleX.step()} height={chartArea.height} />
                 })
             }
             {
