@@ -3,7 +3,6 @@ import { DataSourceType } from '@measure/DataSourceSpec';
 import {
   TouchingElementInfo,
   IntraDayDataSourceType,
-  ExplorationInfoParameter,
   HighlightFilter,
 } from '@core/exploration/types';
 import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';

@@ -7,6 +7,8 @@ import { explorationDataStateReducer } from '@state/exploration/data/reducers';
 import thunk from 'redux-thunk';
 import { speechRecognizerStateReducer } from '@state/speech/reducers';
 import { SystemLogger } from '@core/logging/SystemLogger';
+import { resetAction } from './exploration/interaction/actions';
+import { DataServiceManager } from '@measure/DataServiceManager';
 
 const persistConfig = {
   key: 'root',
@@ -39,6 +41,12 @@ export default () => {
     }
   })
 
-  const persistor = persistStore(store, null, () => { });
+  const persistor = persistStore(store, null, () => {
+    const currentState = store.getState()
+
+    if(currentState.settingsState.serviceKey != null && currentState.explorationState.info == null){
+      store.dispatch(resetAction(DataServiceManager.instance.getServiceByKey(currentSettingsState.serviceKey).getToday()))
+    }
+   });
   return { store, persistor };
 };

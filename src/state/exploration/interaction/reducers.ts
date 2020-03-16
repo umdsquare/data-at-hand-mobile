@@ -43,7 +43,7 @@ export interface ExplorationState {
 }
 
 const INITIAL_STATE = {
-  info: makeInitialStateInfo(),
+  info: null,
   prevInfo: null,
   backNavStack: [],
   uiStatus: {},
@@ -55,7 +55,7 @@ export const explorationStateReducer = (
   action: ExplorationAction,
 ): ExplorationState => {
   const newState: ExplorationState = {
-    info: shallowCopyExplorationInfo(state.info),
+    info: state.info != null? shallowCopyExplorationInfo(state.info) : null,
     prevInfo: null,
     backNavStack: state.backNavStack.slice(0),
     uiStatus: state.uiStatus,
