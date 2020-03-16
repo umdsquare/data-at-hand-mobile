@@ -4,11 +4,11 @@ compromise.extend(require('compromise-numbers'))
 compromise.extend(require('compromise-dates'))
 import { preprocess } from "./preprocessor";
 import { ActionTypeBase } from "../../../state/types";
-import { VariableType, VariableInfo, PreProcessedInputText, VerbInfo, Intent, NLUOptions, ConditionInfo } from "./types";
-import { ExplorationInfo, ExplorationType, ParameterType, inferIntraDayDataSourceType, inferDataSource, HighlightFilter, NumericConditionType } from "../../exploration/types";
+import { VariableType, VariableInfo, PreProcessedInputText, Intent, NLUOptions, ConditionInfo } from "./types";
+import { ExplorationInfo, ExplorationType, ParameterType, inferIntraDayDataSourceType, inferDataSource, HighlightFilter } from "../../exploration/types";
 import { setDateAction, InteractionType, createSetRangeAction, setDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, createGoToComparisonCyclicAction, setCycleTypeAction, setHighlightFilter } from "../../../state/exploration/interaction/actions";
 import { explorationInfoHelper } from "../../exploration/ExplorationInfoHelper";
-import { differenceInDays, isLastDayOfMonth } from "date-fns";
+import { differenceInDays } from "date-fns";
 import { DateTimeHelper } from "@utils/time";
 import { DataSourceType } from "../../../measure/DataSourceSpec";
 

@@ -27,6 +27,7 @@ import {
   SetCycleDimensionAction,
   ShiftAllRangesAction,
   SetHighlightFilterAction,
+  ResetAction,
 } from '@state/exploration/interaction/actions';
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
 import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
@@ -65,7 +66,8 @@ export const explorationStateReducer = (
     action.type === ExplorationActionType.RestorePreviousInfo ||
     action.type === ExplorationActionType.GoBack ||
     action.type === ExplorationActionType.MemoUiStatus ||
-    action.type === ExplorationActionType.SetTouchElementInfo
+    action.type === ExplorationActionType.SetTouchElementInfo ||
+    action.type === ExplorationActionType.Reset
   ) {
     switch (action.type) {
       case ExplorationActionType.RestorePreviousInfo:
@@ -96,10 +98,24 @@ export const explorationStateReducer = (
         newState.uiStatus = { ...state.uiStatus };
         newState.uiStatus[memoUiStatusAction.key] = memoUiStatusAction.value;
         return newState;
+      
       case ExplorationActionType.SetTouchElementInfo:
         const setTouchElementInfoAction = action as SetTouchingElementInfoAction;
         newState.touchingElement = setTouchElementInfoAction.info;
         return newState;
+
+      case ExplorationActionType.Reset:
+        {
+          const a = action as ResetAction;
+          //clear all information
+          newState.backNavStack = []
+          newState.prevInfo = null
+          newState.touchingElement = null
+          newState.uiStatus = {}
+          newState.info = makeInitialStateInfo();
+          explorationInfoHelper.setParameterValue(newState.info, a.resetRange, ParameterType.Range)
+          return newState;
+        }
     }
   } else {
     if ((action as any)['interactionType'] === InteractionType.Speech) {

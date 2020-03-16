@@ -7,6 +7,8 @@ import {
   HighlightFilter,
 } from '@core/exploration/types';
 import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
+import { startOfDay, subDays, endOfDay } from 'date-fns';
+import { DateTimeHelper } from '@utils/time';
 
 export enum ExplorationActionType {
   MemoUiStatus = 'exploration:interaction:memoUIStatus',
@@ -32,6 +34,7 @@ export enum ExplorationActionType {
   //History
   RestorePreviousInfo = 'exploration:interaction:restorePreviousInfo',
   GoBack = 'exploration:interaction:goBack',
+  Reset = 'exploration:interaction:reset',
 
   //Touch
   SetTouchElementInfo = 'exploration:interaction:setTouchElementInfo',
@@ -49,6 +52,10 @@ interface ExplorationActionBase extends ActionTypeBase {
 export interface MemoUIStatusAction extends ActionTypeBase {
   key: string;
   value: any;
+}
+
+export interface ResetAction extends ActionTypeBase {
+  resetRange: [number, number]
 }
 
 export interface SetRangeAction extends ExplorationActionBase {
@@ -115,6 +122,7 @@ export interface SetTouchingElementInfoAction extends ActionTypeBase {
 export interface ShiftAllRangesAction extends ExplorationActionBase {
   direction: 'past' | 'future'
 }
+
 
 export type ExplorationAction =
   | ActionTypeBase
@@ -323,7 +331,7 @@ export function shiftAllRanges(interactionType: InteractionType, direction: 'pas
   }
 }
 
-export function setHighlightFilter(interactionType: InteractionType, highlightFilter?: HighlightFilter | null): SetHighlightFilterAction{
+export function setHighlightFilter(interactionType: InteractionType, highlightFilter?: HighlightFilter | null): SetHighlightFilterAction {
   return {
     interactionType,
     type: ExplorationActionType.SetHighlightFilter,
@@ -335,6 +343,17 @@ export function goBackAction(): ActionTypeBase {
   return {
     type: ExplorationActionType.GoBack,
   };
+}
+
+export function resetAction(today: Date): ResetAction {
+  const now = startOfDay(today);
+  return {
+    type: ExplorationActionType.Reset,
+    resetRange: [
+      DateTimeHelper.toNumberedDateFromDate(subDays(now, 6)),
+      DateTimeHelper.toNumberedDateFromDate(endOfDay(now)),
+    ]
+  }
 }
 
 //===================================================
