@@ -2,7 +2,7 @@ import { createGoToBrowseRangeAction, InteractionType, memoUIStatus, Exploration
 import React from "react";
 import { connect } from "react-redux";
 import { ReduxAppState } from "@state/types";
-import { FlatList, View } from "react-native";
+import { FlatList, View, LayoutAnimation } from "react-native";
 import { DataSourceChartFrame } from "@components/exploration/DataSourceChartFrame";
 import { OverviewData } from "@core/exploration/data/types";
 import { MeasureUnitType, DataSourceType } from "@measure/DataSourceSpec";
@@ -42,6 +42,15 @@ class OverviewMainPanel extends React.PureComponent<Props> {
             requestAnimationFrame(() => {
                 this._listRef.current.scrollToOffset({ offset: this.props.overviewScrollY, animated: false })
             })
+        }
+    }
+
+    componentDidUpdate(prevProps: Props){
+        if(prevProps.highlightFilter !== this.props.highlightFilter){
+            LayoutAnimation.configureNext(
+                LayoutAnimation.create(
+                    500, LayoutAnimation.Types.easeInEaseOut, "opacity")
+            )
         }
     }
 

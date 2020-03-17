@@ -101,8 +101,11 @@ class BrowseRangeMainPanel extends React.PureComponent<Props, State>{
 
 
     componentDidUpdate(prevProps: Props) {
-        if (prevProps.isLoadingData !== this.props.isLoadingData) {
-            //LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
+        if(prevProps.highlightFilter !== this.props.highlightFilter){
+            LayoutAnimation.configureNext(
+                LayoutAnimation.create(
+                    500, LayoutAnimation.Types.easeInEaseOut, "opacity")
+            )
         }
     }
 

@@ -22,6 +22,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@components/Routes';
 import { SpeechContextHelper } from '@core/speech/nlp/context';
+import { HighlightFilterPanel } from '@components/exploration/HighlightFilterPanel';
 
 const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={'white'} />
 
@@ -93,9 +94,10 @@ export const ExplorationViewHeader = () => {
 
     const navigation = useNavigation<StackNavigationProp<RootStackParamList, "Exploration">>()
 
+    let headerContents
     switch (explorationType) {
         case ExplorationType.B_Overview:
-            return <HeaderContainer>
+            headerContents = <>
                 <View style={styles.titleBarStyle}>
                     <Text style={styles.titleBarTitleStyle}>Browse</Text>
                     <Button
@@ -107,38 +109,47 @@ export const ExplorationViewHeader = () => {
                         }} />
                 </View>
                 <HeaderRangeBar />
-            </HeaderContainer>
+            </>
+            break;
         case ExplorationType.B_Range:
-            return <HeaderContainer>
+            headerContents = <>
                 <DataSourceBar showBorder={false} />
                 <HeaderRangeBar />
-            </HeaderContainer>
+            </>
+            break;
         case ExplorationType.B_Day:
-            return <HeaderContainer>
+            headerContents = <>
                 <IntraDayDataSourceBar showBorder={true} />
                 <HeaderDateBar />
-
-            </HeaderContainer>
+            </>
+            break;
         case ExplorationType.C_Cyclic:
-            return <HeaderContainer>
+            headerContents = <>
                 <DataSourceBar showBorder={true} />
                 <CyclicComparisonTypeBar showBorder={false} />
                 <HeaderRangeBar />
-            </HeaderContainer>
+            </>
+            break;
         case ExplorationType.C_CyclicDetail_Daily:
         case ExplorationType.C_CyclicDetail_Range:
-            return <HeaderContainer>
+            headerContents = <>
                 <DataSourceBar showBorder={true} />
                 <CycleDimensionBar showBorder={false} />
                 <HeaderRangeBar />
-            </HeaderContainer>
+            </>
+            break;
         case ExplorationType.C_TwoRanges:
-            return <HeaderContainer>
+            headerContents = <>
                 <DataSourceBar showBorder={false} />
                 <HeaderRangeBar showBorder={true} parameterKey={ParameterKey.RangeA} />
                 <HeaderRangeBar parameterKey={ParameterKey.RangeB} />
-            </HeaderContainer>
+            </>
+            break;
     }
+
+    return <HeaderContainer>
+        {headerContents}
+    </HeaderContainer>
 }
 
 const HeaderContainer = (prop: { children?: any, }) => {
@@ -151,7 +162,7 @@ const HeaderContainer = (prop: { children?: any, }) => {
         const backStackSize = appState.explorationState.backNavStack.length
         return {
             backStackSize,
-            backTitle: backStackSize > 0 ? (explorationInfoHelper.getTitleText(appState.explorationState.backNavStack[backStackSize-1])) : null
+            backTitle: backStackSize > 0 ? (explorationInfoHelper.getTitleText(appState.explorationState.backNavStack[backStackSize - 1])) : null,
         }
     })
 
@@ -285,7 +296,7 @@ const DataSourceBar = React.memo((props: { showBorder: boolean }) => {
     />
 })
 
-const IntraDayDataSourceBar = React.memo((props: {showBorder: boolean}) => {
+const IntraDayDataSourceBar = React.memo((props: { showBorder: boolean }) => {
     const dispatch = useDispatch()
     const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
 

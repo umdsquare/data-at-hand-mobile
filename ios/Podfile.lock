@@ -263,7 +263,7 @@ PODS:
     - React
   - RNScreens (2.3.0):
     - React
-  - RNShare (3.0.0):
+  - RNShare (3.1.0):
     - React
   - RNStaticSafeAreaInsets (2.0.0):
     - React
@@ -491,7 +491,7 @@ SPEC CHECKSUMS:
   RNReactNativeHapticFeedback: 2566b468cc8d0e7bb2f84b23adc0f4614594d071
   RNReanimated: 031fe8d9ea93c2bd689a40f05320ef9d96f74d7f
   RNScreens: 03bf608b92ac0acf323f47d8f5b63a8f829340c8
-  RNShare: 0e19ddb0bf338b62702ce1d9e001ee14effa68a8
+  RNShare: b9640a45e02423cb47a9eb851863d10395fbc844
   RNStaticSafeAreaInsets: e4450176adbf197061543e4a4aa82036b3d7abe0
   RNSVG: 7e16ddfc6e00d5aa69c9eb83e699bcce5dcb85d4
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
