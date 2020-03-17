@@ -22,7 +22,8 @@ const INITIAL_STATE = {
   serviceKey: 'fitbit',
   serviceInitialDate: undefined,
   unit: MeasureUnitType.Metric,
-  recordLogs: false,
+  recordLogs: true,
+  recordScreens: false,
   loggingSessionId: undefined
 } as SettingsState;
 
