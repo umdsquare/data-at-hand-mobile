@@ -4,7 +4,7 @@ import { ScaleBand } from "d3-scale";
 import { useMemo, useRef, useState, useCallback } from "react";
 import { LongPressGestureHandler, LongPressGestureHandlerStateChangeEvent, State, TapGestureHandlerStateChangeEvent, TapGestureHandler } from "react-native-gesture-handler";
 import Svg, { Rect, G } from "react-native-svg";
-import { getScaleStepLeft } from '@components/exploration/visualization/d3-utils';
+import { getScaleStepLeft } from '@components/visualization/d3-utils';
 
 export const CategoricalTouchableSvg = React.memo((props: {
     chartContainerWidth: number,

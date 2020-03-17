@@ -20,8 +20,8 @@ import { format } from 'date-fns';
 import { DateTimeHelper } from '@utils/time';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
-import { GroupWithTouchInteraction } from '@components/exploration/visualization/browse/GroupWithTouchInteraction';
-import { timeTickFormat } from '@components/exploration/visualization/compare/common';
+import { GroupWithTouchInteraction } from '@components/visualization/browse/GroupWithTouchInteraction';
+import { timeTickFormat } from '@components/visualization/compare/common';
 import commaNumber from 'comma-number';
 
 const xAxisHeight = 160

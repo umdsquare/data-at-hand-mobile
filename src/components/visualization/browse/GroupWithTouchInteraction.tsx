@@ -11,7 +11,7 @@ import { ReduxAppState } from "@state/types";
 import { connect } from "react-redux";
 import { DataSourceType } from "@measure/DataSourceSpec";
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
-import { getScaleStepLeft } from '@components/exploration/visualization/d3-utils';
+import { getScaleStepLeft } from '@components/visualization/d3-utils';
 
 const CLICK_THRESHOLD_MILLIS = 300
 
