@@ -4,6 +4,7 @@ import { LayoutRectangle } from 'react-native';
 import { DataSourceType } from '@measure/DataSourceSpec';
 import { HighlightFilter, NumericConditionType } from '@core/exploration/types';
 import { useMemo } from 'react';
+import Colors from '@style/Colors';
 
 export interface ChartPropsBase<T> {
   dateRange: number[],
@@ -95,11 +96,11 @@ export namespace CommonBrowsingChartStyles {
               if (extremeDays.length > 0) {
                 const extremeDatum = array.find(d => d.numberedDate === Number.parseInt(extremeDays[0]))
                 if (extremeDatum) {
-                  if(dataSource === DataSourceType.SleepRange){
-                    if(prop.highlightFilter!.propertyKey === 'waketime'){
+                  if (dataSource === DataSourceType.SleepRange) {
+                    if (prop.highlightFilter!.propertyKey === 'waketime') {
                       return extremeDatum["wakeTimeDiffSeconds"]
-                    }else return extremeDatum["bedTimeDiffSeconds"]
-                  }else return extremeDatum.value
+                    } else return extremeDatum["bedTimeDiffSeconds"]
+                  } else return extremeDatum.value
                 }
               }
             }
@@ -111,7 +112,13 @@ export namespace CommonBrowsingChartStyles {
     return {
       shouldHighlightElements,
       highlightReference
-      
+
     }
   }
+}
+
+export function getChartElementColor(shouldHighlightElements: boolean, isHighlighted: boolean, isToday: boolean): string {
+  return shouldHighlightElements === true && isHighlighted == true ?
+    Colors.highlightElementColor :
+    (isToday === true ? Colors.today : Colors.chartElementDefault)
 }

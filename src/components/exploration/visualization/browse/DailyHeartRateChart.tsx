@@ -1,6 +1,6 @@
 import React from 'react';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
-import { CommonBrowsingChartStyles, ChartProps } from './common';
+import { CommonBrowsingChartStyles, ChartProps, getChartElementColor } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
 import { DateTimeHelper } from '@utils/time';
@@ -69,7 +69,7 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
                         r={Math.min(scaleX.bandwidth(), 8) / 2}
                         strokeWidth={2}
                         fill='white'
-                        stroke={today === d.numberedDate ? Colors.today : (shouldHighlightElements && prop.highlightedDays[d.numberedDate] == true ? Colors.highlightElementColor : Colors.chartElementDefault)}
+                        stroke={getChartElementColor(shouldHighlightElements, prop.highlightedDays? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
                         opacity={0.62}
                     />
                 })

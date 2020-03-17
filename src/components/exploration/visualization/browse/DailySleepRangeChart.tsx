@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import Svg, { Rect, Line } from 'react-native-svg';
-import { CommonBrowsingChartStyles, ChartProps } from './common';
+import { CommonBrowsingChartStyles, ChartProps, getChartElementColor } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
 import { DateTimeHelper } from '@utils/time';
@@ -82,7 +82,7 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
                         x={scaleX(d.numberedDate)! + (scaleX.bandwidth() - barWidth) * 0.5}
                         y={scaleY(d.bedTimeDiffSeconds)}
                         rx={2}
-                        fill={today === d.numberedDate ? Colors.today : (shouldHighlightElements && prop.highlightedDays[d.numberedDate] == true ? Colors.highlightElementColor : Colors.chartElementDefault)}
+                        fill={getChartElementColor(shouldHighlightElements, prop.highlightedDays? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
                         opacity={0.62}
                     />
                 })

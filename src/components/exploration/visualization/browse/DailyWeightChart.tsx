@@ -1,6 +1,6 @@
 import React from 'react';
 import Svg, { G, Circle, Path, Line, Rect } from 'react-native-svg';
-import { CommonBrowsingChartStyles, ChartPropsBase } from './common';
+import { CommonBrowsingChartStyles, ChartPropsBase, getChartElementColor } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
 import { DateTimeHelper } from '@utils/time';
@@ -91,7 +91,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
                         r={Math.min(scaleX.bandwidth(), 8) / 2}
                         strokeWidth={2}
                         fill='white'
-                        stroke={today === d.numberedDate ? Colors.today : (shouldHighlightElements && prop.highlightedDays[d.numberedDate] == true ? Colors.highlightElementColor : Colors.chartElementDefault)}
+                        stroke={getChartElementColor(shouldHighlightElements, prop.highlightedDays? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
                         opacity={0.62}
                     />
                 })
