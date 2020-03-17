@@ -96,7 +96,10 @@ const BooleanSettingsRow = (props: { title: string, value: boolean, onChange?: (
 
     return <View style={styles.rowContainerStyleNormalPadding}>
         <Text style={styles.rowTitleStyle}>{props.title}</Text>
-        <Switch value={props.value || false} onValueChange={onValueChange} trackColor={Platform.OS=== 'ios'? { false: undefined, true: Colors.primary } : undefined} />
+        <Switch value={props.value || false} onValueChange={onValueChange} 
+        trackColor={{ false: undefined, true: Platform.OS === 'android'? Colors.primaryLight : Colors.primary }}
+        thumbColor={Platform.OS === 'android'? (props.value === true? Colors.primary : '#f0f0f0') : undefined}
+        />
     </View>
 }
 
