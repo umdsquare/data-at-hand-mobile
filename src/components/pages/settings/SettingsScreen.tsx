@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { View, Text, StyleSheet, TouchableHighlight, Alert, ScrollView, Switch, ViewStyle } from "react-native";
+import { View, Text, StyleSheet, TouchableHighlight, Alert, ScrollView, Switch, ViewStyle, Platform } from "react-native";
 import { MeasureUnitType } from "@measure/DataSourceSpec";
 import { Dispatch } from "redux";
 import { ReduxAppState } from "@state/types";
@@ -96,7 +96,7 @@ const BooleanSettingsRow = (props: { title: string, value: boolean, onChange?: (
 
     return <View style={styles.rowContainerStyleNormalPadding}>
         <Text style={styles.rowTitleStyle}>{props.title}</Text>
-        <Switch value={props.value || false} onValueChange={onValueChange} trackColor={{ false: undefined, true: Colors.primary }} />
+        <Switch value={props.value || false} onValueChange={onValueChange} trackColor={Platform.OS=== 'ios'? { false: undefined, true: Colors.primary } : undefined} />
     </View>
 }
 

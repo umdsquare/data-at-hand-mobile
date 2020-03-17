@@ -1,9 +1,8 @@
-import { FileLogger } from "./FileLogger"
+import { DirectoryLogger } from "@core/logging/DirectoryLogger"
 import { ExplorationInfo } from "@core/exploration/types"
 import { SpeechContext } from "@core/speech/nlp/context"
 import { ActionTypeBase } from "@state/types"
 import Share from 'react-native-share'
-import { ExplorationState } from "@state/exploration/interaction/reducers"
 import { randomString } from "@utils/utils"
 
 enum LogFileName {
@@ -29,7 +28,7 @@ export class SystemLogger {
     private constructor() { }
 
     private _sessionId: string | null = null
-    private currentLogger: FileLogger | null = null
+    private currentLogger: DirectoryLogger | null = null
 
     public enabled = false
 
@@ -37,7 +36,7 @@ export class SystemLogger {
         console.log("set logging session id: ", id)
         this._sessionId = id;
         if (id) {
-            this.currentLogger = new FileLogger("logs/" + id)
+            this.currentLogger = new DirectoryLogger("logs/" + id)
         } else {
             this.currentLogger = null
         }
