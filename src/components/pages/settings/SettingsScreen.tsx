@@ -4,7 +4,7 @@ import { MeasureUnitType } from "@measure/DataSourceSpec";
 import { Dispatch } from "redux";
 import { ReduxAppState } from "@state/types";
 import { connect } from "react-redux";
-import { setUnit, setRecordLogs } from '@state/settings/actions';
+import { setUnit, setRecordLogs, setRecordScreens } from '@state/settings/actions';
 import { Sizes } from "@style/Sizes";
 import Colors from "@style/Colors";
 import { DataServiceManager } from "@measure/DataServiceManager";
@@ -113,10 +113,12 @@ interface Props {
     selectedUnitType: MeasureUnitType,
     selectedServiceKey: string,
     recordLogs: boolean,
+    recordScreens: boolean,
     loggingSessionId?: string,
 
     setUnitType: (index) => void,
     setRecordLogs: (record: boolean, id?: string) => void
+    setRecordScreens: (record: boolean) => void
 }
 
 interface State {
@@ -225,6 +227,10 @@ class SettingsScreen extends React.PureComponent<Props, State>{
         } else this.props.setRecordLogs(recordLogs, this.props.loggingSessionId)
     }
 
+    readonly onSetRecordScreens = (recordScreens: boolean) => {
+        this.props.setRecordScreens(recordScreens)
+    }
+
     readonly onClearLoggingSession = () => {
         Alert.alert("Clear Logging Session", "Remove the log data?", [
             {
@@ -282,6 +288,10 @@ class SettingsScreen extends React.PureComponent<Props, State>{
 
             <BooleanSettingsRow title="Record Logs" value={this.props.recordLogs} onChange={this.onSetRecordLogs} />
             {
+                this.props.recordLogs === true ?
+                    <BooleanSettingsRow title="Record Screens" value={this.props.recordScreens} onChange={this.onSetRecordScreens}/> : null
+            }
+            {
                 this.props.loggingSessionId != null ? <>
                     <SettingsRow title="Clear the current logging session" subtitle={"Current session id: " + this.props.loggingSessionId}
                         onClick={this.onClearLoggingSession} showArrow={false} />
@@ -298,7 +308,8 @@ function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props {
     return {
         ...ownProps,
         setUnitType: (index) => dispatch(setUnit(unitTypes[index].key)),
-        setRecordLogs: (record, id) => dispatch(setRecordLogs(record, id))
+        setRecordLogs: (record, id) => dispatch(setRecordLogs(record, id)),
+        setRecordScreens: (record) => dispatch(setRecordScreens(record))
     }
 }
 
@@ -308,6 +319,7 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
         selectedUnitType: appState.settingsState.unit,
         selectedServiceKey: appState.settingsState.serviceKey,
         recordLogs: appState.settingsState.recordLogs,
+        recordScreens: appState.settingsState.recordScreens,
         loggingSessionId: appState.settingsState.loggingSessionId
     }
 }

@@ -4,7 +4,7 @@ import { zip } from 'react-native-zip-archive';
 
 export class FileLogger {
 
-    private readonly fullDirectoryPath: string
+    readonly fullDirectoryPath: string
 
     constructor(readonly directoryPath: string) {
         this.fullDirectoryPath = path.resolve(CachesDirectoryPath, directoryPath)

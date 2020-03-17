@@ -3,6 +3,7 @@ import {
   SetServiceAction,
   SetUnitTypeAction,
   SetRecordLogsAction,
+  SetRecordScreensAction,
 } from '@state/settings/actions';
 import { MeasureUnitType } from '@measure/DataSourceSpec';
 import { ActionTypeBase } from '@state/types';
@@ -13,6 +14,7 @@ export interface SettingsState {
   serviceInitialDate?: number,
   unit: MeasureUnitType,
   recordLogs: boolean,
+  recordScreens: boolean,
   loggingSessionId?: string
 }
 
@@ -54,10 +56,17 @@ export const settingsStateReducer = (
             const id = randomString(10) + "_" + Date.now()
             console.log("Start recording logs in session id", id)
             newState.loggingSessionId = id
+            newState.recordScreens = true
           }
           return newState;
         }else return state
       }
+      case SettingsActionTypes.SetRecordScreens:
+        {
+          const a = action as SetRecordScreensAction
+          newState.recordScreens = a.recordScreens
+          return newState
+        }
     default:
       return state;
   }

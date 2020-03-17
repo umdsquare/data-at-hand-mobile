@@ -47,6 +47,12 @@ export class SystemLogger {
         return this._sessionId
     }
 
+    get logDirectoryPath(): string | null {
+        if (this.currentLogger) {
+            return this.currentLogger.fullDirectoryPath
+        } else return null
+    }
+
     async clearLogsInCurrentSession(): Promise<void> {
         if (this.currentLogger) {
             await this.currentLogger.removeAllFilesInDirectory()
@@ -65,11 +71,21 @@ export class SystemLogger {
         } else return;
     }
 
-    async logVerboseToInteractionStateTransition(event: string, content: Object): Promise<void> {
+    makeLogId(timestamp: number): string{
+        return "log_" + timestamp + "_" + randomString(10)
+    }
+
+    async logVerboseToInteractionStateTransition(event: string, content: Object, logId?: string, timestamp?: number): Promise<void> {
         if (this.currentLogger && this.enabled === true) {
-            const timestamp = Date.now();
-            const logId = randomString(15) + "_" + timestamp;
-            
+
+            if(timestamp == null){
+                timestamp = Date.now()
+            }
+
+            if (logId == null) {
+                logId = this.makeLogId(timestamp);
+            }
+
             await this.currentLogger.appendJsonLine(LogFileName.InteractionTransitionLogs,
                 {
                     type: InteractionTransitionLogType.VerboseEvent,
@@ -80,11 +96,16 @@ export class SystemLogger {
         } else return
     }
 
-    async logInteractionStateTransition(serviceKey: string, action: ActionTypeBase, nextInfo: ExplorationInfo): Promise<void> {
+    async logInteractionStateTransition(serviceKey: string, action: ActionTypeBase, nextInfo: ExplorationInfo, logId?: string, timestamp?: number): Promise<void> {
         if (this.currentLogger && this.enabled === true) {
+            
+            if(timestamp == null){
+                timestamp = Date.now()
+            }
 
-            const timestamp = Date.now();
-            const logId = randomString(15) + "_" + timestamp;
+            if (logId == null) {
+                logId = this.makeLogId(timestamp);
+            }
 
             await this.currentLogger.appendJsonLine(LogFileName.InteractionTransitionLogs,
                 {

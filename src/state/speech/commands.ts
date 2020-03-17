@@ -118,7 +118,7 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
                                 })
                             } else {
                                 SystemLogger.instance.logVerboseToInteractionStateTransition("SpeechFail", {speech: dictationResult.text}).then()
-                                
+
                                 requestAnimationFrame(() => {
                                     SpeechEventQueue.instance.push({
                                         type: "fail",

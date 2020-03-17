@@ -6,7 +6,8 @@ import { MeasureUnitType } from "@measure/DataSourceSpec";
 export enum SettingsActionTypes {
     SetService = "settings/SET_SERVICE",
     SetUnitType = "settings/SET_UNIT_TYPE",
-    SetRecordLogs = "settings/RECORD_LOGS",
+    SetRecordLogs = "settings/SET_RECORD_LOGS",
+    SetRecordScreens = "settings/SET_RECORD_SCREENS"
 }
 
 export interface SetServiceAction extends ActionTypeBase {
@@ -23,8 +24,9 @@ export interface SetRecordLogsAction extends ActionTypeBase{
     sessionId?: string
 }
 
-export type MeasureSettingsAction = SetServiceAction | SetUnitTypeAction
-
+export interface SetRecordScreensAction extends ActionTypeBase{
+    recordScreens: boolean
+}
 
 //======================================
 export const setService = (serviceKey: string, serviceInitialDate?: number): SetServiceAction => ({
@@ -42,4 +44,9 @@ export const setRecordLogs = (recordLogs: boolean, sessionId?: string): SetRecor
     type: SettingsActionTypes.SetRecordLogs,
     recordLogs,
     sessionId
+})
+
+export const setRecordScreens = (recordScreens: boolean): SetRecordScreensAction => ({
+    type: SettingsActionTypes.SetRecordScreens,
+    recordScreens
 })
