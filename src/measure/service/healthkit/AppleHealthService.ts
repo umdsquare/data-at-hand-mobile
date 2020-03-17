@@ -12,7 +12,7 @@ export class AppleHealthService extends DataService {
   name: string = 'Apple Health';
   description: string = 'Apple Health and HealthKit Data';
 
-  thumbnail = require('../../../../assets/images/services/service_apple.jpg');
+  thumbnail = require('@assets/images/services/service_apple.jpg');
 
   private supportedDataTypes = [HK.HealthDataType.Step, HK.HealthDataType.Sleep, HK.HealthDataType.Weight, HK.HealthDataType.HeartRate]
 

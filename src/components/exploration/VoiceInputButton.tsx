@@ -102,7 +102,7 @@ export class VoiceInputButton extends React.PureComponent<Props, ComponentState>
                     >
                         {
                             this.props.isBusy === true ?
-                                (<LottieView source={require("../../../assets/lottie/5257-loading.json")} autoPlay loop
+                                (<LottieView source={require("@assets/lottie/5257-loading.json")} autoPlay loop
                                     style={Styles.loadingIconStyle} />)
                                 : (
                                     <View

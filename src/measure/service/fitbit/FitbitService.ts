@@ -37,7 +37,7 @@ export class FitbitService extends DataService {
     this.key = core.keyOverride || 'fitbit'
     this.name = core.nameOverride || 'Fitbit'
     this.description = core.descriptionOverride || 'Fitbit Fitness Tracker'
-    this.thumbnail = core.thumbnailOverride || require('../../../../assets/images/services/service_fitbit.jpg')
+    this.thumbnail = core.thumbnailOverride || require('@assets/images/services/service_fitbit.jpg')
 
   }
 

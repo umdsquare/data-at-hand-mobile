@@ -17,7 +17,7 @@ import { startOfDay, addSeconds, format, getHours, getMinutes } from 'date-fns'
 import commaNumber from 'comma-number'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TimePicker } from "react-native-wheel-picker-android";
-import { DurationWheelPicker } from '../common/DurationWheelPicker'
+import { DurationWheelPicker } from '@components/common/DurationWheelPicker'
 
 type SpecType = { dataSourceType: DataSourceType, propertyKey?: string | null, label: string }
 const dataSourceSpecs: Array<SpecType> = [

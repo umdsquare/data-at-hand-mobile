@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { IAggregatedValue } from "@core/exploration/data/types";
 import { View, LayoutRectangle, ViewStyle } from "react-native";
-import { SizeWatcher } from "../../../visualization/SizeWatcher";
+import { SizeWatcher } from "@components/visualization/SizeWatcher";
 import { useState } from "react";
 import { StyleTemplates } from "@style/Styles";
 import { scaleBand, scaleLinear } from "d3-scale";
@@ -14,7 +14,7 @@ import { getDomainAndTickFormat, makeTouchingInfoForCycle } from './common';
 import { CycleChartFrame } from './CycleChartFrame';
 import { useDispatch } from 'react-redux';
 import { createGoToCyclicDetailDailyAction, InteractionType, createGoToCyclicDetailRangeAction, setTouchElementInfo } from '@state/exploration/interaction/actions';
-import { CyclicTimeFrame, CycleDimension, getCycleDimensionWithTimeKey, getCycleLevelOfDimension } from '@core/exploration/cyclic_time';
+import { CyclicTimeFrame, getCycleDimensionWithTimeKey, getCycleLevelOfDimension } from '@core/exploration/cyclic_time';
 import { DataSourceType } from '@measure/DataSourceSpec';
 
 const dummyConverter = (num: number) => num

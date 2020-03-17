@@ -13,6 +13,7 @@ module.exports = {
           '^@measure/(.+)': "./src/measure/\\1",
           '^@components/(.+)': "./src/components/\\1",
           '^@utils/(.+)': "./src/utils/\\1",
+          '^@assets/(.+)': "./assets/\\1",
         }
       }
     ]

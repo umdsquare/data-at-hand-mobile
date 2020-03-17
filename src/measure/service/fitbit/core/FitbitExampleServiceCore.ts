@@ -33,7 +33,7 @@ export class FitbitExampleServiceCore implements FitbitServiceCore {
     private _exampleData: Array<ExampleDayRow> = null
     get exampleData(): Array<ExampleDayRow> {
         if (this._exampleData == null) {
-            this._exampleData = require("../../../../../assets/data/example_data_generated")
+            this._exampleData = require("@assets/data/example_data_generated")
             this._exampleData.sort((a, b) => {
                 if (a.numberedDate < b.numberedDate) {
                     return -1
