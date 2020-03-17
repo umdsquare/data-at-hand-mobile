@@ -1,13 +1,14 @@
 import { MiddlewareAPI, Dispatch } from "redux"
-import { ActionTypeBase, ReduxAppState } from "./types"
-import { USER_INTERACTION_ACTION_PREFIX, ExplorationActionType } from "./exploration/interaction/actions"
+import { ActionTypeBase, ReduxAppState } from "@state/types"
+import { USER_INTERACTION_ACTION_PREFIX, ExplorationActionType } from "@state/exploration/interaction/actions"
 import { SystemLogger } from "@core/logging/SystemLogger"
 import { captureScreen } from "react-native-view-shot";
 import { moveFile, exists, mkdir } from "react-native-fs";
-import { randomString } from "@utils/utils";
 import path from 'react-native-path'
 import { Dimensions, PixelRatio } from "react-native";
-import { SettingsActionTypes, SetRecordLogsAction } from "./settings/actions";
+import { SettingsActionTypes, SetRecordLogsAction } from "@state/settings/actions";
+
+const whitelistForScreenshot = [ExplorationActionType.SetTouchElementInfo];
 
 export const makeLogger = () => {
     return (api: MiddlewareAPI) => (next: Dispatch) => (action: ActionTypeBase) => {
@@ -31,10 +32,11 @@ export const makeLogger = () => {
                     }, logId, timestamp).then()
             } else {
                 SystemLogger.instance
-                    .logInteractionStateTransition(prevState.settingsState.serviceKey, action, nextExplorationState.info, logId, timestamp).then()
+                    .logInteractionStateTransition(prevState.settingsState.serviceKey, action, action.type === ExplorationActionType.SetTouchElementInfo? undefined : nextExplorationState.info, logId, timestamp).then()
             }
 
-            if (prevState.settingsState.recordLogs === true && prevState.settingsState.recordScreens === true) {
+            if (prevState.settingsState.recordLogs === true && prevState.settingsState.recordScreens === true && whitelistForScreenshot.indexOf(action.type as any) === -1) {
+                console.log("take screenshot")
                 setTimeout(() => {
                     const pixelRatio = PixelRatio.get();
                     const imageWidth = 300;
