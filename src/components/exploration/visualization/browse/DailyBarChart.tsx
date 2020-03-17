@@ -1,5 +1,5 @@
-import React from 'react';
-import Svg, { Rect, Line } from 'react-native-svg';
+import React, { useEffect } from 'react';
+import Svg, { Rect, Line, Text } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartProps } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
@@ -23,7 +23,7 @@ interface Props extends ChartProps {
 
 export const DailyBarChart = React.memo((prop: Props) => {
 
-    const {shouldHighlightElements, highlightReference} = CommonBrowsingChartStyles.makeHighlightInformation(prop, prop.dataSource)
+    const { shouldHighlightElements, highlightReference } = CommonBrowsingChartStyles.makeHighlightInformation(prop, prop.dataSource)
 
     const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
@@ -59,8 +59,9 @@ export const DailyBarChart = React.memo((prop: Props) => {
     return <Svg width={prop.containerWidth} height={prop.containerHeight}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={prop.valueTickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
-
-        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date)!.value} highlightedDays={prop.highlightedDays}>
+        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date)!.value}
+            highlightedDays={prop.highlightFilter != null? prop.highlightedDays : undefined}
+        >
             {
                 prop.data.map(d => {
                     const barHeight = scaleY(0) - scaleY(d.value)

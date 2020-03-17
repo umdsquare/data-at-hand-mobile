@@ -194,9 +194,9 @@ class GroupWithTouchInteraction extends React.PureComponent<Props, State>{
                 width={this.props.scaleX.step()} height={this.props.chartArea.height} />
             }
             {
-                this.props.highlightedDays && Object.keys(this.props.highlightedDays).map(date => {
+                this.props.highlightedDays != null ? Object.keys(this.props.highlightedDays).map(date => {
                     return <Rect key={date} fill={Colors.highlightElementBackground} opacity={0.2} x={getScaleStepLeft(this.props.scaleX, Number.parseInt(date))} width={this.props.scaleX.step()} height={this.props.chartArea.height} />
-                }) 
+                }) : null
             }
             {this.props.children}
         </G>

@@ -79,7 +79,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
         <AxisSvg key="yAxis" tickMargin={0} ticks={scaleY.ticks(5)} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
         <G key="chart" {...chartArea}>
             {
-                prop.highlightedDays && Object.keys(prop.highlightedDays).map(date => {
+                prop.highlightFilter && prop.highlightedDays && Object.keys(prop.highlightedDays).map(date => {
                     return <Rect key={date} fill={Colors.highlightElementBackground} opacity={0.2} x={getScaleStepLeft(scaleX, Number.parseInt(date))} width={scaleX.step()} height={chartArea.height} />
                 })
             }

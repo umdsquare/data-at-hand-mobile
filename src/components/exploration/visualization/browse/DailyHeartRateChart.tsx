@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import Svg, { G, Rect, Circle, Line, Path } from 'react-native-svg';
+import React from 'react';
+import Svg, { Circle, Line, Path } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartProps } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
@@ -51,7 +51,8 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
     return <Svg width={prop.containerWidth} height={prop.containerHeight}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={scaleY.ticks(5)} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
-        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date)!.value} highlightedDays={prop.highlightedDays}>
+        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date)!.value} 
+        highlightedDays={prop.highlightFilter != null? prop.highlightedDays : undefined}>
             {
                 <Path d={line(prop.data)!}
                     strokeWidth={2.5}

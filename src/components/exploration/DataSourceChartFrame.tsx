@@ -254,7 +254,7 @@ function formatStatistics(sourceType: DataSourceType, statisticsType: Statistics
                     }
                     break;
             }
-            const unit = measureUnitType === MeasureUnitType.Metric? 'kg' : 'lb'
+            const unit = measureUnitType === MeasureUnitType.Metric ? 'kg' : 'lb'
             switch (statisticsType) {
                 case 'avg': return value.toFixed(1) + " " + unit
                 case 'range': return `${value[0].toFixed(1)} - ${value[1].toFixed(1)} ${unit}`
@@ -274,24 +274,28 @@ function formatStatistics(sourceType: DataSourceType, statisticsType: Statistics
 }
 
 function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filter: HighlightFilter | undefined, highlightedDays: { [key: number]: boolean | undefined } | undefined, width: number, height: number, measureUnitType: MeasureUnitType): any {
+
+    const commonProps = {
+        preferredValueRange: data.preferredValueRange,
+        highlightFilter: filter,
+        highlightedDays: highlightedDays,
+        dateRange: data.range,
+        containerWidth: width,
+        containerHeight: height,
+        data: data.data
+    }
+
     switch (sourceType) {
         case DataSourceType.StepCount:
             return <DailyBarChart
+                {...commonProps}
                 dataSource={DataSourceType.StepCount}
-                preferredValueRange={data.preferredValueRange}
-                highlightFilter={filter}
-                highlightedDays={highlightedDays}
-                dateRange={data.range} data={data.data} containerHeight={height} containerWidth={width}
                 valueTickFormat={(tick: number) => { return (tick % 1000 === 0 && tick != 0) ? tick / 1000 + "k" : commaNumber(tick) }} />
         case DataSourceType.HoursSlept:
-            return <DailyBarChart dateRange={data.range}
-
+            return <DailyBarChart
+                {...commonProps}
                 dataSource={DataSourceType.HoursSlept}
-                preferredValueRange={data.preferredValueRange}
-                highlightFilter={filter}
-                highlightedDays={highlightedDays}
                 data={data.data.map(d => ({ numberedDate: d.numberedDate, value: d.lengthInSeconds }))}
-                containerHeight={height} containerWidth={width}
                 valueTickFormat={(tick: number) => { return DateTimeHelper.formatDuration(tick, true) }}
                 valueTicksOverride={(maxValue: number) => {
                     const scale = scaleLinear().domain([0, Math.ceil(maxValue / 3600)]).nice()
@@ -303,30 +307,20 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filte
             />
         case DataSourceType.HeartRate:
             return <DailyHeartRateChart
-                highlightedDays={highlightedDays}
-                highlightFilter={filter}
+                {...commonProps}
                 dataSource={DataSourceType.HeartRate}
-                preferredValueRange={data.preferredValueRange}
-                dateRange={data.range} data={data.data} containerWidth={width} containerHeight={height}
             />
         case DataSourceType.SleepRange:
             return <DailySleepRangeChart
-                highlightedDays={highlightedDays}
-                highlightFilter={filter}
+                {...commonProps}
                 dataSource={DataSourceType.SleepRange}
-                preferredValueRange={data.preferredValueRange}
-                dateRange={data.range} data={data.data}
-                containerHeight={height} containerWidth={width}
             />
         case DataSourceType.Weight:
             const weightData = data as WeightRangedData
-            return <DailyWeightChart dateRange={data.range} data={data.data}
-                highlightedDays={highlightedDays}
-                highlightFilter={filter}
-                preferredValueRange={data.preferredValueRange}
+            return <DailyWeightChart
+                {...commonProps}
                 pastNearestLog={weightData.pastNearestLog}
                 futureNearestLog={weightData.futureNearestLog}
-                containerWidth={width} containerHeight={height}
                 measureUnitType={measureUnitType}
             />
     }
@@ -389,7 +383,6 @@ export const DataSourceChartFrame = React.memo((props: {
                 }
             </SizeWatcher>
         </View>
-
         <View style={styles.footerStyle}>{
             props.data.statistics && props.data.statistics.map(stat => {
                 return <Text key={stat.type} style={styles.statValueStyle}>

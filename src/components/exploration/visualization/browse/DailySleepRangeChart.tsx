@@ -72,7 +72,7 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
             if (datum) {
                 return { value: datum.bedTimeDiffSeconds, value2: datum.wakeTimeDiffSeconds }
             } else return null
-        }} highlightedDays={prop.highlightedDays}>
+        }} highlightedDays={prop.highlightFilter != null? prop.highlightedDays : undefined}>
             {
                 prop.data.map(d => {
                     const barHeight = scaleY(d.wakeTimeDiffSeconds) - scaleY(d.bedTimeDiffSeconds)
