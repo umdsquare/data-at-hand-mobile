@@ -29,7 +29,8 @@ function normalizeCompromiseGroup(groups: { [groupName: string]: compromise.Docu
 const lexicon = {
     'highlight': 'Verb',
     'compare': 'Verb',
-    'compared': 'Verb'
+    'compared': 'Verb',
+    'less': 'Adjective'
 }
 
 const MONTH_NAMES_REGEX = new RegExp(`${MONTH_NAMES.join("|")}`, 'gi')
@@ -296,6 +297,8 @@ function inferHighlight(nlp: compromise.Document, original: string): { condition
     //try to find the condition
 
     const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time)+]`)
+
+    console.log("possible comparison info found.", nlp.termList())
     const durationComparisonInfo = normalizeCompromiseGroup(durationComparisonMatch.groups())
     if (durationComparisonInfo) {
         console.log("duration comparison info found:", durationComparisonInfo)
@@ -329,7 +332,9 @@ function inferHighlight(nlp: compromise.Document, original: string): { condition
         }
     }
     else {
-        const numericComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<number>#Value] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
+        const numericComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than? [<number>#Value] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
+
+
         const numericComparisonInfo = normalizeCompromiseGroup(numericComparisonMatch.groups())
         if (numericComparisonInfo) {
             numericComparisonInfo.number = Number.parseInt(numericComparisonInfo.number.replace(",", ""))
@@ -386,6 +391,6 @@ export async function test() {
     */
     //await preprocess("step count by day of the week", { getToday: () => new Date() })
     //await preprocess("2019", { getToday: () => new Date() })
-    await preprocess("days i walked more than 10,000 steps",  { getToday: () => new Date() })
+    await preprocess("days i slept less than 6 hours",  { getToday: () => new Date() })
 
 }

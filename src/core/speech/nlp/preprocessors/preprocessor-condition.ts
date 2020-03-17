@@ -9,6 +9,10 @@ const lexicon: Array<TermInfo> = [
     
     { term: 'low', conditionType: NumericConditionType.Less, valueType: ["scalar"], impliedSource: null,},
     { term: 'high', conditionType: NumericConditionType.More, valueType: ["scalar"], impliedSource: null,},
+
+    { term: 'under', conditionType: NumericConditionType.Less, valueType: ["scalar"], impliedSource: null,},
+    { term: 'below', conditionType: NumericConditionType.Less, valueType: ["scalar"], impliedSource: null,},
+    { term: 'over', conditionType: NumericConditionType.More, valueType: ["scalar"], impliedSource: null,},
     
     { term: 'short', conditionType: NumericConditionType.Less, valueType: ["duration"], impliedSource: DataSourceType.HoursSlept},
     { term: 'long', conditionType: NumericConditionType.More, valueType: ["duration"], impliedSource: DataSourceType.HoursSlept},
