@@ -38,6 +38,7 @@
     "merge": "^1.2.1",
     "named-regexp-groups": "^1.0.5",
     "papaparse": "^5.1.1",
+    "parse-decimal-number": "^1.0.0",
     "parse-duration": "^0.1.2",
     "pluralize": "^8.0.0",
     "react": "16.13.0",

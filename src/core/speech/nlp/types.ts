@@ -44,7 +44,7 @@ export interface VerbInfo {
 
 export interface ConditionInfo {
     type: NumericConditionType,
-    property?: "waketime" | "bedtime" | undefined | null
+    propertyKey?: "waketime" | "bedtime" | undefined | null
     unit?: string
     ref?: number
 }

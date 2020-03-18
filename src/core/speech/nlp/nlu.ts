@@ -172,7 +172,7 @@ export class NLUCommandResolver {
                     //TODO infer data source implied by the adverb or adjective, such as "heavier".
                 }
 
-                if (conditionInfo.property == "waketime" || conditionInfo.property == 'bedtime') {
+                if (conditionInfo.propertyKey == "waketime" || conditionInfo.propertyKey == 'bedtime') {
                     cascadedDataSource = DataSourceType.SleepRange
                 }
 

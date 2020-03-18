@@ -17,8 +17,8 @@ const lexicon: Array<TermInfo> = [
     { term: 'short', conditionType: NumericConditionType.Less, valueType: ["duration"], impliedSource: DataSourceType.HoursSlept},
     { term: 'long', conditionType: NumericConditionType.More, valueType: ["duration"], impliedSource: DataSourceType.HoursSlept},
     
-    { term: 'less', conditionType: NumericConditionType.Less, valueType: ["duration", "scalar"], impliedSource: null},
-    { term: 'more', conditionType: NumericConditionType.More, valueType: ["duration", "scalar"], impliedSource: null},
+    { term: 'less', conditionType: NumericConditionType.Less, valueType: ["scalar", "duration"], impliedSource: null},
+    { term: 'more', conditionType: NumericConditionType.More, valueType: ["scalar", 'duration'], impliedSource: null},
     
     { term: 'slow', conditionType: NumericConditionType.Less, valueType: ["scalar"], impliedSource: DataSourceType.HeartRate},
     { term: 'fast', conditionType: NumericConditionType.More, valueType: ["scalar"], impliedSource: DataSourceType.HeartRate},

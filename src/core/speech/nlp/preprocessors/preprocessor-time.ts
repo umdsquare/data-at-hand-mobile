@@ -163,22 +163,9 @@ export function parseDateTextToNumberedDate(text: string, today: Date): number |
     return null
 }
 
-export function parseTimeOfTheDayTextToDiffSeconds(text: string, preferred: "day" | "night"): number {
-    //Inspired by https://dlc.hypotheses.org/698
-    //Test set
-    //half past eleven
-    //quarter to twelve
-    //10:30
-    //8 am
-    //7 pm
-    //7:30 am
-    //ten o'clock
 
-    return 0
-}
 
 const quarterhalfpattern = new NamedRegExp("((?<number>[0-9])\\s+)?(and\\s+)?(a\\s+)?(?<ratio>half|quarter|1/2|1/4)\\s+(?<unit>day|hour|minute|second)", "i");
-
 
 export function parseDurationTextToSeconds(text: string): number {
 

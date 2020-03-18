@@ -18,6 +18,7 @@ import commaNumber from 'comma-number'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TimePicker } from "react-native-wheel-picker-android";
 import { DurationWheelPicker } from '@components/common/DurationWheelPicker'
+import { BEDTIME_SHIFT_HOUR_OF_DAY } from '@measure/consts'
 
 type SpecType = { dataSourceType: DataSourceType, propertyKey?: string | null, label: string }
 const dataSourceSpecs: Array<SpecType> = [
@@ -75,13 +76,13 @@ function getComparisonLabel(type: NumericConditionType, dataSource: DataSourceTy
     }
 }
 
-function getDefaultReference(dataSource: DataSourceType, propertyKey: string | undefined): number{
+function getDefaultReference(dataSource: DataSourceType, propertyKey: string | undefined): number {
     switch (dataSource) {
         case DataSourceType.StepCount: return 10000
         case DataSourceType.HeartRate: return 80
         case DataSourceType.SleepRange:
             switch (propertyKey) {
-                case 'waketime': return 8*3600
+                case 'waketime': return 8 * 3600
                 case 'bedtime': return 0
             }
         case DataSourceType.HoursSlept: return 6 * 3600
@@ -215,7 +216,7 @@ export const HighlightFilterPanel = React.memo((props: {
                 ...props.filter,
                 dataSource: key.dataSourceType,
                 propertyKey: key.propertyKey,
-                ref: (props.filter.type !== NumericConditionType.Max && props.filter.type !== NumericConditionType.Min)? getDefaultReference(key.dataSourceType, key.propertyKey) : undefined
+                ref: (props.filter.type !== NumericConditionType.Max && props.filter.type !== NumericConditionType.Min) ? getDefaultReference(key.dataSourceType, key.propertyKey) : undefined
             }
             props.onFilterModified(newFilter)
         }
@@ -260,11 +261,21 @@ export const HighlightFilterPanel = React.memo((props: {
         setInputReferenceValue(text.length > 0 ? Number.parseInt(text) : null)
     }, [])
 
-    const onTimePickerValueChange = Platform.OS === 'ios' ? useCallback((ev, value) => {
-        setInputReferenceValue(getHours(value) * 3600 + getMinutes(value) * 60)
-    }, [setInputReferenceValue]) : useCallback((value) => {
-        setInputReferenceValue(getHours(value) * 3600 + getMinutes(value) * 60)
+
+    const calcTimeOfDay = useMemo(() => (propertyKey: "waketime" | "bedtime", date: Date) => {
+        let result = getHours(date) * 3600 + getMinutes(date) * 60
+        result %= 24 * 3600
+        if (propertyKey === 'bedtime' && result > BEDTIME_SHIFT_HOUR_OF_DAY * 3600) {
+            result -= 24 * 3600
+        }
+        return result
     }, [])
+
+    const onTimePickerValueChange = Platform.OS === 'ios' ? useCallback((ev, value) => {
+        setInputReferenceValue(calcTimeOfDay(props.filter.propertyKey as any, value))
+    }, [setInputReferenceValue]) : useCallback((value) => {
+        setInputReferenceValue(calcTimeOfDay(props.filter.propertyKey as any, value))
+    }, [props.filter.propertyKey])
 
     const onDurationChange = useCallback((duration) => {
         setInputReferenceValue(duration)
@@ -286,7 +297,7 @@ export const HighlightFilterPanel = React.memo((props: {
                         initDate={addSeconds(pivot, inputReferenceValue) as any}
                         onTimeSelected={onTimePickerValueChange as any} />
             case DataSourceType.HoursSlept:
-                return <DurationWheelPicker durationSeconds={inputReferenceValue} onDurationChange={onDurationChange}/>
+                return <DurationWheelPicker durationSeconds={inputReferenceValue} onDurationChange={onDurationChange} />
             default: return <Dialog.Input
                 style={Platform.OS === 'android' ? styles.textInputAndroidStyle : undefined}
                 autoFocus={true}

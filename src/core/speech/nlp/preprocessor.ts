@@ -1,11 +1,12 @@
 import { PreProcessedInputText, VariableType, VariableInfoDict, VerbInfo, NLUOptions, Intent, ConditionInfo, MONTH_NAMES, makeVariableId } from "./types";
 import compromise from 'compromise';
-import { parseTimeText, parseDateTextToNumberedDate, parseTimeOfTheDayTextToDiffSeconds, parseDurationTextToSeconds } from "./preprocessors/preprocessor-time";
+import { parseTimeText, parseDateTextToNumberedDate, parseDurationTextToSeconds } from "./preprocessors/preprocessor-time";
 import { DateTimeHelper } from "@utils/time";
 import { subDays, subWeeks, subMonths, addDays, subYears, endOfWeek, startOfWeek } from "date-fns";
 import { inferVerbType } from "./preprocessors/preprocessor-verb";
 import { categorizeExtreme, findComparisonTermInfo } from "./preprocessors/preprocessor-condition";
 import { tryPreprocessingByTemplates, DATASOURCE_VARIABLE_RULES, CYCLIC_TIME_RULES } from "./preprocessors/preprocessor-templates";
+import { parseTimeOfTheDayTextToDiffSeconds } from "./preprocessors/preprocessor-time-clock";
 
 const PARSED_TAG = "ReplacedId"
 
@@ -121,11 +122,11 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
     speech = speech.replace(/(\d),(\d)/g, '$1$2').toLowerCase()
 
     const quickPassWithTemplate = tryPreprocessingByTemplates(speech, options)
-    if(quickPassWithTemplate){
+    if (quickPassWithTemplate) {
         console.log("Quick passed : ", speech)
         return quickPassWithTemplate
     }
-    
+
 
     const variables: VariableInfoDict = {}
 
@@ -321,7 +322,7 @@ function inferHighlight(nlp: compromise.Document, original: string): { condition
                     return {
                         conditionInfo: {
                             type: comparisonTermInfo.conditionType,
-                            property: isBedtimePassed === true ? 'bedtime' : (isWakeTimePassed === true ? 'waketime' : undefined),
+                            propertyKey: isBedtimePassed === true ? 'bedtime' : (isWakeTimePassed === true ? 'waketime' : undefined),
                             ref: parseTimeOfTheDayTextToDiffSeconds(durationComparisonInfo.duration, isBedtimePassed === true ? 'night' : (isWakeTimePassed === true ? 'day' : undefined)),
                         },
                         match: durationComparisonMatch
@@ -332,20 +333,61 @@ function inferHighlight(nlp: compromise.Document, original: string): { condition
         }
     }
     else {
-        const numericComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than? [<number>#Value] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
+        const numericComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than? [<number>#Value+] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
 
 
         const numericComparisonInfo = normalizeCompromiseGroup(numericComparisonMatch.groups())
         if (numericComparisonInfo) {
-            numericComparisonInfo.number = Number.parseInt(numericComparisonInfo.number.replace(",", ""))
             //numeric condition
             console.log("numeric comparison info found.", numericComparisonInfo)
             const comparisonTermInfo = findComparisonTermInfo(numericComparisonInfo.comparison)
             if (comparisonTermInfo) {
+                const parseDecimalNumber = require('parse-decimal-number');
+                for (const prioritizedValueType of comparisonTermInfo.valueType) {
+                    switch (prioritizedValueType) {
+                        case "duration":
+                            console.log("treated as duration")
+                            return {
+                                conditionInfo: {
+                                    type: comparisonTermInfo.conditionType,
+                                    ref: parseDurationTextToSeconds(numericComparisonInfo.number)
+                                } as ConditionInfo,
+                                match: numericComparisonMatch
+                            }
+                        case "time":
+                            {
+                                console.log("treated as time")
+                                const isBedtimePassed = isBedtimeReferred(original)
+                                const isWakeTimePassed = isWaketimeReferred(original)
+                                if (isBedtimePassed || isWakeTimePassed) {
+                                    return {
+                                        conditionInfo: {
+                                            type: comparisonTermInfo.conditionType,
+                                            propertyKey: isBedtimePassed === true ? 'bedtime' : (isWakeTimePassed === true ? 'waketime' : undefined),
+                                            ref: parseTimeOfTheDayTextToDiffSeconds(numericComparisonInfo.number, isBedtimePassed === true ? 'night' : (isWakeTimePassed === true ? 'day' : undefined)),
+                                        },
+                                        match: durationComparisonMatch
+                                    }
+                                }
+                            }
+                            break;
+                        case "scalar":
+                            console.log("treated as scalar")
+                            return {
+                                conditionInfo: {
+                                    type: comparisonTermInfo.conditionType,
+                                    ref: parseDecimalNumber(numericComparisonInfo.number),
+                                    unit: numericComparisonInfo.unit
+                                } as ConditionInfo,
+                                match: numericComparisonMatch
+                            } 
+                    }
+                }
+
                 return {
                     conditionInfo: {
                         type: comparisonTermInfo.conditionType,
-                        ref: numericComparisonInfo.number,
+                        ref: parseDecimalNumber(numericComparisonInfo.number),
                         unit: numericComparisonInfo.unit
                     } as ConditionInfo,
                     match: numericComparisonMatch
@@ -364,7 +406,7 @@ function inferHighlight(nlp: compromise.Document, original: string): { condition
                     return {
                         conditionInfo: {
                             type: category,
-                            property: isBedtimePassed === true ? 'bedtime' : (isWakeTimePassed === true ? 'waketime' : undefined)
+                            propertyKey: isBedtimePassed === true ? 'bedtime' : (isWakeTimePassed === true ? 'waketime' : undefined)
                         } as ConditionInfo,
                         match
                     }
@@ -391,6 +433,8 @@ export async function test() {
     */
     //await preprocess("step count by day of the week", { getToday: () => new Date() })
     //await preprocess("2019", { getToday: () => new Date() })
-    console.log(await preprocess("go to march",  { getToday: () => new Date() }))
+    console.log(await preprocess("days I woke up earlier than 11 five", { getToday: () => new Date() }))
 
+    console.log(await preprocess("days I walked more than 10000", { getToday: () => new Date() }))
+    
 }
