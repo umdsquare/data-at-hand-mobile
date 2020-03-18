@@ -164,6 +164,7 @@ export function parseDateTextToNumberedDate(text: string, today: Date): number |
 }
 
 export function parseTimeOfTheDayTextToDiffSeconds(text: string, preferred: "day" | "night"): number {
+    //Inspired by https://dlc.hypotheses.org/698
     //Test set
     //half past eleven
     //quarter to twelve
@@ -176,10 +177,50 @@ export function parseTimeOfTheDayTextToDiffSeconds(text: string, preferred: "day
     return 0
 }
 
+const quarterhalfpattern = new NamedRegExp("((?<number>[0-9])\\s+)?(and\\s+)?(a\\s+)?(?<ratio>half|quarter|1/2|1/4)\\s+(?<unit>day|hour|minute|second)", "i");
+
+
 export function parseDurationTextToSeconds(text: string): number {
-    //Test set
-    //10 hours
-    //4 and a half hours
-    //4 hours and 30 minutes
-    return 0
+
+    const matched = text.match(quarterhalfpattern)
+    if (matched) {
+        try {
+            let digit = 0
+            if (matched.groups.number != null) {
+                digit = Number.parseInt(matched.groups.number)
+            }
+
+            switch (matched.groups.ratio) {
+                case 'half':
+                case '1/2':
+                    digit += 0.5
+                    break;
+                case 'quarter':
+                case '1/4':
+                    digit += 0.25
+                    break;
+            }
+
+            switch (matched.groups.unit) {
+                case 'day':
+                    return digit * 24 * 3600
+                case 'minute':
+                    return digit * 60
+                case 'hour':
+                default:
+                    return digit * 3600
+            }
+        } catch (e) {
+            console.log("duration parsing error - ", text, ": ", e)
+        }
+    }
+
+    var parse = require('parse-duration')
+    const parsedByLibrary = parse(text)
+    return Math.round(parsedByLibrary / 1000);
 }
+
+
+["10 hours", "4 and a half hours", "5 hours and 30 minutes", "4 and a quarter hours", "4 1/2 hours"].forEach(test => {
+    console.log(test, ":", parseDurationTextToSeconds(test));
+})
