@@ -33,7 +33,7 @@ const lexicon = {
     'less': 'Adjective'
 }
 
-const MONTH_NAMES_REGEX = new RegExp(`${MONTH_NAMES.join("|")}`, 'gi')
+const MONTH_NAMES_REGEX = new RegExp(`${MONTH_NAMES.join("|")}`, 'i')
 
 
 const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (obj: any, options: NLUOptions) => { type: VariableType.Date | VariableType.Period, value: number | [number, number] } | null }> = [
@@ -391,6 +391,6 @@ export async function test() {
     */
     //await preprocess("step count by day of the week", { getToday: () => new Date() })
     //await preprocess("2019", { getToday: () => new Date() })
-    await preprocess("days i slept less than 6 hours",  { getToday: () => new Date() })
+    console.log(await preprocess("go to march",  { getToday: () => new Date() }))
 
 }
