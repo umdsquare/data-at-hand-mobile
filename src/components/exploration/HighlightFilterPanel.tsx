@@ -20,13 +20,14 @@ import { TimePicker } from "react-native-wheel-picker-android";
 import { DurationWheelPicker } from '@components/common/DurationWheelPicker'
 import { BEDTIME_SHIFT_HOUR_OF_DAY } from '@measure/consts'
 
-type SpecType = { dataSourceType: DataSourceType, propertyKey?: string | null, label: string }
+
+type SpecType = { dataSourceType: DataSourceType, propertyKey?: string | null, label: string, presets?: number[] }
 const dataSourceSpecs: Array<SpecType> = [
-    { dataSourceType: DataSourceType.StepCount, propertyKey: undefined, label: DataSourceManager.instance.getSpec(DataSourceType.StepCount).name },
-    { dataSourceType: DataSourceType.HeartRate, propertyKey: undefined, label: "Resting HR" },
-    { dataSourceType: DataSourceType.HoursSlept, propertyKey: undefined, label: DataSourceManager.instance.getSpec(DataSourceType.HoursSlept).name },
-    { dataSourceType: DataSourceType.SleepRange, propertyKey: "waketime", label: "Wake Time" },
-    { dataSourceType: DataSourceType.SleepRange, propertyKey: "bedtime", label: "Bedtime" },
+    { dataSourceType: DataSourceType.StepCount, propertyKey: undefined, label: DataSourceManager.instance.getSpec(DataSourceType.StepCount).name, presets: [5000, 10000, 20000] },
+    { dataSourceType: DataSourceType.HeartRate, propertyKey: undefined, label: "Resting HR", presets: [60, 80, 100] },
+    { dataSourceType: DataSourceType.HoursSlept, propertyKey: undefined, label: DataSourceManager.instance.getSpec(DataSourceType.HoursSlept).name, presets: [4 * 3600, 6 * 3600, 8 * 3600, 10 * 3600] },
+    { dataSourceType: DataSourceType.SleepRange, propertyKey: "waketime", label: "Wake Time", presets: [7 * 3600, 9 * 3600, 10 * 3600] },
+    { dataSourceType: DataSourceType.SleepRange, propertyKey: "bedtime", label: "Bedtime", presets: [-2 * 3600, 0, 1 * 3600] },
     { dataSourceType: DataSourceType.Weight, propertyKey: undefined, label: DataSourceManager.instance.getSpec(DataSourceType.Weight).name },
 ]
 
@@ -147,7 +148,21 @@ const styles = StyleSheet.create({
         paddingLeft: Sizes.horizontalPadding,
         paddingRight: Sizes.horizontalPadding,
         fontSize: Sizes.normalFontSize
-    }
+    },
+
+    dialogContainerStyle: { width: undefined },
+
+    dialogPresetViewStyle: {
+        ...StyleTemplates.flexHorizontalCenteredListContainer,
+        justifyContent: 'space-between',
+        padding: Sizes.horizontalPadding
+    },
+
+    dialogPresetButtonStyle: { marginLeft: 4, marginRight: 4, borderRadius: 6 },
+
+    dialogPresetButtonContentStyle: { borderColor: Colors.accent + "88", borderWidth: 1, borderRadius: 6, padding: 6 },
+
+    dialogPresetButtonTextStyle: { fontSize: Sizes.smallFontSize, color: Colors.accent, fontWeight: '500' }
 })
 
 const pivot = startOfDay(new Date())
@@ -170,6 +185,9 @@ export const HighlightFilterPanel = React.memo((props: {
     }, [props.filter.dataSource, props.filter.propertyKey])
 
 
+    const dataSourceSpec = useMemo(() => {
+        return dataSourceSpecs.find(s => s.dataSourceType === props.filter.dataSource && s.propertyKey === props.filter.propertyKey)
+    }, [props.filter.dataSource])
 
     const renderRightActions = useCallback((progress: Animated.AnimatedInterpolation) => {
         const scale = progress.interpolate({
@@ -199,8 +217,16 @@ export const HighlightFilterPanel = React.memo((props: {
         switch (props.filter.dataSource) {
             case DataSourceType.StepCount:
                 return commaNumber(value)
-            case DataSourceType.SleepRange:
-                return format(addSeconds(pivot, value), "hh:mm a")
+            case DataSourceType.SleepRange: {
+                const time = addSeconds(pivot, value)
+                switch (getHours(time)) {
+                    case 0:
+                    case 24:
+                        return "Midnight"
+                    case 12: return "Noon"
+                    default: return format(time, "hh:mm a")
+                }
+            }
             case DataSourceType.HoursSlept:
                 return DateTimeHelper.formatDuration(value, true)
             default: return value.toString()
@@ -333,9 +359,22 @@ export const HighlightFilterPanel = React.memo((props: {
 
             <Text style={styles.numDaysLabelStyle}>{pluralize('day', props.highlightedDays != null ? Object.keys(props.highlightedDays).length : 0, true)}</Text>
 
-            <Dialog.Container visible={showReferenceEditView} onBackdropPress={handleCancelReferenceEdit}>
+            <Dialog.Container contentStyle={styles.dialogContainerStyle} visible={showReferenceEditView} onBackdropPress={handleCancelReferenceEdit}>
                 <Dialog.Title>Change Reference Value</Dialog.Title>
                 {inputView()}
+
+                {
+                    dataSourceSpec.presets != null ? <View style={styles.dialogPresetViewStyle}>
+                        {
+                            dataSourceSpec.presets.map((preset, i) =>
+                                <RectButton key={i.toString()} style={styles.dialogPresetButtonStyle} onPress={() => { setInputReferenceValue(preset) }}>
+                                    <View style={styles.dialogPresetButtonContentStyle}>
+                                        <Text style={styles.dialogPresetButtonTextStyle}>{valueFormatter(preset)}</Text>
+                                    </View>
+                                </RectButton>)
+                        }
+                    </View> : null
+                }
 
                 <Dialog.Button label="Cancel" onPress={handleCancelReferenceEdit} />
                 <Dialog.Button label="Apply"
