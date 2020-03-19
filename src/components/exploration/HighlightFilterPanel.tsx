@@ -237,7 +237,7 @@ export const HighlightFilterPanel = React.memo((props: {
 
     const onDataSourceChanged = useCallback((key: { dataSourceType: DataSourceType, propertyKey?: string }) => {
 
-        if (props.filter.dataSource !== key.dataSourceType) {
+        if (props.filter.dataSource !== key.dataSourceType || props.filter.propertyKey !== key.propertyKey) {
             const newFilter = {
                 ...props.filter,
                 dataSource: key.dataSourceType,
