@@ -1,6 +1,6 @@
 import React from 'react';
 import Svg, { Rect, Line, G } from 'react-native-svg';
-import { CommonBrowsingChartStyles, ChartProps, getChartElementColor } from './common';
+import { CommonBrowsingChartStyles, ChartProps, getChartElementColor, getChartElementOpacity } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
 import { DateTimeHelper } from '@utils/time';
@@ -79,7 +79,7 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
         highlightedDays={prop.highlightFilter != null ? prop.highlightedDays : undefined}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={tickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
-        <G {...chartArea}>
+        <G pointerEvents="none" {...chartArea}>
             {
                 prop.data.map(d => {
                     const barHeight = scaleY(d.wakeTimeDiffSeconds) - scaleY(d.bedTimeDiffSeconds)
@@ -90,15 +90,15 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
                         y={scaleY(d.bedTimeDiffSeconds)}
                         rx={2}
                         fill={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
-                        opacity={0.62}
+                        opacity={getChartElementOpacity(today === d.numberedDate)}
                     />
                 })
             }
             {
-                Number.isNaN(bedTimeAvg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(bedTimeAvg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"} />
+                Number.isNaN(bedTimeAvg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(bedTimeAvg)} stroke={Colors.chartAvgLineColor} strokeWidth={CommonBrowsingChartStyles.AVERAGE_LINE_WIDTH} strokeDasharray={"2"} />
             }
             {
-                Number.isNaN(wakeTimeAvg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(wakeTimeAvg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"} />
+                Number.isNaN(wakeTimeAvg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(wakeTimeAvg)} stroke={Colors.chartAvgLineColor} strokeWidth={CommonBrowsingChartStyles.AVERAGE_LINE_WIDTH} strokeDasharray={"2"} />
             }
             {
                 highlightReference != null ? <Line x1={0} x2={chartArea.width} y={scaleY(highlightReference)} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null

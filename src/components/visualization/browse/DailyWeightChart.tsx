@@ -74,7 +74,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
 
     const veryLastLog = prop.futureNearestLog == null ? (prop.data.logs.length > 0 ? prop.data.logs[prop.data.logs.length - 1] : prop.pastNearestLog) : null
 
-    return <Svg width={prop.containerWidth} height={prop.containerHeight}>
+    return <Svg pointerEvents="none" width={prop.containerWidth} height={prop.containerHeight}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={scaleY.ticks(5)} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
         <G key="chart" {...chartArea}>

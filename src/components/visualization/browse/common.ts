@@ -29,6 +29,8 @@ export namespace CommonBrowsingChartStyles {
   export const yAxisTickSize = 10;
   export const maxBarSpacing = 0.7;
 
+  export const AVERAGE_LINE_WIDTH = 1.5;
+
   export const chartAreaPadding = {
     left: yAxisWidth,
     top: topPadding,
@@ -135,4 +137,8 @@ export function getChartElementColor(shouldHighlightElements: boolean, isHighlig
   return shouldHighlightElements === true && isHighlighted == true ?
     Colors.highlightElementColor :
     (isToday === true ? Colors.today : Colors.chartElementDefault)
+}
+
+export function getChartElementOpacity(isToday: boolean): number{
+  return isToday === true? 0.8: 0.62
 }

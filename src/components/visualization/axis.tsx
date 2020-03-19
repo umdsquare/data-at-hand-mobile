@@ -18,7 +18,7 @@ interface Props<T> {
 export const AxisSvg = (props: Props<any>) => {
     switch (props.position) {
         case Padding.Bottom:
-            return <G x={props.chartArea.x} y={props.chartArea.y + props.chartArea.height}>
+            return <G pointerEvents="none" x={props.chartArea.x} y={props.chartArea.y + props.chartArea.height}>
                 <Line x1={-props.tickMargin} x2={props.chartArea.width + 8} y1={0} y2={0} stroke={Colors.textColorLight} strokeWidth={0.5} />
 
                 {
@@ -32,7 +32,7 @@ export const AxisSvg = (props: Props<any>) => {
                 }
             </G>
         case Padding.Left:
-            return <G y={props.chartArea.y}>
+            return <G pointerEvents="none" y={props.chartArea.y}>
             {
                 props.ticks.map(tick => {
                     return <G key={tick} y={props.scale(tick)}>

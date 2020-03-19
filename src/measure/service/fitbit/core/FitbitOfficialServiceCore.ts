@@ -6,7 +6,7 @@ import { DataService, UnSupportedReason } from "../../DataService";
 import { DateTimeHelper } from "@utils/time";
 import { FitbitLocalDbManager } from '../sqlite/database';
 import { DatabaseParams } from 'react-native-sqlite-storage';
-import { toDate, parse, parseISO, max } from 'date-fns';
+import { parseISO, max } from 'date-fns';
 
 
 interface FitbitCredential {

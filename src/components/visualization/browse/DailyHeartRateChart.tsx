@@ -1,6 +1,6 @@
 import React from 'react';
 import Svg, { Circle, Line, Path, G } from 'react-native-svg';
-import { CommonBrowsingChartStyles, ChartProps, getChartElementColor } from './common';
+import { CommonBrowsingChartStyles, ChartProps, getChartElementColor, getChartElementOpacity } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
 import { DateTimeHelper } from '@utils/time';
@@ -56,7 +56,7 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
         highlightedDays={prop.highlightFilter != null ? prop.highlightedDays : undefined}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={scaleY.ticks(5)} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
-        <G {...chartArea}>
+        <G pointerEvents="none" {...chartArea}>
             {
                 <Path d={line(prop.data)!}
                     strokeWidth={2.5}
@@ -74,12 +74,12 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
                         strokeWidth={2}
                         fill='white'
                         stroke={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
-                        opacity={0.62}
+                        opacity={getChartElementOpacity(today === d.numberedDate)}
                     />
                 })
             }
             {
-                Number.isNaN(avg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(avg)} stroke={Colors.chartAvgLineColor} strokeWidth={1} strokeDasharray={"2"} />
+                Number.isNaN(avg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(avg)} stroke={Colors.chartAvgLineColor} strokeWidth={CommonBrowsingChartStyles.AVERAGE_LINE_WIDTH} strokeDasharray={"2"} />
             }
             {
                 highlightReference != null ? <Line x1={0} x2={chartArea.width} y={scaleY(highlightReference)} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null

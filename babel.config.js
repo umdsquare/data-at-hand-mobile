@@ -16,6 +16,7 @@ module.exports = {
           '^@assets/(.+)': "./assets/\\1",
         }
       }
-    ]
+    ],
+    "transform-remove-console"
   ]
 };

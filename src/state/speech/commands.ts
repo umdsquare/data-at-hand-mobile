@@ -4,7 +4,6 @@ import { createBootstrapAction, createTerminateSessionAction, createUpdateDictat
 import { VoiceDictator } from "../../core/speech/VoiceDictator";
 import { DictationResult } from "../../core/speech/types";
 import { SpeechRecognizerSessionStatus } from "./types";
-import { sleep } from "@utils/utils";
 import { Mutex } from 'async-mutex';
 import { SpeechContext } from "../../core/speech/nlp/context";
 import { NLUCommandResolver } from "../../core/speech/nlp/nlu";
