@@ -4,7 +4,7 @@ import { parseTimeText, parseDateTextToNumberedDate, parseDurationTextToSeconds 
 import { DateTimeHelper } from "@utils/time";
 import { subDays, subWeeks, subMonths, addDays, subYears, endOfWeek, startOfWeek } from "date-fns";
 import { inferVerbType } from "./preprocessors/preprocessor-verb";
-import { categorizeExtreme, findComparisonTermInfo } from "./preprocessors/preprocessor-condition";
+import { categorizeExtreme, findComparisonTermInfo, inferScalarValue } from "./preprocessors/preprocessor-condition";
 import { tryPreprocessingByTemplates, DATASOURCE_VARIABLE_RULES, CYCLIC_TIME_RULES } from "./preprocessors/preprocessor-templates";
 import { parseTimeOfTheDayTextToDiffSeconds } from "./preprocessors/preprocessor-time-clock";
 import { DataSourceType } from "@measure/DataSourceSpec";
@@ -259,7 +259,7 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
     //Infer highlight======================================================
     //if (nlp.match("(number of)? (the)? days?").json().length > 0 || intent === Intent.Highlight) {
 
-    const inferredConditionInfoResult = inferHighlight(nlp, speech)
+    const inferredConditionInfoResult = inferHighlight(nlp, speech, options)
     if (inferredConditionInfoResult) {
         const id = makeVariableId()
         variables[id] = {
@@ -296,7 +296,7 @@ function isWaketimeReferred(speech: string): boolean {
     return /(wake)|(woke)|(g(o|e)t(ting)?\s+up)/gi.test(speech)
 }
 
-function inferHighlight(nlp: compromise.Document, original: string): { conditionInfo: ConditionInfo, match: compromise.Document } | null {
+function inferHighlight(nlp: compromise.Document, original: string, options: NLUOptions): { conditionInfo: ConditionInfo, match: compromise.Document } | null {
     //try to find the condition
 
     const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time)+]`)
@@ -383,8 +383,10 @@ function inferHighlight(nlp: compromise.Document, original: string): { condition
                                 conditionInfo: {
                                     type: comparisonTermInfo.conditionType,
                                     impliedDataSource: comparisonTermInfo.impliedSource,
-                                    ref: parseDecimalNumber(numericComparisonInfo.number),
-                                    unit: numericComparisonInfo.unit
+                                    ref: comparisonTermInfo.impliedSource ?
+                                        inferScalarValue(parseDecimalNumber(numericComparisonInfo.number),
+                                            numericComparisonInfo.unit, comparisonTermInfo.impliedSource, options.measureUnit)
+                                        : parseDecimalNumber(numericComparisonInfo.number)
                                 } as ConditionInfo,
                                 match: numericComparisonMatch
                             }
@@ -395,8 +397,10 @@ function inferHighlight(nlp: compromise.Document, original: string): { condition
                     conditionInfo: {
                         type: comparisonTermInfo.conditionType,
                         impliedDataSource: comparisonTermInfo.impliedSource,
-                        ref: parseDecimalNumber(numericComparisonInfo.number),
-                        unit: numericComparisonInfo.unit
+                        ref: comparisonTermInfo.impliedSource ?
+                            inferScalarValue(parseDecimalNumber(numericComparisonInfo.number),
+                                numericComparisonInfo.unit, comparisonTermInfo.impliedSource, options.measureUnit)
+                            : parseDecimalNumber(numericComparisonInfo.number)
                     } as ConditionInfo,
                     match: numericComparisonMatch
                 }

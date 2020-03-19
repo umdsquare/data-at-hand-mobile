@@ -95,7 +95,8 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
                                 context,
                                 currentState.explorationState.info,
                                 {
-                                    getToday: DataServiceManager.instance.getServiceByKey(currentState.settingsState.serviceKey).getToday
+                                    getToday: DataServiceManager.instance.getServiceByKey(currentState.settingsState.serviceKey).getToday,
+                                    measureUnit: currentState.settingsState.unit
                                 }
                             )
 

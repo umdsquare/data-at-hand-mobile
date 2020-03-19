@@ -349,7 +349,6 @@ export function goBackAction(): ActionTypeBase {
 
 export function resetAction(today: Date): ResetAction {
   const now = startOfDay(today);
-  console.log("now:", now)
   return {
     type: ExplorationActionType.Reset,
     resetRange: [

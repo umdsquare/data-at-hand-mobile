@@ -3,6 +3,7 @@ import { View, StyleSheet, Platform } from 'react-native'
 import { WheelPicker } from 'react-native-wheel-picker-android'
 import { getNumberSequence } from '@utils/utils'
 import pluralize from 'pluralize'
+import { StyleTemplates } from '@style/Styles'
 
 const hours = getNumberSequence(0, 24).map(n => pluralize("hour", n, true))
 const minutes = getNumberSequence(0, 11).map(n => pluralize("minute", n * 5, true))
@@ -13,7 +14,7 @@ const styles = StyleSheet.create({
         alignItems: 'stretch',
     },
     pickerStyle: {
-        height: Platform.OS === 'ios' ? undefined : 150,
+        ...StyleTemplates.wheelPickerCommonStyle,
         width: 150,
         flex: 1,
     }

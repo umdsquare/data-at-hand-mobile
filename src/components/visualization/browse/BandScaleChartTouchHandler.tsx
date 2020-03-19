@@ -49,7 +49,6 @@ export const BandScaleChartTouchHandler = (props: {
 
 
     const onUpdateTouchingInfo = useCallback((date: number, x: number, y: number, screenX: number, screenY: number, touchId: string) => {
-        console.log("haha")
         const dX = screenX - x
         const dY = screenY - y
 

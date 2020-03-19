@@ -7,7 +7,7 @@ import { StyleTemplates } from '@style/Styles'
 import { Sizes } from '@style/Sizes'
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { RectButton } from 'react-native-gesture-handler'
-import { DataSourceType } from '@measure/DataSourceSpec'
+import { DataSourceType, MeasureUnitType } from '@measure/DataSourceSpec'
 import { useActionSheet } from '@expo/react-native-action-sheet'
 import pluralize from 'pluralize';
 import deepEqual from 'deep-equal';
@@ -16,12 +16,25 @@ import { DateTimeHelper } from '@utils/time'
 import { startOfDay, addSeconds, format, getHours, getMinutes } from 'date-fns'
 import commaNumber from 'comma-number'
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { TimePicker } from "react-native-wheel-picker-android";
+import { TimePicker, WheelPicker } from "react-native-wheel-picker-android";
 import { DurationWheelPicker } from '@components/common/DurationWheelPicker'
 import { BEDTIME_SHIFT_HOUR_OF_DAY } from '@measure/consts'
+import { useSelector } from 'react-redux'
+import { ReduxAppState } from '@state/types'
+import convert from 'convert-units'
+import { getNumberSequence, clamp } from '@utils/utils'
+
+const HEART_RATE_RANGE = getNumberSequence(0, 150)
+const HEART_RATE_RANGE_TEXTS = HEART_RATE_RANGE.map(v => `${v.toString()} bpm`)
+
+const WEIGHT_RANGE = getNumberSequence(0, 250)
+const WEIGHT_RANGE_TEXTS_KG = WEIGHT_RANGE.map(v => `${v.toString()} kg`)
+const WEIGHT_RANGE_TEXTS_LB = WEIGHT_RANGE.map(v => `${v.toString()} lb`)
 
 
-type SpecType = { dataSourceType: DataSourceType, propertyKey?: string | null, label: string, presets?: number[] }
+
+
+type SpecType = { dataSourceType: DataSourceType, propertyKey?: string | null, label: string, presets?: number[] | ((unit: MeasureUnitType) => number[]) }
 const dataSourceSpecs: Array<SpecType> = [
     { dataSourceType: DataSourceType.StepCount, propertyKey: undefined, label: DataSourceManager.instance.getSpec(DataSourceType.StepCount).name, presets: [5000, 10000, 20000] },
     { dataSourceType: DataSourceType.HeartRate, propertyKey: undefined, label: "Resting HR", presets: [60, 80, 100] },
@@ -162,7 +175,8 @@ const styles = StyleSheet.create({
 
     dialogPresetButtonContentStyle: { borderColor: Colors.accent + "88", borderWidth: 1, borderRadius: 6, padding: 6 },
 
-    dialogPresetButtonTextStyle: { fontSize: Sizes.smallFontSize, color: Colors.accent, fontWeight: '500' }
+    dialogPresetButtonTextStyle: { fontSize: Sizes.smallFontSize, color: Colors.accent, fontWeight: '500' },
+
 })
 
 const pivot = startOfDay(new Date())
@@ -174,6 +188,7 @@ export const HighlightFilterPanel = React.memo((props: {
     onFilterModified: (newFilter: HighlightFilter) => void
 }) => {
 
+    const measureUnitType: MeasureUnitType = useSelector((appState: ReduxAppState) => appState.settingsState.unit)
 
     const comparisonTypes = useMemo(() => {
         return [NumericConditionType.Less, NumericConditionType.More, NumericConditionType.Min, NumericConditionType.Max].map(type => {
@@ -188,6 +203,12 @@ export const HighlightFilterPanel = React.memo((props: {
     const dataSourceSpec = useMemo(() => {
         return dataSourceSpecs.find(s => s.dataSourceType === props.filter.dataSource && s.propertyKey === props.filter.propertyKey)
     }, [props.filter.dataSource])
+
+    const dataSourcePresets = useMemo(() => {
+        if (typeof dataSourceSpec.presets === 'function') {
+            return dataSourceSpec.presets(measureUnitType)
+        } else return dataSourceSpec.presets
+    }, [dataSourceSpec, measureUnitType])
 
     const renderRightActions = useCallback((progress: Animated.AnimatedInterpolation) => {
         const scale = progress.interpolate({
@@ -214,6 +235,8 @@ export const HighlightFilterPanel = React.memo((props: {
     const getLabel = useCallback((v) => v.label, [])
 
     const valueFormatter = useMemo(() => (value: number) => {
+        value = DataSourceManager.instance.convertValue(value, props.filter.dataSource, measureUnitType)
+
         switch (props.filter.dataSource) {
             case DataSourceType.StepCount:
                 return commaNumber(value)
@@ -229,9 +252,20 @@ export const HighlightFilterPanel = React.memo((props: {
             }
             case DataSourceType.HoursSlept:
                 return DateTimeHelper.formatDuration(value, true)
+            case DataSourceType.HeartRate:
+                return `${value} bpm`
+            case DataSourceType.Weight:
+                {
+                    switch (measureUnitType) {
+                        case MeasureUnitType.Metric:
+                            return `${Math.round(value)} kg`
+                        case MeasureUnitType.US:
+                            return `${Math.round(value)} lb`
+                    }
+                }
             default: return value.toString()
         }
-    }, [props.filter.dataSource])
+    }, [props.filter.dataSource, measureUnitType])
 
     const getKeyOfDataSource = useCallback((t: SpecType) => ({ dataSourceType: t.dataSourceType, propertyKey: t.propertyKey }), [])
 
@@ -283,9 +317,14 @@ export const HighlightFilterPanel = React.memo((props: {
         setShowReferenceEditView(false)
     }, [])
 
-    const onInputTextChange = useCallback((text: string) => {
-        setInputReferenceValue(text.length > 0 ? Number.parseInt(text) : null)
+    const heartRateInputChange = useCallback(index => {
+        setInputReferenceValue(HEART_RATE_RANGE[index])
     }, [])
+
+    const onInputTextChange = useCallback((text: string) => {
+        setInputReferenceValue(text.length > 0 ? DataSourceManager.instance
+            .convertValueReverse(Number.parseFloat(text), props.filter.dataSource, measureUnitType) : null)
+    }, [props.filter.dataSource, measureUnitType])
 
 
     const calcTimeOfDay = useMemo(() => (propertyKey: "waketime" | "bedtime", date: Date) => {
@@ -324,6 +363,47 @@ export const HighlightFilterPanel = React.memo((props: {
                         onTimeSelected={onTimePickerValueChange as any} />
             case DataSourceType.HoursSlept:
                 return <DurationWheelPicker durationSeconds={inputReferenceValue} onDurationChange={onDurationChange} />
+
+            case DataSourceType.HeartRate:
+                {
+                    const index = clamp(Math.round(inputReferenceValue) - HEART_RATE_RANGE[0], 0, HEART_RATE_RANGE.length-1)
+                    return <WheelPicker
+                        selectedItemTextFontFamily={undefined}
+                        itemTextFontFamily={undefined}
+                        style={StyleTemplates.wheelPickerCommonStyle}
+                        data={HEART_RATE_RANGE_TEXTS}
+                        initPosition={index}
+                        selectedItem={index}
+                        onItemSelected={heartRateInputChange}
+                    />
+                }
+            case DataSourceType.Weight:
+
+                {
+                    let labels;
+                    switch (measureUnitType) {
+                        case MeasureUnitType.Metric:
+                            labels = WEIGHT_RANGE_TEXTS_KG
+                            break;
+                        case MeasureUnitType.US:
+                            labels = WEIGHT_RANGE_TEXTS_LB
+                            break;
+                    }
+                    const index = clamp(Math.round(DataSourceManager.instance.convertValue(inputReferenceValue, DataSourceType.Weight, measureUnitType)) - WEIGHT_RANGE[0], 0, WEIGHT_RANGE.length - 1)
+                    return <WheelPicker
+                        selectedItemTextFontFamily={undefined}
+                        itemTextFontFamily={undefined}
+                        style={StyleTemplates.wheelPickerCommonStyle}
+                        data={labels}
+                        initPosition={index}
+                        selectedItem={index}
+                        onItemSelected={(index) => {
+                            const selectedNumber = WEIGHT_RANGE[index]
+                            setInputReferenceValue(DataSourceManager.instance.convertValueReverse(selectedNumber, DataSourceType.Weight, measureUnitType))
+                        }}
+                    />
+                }
+
             default: return <Dialog.Input
                 style={Platform.OS === 'android' ? styles.textInputAndroidStyle : undefined}
                 autoFocus={true}
@@ -331,9 +411,9 @@ export const HighlightFilterPanel = React.memo((props: {
                 keyboardType="number-pad"
                 selectTextOnFocus={true}
                 onChangeText={onInputTextChange}
-            >{inputReferenceValue}</Dialog.Input>
+            >{DataSourceManager.instance.convertValue(inputReferenceValue, props.filter.dataSource, measureUnitType)}</Dialog.Input>
         }
-    }, [props.filter.dataSource, onInputTextChange, inputReferenceValue, onTimePickerValueChange])
+    }, [props.filter.dataSource, measureUnitType, onInputTextChange, inputReferenceValue, onTimePickerValueChange])
 
     return <Swipeable
         renderRightActions={renderRightActions}
@@ -364,9 +444,9 @@ export const HighlightFilterPanel = React.memo((props: {
                 {inputView()}
 
                 {
-                    dataSourceSpec.presets != null ? <View style={styles.dialogPresetViewStyle}>
+                    dataSourcePresets != null ? <View style={styles.dialogPresetViewStyle}>
                         {
-                            dataSourceSpec.presets.map((preset, i) =>
+                            dataSourcePresets.map((preset, i) =>
                                 <RectButton key={i.toString()} style={styles.dialogPresetButtonStyle} onPress={() => { setInputReferenceValue(preset) }}>
                                     <View style={styles.dialogPresetButtonContentStyle}>
                                         <Text style={styles.dialogPresetButtonTextStyle}>{valueFormatter(preset)}</Text>

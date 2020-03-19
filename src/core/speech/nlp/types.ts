@@ -1,6 +1,6 @@
 import { NumericConditionType } from "../../exploration/types"
 import { randomString } from "@utils/utils"
-import { DataSourceType } from "@measure/DataSourceSpec"
+import { DataSourceType, MeasureUnitType } from "@measure/DataSourceSpec"
 
 export const MONTH_NAMES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
 
@@ -47,12 +47,12 @@ export interface ConditionInfo {
     type: NumericConditionType,
     impliedDataSource?: DataSourceType,
     propertyKey?: "waketime" | "bedtime" | undefined | null
-    unit?: string
     ref?: number
 }
 
 export interface NLUOptions {
     getToday: () => Date,
+    measureUnit: MeasureUnitType
 }
 
 export function makeVariableId() {

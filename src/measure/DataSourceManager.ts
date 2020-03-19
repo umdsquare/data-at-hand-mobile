@@ -1,5 +1,6 @@
-import { DataSourceSpec, DataSourceType, DataSourceCategory, DataSourceCategorySpec } from "@measure/DataSourceSpec";
+import { DataSourceSpec, DataSourceType, DataSourceCategory, DataSourceCategorySpec, MeasureUnitType } from "@measure/DataSourceSpec";
 import commaNumber from 'comma-number';
+import convert from "convert-units";
 
 export class DataSourceManager {
 
@@ -91,6 +92,34 @@ export class DataSourceManager {
         return commaNumber(Math.round(value))
       default:
         return value.toString()
+    }
+  }
+
+  convertValue(value: number, type: DataSourceType, unitType: MeasureUnitType): number {
+    switch (type) {
+      case DataSourceType.Weight:
+        switch (unitType) {
+          case MeasureUnitType.Metric:
+            return value
+          case MeasureUnitType.US:
+            return Math.round(convert(value).from('kg').to('lb') * 10)/10
+        }
+      default:
+        return value
+    }
+  }
+
+  convertValueReverse(value: number, type: DataSourceType, unitType: MeasureUnitType): number {
+    switch (type) {
+      case DataSourceType.Weight:
+        switch (unitType) {
+          case MeasureUnitType.Metric:
+            return value
+          case MeasureUnitType.US:
+            return Math.round(convert(value).from('lb').to('kg') * 10)/10
+        }
+      default:
+        return value
     }
   }
 }

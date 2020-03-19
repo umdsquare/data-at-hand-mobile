@@ -114,7 +114,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
                 />
             }
             {
-                highlightReference != null ? <Line x1={0} x2={chartArea.width} y={scaleY(highlightReference)} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
+                highlightReference != null ? <Line x1={0} x2={chartArea.width} y={scaleY(convert(highlightReference))} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
             }
         </G>
     </Svg>

@@ -25,3 +25,7 @@ export function randomString(length: number= 5): string {
     }
     return result.join("")
 }
+
+export function clamp(value: number, min: number, max: number): number{
+    return Math.min(max, Math.max(value, min))
+}

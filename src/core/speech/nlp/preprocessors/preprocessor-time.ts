@@ -207,7 +207,7 @@ export function parseDurationTextToSeconds(text: string): number {
     return Math.round(parsedByLibrary / 1000);
 }
 
-
+/*
 ["10 hours", "4 and a half hours", "5 hours and 30 minutes", "4 and a quarter hours", "4 1/2 hours"].forEach(test => {
     console.log(test, ":", parseDurationTextToSeconds(test));
-})
+})*/

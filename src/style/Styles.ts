@@ -1,5 +1,5 @@
 import {Sizes} from './Sizes';
-import {StyleSheet} from 'react-native';
+import {StyleSheet, Platform} from 'react-native';
 import Colors from './Colors';
 
 const StyleTemplates = StyleSheet.create({
@@ -120,6 +120,10 @@ const StyleTemplates = StyleSheet.create({
   },
 
   contentVerticalCenteredContainer: {flex: 1, justifyContent: 'center'},
+
+  wheelPickerCommonStyle: {
+      height: Platform.OS === 'ios' ? undefined : 150,
+  }
 });
 
 export {StyleTemplates};
