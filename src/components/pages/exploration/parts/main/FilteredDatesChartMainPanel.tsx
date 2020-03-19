@@ -2,7 +2,7 @@ import React from 'react';
 import { View, LayoutRectangle } from 'react-native';
 import { StyleTemplates } from '@style/Styles';
 import { SizeWatcher } from '@components/visualization/SizeWatcher';
-import Svg, { G, Line, Text as SvgText, Rect, Circle } from 'react-native-svg';
+import { G, Line, Text as SvgText, Rect, Circle } from 'react-native-svg';
 import { Dispatch } from 'redux';
 import { ReduxAppState } from '@state/types';
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
@@ -20,9 +20,9 @@ import { format } from 'date-fns';
 import { DateTimeHelper } from '@utils/time';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
-import { GroupWithTouchInteraction } from '@components/visualization/browse/GroupWithTouchInteraction';
 import { timeTickFormat } from '@components/visualization/compare/common';
 import commaNumber from 'comma-number';
+import { BandScaleChartTouchHandler } from '@components/visualization/browse/BandScaleChartTouchHandler';
 
 const xAxisHeight = 160
 const yAxisWidth = 60
@@ -122,7 +122,18 @@ class FilteredDatesChartMainPanel extends React.Component<Props, State> {
             const divider = scaleX.bandwidth() < Sizes.smallFontSize ? Math.ceil(this.props.data.data.length / 25) : 1
 
             return <SizeWatcher containerStyle={StyleTemplates.fillFlex} onSizeChange={this.onSizeChange}>
-                <Svg width={this.state.containerWidth} height={this.state.containerHeight}>
+                <BandScaleChartTouchHandler
+                    chartContainerWidth={this.state.containerWidth}
+                    chartContainerHeight={this.state.containerHeight}
+
+                    chartArea={chartArea} scaleX={scaleX} dataSource={this.props.source} getValueOfDate={(date: number) => {
+                        const datum = this.props.data.data.find(d => d.numberedDate === date)
+                        if (this.props.data.type === 'range') {
+                            return datum
+                        } else return datum.value
+                    }
+                    }
+                >
                     <G x={chartArea.x} y={chartArea.y + chartArea.height}>
                         <Line x1={0} x2={chartArea.width} y={0} stroke={Colors.textColorDark} strokeWidth={0.5} />
                         {
@@ -157,13 +168,7 @@ class FilteredDatesChartMainPanel extends React.Component<Props, State> {
 
                     <AxisSvg position={Padding.Left} scale={scaleY} ticks={ticks || scaleY.ticks()} tickFormat={tickFormat} tickMargin={0} chartArea={chartArea} />
 
-                    <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={this.props.source} getValueOfDate={(date: number) => {
-                        const datum = this.props.data.data.find(d => d.numberedDate === date)
-                        if(this.props.data.type === 'range'){
-                            return datum
-                        }else return datum.value
-                    }
-                }>
+                    <G {...chartArea}>
                         {
                             nonNullDataset.map(datum => {
                                 const sizeInfo = this.getXSize(datum.numberedDate, scaleX)
@@ -197,8 +202,8 @@ class FilteredDatesChartMainPanel extends React.Component<Props, State> {
                                 }
                             })
                         }
-                    </GroupWithTouchInteraction>
-                </Svg>
+                    </G>
+                </BandScaleChartTouchHandler>
             </SizeWatcher>
         } else return <></>
     }

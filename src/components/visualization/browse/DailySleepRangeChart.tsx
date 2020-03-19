@@ -1,5 +1,5 @@
 import React from 'react';
-import Svg, { Rect, Line } from 'react-native-svg';
+import Svg, { Rect, Line, G } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartProps, getChartElementColor } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
@@ -9,10 +9,10 @@ import { scaleLinear } from 'd3-scale';
 import * as d3Array from 'd3-array';
 import Colors from '@style/Colors';
 import { startOfDay, addSeconds, format } from 'date-fns';
-import { GroupWithTouchInteraction } from './GroupWithTouchInteraction';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
 import { DataServiceManager } from '@measure/DataServiceManager';
+import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
 
 interface Props extends ChartProps {
     data: Array<{ numberedDate: number, value: number, bedTimeDiffSeconds: number, wakeTimeDiffSeconds: number }>
@@ -64,15 +64,22 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
     const bedTimeAvg = d3Array.mean(prop.data, d => d.bedTimeDiffSeconds)!
     const wakeTimeAvg = d3Array.mean(prop.data, d => d.wakeTimeDiffSeconds)!
 
-    return <Svg width={prop.containerWidth} height={prop.containerHeight}>
-        <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
-        <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={tickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
-        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => {
+    return <BandScaleChartTouchHandler
+        chartContainerWidth={prop.containerWidth}
+        chartContainerHeight={prop.containerHeight}
+        chartArea={chartArea}
+        scaleX={scaleX}
+        dataSource={prop.dataSource}
+        getValueOfDate={(date) => {
             const datum = prop.data ? prop.data.find(d => d.numberedDate === date) : null;
             if (datum) {
                 return { value: datum.bedTimeDiffSeconds, value2: datum.wakeTimeDiffSeconds }
             } else return null
-        }} highlightedDays={prop.highlightFilter != null? prop.highlightedDays : undefined}>
+        }}
+        highlightedDays={prop.highlightFilter != null ? prop.highlightedDays : undefined}>
+        <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
+        <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={tickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
+        <G {...chartArea}>
             {
                 prop.data.map(d => {
                     const barHeight = scaleY(d.wakeTimeDiffSeconds) - scaleY(d.bedTimeDiffSeconds)
@@ -82,7 +89,7 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
                         x={scaleX(d.numberedDate)! + (scaleX.bandwidth() - barWidth) * 0.5}
                         y={scaleY(d.bedTimeDiffSeconds)}
                         rx={2}
-                        fill={getChartElementColor(shouldHighlightElements, prop.highlightedDays? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
+                        fill={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
                         opacity={0.62}
                     />
                 })
@@ -96,7 +103,7 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
             {
                 highlightReference != null ? <Line x1={0} x2={chartArea.width} y={scaleY(highlightReference)} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
             }
-        </GroupWithTouchInteraction>
-    </Svg>
+        </G>
+    </BandScaleChartTouchHandler>
 
 })

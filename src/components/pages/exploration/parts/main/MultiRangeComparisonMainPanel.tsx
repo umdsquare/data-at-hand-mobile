@@ -26,7 +26,7 @@ import { SingleValueElement } from '@components/visualization/compare/SingleValu
 import { RangeValueElement } from '@components/visualization/compare/RangeValueElement'
 import { ExplorationAction, createGoToBrowseRangeAction, InteractionType, setTouchElementInfo, shiftAllRanges } from '@state/exploration/interaction/actions'
 import { noop } from '@utils/utils'
-import { CategoricalTouchableSvg } from '@components/visualization/compare/CategoricalTouchableSvg'
+import { CategoricalTouchableSvg } from '@components/visualization/CategoricalTouchableSvg'
 import { HorizontalPullToActionContainer } from '@components/common/HorizontalPullToActionContainer'
 import { getScaleStepLeft } from '@components/visualization/d3-utils'
 

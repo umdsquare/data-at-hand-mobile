@@ -20,7 +20,6 @@ interface Props {
     isLoading?: boolean,
     measureUnitType?: MeasureUnitType,
     overviewScrollY?: any,
-    isTouchingChartElement?: boolean,
     highlightFilter?: HighlightFilter,
     getToday?: () => Date,
     dispatchAction?: (action: ExplorationAction) => void
@@ -93,14 +92,6 @@ class OverviewMainPanel extends React.PureComponent<Props> {
         this.currentListScrollOffset = scrollY
     }
 
-    private onScrollBegin = () => {
-        this.props.dispatchAction(memoUIStatus("overviewScrolling", true))
-    }
-
-    private onScrollEnd = () => {
-        this.props.dispatchAction(memoUIStatus("overviewScrolling", false))
-    }
-
     private renderItem = ({ item }) => <DataSourceChartFrame key={item.source.toString()}
         data={item}
         filter={this.props.highlightFilter}
@@ -129,9 +120,6 @@ class OverviewMainPanel extends React.PureComponent<Props> {
                     ItemSeparatorComponent={this.Separator}
                     renderItem={this.renderItem}
                     onScroll={this.onScroll}
-                    onScrollBeginDrag={this.onScrollBegin}
-                    onScrollEndDrag={this.onScrollEnd}
-                    scrollEnabled={this.props.isTouchingChartElement === false}
 
                 /></View>
         } else return <></>
@@ -147,7 +135,6 @@ function mapStateToProps(state: ReduxAppState, ownProps: Props): Props {
         data: state.explorationDataState.data,
         measureUnitType: state.settingsState.unit,
         overviewScrollY: state.explorationState.uiStatus.overviewScrollY,
-        isTouchingChartElement: state.explorationState.touchingElement != null,
         highlightFilter: state.explorationState.info.highlightFilter,
         getToday: DataServiceManager.instance.getServiceByKey(state.settingsState.serviceKey).getToday
     }

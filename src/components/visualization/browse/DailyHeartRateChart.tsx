@@ -1,5 +1,5 @@
 import React from 'react';
-import Svg, { Circle, Line, Path } from 'react-native-svg';
+import Svg, { Circle, Line, Path, G } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartProps, getChartElementColor } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
@@ -9,15 +9,15 @@ import { scaleLinear } from 'd3-scale';
 import * as d3Array from 'd3-array';
 import * as d3Shape from 'd3-shape';
 import Colors from '@style/Colors';
-import { GroupWithTouchInteraction } from './GroupWithTouchInteraction';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
 import { DataServiceManager } from '@measure/DataServiceManager';
+import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
 
 
 export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
 
-    const {shouldHighlightElements, highlightReference} = CommonBrowsingChartStyles.makeHighlightInformation(prop, prop.dataSource)
+    const { shouldHighlightElements, highlightReference } = CommonBrowsingChartStyles.makeHighlightInformation(prop, prop.dataSource)
 
     const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
@@ -48,11 +48,15 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
 
     const avg = d3Array.mean(prop.data, d => d.value)!
 
-    return <Svg width={prop.containerWidth} height={prop.containerHeight}>
+    return <BandScaleChartTouchHandler
+        chartContainerWidth={prop.containerWidth}
+        chartContainerHeight={prop.containerHeight}
+        chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource}
+        getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date)!.value}
+        highlightedDays={prop.highlightFilter != null ? prop.highlightedDays : undefined}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={scaleY.ticks(5)} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
-        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date)!.value} 
-        highlightedDays={prop.highlightFilter != null? prop.highlightedDays : undefined}>
+        <G {...chartArea}>
             {
                 <Path d={line(prop.data)!}
                     strokeWidth={2.5}
@@ -69,7 +73,7 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
                         r={Math.min(scaleX.bandwidth(), 8) / 2}
                         strokeWidth={2}
                         fill='white'
-                        stroke={getChartElementColor(shouldHighlightElements, prop.highlightedDays? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
+                        stroke={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
                         opacity={0.62}
                     />
                 })
@@ -80,7 +84,7 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
             {
                 highlightReference != null ? <Line x1={0} x2={chartArea.width} y={scaleY(highlightReference)} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
             }
-        </GroupWithTouchInteraction>
-    </Svg>
+        </G>
+    </BandScaleChartTouchHandler>
 
 })

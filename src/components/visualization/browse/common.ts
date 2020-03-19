@@ -29,6 +29,20 @@ export namespace CommonBrowsingChartStyles {
   export const yAxisTickSize = 10;
   export const maxBarSpacing = 0.7;
 
+  export const chartAreaPadding = {
+    left: yAxisWidth,
+    top: topPadding,
+    right: rightPadding,
+    bottom: xAxisHeight
+  }
+
+  export const chartAreaPaddingNegative = {
+    left: -chartAreaPadding.left,
+    top: -chartAreaPadding.top,
+    right: -chartAreaPadding.right,
+    bottom: -chartAreaPadding.bottom
+  }
+
   export function transformViewXToChartAreaLocalX(x: number): number {
     return x - yAxisWidth;
   }

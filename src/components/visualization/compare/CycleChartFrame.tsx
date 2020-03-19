@@ -4,7 +4,7 @@ import { G, Line, Text as SvgText } from "react-native-svg"
 import Colors from "@style/Colors"
 import { Sizes } from "@style/Sizes"
 import { ScaleBand, ScaleLinear } from "d3-scale"
-import { CategoricalTouchableSvg } from './CategoricalTouchableSvg';
+import { CategoricalTouchableSvg } from '@components/visualization/CategoricalTouchableSvg';
 
 export const CycleChartFrame = React.memo((props: {
     chartContainerWidth: number,

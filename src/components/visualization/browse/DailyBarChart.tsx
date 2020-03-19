@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import Svg, { Rect, Line, Text } from 'react-native-svg';
+import Svg, { Rect, Line, G } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartProps, getChartElementColor } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
@@ -8,10 +8,10 @@ import { DateBandAxis } from './DateBandAxis';
 import { scaleLinear } from 'd3-scale';
 import * as d3Array from 'd3-array';
 import Colors from '@style/Colors';
-import { GroupWithTouchInteraction } from './GroupWithTouchInteraction';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
 import { DataServiceManager } from '@measure/DataServiceManager';
+import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
 
 interface Props extends ChartProps {
     valueTickFormat?: (num: number) => string,
@@ -56,12 +56,17 @@ export const DailyBarChart = React.memo((prop: Props) => {
         ticks = scaleY.ticks(5)
     }
 
-    return <Svg width={prop.containerWidth} height={prop.containerHeight}>
+    return <BandScaleChartTouchHandler
+        chartContainerWidth={prop.containerWidth}
+        chartContainerHeight={prop.containerHeight}
+        chartArea={chartArea}
+        scaleX={scaleX}
+        dataSource={prop.dataSource}
+        getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date)!.value}
+        highlightedDays={prop.highlightFilter != null ? prop.highlightedDays : undefined}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={prop.valueTickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
-        <GroupWithTouchInteraction chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource} getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date)!.value}
-            highlightedDays={prop.highlightFilter != null? prop.highlightedDays : undefined}
-        >
+        <G {...chartArea}>
             {
                 prop.data.map(d => {
                     const barHeight = scaleY(0) - scaleY(d.value)
@@ -71,7 +76,7 @@ export const DailyBarChart = React.memo((prop: Props) => {
                         x={scaleX(d.numberedDate)! + (scaleX.bandwidth() - barWidth) * 0.5}
                         y={scaleY(d.value)}
 
-                        fill={getChartElementColor(shouldHighlightElements, prop.highlightedDays? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
+                        fill={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
                         opacity={0.62}
                     />
                 })
@@ -82,7 +87,6 @@ export const DailyBarChart = React.memo((prop: Props) => {
             {
                 highlightReference != null ? <Line x1={0} x2={chartArea.width} y={scaleY(highlightReference)} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
             }
-        </GroupWithTouchInteraction>
-    </Svg>
-
+        </G>
+    </BandScaleChartTouchHandler>
 })
