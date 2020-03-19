@@ -1,5 +1,6 @@
 import { NumericConditionType } from "../../exploration/types"
 import { randomString } from "@utils/utils"
+import { DataSourceType } from "@measure/DataSourceSpec"
 
 export const MONTH_NAMES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
 
@@ -44,6 +45,7 @@ export interface VerbInfo {
 
 export interface ConditionInfo {
     type: NumericConditionType,
+    impliedDataSource?: DataSourceType,
     propertyKey?: "waketime" | "bedtime" | undefined | null
     unit?: string
     ref?: number

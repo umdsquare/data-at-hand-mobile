@@ -165,21 +165,16 @@ export class NLUCommandResolver {
             case Intent.Highlight:
                 console.log("Highlight intent")
                 const conditionInfo = conditions[0].value as ConditionInfo
-                let cascadedDataSource: DataSourceType = toldDataSources ? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
+                const cascadedDataSource: DataSourceType = toldDataSources ? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
 
-                if (!cascadedDataSource) {
-                    console.log("Failed to initialize the highlight intent.")
-                    //TODO infer data source implied by the adverb or adjective, such as "heavier".
-                }
+                console.log("implied data source:", conditionInfo.impliedDataSource, "cascaded data source:", cascadedDataSource)
+                
+                const dataSource: DataSourceType = conditionInfo.impliedDataSource || cascadedDataSource
 
-                if (conditionInfo.propertyKey == "waketime" || conditionInfo.propertyKey == 'bedtime') {
-                    cascadedDataSource = DataSourceType.SleepRange
-                }
-
-                if (cascadedDataSource) {
+                if (dataSource) {
                     const highlightFilter: HighlightFilter = {
                         ...conditionInfo,
-                        dataSource: cascadedDataSource
+                        dataSource
                     }
                     console.log("set highlight filter")
                     return setHighlightFilter(InteractionType.Speech, highlightFilter)

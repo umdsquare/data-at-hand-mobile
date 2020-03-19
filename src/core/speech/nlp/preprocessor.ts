@@ -7,6 +7,7 @@ import { inferVerbType } from "./preprocessors/preprocessor-verb";
 import { categorizeExtreme, findComparisonTermInfo } from "./preprocessors/preprocessor-condition";
 import { tryPreprocessingByTemplates, DATASOURCE_VARIABLE_RULES, CYCLIC_TIME_RULES } from "./preprocessors/preprocessor-templates";
 import { parseTimeOfTheDayTextToDiffSeconds } from "./preprocessors/preprocessor-time-clock";
+import { DataSourceType } from "@measure/DataSourceSpec";
 
 const PARSED_TAG = "ReplacedId"
 
@@ -287,10 +288,11 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
 }
 
 function isBedtimeReferred(speech: string): boolean {
-    return /(bed)|(asleep)|(start)/gi.test(speech)
+    return /(slept)|(bed)|(asleep)|(start)/gi.test(speech)
 }
 
 function isWaketimeReferred(speech: string): boolean {
+    console.log("test wake time on ", speech, " - ", /(wake)|(woke)|(g(o|e)t(ting)?\s+up)/gi.test(speech))
     return /(wake)|(woke)|(g(o|e)t(ting)?\s+up)/gi.test(speech)
 }
 
@@ -310,8 +312,9 @@ function inferHighlight(nlp: compromise.Document, original: string): { condition
                 return {
                     conditionInfo: {
                         type: comparisonTermInfo.conditionType,
+                        impliedDataSource: DataSourceType.HoursSlept,
                         ref: parseDurationTextToSeconds(durationComparisonInfo.duration),
-                    },
+                    } as ConditionInfo,
                     match: durationComparisonMatch
                 }
             } else if (comparisonTermInfo.valueType.indexOf("time") !== -1) {
@@ -322,9 +325,10 @@ function inferHighlight(nlp: compromise.Document, original: string): { condition
                     return {
                         conditionInfo: {
                             type: comparisonTermInfo.conditionType,
+                            impliedDataSource: DataSourceType.SleepRange,
                             propertyKey: isBedtimePassed === true ? 'bedtime' : (isWakeTimePassed === true ? 'waketime' : undefined),
                             ref: parseTimeOfTheDayTextToDiffSeconds(durationComparisonInfo.duration, isBedtimePassed === true ? 'night' : (isWakeTimePassed === true ? 'day' : undefined)),
-                        },
+                        } as ConditionInfo,
                         match: durationComparisonMatch
                     }
                 }
@@ -350,6 +354,7 @@ function inferHighlight(nlp: compromise.Document, original: string): { condition
                             return {
                                 conditionInfo: {
                                     type: comparisonTermInfo.conditionType,
+                                    impliedDataSource: DataSourceType.HoursSlept,
                                     ref: parseDurationTextToSeconds(numericComparisonInfo.number)
                                 } as ConditionInfo,
                                 match: numericComparisonMatch
@@ -363,6 +368,7 @@ function inferHighlight(nlp: compromise.Document, original: string): { condition
                                     return {
                                         conditionInfo: {
                                             type: comparisonTermInfo.conditionType,
+                                            impliedDataSource: DataSourceType.SleepRange,
                                             propertyKey: isBedtimePassed === true ? 'bedtime' : (isWakeTimePassed === true ? 'waketime' : undefined),
                                             ref: parseTimeOfTheDayTextToDiffSeconds(numericComparisonInfo.number, isBedtimePassed === true ? 'night' : (isWakeTimePassed === true ? 'day' : undefined)),
                                         },
@@ -376,17 +382,19 @@ function inferHighlight(nlp: compromise.Document, original: string): { condition
                             return {
                                 conditionInfo: {
                                     type: comparisonTermInfo.conditionType,
+                                    impliedDataSource: comparisonTermInfo.impliedSource,
                                     ref: parseDecimalNumber(numericComparisonInfo.number),
                                     unit: numericComparisonInfo.unit
                                 } as ConditionInfo,
                                 match: numericComparisonMatch
-                            } 
+                            }
                     }
                 }
 
                 return {
                     conditionInfo: {
                         type: comparisonTermInfo.conditionType,
+                        impliedDataSource: comparisonTermInfo.impliedSource,
                         ref: parseDecimalNumber(numericComparisonInfo.number),
                         unit: numericComparisonInfo.unit
                     } as ConditionInfo,
@@ -433,5 +441,5 @@ export async function test() {
     */
     //await preprocess("step count by day of the week", { getToday: () => new Date() })
     //await preprocess("2019", { getToday: () => new Date() })
-    
+
 }
