@@ -433,8 +433,5 @@ export async function test() {
     */
     //await preprocess("step count by day of the week", { getToday: () => new Date() })
     //await preprocess("2019", { getToday: () => new Date() })
-    console.log(await preprocess("days I woke up earlier than 11 five", { getToday: () => new Date() }))
-
-    console.log(await preprocess("days I walked more than 10000", { getToday: () => new Date() }))
     
 }

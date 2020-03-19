@@ -219,7 +219,6 @@ export function parseTimeOfTheDayTextToDiffSeconds(text: string, preferred: "day
         result = result % SECONDS_DAY
         if(preferred === 'night'){
             if(result >= BEDTIME_SHIFT_HOUR_OF_DAY * SECONDS_HOUR){
-                //If the result is after 7 pm, send it to the day before (negative)
                 return result - SECONDS_DAY
             }
         }
