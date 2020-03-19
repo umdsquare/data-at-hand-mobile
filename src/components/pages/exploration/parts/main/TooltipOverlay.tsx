@@ -113,9 +113,9 @@ interface Props {
     touchingInfo?: TouchingElementInfo,
     measureUnitType?: MeasureUnitType,
     explorationType?: ExplorationType,
-    getToday?: ()=>Date,
+    getToday?: () => Date,
     dispatchStartSpeechSession?: (sessionId: string, context: SpeechContext) => void,
-    dispatchStopDictation?: (sessionId: string) => void,
+    dispatchStopDictation?: (sessionId: string, updateContext?: SpeechContext) => void,
 }
 
 interface State {
@@ -131,7 +131,7 @@ interface State {
 
 class TooltipOverlay extends React.PureComponent<Props, State>{
 
-    private speechInputPanelRef = null
+    private _recentSpeechContext: SpeechContext | undefined = undefined
 
     constructor(props) {
         super(props)
@@ -214,8 +214,58 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
         return { x: tooltipPositionX, y: tooltipPositionY }
     }
 
+    makeSpeechContextFromTouchingInfo(touchingInfo: TouchingElementInfo): SpeechContext {
+        let context: SpeechContext
+        switch (touchingInfo.valueType) {
+            case TouchingElementValueType.CycleDimension:
+                {
+                    context = SpeechContextHelper.makeCycleDimentionElementSpeechContext(
+                        explorationInfoHelper.getParameterValueOfParams<CycleDimension>(
+                            touchingInfo.params,
+                            ParameterType.CycleDimension),
+                        explorationInfoHelper.getParameterValueOfParams<DataSourceType>(
+                            touchingInfo.params,
+                            ParameterType.DataSource)
+                    )
+                }
+                break;
+            case TouchingElementValueType.DayValue:
+                {
+                    context = SpeechContextHelper.makeDateElementSpeechContext(
+                        this.props.explorationType,
+                        explorationInfoHelper.getParameterValueOfParams<number>(
+                            touchingInfo.params,
+                            ParameterType.Date
+                        ),
+                        explorationInfoHelper.getParameterValueOfParams<DataSourceType>(
+                            this.props.touchingInfo.params,
+                            ParameterType.DataSource
+                        ),
+                    )
+                }
+                break;
+            case TouchingElementValueType.RangeAggregated:
+                {
+                    context = SpeechContextHelper.makeRangeElementSpeechContext(
+                        this.props.explorationType,
+                        explorationInfoHelper.getParameterValueOfParams<[number, number]>(
+                            touchingInfo.params,
+                            ParameterType.Range
+                        ),
+                        explorationInfoHelper.getParameterValueOfParams<DataSourceType>(
+                            touchingInfo.params,
+                            ParameterType.DataSource
+                        ),
+                    )
+                }
+                break;
+        }
+        return context
+    }
+
     componentDidUpdate(prevProps: Props) {
         if (prevProps.touchingInfo !== this.props.touchingInfo) {
+
             if (prevProps.touchingInfo == null) {
                 const tooltipPosition = this.calculateOptimalTooltipPosition(this.props.touchingInfo.elementBoundInScreen, this.state.tooltipWidth, this.state.tooltipHeight)
 
@@ -241,53 +291,9 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
                     useNativeDriver: true
                 }).start()
 
-                let context: SpeechContext
-                switch (this.props.touchingInfo.valueType) {
-                    case TouchingElementValueType.CycleDimension:
-                        {
-                            context = SpeechContextHelper.makeCycleDimentionElementSpeechContext(
-                                explorationInfoHelper.getParameterValueOfParams<CycleDimension>(
-                                    this.props.touchingInfo.params,
-                                    ParameterType.CycleDimension),
-                                explorationInfoHelper.getParameterValueOfParams<DataSourceType>(
-                                    this.props.touchingInfo.params,
-                                    ParameterType.DataSource)
-                            )
-                        }
-                        break;
-                    case TouchingElementValueType.DayValue:
-                        {
-                            context = SpeechContextHelper.makeDateElementSpeechContext(
-                                this.props.explorationType,
-                                explorationInfoHelper.getParameterValueOfParams<number>(
-                                    this.props.touchingInfo.params,
-                                    ParameterType.Date
-                                ),
-                                explorationInfoHelper.getParameterValueOfParams<DataSourceType>(
-                                    this.props.touchingInfo.params,
-                                    ParameterType.DataSource
-                                ),
-                            )
-                        }
-                        break;
-                    case TouchingElementValueType.RangeAggregated:
-                        {
-                            context = SpeechContextHelper.makeRangeElementSpeechContext(
-                                this.props.explorationType,
-                                explorationInfoHelper.getParameterValueOfParams<[number, number]>(
-                                    this.props.touchingInfo.params,
-                                    ParameterType.Range
-                                ),
-                                explorationInfoHelper.getParameterValueOfParams<DataSourceType>(
-                                    this.props.touchingInfo.params,
-                                    ParameterType.DataSource
-                                ),
-                            )
-                        }
-                        break;
-                }
+                this._recentSpeechContext = this.makeSpeechContextFromTouchingInfo(this.props.touchingInfo)
 
-                this.props.dispatchStartSpeechSession(speechSessionId, context)
+                this.props.dispatchStartSpeechSession(speechSessionId, this._recentSpeechContext)
 
                 Haptic.trigger("impactHeavy", {
                     enableVibrateFallback: true,
@@ -306,10 +312,11 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
                         touchingInfo: null
                     })
                 })
-                if (this.state.speechSessionId) {
-                    this.props.dispatchStopDictation(this.state.speechSessionId)
+                if (this.state.speechSessionId && this._recentSpeechContext != null) {
+                    this.props.dispatchStopDictation(this.state.speechSessionId, this._recentSpeechContext)
                 }
 
+                this._recentSpeechContext = undefined
             } else {
 
                 const tooltipPosition = this.calculateOptimalTooltipPosition(this.props.touchingInfo.elementBoundInScreen, this.state.tooltipWidth, this.state.tooltipHeight)
@@ -326,6 +333,7 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
                     useNativeDriver: true
                 }).start()
 
+                this._recentSpeechContext = this.makeSpeechContextFromTouchingInfo(this.props.touchingInfo)
             }
         }
     }
@@ -539,7 +547,7 @@ function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Prop
     return {
         ...ownProps,
         dispatchStartSpeechSession: (sessionId, context) => dispatch(startSpeechSession(sessionId, context)),
-        dispatchStopDictation: (sessionId) => dispatch(requestStopDictation(sessionId))
+        dispatchStopDictation: (sessionId, context?) => dispatch(requestStopDictation(sessionId, context))
     }
 }
 
