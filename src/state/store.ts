@@ -10,6 +10,7 @@ import { SystemLogger } from '@core/logging/SystemLogger';
 import { resetAction } from './exploration/interaction/actions';
 import { DataServiceManager } from '@measure/DataServiceManager';
 import { makeLogger } from './logger';
+import { setRecordLogs } from './settings/actions';
 
 const persistConfig = {
   key: 'root',
@@ -29,7 +30,6 @@ export default () => {
     applyMiddleware(thunk, makeLogger())
   );
 
-
   let currentSettingsState: SettingsState | undefined = undefined
   store.subscribe(() => {
     const prevSettingsState = currentSettingsState
@@ -43,7 +43,14 @@ export default () => {
   })
 
   const persistor = persistStore(store, null, () => {
-    const currentState = store.getState()
+    let currentState = store.getState()
+
+    if(currentState.settingsState.recordLogs === true && currentState.settingsState.loggingSessionId == null){
+      //initialize new logging session
+      store.dispatch(setRecordLogs(true,  SystemLogger.instance.makeLogId(Date.now())))
+    }
+
+    currentState = store.getState()
 
     if(currentState.settingsState.serviceKey != null && currentState.explorationState.info == null){
       store.dispatch(resetAction(DataServiceManager.instance.getServiceByKey(currentSettingsState.serviceKey).getToday()))

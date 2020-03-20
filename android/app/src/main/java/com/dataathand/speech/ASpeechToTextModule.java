@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.pm.PackageManager;
 import android.os.Build;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
@@ -24,14 +23,14 @@ import java.util.Objects;
 
 public abstract class ASpeechToTextModule extends ReactContextBaseJavaModule implements PermissionListener {
 
-    static String joinTexts(@Nullable String left, @Nullable String right){
-        if(left == null && right == null){
+    static String joinTexts(@Nullable String left, @Nullable String right) {
+        if (left == null && right == null) {
             return null;
-        }else if (left != null && right == null){
+        } else if (left != null && right == null) {
             return left;
-        }else if(left == null && right != null){
+        } else if (left == null && right != null) {
             return right;
-        }else{
+        } else {
             return (left + " " + right).trim().replaceAll("\\s+", " ");
         }
     }
@@ -66,27 +65,28 @@ public abstract class ASpeechToTextModule extends ReactContextBaseJavaModule imp
     public abstract void uninstall(Promise promise);
 
     @SuppressWarnings("WeakerAccess")
-    protected void postInstall(){}
+    protected void postInstall() {
+    }
 
-    protected void emitStartEvent(){
+    protected void emitStartEvent() {
         getDeviceEmitter().emit(EVENT_STARTED, null);
     }
 
-    protected void emitStopEvent(@Nullable Object error){
-        if(error != null){
+    protected void emitStopEvent(@Nullable Object error) {
+        if (error != null) {
             final WritableMap params = Arguments.createMap();
-            if(error instanceof Integer){
-                params.putInt("error", (int)error);
-            }else{
+            if (error instanceof Integer) {
+                params.putInt("error", (int) error);
+            } else {
                 params.putString("error", error.toString());
             }
             getDeviceEmitter().emit(EVENT_STOPPED, params);
-        }else{
+        } else {
             getDeviceEmitter().emit(EVENT_STOPPED, null);
         }
     }
 
-    protected void emitReceivedEvent(String text){
+    protected void emitReceivedEvent(String text) {
         WritableMap resultParams = Arguments.createMap();
         resultParams.putString("text", text);
         getDeviceEmitter().emit(EVENT_RECEIVED, resultParams);
@@ -96,7 +96,7 @@ public abstract class ASpeechToTextModule extends ReactContextBaseJavaModule imp
     public void install(@Nullable final ReadableMap args, final Promise promise) {
         boolean isPermissionGranted = false;
 
-        try{
+        try {
             installWithArguments(args);
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
@@ -112,7 +112,7 @@ public abstract class ASpeechToTextModule extends ReactContextBaseJavaModule imp
                 this.installRequest = promise;
                 getPermissionAwareActivity().requestPermissions(new String[]{Manifest.permission.RECORD_AUDIO}, DEFAULT_PERMISSION_REQUEST, this);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             promise.reject(e);
         }
     }

@@ -9,7 +9,7 @@ import { SpeechContext } from "../../core/speech/nlp/context";
 import { NLUCommandResolver } from "../../core/speech/nlp/nlu";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { SpeechEventQueue } from "../../core/speech/SpeechEventQueue";
-import { SystemLogger } from "@core/logging/SystemLogger";
+import { SystemLogger, VerboseEventTypes } from "@core/logging/SystemLogger";
 
 const sessionMutex = new Mutex()
 
@@ -121,7 +121,7 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
                                     })
                                 })
                             } else {
-                                SystemLogger.instance.logVerboseToInteractionStateTransition("SpeechFail", {speech: dictationResult.text}).then()
+                                SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.SpeechFail, {speech: dictationResult.text})
 
                                 requestAnimationFrame(() => {
                                     SpeechEventQueue.instance.push({

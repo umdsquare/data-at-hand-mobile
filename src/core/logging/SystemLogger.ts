@@ -15,6 +15,15 @@ enum InteractionTransitionLogType {
     VerboseEvent = "event"
 }
 
+export enum VerboseEventTypes {
+    Reset = "Reset",
+    LoggingTurnedOn = "LoggingTurnedOn",
+    LoggingTurnedOff = "LoggingTurnedOff",
+    SpeechFail = "SpeechFail",
+    FatalError = "ErrorFatal",
+    NonFatalError = "ErrorNonFatal"
+}
+
 export class SystemLogger {
     private static _instance: SystemLogger | undefined = undefined
 
@@ -36,7 +45,8 @@ export class SystemLogger {
         console.log("set logging session id: ", id)
         this._sessionId = id;
         if (id) {
-            this.currentLogger = new DirectoryLogger("logs/" + id)
+            if (this.currentLogger && this.currentLogger.directoryPath === "logs/" + id) {
+            } else this.currentLogger = new DirectoryLogger("logs/" + id)
         } else {
             this.currentLogger = null
         }
@@ -70,14 +80,14 @@ export class SystemLogger {
         } else return;
     }
 
-    makeLogId(timestamp: number): string{
+    makeLogId(timestamp: number): string {
         return "log_" + timestamp + "_" + randomString(10)
     }
 
-    async logVerboseToInteractionStateTransition(event: string, content: Object, logId?: string, timestamp?: number): Promise<void> {
+    logVerboseToInteractionStateTransition(event: string, content: Object, logId?: string, timestamp?: number): void {
         if (this.currentLogger && this.enabled === true) {
 
-            if(timestamp == null){
+            if (timestamp == null) {
                 timestamp = Date.now()
             }
 
@@ -85,7 +95,7 @@ export class SystemLogger {
                 logId = this.makeLogId(timestamp);
             }
 
-            await this.currentLogger.appendJsonLine(LogFileName.InteractionTransitionLogs,
+            this.currentLogger.appendJsonLine(LogFileName.InteractionTransitionLogs,
                 {
                     type: InteractionTransitionLogType.VerboseEvent,
                     id: logId,
@@ -95,10 +105,10 @@ export class SystemLogger {
         } else return
     }
 
-    async logInteractionStateTransition(serviceKey: string, action: ActionTypeBase, nextInfo: ExplorationInfo, logId?: string, timestamp?: number): Promise<void> {
+    logInteractionStateTransition(serviceKey: string, action: ActionTypeBase, nextInfo: ExplorationInfo, logId?: string, timestamp?: number): void {
         if (this.currentLogger && this.enabled === true) {
-            
-            if(timestamp == null){
+
+            if (timestamp == null) {
                 timestamp = Date.now()
             }
 
@@ -106,7 +116,7 @@ export class SystemLogger {
                 logId = this.makeLogId(timestamp);
             }
 
-            await this.currentLogger.appendJsonLine(LogFileName.InteractionTransitionLogs,
+            this.currentLogger.appendJsonLine(LogFileName.InteractionTransitionLogs,
                 {
                     type: InteractionTransitionLogType.Transition,
                     id: logId,

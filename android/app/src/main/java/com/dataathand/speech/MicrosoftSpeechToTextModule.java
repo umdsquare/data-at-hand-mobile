@@ -31,6 +31,7 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
     static final String TAG = "MicrosoftSpeech";
 
     private static ExecutorService s_executorService;
+
     static {
         s_executorService = Executors.newCachedThreadPool();
     }
@@ -71,7 +72,7 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
     }
 
     @ReactMethod
-    public void uninstall(Promise promise){
+    public void uninstall(Promise promise) {
 
     }
 
@@ -98,7 +99,7 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
             config.setSpeechRecognitionLanguage("en-US");
 
             this.config = config;
-        }catch( NullPointerException ex){
+        } catch (NullPointerException ex) {
             throw new Exception("CredentialInvalid");
         }
 
@@ -115,7 +116,7 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
     @ReactMethod
     public void start(Promise promise) {
         Log.d(TAG, "Start speech recognition.");
-        if(this.currentRecognizer!=null){
+        if (this.currentRecognizer != null) {
             this.currentRecognizer.close();
             this.currentRecognizer = null;
         }
@@ -126,17 +127,17 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
         final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
         final SpeechRecognizer recognizer = new SpeechRecognizer(this.config, audioInput);
 
-        recognizer.sessionStarted.addEventListener((o, eventArgs)->{
+        recognizer.sessionStarted.addEventListener((o, eventArgs) -> {
             Log.d(TAG, "Session started");
             emitStartEvent();
         });
 
-        recognizer.sessionStopped.addEventListener((o, eventArgs)->{
+        recognizer.sessionStopped.addEventListener((o, eventArgs) -> {
             Log.d(TAG, "Session stopped");
             emitStopEvent(null);
         });
 
-        recognizer.recognizing.addEventListener((o, eventArgs)->{
+        recognizer.recognizing.addEventListener((o, eventArgs) -> {
             Log.d(TAG, "Partial result received");
             final String s = eventArgs.getResult().getText();
             final String stitchedResult = joinTexts(accumulatedTextToPrevCycle, s);
@@ -144,7 +145,7 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
             emitReceivedEvent(stitchedResult);
         });
 
-        recognizer.recognized.addEventListener((o, eventArgs)->{
+        recognizer.recognized.addEventListener((o, eventArgs) -> {
             final String s = eventArgs.getResult().getText();
             accumulatedTextToPrevCycle = joinTexts(accumulatedTextToPrevCycle, currentCycleRecognizedText);
         });
@@ -173,8 +174,8 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
     @ReactMethod
     public void stop(Promise promise) {
         Log.d(TAG, "Request stop recognition.");
-        if(this.currentRecognizer != null){
-            try{
+        if (this.currentRecognizer != null) {
+            try {
                 this.currentRecognizer.stopContinuousRecognitionAsync().get();
                 this.currentRecognizer.close();
                 this.currentRecognizer = null;
@@ -182,16 +183,16 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
                 this.currentCycleRecognizedText = null;
                 this.accumulatedTextToPrevCycle = null;
 
-                if(this.microphoneStream!=null) {
+                if (this.microphoneStream != null) {
                     this.microphoneStream.close();
                     this.microphoneStream = null;
                 }
 
                 promise.resolve(true);
-            }catch(Exception e){
+            } catch (Exception e) {
                 promise.reject(e);
             }
-        }else{
+        } else {
             promise.resolve(true);
         }
         emitStopEvent(null);
@@ -199,11 +200,11 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
 
 
     //Handlers ==========
-    private void onSessionStarted(){
+    private void onSessionStarted() {
 
     }
 
-    private void onStopped(){
+    private void onStopped() {
 
     }
 }
@@ -219,7 +220,7 @@ class MicrophoneStream extends PullAudioInputStreamCallback {
     private AudioRecord recorder;
 
     public MicrophoneStream() {
-        this.format = AudioStreamFormat.getWaveFormatPCM(SAMPLE_RATE, (short)16, (short)1);
+        this.format = AudioStreamFormat.getWaveFormatPCM(SAMPLE_RATE, (short) 16, (short) 1);
         this.initMic();
     }
 
@@ -230,7 +231,7 @@ class MicrophoneStream extends PullAudioInputStreamCallback {
     @Override
     public int read(byte[] bytes) {
         long ret = this.recorder.read(bytes, 0, bytes.length);
-        return (int)ret;
+        return (int) ret;
     }
 
     @Override
@@ -241,7 +242,7 @@ class MicrophoneStream extends PullAudioInputStreamCallback {
 
     private void initMic() {
         // Note: currently, the Speech SDK support 16 kHz sample rate, 16 bit samples, mono (single-channel) only.
-        if(Build.VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT >= 23) {
             AudioFormat af = new AudioFormat.Builder()
                     .setSampleRate(SAMPLE_RATE)
                     .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
@@ -252,7 +253,7 @@ class MicrophoneStream extends PullAudioInputStreamCallback {
                     .setAudioSource(MediaRecorder.AudioSource.VOICE_RECOGNITION)
                     .setAudioFormat(af)
                     .build();
-        }else{
+        } else {
             this.recorder = new AudioRecord(
                     MediaRecorder.AudioSource.VOICE_RECOGNITION,
                     SAMPLE_RATE,

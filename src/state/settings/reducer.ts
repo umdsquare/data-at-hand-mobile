@@ -8,6 +8,7 @@ import {
 import { MeasureUnitType } from '@measure/DataSourceSpec';
 import { ActionTypeBase } from '@state/types';
 import { randomString } from '@utils/utils';
+import { SystemLogger } from '@core/logging/SystemLogger';
 
 export interface SettingsState {
   serviceKey: string,
@@ -24,7 +25,7 @@ const INITIAL_STATE = {
   unit: MeasureUnitType.Metric,
   recordLogs: true,
   recordScreens: false,
-  loggingSessionId: undefined
+  loggingSessionId: undefined,
 } as SettingsState;
 
 export const settingsStateReducer = (

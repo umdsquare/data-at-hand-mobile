@@ -1,7 +1,7 @@
 import { MiddlewareAPI, Dispatch } from "redux"
 import { ActionTypeBase, ReduxAppState } from "@state/types"
 import { USER_INTERACTION_ACTION_PREFIX, ExplorationActionType } from "@state/exploration/interaction/actions"
-import { SystemLogger } from "@core/logging/SystemLogger"
+import { SystemLogger, VerboseEventTypes } from "@core/logging/SystemLogger"
 import { captureScreen } from "react-native-view-shot";
 import { moveFile, exists, mkdir } from "react-native-fs";
 import path from 'react-native-path'
@@ -29,13 +29,13 @@ export const makeLogger = () => {
 
             if (action.type === ExplorationActionType.Reset) {
                 SystemLogger.instance
-                    .logVerboseToInteractionStateTransition("Reset", {
+                    .logVerboseToInteractionStateTransition(VerboseEventTypes.Reset, {
                         info: nextExplorationState.info,
                         service: nextState.settingsState.serviceKey
-                    }, logId, timestamp).then()
+                    }, logId, timestamp)
             } else {
                 SystemLogger.instance
-                    .logInteractionStateTransition(prevState.settingsState.serviceKey, action, action.type === ExplorationActionType.SetTouchElementInfo ? undefined : nextExplorationState.info, logId, timestamp).then()
+                    .logInteractionStateTransition(prevState.settingsState.serviceKey, action, action.type === ExplorationActionType.SetTouchElementInfo ? undefined : nextExplorationState.info, logId, timestamp)
             }
 
             if (prevState.settingsState.recordLogs === true && prevState.settingsState.recordScreens === true && whitelistForScreenshot.indexOf(action.type as any) === -1) {
@@ -55,19 +55,19 @@ export const makeLogger = () => {
                     const returnedValue = next(action)
 
                     SystemLogger.instance
-                        .logVerboseToInteractionStateTransition("LoggingTurnedOn", {
+                        .logVerboseToInteractionStateTransition(VerboseEventTypes.LoggingTurnedOn, {
                             info: prevState.explorationState.info,
                             service: prevState.settingsState.serviceKey
-                        }, logId, timestamp).then()
+                        }, logId, timestamp)
 
                     return returnedValue
                 } else {
                     //turn off
                     SystemLogger.instance
-                        .logVerboseToInteractionStateTransition("LoggingTurnedOff", {
+                        .logVerboseToInteractionStateTransition(VerboseEventTypes.LoggingTurnedOff, {
                             info: prevState.explorationState.info,
                             service: prevState.settingsState.serviceKey
-                        }, logId, timestamp).then()
+                        }, logId, timestamp)
 
                     return next(action)
                 }

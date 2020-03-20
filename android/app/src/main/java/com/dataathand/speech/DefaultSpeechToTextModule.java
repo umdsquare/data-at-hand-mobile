@@ -15,16 +15,12 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.WritableMap;
 
 import java.util.List;
-
-;
 
 public class DefaultSpeechToTextModule extends ASpeechToTextModule implements RecognitionListener {
 
@@ -81,28 +77,28 @@ public class DefaultSpeechToTextModule extends ASpeechToTextModule implements Re
     public void start(Promise promise) {
         this.isRunning = true;
         Activity activity = getCurrentActivity();
-        if(activity != null) {
+        if (activity != null) {
             getCurrentActivity().runOnUiThread(() -> {
-                    hasResultReceived = false;
-                    pendingError = null;
+                hasResultReceived = false;
+                pendingError = null;
 
-                    AudioManager audioManager = (AudioManager)getReactApplicationContext().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+                AudioManager audioManager = (AudioManager) getReactApplicationContext().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
 
-                    if(Build.VERSION.SDK_INT >= 23) {
-                        audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
-                        audioManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_MUTE, 0);
-                    }else{
-                        audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
-                        audioManager.setStreamMute(AudioManager.STREAM_SYSTEM, true);
-                    }
+                if (Build.VERSION.SDK_INT >= 23) {
+                    audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_MUTE, 0);
+                    audioManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_MUTE, 0);
+                } else {
+                    audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
+                    audioManager.setStreamMute(AudioManager.STREAM_SYSTEM, true);
+                }
 
 
-                    startOver(false);
+                startOver(false);
 
-                    Log.d("Speech", "Start requested.");
-                    promise.resolve(true);
+                Log.d("Speech", "Start requested.");
+                promise.resolve(true);
             });
-        }else{
+        } else {
             promise.resolve(false);
         }
     }
@@ -114,18 +110,18 @@ public class DefaultSpeechToTextModule extends ASpeechToTextModule implements Re
     }
 
     @ReactMethod
-    public void uninstall(Promise promise){
+    public void uninstall(Promise promise) {
         promise.resolve(true);
     }
 
-    private void startOver(Boolean isStartOver){
+    private void startOver(Boolean isStartOver) {
         this.isStartOver = isStartOver;
-        if(isStartOver){
+        if (isStartOver) {
             startOverCycle++;
             accumulatedTextToPrevCycle = joinTexts(accumulatedTextToPrevCycle, currentCycleRecognizedText);
         }
 
-        if(recognizer!=null){
+        if (recognizer != null) {
             recognizer.destroy();
         }
         pendingError = null;
@@ -172,9 +168,9 @@ public class DefaultSpeechToTextModule extends ASpeechToTextModule implements Re
                                 emitStopEvent(pendingError);
                             }
                         }
-                    } else if(hasResultReceived) {
+                    } else if (hasResultReceived) {
                         emitStopEvent(null);
-                    }else {
+                    } else {
                         emitStopEvent("Retry");
                     }
 
@@ -191,23 +187,23 @@ public class DefaultSpeechToTextModule extends ASpeechToTextModule implements Re
             } finally {
                 final Handler handler = new Handler();
                 handler.postDelayed(() -> {
-                        if(!isRunning) {
-                            AudioManager audioManager = (AudioManager) getReactApplicationContext().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-                            if(Build.VERSION.SDK_INT >= 23) {
-                                audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_UNMUTE, 0);
-                                audioManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_UNMUTE, 0);
-                            }else{
-                                audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
-                                audioManager.setStreamMute(AudioManager.STREAM_SYSTEM, false);
-                            }
+                    if (!isRunning) {
+                        AudioManager audioManager = (AudioManager) getReactApplicationContext().getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+                        if (Build.VERSION.SDK_INT >= 23) {
+                            audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_UNMUTE, 0);
+                            audioManager.adjustStreamVolume(AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_UNMUTE, 0);
+                        } else {
+                            audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
+                            audioManager.setStreamMute(AudioManager.STREAM_SYSTEM, false);
                         }
+                    }
                 }, 1000);
             }
 
         });
     }
 
-    private void emitResults(Bundle results){
+    private void emitResults(Bundle results) {
         hasResultReceived = true;
 
         List<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
@@ -216,10 +212,10 @@ public class DefaultSpeechToTextModule extends ASpeechToTextModule implements Re
         float[] confidence = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
 
         String recognizedText;
-        if(accumulatedTextToPrevCycle != null){
+        if (accumulatedTextToPrevCycle != null) {
             //append the prior result.
             recognizedText = joinTexts(accumulatedTextToPrevCycle, matches.get(0));
-        }else{
+        } else {
             recognizedText = matches.get(0);
         }
 
@@ -238,7 +234,7 @@ public class DefaultSpeechToTextModule extends ASpeechToTextModule implements Re
     @Override
     public void onReadyForSpeech(Bundle params) {
         Log.d("Speech", "Ready of Speech");
-        if(!isStartOver) {
+        if (!isStartOver) {
             emitStartEvent();
         }
     }

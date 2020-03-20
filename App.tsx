@@ -21,6 +21,8 @@ import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { theme } from '@style/Theme';
+import { setJSExceptionHandler, setNativeExceptionHandler } from 'react-native-exception-handler';
+import { SystemLogger, VerboseEventTypes } from '@core/logging/SystemLogger';
 
 if (
   Platform.OS === 'android' &&
@@ -29,21 +31,21 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
+setJSExceptionHandler((error, isFatal) => {
+  SystemLogger.instance.logVerboseToInteractionStateTransition(isFatal === true ? VerboseEventTypes.FatalError : VerboseEventTypes.NonFatalError, {
+    name: error.name,
+    message: error.message,
+    stack: error.stack
+  })
+}, true)
+
+setNativeExceptionHandler((exceptionMessage)=>{
+
+})
+
 const { store, persistor } = CreateStore()
 
-interface State {
-  isLoading: boolean
-}
-
-class App extends React.Component<any, State> {
-
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      isLoading: true
-    }
-  }
+class App extends React.Component {
 
   async componentDidMount() {
 
@@ -59,7 +61,6 @@ class App extends React.Component<any, State> {
       }
     }
     console.log("initial loading finished in ", Date.now() - loadingStartTime, "milis.")
-    this.setState({ isLoading: false })
   }
 
   async componentWillUnmount() {
