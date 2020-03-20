@@ -1,5 +1,16 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+import groovy.json.JsonSlurper
+
+def releaseSigningPropsFile = rootProject.file("../credentials/android_signing_config.json")
+def releaseSigningProps = null
+if (releaseSigningPropsFile.exists()) {
+    println("Found release signing config info file.")
+    releaseSigningProps = new JsonSlurper().parseText(releaseSigningPropsFile.text)
+}else{
+    println("Release signing config file does not exist.")
+}
+
 buildscript {
     ext {
         buildToolsVersion = "28.0.3"
@@ -22,6 +33,10 @@ buildscript {
 }
 
 allprojects {
+    project.ext {
+        releaseSigningProperties = releaseSigningProps
+    }
+
     repositories {
         mavenLocal()
         maven {

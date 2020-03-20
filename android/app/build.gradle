@@ -2,6 +2,7 @@ apply plugin: "com.android.application"
 apply plugin: 'kotlin-android'
 
 import com.android.build.OutputFile
+import com.android.build.gradle.internal.dsl.SigningConfig
 
 /**
  * The react.gradle file registers a task for each build variant (e.g. bundleDebugJsAndAssets
@@ -77,8 +78,8 @@ import com.android.build.OutputFile
  */
 
 project.ext.react = [
-    entryFile: "index.js",
-    enableHermes: true,  // clean and rebuild if changing
+        entryFile   : "index.js",
+        enableHermes: true,  // clean and rebuild if changing
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"
@@ -91,7 +92,7 @@ apply from: "../../node_modules/react-native/react.gradle"
  * Upload all the APKs to the Play Store and people will download
  * the correct one based on the CPU architecture of their device.
  */
-def enableSeparateBuildPerCPUArchitecture = false
+def enableSeparateBuildPerCPUArchitecture = true
 
 /**
  * Run Proguard to shrink the Java bytecode in release builds.
@@ -139,14 +140,15 @@ android {
         renderscriptSupportModeEnabled true
 
         manifestPlaceholders = [
-                appAuthRedirectScheme: 'edu.umd.hcil.data-at-hand'
+                appAuthRedirectScheme: 'edu.umd.hcil.data-at-hand',
+                appName              : 'Data@Hand'
         ]
     }
     splits {
         abi {
             reset()
             enable enableSeparateBuildPerCPUArchitecture
-            universalApk false  // If true, also generate a universal APK
+            universalApk true // If true, also generate a universal APK
             include "armeabi-v7a", "x86", "arm64-v8a", "x86_64"
         }
     }
@@ -158,16 +160,44 @@ android {
             keyPassword 'android'
         }
     }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            applicationIdSuffix ".debug"
+            manifestPlaceholders.appNamePrefix = "(Dbg) "
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://facebook.github.io/react-native/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            manifestPlaceholders.appNamePrefix = ""
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+
+            //Find keystore for release build.
+            try {
+                println("Look for the keystore file at " + project.releaseSigningProperties.storeFile)
+                def releaseKeystoreFile = file(project.releaseSigningProperties.storeFile)
+                if (releaseKeystoreFile.exists()) {
+                    def releaseConfig = new SigningConfig("release")
+                    releaseConfig.storeFile = releaseKeystoreFile
+                        releaseConfig.keyAlias = project.releaseSigningProperties.keyAlias
+                        releaseConfig.keyPassword = project.releaseSigningProperties.keyPassword
+                        releaseConfig.storePassword = project.releaseSigningProperties.storePassword
+
+                    if(releaseConfig.isSigningReady()){
+                        println("Successfully applied the release sigining info.")
+                        signingConfig = releaseConfig
+                    }else{
+                        throw IllegalArgumentException("Signing config is not valid.")
+                    }
+
+                } else {
+                    throw FileNotFoundException("Keystore file path is wrong.")
+                }
+            } catch (e) {
+                e.printStackTrace()
+                print("Failed to find a keystore file for release build. Use the debug file instead")
+                signingConfig = signingConfigs.debug
+            }
         }
     }
     // applicationVariants are e.g. debug, release
