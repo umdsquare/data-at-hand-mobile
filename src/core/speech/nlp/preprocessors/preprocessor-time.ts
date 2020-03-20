@@ -1,8 +1,31 @@
 import { VariableType } from "../types";
 import { DateTimeHelper } from "@utils/time";
 import { startOfMonth, startOfYear, endOfMonth, endOfYear, addYears, addMonths, startOfWeek, endOfWeek, addWeeks } from "date-fns";
-import { Chrono } from "../../../../types/chrono";
+import { Chrono, mergeChronoOptions } from "../../../../types/chrono";
 import NamedRegExp from 'named-regexp-groups'
+import chrono_node from 'chrono-node';
+import chronoOptions from 'chrono-node/src/options';
+
+
+let _chrono: Chrono.ChronoInstance = undefined
+function getChrono(): Chrono.ChronoInstance{
+    if(_chrono == null){
+        //initialize chrono
+        const options = mergeChronoOptions([
+            chronoOptions.en.casual,
+            chronoOptions.commonPostProcessing
+        ]);
+        
+        _chrono = new chrono_node.Chrono(options)
+
+        console.log("My chrono instance info:===============================")
+        console.log("Parsers:", _chrono.parsers.length)
+        console.log("Refiners:", _chrono.refiners.length)
+        console.log("===============================")
+        
+    }
+    return _chrono
+}
 
 const templates: Array<{ regex: NamedRegExp, parse: (groups: any, today: Date) => number | [number, number] | null }> = [
     {
@@ -70,8 +93,7 @@ const templates: Array<{ regex: NamedRegExp, parse: (groups: any, today: Date) =
 
 
 function chronoPass(text: string, today: Date): { type: VariableType.Date | VariableType.Period, value: number | [number, number] } | null {
-    var chrono = require('chrono-node');
-    const chronoResult: Chrono.ParsedResult[] = chrono.parse(text, today)
+    const chronoResult: Chrono.ParsedResult[] = getChrono().parse(text, today)
     if (chronoResult.length > 0) {
         const bestResult = chronoResult[0]
         if (bestResult.end) {
@@ -151,8 +173,7 @@ export function parseTimeText(text: string, today: Date): { type: VariableType.D
 }
 
 export function parseDateTextToNumberedDate(text: string, today: Date): number | null {
-    var chrono = require('chrono-node');
-    const chronoResult: Chrono.ParsedResult[] = chrono.parse(text, today)
+    const chronoResult: Chrono.ParsedResult[] = getChrono().parse(text, today)
     if (chronoResult.length > 0) {
         const bestResult = chronoResult[0]
         if (bestResult.start.isCertain('day')) {
