@@ -58,3 +58,4 @@ export function mergeChronoOptions(options: Array<any>) {
 
     return mergedOption
 }
+

@@ -1,10 +1,11 @@
 import { VariableType } from "../types";
 import { DateTimeHelper } from "@utils/time";
 import { startOfMonth, startOfYear, endOfMonth, endOfYear, addYears, addMonths, startOfWeek, endOfWeek, addWeeks } from "date-fns";
-import { Chrono, mergeChronoOptions } from "../../../../types/chrono";
+import { Chrono, mergeChronoOptions } from "./chrono";
 import NamedRegExp from 'named-regexp-groups'
 import chrono_node from 'chrono-node';
 import chronoOptions from 'chrono-node/src/options';
+import { HOLIDAY_PARSERS, HOLIDAY_REFINERS } from "./chrono-holidays";
 
 
 let _chrono: Chrono.ChronoInstance = undefined
@@ -15,7 +16,15 @@ function getChrono(): Chrono.ChronoInstance{
             chronoOptions.en.casual,
             chronoOptions.commonPostProcessing
         ]);
-        
+
+        HOLIDAY_PARSERS.forEach(parser => {
+            options.parsers.push(parser)
+        })
+
+        HOLIDAY_REFINERS.forEach(refiner => {
+            options.refiners.push(refiner)
+        })
+
         _chrono = new chrono_node.Chrono(options)
 
         console.log("My chrono instance info:===============================")
