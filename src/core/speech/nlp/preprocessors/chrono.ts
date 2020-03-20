@@ -11,6 +11,7 @@ export declare module Chrono {
         index: number;
         text: string;
         ref: Date;
+        tags: {[key:string]:boolean|undefined}
     }
 
     export class ParsedComponents {

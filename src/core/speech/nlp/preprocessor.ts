@@ -294,7 +294,6 @@ function isBedtimeReferred(speech: string): boolean {
 }
 
 function isWaketimeReferred(speech: string): boolean {
-    console.log("test wake time on ", speech, " - ", /(wake)|(woke)|(g(o|e)t(ting)?\s+up)/gi.test(speech))
     return /(wake)|(woke)|(g(o|e)t(ting)?\s+up)/gi.test(speech)
 }
 
@@ -303,7 +302,6 @@ function inferHighlight(nlp: compromise.Document, original: string, options: NLU
 
     const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time)+]`)
 
-    console.log("possible comparison info found.", nlp.termList())
     const durationComparisonInfo = normalizeCompromiseGroup(durationComparisonMatch.groups())
     if (durationComparisonInfo) {
         console.log("duration comparison info found:", durationComparisonInfo)

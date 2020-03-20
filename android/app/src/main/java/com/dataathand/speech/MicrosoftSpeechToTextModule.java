@@ -19,6 +19,7 @@ import com.microsoft.cognitiveservices.speech.audio.AudioConfig;
 import com.microsoft.cognitiveservices.speech.audio.AudioStreamFormat;
 import com.microsoft.cognitiveservices.speech.audio.PullAudioInputStreamCallback;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -136,6 +137,7 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
         });
 
         recognizer.recognizing.addEventListener((o, eventArgs)->{
+            Log.d(TAG, "Partial result received");
             final String s = eventArgs.getResult().getText();
             final String stitchedResult = joinTexts(accumulatedTextToPrevCycle, s);
             currentCycleRecognizedText = s;
@@ -157,7 +159,14 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
 
         this.currentRecognizer = recognizer;
 
-        promise.resolve(true);
+        try {
+            startTask.get();
+            Log.d(TAG, "Speech session start command approved.");
+            promise.resolve(true);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            promise.resolve(false);
+        }
     }
 
     @Override

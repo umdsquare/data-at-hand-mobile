@@ -6,6 +6,7 @@ import NamedRegExp from 'named-regexp-groups'
 import chrono_node from 'chrono-node';
 import chronoOptions from 'chrono-node/src/options';
 import { HOLIDAY_PARSERS, HOLIDAY_REFINERS } from "./chrono-holidays";
+import { CHRONO_EXTENSION_PARSERS, CHRONO_EXTENSION_REFINERS } from "./chrono-extension";
 
 
 let _chrono: Chrono.ChronoInstance = undefined
@@ -16,12 +17,12 @@ function getChrono(): Chrono.ChronoInstance{
             chronoOptions.en.casual,
             chronoOptions.commonPostProcessing
         ]);
-
-        HOLIDAY_PARSERS.forEach(parser => {
+        
+        HOLIDAY_PARSERS.concat(CHRONO_EXTENSION_PARSERS).forEach(parser => {
             options.parsers.push(parser)
         })
 
-        HOLIDAY_REFINERS.forEach(refiner => {
+        HOLIDAY_REFINERS.concat(CHRONO_EXTENSION_REFINERS).forEach(refiner => {
             options.refiners.push(refiner)
         })
 
@@ -102,7 +103,9 @@ const templates: Array<{ regex: NamedRegExp, parse: (groups: any, today: Date) =
 
 
 function chronoPass(text: string, today: Date): { type: VariableType.Date | VariableType.Period, value: number | [number, number] } | null {
-    const chronoResult: Chrono.ParsedResult[] = getChrono().parse(text, today)
+    console.log("try parsing time text:", text)
+    const chronoResult: Chrono.ParsedResult[] = getChrono().parse(text, today, {forwardDate: false})
+    console.log("chrono result:", chronoResult)
     if (chronoResult.length > 0) {
         const bestResult = chronoResult[0]
         if (bestResult.end) {
