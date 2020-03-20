@@ -211,7 +211,14 @@ android {
                 output.versionCodeOverride =
                         versionCodes.get(abi) * 1048576 + defaultConfig.versionCode
             }
+        }
 
+        variant.outputs.all { output ->
+            def architecture = output.getFilter(OutputFile.ABI)
+            if(architecture == null){
+                architecture = 'universal'
+            }
+            outputFileName = "data_at_hand-${variant.name}-${variant.versionName}-${architecture}.apk"
         }
     }
 }
