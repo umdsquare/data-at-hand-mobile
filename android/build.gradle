@@ -11,6 +11,16 @@ if (releaseSigningPropsFile.exists()) {
     println("Release signing config file does not exist.")
 }
 
+def packageJsonFile = rootProject.file("../package.json")
+def packageJson = new JsonSlurper().parseText(packageJsonFile.text)
+def _npmVersion = packageJson.version
+println("npm package version (used as versionName): " + _npmVersion)
+
+/* calculated from git commits to give sequential integers */
+def gitCountProcessResult = "git rev-list master --first-parent --count".execute()
+def _gitCount = gitCountProcessResult.text.toInteger()
+println("git revision count (used as versionCode): " + _gitCount)
+
 buildscript {
     ext {
         buildToolsVersion = "28.0.3"
@@ -35,6 +45,8 @@ buildscript {
 allprojects {
     project.ext {
         releaseSigningProperties = releaseSigningProps
+        npmVersion = _npmVersion
+        gitCount = _gitCount
     }
 
     repositories {
