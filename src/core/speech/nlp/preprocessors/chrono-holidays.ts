@@ -70,7 +70,7 @@ yearRefiner.refine = function(text, results: Array<Chrono.ParsedResult>, opt){
     if(/[1-2][0-9]{3}(\s|$)/i.test(text) === true 
     && results.length === 1 
     && results[0].tags["ENHoliday"] === true){
-
+        //TODO Don't just shift the holiday. Calculate it.
         const year = Number.parseInt(text.match(/([1-2][0-9]{3})(\s|$)/i)[0])
         results[0].start.assign("year", year)
         return results

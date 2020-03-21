@@ -16,6 +16,8 @@ class SpeechRecognitionManager: RCTEventEmitter{
   let EVENT_STOPPED = "speech.stopped"
   let EVENT_RECEIVED = "speech.received"
   
+  let CONTEXTUAL_STRINGS = ["hours slept", "step count", "heart rate", "weight", "my weight", "last last month"]
+  
   @objc
   static override func requiresMainQueueSetup() -> Bool {
     return true
@@ -88,6 +90,7 @@ class SpeechRecognitionManager: RCTEventEmitter{
     currentRecognitionRequest = SFSpeechAudioBufferRecognitionRequest()
     guard let currentRecognitionRequest = currentRecognitionRequest else { fatalError("Unable to create a SFSpeechAudioBufferRecognitionRequest object") }
     currentRecognitionRequest.shouldReportPartialResults = true
+    currentRecognitionRequest.contextualStrings = CONTEXTUAL_STRINGS
     
     if #available(iOS 13, *) {
       currentRecognitionRequest.requiresOnDeviceRecognition = false

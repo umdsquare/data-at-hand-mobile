@@ -34,7 +34,8 @@ const lexicon = {
     'compared': 'Verb',
     'less': 'Adjective',
     'near': 'Date',
-    "new year": 'Date'
+    "new year": 'Date',
+    'since': 'Date'
 }
 
 const MONTH_NAMES_REGEX = new RegExp(`${MONTH_NAMES.join("|")}`, 'i')
@@ -71,19 +72,6 @@ const TIME_EXPRESSION_MATCH_SYNTAX: Array<{ matchSyntax: string, valueParser: (o
                     DateTimeHelper.toNumberedDateFromDate(subDays(endOfWeek(today, { weekStartsOn: 1 }), 7 * numberOfLast))]
                 }
             }
-        }
-    },
-    {
-        matchSyntax: "since [<date>#Date+]",
-        valueParser: (obj: { date: string }, options) => {
-            const parsedDate = parseDateTextToNumberedDate(obj.date, options.getToday())
-            if (parsedDate) {
-                const today = options.getToday()
-                return {
-                    type: VariableType.Period,
-                    value: [parsedDate, DateTimeHelper.toNumberedDateFromDate(today)]
-                }
-            } else return null
         }
     },
     {
@@ -156,6 +144,8 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
     const nlp = compromise(processedSpeech, lexicon)
 
     nlp.match("compare").unTag("Date").unTag("Time").unTag("Duration").tag("Verb")
+
+    console.log(nlp.termList())
 
     //Tag all the inferred variables
     Object.keys(variables).forEach(id => {
