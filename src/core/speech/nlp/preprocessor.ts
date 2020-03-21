@@ -35,7 +35,8 @@ const lexicon = {
     'less': 'Adjective',
     'near': 'Date',
     "new year": 'Date',
-    'since': 'Date'
+    'since': 'Date',
+    "fall": 'Date',
 }
 
 const MONTH_NAMES_REGEX = new RegExp(`${MONTH_NAMES.join("|")}`, 'i')

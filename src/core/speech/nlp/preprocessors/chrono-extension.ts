@@ -1,7 +1,74 @@
 import chrono from 'chrono-node';
-import { getYear, isAfter, addYears, getDate, subDays, getMonth, addDays, subYears, subWeeks, subMonths } from 'date-fns';
+import { getYear, isAfter, addYears, getDate, subDays, getMonth, addDays, subYears, subWeeks, subMonths, startOfMonth, endOfMonth, isBefore } from 'date-fns';
 import { Chrono } from './chrono';
+import NamedRegExp from 'named-regexp-groups'
 
+
+function getSeasonOfYear(season: string, year: number): [Date, Date] {
+    switch (season) {
+        case "spring":
+            return [startOfMonth(new Date(year, 2)), endOfMonth(new Date(year, 4))]
+        case "summer":
+            return [startOfMonth(new Date(year, 5)), endOfMonth(new Date(year, 7))]
+        case "autumn":
+        case "fall":
+            return [startOfMonth(new Date(year, 8)), endOfMonth(new Date(year, 10))]
+        case "winter":
+            return [startOfMonth(new Date(year, 11)), endOfMonth(new Date(year + 1, 1))]
+    }
+}
+
+const seasonParser = new chrono.Parser();
+seasonParser.pattern = function () { return new NamedRegExp("(((?<year1>[1-2][0-9]{3})(\\'s)?\\s+)|(?<last>(last,?\\s+)+))?(?<season>spring|summer|autumn|winter)(\\s+((of|in)\\s+)?(?<year2>[1-2][0-9]{3}))?", "i") }
+seasonParser.extract = function (text, ref, match, opt) {
+
+
+    let seasonRange
+
+    const season = match.groups.season.trim()
+
+    let referredYear = match.groups.year1 || match.groups.year2
+    if (referredYear) {
+        referredYear = Number.parseInt(referredYear)
+        seasonRange = getSeasonOfYear(season, referredYear)
+    } else {
+        let lastCount = 0
+        if (match.groups.last) {
+            lastCount = match.groups.last.trim().split(/\s+/).length - 1
+        }
+        let year = getYear(ref)
+        seasonRange = getSeasonOfYear(season, year)
+        while (isBefore(ref, seasonRange[0])) {
+            year--
+            seasonRange = getSeasonOfYear(season, year)
+        }
+        if (lastCount > 0) {
+            year -= lastCount
+            seasonRange = getSeasonOfYear(season, year)
+        }
+    }
+
+    const result = new chrono.ParsedResult({
+        ref,
+        text: match[0],
+        index: match.index,
+        start: {
+            year: getYear(seasonRange[0]),
+            month: getMonth(seasonRange[0]) + 1,
+            day: getDate(seasonRange[0])
+        },
+        end: {
+            year: getYear(seasonRange[1]),
+            month: getMonth(seasonRange[1]) + 1,
+            day: getDate(seasonRange[1])
+        }
+    })
+
+    result.tags["ENSeasonParser"] = true
+    result.tags["ENSeason" + season] = true
+
+    return result
+}
 
 //===========================================================================
 
@@ -43,7 +110,6 @@ relativePastRefiner.refine = function (text, results: Array<Chrono.ParsedResult>
 
                 date = subMonths(date, numWords - 1)
             }
-
 
             //first it should be the past
 
@@ -124,5 +190,5 @@ sinceRefiner.refine = function (text, results: Array<Chrono.ParsedResult>, opt) 
     return results
 }
 
-export const CHRONO_EXTENSION_PARSERS = []
+export const CHRONO_EXTENSION_PARSERS = [seasonParser]
 export const CHRONO_EXTENSION_REFINERS = [relativePastRefiner, aroundRefiner, sinceRefiner]

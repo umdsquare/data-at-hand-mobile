@@ -56,10 +56,10 @@ const commonHolidayParsers = holidayRules.get().map(rule => {
     commonHolidayParser.extract = function (text, ref, match, opt) {
         const generateFunc: ((year: number) => Date) = Holidays[rule.functionName]
         let date: Date
-        if (match.groups.year1 != null || match.groups.year2) {
+        if (match.groups.year1 || match.groups.year2) {
             //year remarked.
             let year = match.groups.year1 || match.groups.year2
-            date = generateFunc(year)
+            date = generateFunc(Number.parseInt(year))
         } else {
             let year = getYear(ref)
             date = generateFunc(year)
