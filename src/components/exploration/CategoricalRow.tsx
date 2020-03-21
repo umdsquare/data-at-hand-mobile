@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, FlatList } from 'react-native';
 import { Sizes } from '@style/Sizes';
 import { SpeechAffordanceIndicator } from './SpeechAffordanceIndicator';
-import GestureRecognizer from 'react-native-swipe-gestures';
 import { SwipedFeedback } from '@components/common/SwipedFeedback';
 import Colors from '@style/Colors';
 import { BottomSheet } from '@components/common/BottomSheet';
@@ -196,34 +195,4 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
             </View>
         </FlingGestureHandler>
     </FlingGestureHandler>
-
-
-    return <GestureRecognizer
-        onSwipeLeft={prop.values ? () => {
-            let currentIndex = prop.values.indexOf(prop.value)
-            if (currentIndex === 0) {
-                currentIndex = prop.values.length - 1
-            } else currentIndex--
-
-            if (prop.onValueChange) {
-                prop.onValueChange(prop.values[currentIndex], currentIndex)
-            }
-            swipedFeedbackRef.current?.startFeedback('left')
-        } : undefined}
-
-        onSwipeRight={prop.values ? () => {
-            let currentIndex = prop.values.indexOf(prop.value)
-            currentIndex = (currentIndex + 1) % prop.values.length
-
-            if (prop.onValueChange) {
-                prop.onValueChange(prop.values[currentIndex], currentIndex)
-            }
-            swipedFeedbackRef.current?.startFeedback('right')
-        } : undefined}
-        style={prop.showBorder === true ? styles.containerStyleWithBorder : styles.containerStyleWithoutBorder}>
-        {
-            prop.values != null ? <SwipedFeedback ref={swipedFeedbackRef} /> : null
-        }
-
-    </GestureRecognizer>
 })
