@@ -104,6 +104,7 @@ const templates: Array<{ regex: NamedRegExp, parse: (groups: any, today: Date) =
 
 function chronoPass(text: string, today: Date): { type: VariableType.Date | VariableType.Period, value: number | [number, number] } | null {
     const chronoResult: Chrono.ParsedResult[] = getChrono().parse(text, today, {forwardDate: false})
+    console.log("chrono result:", chronoResult)
     if (chronoResult.length > 0) {
         const bestResult = chronoResult[0]
         if (bestResult.end) {

@@ -1,88 +1,94 @@
 import chrono from 'chrono-node';
 import { getYear, isAfter, addYears, getDate, subDays, getMonth, addDays } from 'date-fns';
-import { Chrono } from './chrono';
+import Holidays from '@date/holidays-us';
+import { Lazy } from '@utils/utils';
 
+import NamedRegExp from 'named-regexp-groups'
+/*
+newYearsDay() - can calculate observed holiday as well
+valentinesDay()
+martinLutherKingDay()
+presidentsDay()
+easter()
+mothersDay()
+memorialDay()
+fathersDay()
+independenceDay() - can calculate observed holiday as well
+laborDay()
+columbusDay()
+halloween()
+veteransDay() - can calculate observed holiday as well
+thanksgiving()
+christmas() - can calculate observed holiday as well
 
-//===========================================================================
+*/
 
-const christmasParser = new chrono.Parser();
-christmasParser.pattern = function () { return /Christmas(\s+(eve))?/i; }
-christmasParser.extract = function (text, ref, match, opt) {
+function sdayFormat(core: string): string {
+    return `${core}\\'?(s?)(\\s+day)?`
+}
+function yearFormat(format: string): string {
+    return `((?<year1>[1-2][0-9]{3})(\\'s)?\\s+)?${format}(\\s+((of|in)\\s+)?(?<year2>[1-2][0-9]{3}))?`
+}
 
-    const isEve = match[2] === 'eve'
+const holidayRules = new Lazy<Array<{ functionName: string, rule: string }>>(() => {
+    return [
+        { rule: sdayFormat("new\\s+year"), functionName: "newYearsDay" },
+        { rule: sdayFormat("valentine"), functionName: 'valentinesDay' },
+        { rule: sdayFormat("martin"), functionName: "martinLutherKingDay" },
+        { rule: sdayFormat("president"), functionName: "presidentsDay" },
+        { rule: "easter", functionName: 'easter' },
+        { rule: sdayFormat("mother"), functionName: "mothersDay" },
+        { rule: "memorial\s+day", functionName: "memorialDay" },
+        { rule: sdayFormat("father"), functionName: "fathersDay" },
+        { rule: "independence\s+day", functionName: "independenceDay" },
+        { rule: "labor\s+day", functionName: "laborDay" },
+        { rule: "columbus\s+day", functionName: "columbusDay" },
+        { rule: "halloween", functionName: "halloween" },
+        { rule: sdayFormat("veteran"), functionName: "veteransDay" },
+        { rule: "thanksgiving(\s+day)?", functionName: "thanksgiving" },
+        { rule: "christmas", functionName: "christmas" },
+    ]
+})
 
-    let christmas = new Date(getYear(ref), 11, isEve === true ? 24 : 25)
-    while (isAfter(christmas, ref) === true) {
-        christmas = addYears(christmas, -1)
-    }
-
-    const result = new chrono.ParsedResult({
-        ref,
-        text: match[0],
-        index: match.index,
-        start: {
-            day: isEve === true ? 24 : 25,
-            month: 12,
-            year: getYear(christmas)
+const commonHolidayParsers = holidayRules.get().map(rule => {
+    const commonHolidayParser = new chrono.Parser();
+    commonHolidayParser.pattern = function () { return new NamedRegExp(yearFormat(rule.rule), "i") }
+    commonHolidayParser.extract = function (text, ref, match, opt) {
+        const generateFunc: ((year: number) => Date) = Holidays[rule.functionName]
+        let date: Date
+        if (match.groups.year1 != null || match.groups.year2) {
+            //year remarked.
+            let year = match.groups.year1 || match.groups.year2
+            date = generateFunc(year)
+        } else {
+            let year = getYear(ref)
+            date = generateFunc(year)
+            while (isAfter(date, ref) === true) {
+                year--
+                date = generateFunc(year)
+            }
         }
-    })
 
-    result.tags["ENHoliday"] = true;
-    result.tags[`ENHolidayChristmas${isEve ? "Eve" : ""}`] = true;
+        const result = new chrono.ParsedResult({
+            ref,
+            text: match[0],
+            index: match.index,
+            start: {
+                day: getDate(date),
+                month: getMonth(date) + 1,
+                year: getYear(date)
+            }
+        })
 
-    return result
-}
-
-const newYearsDayParser = new chrono.Parser();
-newYearsDayParser.pattern = function () { return /new\s+year(\'?)s?\s+(day|eve)/i; }
-newYearsDayParser.extract = function (text, ref, match, opt) {
-
-    const isEve = match[2] === 'eve'
-
-    let newYearsDay = new Date(getYear(ref), 0, 1)
-    if (isEve) {
-        newYearsDay = subDays(newYearsDay, 1)
-    }
-    while (isAfter(newYearsDay, ref) === true) {
-        newYearsDay = addYears(newYearsDay, -1)
+        result.tags["ENHoliday"] = true;
+        result.tags[`ENHolidayName${rule.functionName}`] = true;
+        return result
     }
 
-    const result = new chrono.ParsedResult({
-        ref,
-        text: match[0],
-        index: match.index,
-        start: {
-            day: getDate(newYearsDay),
-            month: getMonth(newYearsDay) + 1,
-            year: getYear(newYearsDay)
-        }
-    })
-
-    result.tags["ENHoliday"] = true;
-    result.tags[`ENHolidayNewYears${isEve ? "Eve" : "Day"}`] = true;
-
-    return result
-}
+    return commonHolidayParser
+})
 
 
-const yearRefiner = new chrono.Refiner();
-yearRefiner.refine = function(text, results: Array<Chrono.ParsedResult>, opt){
-    if(/[1-2][0-9]{3}(\s|$)/i.test(text) === true 
-    && results.length === 1 
-    && results[0].tags["ENHoliday"] === true){
-        //TODO Don't just shift the holiday. Calculate it.
-        const year = Number.parseInt(text.match(/([1-2][0-9]{3})(\s|$)/i)[0])
-        results[0].start.assign("year", year)
-        return results
-    }
-    return results
-}
+export const HOLIDAY_PARSERS = [].concat(commonHolidayParsers)
 
-
-export const HOLIDAY_PARSERS = [
-    christmasParser, newYearsDayParser
-]
-
-export const HOLIDAY_REFINERS = [
-    yearRefiner
-]
+export const HOLIDAY_REFINERS = []
