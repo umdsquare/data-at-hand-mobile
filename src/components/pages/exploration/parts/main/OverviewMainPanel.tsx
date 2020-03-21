@@ -12,6 +12,8 @@ import { DateTimeHelper } from "@utils/time";
 import { inferIntraDayDataSourceType, HighlightFilter } from "@core/exploration/types";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { HighlightFilterPanel } from "@components/exploration/HighlightFilterPanel";
+import { DataSourceManager } from "@measure/DataSourceManager";
+import { StyleTemplates } from "@style/Styles";
 
 const separatorStyle = { height: Sizes.verticalPadding }
 
@@ -44,14 +46,14 @@ class OverviewMainPanel extends React.PureComponent<Props> {
         }
     }
 
-    componentDidUpdate(prevProps: Props){
-        if(prevProps.highlightFilter !== this.props.highlightFilter){
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.highlightFilter !== this.props.highlightFilter) {
             LayoutAnimation.configureNext(
                 LayoutAnimation.create(
                     500, LayoutAnimation.Types.easeInEaseOut, "opacity")
             )
 
-            if(prevProps.highlightFilter == null && this.props.highlightFilter != null){
+            if (prevProps.highlightFilter == null && this.props.highlightFilter != null) {
                 this._listRef.current?.scrollToIndex({
                     animated: true,
                     index: this.props.data.sourceDataList.findIndex(d => d.source === this.props.highlightFilter.dataSource)
@@ -74,25 +76,25 @@ class OverviewMainPanel extends React.PureComponent<Props> {
     }
 
 
-    private Separator = () => {
+    private readonly Separator = () => {
         return <View style={separatorStyle} />
     }
 
-    private onHeaderPressed = (source: DataSourceType) => {
+    private readonly onHeaderPressed = (source: DataSourceType) => {
         this.props.dispatchAction(createGoToBrowseRangeAction(InteractionType.TouchOnly, source))
     }
 
-    private onTodayPressed = (source: DataSourceType) => {
+    private readonly onTodayPressed = (source: DataSourceType) => {
         this.props.dispatchAction(createGoToBrowseDayAction(InteractionType.TouchOnly,
             inferIntraDayDataSourceType(source), DateTimeHelper.toNumberedDateFromDate(this.props.getToday())))
     }
 
-    private onScroll = (event) => {
+    private readonly onScroll = (event) => {
         const scrollY = event.nativeEvent.contentOffset.y
         this.currentListScrollOffset = scrollY
     }
 
-    private renderItem = ({ item }) => <DataSourceChartFrame key={item.source.toString()}
+    private readonly renderItem = ({ item }) => <DataSourceChartFrame key={item.source.toString()}
         data={item}
         filter={this.props.highlightFilter}
         highlightedDays={this.props.data.highlightedDays}
@@ -101,26 +103,28 @@ class OverviewMainPanel extends React.PureComponent<Props> {
         onTodayPressed={inferIntraDayDataSourceType(item.source) != null ? this.onTodayPressed : null}
     />
 
+    private readonly keyExtractor = (item) => item.source
+
     render() {
         if (this.props.data != null) {
-            return <View>
+            return <View style={StyleTemplates.fillFlex}>
                 {
-                    this.props.highlightFilter != null? <HighlightFilterPanel 
-                    filter={this.props.highlightFilter}
-                    highlightedDays={this.props.data.highlightedDays}
-                    onDiscardFilterPressed={this.onDiscardFilter}
-                    onFilterModified={this.onFilterModified}
-                    />:<></>
+                    this.props.highlightFilter != null ? <HighlightFilterPanel
+                        filter={this.props.highlightFilter}
+                        highlightedDays={this.props.data.highlightedDays}
+                        onDiscardFilterPressed={this.onDiscardFilter}
+                        onFilterModified={this.onFilterModified}
+                    /> : <></>
                 }
                 <FlatList
-                    nestedScrollEnabled={true}
                     ref={this._listRef}
+                    windowSize={DataSourceManager.instance.supportedDataSources.length}
+
                     data={this.props.data.sourceDataList}
-                    keyExtractor={item => item.source}
+                    keyExtractor={this.keyExtractor}
                     ItemSeparatorComponent={this.Separator}
                     renderItem={this.renderItem}
                     onScroll={this.onScroll}
-
                 /></View>
         } else return <></>
     }

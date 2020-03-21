@@ -16,7 +16,9 @@ class SpeechRecognitionManager: RCTEventEmitter{
   let EVENT_STOPPED = "speech.stopped"
   let EVENT_RECEIVED = "speech.received"
   
-  let CONTEXTUAL_STRINGS = ["hours slept", "step count", "heart rate", "weight", "my weight", "last last month", "Spring", "Winter", "Fall", "Autumn", "Summer"]
+  let CONTEXTUAL_STRINGS = ["hours slept", "step count", "heart rate", "weight", "my weight",
+                            "last last month",
+                            "Spring", "Winter", "Fall", "Autumn", "Summer"]
   
   @objc
   static override func requiresMainQueueSetup() -> Bool {
