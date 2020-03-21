@@ -1,5 +1,12 @@
 {
   "name": "data-at-hand",
+  "description": "Mobile application for exploring fitness data using both speech and touch interaction.",
+  "author": "Young-Ho Kim (http://younghokim.net)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/muclipse/data-at-hand/issues"
+  },
+  "keywords": ["multimodal", "speech", "fitness", "mobile", "personal", "tracking", "hci", "infovis"],
   "version": "0.2.3",
   "private": true,
   "scripts": {
@@ -70,7 +77,6 @@
     "react-native-zip-archive": "^5.0.2",
     "react-redux": "^7.2.0",
     "redux": "^4.0.5",
-    "redux-logger": "^3.0.6",
     "redux-persist": "^6.0.0",
     "redux-thunk": "^2.3.0",
     "rxjs": "^6.5.4",
