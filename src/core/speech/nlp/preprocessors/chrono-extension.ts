@@ -240,7 +240,6 @@ export const makeENMergeDateRangeRefiner = () => {
 
         //merge toResult to fromResult.
 
-        //e.g., Sunday to Friday
         if (!fromResult.isOnlyWeekday() && !toResult.isOnlyWeekday()) {
 
             for (var key in toResult.start.knownValues) {
@@ -262,8 +261,6 @@ export const makeENMergeDateRangeRefiner = () => {
             var fromMoment = fromResult.start.dayjs();
             var toMoment = toResult.start.dayjs();
 
-
-
             if (fromResult.isOnlyWeekday() && fromMoment.add(-7, 'days').isBefore(toMoment)) {
                 fromMoment = fromMoment.add(-7, 'days');
                 fromResult.start.imply('day', fromMoment.date());
@@ -284,13 +281,13 @@ export const makeENMergeDateRangeRefiner = () => {
 
                 if (toResult.start.isCertain('day')) {
                     toResult.start.assign('day', getDate(toResultDate))
-                }else{
+                } else {
                     toResult.start.imply('day', getDate(toResultDate))
                 }
 
-                if(toResult.start.isCertain('month')){
+                if (toResult.start.isCertain('month')) {
                     toResult.start.assign('month', getMonth(toResultDate) + 1)
-                }else{
+                } else {
                     toResult.start.imply('month', getMonth(toResultDate) + 1)
                 }
 

@@ -60,13 +60,16 @@ export const makeWeekdayParser = () => {
             date = addDays(subWeeks(startOfWeek(ref, { weekStartsOn: 1 }), 1), offset == 0 ? 6 : (offset - 1))
         }
 
-        result.start.assign('year', getYear(date))
-        result.start.assign('month', getMonth(date) + 1)
-        result.start.assign('day', getDate(date))
+        const funcName = norm.length === 0? 'imply' : 'assign'
+        result.start[funcName]('year', getYear(date))
+        result.start[funcName]('month', getMonth(date) + 1)
+        result.start[funcName]('day', getDate(date))
+        if(funcName=== 'imply'){
+            result.start.assign('weekday', offset)
+            result.start.knownValues['weekday'] = offset
+        }
 
         result.tags['ENWeekdayParser'] = true;
-        result.tags['ENWeekdayPastParser'] = true;
-
 
         return result;
     }

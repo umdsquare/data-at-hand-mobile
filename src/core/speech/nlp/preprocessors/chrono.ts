@@ -3,7 +3,7 @@
 // Forked from https://github.com/Microsoft/BotBuilder
 
 export declare module Chrono {
-    export type ComponentName = "year" | "month" | "day"
+    export type ComponentName = "year" | "month" | "day" | "weekday"
 
     export class ParsedResult {
         start: ParsedComponents;
