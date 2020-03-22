@@ -5,9 +5,11 @@ import { Chrono, mergeChronoOptions } from "./chrono";
 import NamedRegExp from 'named-regexp-groups'
 import chrono_node from 'chrono-node';
 import chronoParserApi from 'chrono-node/src/parsers/parser';
+import chronoRefinerApi from 'chrono-node/src/refiners/refiner';
+
 import chronoOptions from 'chrono-node/src/options';
 import { HOLIDAY_PARSERS, HOLIDAY_REFINERS } from "./chrono-holidays";
-import { CHRONO_EXTENSION_PARSERS, CHRONO_EXTENSION_REFINERS } from "./chrono-extension";
+import { CHRONO_EXTENSION_PARSERS, CHRONO_EXTENSION_REFINERS, makeENMergeDateRangeRefiner } from "./chrono-extension";
 import { makeWeekdayParser } from "./chrono-extensions/chrono-weekdays";
 
 
@@ -24,6 +26,7 @@ function getChrono(): Chrono.ChronoInstance {
         }
 
         chronoParserApi.ENWeekdayParser = makeWeekdayParser
+        chronoRefinerApi.ENMergeDateRangeRefiner = makeENMergeDateRangeRefiner
 
         //initialize chrono
         const options = mergeChronoOptions([
@@ -41,10 +44,10 @@ function getChrono(): Chrono.ChronoInstance {
 
         _chrono = new chrono_node.Chrono(options)
 
-        console.log("My chrono instance info:===============================")
-        console.log("Parsers:", _chrono.parsers.length)
-        console.log("Refiners:", _chrono.refiners.length)
-        console.log("===============================")
+        console.debug("My chrono instance info:===============================")
+        console.debug("Parsers:", _chrono.parsers.length)
+        console.debug("Refiners:", _chrono.refiners.length)
+        console.debug("===============================")
 
     }
     return _chrono
