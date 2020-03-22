@@ -78,7 +78,7 @@ export const makeLogger = () => {
             return next(action)
 
         } else if (action.type === ExplorationDataActionType.FinishLoadingDataAction && logIdForScreenshot != null) {
-            if(screenshotTimeout){
+            if (screenshotTimeout) {
                 console.log("skip the previous screenshot task.")
                 clearTimeout(screenshotTimeout)
             }
@@ -94,7 +94,7 @@ export const makeLogger = () => {
                 const imageHeight = imageWidth * screenDimension.height / screenDimension.width
                 captureScreen({
                     format: 'jpg',
-                    quality: Platform.OS == 'ios'? 0.5 : 1,
+                    quality: Platform.OS == 'ios' ? 0.5 : 1,
                     width: Math.round(imageWidth / pixelRatio),
                     height: Math.round(imageHeight / pixelRatio)
                 }).then(async uri => {
@@ -116,8 +116,3 @@ export const makeLogger = () => {
         } else return next(action)
     }
 }
-
-
-
-
-

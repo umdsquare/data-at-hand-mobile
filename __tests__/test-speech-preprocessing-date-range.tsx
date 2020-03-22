@@ -3,8 +3,6 @@
  */
 
 import 'react-native';
-import React from 'react';
-import App from '../App';
 
 // Note: test renderer must be required after react-native.
 import { preprocess } from '@core/speech/nlp/preprocessor';
@@ -164,7 +162,7 @@ const dataSources = [
   ["sleep length", DataSourceType.HoursSlept],
 ]
 
-/*
+
 describe("[DataSource] on [Date]", () => {
   for (const dayExpression of dayExpressions) {
     for (const dataSource of dataSources) {
@@ -202,4 +200,4 @@ describe("[DataSource] of/in/during [Period]", () => {
       }
     }
   }
-})*/
+})

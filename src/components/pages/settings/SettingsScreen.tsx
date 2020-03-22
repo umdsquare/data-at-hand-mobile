@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { View, Text, StyleSheet, TouchableHighlight, Alert, ScrollView, Switch, ViewStyle, Platform } from "react-native";
+import { View, Text, StyleSheet, TouchableHighlight, Alert, ScrollView, Switch, ViewStyle, Platform, SafeAreaView } from "react-native";
 import { MeasureUnitType } from "@measure/DataSourceSpec";
 import { Dispatch } from "redux";
 import { ReduxAppState } from "@state/types";
@@ -14,6 +14,10 @@ import { InitialLoadingIndicator } from "@components/pages/exploration/parts/mai
 import { StackNavigationProp } from "@react-navigation/stack";
 import { SettingsSteckParamList } from "@components/Routes";
 import { SystemLogger } from "@core/logging/SystemLogger";
+import { Logo } from "@components/Logo";
+import { StyleTemplates } from "@style/Styles";
+import { SafeAreaConsumer } from "react-native-safe-area-context";
+import { AboutPanel } from "./AbountPanel";
 
 
 const unitTypes = [{
@@ -62,12 +66,13 @@ const styles = StyleSheet.create({
     },
 
     subheaderStyle: {
-        marginTop: Sizes.verticalPadding * 2,
-        marginBottom: Sizes.verticalPadding,
+        paddingTop: Sizes.verticalPadding * 2,
+        paddingBottom: Sizes.verticalPadding,
         fontSize: Sizes.normalFontSize,
-        marginLeft: Sizes.horizontalPadding,
+        paddingLeft: Sizes.horizontalPadding,
         color: Colors.textGray,
-        fontWeight: '500'
+        fontWeight: '500',
+        backgroundColor: Colors.backPanelColor
     }
 })
 
@@ -96,9 +101,9 @@ const BooleanSettingsRow = (props: { title: string, value: boolean, onChange?: (
 
     return <View style={styles.rowContainerStyleNormalPadding}>
         <Text style={styles.rowTitleStyle}>{props.title}</Text>
-        <Switch value={props.value || false} onValueChange={onValueChange} 
-        trackColor={{ false: undefined, true: Platform.OS === 'android'? Colors.primaryLight : Colors.primary }}
-        thumbColor={Platform.OS === 'android'? (props.value === true? Colors.primary : '#f0f0f0') : undefined}
+        <Switch value={props.value || false} onValueChange={onValueChange}
+            trackColor={{ false: undefined, true: Platform.OS === 'android' ? Colors.primaryLight : Colors.primary }}
+            thumbColor={Platform.OS === 'android' ? (props.value === true ? Colors.primary : '#f0f0f0') : undefined}
         />
     </View>
 }
@@ -274,35 +279,59 @@ class SettingsScreen extends React.PureComponent<Props, State>{
     }
 
     render() {
-        return <ScrollView>
-            <Subheader title={"Measure Data Source"} />
-            <SettingsRow title="Service" value={DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).name}
-                onClick={this.onPressServiceButton} />
-            <SettingsRow title="Unit" value={unitTypes.find(t => t.key === this.props.selectedUnitType).label}
-                onClick={this.onPressUnitRow} />
-            <SettingsRow title="Refresh all cache" onClick={this.onPressRefreshAllCache} showArrow={false} />
-            <SettingsRow title={"Export " + DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).name + " data"} onClick={this.onPressExportAllData} showArrow={false} />
+        return <View style={StyleTemplates.backPanelBackgroundColor}>
+            <View style={{
+                ...StyleTemplates.fitParent,
+                top: undefined,
+                height: '50%',
+                backgroundColor: Colors.headerBackground
+            }} />
+            <SafeAreaConsumer>
+                {insets =>
+                    <ScrollView>
+                        <Subheader title={"Measure Data Source"} />
+                        <SettingsRow title="Service" value={DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).name}
+                            onClick={this.onPressServiceButton} />
+                        <SettingsRow title="Refresh all data cache" onClick={this.onPressRefreshAllCache} showArrow={false} />
+                        {
+                            __DEV__ === true ?
+                                <SettingsRow title={"Export " + DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).name + " data"} onClick={this.onPressExportAllData} showArrow={false} />
+                                : null
+                        }
+                        {
+                            this.state.isLoading === true ? <InitialLoadingIndicator loadingMessage={this.state.loadingMessage} /> : null
+                        }
 
-            {
-                this.state.isLoading === true ? <InitialLoadingIndicator loadingMessage={this.state.loadingMessage} /> : null
-            }
 
-            <Subheader title={"Logging"} />
+                        <Subheader title={"Display Settings"} />
+                        <SettingsRow title="Unit" value={unitTypes.find(t => t.key === this.props.selectedUnitType).label}
+                            onClick={this.onPressUnitRow} />
 
-            <BooleanSettingsRow title="Record Logs" value={this.props.recordLogs} onChange={this.onSetRecordLogs} />
-            {
-                this.props.recordLogs === true ?
-                    <BooleanSettingsRow title="Record Screens" value={this.props.recordScreens} onChange={this.onSetRecordScreens}/> : null
-            }
-            {
-                this.props.loggingSessionId != null ? <>
-                    <SettingsRow title="Clear the current logging session" subtitle={"Current session id: " + this.props.loggingSessionId}
-                        onClick={this.onClearLoggingSession} showArrow={false} />
-                    <SettingsRow title="Export logs" onClick={this.onExportLogsClick} showArrow={false} />
-                </> : null
-            }
 
-        </ScrollView>
+                        <Subheader title={"Logging"} />
+
+                        <BooleanSettingsRow title="Record Logs" value={this.props.recordLogs} onChange={this.onSetRecordLogs} />
+                        {
+                            this.props.recordLogs === true ?
+                                <BooleanSettingsRow title="Record Screens" value={this.props.recordScreens} onChange={this.onSetRecordScreens} /> : null
+                        }
+                        {
+                            this.props.loggingSessionId != null ? <>
+                                <SettingsRow title="Clear the current logging session" subtitle={"Current session id: " + this.props.loggingSessionId}
+                                    onClick={this.onClearLoggingSession} showArrow={false} />
+                                <SettingsRow title="Export logs" onClick={this.onExportLogsClick} showArrow={false} />
+                            </> : null
+                        }
+
+
+                        <Subheader title={"About"} />
+                        <AboutPanel containerStyle={{
+                            paddingBottom: Math.max(20, insets!.bottom) + 20
+                        }} />
+                    </ScrollView>
+                }
+            </SafeAreaConsumer>
+        </View>
     }
 }
 

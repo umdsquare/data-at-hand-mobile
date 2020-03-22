@@ -1,8 +1,10 @@
 'use strict';
 
 export default {
-  lightBackground: "#F5F9F8",
+  backPanelColor: '#EFEFF4',
+
   lightBackgroundGradient: ["#e0e8ee", "#eeeaec"],
+  
   accent: "#F58674",
   primary: "#EF579D",
   primaryLight: "#ffb5d1",

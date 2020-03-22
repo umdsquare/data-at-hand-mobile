@@ -3,6 +3,11 @@ import {StyleSheet, Platform} from 'react-native';
 import Colors from './Colors';
 
 const StyleTemplates = StyleSheet.create({
+
+  backPanelBackgroundColor: {
+    backgroundColor: Colors.backPanelColor
+  },
+
   screenDefaultStyle: {
     flex: 1,
     alignSelf: 'stretch',
