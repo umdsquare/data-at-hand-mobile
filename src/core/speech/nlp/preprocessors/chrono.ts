@@ -15,6 +15,7 @@ export declare module Chrono {
     }
 
     export class ParsedComponents {
+        knownValues: {[key: string]:number};
         assign(component: ComponentName, value: number): void;
         imply(component: ComponentName, value: number): void;
         get(component: ComponentName): number;

@@ -1,23 +1,36 @@
 import { VariableType } from "../types";
 import { DateTimeHelper } from "@utils/time";
-import { startOfMonth, startOfYear, endOfMonth, endOfYear, addYears, addMonths, startOfWeek, endOfWeek, addWeeks } from "date-fns";
+import { startOfMonth, startOfYear, endOfMonth, endOfYear, addYears, addMonths, startOfWeek, endOfWeek, addWeeks, getYear, getMonth, isAfter, subYears } from "date-fns";
 import { Chrono, mergeChronoOptions } from "./chrono";
 import NamedRegExp from 'named-regexp-groups'
 import chrono_node from 'chrono-node';
+import chronoParserApi from 'chrono-node/src/parsers/parser';
 import chronoOptions from 'chrono-node/src/options';
 import { HOLIDAY_PARSERS, HOLIDAY_REFINERS } from "./chrono-holidays";
 import { CHRONO_EXTENSION_PARSERS, CHRONO_EXTENSION_REFINERS } from "./chrono-extension";
+import { makeWeekdayParser } from "./chrono-extensions/chrono-weekdays";
 
 
 let _chrono: Chrono.ChronoInstance = undefined
-function getChrono(): Chrono.ChronoInstance{
-    if(_chrono == null){
+function getChrono(): Chrono.ChronoInstance {
+    if (_chrono == null) {
+
+        chronoParserApi.findYearClosestToRef = function (ref, day, month) {
+            let date = new Date(getYear(ref), month-1, day)
+            while (isAfter(date, ref) === true) {
+                date = subYears(date, 1)
+            }
+            return getYear(date)
+        }
+
+        chronoParserApi.ENWeekdayParser = makeWeekdayParser
+
         //initialize chrono
         const options = mergeChronoOptions([
             chronoOptions.en.casual,
             chronoOptions.commonPostProcessing
         ]);
-        
+
         HOLIDAY_PARSERS.concat(CHRONO_EXTENSION_PARSERS).forEach(parser => {
             options.parsers.push(parser)
         })
@@ -32,7 +45,7 @@ function getChrono(): Chrono.ChronoInstance{
         console.log("Parsers:", _chrono.parsers.length)
         console.log("Refiners:", _chrono.refiners.length)
         console.log("===============================")
-        
+
     }
     return _chrono
 }
@@ -103,7 +116,7 @@ const templates: Array<{ regex: NamedRegExp, parse: (groups: any, today: Date) =
 
 
 function chronoPass(text: string, today: Date): { type: VariableType.Date | VariableType.Period, value: number | [number, number] } | null {
-    const chronoResult: Chrono.ParsedResult[] = getChrono().parse(text, today, {forwardDate: false})
+    const chronoResult: Chrono.ParsedResult[] = getChrono().parse(text, today)
     console.log("chrono result:", chronoResult)
     if (chronoResult.length > 0) {
         const bestResult = chronoResult[0]
@@ -116,7 +129,7 @@ function chronoPass(text: string, today: Date): { type: VariableType.Date | Vari
                 startDate = startOfMonth(bestResult.start.date())
             } else if (bestResult.start.isCertain('year')) {
                 startDate = startOfYear(bestResult.start.date())
-            }
+            } else startDate = bestResult.start.date()
 
             let endDate: Date | undefined
             if (bestResult.end.isCertain('day')) {
@@ -125,7 +138,7 @@ function chronoPass(text: string, today: Date): { type: VariableType.Date | Vari
                 endDate = endOfMonth(bestResult.end.date())
             } else if (bestResult.end.isCertain('year')) {
                 endDate = endOfYear(bestResult.end.date())
-            }
+            } else endDate = bestResult.end.date()
 
             if (startDate != null && endDate != null) {
                 return {
@@ -145,6 +158,12 @@ function chronoPass(text: string, today: Date): { type: VariableType.Date | Vari
                 return {
                     type: VariableType.Period,
                     value: [DateTimeHelper.toNumberedDateFromDate(startOfMonth(date)), DateTimeHelper.toNumberedDateFromDate(endOfMonth(date))]
+                }
+            } else if (bestResult.start.knownValues.weekday != null) {
+                const date = bestResult.start.date()
+                return {
+                    type: VariableType.Date,
+                    value: DateTimeHelper.toNumberedDateFromDate(date)
                 }
             }
         }

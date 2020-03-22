@@ -6,7 +6,16 @@
   "bugs": {
     "url": "https://github.com/muclipse/data-at-hand/issues"
   },
-  "keywords": ["multimodal", "speech", "fitness", "mobile", "personal", "tracking", "hci", "infovis"],
+  "keywords": [
+    "multimodal",
+    "speech",
+    "fitness",
+    "mobile",
+    "personal",
+    "tracking",
+    "hci",
+    "infovis"
+  ],
   "version": "0.2.3",
   "private": true,
   "scripts": {
@@ -14,6 +23,7 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
+    "testsilent": "jest --silent",
     "postversion": "react-native-version --target ios"
   },
   "dependencies": {
@@ -111,14 +121,6 @@
     "typescript": "^3.8.3"
   },
   "jest": {
-    "preset": "react-native",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ]
+    "preset": "react-native"
   }
 }

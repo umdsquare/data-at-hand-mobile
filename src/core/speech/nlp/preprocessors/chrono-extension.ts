@@ -1,8 +1,8 @@
 import chrono from 'chrono-node';
-import { getYear, isAfter, addYears, getDate, subDays, getMonth, addDays, subYears, subWeeks, subMonths, startOfMonth, endOfMonth, isBefore } from 'date-fns';
 import { Chrono } from './chrono';
-import NamedRegExp from 'named-regexp-groups'
+import { getYear, isAfter, addYears, getDate, subDays, getMonth, addDays, subYears, subWeeks, subMonths, startOfMonth, endOfMonth, isBefore } from 'date-fns';
 
+import NamedRegExp from 'named-regexp-groups'
 
 function getSeasonOfYear(season: string, year: number): [Date, Date] {
     switch (season) {
@@ -19,9 +19,9 @@ function getSeasonOfYear(season: string, year: number): [Date, Date] {
 }
 
 const seasonParser = new chrono.Parser();
-seasonParser.pattern = function () { return new NamedRegExp("(((?<year1>[1-2][0-9]{3})(\\'s)?\\s+)|(?<last>(last,?\\s+)+))?(?<season>spring|summer|autumn|winter)(\\s+((of|in)\\s+)?(?<year2>[1-2][0-9]{3}))?", "i") }
+seasonParser.pattern = function () { return new NamedRegExp("(((?<year1>[1-2][0-9]{3})(\\'s)?\\s+)|(?<last>(last,?\\s+)+))?(?<season>spring|summer|fall|autumn|winter)(\\s+((of|in)\\s+)?(?<year2>[1-2][0-9]{3}))?", "i") }
 seasonParser.extract = function (text, ref, match, opt) {
-
+    console.log("season matched:", match)
 
     let seasonRange
 
@@ -34,7 +34,7 @@ seasonParser.extract = function (text, ref, match, opt) {
     } else {
         let lastCount = 0
         if (match.groups.last) {
-            lastCount = match.groups.last.trim().split(/\s+/).length - 1
+            lastCount = match.groups.last.trim().split(/\s+/).length
         }
         let year = getYear(ref)
         seasonRange = getSeasonOfYear(season, year)
@@ -43,7 +43,7 @@ seasonParser.extract = function (text, ref, match, opt) {
             seasonRange = getSeasonOfYear(season, year)
         }
         if (lastCount > 0) {
-            year -= lastCount
+            year -= isBefore(ref, seasonRange[1]) === true? (lastCount) : lastCount - 1
             seasonRange = getSeasonOfYear(season, year)
         }
     }
@@ -69,6 +69,10 @@ seasonParser.extract = function (text, ref, match, opt) {
 
     return result
 }
+
+//===========================================================================
+
+
 
 //===========================================================================
 

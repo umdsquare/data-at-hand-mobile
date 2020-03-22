@@ -9,6 +9,9 @@ import { tryPreprocessingByTemplates, DATASOURCE_VARIABLE_RULES, CYCLIC_TIME_RUL
 import { parseTimeOfTheDayTextToDiffSeconds } from "./preprocessors/preprocessor-time-clock";
 import { DataSourceType } from "@measure/DataSourceSpec";
 
+compromise.extend(require('compromise-numbers'))
+compromise.extend(require('compromise-dates'))
+
 const PARSED_TAG = "ReplacedId"
 
 function tag(doc: compromise.Document, variableType: VariableType): compromise.Document {
@@ -37,6 +40,7 @@ const lexicon = {
     "new year": 'Date',
     'since': 'Date',
     "fall": 'Date',
+    "spring": 'Date'
 }
 
 const MONTH_NAMES_REGEX = new RegExp(`${MONTH_NAMES.join("|")}`, 'i')

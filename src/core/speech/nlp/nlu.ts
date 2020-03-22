@@ -1,7 +1,4 @@
 import { SpeechContext, SpeechContextType, TimeSpeechContext, RangeElementSpeechContext } from "./context"
-import compromise from 'compromise';
-compromise.extend(require('compromise-numbers'))
-compromise.extend(require('compromise-dates'))
 import { preprocess } from "./preprocessor";
 import { ActionTypeBase } from "../../../state/types";
 import { VariableType, VariableInfo, PreProcessedInputText, Intent, NLUOptions, ConditionInfo } from "./types";
