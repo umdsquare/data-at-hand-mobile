@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
 import { DataServiceManager } from '@measure/DataServiceManager';
 import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
+import { coverValueInRange } from '@utils/utils';
 
 interface Props extends ChartProps {
     data: Array<{ numberedDate: number, value: number, bedTimeDiffSeconds: number, wakeTimeDiffSeconds: number }>
@@ -50,7 +51,7 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
     const earliestTimeDiff = Math.min(d3Array.min(prop.data, d => d.wakeTimeDiffSeconds)!, d3Array.min(prop.data, d => d.bedTimeDiffSeconds)!, prop.preferredValueRange[0] || Number.MAX_SAFE_INTEGER)
 
     const scaleForNice = scaleLinear()
-        .domain([Math.floor(earliestTimeDiff / 3600), Math.ceil(latestTimeDiff / 3600)])
+        .domain(coverValueInRange([Math.floor(earliestTimeDiff / 3600), Math.ceil(latestTimeDiff / 3600)], highlightReference/3600))
         .nice()
 
     const ticks = scaleForNice.ticks(5).map(t => t * 3600)

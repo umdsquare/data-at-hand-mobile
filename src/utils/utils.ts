@@ -41,3 +41,12 @@ export class Lazy<T>{
         return this._instance!
     }
 }
+
+
+export function coverValueInRange(range: [number, number], value: number | undefined | null): [number, number] {
+    if (value != null) {
+        range[0] = Math.min(range[0], value)
+        range[1] = Math.max(range[1], value)
+    }
+    return range
+}

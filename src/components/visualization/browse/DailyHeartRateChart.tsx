@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
 import { DataServiceManager } from '@measure/DataServiceManager';
 import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
+import { coverValueInRange } from '@utils/utils';
 
 
 export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
@@ -37,7 +38,7 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
     const valueMax = Math.max(d3Array.max(prop.data, d => d.value)!, prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)
 
     const scaleY = scaleLinear()
-        .domain([valueMin - 1, valueMax + 1])
+        .domain(coverValueInRange([valueMin - 1, valueMax + 1], highlightReference))
         .range([chartArea.height, 0])
         .nice()
 

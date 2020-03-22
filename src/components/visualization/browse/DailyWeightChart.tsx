@@ -12,7 +12,7 @@ import Colors from '@style/Colors';
 import { IWeightIntraDayLogEntry } from '@core/exploration/data/types';
 import { MeasureUnitType, DataSourceType } from '@measure/DataSourceSpec';
 import unitConvert from 'convert-units';
-import { noop } from '@utils/utils';
+import { noop, coverValueInRange } from '@utils/utils';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
 import { DataServiceManager } from '@measure/DataServiceManager';
@@ -57,10 +57,10 @@ export const DailyWeightChart = React.memo((prop: Props) => {
 
     const preferredMin = prop.preferredValueRange[0] != null ? convert(prop.preferredValueRange[0]) : null
     const preferredMax = prop.preferredValueRange[1] != null ? convert(prop.preferredValueRange[1]) : null
-    const weightDomain = [
+    const weightDomain = coverValueInRange([
         Math.floor(((trendMin === Number.MAX_SAFE_INTEGER && logMin === Number.MAX_SAFE_INTEGER && preferredMin == null) ? 0 : Math.min(trendMin, logMin, preferredMin || Number.MAX_SAFE_INTEGER)) - 1),
         Math.ceil(((trendMax === Number.MIN_SAFE_INTEGER && logMax === Number.MIN_SAFE_INTEGER && preferredMax == null) ? 0 : Math.max(trendMax, logMax, preferredMax || Number.MIN_SAFE_INTEGER)) + 1),
-    ]
+    ], convert(highlightReference))
 
     const scaleY = scaleLinear()
         .domain(weightDomain)

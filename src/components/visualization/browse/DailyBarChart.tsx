@@ -12,6 +12,7 @@ import { useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
 import { DataServiceManager } from '@measure/DataServiceManager';
 import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
+import { coverValueInRange } from '@utils/utils';
 
 interface Props extends ChartProps {
     valueTickFormat?: (num: number) => string,
@@ -39,8 +40,13 @@ export const DailyBarChart = React.memo((prop: Props) => {
     const today = DateTimeHelper.toNumberedDateFromDate(getToday())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
+    const valueRange = coverValueInRange(
+        [0, Math.max(d3Array.max(prop.data, d => d.value)!, prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)],
+        highlightReference
+    )
+
     const scaleY = scaleLinear()
-        .domain([0, Math.max(d3Array.max(prop.data, d => d.value)!, prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)])
+        .domain(valueRange)
         .range([chartArea.height, 0])
         .nice()
 
