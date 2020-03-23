@@ -1,10 +1,10 @@
-import React, { useState, useRef, useCallback, useMemo, useEffect } from "react";
-import { View, StyleSheet, Text, ViewStyle, TextStyle } from "react-native";
+import React, { useState, useRef, useCallback, useMemo, useEffect, useImperativeHandle } from "react";
+import { View, StyleSheet, Text, ViewStyle, TextStyle, Animated } from "react-native";
 import Colors from "@style/Colors";
 import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
 import { Sizes } from "@style/Sizes";
 import Dash from 'react-native-dash';
-import { format, differenceInCalendarDays, isFirstDayOfMonth, isLastDayOfMonth, isMonday, isSunday, addDays, startOfMonth, endOfMonth, addMonths } from "date-fns";
+import { format, differenceInCalendarDays, addDays, startOfMonth, endOfMonth, addMonths } from "date-fns";
 import { DatePicker, WeekPicker, MonthPicker } from "@components/common/CalendarPickers";
 import { InteractionType } from "@state/exploration/interaction/actions";
 import { DateTimeHelper, isToday, isYesterday } from "@utils/time";
@@ -15,6 +15,7 @@ import { useSelector } from "react-redux";
 import { ReduxAppState } from "@state/types";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { BorderlessButton, LongPressGestureHandler, State as GestureState, LongPressGestureHandlerStateChangeEvent, FlingGestureHandler, Directions, FlingGestureHandlerStateChangeEvent } from "react-native-gesture-handler";
+import { denialAnimationSettings } from "@components/common/Animations";
 
 const dateButtonWidth = 140
 const barHeight = 60
@@ -130,6 +131,7 @@ interface Props {
     onLongPressOut?: (porition: ElementType) => void,
     showBorder?: boolean,
     isLightMode?: boolean,
+    showSpeechIndicator?: boolean
 }
 
 interface State {
@@ -144,12 +146,18 @@ interface State {
     clickedElementType?: ElementType | null,
 }
 
-const DateButton = React.memo((props: {
+interface DateButtonApi {
+    playDenialAnimation: () => void
+}
+interface DateButtonProps {
     date: number, overrideFormat?: string, freeWidth?: boolean, onPress: () => void,
+    showSpeechIndicator?: boolean,
     onLongPressIn?: () => void,
     onLongPressOut?: () => void,
     isLightMode?: boolean,
-}) => {
+}
+
+const DateButton = React.forwardRef((props: DateButtonProps, ref: any) => {
 
     const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const today = DataServiceManager.instance.getServiceByKey(serviceKey).getToday()
@@ -157,6 +165,15 @@ const DateButton = React.memo((props: {
     const date = DateTimeHelper.toDate(props.date)
     const dateString = format(date, props.overrideFormat || "MMM dd, yyyy")
     const subText = isToday(date, today) === true ? 'Today' : (isYesterday(date, today) === true ? "Yesterday" : format(date, "EEEE"))
+
+    const [movement] = useState(new Animated.Value(0))
+
+    useImperativeHandle(ref, () => ({
+        playDenialAnimation: () => {
+            movement.setValue(0)
+            Animated.timing(movement, denialAnimationSettings.timingConfig).start()
+        }
+    }), [movement])
 
     const onLongPressStateChange = useCallback((ev: LongPressGestureHandlerStateChangeEvent) => {
         if (ev.nativeEvent.state === GestureState.ACTIVE) {
@@ -170,16 +187,19 @@ const DateButton = React.memo((props: {
         shouldCancelWhenOutside={false}
         maxDist={150}>
         <BorderlessButton onPress={props.onPress} shouldCancelWhenOutside={false} rippleColor={"rgba(255,255,255,0.2)"}>
-            <View style={props.freeWidth === true ? styles.dateButtonContainerStyleFreeWidth : styles.dateButtonContainerStyle}>
+            <Animated.View style={{
+                ...(props.freeWidth === true ? styles.dateButtonContainerStyleFreeWidth : styles.dateButtonContainerStyle),
+                transform: [{ translateX: movement.interpolate(denialAnimationSettings.interpolationConfig) }]
+            }}>
                 <View style={styles.dateButtonDatePartStyle}>
                     <Text style={props.isLightMode === true ? styles.dateButtonDateTextStyleLight : styles.dateButtonDateTextStyle}>{dateString}</Text>
-                    <View style={styles.dateButtonIndicatorContainerStyle}>
+                    {props.showSpeechIndicator !== false ? <View style={styles.dateButtonIndicatorContainerStyle}>
                         <SpeechAffordanceIndicator />
-                    </View>
+                    </View> : null}
                 </View>
                 <Text style={styles.midViewDescriptionTextStyle}>
                     {subText}
-                </Text></View>
+                </Text></Animated.View>
         </BorderlessButton>
     </LongPressGestureHandler>
 })
@@ -200,8 +220,8 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
         const semanticTest = DateTimeHelper.rangeSemantic(fromDate, toDate);
 
-        if(semanticTest){
-            switch(semanticTest.semantic){
+        if (semanticTest) {
+            switch (semanticTest.semantic) {
                 case 'month':
                     return {
                         ...prevState,
@@ -226,7 +246,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                         numDays: numDays,
                         level: "week",
                         periodName: "Week of " + format(fromDate, "MMM dd")
-                    }   
+                    }
             }
         }
 
@@ -253,7 +273,10 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
     private swipedFeedbackRef = React.createRef<SwipedFeedback>()
     private bottomSheetRef = React.createRef<BottomSheet>()
-    
+
+    private toButtonRef = React.createRef<DateButtonApi>()
+    private fromButtonRef = React.createRef<DateButtonApi>()
+
     constructor(props: Props) {
         super(props)
         this.state = DateRangeBar.deriveState(props.from, props.to, { isBottomSheetOpen: false, } as any)
@@ -349,7 +372,14 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             ignoreAndroidSystemSettings: true
         })
 
-        this.props.onLongPressIn && this.props.onLongPressIn('from')
+        if (this.props.onLongPressIn) {
+            this.props.onLongPressIn('from')
+        } else {
+            requestAnimationFrame(() => {
+                this.fromButtonRef.current?.playDenialAnimation()
+            })
+        }
+
     }
 
     onFromButtonLongPressOut = () => {
@@ -362,7 +392,13 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
             enableVibrateFallback: true,
             ignoreAndroidSystemSettings: true
         })
-        this.props.onLongPressIn && this.props.onLongPressIn('to')
+
+        if (this.props.onLongPressIn != null) {
+            this.props.onLongPressIn('to')
+        } else {
+
+            this.toButtonRef.current?.playDenialAnimation()
+        }
     }
 
     onToButtonLongPressOut = () => {
@@ -429,7 +465,9 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                 } as ViewStyle}>
                     <SwipedFeedback ref={this.swipedFeedbackRef} />
 
-                    <DateButton date={this.state.from} onPress={this.onFromDatePressed} isLightMode={this.props.isLightMode}
+                    <DateButton ref={this.fromButtonRef} date={this.state.from} onPress={this.onFromDatePressed}
+                        isLightMode={this.props.isLightMode}
+                        showSpeechIndicator={this.props.showSpeechIndicator}
                         onLongPressIn={this.onFromButtonLongPressIn} onLongPressOut={this.onFromButtonLongPressOut} />
 
                     <View style={styles.midViewContainerStyle} >
@@ -458,7 +496,9 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
                         </View>
                     </View>
 
-                    <DateButton date={this.state.to} onPress={this.onToDatePressed} isLightMode={this.props.isLightMode}
+                    <DateButton ref={this.toButtonRef} date={this.state.to} onPress={this.onToDatePressed}
+                        isLightMode={this.props.isLightMode}
+                        showSpeechIndicator={this.props.showSpeechIndicator}
                         onLongPressIn={this.onToButtonLongPressIn} onLongPressOut={this.onToButtonLongPressOut} />
 
                     <BottomSheet ref={this.bottomSheetRef}>

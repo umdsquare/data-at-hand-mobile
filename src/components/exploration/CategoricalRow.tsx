@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, FlatList, Animated } from 'react-native';
 import { Sizes } from '@style/Sizes';
 import { SpeechAffordanceIndicator } from './SpeechAffordanceIndicator';
 import { SwipedFeedback } from '@components/common/SwipedFeedback';
@@ -10,6 +10,7 @@ import { StyleTemplates } from '@style/Styles';
 import Haptic from "react-native-haptic-feedback";
 
 import { FlingGestureHandler, Directions, FlingGestureHandlerStateChangeEvent, State, BorderlessButton, LongPressGestureHandler, LongPressGestureHandlerStateChangeEvent } from 'react-native-gesture-handler';
+import { denialAnimationSettings } from '@components/common/Animations';
 const height = 50
 const containerStyleBase = {
     flexDirection: 'row',
@@ -123,11 +124,22 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
                 ignoreAndroidSystemSettings: true
             })
 
-            if (prop.onLongPressIn) prop.onLongPressIn()
+            if (prop.onLongPressIn) {
+                prop.onLongPressIn()
+            } else {
+                requestAnimationFrame(()=>{
+                    movement.setValue(0)
+                    Animated.timing(movement, denialAnimationSettings.timingConfig).start()
+                })
+            }
         } else if (ev.nativeEvent.state === State.END || ev.nativeEvent.state === State.CANCELLED) {
             if (prop.onLongPressOut) prop.onLongPressOut()
         }
     }, [prop.onLongPressIn, prop.onLongPressOut])
+
+
+    const [movement] = useState(new Animated.Value(0))
+
 
     return <FlingGestureHandler
         direction={Directions.LEFT}
@@ -144,15 +156,22 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
                     onHandlerStateChange={onLongPressStateChange}
                     shouldCancelWhenOutside={false}
                     maxDist={200}>
-                    <BorderlessButton style={styles.buttonStyle} onPress={onPress} rippleColor={"rgba(255,255,255,0.2)"}>
-                        {
-                            prop.IconComponent ? <prop.IconComponent
-                                {...{ color: prop.isLightMode === true ? Colors.textGray : 'white', size: 20 }}
-                                {...(prop.iconProps && prop.iconProps(prop.values.indexOf(prop.value)))} /> : null
-                        }
-                        <Text style={prop.isLightMode === true ? styles.valueStyelLight : styles.valueStyle}>{prop.value}</Text>
-                        {prop.useSpeechIndicator !== false ?
-                            <SpeechAffordanceIndicator overrideStyle={styles.indicatorStyle} /> : null}
+                    <BorderlessButton onPress={onPress} rippleColor={"rgba(255,255,255,0.2)"}>
+                        <Animated.View style={{
+                            ...styles.buttonStyle,
+                            transform: [{
+                                translateX: movement.interpolate(denialAnimationSettings.interpolationConfig)
+                            }]
+                        }}>
+                            {
+                                prop.IconComponent ? <prop.IconComponent
+                                    {...{ color: prop.isLightMode === true ? Colors.textGray : 'white', size: 20 }}
+                                    {...(prop.iconProps && prop.iconProps(prop.values.indexOf(prop.value)))} /> : null
+                            }
+                            <Text style={prop.isLightMode === true ? styles.valueStyelLight : styles.valueStyle}>{prop.value}</Text>
+                            {prop.useSpeechIndicator !== false ?
+                                <SpeechAffordanceIndicator overrideStyle={styles.indicatorStyle} /> : null}
+                        </Animated.View>
                     </BorderlessButton>
                 </LongPressGestureHandler>
 

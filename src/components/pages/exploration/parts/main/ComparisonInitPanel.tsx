@@ -95,6 +95,7 @@ export const ComparisonInitPanel = (props: { info: ExplorationInfo, onCompleted?
         <DateRangeBar
             from={rangeA[0]}
             to={rangeA[1]}
+            showSpeechIndicator={false}
             isLightMode={true}
             onRangeChanged={(from, to) => {
                 setRangeA([from, to])
@@ -113,6 +114,7 @@ export const ComparisonInitPanel = (props: { info: ExplorationInfo, onCompleted?
             cycleType === 'compareTwoRanges' && rangeB ? <DateRangeBar
                 from={rangeB[0]}
                 to={rangeB[1]}
+                showSpeechIndicator={false}
                 isLightMode={true}
                 onRangeChanged={(from, to) => {
                     setRangeB([from, to])
