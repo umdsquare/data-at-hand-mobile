@@ -1,4 +1,4 @@
-import { getYear, getMonth, getDate, differenceInDays, subDays, addDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, addMonths, lastDayOfMonth, isSameYear, startOfMonth, endOfMonth, format, isSameDay, differenceInCalendarDays, isMonday, isSunday, getDayOfYear, isLeapYear, startOfWeek } from "date-fns"
+import { getYear, getMonth, getDate, differenceInDays, subDays, addDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, addMonths, lastDayOfMonth, isSameYear, startOfMonth, endOfMonth, format, isSameDay, differenceInCalendarDays, isMonday, isSunday, getDayOfYear, isLeapYear, startOfWeek, startOfYear, endOfYear, addYears, endOfWeek, addWeeks } from "date-fns"
 import { toDate } from "date-fns-tz"
 
 /**
@@ -85,6 +85,12 @@ export class DateTimeHelper {
         return seq
     }
 
+    static getNumDays(start: number|Date, end: number|Date): number{
+        const fromDate: Date = typeof start === 'number' ? DateTimeHelper.toDate(start) : start
+        const toDate: Date = typeof end === 'number' ? DateTimeHelper.toDate(end) : end
+        return -differenceInCalendarDays(fromDate, toDate) + 1
+    }
+
     static rangeSemantic(start: number | Date, end: number | Date, ref?: Date): { semantic: "mondayWeek" | "sundayWeek" | "month" | "year", differenceToRef?: number } | null {
         const fromDate: Date = typeof start === 'number' ? DateTimeHelper.toDate(start) : start
         const toDate: Date = typeof end === 'number' ? DateTimeHelper.toDate(end) : end
@@ -118,6 +124,46 @@ export class DateTimeHelper {
         }
 
         return null
+    }
+
+    static mondayWeekStartFunc = date => startOfWeek(date, { weekStartsOn: 1 })
+    static mondayWeekEndFunc = date => endOfWeek(date, { weekStartsOn: 1 })
+    static sundayWeekStartFunc = date => startOfWeek(date, { weekStartsOn: 0 })
+    static sundayWeekEndFunc = date => endOfWeek(date, { weekStartsOn: 0 })
+
+
+    static getSemanticRange(ref: Date, semantic: 'year' | 'month' | 'sundayWeek' | 'mondayWeek', offset: number = 0): [number, number] {
+        let startFunc: (Date) => Date
+        let endFunc: (Date) => Date
+        let offsetFunc: (Date, offset) => Date
+        switch (semantic) {
+            case 'year':
+                startFunc = startOfYear
+                endFunc = endOfYear
+                offsetFunc = addYears
+                break;
+            case 'month':
+                startFunc = startOfMonth
+                endFunc = endOfMonth
+                offsetFunc = addMonths
+                break;
+            case 'mondayWeek':
+                startFunc = this.mondayWeekStartFunc
+                endFunc = this.mondayWeekEndFunc
+                offsetFunc = addWeeks
+                break;
+            case 'sundayWeek':
+                startFunc = this.sundayWeekStartFunc
+                endFunc = this.sundayWeekEndFunc
+                offsetFunc = addWeeks
+                break;
+            default: throw Error("Unsupported semantic: " + semantic)
+        }
+        const offsetDate = offsetFunc(ref, offset)
+        return [
+            this.toNumberedDateFromDate(startFunc(offsetDate)), 
+            this.toNumberedDateFromDate(endFunc(offsetDate))
+        ]
     }
 
     static formatDuration(durationInSeconds: number, roundToMins: boolean = false): string {

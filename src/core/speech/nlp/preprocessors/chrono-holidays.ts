@@ -34,26 +34,27 @@ const holidayRules = new Lazy<Array<{ functionName: string, rule: string }>>(() 
     return [
         { rule: sdayFormat("new\\s+year"), functionName: "newYearsDay" },
         { rule: sdayFormat("valentine"), functionName: 'valentinesDay' },
-        { rule: sdayFormat("martin"), functionName: "martinLutherKingDay" },
+        { rule: sdayFormat("martin\\s+luther(\\s+king)?(\\s+jr.?)?(\\s+junior)?"), functionName: "martinLutherKingDay" },
         { rule: sdayFormat("president"), functionName: "presidentsDay" },
         { rule: "easter", functionName: 'easter' },
         { rule: sdayFormat("mother"), functionName: "mothersDay" },
-        { rule: "memorial\s+day", functionName: "memorialDay" },
+        { rule: "memorial\\s+day", functionName: "memorialDay" },
         { rule: sdayFormat("father"), functionName: "fathersDay" },
-        { rule: "independence\s+day", functionName: "independenceDay" },
-        { rule: "labor\s+day", functionName: "laborDay" },
-        { rule: "columbus\s+day", functionName: "columbusDay" },
+        { rule: "independence\\s+day", functionName: "independenceDay" },
+        { rule: "labor\\s+day", functionName: "laborDay" },
+        { rule: sdayFormat("columbus"), functionName: "columbusDay" },
         { rule: "halloween", functionName: "halloween" },
         { rule: sdayFormat("veteran"), functionName: "veteransDay" },
-        { rule: "thanksgiving(\s+day)?", functionName: "thanksgiving" },
+        { rule: "thanksgiving(\\s+day)?", functionName: "thanksgiving" },
         { rule: "christmas", functionName: "christmas" },
     ]
 })
 
 const commonHolidayParsers = holidayRules.get().map(rule => {
     const commonHolidayParser = new chrono.Parser();
-    commonHolidayParser.pattern = function () { return new NamedRegExp(yearFormat(rule.rule), "i") }
+    commonHolidayParser.pattern = function () { console.log(new NamedRegExp(yearFormat(rule.rule), "i")); return new NamedRegExp(yearFormat(rule.rule), "i") }
     commonHolidayParser.extract = function (text, ref, match, opt) {
+        console.log("match:", match)
         const generateFunc: ((year: number) => Date) = Holidays[rule.functionName]
         let date: Date
         if (match.groups.year1 || match.groups.year2) {

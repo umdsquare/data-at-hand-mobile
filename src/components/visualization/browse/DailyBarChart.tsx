@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import Svg, { Rect, Line, G } from 'react-native-svg';
+import React from 'react';
+import { Rect, Line, G } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartProps, getChartElementColor, getChartElementOpacity } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';

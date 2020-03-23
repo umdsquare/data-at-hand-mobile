@@ -69,6 +69,24 @@ const relatives: Array<[string, [number, number]]> = [
   ["last last week", [20200210, 20200216]],
 ]
 
+const holidays: Array<[string, number]> = [
+  ["New Year's Day", 20200101],
+  ["Valentine Day", 20200214],
+  ["Martin Luther King Junior Day", 20200120],
+  ["Presidents Day", 20200217],
+  ["Easter", 20190421],
+  ["Columbus Day", 20191014],
+  ["Mother's Day", 20190512],
+  ["Memorial Day", 20190527],
+  ["Father's Day", 20190616],
+  ["Independence Day", 20190704],
+  ["Labor Day", 20190902],
+  ["Halloween", 20191031],
+  ["Veterans Day", 20191111],
+  ["Thanksgiving Day", 20191128],
+  ["Christmas", 20191225]
+]
+
 const months: Array<[string, [number, number]]> = [
   ["january", [20200101, 20200131]],
   ["february", [20200201, 20200229]],
@@ -121,7 +139,7 @@ const manualPeriods: Array<[string, [number, number]]> = [
   ["from Monday to Wednesday", [20200224, 20200226]]
 ]
 
-const dayExpressions = dayOfWeeks.concat(dayOfWeeksLast).concat(dayOfWeeksLastLast).concat(specificDays)
+const dayExpressions = dayOfWeeks.concat(dayOfWeeksLast).concat(dayOfWeeksLastLast).concat(specificDays).concat(holidays)
 const periodExpressions = relatives.concat(months).concat(seasons).concat(manualPeriods)
 
 describe("Day-only sentence", () => {
@@ -162,7 +180,7 @@ const dataSources = [
 ]
 
 
-describe("[DataSource] on [Date]", () => {
+describe.skip("[DataSource] on [Date]", () => {
   for (const dayExpression of dayExpressions) {
     for (const dataSource of dataSources) {
       const sentence = `${dataSource[0]} on ${dayExpression[0]}`
@@ -180,7 +198,7 @@ describe("[DataSource] on [Date]", () => {
   }
 })
 
-describe("[DataSource] of/in/during [Period]", () => {
+describe.skip("[DataSource] of/in/during [Period]", () => {
   for (const preposition of ["of", "in", "during"]) {
     for (const periodExpression of periodExpressions) {
       for (const dataSource of dataSources) {

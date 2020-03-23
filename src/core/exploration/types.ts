@@ -95,7 +95,7 @@ export function getIntraDayDataSourceName(type: IntraDayDataSourceType): string 
     case IntraDayDataSourceType.StepCount:
       return "Step Count"
     case IntraDayDataSourceType.Sleep:
-      return "Main Sleep"
+      return "Sleep"
     case IntraDayDataSourceType.HeartRate:
       return "Heart Rate"
   }

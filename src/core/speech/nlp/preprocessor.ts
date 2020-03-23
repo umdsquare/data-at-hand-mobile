@@ -40,7 +40,12 @@ const lexicon = {
     "new year": 'Date',
     'since': 'Date',
     "fall": 'Date',
-    "spring": 'Date'
+    "spring": 'Date',
+    //holidays
+    "valentine": 'Date',
+    "father":'Date',
+    "mother": 'Date',
+    'labor': 'Date'
 }
 
 const MONTH_NAMES_REGEX = new RegExp(`${MONTH_NAMES.join("|")}`, 'i')
@@ -149,6 +154,7 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
     const nlp = compromise(processedSpeech, lexicon)
 
     nlp.match("compare").unTag("Date").unTag("Time").unTag("Duration").tag("Verb")
+    nlp.match("martin luther king (jr|junior) day?").unTag('Person').tag('Date').tag('Holiday')
 
     console.log(nlp.termList())
 

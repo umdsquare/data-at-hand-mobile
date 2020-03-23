@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, Text, StyleSheet, LayoutAnimation } from 'react-native';
 import { Sizes } from '@style/Sizes';
 import { connect, useSelector, shallowEqual } from 'react-redux';
 import { ReduxAppState } from '@state/types';
@@ -51,8 +51,8 @@ const styles = StyleSheet.create({
 
     exampleTextSentenceStyle: {
         color: Colors.speechExampleTextColor,
-        fontSize: Sizes.normalFontSize,
-        fontWeight: '600',
+        fontSize: Sizes.smallFontSize,
+        fontWeight: '400',
         marginTop: 6,
         marginRight: 3, marginLeft: 3
     }
@@ -67,6 +67,7 @@ export const SpeechInputPanel = React.memo(() => {
         speechStatus: appState.speechRecognizerState.status,
         serviceKey: appState.settingsState.serviceKey
     }), shallowEqual)
+
 
     const selectedService = DataServiceManager.instance.getServiceByKey(serviceKey)
 
