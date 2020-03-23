@@ -1,6 +1,8 @@
 import { DataSourceSpec, DataSourceType, DataSourceCategory, DataSourceCategorySpec, MeasureUnitType } from "@measure/DataSourceSpec";
 import commaNumber from 'comma-number';
 import convert from "convert-units";
+import { IntraDayDataSourceType, inferIntraDayDataSourceType } from "@core/exploration/types";
+import { Lazy } from "@utils/utils";
 
 export class DataSourceManager {
 
@@ -49,6 +51,21 @@ export class DataSourceManager {
       description: 'Body weight measured at a specific moment',
     },
   ];
+
+  private _supportedIntradayDataSources = new Lazy(()=>{
+    const result: Array<IntraDayDataSourceType> = []
+    DataSourceManager.instance.supportedDataSources.forEach(s => {
+      const inferred = inferIntraDayDataSourceType(s.type)
+      if (result.indexOf(inferred) === -1 && inferred != null) {
+        result.push(inferred)
+      }
+    })
+    return result
+  })
+
+  get supportedIntraDayDataSources(): ReadonlyArray<IntraDayDataSourceType> {
+    return this._supportedIntradayDataSources.get()
+  }
 
   readonly dataSourceCategorySpecs: { [key: string]: DataSourceCategorySpec } = {}
 
@@ -102,7 +119,7 @@ export class DataSourceManager {
           case MeasureUnitType.Metric:
             return value
           case MeasureUnitType.US:
-            return Math.round(convert(value).from('kg').to('lb') * 10)/10
+            return Math.round(convert(value).from('kg').to('lb') * 10) / 10
         }
       default:
         return value
@@ -116,7 +133,7 @@ export class DataSourceManager {
           case MeasureUnitType.Metric:
             return value
           case MeasureUnitType.US:
-            return Math.round(convert(value).from('lb').to('kg') * 10)/10
+            return Math.round(convert(value).from('lb').to('kg') * 10) / 10
         }
       default:
         return value

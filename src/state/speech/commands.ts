@@ -13,9 +13,7 @@ import { SystemLogger, VerboseEventTypes } from "@core/logging/SystemLogger";
 
 const sessionMutex = new Mutex()
 
-let updatedContext: SpeechContext = null
-
-export function startSpeechSession(sessionId: string, context: SpeechContext): (dispatch: Dispatch, getState: () => ReduxAppState) => void {
+export function startSpeechSession(sessionId: string, speechContext: SpeechContext): (dispatch: Dispatch, getState: () => ReduxAppState) => void {
     return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
         const currentState = getState()
         console.log("Previous speech session state: ", currentState.speechRecognizerState.status)
@@ -43,7 +41,7 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
         }
 
         console.log(sessionId, "Start speech session")
-        dispatch(createBootstrapAction(sessionId))
+        dispatch(createBootstrapAction(sessionId, speechContext))
 
         try {
             console.log(sessionId, "Setup speech components")
@@ -75,15 +73,13 @@ export function startSpeechSession(sessionId: string, context: SpeechContext): (
             VoiceDictator.instance.registerStopEventListener(async error => {
                 console.log(sessionId, "dictator stop event")
 
-                context = updatedContext || context
-
-                updatedContext = null
-
                 if (error) {
                     console.log(sessionId, "Finish without dictation")
                     terminate(releaseMutex, dispatch, TerminationReason.Fail, sessionId, error)
                 } else {
                     const currentState = getState()
+
+                    const context = currentState.speechRecognizerState.currentSpeechContext
                     const dictationResult = currentState.speechRecognizerState.dictationResult
                     if (dictationResult != null && dictationResult.text != null && dictationResult.text.length > 0) {
                         //can start analyzing
@@ -161,7 +157,7 @@ function terminate(releaseMutex: Function, dispatch: Dispatch, reason: Terminati
     releaseMutex()
 }
 
-export function requestStopDictation(sessionId: string, updateSpeechContext?: SpeechContext): (dispatch: Dispatch, getState: () => ReduxAppState) => void {
+export function requestStopDictation(sessionId: string): (dispatch: Dispatch, getState: () => ReduxAppState) => void {
     return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
         const initialState = getState()
         console.log("request stop on session status:", initialState.speechRecognizerState.status)
@@ -169,7 +165,6 @@ export function requestStopDictation(sessionId: string, updateSpeechContext?: Sp
             initialState.speechRecognizerState.status === SpeechRecognizerSessionStatus.Starting
             && initialState.speechRecognizerState.currentSessionId === sessionId
         ) {
-            updatedContext = updateSpeechContext
             await VoiceDictator.instance.stop();
         } else if (initialState.speechRecognizerState.status === SpeechRecognizerSessionStatus.Waiting) {
             console.log("stop waiting.")

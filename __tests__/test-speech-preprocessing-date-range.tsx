@@ -4,7 +4,6 @@
 
 import 'react-native';
 
-// Note: test renderer must be required after react-native.
 import { preprocess } from '@core/speech/nlp/preprocessor';
 import { NLUOptions, VariableType } from '@core/speech/nlp/types';
 import { MeasureUnitType, DataSourceType } from '@measure/DataSourceSpec';

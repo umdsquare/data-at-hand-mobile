@@ -1,4 +1,4 @@
-import { getYear, getMonth, getDate, differenceInDays, subDays, addDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, addMonths, lastDayOfMonth, isSameYear, startOfMonth, endOfMonth, format, isSameDay } from "date-fns"
+import { getYear, getMonth, getDate, differenceInDays, subDays, addDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, addMonths, lastDayOfMonth, isSameYear, startOfMonth, endOfMonth, format, isSameDay, differenceInCalendarDays, isMonday, isSunday, getDayOfYear, isLeapYear, startOfWeek } from "date-fns"
 import { toDate } from "date-fns-tz"
 
 /**
@@ -83,6 +83,41 @@ export class DateTimeHelper {
         }
 
         return seq
+    }
+
+    static rangeSemantic(start: number | Date, end: number | Date, ref?: Date): { semantic: "mondayWeek" | "sundayWeek" | "month" | "year", differenceToRef?: number } | null {
+        const fromDate: Date = typeof start === 'number' ? DateTimeHelper.toDate(start) : start
+        const toDate: Date = typeof end === 'number' ? DateTimeHelper.toDate(end) : end
+
+        const numDays = -differenceInCalendarDays(fromDate, toDate) + 1
+
+        if (isSameYear(fromDate, toDate) === true && getDayOfYear(fromDate) === 1 && (isLeapYear(fromDate) === true && numDays === 366 || isLeapYear(fromDate) === false && numDays === 365)) {
+
+            return {
+                semantic: 'year',
+                differenceToRef: ref ? getYear(ref) - getYear(fromDate) : undefined
+            }
+        } if (isSameYear(fromDate, toDate) === true && getMonth(fromDate) === getMonth(toDate) && isFirstDayOfMonth(fromDate) === true && isLastDayOfMonth(toDate)) {
+
+            return {
+                semantic: 'month',
+                differenceToRef: ref ? 12 * (getYear(ref) - getYear(fromDate)) + getMonth(ref) - getMonth(fromDate) : undefined
+            }
+        } else if (numDays === 7) {
+            if (isMonday(fromDate)) {
+                return {
+                    semantic: 'mondayWeek',
+                    differenceToRef: ref ? Math.floor(differenceInCalendarDays(startOfWeek(ref, { weekStartsOn: 1 }), fromDate) / 7) : undefined
+                }
+            } else if (isSunday(fromDate)) {
+                return {
+                    semantic: 'sundayWeek',
+                    differenceToRef: ref ? Math.floor(differenceInCalendarDays(startOfWeek(ref, { weekStartsOn: 0 }), fromDate) / 7) : undefined
+                }
+            }
+        }
+
+        return null
     }
 
     static formatDuration(durationInSeconds: number, roundToMins: boolean = false): string {

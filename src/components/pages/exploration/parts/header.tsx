@@ -304,14 +304,7 @@ const IntraDayDataSourceBar = React.memo((props: { showBorder: boolean }) => {
     const sourceTypeName = getIntraDayDataSourceName(intraDaySourceType)
 
     const supportedIntraDayDataSourceTypes = useMemo(() => {
-        const result: Array<IntraDayDataSourceType> = []
-        DataSourceManager.instance.supportedDataSources.forEach(s => {
-            const inferred = inferIntraDayDataSourceType(s.type)
-            if (result.indexOf(inferred) === -1 && inferred != null) {
-                result.push(inferred)
-            }
-        })
-        return result
+        return DataSourceManager.instance.supportedIntraDayDataSources
     }, [])
 
     const values = useMemo(() => supportedIntraDayDataSourceTypes.map(type => getIntraDayDataSourceName(type)),

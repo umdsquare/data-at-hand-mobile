@@ -198,43 +198,48 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
         const toDate = DateTimeHelper.toDate(to)
         const numDays = -differenceInCalendarDays(fromDate, toDate) + 1
 
-        if (DateTimeHelper.getMonth(from) === DateTimeHelper.getMonth(to) && isFirstDayOfMonth(fromDate) === true && isLastDayOfMonth(toDate)) {
-            //month
-            return {
-                ...prevState,
-                from,
-                to,
-                fromDate,
-                toDate,
-                semanticPeriodCaptured: true,
-                numDays: numDays,
-                level: "month",
-                periodName: format(fromDate, "MMM yyyy")
+        const semanticTest = DateTimeHelper.rangeSemantic(fromDate, toDate);
+
+        if(semanticTest){
+            switch(semanticTest.semantic){
+                case 'month':
+                    return {
+                        ...prevState,
+                        from,
+                        to,
+                        fromDate,
+                        toDate,
+                        semanticPeriodCaptured: true,
+                        numDays: numDays,
+                        level: "month",
+                        periodName: format(fromDate, "MMM yyyy")
+                    }
+                case 'mondayWeek':
+                case 'sundayWeek':
+                    return {
+                        ...prevState,
+                        from,
+                        to,
+                        fromDate,
+                        toDate,
+                        semanticPeriodCaptured: true,
+                        numDays: numDays,
+                        level: "week",
+                        periodName: "Week of " + format(fromDate, "MMM dd")
+                    }   
             }
-        } else if (numDays === 7 && (isMonday(fromDate) || isSunday(fromDate))) {
-            return {
-                ...prevState,
-                from,
-                to,
-                fromDate,
-                toDate,
-                semanticPeriodCaptured: true,
-                numDays: numDays,
-                level: "week",
-                periodName: "Week of " + format(fromDate, "MMM dd")
-            }
-        } else {
-            return {
-                ...prevState,
-                from,
-                to,
-                fromDate,
-                toDate,
-                semanticPeriodCaptured: false,
-                numDays: numDays,
-                level: "day",
-                periodName: undefined
-            }
+        }
+
+        return {
+            ...prevState,
+            from,
+            to,
+            fromDate,
+            toDate,
+            semanticPeriodCaptured: false,
+            numDays: numDays,
+            level: "day",
+            periodName: undefined
         }
     }
 

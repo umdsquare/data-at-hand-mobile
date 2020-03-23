@@ -23,6 +23,7 @@ import Insets from 'react-native-static-safe-area-insets';
 import { ZIndices } from '../zIndices'
 import { DataServiceManager } from '@measure/DataServiceManager'
 import { SpeechContext, SpeechContextHelper } from '@core/speech/nlp/context'
+import { createSetSpeechContextAction } from '@state/speech/actions'
 
 const borderRadius = 8
 
@@ -115,7 +116,8 @@ interface Props {
     explorationType?: ExplorationType,
     getToday?: () => Date,
     dispatchStartSpeechSession?: (sessionId: string, context: SpeechContext) => void,
-    dispatchStopDictation?: (sessionId: string, updateContext?: SpeechContext) => void,
+    dispatchUpdateSpeechContext?: (sessionId: string, context: SpeechContext) => void,
+    dispatchStopDictation?: (sessionId: string) => void,
 }
 
 interface State {
@@ -130,8 +132,6 @@ interface State {
 }
 
 class TooltipOverlay extends React.PureComponent<Props, State>{
-
-    private _recentSpeechContext: SpeechContext | undefined = undefined
 
     constructor(props) {
         super(props)
@@ -291,9 +291,7 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
                     useNativeDriver: true
                 }).start()
 
-                this._recentSpeechContext = this.makeSpeechContextFromTouchingInfo(this.props.touchingInfo)
-
-                this.props.dispatchStartSpeechSession(speechSessionId, this._recentSpeechContext)
+                this.props.dispatchStartSpeechSession(speechSessionId, this.makeSpeechContextFromTouchingInfo(this.props.touchingInfo))
 
                 Haptic.trigger("impactHeavy", {
                     enableVibrateFallback: true,
@@ -312,11 +310,10 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
                         touchingInfo: null
                     })
                 })
-                if (this.state.speechSessionId && this._recentSpeechContext != null) {
-                    this.props.dispatchStopDictation(this.state.speechSessionId, this._recentSpeechContext)
+                if (this.state.speechSessionId) {
+                    this.props.dispatchStopDictation(this.state.speechSessionId)
                 }
 
-                this._recentSpeechContext = undefined
             } else {
 
                 const tooltipPosition = this.calculateOptimalTooltipPosition(this.props.touchingInfo.elementBoundInScreen, this.state.tooltipWidth, this.state.tooltipHeight)
@@ -333,7 +330,10 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
                     useNativeDriver: true
                 }).start()
 
-                this._recentSpeechContext = this.makeSpeechContextFromTouchingInfo(this.props.touchingInfo)
+                if (this.state.speechSessionId) {
+                    this.props.dispatchUpdateSpeechContext(this.state.speechSessionId,
+                        this.makeSpeechContextFromTouchingInfo(this.props.touchingInfo))
+                }
             }
         }
     }
@@ -547,7 +547,8 @@ function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Prop
     return {
         ...ownProps,
         dispatchStartSpeechSession: (sessionId, context) => dispatch(startSpeechSession(sessionId, context)),
-        dispatchStopDictation: (sessionId, context?) => dispatch(requestStopDictation(sessionId, context))
+        dispatchStopDictation: (sessionId) => dispatch(requestStopDictation(sessionId)),
+        dispatchUpdateSpeechContext: (sessionId, speechContext) => dispatch(createSetSpeechContextAction(speechContext, sessionId))
     }
 }
 

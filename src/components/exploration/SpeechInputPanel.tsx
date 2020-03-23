@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Sizes } from '@style/Sizes';
-import { connect } from 'react-redux';
+import { connect, useSelector, shallowEqual } from 'react-redux';
 import { ReduxAppState } from '@state/types';
 import { SpeechRecognizerState, SpeechRecognizerSessionStatus } from '@state/speech/types';
 import Colors from '@style/Colors';
 import Spinner from 'react-native-spinkit';
+import { generateExampleSentences } from '@core/speech/ExampleSentenceRecommender';
+import { DataServiceManager } from '@measure/DataServiceManager';
 
 const styles = StyleSheet.create({
     containerStyle: {
@@ -56,79 +58,76 @@ const styles = StyleSheet.create({
     }
 })
 
-interface Props {
-    recognizerState?: SpeechRecognizerState,
-    exampleSentences?: string[],
-}
-class SpeechInputPanel extends React.Component<Props>{
+export const SpeechInputPanel = React.memo(() => {
 
-    private isRecognizedTextExists(state: SpeechRecognizerState): boolean {
-        return !(state.dictationResult == null
-            || state!.dictationResult.text == null
-            || state!.dictationResult!.text!.length === 0)
-    }
+    const { explorationInfo, speechStatus, dictationResult, speechContext, serviceKey } = useSelector((appState: ReduxAppState) => ({
+        dictationResult: appState.speechRecognizerState.dictationResult,
+        explorationInfo: appState.explorationState.info,
+        speechContext: appState.speechRecognizerState.currentSpeechContext,
+        speechStatus: appState.speechRecognizerState.status,
+        serviceKey: appState.settingsState.serviceKey
+    }), shallowEqual)
 
-    render() {
+    const selectedService = DataServiceManager.instance.getServiceByKey(serviceKey)
 
-        const recognizerState = this.props.recognizerState!
+    const isRecognizedTextExists = useMemo(() => {
+        return !(dictationResult == null
+            || dictationResult.text == null
+            || dictationResult!.text!.length === 0)
+    }, [dictationResult])
 
-        switch (recognizerState.status) {
-            case SpeechRecognizerSessionStatus.Waiting:
-                return <View style={styles.containerStyle}>
-                    <View style={styles.titleContainerStyle}>
-                        <Spinner size={20} isVisible={true} type="FadingCircle" color={Colors.accent} />
-                        <Text style={styles.waitingTextStyle}>Processing the previous command...</Text>
-                    </View>
+    const examples = useMemo(() => {
+        return generateExampleSentences(explorationInfo, speechContext, selectedService.getToday())
+    }, [explorationInfo, speechContext])
+
+    switch (speechStatus) {
+        case SpeechRecognizerSessionStatus.Waiting:
+            return <View style={styles.containerStyle}>
+                <View style={styles.titleContainerStyle}>
+                    <Spinner size={20} isVisible={true} type="FadingCircle" color={Colors.accent} />
+                    <Text style={styles.waitingTextStyle}>Processing the previous command...</Text>
                 </View>
-            default:
-                return <View style={styles.containerStyle}>
+            </View>
+        default:
+            return <View style={styles.containerStyle}>
 
                 <View style={styles.titleContainerStyle}>
                     <Spinner size={20} isVisible={true} type="Wave" color={Colors.speechAffordanceColorBackground} />
                     <Text style={styles.listeningTextStyle}>Listening...</Text>
                 </View>
-    
+
                 {
-                    this.isRecognizedTextExists(recognizerState) === true ? <Text style={styles.dictatedMessageStyle}>
+                    isRecognizedTextExists === true ? <Text style={styles.dictatedMessageStyle}>
                         {
-                            recognizerState.dictationResult ? (recognizerState.dictationResult.diffResult ?
-                                recognizerState.dictationResult.diffResult.map((diffElm, i) => {
+                            dictationResult ? (dictationResult.diffResult ?
+                                dictationResult.diffResult.map((diffElm, i) => {
                                     if (diffElm.added == null && diffElm.removed == null) {
                                         return <Text key={i} >{diffElm.value}</Text>
                                     } else if (diffElm.added === true) {
                                         return <Text key={i} style={{ color: Colors.accent }}>{diffElm.value}</Text>
                                     }
-                                }) : recognizerState.dictationResult.text) : undefined
+                                }) : dictationResult.text) : undefined
                         }
                         _</Text>
                         : <View style={{
                             alignItems: 'center'
                         }}>
-                            <Text style={styles.exampleTextTitleStyle}>Say something like:</Text>
-                            <View style={{
-                                flexDirection: 'row',
-                                flexWrap: 'wrap',
-                                justifyContent: 'space-around',
-                            }}>
-                                <Text style={styles.exampleTextSentenceStyle}>"Show all data"</Text>
-                                <Text style={styles.exampleTextSentenceStyle}>"Go to heart rate"</Text>
-                            </View>
+                            {
+                                examples != null ? <>
+                                    <Text style={styles.exampleTextTitleStyle}>Say something like:</Text>
+                                    <View style={{
+                                        flexDirection: 'row',
+                                        flexWrap: 'wrap',
+                                        justifyContent: 'space-around',
+                                    }}>
+                                        {
+                                            examples.map((example, i) => <Text key={i.toString()} style={styles.exampleTextSentenceStyle}>"{example}"</Text>)
+                                        }
+                                    </View>
+                                </> : <Text style={styles.exampleTextTitleStyle}>What can I do for you?</Text>
+                            }
                         </View>
                 }
             </View>
-        }
     }
-}
-
-
-function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
-    return {
-        ...ownProps,
-        recognizerState: appState.speechRecognizerState
-    }
-}
-
-
-const connected = connect(mapStateToProps, undefined)(SpeechInputPanel)
-
-export { connected as SpeechInputPanel }
+})

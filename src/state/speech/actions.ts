@@ -1,5 +1,6 @@
 import { ActionTypeBase } from "../types";
 import { DictationResult } from "../../core/speech/types";
+import { SpeechContext } from "@core/speech/nlp/context";
 
 export enum SpeechRecognizerActionType {
     BootstrapAction = "speech:recognition:bootstrap",
@@ -8,7 +9,8 @@ export enum SpeechRecognizerActionType {
     UpdateDictationResult = "speech:recognition:update_dictation_result",
     FinishDictation = "speech:recognition:finish_dictation",
     TerminateSession = "speech:recognition:terminate",
-    SetShowGlobalPopupAction = "speech:recognition:set_show_global_popup"
+    SetShowGlobalPopupAction = "speech:recognition:set_show_global_popup",
+    SetSpeechContextAction = "speech:recognition:set_speech_context"
 }
 
 
@@ -40,6 +42,10 @@ export interface SetShowGlobalPopupAction extends SpeechSessionAction {
     value: boolean
 }
 
+export interface SetSpeechContextAction extends SpeechSessionAction {
+    speechContext: SpeechContext | null
+}
+
 export function createUpdateDictationResultAction(dictationResult: DictationResult, sessionId: string): UpdateDictationResultAction {
     return {
         type: SpeechRecognizerActionType.UpdateDictationResult,
@@ -62,10 +68,11 @@ export function createWaitAction(sessionId): SpeechSessionAction{
     }
 }
 
-export function createBootstrapAction(sessionId: string): SpeechSessionAction {
+export function createBootstrapAction(sessionId: string, speechContext: SpeechContext): SetSpeechContextAction {
     return {
         type: SpeechRecognizerActionType.BootstrapAction,
-        sessionId
+        sessionId,
+        speechContext
     }
 }
 
@@ -90,5 +97,13 @@ export function createSetShowGlobalPopupAction(value: boolean, sessionId: string
         type: SpeechRecognizerActionType.SetShowGlobalPopupAction,
         sessionId,
         value
+    }
+}
+
+export function createSetSpeechContextAction(speechContext: SpeechContext, sessionId: string): SetSpeechContextAction {
+    return {
+        type: SpeechRecognizerActionType.SetSpeechContextAction,
+        sessionId,
+        speechContext
     }
 }
