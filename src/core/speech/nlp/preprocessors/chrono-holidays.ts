@@ -52,9 +52,8 @@ const holidayRules = new Lazy<Array<{ functionName: string, rule: string }>>(() 
 
 const commonHolidayParsers = holidayRules.get().map(rule => {
     const commonHolidayParser = new chrono.Parser();
-    commonHolidayParser.pattern = function () { console.log(new NamedRegExp(yearFormat(rule.rule), "i")); return new NamedRegExp(yearFormat(rule.rule), "i") }
+    commonHolidayParser.pattern = function () { return new NamedRegExp(yearFormat(rule.rule), "i") }
     commonHolidayParser.extract = function (text, ref, match, opt) {
-        console.log("match:", match)
         const generateFunc: ((year: number) => Date) = Holidays[rule.functionName]
         let date: Date
         if (match.groups.year1 || match.groups.year2) {

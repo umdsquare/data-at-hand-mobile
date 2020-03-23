@@ -43,12 +43,6 @@ function getChrono(): Chrono.ChronoInstance {
         })
 
         _chrono = new chrono_node.Chrono(options)
-
-        console.debug("My chrono instance info:===============================")
-        console.debug("Parsers:", _chrono.parsers.length)
-        console.debug("Refiners:", _chrono.refiners.length)
-        console.debug("===============================")
-
     }
     return _chrono
 }
