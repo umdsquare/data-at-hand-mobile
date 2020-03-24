@@ -201,7 +201,7 @@ export const HighlightFilterPanel = React.memo((props: {
 
 
     const dataSourceSpec = useMemo(() => {
-        return dataSourceSpecs.find(s => s.dataSourceType === props.filter.dataSource && s.propertyKey === props.filter.propertyKey)
+        return dataSourceSpecs.find(s => s.dataSourceType === props.filter.dataSource && s.propertyKey === props.filter.propertyKey)!
     }, [props.filter.dataSource])
 
     const dataSourcePresets = useMemo(() => {
@@ -294,7 +294,7 @@ export const HighlightFilterPanel = React.memo((props: {
 
     const [showReferenceEditView, setShowReferenceEditView] = useState(false)
 
-    const [inputReferenceValue, setInputReferenceValue] = useState(null)
+    const [inputReferenceValue, setInputReferenceValue] = useState<number|undefined|null>(null)
 
     useEffect(() => {
         setInputReferenceValue(props.filter.ref)
@@ -309,7 +309,7 @@ export const HighlightFilterPanel = React.memo((props: {
         const newFilter = {
             ...props.filter,
             ref: inputReferenceValue
-        }
+        } as HighlightFilter
         props.onFilterModified(newFilter)
     }, [inputReferenceValue, props.onFilterModified])
 

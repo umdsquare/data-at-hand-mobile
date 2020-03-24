@@ -4,18 +4,22 @@ import Colors from "@style/Colors";
 import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
 import { Sizes } from "@style/Sizes";
 import Dash from 'react-native-dash';
-import { format, differenceInCalendarDays, addDays, startOfMonth, endOfMonth, addMonths } from "date-fns";
+import { format, differenceInCalendarDays, addDays, startOfMonth, endOfMonth, addMonths, getYear } from "date-fns";
 import { DatePicker, WeekPicker, MonthPicker } from "@components/common/CalendarPickers";
 import { InteractionType } from "@state/exploration/interaction/actions";
 import { DateTimeHelper, isToday, isYesterday } from "@utils/time";
 import { SwipedFeedback } from "@components/common/SwipedFeedback";
 import { BottomSheet } from "@components/common/BottomSheet";
 import Haptic from "react-native-haptic-feedback";
-import { useSelector } from "react-redux";
+import { useSelector, shallowEqual } from "react-redux";
 import { ReduxAppState } from "@state/types";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { BorderlessButton, LongPressGestureHandler, State as GestureState, LongPressGestureHandlerStateChangeEvent, FlingGestureHandler, Directions, FlingGestureHandlerStateChangeEvent } from "react-native-gesture-handler";
 import { denialAnimationSettings } from "@components/common/Animations";
+import { WheelPicker } from "react-native-wheel-picker-android";
+import { StyleTemplates } from "@style/Styles";
+import { getNumberSequence } from "@utils/utils";
+import { Button } from "react-native-elements";
 
 const dateButtonWidth = 140
 const barHeight = 60
@@ -119,6 +123,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
 
+    yearPopupButtonStyle: { alignSelf: 'flex-end', marginRight: Sizes.horizontalPadding }
 })
 
 export type ElementType = 'from' | 'to' | 'period'
@@ -141,10 +146,376 @@ interface State {
     toDate: Date,
     semanticPeriodCaptured: boolean,
     numDays: number,
-    level?: "day" | "week" | "month",
+    level?: "day" | "week" | "month" | "year",
     periodName?: string,
     clickedElementType?: ElementType | null,
 }
+
+
+export class DateRangeBar extends React.PureComponent<Props, State> {
+
+    static deriveState(from: number, to: number, prevState: State): State {
+
+        if (to < from) {
+            const fromTemp = from
+            from = to
+            to = fromTemp
+        }
+
+        const fromDate = DateTimeHelper.toDate(from)
+        const toDate = DateTimeHelper.toDate(to)
+        const numDays = -differenceInCalendarDays(fromDate, toDate) + 1
+
+        const semanticTest = DateTimeHelper.rangeSemantic(fromDate, toDate);
+
+        const newState = {
+            ...prevState,
+            from,
+            to,
+            fromDate,
+            toDate,
+            semanticPeriodCaptured: false,
+            numDays: numDays,
+            level: "day",
+            periodName: undefined
+        } as State
+
+        if (semanticTest) {
+            switch (semanticTest.semantic) {
+                case 'month':
+                    newState.semanticPeriodCaptured = true
+                    newState.level = 'month'
+                    newState.periodName = format(fromDate, "MMM yyyy")
+                    break;
+                case 'mondayWeek':
+                case 'sundayWeek':
+                    newState.semanticPeriodCaptured = true
+                    newState.level = 'week'
+                    newState.periodName = "Week of " + format(fromDate, "MMM d")
+                    break;
+                case 'year':
+                    newState.semanticPeriodCaptured = true
+                    newState.level = 'year'
+                    newState.periodName = format(fromDate, 'yyyy')
+                    break;
+            }
+        }
+
+        return newState
+    }
+
+    static getDerivedStateFromProps(nextProps: Props, currentState: State): State | null {
+        if (currentState.from !== nextProps.from ||
+            currentState.to !== nextProps.to) {
+            return DateRangeBar.deriveState(nextProps.from, nextProps.to, currentState)
+        }
+        return null
+    }
+
+    private swipedFeedbackRef = React.createRef<SwipedFeedback>()
+    private bottomSheetRef = React.createRef<BottomSheet>()
+
+    private toButtonRef = React.createRef<DateButtonApi>()
+    private fromButtonRef = React.createRef<DateButtonApi>()
+
+    constructor(props: Props) {
+        super(props)
+        this.state = DateRangeBar.deriveState(props.from, props.to, { isBottomSheetOpen: false, } as any)
+    }
+
+    private onClickedElement(type: ElementType) {
+        this.setState({
+            ...this.state,
+            clickedElementType: type,
+        })
+        this.bottomSheetRef.current?.open()
+    }
+
+    private readonly onFromDatePressed = () => {
+        this.onClickedElement('from')
+    }
+
+    private readonly onToDatePressed = () => {
+        this.onClickedElement('to')
+    }
+
+    private readonly onPeriodPressed = () => {
+        this.onClickedElement('period')
+    }
+
+    private readonly handleSwipe = (direction: 'left' | 'right') => {
+        const sign = direction === 'left' ? 1 : -1
+
+        const shiftedRange = DateTimeHelper.pageRange(this.state.fromDate, this.state.toDate, sign)
+
+        this.setRange(shiftedRange[0], shiftedRange[1], InteractionType.TouchOnly)
+        this.swipedFeedbackRef.current?.startFeedback(direction)
+    }
+
+    private readonly onSwipeLeft = (ev: FlingGestureHandlerStateChangeEvent) => {
+        if (ev.nativeEvent.state === GestureState.ACTIVE) {
+            this.handleSwipe('left')
+        }
+    }
+
+    private readonly onSwipeRight = (ev: FlingGestureHandlerStateChangeEvent) => {
+        if (ev.nativeEvent.state === GestureState.ACTIVE) {
+            this.handleSwipe('right')
+        }
+    }
+
+    private readonly setRange = (from: number, to: number, interactionType: InteractionType = InteractionType.TouchOnly) => {
+
+        const newState = DateRangeBar.deriveState(
+            from,
+            to,
+            { ...this.state, clickedElementType: null }
+        )
+
+        this.setState(newState)
+
+        this.bottomSheetRef.current?.close()
+
+        if (this.props.onRangeChanged) {
+            this.props.onRangeChanged!(newState.from, newState.to, interactionType)
+        }
+    }
+
+    private readonly setFromDate = (from: Date, interactionType: InteractionType = InteractionType.TouchOnly) => {
+        this.setRange(DateTimeHelper.toNumberedDateFromDate(from), this.state.to, interactionType)
+    }
+
+    private readonly setToDate = (to: Date, interactionType: InteractionType = InteractionType.TouchOnly) => {
+        this.setRange(
+            this.state.from, DateTimeHelper.toNumberedDateFromDate(to), interactionType)
+    }
+
+    private readonly setMonth = (monthDate: Date, interactionType: InteractionType) => {
+        this.setRange(DateTimeHelper.toNumberedDateFromDate(startOfMonth(monthDate)),
+            DateTimeHelper.toNumberedDateFromDate(endOfMonth(monthDate)), interactionType)
+    }
+
+    private readonly setMonthByCalendar = (monthDate: Date) => {
+        this.setMonth(monthDate, InteractionType.TouchOnly)
+    }
+
+    private readonly onYearSelected = (year: number) => {
+        this.setRange(DateTimeHelper.toNumberedDateFromValues(year, 1,1), DateTimeHelper.toNumberedDateFromValues(year, 12, 31), InteractionType.TouchOnly)
+    }
+
+    private readonly onWeekSelected = (start: Date, end: Date) => {
+        this.setRange(DateTimeHelper.toNumberedDateFromDate(start), DateTimeHelper.toNumberedDateFromDate(end), InteractionType.TouchOnly)
+    }
+
+    private readonly onFromButtonLongPressIn = () => {
+        Haptic.trigger("impactHeavy", {
+            enableVibrateFallback: true,
+            ignoreAndroidSystemSettings: true
+        })
+
+        if (this.props.onLongPressIn) {
+            this.props.onLongPressIn('from')
+        } else {
+            requestAnimationFrame(() => {
+                this.fromButtonRef.current?.playDenialAnimation()
+            })
+        }
+
+    }
+
+    private readonly onFromButtonLongPressOut = () => {
+        this.props.onLongPressOut && this.props.onLongPressOut('from')
+    }
+
+
+    private readonly onToButtonLongPressIn = () => {
+        Haptic.trigger("impactHeavy", {
+            enableVibrateFallback: true,
+            ignoreAndroidSystemSettings: true
+        })
+
+        if (this.props.onLongPressIn != null) {
+            this.props.onLongPressIn('to')
+        } else {
+
+            this.toButtonRef.current?.playDenialAnimation()
+        }
+    }
+
+    private readonly onToButtonLongPressOut = () => {
+        this.props.onLongPressOut && this.props.onLongPressOut('to')
+    }
+
+    private readonly onPeriodButtonLongPress = (ev: LongPressGestureHandlerStateChangeEvent) => {
+
+        if (ev.nativeEvent.state === GestureState.ACTIVE) {
+            Haptic.trigger("impactHeavy", {
+                enableVibrateFallback: true,
+                ignoreAndroidSystemSettings: true
+            })
+            this.props.onLongPressIn && this.props.onLongPressIn('period')
+
+        } else if (ev.nativeEvent.state === GestureState.END) {
+            this.props.onLongPressOut && this.props.onLongPressOut('period')
+        }
+    }
+
+    componentDidUpdate() {
+    }
+
+    render() {
+        var modalPickerView
+        if (this.state.clickedElementType) {
+
+            switch (this.state.clickedElementType) {
+                case 'period':
+                    switch (this.state.level) {
+                        case 'week':
+                            modalPickerView = <WeekPicker selectedWeekFirstDay={this.state.fromDate} onWeekSelected={this.onWeekSelected} />
+                            break;
+                        case 'month':
+                            modalPickerView = <MonthPicker selectedMonth={this.state.fromDate} onMonthSelected={this.setMonthByCalendar} />
+                            break;
+                        case 'year':
+                            modalPickerView = <YearPicker year={getYear(this.state.fromDate)} onYearSelected={this.onYearSelected}/>
+                            break;
+                    }
+                    break;
+                case 'from':
+                    modalPickerView = <DatePicker selectedDay={this.state.fromDate}
+                        disabledDates={[this.state.toDate]}
+                        onDayPress={this.setFromDate} ghostRange={[this.state.fromDate, this.state.toDate]} />
+                    break;
+                case 'to':
+                    modalPickerView = <DatePicker selectedDay={this.state.toDate}
+                        disabledDates={[this.state.fromDate]}
+                        onDayPress={this.setToDate}
+                        ghostRange={[this.state.fromDate, this.state.toDate]} />
+                    break;
+            }
+        }
+
+        return <FlingGestureHandler
+            direction={Directions.LEFT}
+            onHandlerStateChange={this.onSwipeLeft}
+        >
+            <FlingGestureHandler
+                direction={Directions.RIGHT}
+                onHandlerStateChange={this.onSwipeRight}
+            >
+                <View style={{
+                    ...(this.props.showBorder === true ? styles.conatainerWithBorder : styles.containerStyle),
+                    backgroundColor: this.props.isLightMode ? null : styles.containerStyle.backgroundColor
+                } as ViewStyle}>
+                    <SwipedFeedback ref={this.swipedFeedbackRef} />
+
+                    <DateButton ref={this.fromButtonRef} date={this.state.from} onPress={this.onFromDatePressed}
+                        isLightMode={this.props.isLightMode}
+                        showSpeechIndicator={this.props.showSpeechIndicator}
+                        onLongPressIn={this.onFromButtonLongPressIn} onLongPressOut={this.onFromButtonLongPressOut} />
+
+                    <View style={styles.midViewContainerStyle} >
+                        <Dash style={styles.dashViewStyle} dashGap={4} dashColor="gray" dashLength={3} dashThickness={3} dashStyle={styles.dashLineStyle} />
+                        <View style={styles.midViewFooterContainerStyle}>
+
+                            {
+                                this.state.semanticPeriodCaptured === true ? (
+                                    <LongPressGestureHandler
+                                        maxDist={Number.MAX_VALUE}
+                                        shouldCancelWhenOutside={false}
+                                        onHandlerStateChange={this.onPeriodButtonLongPress}
+                                    ><BorderlessButton onPress={this.onPeriodPressed}
+                                    >
+                                            <View style={styles.periodButtonStyle}
+                                                hitSlop={{ top: 15, bottom: 15 }}>
+                                                <Text style={styles.periodButtonTitleStyle}>{this.state.periodName}</Text>
+                                            </View>
+
+                                        </BorderlessButton></LongPressGestureHandler>
+                                ) : (
+                                        <Text style={styles.midViewDescriptionTextStyle}>{this.state.numDays} Days</Text>
+                                    )
+                            }
+
+                        </View>
+                    </View>
+
+                    <DateButton ref={this.toButtonRef} date={this.state.to} onPress={this.onToDatePressed}
+                        isLightMode={this.props.isLightMode}
+                        showSpeechIndicator={this.props.showSpeechIndicator}
+                        onLongPressIn={this.onToButtonLongPressIn} onLongPressOut={this.onToButtonLongPressOut} />
+
+                    <BottomSheet ref={this.bottomSheetRef}>
+                        {modalPickerView}
+                    </BottomSheet>
+
+                </View>
+            </FlingGestureHandler>
+        </FlingGestureHandler>
+    }
+}
+
+//Year Picker============================================================================================================================================
+
+const YearPicker = React.memo((props: { year: number, onYearSelected: (year: number) => void }) => {
+
+    const [selectedIndex, setSelectedIndex] = useState(0)
+    const [minimumYear, setMinimumYear] = useState(getYear(new Date()) - 10)
+
+    const serviceKey = useSelector((appState: ReduxAppState) => {
+        return appState.settingsState.serviceKey
+    })
+
+    useEffect(() => {
+        const service = DataServiceManager.instance.getServiceByKey(serviceKey)
+        const fetchInitialDate = async () => {
+            const initialDate = await service.getDataInitialDate()
+            setMinimumYear(DateTimeHelper.getYear(initialDate))
+        }
+
+        fetchInitialDate()
+    }, [serviceKey])
+
+
+    const maximumYear = useMemo(() => {
+        return getYear(DataServiceManager.instance.getServiceByKey(serviceKey).getToday())
+    }, [serviceKey])
+
+    const yearLabels: Array<string> = useMemo(() => getNumberSequence(minimumYear, maximumYear).map(y => y.toString()), [minimumYear, maximumYear])
+
+    useEffect(() => {
+        setSelectedIndex(yearLabels.indexOf(props.year.toString()))
+    }, [props.year, yearLabels])
+
+    const onItemSelected = useCallback((index) => {
+        console.log("selected index: ", index)
+        setSelectedIndex(index)
+    }, [yearLabels])
+
+    const onApplyPress = useCallback(() => {
+        console.log("selected index:", selectedIndex)
+        console.log("year labels:", yearLabels)
+        console.log(yearLabels[selectedIndex])
+        props.onYearSelected(Number.parseInt(yearLabels[selectedIndex]))
+    }, [selectedIndex, yearLabels, props.onYearSelected])
+
+    return <>
+        <Button type="clear" title="Apply" style={styles.yearPopupButtonStyle} onPress={onApplyPress}/>
+        <WheelPicker
+            selectedItemTextFontFamily={undefined}
+            itemTextFontFamily={undefined}
+            style={StyleTemplates.wheelPickerCommonStyle}
+            data={yearLabels}
+            initPosition={yearLabels.indexOf(props.year.toString())}
+            selectedItem={selectedIndex}
+            onItemSelected={onItemSelected}
+        />
+    </>
+})
+
+
+//Date Button============================================================================================================================================
+
 
 interface DateButtonApi {
     playDenialAnimation: () => void
@@ -204,314 +575,9 @@ const DateButton = React.forwardRef((props: DateButtonProps, ref: any) => {
     </LongPressGestureHandler>
 })
 
-export class DateRangeBar extends React.PureComponent<Props, State> {
-
-    static deriveState(from: number, to: number, prevState: State): State {
-
-        if (to < from) {
-            const fromTemp = from
-            from = to
-            to = fromTemp
-        }
-
-        const fromDate = DateTimeHelper.toDate(from)
-        const toDate = DateTimeHelper.toDate(to)
-        const numDays = -differenceInCalendarDays(fromDate, toDate) + 1
-
-        const semanticTest = DateTimeHelper.rangeSemantic(fromDate, toDate);
-
-        if (semanticTest) {
-            switch (semanticTest.semantic) {
-                case 'month':
-                    return {
-                        ...prevState,
-                        from,
-                        to,
-                        fromDate,
-                        toDate,
-                        semanticPeriodCaptured: true,
-                        numDays: numDays,
-                        level: "month",
-                        periodName: format(fromDate, "MMM yyyy")
-                    }
-                case 'mondayWeek':
-                case 'sundayWeek':
-                    return {
-                        ...prevState,
-                        from,
-                        to,
-                        fromDate,
-                        toDate,
-                        semanticPeriodCaptured: true,
-                        numDays: numDays,
-                        level: "week",
-                        periodName: "Week of " + format(fromDate, "MMM dd")
-                    }
-            }
-        }
-
-        return {
-            ...prevState,
-            from,
-            to,
-            fromDate,
-            toDate,
-            semanticPeriodCaptured: false,
-            numDays: numDays,
-            level: "day",
-            periodName: undefined
-        }
-    }
-
-    static getDerivedStateFromProps(nextProps: Props, currentState: State): State | null {
-        if (currentState.from !== nextProps.from ||
-            currentState.to !== nextProps.to) {
-            return DateRangeBar.deriveState(nextProps.from, nextProps.to, currentState)
-        }
-        return null
-    }
-
-    private swipedFeedbackRef = React.createRef<SwipedFeedback>()
-    private bottomSheetRef = React.createRef<BottomSheet>()
-
-    private toButtonRef = React.createRef<DateButtonApi>()
-    private fromButtonRef = React.createRef<DateButtonApi>()
-
-    constructor(props: Props) {
-        super(props)
-        this.state = DateRangeBar.deriveState(props.from, props.to, { isBottomSheetOpen: false, } as any)
-    }
-
-    private onClickedElement(type: ElementType) {
-        this.setState({
-            ...this.state,
-            clickedElementType: type,
-        })
-        this.bottomSheetRef.current?.open()
-    }
-
-    onFromDatePressed = () => {
-        this.onClickedElement('from')
-    }
-
-    onToDatePressed = () => {
-        this.onClickedElement('to')
-    }
-
-    onPeriodPressed = () => {
-        this.onClickedElement('period')
-    }
-
-    private readonly handleSwipe = (direction: 'left' | 'right') => {
-        const sign = direction === 'left' ? 1 : -1
-        var from: Date
-        var to: Date
-        if (this.state.level !== 'month') {
-            from = addDays(this.state.fromDate, sign * this.state.numDays)
-            to = addDays(this.state.toDate, sign * this.state.numDays)
-        } else {
-            const newMonthFirst = addMonths(this.state.fromDate, sign)
-            const newMonthLast = endOfMonth(newMonthFirst)
-            from = newMonthFirst
-            to = newMonthLast
-        }
-        this.setRange(DateTimeHelper.toNumberedDateFromDate(from), DateTimeHelper.toNumberedDateFromDate(to), InteractionType.TouchOnly)
-        this.swipedFeedbackRef.current?.startFeedback(direction)
-    }
-
-    private readonly onSwipeLeft = (ev: FlingGestureHandlerStateChangeEvent) => {
-        if (ev.nativeEvent.state === GestureState.ACTIVE) {
-            this.handleSwipe('left')
-        }
-    }
-
-    private readonly onSwipeRight = (ev: FlingGestureHandlerStateChangeEvent) => {
-        if (ev.nativeEvent.state === GestureState.ACTIVE) {
-            this.handleSwipe('right')
-        }
-    }
-
-    setRange = (from: number, to: number, interactionType: InteractionType = InteractionType.TouchOnly) => {
-
-        const newState = DateRangeBar.deriveState(
-            from,
-            to,
-            { ...this.state, clickedElementType: null }
-        )
-
-        this.setState(newState)
-
-        this.bottomSheetRef.current?.close()
-
-        if (this.props.onRangeChanged) {
-            this.props.onRangeChanged!(newState.from, newState.to, interactionType)
-        }
-    }
-
-    setFromDate = (from: Date, interactionType: InteractionType = InteractionType.TouchOnly) => {
-        this.setRange(DateTimeHelper.toNumberedDateFromDate(from), this.state.to, interactionType)
-    }
-
-    setToDate = (to: Date, interactionType: InteractionType = InteractionType.TouchOnly) => {
-        this.setRange(
-            this.state.from, DateTimeHelper.toNumberedDateFromDate(to), interactionType)
-    }
-
-    setMonth = (monthDate: Date, interactionType: InteractionType) => {
-        this.setRange(DateTimeHelper.toNumberedDateFromDate(startOfMonth(monthDate)),
-            DateTimeHelper.toNumberedDateFromDate(endOfMonth(monthDate)), interactionType)
-    }
-
-    setMonthByCalendar = (monthDate: Date) => {
-        this.setMonth(monthDate, InteractionType.TouchOnly)
-    }
-
-    onFromButtonLongPressIn = () => {
-        Haptic.trigger("impactHeavy", {
-            enableVibrateFallback: true,
-            ignoreAndroidSystemSettings: true
-        })
-
-        if (this.props.onLongPressIn) {
-            this.props.onLongPressIn('from')
-        } else {
-            requestAnimationFrame(() => {
-                this.fromButtonRef.current?.playDenialAnimation()
-            })
-        }
-
-    }
-
-    onFromButtonLongPressOut = () => {
-        this.props.onLongPressOut && this.props.onLongPressOut('from')
-    }
 
 
-    onToButtonLongPressIn = () => {
-        Haptic.trigger("impactHeavy", {
-            enableVibrateFallback: true,
-            ignoreAndroidSystemSettings: true
-        })
-
-        if (this.props.onLongPressIn != null) {
-            this.props.onLongPressIn('to')
-        } else {
-
-            this.toButtonRef.current?.playDenialAnimation()
-        }
-    }
-
-    onToButtonLongPressOut = () => {
-        this.props.onLongPressOut && this.props.onLongPressOut('to')
-    }
-
-    onPeriodButtonLongPress = (ev: LongPressGestureHandlerStateChangeEvent) => {
-
-        if (ev.nativeEvent.state === GestureState.ACTIVE) {
-            Haptic.trigger("impactHeavy", {
-                enableVibrateFallback: true,
-                ignoreAndroidSystemSettings: true
-            })
-            this.props.onLongPressIn && this.props.onLongPressIn('period')
-
-        } else if (ev.nativeEvent.state === GestureState.END) {
-            this.props.onLongPressOut && this.props.onLongPressOut('period')
-        }
-    }
-
-    componentDidUpdate() {
-    }
-
-    render() {
-        var modalPickerView
-        if (this.state.clickedElementType) {
-
-            switch (this.state.clickedElementType) {
-                case 'period':
-                    switch (this.state.level) {
-                        case 'week':
-                            modalPickerView = <WeekPicker selectedWeekFirstDay={this.state.fromDate} onWeekSelected={(start, end) => this.setRange(DateTimeHelper.toNumberedDateFromDate(start), DateTimeHelper.toNumberedDateFromDate(end))} />
-                            break;
-                        case 'month':
-                            modalPickerView = <MonthPicker selectedMonth={this.state.fromDate} onMonthSelected={this.setMonthByCalendar} />
-                            break;
-                    }
-                    break;
-                case 'from':
-                    modalPickerView = <DatePicker selectedDay={this.state.fromDate}
-                        disabledDates={[this.state.toDate]}
-                        onDayPress={this.setFromDate} ghostRange={[this.state.fromDate, this.state.toDate]} />
-                    break;
-                case 'to':
-                    modalPickerView = <DatePicker selectedDay={this.state.toDate}
-                        disabledDates={[this.state.fromDate]}
-                        onDayPress={this.setToDate}
-                        ghostRange={[this.state.fromDate, this.state.toDate]} />
-                    break;
-            }
-        }
-
-        return <FlingGestureHandler
-            direction={Directions.LEFT}
-            onHandlerStateChange={this.onSwipeLeft}
-        >
-            <FlingGestureHandler
-                direction={Directions.RIGHT}
-                onHandlerStateChange={this.onSwipeRight}
-            >
-                <View style={{
-                    ...(this.props.showBorder === true ? styles.conatainerWithBorder : styles.containerStyle),
-                    backgroundColor: this.props.isLightMode ? null : styles.containerStyle.backgroundColor
-                } as ViewStyle}>
-                    <SwipedFeedback ref={this.swipedFeedbackRef} />
-
-                    <DateButton ref={this.fromButtonRef} date={this.state.from} onPress={this.onFromDatePressed}
-                        isLightMode={this.props.isLightMode}
-                        showSpeechIndicator={this.props.showSpeechIndicator}
-                        onLongPressIn={this.onFromButtonLongPressIn} onLongPressOut={this.onFromButtonLongPressOut} />
-
-                    <View style={styles.midViewContainerStyle} >
-                        <Dash style={styles.dashViewStyle} dashGap={4} dashColor="gray" dashLength={3} dashThickness={3} dashStyle={styles.dashLineStyle} />
-                        <View style={styles.midViewFooterContainerStyle}>
-
-                            {
-                                this.state.semanticPeriodCaptured === true ? (
-                                    <LongPressGestureHandler
-                                        maxDist={Number.MAX_VALUE}
-                                        shouldCancelWhenOutside={false}
-                                        onHandlerStateChange={this.onPeriodButtonLongPress}
-                                    ><BorderlessButton onPress={this.onPeriodPressed}
-                                    >
-                                            <View style={styles.periodButtonStyle}
-                                                hitSlop={{ top: 10, bottom: 10 }}>
-                                                <Text style={styles.periodButtonTitleStyle}>{this.state.periodName}</Text>
-                                            </View>
-
-                                        </BorderlessButton></LongPressGestureHandler>
-                                ) : (
-                                        <Text style={styles.midViewDescriptionTextStyle}>{this.state.numDays} Days</Text>
-                                    )
-                            }
-
-                        </View>
-                    </View>
-
-                    <DateButton ref={this.toButtonRef} date={this.state.to} onPress={this.onToDatePressed}
-                        isLightMode={this.props.isLightMode}
-                        showSpeechIndicator={this.props.showSpeechIndicator}
-                        onLongPressIn={this.onToButtonLongPressIn} onLongPressOut={this.onToButtonLongPressOut} />
-
-                    <BottomSheet ref={this.bottomSheetRef}>
-                        {modalPickerView}
-                    </BottomSheet>
-
-                </View>
-            </FlingGestureHandler>
-        </FlingGestureHandler>
-    }
-}
-
-
+//Date Bar============================================================================================================================================
 
 export const DateBar = React.memo((props: {
     date: number,
@@ -592,5 +658,6 @@ export const DateBar = React.memo((props: {
                 </BottomSheet>
             </View>
 
-        </FlingGestureHandler></FlingGestureHandler>
+        </FlingGestureHandler>
+    </FlingGestureHandler>
 })

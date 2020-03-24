@@ -203,7 +203,7 @@ export const explorationStateReducer = (
               ParameterKey.RangeA,
             );
             if (rangeA != null) {
-              explorationInfoHelper.setParameterValue(newState.info, DateTimeHelper.pageRange(rangeA, a.direction === 'future' ? 1 : -1), ParameterType.Range, ParameterKey.RangeA)
+              explorationInfoHelper.setParameterValue(newState.info, DateTimeHelper.pageRange(rangeA[0], rangeA[1], a.direction === 'future' ? 1 : -1), ParameterType.Range, ParameterKey.RangeA)
             }
 
             const rangeB =
@@ -213,12 +213,12 @@ export const explorationStateReducer = (
                 ParameterKey.RangeB,
               );
             if (rangeB != null) {
-              explorationInfoHelper.setParameterValue(newState.info, DateTimeHelper.pageRange(rangeB, a.direction === 'future' ? 1 : -1), ParameterType.Range, ParameterKey.RangeB)
+              explorationInfoHelper.setParameterValue(newState.info, DateTimeHelper.pageRange(rangeB[0], rangeB[1], a.direction === 'future' ? 1 : -1), ParameterType.Range, ParameterKey.RangeB)
             }
           } else {
             const range = explorationInfoHelper.getParameterValue<[number, number]>(newState.info, ParameterType.Range, null)
             if (range != null) {
-              explorationInfoHelper.setParameterValue(newState.info, DateTimeHelper.pageRange(range, a.direction === 'future' ? 1 : -1), ParameterType.Range)
+              explorationInfoHelper.setParameterValue(newState.info, DateTimeHelper.pageRange(range[0], range[1], a.direction === 'future' ? 1 : -1), ParameterType.Range)
             }
           }
 

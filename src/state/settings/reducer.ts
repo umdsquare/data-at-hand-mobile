@@ -12,7 +12,6 @@ import { SystemLogger } from '@core/logging/SystemLogger';
 
 export interface SettingsState {
   serviceKey: string,
-  serviceInitialDate?: number,
   unit: MeasureUnitType,
   recordLogs: boolean,
   recordScreens: boolean,
@@ -21,7 +20,6 @@ export interface SettingsState {
 
 const INITIAL_STATE = {
   serviceKey: 'fitbit',
-  serviceInitialDate: undefined,
   unit: MeasureUnitType.Metric,
   recordLogs: true,
   recordScreens: false,
@@ -79,7 +77,6 @@ function setServiceImpl(
   action: SetServiceAction
 ) {
   state.serviceKey = action.serviceKey
-  state.serviceInitialDate = action.serviceInitialDate
 }
 
 function setUnitTypeImpl(

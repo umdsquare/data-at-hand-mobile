@@ -29,10 +29,9 @@ export interface SetRecordScreensAction extends ActionTypeBase{
 }
 
 //======================================
-export const setService = (serviceKey: string, serviceInitialDate?: number): SetServiceAction => ({
+export const setService = (serviceKey: string): SetServiceAction => ({
     type: SettingsActionTypes.SetService,
-    serviceKey,
-    serviceInitialDate
+    serviceKey
 })
 
 export const setUnit = (unit: MeasureUnitType): SetUnitTypeAction => ({

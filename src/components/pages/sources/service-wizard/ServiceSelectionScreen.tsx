@@ -16,7 +16,7 @@ import { resetAction } from "@state/exploration/interaction/actions";
 
 interface Prop {
     navigation: StackNavigationProp<SettingsSteckParamList, "ServiceWizardModal">,
-    selectService: (key: string, initialDate: number) => void,
+    selectService: (key: string) => void,
     selectedServiceKey: string,
 }
 
@@ -89,7 +89,7 @@ class ServiceSelectionScreen extends React.Component<Prop, State>{
                                                 if (activationResult.success === true) {
                                                     //await DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).deactivatedInSystem()
 
-                                                    this.props.selectService(service.key, activationResult.serviceInitialDate)
+                                                    this.props.selectService(service.key)
                                                 }
                                             } catch (err) {
                                                 console.error("Failed to sign in to ", service.key, err)
@@ -125,8 +125,8 @@ function mapStateToPropsScreen(appState: ReduxAppState, ownProps: Prop): Prop {
 function mapDispatchToPropsScreen(dispatch: Dispatch, ownProps: Prop): Prop {
     return {
         ...ownProps,
-        selectService: (key: string, initialDate: number) => {
-            dispatch(setService(key, initialDate))
+        selectService: (key: string) => {
+            dispatch(setService(key))
             dispatch(resetAction(DataServiceManager.instance.getServiceByKey(key).getToday()))
         }
     }

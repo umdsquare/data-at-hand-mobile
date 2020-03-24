@@ -11,7 +11,6 @@ import Share from 'react-native-share'
 
 export interface ServiceActivationResult {
   success: boolean,
-  serviceInitialDate?: number // numbered date. The date when the user first started using the service.
   error?: any
 }
 
@@ -130,6 +129,8 @@ export abstract class DataService {
   getToday = (): Date => {
     return new Date()
   }
+
+  abstract getDataInitialDate(): Promise<number>
 
   abstract async clearAllCache(): Promise<void>
 

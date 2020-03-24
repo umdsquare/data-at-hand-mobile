@@ -89,6 +89,6 @@ const commonHolidayParsers = holidayRules.get().map(rule => {
 })
 
 
-export const HOLIDAY_PARSERS = [].concat(commonHolidayParsers)
+export const HOLIDAY_PARSERS = commonHolidayParsers
 
 export const HOLIDAY_REFINERS = []

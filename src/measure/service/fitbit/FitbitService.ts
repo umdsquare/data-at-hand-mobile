@@ -295,7 +295,6 @@ export class FitbitService extends DataService {
       })
       const accessToken = await this.authenticate();
       if (accessToken != null) {
-        const initialDate = await this.getMembershipStartDate();
         const now = DateTimeHelper.toNumberedDateFromDate(this.core.getToday());
 
         for (const measure of this.preloadableMeasures) {
@@ -308,7 +307,6 @@ export class FitbitService extends DataService {
 
         return {
           success: true,
-          serviceInitialDate: initialDate,
         };
       } else
         return {
@@ -348,6 +346,10 @@ export class FitbitService extends DataService {
 
   getMembershipStartDate(): Promise<number> {
     return this.core.getMembershipStartDate()
+  }
+
+  getDataInitialDate(): Promise<number> {
+    return this.getMembershipStartDate()
   }
 
   protected onCheckSupportedInSystem(): Promise<{

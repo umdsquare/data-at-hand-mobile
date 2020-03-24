@@ -65,7 +65,7 @@ export const ComparisonInitPanel = (props: { info: ExplorationInfo, onCompleted?
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
 
         if (cycleType === 'compareTwoRanges' && rangeB == null) {
-            setRangeB(DateTimeHelper.pageRange(rangeA, -1))
+            setRangeB(DateTimeHelper.pageRange(rangeA[0], rangeA[1], -1))
         }
     }, [cycleType])
 

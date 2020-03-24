@@ -85,7 +85,7 @@ export class DateTimeHelper {
         return seq
     }
 
-    static getNumDays(start: number|Date, end: number|Date): number{
+    static getNumDays(start: number | Date, end: number | Date): number {
         const fromDate: Date = typeof start === 'number' ? DateTimeHelper.toDate(start) : start
         const toDate: Date = typeof end === 'number' ? DateTimeHelper.toDate(end) : end
         return -differenceInCalendarDays(fromDate, toDate) + 1
@@ -161,7 +161,7 @@ export class DateTimeHelper {
         }
         const offsetDate = offsetFunc(ref, offset)
         return [
-            this.toNumberedDateFromDate(startFunc(offsetDate)), 
+            this.toNumberedDateFromDate(startFunc(offsetDate)),
             this.toNumberedDateFromDate(endFunc(offsetDate))
         ]
     }
@@ -219,13 +219,12 @@ export class DateTimeHelper {
         return result
     }
 
-    static pageRange(range: [number, number], direction: -1 | 1): [number, number] {
-        const startDate = DateTimeHelper.toDate(range[0])
-        const endDate = DateTimeHelper.toDate(range[1])
-        if (isSameMonth(startDate, endDate) === true && isFirstDayOfMonth(startDate) === true && isLastDayOfMonth(endDate) === true) {
-            const newStartDate = addMonths(startDate, direction)
-            //month
-            return [DateTimeHelper.toNumberedDateFromDate(newStartDate), DateTimeHelper.toNumberedDateFromDate(lastDayOfMonth(newStartDate))]
+    static pageRange(start: number | Date, end: number | Date, direction: -1 | 1): [number, number] {
+        const startDate: Date = typeof start === 'number' ? DateTimeHelper.toDate(start) : start
+        const endDate: Date = typeof end === 'number'? DateTimeHelper.toDate(end) : end
+        const semanticTest = this.rangeSemantic(startDate, endDate)
+        if (semanticTest) {
+            return this.getSemanticRange(startDate, semanticTest.semantic, direction)
         } else {
             const numDays = differenceInDays(endDate, startDate) + 1
             return [DateTimeHelper.toNumberedDateFromDate(addDays(startDate, direction * numDays)),
