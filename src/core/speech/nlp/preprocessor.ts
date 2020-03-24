@@ -196,7 +196,7 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
         }
     } = {}
 
-    nlpCasted.dates().forEach(match => {
+    nlpCasted.dates().forEach((match: compromise.Document) => {
         const text = match.text()
         const parseResult = parseTimeText(text, options.getToday())
         if (parseResult) {

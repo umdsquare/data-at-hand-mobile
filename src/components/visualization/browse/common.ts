@@ -93,7 +93,7 @@ export namespace CommonBrowsingChartStyles {
 
     const shouldHighlightElements = useMemo(() => prop.highlightFilter && prop.highlightFilter.dataSource === dataSource && prop.highlightedDays != null, [
       prop.highlightFilter,
-      prop["dataSource"],
+      (prop as any)["dataSource"],
       prop.highlightedDays
     ])
 
@@ -110,7 +110,7 @@ export namespace CommonBrowsingChartStyles {
             if (array.length > 0 && prop.highlightedDays) {
               const extremeDays = Object.keys(prop.highlightedDays)
               if (extremeDays.length > 0) {
-                const extremeDatum = array.find(d => d.numberedDate === Number.parseInt(extremeDays[0]))
+                const extremeDatum = array.find((d: { numberedDate: number }) => d.numberedDate === Number.parseInt(extremeDays[0]))
                 if (extremeDatum) {
                   if (dataSource === DataSourceType.SleepRange) {
                     if (prop.highlightFilter!.propertyKey === 'waketime') {
@@ -139,6 +139,6 @@ export function getChartElementColor(shouldHighlightElements: boolean, isHighlig
     (isToday === true ? Colors.today : Colors.chartElementDefault)
 }
 
-export function getChartElementOpacity(isToday: boolean): number{
-  return isToday === true? 0.8: 0.62
+export function getChartElementOpacity(isToday: boolean): number {
+  return isToday === true ? 0.8 : 0.62
 }

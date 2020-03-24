@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 
 export abstract class AndroidDictatorImplBase implements IVoiceDictatorNative {
-  constructor(protected readonly bridge) { }
+  constructor(protected readonly bridge: any) { }
 
   private eventEmitter = new NativeEventEmitter(this.bridge);
 

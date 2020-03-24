@@ -56,7 +56,7 @@ export class NLUCommandResolver {
 
         //Cover cyclic time frame first
         if (cyclicTimeFrames.length > 0) {
-            const guaranteedDataSource: DataSourceType = dataSources.length > 0 ? dataSources[0].value : (context["dataSource"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
+            const guaranteedDataSource: DataSourceType = dataSources.length > 0 ? dataSources[0].value : ((context as any)["dataSource"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
             if (guaranteedDataSource) {
                 const guaranteedRange = ranges.length > 0 ? ranges[0].value : (context.type === SpeechContextType.RangeElement ? (context as RangeElementSpeechContext).range : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range))
                 return createGoToComparisonCyclicAction(InteractionType.Speech, guaranteedDataSource, guaranteedRange, cyclicTimeFrames[0].value)
@@ -70,14 +70,14 @@ export class NLUCommandResolver {
                 {
                     console.log("Comparison intent")
                     const cascadedDataSource: DataSourceType = toldDataSources === true ? dataSources[0].value :
-                        (context["dataSource"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
+                        ((context as any)["dataSource"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
                     if (toldRanges) {
                         let rangeA, rangeB
                         if (ranges.length > 1) {
                             rangeA = ranges[0].value
                             rangeB = ranges[1].value
                         } else {
-                            rangeA = context["range"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range)
+                            rangeA = (context as any)["range"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range)
                             rangeB = ranges[0].value
                         }
 
@@ -110,7 +110,7 @@ export class NLUCommandResolver {
                 {
                     console.log("Browse intent")
                     const cascadedDataSource: DataSourceType = toldDataSources === true ? dataSources[0].value :
-                        (context["dataSource"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
+                        ((context as any)["dataSource"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
 
                     let rangePriority: EntityPriority = EntityPriority.None
                     let datePriority: EntityPriority = EntityPriority.None
@@ -120,8 +120,8 @@ export class NLUCommandResolver {
                     if (toldRanges) {
                         cascadedRange = ranges[0].value
                         rangePriority = EntityPriority.Spoken
-                    } else if (context["range"]) {
-                        cascadedRange = context["range"]
+                    } else if ((context as any)["range"]) {
+                        cascadedRange = (context as any)["range"]
                         rangePriority = EntityPriority.Touched
                     } else {
                         cascadedRange = explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range)
@@ -133,8 +133,8 @@ export class NLUCommandResolver {
                     if (toldDates) {
                         cascadedDate = dates[0].value
                         datePriority = EntityPriority.Spoken
-                    } else if (context["date"]) {
-                        cascadedDate = context["date"]
+                    } else if ((context as any)["date"]) {
+                        cascadedDate = (context as any)["date"]
                         datePriority = EntityPriority.Touched
                     } else {
                         cascadedDate = explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Date)

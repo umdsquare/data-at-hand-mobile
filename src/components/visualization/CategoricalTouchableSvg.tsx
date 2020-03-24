@@ -11,8 +11,8 @@ export interface CategoricalTouchableSvgProps {
     chartContainerHeight: number,
     chartArea: LayoutRectangle,
     scaleX: ScaleBand<number>,
-    onLongPressIn: (timeKey, x, y, screenX, screenY, touchId) => void,
-    onLongPressMove: (timeKey, x, y, screenX, screenY, touchId) => void,
+    onLongPressIn: (timeKey: number, x: number, y: number, screenX: number, screenY: number, touchId: string) => void,
+    onLongPressMove: (timeKey: number, x: number, y: number, screenX: number, screenY: number, touchId: string) => void,
     onLongPressOut: () => void,
     onClickElement: (timeKey: number) => void,
     children?: any

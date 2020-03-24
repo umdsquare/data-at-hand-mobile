@@ -8,8 +8,8 @@ import { LayoutRectangle } from 'react-native';
 interface Props<T> {
     ticks: Array<T>
     tickMargin: number
-    scale: (T) => number
-    tickFormat?: (T) => string
+    scale: (value: T) => number
+    tickFormat?: (value: T) => string
     chartArea: LayoutRectangle
     position: Padding
     overrideTickLabelStyle?: any

@@ -1,9 +1,7 @@
-import chrono from 'chrono-node';
-
-import { Chrono } from '../chrono';
 import { lastDayOfWeek, getYear, getMonth, getDate, getDay, addDays, startOfWeek, subWeeks } from 'date-fns';
+import { Parser, ParsedResult } from 'chrono-node';
 
-const DAYS_OFFSET = {
+const DAYS_OFFSET: { [key: string]: number } = {
     'sunday': 0, 'sun': 0, 'monday': 1, 'mon': 1, 'tuesday': 2, 'tues': 2, 'tue': 2, 'wednesday': 3, 'wed': 3,
     'thursday': 4, 'thurs': 4, 'thur': 4, 'thu': 4, 'friday': 5, 'fri': 5, 'saturday': 6, 'sat': 6
 };
@@ -23,13 +21,13 @@ const POSTFIX_GROUP = 4;
 
 
 export const makeWeekdayParser = () => {
-    const weekdayParser = new chrono.Parser()
+    const weekdayParser = new Parser()
 
     weekdayParser.pattern = () => PATTERN
     weekdayParser.extract = function (text, ref: Date, match, opt) {
         var index = match.index + match[1].length;
         var text = match[0].substr(match[1].length, match[0].length - match[1].length);
-        var result: Chrono.ParsedResult = new chrono.ParsedResult({
+        var result: ParsedResult = new ParsedResult({
             index,
             text,
             ref
@@ -60,11 +58,11 @@ export const makeWeekdayParser = () => {
             date = addDays(subWeeks(startOfWeek(ref, { weekStartsOn: 1 }), 1), offset == 0 ? 6 : (offset - 1))
         }
 
-        const funcName = norm.length === 0? 'imply' : 'assign'
+        const funcName = norm.length === 0 ? 'imply' : 'assign'
         result.start[funcName]('year', getYear(date))
         result.start[funcName]('month', getMonth(date) + 1)
         result.start[funcName]('day', getDate(date))
-        if(funcName=== 'imply'){
+        if (funcName === 'imply') {
             result.start.assign('weekday', offset)
             result.start.knownValues['weekday'] = offset
         }

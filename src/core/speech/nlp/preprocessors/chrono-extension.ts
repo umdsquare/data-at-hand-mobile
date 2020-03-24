@@ -1,6 +1,5 @@
-import chrono from 'chrono-node';
-import { Chrono } from './chrono';
-import { getYear, isAfter, addYears, getDate, subDays, getMonth, addDays, subYears, subWeeks, subMonths, startOfMonth, endOfMonth, isBefore } from 'date-fns';
+import chrono, { ParsedResult, Refiner, ParsedComponents, ComponentParams, ComponentName } from 'chrono-node';
+import { getYear, isAfter, addYears, getDate, getMonth, addDays, subYears, subWeeks, subMonths, startOfMonth, endOfMonth, isBefore } from 'date-fns';
 
 import NamedRegExp from 'named-regexp-groups'
 
@@ -26,9 +25,8 @@ seasonParser.extract = function (text, ref, match, opt) {
 
     const season = match.groups.season.trim()
 
-    let referredYear = match.groups.year1 || match.groups.year2
-    if (referredYear) {
-        referredYear = Number.parseInt(referredYear)
+    if (match.groups.year1 != null || match.groups.year2 != null) {
+        const referredYear = Number.parseInt(match.groups.year1 || match.groups.year2)
         seasonRange = getSeasonOfYear(season, referredYear)
     } else {
         let lastCount = 0
@@ -47,7 +45,7 @@ seasonParser.extract = function (text, ref, match, opt) {
         }
     }
 
-    const result = new chrono.ParsedResult({
+    const result = new ParsedResult({
         ref,
         text: match[0],
         index: match.index,
@@ -73,8 +71,8 @@ seasonParser.extract = function (text, ref, match, opt) {
 
 //===========================================================================
 
-const relativePastRefiner = new chrono.Refiner();
-relativePastRefiner.refine = function (text, results: Array<Chrono.ParsedResult>, opt) {
+const relativePastRefiner = new Refiner();
+relativePastRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
 
     const shouldRefine = results.length === 1 && /((last|past),?\s+)+/i.test(text) === true
         && (
@@ -117,14 +115,14 @@ relativePastRefiner.refine = function (text, results: Array<Chrono.ParsedResult>
             const dateInfo = {
                 year: getYear(date),
                 month: getMonth(date) + 1,
-            }
+            } as ComponentParams
 
             if (results[0].start.isCertain('day') === true) {
                 dateInfo["day"] = getDate(date)
             }
 
             const result = [
-                new chrono.ParsedResult({
+                new ParsedResult({
                     ref: results[0].ref,
                     text: match[0] + results[0].text,
                     index: match.index,
@@ -139,7 +137,7 @@ relativePastRefiner.refine = function (text, results: Array<Chrono.ParsedResult>
 }
 
 const aroundRefiner = new chrono.Refiner();
-aroundRefiner.refine = function (text, results: Array<Chrono.ParsedResult>, opt) {
+aroundRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
     if (/(around|near)\s+/i.test(text) === true
         && results.length === 1
         && results[0].start != null
@@ -171,8 +169,8 @@ aroundRefiner.refine = function (text, results: Array<Chrono.ParsedResult>, opt)
     return results
 }
 
-const sinceRefiner = new chrono.Refiner()
-sinceRefiner.refine = function (text, results: Array<Chrono.ParsedResult>, opt) {
+const sinceRefiner = new Refiner()
+sinceRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
     const match = text.match(/(since)\s+/i)
     if (match
         && results.length === 1
@@ -181,7 +179,7 @@ sinceRefiner.refine = function (text, results: Array<Chrono.ParsedResult>, opt) 
         && results[0].start.isCertain('day') === true) {
 
         results[0].text = match[0] + results[0].text
-        results[0].end = new chrono.ParsedComponents({
+        results[0].end = new ParsedComponents({
             year: getYear(results[0].ref),
             month: getMonth(results[0].ref) + 1,
             day: getDate(results[0].ref)
@@ -192,7 +190,7 @@ sinceRefiner.refine = function (text, results: Array<Chrono.ParsedResult>, opt) 
 }
 
 export const makeENMergeDateRangeRefiner = () => {
-    const refiner = new chrono.Refiner()
+    const refiner = new Refiner()
 
     refiner.pattern = function () { return /^\s*(to|\-)\s*$/i };
 
@@ -228,7 +226,7 @@ export const makeENMergeDateRangeRefiner = () => {
         return mergedResult;
     };
 
-    function isAbleToMerge(text, result1, result2) {
+    function isAbleToMerge(text: string, result1: ParsedResult, result2: ParsedResult) {
         var begin = result1.index + result1.text.length;
         var end = result2.index;
         var textBetween = text.substring(begin, end);
@@ -236,21 +234,21 @@ export const makeENMergeDateRangeRefiner = () => {
         return textBetween.match(refiner.pattern());
     };
 
-    function mergeResult(text, fromResult, toResult) {
+    function mergeResult(text: string, fromResult: ParsedResult, toResult: ParsedResult) {
 
         //merge toResult to fromResult.
 
         if (!fromResult.isOnlyWeekday() && !toResult.isOnlyWeekday()) {
 
             for (var key in toResult.start.knownValues) {
-                if (!fromResult.start.isCertain(key)) {
-                    fromResult.start.assign(key, toResult.start.get(key));
+                if (!fromResult.start.isCertain(key as ComponentName)) {
+                    fromResult.start.assign(key as ComponentName, toResult.start.get(key as ComponentName));
                 }
             }
 
             for (var key in fromResult.start.knownValues) {
-                if (!toResult.start.isCertain(key)) {
-                    toResult.start.assign(key, fromResult.start.get(key));
+                if (!toResult.start.isCertain(key as ComponentName)) {
+                    toResult.start.assign(key as ComponentName, fromResult.start.get(key as ComponentName));
                 }
             }
         }

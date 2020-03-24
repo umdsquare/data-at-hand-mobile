@@ -13,7 +13,7 @@ export class IOSDictatorImpl implements IVoiceDictatorNative {
 
   install(): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      this.iosBridge.install((error, result) => {
+      this.iosBridge.install((error?: any, result?: { installed: boolean }) => {
         if (error) {
           reject(error);
         } else {
@@ -25,7 +25,7 @@ export class IOSDictatorImpl implements IVoiceDictatorNative {
 
   isAvailableInSystem(): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      this.iosBridge.isAvailableInSystem((error, result) => {
+      this.iosBridge.isAvailableInSystem((error?: any, result?: { available: boolean }) => {
         if (error) {
           reject(error);
         } else {
@@ -55,7 +55,7 @@ export class IOSDictatorImpl implements IVoiceDictatorNative {
     return subscription
   }
 
-  registerStopEventListener(listener: (error) => void): EventSubscription {
+  registerStopEventListener(listener: (error: any) => void): EventSubscription {
     const subscription = this.iosEventEmitter.addListener(
       SpeechRecognitionEventType.EVENT_STOPPED,
       listener,
@@ -74,7 +74,7 @@ export class IOSDictatorImpl implements IVoiceDictatorNative {
 
   start(): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      this.iosBridge.start((error, result) => {
+      this.iosBridge.start((error?: any) => {
         if (error) {
           reject(error);
         } else resolve(true);
@@ -84,7 +84,7 @@ export class IOSDictatorImpl implements IVoiceDictatorNative {
 
   stop(): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      this.iosBridge.stop((error, result) => {
+      this.iosBridge.stop((error?: any) => {
         if (error) {
           console.log("IOS dictator stop error:", error)
           reject(error)

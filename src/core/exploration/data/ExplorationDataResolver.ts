@@ -137,17 +137,17 @@ class ExplorationDataResolver {
               switch (statistic.type) {
                 case "avg":
                   {
-                    statistic.value = mean(newData.data, d => d["value"])
+                    statistic.value = mean(newData.data, (d: any) => d["value"])
                   }
                   break;
                 case 'range':
                   {
-                    statistic.value = [min(newData.data, d => d["value"]), max(newData.data, d => d["value"])]
+                    statistic.value = [min(newData.data, (d: any) => d["value"]), max(newData.data, (d: any) => d["value"])]
                   }
                   break;
                 case 'total':
                   {
-                    statistic.value = sum(newData.data, d => d["value"])
+                    statistic.value = sum(newData.data, (d: any) => d["value"])
                   }
                   break;
               }
@@ -158,12 +158,12 @@ class ExplorationDataResolver {
               switch (statistic.type) {
                 case "avg":
                   {
-                    statistic.value = mean(newData.data.trend, d => d["value"])
+                    statistic.value = mean(newData.data.trend, (d: any) => d["value"])
                   }
                   break;
                 case 'range':
                   {
-                    statistic.value = [min(newData.data.trend, d => d["value"]), max(newData.data.trend, d => d["value"])]
+                    statistic.value = [min(newData.data.trend, (d: any) => d["value"]), max(newData.data.trend, (d: any) => d["value"])]
                   }
                   break;
               }
@@ -176,17 +176,17 @@ class ExplorationDataResolver {
               switch (statistic.type) {
                 case "avg":
                   {
-                    statistic.value = mean(newData.data, d => d["lengthInSeconds"])
+                    statistic.value = mean(newData.data, (d: any) => d["lengthInSeconds"])
                   }
                   break;
                 case 'range':
                   {
-                    statistic.value = [min(newData.data, d => d["lengthInSeconds"]), max(newData.data, d => d["lengthInSeconds"])]
+                    statistic.value = [min(newData.data, (d: any) => d["lengthInSeconds"]), max(newData.data, (d: any) => d["lengthInSeconds"])]
                   }
                   break;
                 case 'total':
                   {
-                    statistic.value = sum(newData.data, d => d["lengthInSeconds"])
+                    statistic.value = sum(newData.data, (d: any) => d["lengthInSeconds"])
                   }
                   break;
               }
@@ -198,12 +198,12 @@ class ExplorationDataResolver {
               switch (statistic.type) {
                 case 'waketime':
                   {
-                    statistic.value = mean(newData.data, d => d["wakeTimeDiffSeconds"])
+                    statistic.value = mean(newData.data, (d: any) => d["wakeTimeDiffSeconds"])
                   }
                   break;
                 case 'bedtime':
                   {
-                    statistic.value = mean(newData.data, d => d["bedTimeDiffSeconds"])
+                    statistic.value = mean(newData.data, (d: any) => d["bedTimeDiffSeconds"])
                   }
                   break;
               }
