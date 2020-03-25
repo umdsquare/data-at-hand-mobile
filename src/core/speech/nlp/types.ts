@@ -1,6 +1,7 @@
 import { NumericConditionType } from "../../exploration/types"
 import { randomString } from "@utils/utils"
 import { DataSourceType, MeasureUnitType } from "@measure/DataSourceSpec"
+import { ActionTypeBase } from "@state/types"
 
 export const MONTH_NAMES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
 
@@ -57,4 +58,16 @@ export interface NLUOptions {
 
 export function makeVariableId() {
     return randomString(5)
+}
+
+export enum NLUResultType {
+    Effective = 1,
+    Void = 0,
+    Unapplicable = -1,
+    Fail = -2,
+}
+
+export interface NLUResult {
+    type: NLUResultType,
+    action?: ActionTypeBase | null,
 }

@@ -1,13 +1,14 @@
 import { SpeechContext, SpeechContextType, TimeSpeechContext, RangeElementSpeechContext } from "./context"
 import { preprocess } from "./preprocessor";
 import { ActionTypeBase } from "../../../state/types";
-import { VariableType, VariableInfo, PreProcessedInputText, Intent, NLUOptions, ConditionInfo } from "./types";
+import { VariableType, VariableInfo, PreProcessedInputText, Intent, NLUOptions, ConditionInfo, NLUResult, NLUResultType } from "./types";
 import { ExplorationInfo, ExplorationType, ParameterType, inferIntraDayDataSourceType, inferDataSource, HighlightFilter } from "../../exploration/types";
 import { setDateAction, InteractionType, createSetRangeAction, setDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, createGoToComparisonCyclicAction, setCycleTypeAction, setHighlightFilter } from "../../../state/exploration/interaction/actions";
 import { explorationInfoHelper } from "../../exploration/ExplorationInfoHelper";
 import { differenceInDays } from "date-fns";
 import { DateTimeHelper } from "@utils/time";
 import { DataSourceType } from "../../../measure/DataSourceSpec";
+import { ExplorationState, explorationStateReducer } from "@state/exploration/interaction/reducers";
 
 enum EntityPriority {
     None = 0,
@@ -29,7 +30,41 @@ export class NLUCommandResolver {
 
     private constructor() { }
 
-    async resolveSpeechCommand(speech: string, context: SpeechContext, explorationInfo: ExplorationInfo, options: NLUOptions): Promise<ActionTypeBase> {
+    static convertActionToNLUResult(action: ActionTypeBase | undefined | null, currentInfo: ExplorationInfo): NLUResult {
+        if (action) {
+            
+            //effective/void/unapplicable
+            const fakeFormerState = {
+                info: currentInfo,
+                backNavStack: [],
+                uiStatus: {},
+            } as ExplorationState
+            const nextState = explorationStateReducer(fakeFormerState, action)
+
+            let type: NLUResultType
+
+            if(nextState == fakeFormerState){
+                //state did not change.
+                type = NLUResultType.Unapplicable
+            }else if(explorationInfoHelper.equals(fakeFormerState.info, nextState.info)){
+                //void
+                type = NLUResultType.Void
+            }else{
+                type = NLUResultType.Effective
+            }
+
+            return {
+                type,
+                action
+            }
+        } else {
+            return {
+                type: NLUResultType.Fail
+            }
+        }
+    }
+
+    async resolveSpeechCommand(speech: string, context: SpeechContext, explorationInfo: ExplorationInfo, options: NLUOptions): Promise<NLUResult> {
 
         const preprocessed = await preprocess(speech, options)
 
@@ -48,10 +83,12 @@ export class NLUCommandResolver {
         const toldConditions = conditions.length > 0
 
         const nonVerbVariableExists = Object.keys(preprocessed.variables).find(id => preprocessed.variables[id].type !== VariableType.Verb) != null
-        
-        if(nonVerbVariableExists === false){
+
+        if (nonVerbVariableExists === false) {
             //reject
-            return null
+            return {
+                type: NLUResultType.Fail
+            }
         }
 
         //Cover cyclic time frame first
@@ -59,7 +96,9 @@ export class NLUCommandResolver {
             const guaranteedDataSource: DataSourceType = dataSources.length > 0 ? dataSources[0].value : ((context as any)["dataSource"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
             if (guaranteedDataSource) {
                 const guaranteedRange = ranges.length > 0 ? ranges[0].value : (context.type === SpeechContextType.RangeElement ? (context as RangeElementSpeechContext).range : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range))
-                return createGoToComparisonCyclicAction(InteractionType.Speech, guaranteedDataSource, guaranteedRange, cyclicTimeFrames[0].value)
+                return NLUCommandResolver.convertActionToNLUResult(
+                    createGoToComparisonCyclicAction(InteractionType.Speech, guaranteedDataSource, guaranteedRange, cyclicTimeFrames[0].value),
+                    explorationInfo)
             }
         }
 
@@ -82,7 +121,9 @@ export class NLUCommandResolver {
                         }
 
                         if (cascadedDataSource && rangeA && rangeB) {
-                            return createGoToComparisonTwoRangesAction(InteractionType.Speech, cascadedDataSource, rangeA, rangeB)
+                            return NLUCommandResolver.convertActionToNLUResult(
+                                createGoToComparisonTwoRangesAction(InteractionType.Speech, cascadedDataSource, rangeA, rangeB),
+                                explorationInfo)
                         }
                     }//Todo cover before and after cases
                 }
@@ -92,17 +133,23 @@ export class NLUCommandResolver {
                 console.log("Assign intent")
                 if (!toldDataSources && !toldCyclicTimeFrames && !toldConditions && (toldDates || toldRanges)) {
                     //only time expression
-                    return this.processTimeOnlyExpressions(dates, ranges, explorationInfo, context)
+                    return NLUCommandResolver.convertActionToNLUResult(
+                        this.processTimeOnlyExpressions(dates, ranges, explorationInfo, context),
+                        explorationInfo)
                 } else if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
                     //only data source
                     //only if the exploration info supports the data source
                     if (explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource) != null) {
-                        return setDataSourceAction(InteractionType.Speech, dataSources[0].value)
+                        return NLUCommandResolver.convertActionToNLUResult(
+                            setDataSourceAction(InteractionType.Speech, dataSources[0].value),
+                            explorationInfo)
                     }
                 } else if (!toldDataSources && toldCyclicTimeFrames && toldDates === false && toldRanges === false) {
                     //only time cycle
                     if (explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.CycleType) === cyclicTimeFrames[0].value) {
-                        return setCycleTypeAction(InteractionType.Speech, cyclicTimeFrames[0].value)
+                        return NLUCommandResolver.convertActionToNLUResult(
+                            setCycleTypeAction(InteractionType.Speech, cyclicTimeFrames[0].value),
+                            explorationInfo)
                     }
                 }
             //Don't break here. The browse intent logic will cover the rest. 
@@ -145,15 +192,21 @@ export class NLUCommandResolver {
 
                     if (cascadedRange || cascadedDate) {
                         if (rangePriority >= datePriority) {
-                            if(cascadedDataSource){
-                                return createGoToBrowseRangeAction(InteractionType.Speech, cascadedDataSource, cascadedRange)
-                            }else{
-                                return createSetRangeAction(InteractionType.Speech, cascadedRange)
+                            if (cascadedDataSource) {
+                                return NLUCommandResolver.convertActionToNLUResult(
+                                    createGoToBrowseRangeAction(InteractionType.Speech, cascadedDataSource, cascadedRange),
+                                    explorationInfo)
+                            } else {
+                                return NLUCommandResolver.convertActionToNLUResult(
+                                    createSetRangeAction(InteractionType.Speech, cascadedRange),
+                                    explorationInfo)
                             }
                         } else {
                             const inferredIntraDayDataSourceType = inferIntraDayDataSourceType(cascadedDataSource)
                             if (inferredIntraDayDataSourceType) {
-                                return createGoToBrowseDayAction(InteractionType.Speech, inferredIntraDayDataSourceType, cascadedDate)
+                                return NLUCommandResolver.convertActionToNLUResult(
+                                    createGoToBrowseDayAction(InteractionType.Speech, inferredIntraDayDataSourceType, cascadedDate),
+                                    explorationInfo)
                             }
                         }
                     }
@@ -164,8 +217,6 @@ export class NLUCommandResolver {
                 const conditionInfo = conditions[0].value as ConditionInfo
                 const cascadedDataSource: DataSourceType = toldDataSources ? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
 
-                console.log("implied data source:", conditionInfo.impliedDataSource, "cascaded data source:", cascadedDataSource)
-                
                 const dataSource: DataSourceType = conditionInfo.impliedDataSource || cascadedDataSource
 
                 if (dataSource) {
@@ -173,8 +224,8 @@ export class NLUCommandResolver {
                         ...conditionInfo,
                         dataSource
                     }
-                    console.log("set highlight filter")
-                    return setHighlightFilter(InteractionType.Speech, highlightFilter)
+                    return NLUCommandResolver.convertActionToNLUResult(setHighlightFilter(InteractionType.Speech, highlightFilter),
+                        explorationInfo)
                 }
                 break;
         }
@@ -184,6 +235,9 @@ export class NLUCommandResolver {
         //Cover cases with trivial intent
         console.log("this is a corner case.")
 
+        return {
+            type: NLUResultType.Fail
+        }
     }
 
     private extractVariablesWithType(processed: PreProcessedInputText, type: VariableType): VariableInfo[] {
@@ -266,7 +320,7 @@ export class NLUCommandResolver {
                                     return createSetRangeAction(InteractionType.Speech, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])], timeContext.parameterKey)
                                 }
                             }
-                            if(ranges.length > 0){
+                            if (ranges.length > 0) {
                                 return createSetRangeAction(InteractionType.Speech, ranges[0].value, timeContext.parameterKey)
                             }
                         }

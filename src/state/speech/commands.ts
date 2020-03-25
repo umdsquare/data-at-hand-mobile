@@ -10,6 +10,7 @@ import { NLUCommandResolver } from "../../core/speech/nlp/nlu";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { SpeechEventQueue } from "../../core/speech/SpeechEventQueue";
 import { SystemLogger, VerboseEventTypes } from "@core/logging/SystemLogger";
+import { NLUResultType } from "@core/speech/nlp/types";
 
 const sessionMutex = new Mutex()
 
@@ -86,7 +87,7 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                         console.log(sessionId, "Analyze the phrase, ", dictationResult.text, "with context: ", context)
 
                         try {
-                            const inferredAction = await NLUCommandResolver.instance.resolveSpeechCommand(
+                            const nluResult = await NLUCommandResolver.instance.resolveSpeechCommand(
                                 dictationResult.text,
                                 context,
                                 currentState.explorationState.info,
@@ -100,32 +101,28 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                                 dictationResult.text,
                                 currentState.explorationState.info,
                                 context,
-                                inferredAction
+                                nluResult
                             ).then()
 
-                            if (inferredAction != null) {
-                                console.log("resulting action:")
-                                console.log(inferredAction)
-
-                                const inferredActionWithMetadata = setMetadataToAction(inferredAction, { speech: dictationResult.text })
-
-                                dispatch(inferredActionWithMetadata)
-                                requestAnimationFrame(() => {
-                                    SpeechEventQueue.instance.push({
-                                        type: "success",
-                                        id: sessionId
-                                    })
-                                })
-                            } else {
-                                SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.SpeechFail, {speech: dictationResult.text})
-
-                                requestAnimationFrame(() => {
-                                    SpeechEventQueue.instance.push({
-                                        type: "fail",
-                                        id: sessionId
-                                    })
-                                })
+                            switch (nluResult.type) {
+                                case NLUResultType.Effective:
+                                    const inferredActionWithMetadata = setMetadataToAction(nluResult.action!, { speech: dictationResult.text })
+                                    dispatch(inferredActionWithMetadata)
+                                    break;
+                                case NLUResultType.Void:
+                                    break;
+                                case NLUResultType.Fail:
+                                    SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.SpeechFail, { speech: dictationResult.text })
+                                    break;
                             }
+
+                            requestAnimationFrame(() => {
+                                SpeechEventQueue.instance.push({
+                                    type: nluResult.type,
+                                    id: sessionId
+                                })
+                            })
+
                             console.log(sessionId, "Finished analyzing.")
                             terminate(releaseMutex, dispatch, TerminationReason.Success, sessionId)
                         } catch (err) {
