@@ -488,14 +488,10 @@ const YearPicker = React.memo((props: { year: number, onYearSelected: (year: num
     }, [props.year, yearLabels])
 
     const onItemSelected = useCallback((index) => {
-        console.log("selected index: ", index)
         setSelectedIndex(index)
     }, [yearLabels])
 
     const onApplyPress = useCallback(() => {
-        console.log("selected index:", selectedIndex)
-        console.log("year labels:", yearLabels)
-        console.log(yearLabels[selectedIndex])
         props.onYearSelected(Number.parseInt(yearLabels[selectedIndex]))
     }, [selectedIndex, yearLabels, props.onYearSelected])
 

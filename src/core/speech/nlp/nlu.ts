@@ -266,10 +266,6 @@ export class NLUCommandResolver {
                     const date = dates[0].value
                     const currentRange = explorationInfoHelper.getParameterValue<[number, number]>(explorationInfo, ParameterType.Range)
 
-                    if (currentRange[0] === date || currentRange[1] === date) {
-                        return null
-                    }
-
                     if (context.type === SpeechContextType.Time) {
                         const timeContext = context as TimeSpeechContext
 

@@ -7,7 +7,7 @@ import { SvgIcon, SvgIconType } from '@components/common/svg/SvgIcon';
 import { Sizes } from '@style/Sizes';
 import LinearGradient from 'react-native-linear-gradient';
 import Colors from '@style/Colors';
-import { NLUResultType } from '@core/speech/nlp/types';
+import { NLUResultType, NLUResult } from '@core/speech/nlp/types';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
 
@@ -42,6 +42,15 @@ const styles = StyleSheet.create({
 
 })
 
+function branchByType<T>(type: NLUResultType, effectiveValue: T, voidValue: T, unapplicableValue: T, failValue: T): T{
+    switch(type){
+        case NLUResultType.Effective: return effectiveValue
+        case NLUResultType.Void: return voidValue
+        case NLUResultType.Unapplicable: return unapplicableValue
+        case NLUResultType.Fail: return failValue
+    }
+}
+
 interface State {
     currentEvent?: SpeechNotificationEvent | null
 }
@@ -56,7 +65,6 @@ export class SpeechEventNotificationOverlay extends React.PureComponent<any, Sta
 
 
     private currentAnimation: Animated.CompositeAnimation | undefined = undefined
-
 
     constructor(props: any) {
         super(props)
@@ -100,7 +108,7 @@ export class SpeechEventNotificationOverlay extends React.PureComponent<any, Sta
                     Animated.timing(this.animProgress, {
                         toValue: 0,
                         easing: Easing.cubic,
-                        duration: currentEvent.type !== NLUResultType.Fail ? 400 : 600,
+                        duration: branchByType(currentEvent.type, 400, 600, 600, 600),
                         useNativeDriver: true
                     })
                 ]),
@@ -156,7 +164,12 @@ export class SpeechEventNotificationOverlay extends React.PureComponent<any, Sta
                         }
                     ]
                 }]}
-                colors={this.state.currentEvent.type !== NLUResultType.Fail ? Colors.speechSuccessGradient : Colors.speechFailGradient}
+                colors={branchByType(this.state.currentEvent.type, 
+                    Colors.speechSuccessGradient, 
+                    Colors.speechVoidGradient, 
+                    Colors.speechFailGradient, 
+                    Colors.speechFailGradient)}
+
                 start={start} end={end}
             >
                 <Animated.View style={
@@ -179,8 +192,7 @@ export class SpeechEventNotificationOverlay extends React.PureComponent<any, Sta
 
 
                 <Text style={{ marginLeft: 8, color: 'white', fontSize: Sizes.normalFontSize }}>{
-                    this.state.currentEvent.type === NLUResultType.Effective ? 'Got it.' : 
-                        (this.state.currentEvent.type === NLUResultType.Void? "Got it, but no effect.": "Sorry, I didn\'t get.")
+                    branchByType(this.state.currentEvent!.type, "Got it.", "Got it, but no effect.", "Unapplicable command for now.", "Sorry, I couldn\'t understand.")
                 }</Text>
             </AnimatedLinearGradient> : null}
         </View>

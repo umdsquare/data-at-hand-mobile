@@ -61,7 +61,7 @@ export function createStartDictationAction(sessionId: string): SpeechSessionActi
     }
 }
 
-export function createWaitAction(sessionId): SpeechSessionAction{
+export function createWaitAction(sessionId: string): SpeechSessionAction{
     return {
         type: SpeechRecognizerActionType.WaitAction,
         sessionId
