@@ -39,7 +39,6 @@
     "chrono-node": "^1.4.4",
     "comma-number": "^2.0.1",
     "compromise": "^13.1.1",
-    "compromise-dates": "0.0.5",
     "compromise-numbers": "0.0.5",
     "convert-units": "^2.3.4",
     "d3-array": "^2.4.0",

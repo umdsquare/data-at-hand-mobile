@@ -6,6 +6,7 @@ import { categorizeExtreme, findComparisonTermInfo, inferScalarValue } from "./p
 import { tryPreprocessingByTemplates, DATASOURCE_VARIABLE_RULES, CYCLIC_TIME_RULES } from "./preprocessors/preprocessor-templates";
 import { parseTimeOfTheDayTextToDiffSeconds } from "./preprocessors/preprocessor-time-clock";
 import { DataSourceType } from "@measure/DataSourceSpec";
+import { runPipe, definePipe } from "./preprocessors/preprosessor-pipe";
 
 compromise.extend(require('compromise-numbers'))
 
@@ -33,23 +34,6 @@ const lexicon = {
     'compare': 'Verb',
     'compared': 'Verb',
     'less': 'Adjective',
-    /*
-    'near': 'Date',
-    "new year": 'Date',
-    'since': 'Date',
-    "fall": 'Date',
-    "spring": 'Date',
-
-    "resent": 'Date',
-    'recent': 'Date',
-
-    "march": 'Date',
-    'may': 'Date',
-    //holidays
-    "valentine": 'Date',
-    "father": 'Date',
-    "mother": 'Date',
-    'labor': 'Date'*/
 }
 
 export async function preprocess(speech: string, options: NLUOptions): Promise<PreProcessedInputText> {
@@ -64,123 +48,105 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
         return quickPassWithTemplate
     }
 
-
-    const variables: VariableInfoDict = {}
-
-    let processedText: string | undefined = undefined
-
-    let intent: Intent | undefined = undefined
-    
-    let processedSpeech = speech
-
     //Find time========================================================================================
-    const parsedTimeVariables = extractTimeExpressions(processedSpeech, options.getToday())
-    parsedTimeVariables.forEach(variable => {
-        const id = makeVariableId()
-        variables[id] = {
-            id,
-            originalText: variable.text,
-            type: variable.type,
-            value: variable.value
-        }
-        processedSpeech = processedSpeech.substr(0, variable.index) + id + processedSpeech.substring(variable.index + variable.text.length, processedSpeech.length)
-    })
 
-    //Find data source=================================================================================
-
-    DATASOURCE_VARIABLE_RULES.concat(CYCLIC_TIME_RULES).forEach(rule => {
-        processedSpeech = processedSpeech.replace(rule.regex, (match) => {
-            const id = makeVariableId()
-            variables[id] = {
-                id,
-                originalText: match,
-                type: rule.variableType,
-                value: rule.value
-            }
-            return id
-        })
-    })
-
-
-    //Find date and period==================================================================================
-    const nlp = compromise(processedSpeech, lexicon)
-
-    nlp.match("compare").unTag("Date").unTag("Time").unTag("Duration").tag("Verb")
-
-    //Tag all the inferred variables
-    Object.keys(variables).forEach(id => {
-        tag(nlp.match(id), variables[id].type)
-    })
-
-    const nlpCasted = (nlp as any)
-
-    nlpCasted.numbers().toCardinal().toNumber()
-
-    //Extract time expressions
-    /*
-        nlpCasted.dates().forEach((match: compromise.Document) => {
-            const text = match.text()
-            const parseResult = parseTimeText(text, options.getToday())
-            if (parseResult) {
+    const pipeResult = runPipe(speech,
+        definePipe("extract-time-expressions", (input) => {
+            const parsedTimeVariables = extractTimeExpressions(input.processedSpeech, options.getToday())
+            parsedTimeVariables.forEach(variable => {
                 const id = makeVariableId()
-                variables[id] = {
-                    value: parseResult.value,
-                    type: parseResult.type,
-                    originalText: parseResult.text,
+                input.variables[id] = {
+                    id,
+                    originalText: variable.text,
+                    type: variable.type,
+                    value: variable.value
+                }
+                input.processedSpeech = input.processedSpeech.substr(0, variable.index) + id + input.processedSpeech.substring(variable.index + variable.text.length, input.processedSpeech.length)
+            })
+            return input
+        }),
+        definePipe("extract-data-sources", (input) => {
+            DATASOURCE_VARIABLE_RULES.concat(CYCLIC_TIME_RULES).forEach(rule => {
+                input.processedSpeech = input.processedSpeech.replace(rule.regex, (match) => {
+                    const id = makeVariableId()
+                    input.variables[id] = {
+                        id,
+                        originalText: match,
+                        type: rule.variableType,
+                        value: rule.value
+                    }
+                    return id
+                })
+            })
+            return input
+        }),
+        definePipe("forward-nlp", (input) => {
+
+            const nlp = compromise(input.processedSpeech, lexicon)
+
+            nlp.match("compare").unTag("Date").unTag("Time").unTag("Duration").tag("Verb")
+
+            //Tag all the inferred variables
+            Object.keys(input.variables).forEach(id => {
+                tag(nlp.match(id), input.variables[id].type)
+            })
+
+            const nlpCasted = (nlp as any)
+
+            nlpCasted.numbers().toCardinal().toNumber()
+
+            input.payload.nlp = nlp
+
+            return input
+        }),
+        definePipe("extract-verbs", (input) => {
+            const verbs = input.payload.nlp.verbs().match("!#Modal").first().toLowerCase().verbs().toInfinitive()
+            const verbsJson = verbs.json()
+            if (verbsJson.length > 0) {
+                const id = makeVariableId()
+                input.variables[id] = {
+                    value: {
+                        root: verbsJson[0].text,
+                        type: inferVerbType(verbsJson[0].text)
+                    } as VerbInfo,
+                    type: VariableType.Verb,
+                    originalText: verbsJson[0].text,
                     id
                 }
-                tag(match.replaceWith(id), parseResult.type)
+
+                tag(verbs.replaceWith(id), VariableType.Verb)
+
+                input.intent = input.variables[id].value.type
             }
-        })*/
-
-    //Find Verb========================================================
-    const verbs = nlp.verbs().match("!#Modal").first().toLowerCase().verbs().toInfinitive()
-    const verbsJson = verbs.json()
-    if (verbsJson.length > 0) {
-        const id = makeVariableId()
-        variables[id] = {
-            value: {
-                root: verbsJson[0].text,
-                type: inferVerbType(verbsJson[0].text)
-            } as VerbInfo,
-            type: VariableType.Verb,
-            originalText: verbsJson[0].text,
-            id
-        }
-
-        tag(verbs.replaceWith(id), VariableType.Verb)
-
-        intent = variables[id].value.type
-    }
-
-    //Infer highlight======================================================
-    //if (nlp.match("(number of)? (the)? days?").json().length > 0 || intent === Intent.Highlight) {
-
-    const inferredConditionInfoResult = inferHighlight(nlp, speech, options)
-    if (inferredConditionInfoResult) {
-        const id = makeVariableId()
-        variables[id] = {
-            id,
-            originalText: inferredConditionInfoResult.match.text(),
-            type: VariableType.Condition,
-            value: inferredConditionInfoResult.conditionInfo
-        }
-        tag(inferredConditionInfoResult.match.replaceWith(id), VariableType.Condition)
-        intent = Intent.Highlight
-    }
-
-    //}
-
-    processedText = nlp.text()
+            input.processedSpeech = input.payload.nlp.text()
+            return input
+        }),
+        definePipe("infer-highlight", (input) => {
+            const inferredConditionInfoResult = inferHighlight(input.payload.nlp, speech, options)
+            if (inferredConditionInfoResult) {
+                const id = makeVariableId()
+                input.variables[id] = {
+                    id,
+                    originalText: inferredConditionInfoResult.match.text(),
+                    type: VariableType.Condition,
+                    value: inferredConditionInfoResult.conditionInfo
+                }
+                tag(inferredConditionInfoResult.match.replaceWith(id), VariableType.Condition)
+                input.processedSpeech = input.payload.nlp.text()
+                input.intent = Intent.Highlight
+            }
+            return input
+        })
+    )
 
     //====================================================================================================
     console.log("Preprocessing: elapsed - ", Date.now() - t)
 
     return {
-        processed: processedText,
+        processed: pipeResult.processedSpeech,
         original: speech,
-        variables,
-        intent: intent || Intent.AssignTrivial
+        variables: pipeResult.variables,
+        intent: pipeResult.intent || Intent.AssignTrivial
     }
 }
 
@@ -233,7 +199,6 @@ function inferHighlight(nlp: compromise.Document, original: string, options: NLU
     }
     else {
         const numericComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than? [<number>#Value+] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
-
 
         const numericComparisonInfo = normalizeCompromiseGroup(numericComparisonMatch.groups())
         if (numericComparisonInfo) {
