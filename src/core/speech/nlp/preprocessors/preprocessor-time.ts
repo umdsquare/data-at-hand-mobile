@@ -11,10 +11,13 @@ import { HOLIDAY_PARSERS } from "./chrono-holidays";
 import { CHRONO_EXTENSION_PARSERS, CHRONO_EXTENSION_REFINERS, makeENMergeDateRangeRefiner } from "./chrono-extension";
 import { makeWeekdayParser } from "./chrono-extensions/chrono-weekdays";
 import NamedRegExp from "named-regexp-groups";
+import { makeMonthNameParser } from "./chrono-extensions/chrono-monthnames";
+import { makeRelativeDateFormatParser } from "./chrono-extensions/chrono-relative";
+import { makeNoopParser } from "./chrono-extensions/chrono-noop";
 
 
 let _chrono: Chrono | undefined = undefined
-function getChrono(): Chrono {
+export function getChrono(): Chrono {
     if (_chrono == null) {
 
         chronoParserApi.findYearClosestToRef = function (ref, day, month) {
@@ -26,12 +29,14 @@ function getChrono(): Chrono {
         }
 
         chronoParserApi.ENWeekdayParser = makeWeekdayParser
+        chronoParserApi.ENMonthNameParser = makeMonthNameParser
+        chronoParserApi.ENRelativeDateFormatParser = makeRelativeDateFormatParser
+        chronoParserApi.ENTimeExpressionParser = makeNoopParser
         chronoRefinerApi.ENMergeDateRangeRefiner = makeENMergeDateRangeRefiner
 
         //initialize chrono
         const options = mergeChronoOptions([
             chronoOptions.en.casual,
-            chronoOptions.commonPostProcessing
         ]);
 
         HOLIDAY_PARSERS.concat(CHRONO_EXTENSION_PARSERS).forEach(parser => {
@@ -47,72 +52,89 @@ function getChrono(): Chrono {
     return _chrono
 }
 
-const templates: Array<{ regex: NamedRegExp, parse: (groups: any, today: Date) => number | [number, number] | null }> = [
-    {
-        regex: new NamedRegExp("^(year\\s+)?(?<year>\\d{4})$", "i"),
-        parse: (groups: { year: string }) => {
-            const year = Number.parseInt(groups.year)
-            return [
-                DateTimeHelper.toNumberedDateFromValues(year, 1, 1),
-                DateTimeHelper.toNumberedDateFromValues(year, 12, 31),
-            ]
-        }
-    },
-    {
-        regex: new NamedRegExp('(?<prefix>((last|lost|past|recent|this|current|present)\\s+)+)(?<durationUnit>month|week|year)', 'i'),
-        parse: (groups: { prefix: string, durationUnit: string }, today: Date) => {
-            const prefixSplit = groups.prefix.split(" ")
-            let startPeriodFunc
-            let periodFuncParams: any
-            let endPeriodFunc
-            let shiftFunc
-            let shiftAmount = 0
+type TimeVariable = {
+    type: VariableType.Date | VariableType.Period,
+    value: number | [number, number],
+    index: number,
+    text: string
+}
 
-            switch (groups.durationUnit) {
-                case "year":
-                    startPeriodFunc = startOfYear
-                    endPeriodFunc = endOfYear
-                    shiftFunc = addYears
-                    break;
-                case "month":
-                    startPeriodFunc = startOfMonth
-                    endPeriodFunc = endOfMonth
-                    shiftFunc = addMonths
-                    break;
-                case "week":
-                    startPeriodFunc = startOfWeek
-                    endPeriodFunc = endOfWeek
-                    periodFuncParams = { weekStartsOn: 1 }
-                    shiftFunc = addWeeks
-                    break;
-                default: return null
+export function extractTimeExpressions(speech: string, ref: Date): Array<TimeVariable>{
+    return getChrono().parse(speech, ref).map(result => processChronoResult(result))
+}
+
+function processChronoResult(chronoResult: ParsedResult): TimeVariable {
+    if (chronoResult.end) {
+        //period
+        let startDate: Date | undefined
+        if (chronoResult.start.isCertain('day')) {
+            startDate = chronoResult.start.date()
+        } else if (chronoResult.start.isCertain('month')) {
+            startDate = startOfMonth(chronoResult.start.date())
+        } else if (chronoResult.start.isCertain('year')) {
+            startDate = startOfYear(chronoResult.start.date())
+        } else startDate = chronoResult.start.date()
+
+        let endDate: Date | undefined
+        if (chronoResult.end.isCertain('day')) {
+            endDate = chronoResult.end.date()
+        } else if (chronoResult.end.isCertain('month')) {
+            endDate = endOfMonth(chronoResult.end.date())
+        } else if (chronoResult.end.isCertain('year')) {
+            endDate = endOfYear(chronoResult.end.date())
+        } else endDate = chronoResult.end.date()
+
+        if (startDate != null && endDate != null) {
+            return {
+                type: VariableType.Period,
+                value: [DateTimeHelper.toNumberedDateFromDate(startDate), DateTimeHelper.toNumberedDateFromDate(endDate)],
+                text: chronoResult.text,
+                index: chronoResult.index
             }
+        } else return null
 
-            if (prefixSplit.length === 1 || prefixSplit.every(v => v === 'last' || v !== 'lost') === false) {
-                switch (prefixSplit[prefixSplit.length - 1]) {
-                    case "this":
-                    case "current":
-                    case "present":
-                        shiftAmount = 0
-                        break;
-                    default: //last
-                        shiftAmount = -1
-                        break;
-                }
-            } else {
-                shiftAmount = prefixSplit.filter(p => p === 'last' || p === 'lost').length
+    } else {
+        if (chronoResult.start.isCertain('day')) {
+            return {
+                type: VariableType.Date,
+                value: DateTimeHelper.toNumberedDateFromDate(chronoResult.start.date()),
+                text: chronoResult.text,
+                index: chronoResult.index
             }
-
-            return [
-                DateTimeHelper.toNumberedDateFromDate(shiftFunc(startPeriodFunc(today, periodFuncParams), shiftAmount)),
-                DateTimeHelper.toNumberedDateFromDate(shiftFunc(endPeriodFunc(today, periodFuncParams), shiftAmount)),
-            ]
+        } else if (chronoResult.start.isCertain('month')) {
+            const date = chronoResult.start.date()
+            return {
+                type: VariableType.Period,
+                value: [DateTimeHelper.toNumberedDateFromDate(startOfMonth(date)), DateTimeHelper.toNumberedDateFromDate(endOfMonth(date))],
+                text: chronoResult.text,
+                index: chronoResult.index
+            }
+        } else if (chronoResult.start.isCertain('year')) {
+            const date = chronoResult.start.date()
+            return {
+                type: VariableType.Period,
+                value: [DateTimeHelper.toNumberedDateFromDate(startOfYear(date)), DateTimeHelper.toNumberedDateFromDate(endOfYear(date))],
+                text: chronoResult.text,
+                index: chronoResult.index
+            }
+        } else if (chronoResult.start.knownValues.weekday != null) {
+            const date = chronoResult.start.date()
+            return {
+                type: VariableType.Date,
+                value: DateTimeHelper.toNumberedDateFromDate(date),
+                text: chronoResult.text,
+                index: chronoResult.index
+            }
         }
     }
-]
+}
 
-
-function chronoPass(text: string, today: Date): { type: VariableType.Date | VariableType.Period, value: number | [number, number] } | null {
+export function parseTimeText(text: string, today: Date): {
+    type: VariableType.Date | VariableType.Period,
+    value: number | [number, number],
+    index: number,
+    text: string
+} | null {
     const chronoResult: ParsedResult[] = getChrono().parse(text, today)
     console.log("chrono result:", chronoResult)
     if (chronoResult.length > 0) {
@@ -140,7 +162,9 @@ function chronoPass(text: string, today: Date): { type: VariableType.Date | Vari
             if (startDate != null && endDate != null) {
                 return {
                     type: VariableType.Period,
-                    value: [DateTimeHelper.toNumberedDateFromDate(startDate), DateTimeHelper.toNumberedDateFromDate(endDate)]
+                    value: [DateTimeHelper.toNumberedDateFromDate(startDate), DateTimeHelper.toNumberedDateFromDate(endDate)],
+                    text: bestResult.text,
+                    index: bestResult.index
                 }
             } else return null
 
@@ -148,54 +172,37 @@ function chronoPass(text: string, today: Date): { type: VariableType.Date | Vari
             if (bestResult.start.isCertain('day')) {
                 return {
                     type: VariableType.Date,
-                    value: DateTimeHelper.toNumberedDateFromDate(bestResult.start.date())
+                    value: DateTimeHelper.toNumberedDateFromDate(bestResult.start.date()),
+                    text: bestResult.text,
+                    index: bestResult.index
                 }
             } else if (bestResult.start.isCertain('month')) {
                 const date = bestResult.start.date()
                 return {
                     type: VariableType.Period,
-                    value: [DateTimeHelper.toNumberedDateFromDate(startOfMonth(date)), DateTimeHelper.toNumberedDateFromDate(endOfMonth(date))]
+                    value: [DateTimeHelper.toNumberedDateFromDate(startOfMonth(date)), DateTimeHelper.toNumberedDateFromDate(endOfMonth(date))],
+                    text: bestResult.text,
+                    index: bestResult.index
+                }
+            } else if (bestResult.start.isCertain('year')) {
+                const date = bestResult.start.date()
+                return {
+                    type: VariableType.Period,
+                    value: [DateTimeHelper.toNumberedDateFromDate(startOfYear(date)), DateTimeHelper.toNumberedDateFromDate(endOfYear(date))],
+                    text: bestResult.text,
+                    index: bestResult.index
                 }
             } else if (bestResult.start.knownValues.weekday != null) {
                 const date = bestResult.start.date()
                 return {
                     type: VariableType.Date,
-                    value: DateTimeHelper.toNumberedDateFromDate(date)
+                    value: DateTimeHelper.toNumberedDateFromDate(date),
+                    text: bestResult.text,
+                    index: bestResult.index
                 }
             }
         }
     }
-    return null
-}
-
-export function parseTimeText(text: string, today: Date): { type: VariableType.Date | VariableType.Period, value: number | [number, number] } | null {
-    const chronoPassResult = chronoPass(text, today)
-    if (chronoPassResult) {
-        return chronoPassResult
-    } else {
-        //manually do something that does not do.
-        console.log("Chrono parsed failed - ", text)
-
-        for (const template of templates) {
-            const parsed = template.regex.exec(text)
-            if (parsed) {
-                const result = template.parse(parsed.groups, today)
-                if (result) {
-                    if (typeof result === 'number') {
-                        return {
-                            type: VariableType.Date,
-                            value: result
-                        }
-                    } else return {
-                        type: VariableType.Period,
-                        value: result
-                    }
-                }
-            }
-        }
-    }
-
-    console.log("Fallback time parsing failed - ", text)
     return null
 }
 

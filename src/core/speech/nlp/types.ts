@@ -1,5 +1,5 @@
 import { NumericConditionType } from "../../exploration/types"
-import { randomString } from "@utils/utils"
+import { randomString, STRING_SET_ALPHABETS, STRING_SET_NUMBERS } from "@utils/utils"
 import { DataSourceType, MeasureUnitType } from "@measure/DataSourceSpec"
 import { ActionTypeBase } from "@state/types"
 
@@ -57,7 +57,9 @@ export interface NLUOptions {
 }
 
 export function makeVariableId() {
-    return randomString(5)
+    const alphabets= randomString(5, STRING_SET_ALPHABETS)
+    const numbers = randomString(5, STRING_SET_NUMBERS)
+    return alphabets[0] + numbers[0] + alphabets[1] + numbers[1] + alphabets[2] + numbers[2] + alphabets[3] + numbers[3] + alphabets[4] + numbers[4]
 }
 
 export enum NLUResultType {

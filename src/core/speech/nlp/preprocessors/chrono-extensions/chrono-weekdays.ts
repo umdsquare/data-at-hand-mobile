@@ -1,49 +1,42 @@
 import { lastDayOfWeek, getYear, getMonth, getDate, getDay, addDays, startOfWeek, subWeeks } from 'date-fns';
 import { Parser, ParsedResult } from 'chrono-node';
+import NamedRegExp from 'named-regexp-groups';
 
 const DAYS_OFFSET: { [key: string]: number } = {
     'sunday': 0, 'sun': 0, 'monday': 1, 'mon': 1, 'tuesday': 2, 'tues': 2, 'tue': 2, 'wednesday': 3, 'wed': 3,
     'thursday': 4, 'thurs': 4, 'thur': 4, 'thu': 4, 'friday': 5, 'fri': 5, 'saturday': 6, 'sat': 6
 };
 
-const PATTERN = new RegExp('(\\W|^)' +
-    '(?:(?:\\,|\\(|\\（)\\s*)?' +
-    '(?:on\\s*?)?' +
-    '(?:(this|last|past|next)\\s*)?' +
-    '(' + Object.keys(DAYS_OFFSET).join('|') + ')' +
-    '(?:\\s*(?:\\,|\\)|\\）))?' +
-    '(?:\\s*(this|last|past|next)\\s*week)?' +
-    '(?=\\W|$)', 'i');
-
-const PREFIX_GROUP = 2;
-const WEEKDAY_GROUP = 3;
-const POSTFIX_GROUP = 4;
-
+const PATTERN = new NamedRegExp('(on\\s*?)?' +
+    '(?<prefix>((this|last|past|next)\\s+)+)?' +
+    '(?<dow>' + Object.keys(DAYS_OFFSET).join('|') + ')' +
+    '((on|of|in)\s+)?' +
+    '(?:\s*(?<suffix>((this|last|past|next)\\s*)+)week)?', 'i');
 
 export const makeWeekdayParser = () => {
     const weekdayParser = new Parser()
 
     weekdayParser.pattern = () => PATTERN
     weekdayParser.extract = function (text, ref: Date, match, opt) {
-        var index = match.index + match[1].length;
-        var text = match[0].substr(match[1].length, match[0].length - match[1].length);
+        var index = match.index;
+        var text = match[0];
         var result: ParsedResult = new ParsedResult({
             index,
             text,
             ref
         });
 
-        var dayOfWeek = match[WEEKDAY_GROUP].toLowerCase();
+        var dayOfWeek = match.groups.dow.toLowerCase();
         var offset = DAYS_OFFSET[dayOfWeek];
         if (offset === undefined) {
             return null;
         }
 
-        var prefix = match[PREFIX_GROUP];
-        var postfix = match[POSTFIX_GROUP];
+        var prefix = match.groups.prefix;
+        var postfix = match.groups.postfix;
         var norm = prefix || postfix;
         norm = norm || '';
-        norm = norm.toLowerCase();
+        norm = norm.toLowerCase().trim();
 
         let date
         if (norm.length === 0 || norm == 'past') {
@@ -54,8 +47,15 @@ export const makeWeekdayParser = () => {
             if (diff > 0) diff -= 7
 
             date = addDays(ref, diff)
-        } else if (norm == 'last') {
+        } else if (norm === 'this') {
+            date = addDays(startOfWeek(ref, { weekStartsOn: 1 }), offset-1)
+        } else if (norm === 'next') {
+            date = addDays(startOfWeek(ref, { weekStartsOn: 1 }), offset-1 + 7)
+        } else {
+            const numLast = norm.split(" ").length
+
             date = addDays(subWeeks(startOfWeek(ref, { weekStartsOn: 1 }), 1), offset == 0 ? 6 : (offset - 1))
+            date = addDays(date, -7 * (numLast - 1))
         }
 
         const funcName = norm.length === 0 ? 'imply' : 'assign'

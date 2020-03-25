@@ -147,7 +147,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
         } else return false
     }
 
-    constructor(props) {
+    constructor(props: ExplorationProps) {
         super(props)
         this.state = {
             appState: AppState.currentState,
@@ -170,7 +170,6 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
                         text: "Open settings",
                         onPress: async () => {
                             await openSettings()
-                            console.log("returned")
                         }
                     }
                 ], {

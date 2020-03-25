@@ -63,6 +63,7 @@ declare module "chrono-node" {
     export class Parser {
         pattern: () => RegExp
         extract: (text: string, ref: Date, match: RegExpMatchArray, options?: ChronoParseOptions) => ParsedResult | null
+        findYearClosestToRef: (ref: Date, day: number, month: number) => number
     }
 
     export class Refiner {
@@ -77,6 +78,10 @@ declare module "chrono-node" {
 
 declare module "chrono-node/src/parsers/parser" {
     export var ENWeekdayParser: () => any
+    export var ENMonthNameParser: () => any
+    export var ENRelativeDateFormatParser: () => any
+    export var ENTimeExpressionParser: () => any
+
     export var findYearClosestToRef: (ref: Date, day: number, month: number) => number
 }
 
@@ -87,4 +92,9 @@ declare module "chrono-node/src/refiners/refiner" {
 declare module "chrono-node/src/options" {
     export const en: any
     export const commonPostProcessing: any
+}
+
+declare module "chrono-node/src/utils/EN" {
+    export const MONTH_PATTERN: string
+    export const MONTH_OFFSET: {[monthNameExpression: string]: number}
 }
