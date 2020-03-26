@@ -2,11 +2,7 @@
  * @format
  */
 
-import 'react-native';
-
 import { DateTimeHelper } from '@utils/time';
-
-console.log = jest.fn()
 
 describe("DateTimeHelper API", () => {
     const fitRangeTestSet: Array<[number, number, Date, string, number]> = [

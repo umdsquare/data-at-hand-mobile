@@ -2,15 +2,12 @@
  * @format
  */
 
-import 'react-native';
-
 import { preprocess } from '@core/speech/nlp/preprocessor';
 import { NLUOptions, VariableType } from '@core/speech/nlp/types';
 import { MeasureUnitType, DataSourceType } from '@measure/DataSourceSpec';
 import { subDays } from 'date-fns';
 import { DateTimeHelper } from '@utils/time';
-
-console.log = jest.fn()
+import { dataSources } from '../jest.setup';
 
 /*it('renders correctly', () => {
   renderer.create(<App />);
@@ -21,44 +18,6 @@ const speechOptions = {
   measureUnit: MeasureUnitType.Metric
 } as NLUOptions
 
-const dayOfWeeks: Array<[string, number]> = [
-  ['sunday', 20200301],
-  ['monday', 20200224],
-  ['tuesday', 20200225],
-  ['wednesday', 20200226],
-  ['thursday', 20200227],
-  ['friday', 20200228],
-  ['saturday', 20200229],
-]
-
-const dayOfWeeksLast: Array<[string, number]> = dayOfWeeks.map(e =>
-  [
-    "last " + e[0],
-    DateTimeHelper.toNumberedDateFromDate(subDays(DateTimeHelper.toDate(e[1]), 7))
-  ]
-)
-
-const dayOfWeeksLastLast: Array<[string, number]> = dayOfWeeks.map(e =>
-  [
-    "last last " + e[0],
-    DateTimeHelper.toNumberedDateFromDate(subDays(DateTimeHelper.toDate(e[1]), 14))
-  ]
-)
-
-const specificDays: Array<[string, number]> = [
-  ["january 1", 20200101],
-  ["january 15", 20200115],
-  ["february 1", 20200201],
-  ["march 5", 20190305],
-  ["may 1", 20190501],
-  ["june 1", 20190601],
-  ["july 1", 20190701],
-  ["august 1", 20190801],
-  ["september 1", 20190901],
-  ["october 1", 20191001],
-  ["november 1", 20191101],
-  ["december 1", 20191201],
-]
 
 const relatives: Array<[string, [number, number]]> = [
   ["this month", [20200301, 20200331]],
@@ -78,23 +37,6 @@ const relatives: Array<[string, [number, number]]> = [
   ["last 10 days", [20200221, 20200301]],
 ]
 
-const holidays: Array<[string, number]> = [
-  ["New Year's Day", 20200101],
-  ["Valentine Day", 20200214],
-  ["Martin Luther King Junior Day", 20200120],
-  ["Presidents Day", 20200217],
-  ["Easter", 20190421],
-  ["Columbus Day", 20191014],
-  ["Mother's Day", 20190512],
-  ["Memorial Day", 20190527],
-  ["Father's Day", 20190616],
-  ["Independence Day", 20190704],
-  ["Labor Day", 20190902],
-  ["Halloween", 20191031],
-  ["Veterans Day", 20191111],
-  ["Thanksgiving Day", 20191128],
-  ["Christmas", 20191225]
-]
 
 const months: Array<[string, [number, number]]> = [
   ["january", [20200101, 20200131]],
@@ -160,21 +102,7 @@ const manualPeriods: Array<[string, [number, number]]> = [
   ["from 2019 to 2020", [20190101, 20201231]]
 ]
 
-const dayExpressions = dayOfWeeks.concat(dayOfWeeksLast).concat(dayOfWeeksLastLast).concat(specificDays).concat(holidays)
 const periodExpressions = relatives.concat(months).concat(seasons).concat(manualPeriods)
-
-describe("Day-only sentence", () => {
-  dayExpressions.forEach(d => {
-    it(d[0], async () => {
-      const result = await preprocess(d[0], speechOptions)
-      expect(Object.keys(result.variables).length).toEqual(1)
-      const id = Object.keys(result.variables)[0]
-      expect(result.variables[id].type).toBe(VariableType.Date)
-      expect(result.variables[id].value).toEqual(d[1])
-    });
-  })
-})
-
 
 describe("Periods", () => {
   periodExpressions.forEach(r => {
@@ -187,37 +115,6 @@ describe("Periods", () => {
       expect(result.variables[id].value[1]).toEqual(r[1][1])
     });
   })
-})
-
-const dataSources = [
-  ["step count", DataSourceType.StepCount],
-  ["steps", DataSourceType.StepCount],
-  ["weight", DataSourceType.Weight],
-  ["heart rate", DataSourceType.HeartRate],
-  ["sleep range", DataSourceType.SleepRange],
-  ["sleep schedule", DataSourceType.SleepRange],
-  ["hours slept", DataSourceType.HoursSlept],
-  ["sleep length", DataSourceType.HoursSlept],
-]
-
-
-describe("[DataSource] on [Date]", () => {
-  for (const dayExpression of dayExpressions) {
-    for (const dataSource of dataSources) {
-      const sentence = `${dataSource[0]} on ${dayExpression[0]}`
-      it(sentence, async () => {
-        const result = await preprocess(sentence, speechOptions)
-        const dataSourceId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.DataSource)
-        const dateId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.Date)
-
-        expect(Object.keys(result.variables).length).toBe(2)
-        expect(result.variables[dataSourceId].type).toBe(VariableType.DataSource)
-        expect(result.variables[dataSourceId].value).toEqual(dataSource[1])
-        expect(result.variables[dateId].type).toBe(VariableType.Date)
-        expect(result.variables[dateId].value).toEqual(dayExpression[1])
-      })
-    }
-  }
 })
 
 describe("[DataSource] of/in/during [Period]", () => {
