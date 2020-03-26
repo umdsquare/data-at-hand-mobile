@@ -200,7 +200,7 @@ PODS:
     - React
   - react-native-spinkit (1.4.1):
     - React
-  - react-native-sqlite-storage (4.1.0):
+  - react-native-sqlite-storage (5.0.0):
     - React
   - react-native-view-shot (3.1.2):
     - React
@@ -257,11 +257,11 @@ PODS:
     - React
   - RNReactNativeHapticFeedback (1.9.0):
     - React
-  - RNReanimated (1.7.0):
+  - RNReanimated (1.7.1):
     - React
   - RNScreens (2.4.0):
     - React
-  - RNShare (3.1.1):
+  - RNShare (3.1.2):
     - React
   - RNStaticSafeAreaInsets (2.0.0):
     - React
@@ -462,7 +462,7 @@ SPEC CHECKSUMS:
   react-native-safe-area-context: 8260e5157617df4b72865f44006797f895b2ada7
   react-native-segmented-control: ed19b78ec28ece7953088495cb9ba33cbafe2590
   react-native-spinkit: da294fd828216ad211fe36a5c14c1e09f09e62db
-  react-native-sqlite-storage: bb10beb2407e5fc21f3f1bcd86bacbfd6edcc818
+  react-native-sqlite-storage: ce71689c5a73b79390a1ab213555ae80979a5dc7
   react-native-view-shot: 08c46c9e8e92f6681e8f2ffa55ac3d06e7e99070
   React-RCTActionSheet: 600b4d10e3aea0913b5a92256d2719c0cdd26d76
   React-RCTAnimation: 791a87558389c80908ed06cc5dfc5e7920dfa360
@@ -483,9 +483,9 @@ SPEC CHECKSUMS:
   RNGestureHandler: 8f09cd560f8d533eb36da5a6c5a843af9f056b38
   RNPermissions: 8afd37dbc1be65748363c6a90caffd1806567651
   RNReactNativeHapticFeedback: 2566b468cc8d0e7bb2f84b23adc0f4614594d071
-  RNReanimated: 031fe8d9ea93c2bd689a40f05320ef9d96f74d7f
+  RNReanimated: 4e102df74a9674fa943e05f97f3362b6e44d0b48
   RNScreens: b5c0e1b2b04512919e78bd3898e144a157ce2363
-  RNShare: a4d8a4e7b85194fcc05f6753bd484f4eba6b833d
+  RNShare: c19dbe4a7224098cd3cfc4d3b92c886ca817b3f0
   RNStaticSafeAreaInsets: e4450176adbf197061543e4a4aa82036b3d7abe0
   RNSVG: 7e16ddfc6e00d5aa69c9eb83e699bcce5dcb85d4
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
