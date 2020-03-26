@@ -1,5 +1,5 @@
-import chrono, { ParsedResult, Refiner, ParsedComponents, ComponentParams, ComponentName } from 'chrono-node';
-import { getYear, isAfter, addYears, getDate, getMonth, addDays, subYears, subWeeks, subMonths, startOfMonth, endOfMonth, isBefore } from 'date-fns';
+import chrono, { ParsedResult, Refiner, ParsedComponents, ComponentParams, ComponentName, Parser } from 'chrono-node';
+import { getYear, isAfter, addYears, getDate, getMonth, addDays, subYears, subWeeks, subMonths, startOfMonth, endOfMonth, isBefore, startOfYear, endOfYear, addMonths, startOfWeek, endOfWeek, addWeeks, subDays } from 'date-fns';
 
 import NamedRegExp from 'named-regexp-groups'
 
@@ -67,78 +67,70 @@ seasonParser.extract = function (text, ref, match, opt) {
     return result
 }
 
-//===========================================================================
+const yearParser = new Parser();
+yearParser.pattern = () => new NamedRegExp("(year\\s+)?(?<year>\\d{4})", "i")
+yearParser.extract = (text, ref, match, opt) => {
+    const year = Number.parseInt(match.groups.year)
+    const result = new ParsedResult({
+        ref,
+        text: match[0],
+        index: match.index,
+        start: {
+            year,
+        },
+        tags: { "ENYearParser": true }
+    })
 
-//===========================================================================
-
-const relativePastRefiner = new Refiner();
-relativePastRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
-
-    const shouldRefine = results.length === 1 && /((last|past),?\s+)+/i.test(text) === true
-        && (
-            results[0].tags["ENMonthNameParser"] === true
-            || results[0].tags["ENRelativeDateFormatParser"] === true
-            || results[0].tags["ENWeekdayParser"] === true
-        )
-
-    if (shouldRefine === true) {
-        const match = text.match(/((last|past),?\s+)+/i)
-        if (match[0].length + match.index >= results[0].index) {
-
-            const numWords = match[0].trim().split(/\s+/).length
-
-            let date = results[0].start.date()
-
-            if (results[0].tags["ENWeekdayParser"] === true) {
-                while (isAfter(date, results[0].ref) === true) {
-                    date = subWeeks(date, 1)
-                }
-
-                date = subWeeks(date, numWords - 1)
-
-            } else if (results[0].tags["ENMonthNameParser"] === true) {
-                while (isAfter(date, results[0].ref) === true) {
-                    date = subYears(date, 1)
-                }
-
-                date = subYears(date, numWords - 1)
-            } else if (results[0].tags["ENRelativeDateFormatParser"] === true) {
-                while (isAfter(date, results[0].ref) === true) {
-                    date = subMonths(date, 1)
-                }
-
-                date = subMonths(date, numWords - 1)
-            }
-
-            //first it should be the past
-
-            const dateInfo = {
-                year: getYear(date),
-                month: getMonth(date) + 1,
-            } as ComponentParams
-
-            if (results[0].start.isCertain('day') === true) {
-                dateInfo["day"] = getDate(date)
-            }
-
-            const result = [
-                new ParsedResult({
-                    ref: results[0].ref,
-                    text: match[0] + results[0].text,
-                    index: match.index,
-                    start: dateInfo,
-                    tags: results[0].tags
-                })
-            ]
-            return result
-        }
-    }
-    return results
+    return result
 }
+
+const recentDurationParser = new Parser();
+recentDurationParser.pattern = () => new NamedRegExp("(?<prefix>recent|resent|resend|past|last)\\s+(?<n>[0-9]+)\\s+(?<durationUnit>days?|weeks?|months?|years?)", 'i')
+recentDurationParser.extract = (text, ref, match, opt) => {
+
+    const n = Number.parseInt(match.groups.n)
+    const durationUnit: string = match.groups.durationUnit
+    if (n > 0) {
+        let startDate
+        if (durationUnit.startsWith("day")) {
+            startDate = subDays(ref, n - 1)
+        } else if (durationUnit.startsWith("week")) {
+            startDate = addDays(subWeeks(ref, n), 1)
+        } else if (durationUnit.startsWith("month")) {
+            startDate = addDays(subMonths(ref, n), 1)
+        } else if (durationUnit.startsWith("year")) {
+            startDate = addDays(subYears(ref, n), 1)
+        } else return null
+
+        return new ParsedResult({
+            ref,
+            text: match[0],
+            index: match.index,
+            start: {
+                year: getYear(startDate),
+                month: getMonth(startDate) + 1,
+                day: getDate(startDate)
+            },
+            end: {
+                year: getYear(ref),
+                month: getMonth(ref) + 1,
+                day: getDate(ref)
+            },
+            tags: {
+                "ENRecentDurationParser": true
+            }
+        })
+    } else return null
+}
+
+//===========================================================================
+
+//===========================================================================
 
 const aroundRefiner = new chrono.Refiner();
 aroundRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
-    if (/(around|near)\s+/i.test(text) === true
+    const match = text.match(/(around|near)\s+/i)
+    if (match != null
         && results.length === 1
         && results[0].start != null
         && results[0].end == null
@@ -150,8 +142,8 @@ aroundRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
         return [
             new chrono.ParsedResult({
                 ref: results[0].ref,
-                text,
-                index: 0,
+                text: match[0] + results[0].text,
+                index: match.index,
                 start: {
                     day: getDate(start),
                     month: getMonth(start) + 1,
@@ -179,6 +171,7 @@ sinceRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
         && results[0].start.isCertain('day') === true) {
 
         results[0].text = match[0] + results[0].text
+        results[0].index = match.index
         results[0].end = new ParsedComponents({
             year: getYear(results[0].ref),
             month: getMonth(results[0].ref) + 1,
@@ -186,6 +179,23 @@ sinceRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
         }, results[0].ref)
         return results
     }
+    return results
+}
+
+const prepositionTagRefiner = new Refiner()
+const prepositionPattern = new NamedRegExp("((?<from>(start with)|from)|(?<to>to))(\\s+)?$", "i")
+prepositionTagRefiner.refine = function (text, results, opt) {
+    results.forEach(result => {
+        const matchPreposition = text.substring(0, result.index).match(prepositionPattern)
+        if (matchPreposition != null) {
+            if (matchPreposition.groups.from) {
+                result.tags["Preposition"] = "from"
+            } else if (matchPreposition.groups.to) {
+                result.tags["Preposition"] = "to"
+            }
+        }
+    })
+
     return results
 }
 
@@ -320,5 +330,5 @@ export const makeENMergeDateRangeRefiner = () => {
     return refiner
 }
 
-export const CHRONO_EXTENSION_PARSERS = [seasonParser]
-export const CHRONO_EXTENSION_REFINERS = [relativePastRefiner, aroundRefiner, sinceRefiner]
+export const CHRONO_EXTENSION_PARSERS = [seasonParser, yearParser, recentDurationParser]
+export const CHRONO_EXTENSION_REFINERS: Array<Refiner> = [aroundRefiner, sinceRefiner, prepositionTagRefiner]

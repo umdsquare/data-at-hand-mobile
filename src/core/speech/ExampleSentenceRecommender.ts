@@ -168,7 +168,6 @@ function getAnotherRangeText(range: [number, number], ref: Date, ...excludes: [n
     const semanticTest = DateTimeHelper.rangeSemantic(range[0], range[1], ref)
     if (semanticTest) {
         const properOffset = humanOffsets.find(o => {
-            console.log(o !== -semanticTest.differenceToRef)
             if (o !== -semanticTest.differenceToRef) {
                 const candidateRange = DateTimeHelper.getSemanticRange(ref, semanticTest.semantic, o)
                 return excludes.find(e => e[0] === candidateRange[0] && e[1] === candidateRange[1]) == null

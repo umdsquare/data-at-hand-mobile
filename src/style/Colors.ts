@@ -27,7 +27,8 @@ export default {
 
   speechFailGradient: ["#F5A17C", "#D6376E"],
   speechSuccessGradient: ["#A3E359", "#3DB4AB"],
-
+  speechVoidGradient: ["#8B8B8B", "#BAB4B1"],
+ 
   speechExampleTextColor: "#E568A2",
 
   tooltipGradient: ["#34425D", "#1D2C41"],

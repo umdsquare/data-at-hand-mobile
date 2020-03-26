@@ -134,9 +134,9 @@ export class FitbitService extends DataService {
     }
 
     const query = `${selectClause} from ${tableName} where ${whereClause!=null? `${whereClause} AND ` : ""} numberedDate BETWEEN ${start} AND ${end}`
-    const queryResult = await this.core.fitbitLocalDbManager.selectQuery(query)
+    const queryResult: Array<any> = await this.core.fitbitLocalDbManager.selectQuery(query)
     if(queryResult.length > 0){
-      const result = {}
+      const result: any = {}
       queryResult.forEach(v => result[v["numberedDate"]] = true)
       return result
     }else return null

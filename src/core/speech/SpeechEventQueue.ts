@@ -1,7 +1,8 @@
 import { Subject, Observable } from "rxjs"
+import { NLUResultType } from "./nlp/types"
 
 export interface SpeechNotificationEvent{
-    type: "success" | "fail",
+    type: NLUResultType,
     id: string
 }
 

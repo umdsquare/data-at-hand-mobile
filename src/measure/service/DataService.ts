@@ -59,7 +59,7 @@ export abstract class DataService {
 
   abstract getPreferredValueRange(dataSource: DataSourceType): Promise<[number, number]>
 
-  abstract fetchFilteredDates(filter: HighlightFilter, start: number, end: number): Promise<{[key:number]:boolean|undefined}>
+  abstract fetchFilteredDates(filter: HighlightFilter, start: number, end: number): Promise<{ [key: number]: boolean | undefined }>
 
   abstract fetchIntraDayData(intraDayDataSource: IntraDayDataSourceType, date: number): Promise<any>
 
@@ -115,7 +115,7 @@ export abstract class DataService {
 
     return {
       data: timeKeySequence.map(elm => {
-        const datum = (result as any).find(d => d.timeKey === elm.timeKey)
+        const datum = (result as any).find((d: { timeKey: number; }) => d.timeKey === elm.timeKey)
         return { range: elm.range, value: datum }
       })
     }
@@ -134,7 +134,7 @@ export abstract class DataService {
 
   abstract async clearAllCache(): Promise<void>
 
-  abstract onSystemExit()
+  abstract onSystemExit(): Promise<void>
 
   protected abstract exportToCsv(): Promise<Array<{ name: string, csv: string }>>
 
@@ -142,7 +142,6 @@ export abstract class DataService {
     const exported = await this.exportToCsv()
     if (exported.length > 0) {
       const directoryPath = TemporaryDirectoryPath
-      console.log("directory path:", directoryPath)
       let finalFilePath: string
       let mimeType: string
       if (exported.length === 1) {

@@ -7,6 +7,7 @@ import { SvgIcon, SvgIconType } from '@components/common/svg/SvgIcon';
 import { Sizes } from '@style/Sizes';
 import LinearGradient from 'react-native-linear-gradient';
 import Colors from '@style/Colors';
+import { NLUResultType, NLUResult } from '@core/speech/nlp/types';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
 
@@ -41,11 +42,20 @@ const styles = StyleSheet.create({
 
 })
 
+function branchByType<T>(type: NLUResultType, effectiveValue: T, voidValue: T, unapplicableValue: T, failValue: T): T{
+    switch(type){
+        case NLUResultType.Effective: return effectiveValue
+        case NLUResultType.Void: return voidValue
+        case NLUResultType.Unapplicable: return unapplicableValue
+        case NLUResultType.Fail: return failValue
+    }
+}
+
 interface State {
     currentEvent?: SpeechNotificationEvent | null
 }
 
-export class SpeechEventNotificationOverlay extends React.PureComponent<{}, State> {
+export class SpeechEventNotificationOverlay extends React.PureComponent<any, State> {
 
     private readonly eventsInQueue = Array<SpeechNotificationEvent>()
 
@@ -56,8 +66,7 @@ export class SpeechEventNotificationOverlay extends React.PureComponent<{}, Stat
 
     private currentAnimation: Animated.CompositeAnimation | undefined = undefined
 
-
-    constructor(props) {
+    constructor(props: any) {
         super(props)
         this.state = {
             currentEvent: null
@@ -65,7 +74,7 @@ export class SpeechEventNotificationOverlay extends React.PureComponent<{}, Stat
     }
 
     public notify(event: SpeechNotificationEvent) {
-        if(this.eventsInQueue.length > 0){
+        if (this.eventsInQueue.length > 0) {
             this.eventsInQueue.splice(0)
         }
         this.eventsInQueue.push(event)
@@ -87,7 +96,7 @@ export class SpeechEventNotificationOverlay extends React.PureComponent<{}, Stat
             this.iconScaleProgress.setValue(0)
 
             this.currentAnimation?.stop()
-            
+
             this.currentAnimation = Animated.parallel([
                 Animated.sequence([
                     Animated.delay(100),
@@ -95,15 +104,15 @@ export class SpeechEventNotificationOverlay extends React.PureComponent<{}, Stat
                         toValue: 1,
                         useNativeDriver: true
                     }),
-                    Animated.delay(currentEvent.type === 'success'? 300 : 800),
+                    Animated.delay(currentEvent.type !== NLUResultType.Fail ? 300 : 800),
                     Animated.timing(this.animProgress, {
                         toValue: 0,
                         easing: Easing.cubic,
-                        duration: currentEvent.type === 'success'? 400: 600,
+                        duration: branchByType(currentEvent.type, 400, 600, 600, 600),
                         useNativeDriver: true
                     })
                 ]),
-                currentEvent.type === 'success'? Animated.sequence([
+                currentEvent.type !== NLUResultType.Fail ? Animated.sequence([
                     Animated.delay(100),
                     Animated.timing(this.iconRotationProgress,
                         {
@@ -113,12 +122,12 @@ export class SpeechEventNotificationOverlay extends React.PureComponent<{}, Stat
                         })
                 ]) : undefined,
                 Animated.sequence([
-                    Animated.delay(currentEvent.type === 'success'? 100: 0),
+                    Animated.delay(currentEvent.type !== NLUResultType.Fail ? 100 : 0),
                     Animated.timing(this.iconScaleProgress, {
                         toValue: 1,
                         duration: 800,
                         useNativeDriver: true,
-                        easing: Easing.elastic(currentEvent.type === 'success'? 3: 1)
+                        easing: Easing.elastic(currentEvent.type !== NLUResultType.Fail ? 3 : 1)
                     })
                 ])
 
@@ -142,20 +151,25 @@ export class SpeechEventNotificationOverlay extends React.PureComponent<{}, Stat
             {this.state.currentEvent != null ? <AnimatedLinearGradient style={[
                 styles.gradientStyleBase,
                 {
-                opacity: this.animProgress.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 1]
-                }),
-                transform: [
-                    {
-                        scale: this.animProgress.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [0, 1],
-                        })
-                    }
-                ]
-            }]}
-                colors={this.state.currentEvent.type === 'success'? Colors.speechSuccessGradient : Colors.speechFailGradient}
+                    opacity: this.animProgress.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0, 1]
+                    }),
+                    transform: [
+                        {
+                            scale: this.animProgress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0, 1],
+                            })
+                        }
+                    ]
+                }]}
+                colors={branchByType(this.state.currentEvent.type, 
+                    Colors.speechSuccessGradient, 
+                    Colors.speechVoidGradient, 
+                    Colors.speechFailGradient, 
+                    Colors.speechFailGradient)}
+
                 start={start} end={end}
             >
                 <Animated.View style={
@@ -163,7 +177,7 @@ export class SpeechEventNotificationOverlay extends React.PureComponent<{}, Stat
                         transform: [{
                             rotate: this.iconRotationProgress.interpolate({
                                 inputRange: [0, 1],
-                                outputRange: [0, 2*Math.PI]
+                                outputRange: [0, 2 * Math.PI]
                             })
                         },
                         {
@@ -171,13 +185,15 @@ export class SpeechEventNotificationOverlay extends React.PureComponent<{}, Stat
                         }]
                     }
                 }>
-                    <SvgIcon type={this.state.currentEvent.type === 'success' ?
+                    <SvgIcon type={this.state.currentEvent.type !== NLUResultType.Fail ?
                         SvgIconType.Check : SvgIconType.QuestionMark}
-                        color={'white'} size={this.state.currentEvent.type === 'success' ? 34 : 28} />
+                        color={'white'} size={this.state.currentEvent.type !== NLUResultType.Fail ? 34 : 28} />
                 </Animated.View>
 
 
-                <Text style={{ marginLeft: 8, color: 'white', fontSize: Sizes.normalFontSize }}>{this.state.currentEvent.type === 'success'? 'Got it.' : "Sorry, I didn\'t get."}</Text>
+                <Text style={{ marginLeft: 8, color: 'white', fontSize: Sizes.normalFontSize }}>{
+                    branchByType(this.state.currentEvent!.type, "Got it.", "Got it, but no effect.", "Unapplicable command for now.", "Sorry, I couldn\'t understand.")
+                }</Text>
             </AnimatedLinearGradient> : null}
         </View>
     }

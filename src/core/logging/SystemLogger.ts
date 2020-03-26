@@ -4,6 +4,7 @@ import { SpeechContext } from "@core/speech/nlp/context"
 import { ActionTypeBase } from "@state/types"
 import Share from 'react-native-share'
 import { randomString } from "@utils/utils"
+import { NLUResult } from "@core/speech/nlp/types"
 
 enum LogFileName {
     SpeechCommandLogs = "speech_command.jsonl",
@@ -68,14 +69,14 @@ export class SystemLogger {
         }
     }
 
-    async logSpeechCommandResult(text: string, explorationInfo: ExplorationInfo, context: SpeechContext, resultingAction: ActionTypeBase): Promise<void> {
+    async logSpeechCommandResult(text: string, explorationInfo: ExplorationInfo, context: SpeechContext, result: NLUResult): Promise<void> {
         if (this.currentLogger && this.enabled === true) {
             await this.currentLogger.appendJsonLine(LogFileName.SpeechCommandLogs,
                 {
                     inputText: text,
                     explorationInfo,
                     speechContext: context,
-                    resultingAction
+                    result
                 })
         } else return;
     }

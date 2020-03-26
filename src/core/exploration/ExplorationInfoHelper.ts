@@ -11,6 +11,7 @@ import {
 } from './types';
 import { DataSourceType, DataSourceSpec } from '@measure/DataSourceSpec';
 import { DataSourceManager } from '@measure/DataSourceManager';
+import { ActionTypeBase } from '@state/types';
 
 class ExplorationInfoHelper {
   getParameterValue<T>(

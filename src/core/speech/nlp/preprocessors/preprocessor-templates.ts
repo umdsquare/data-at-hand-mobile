@@ -75,30 +75,6 @@ interface Template {
 
 const templates: Array<Template> = [
     {
-        regex: new NamedRegExp(`^(?<month>${MONTH_NAMES.join("|")})$`, 'i'),
-        parse: (groups: { month: string }, options) => {
-            const month = MONTH_NAMES.indexOf(groups.month.toLowerCase())
-            const today = options.getToday()
-            const todayMonth = getMonth(today)
-            let monthDate: Date
-
-            if (month <= todayMonth) {
-                //same year
-                monthDate = setMonth(today, month)
-            } else {
-                monthDate = subYears(setMonth(today, month), 1)
-            }
-
-            return {
-                intent: Intent.AssignTrivial,
-                variables: [{
-                    type: VariableType.Period,
-                    value: [DateTimeHelper.toNumberedDateFromDate(startOfMonth(monthDate)), DateTimeHelper.toNumberedDateFromDate(endOfMonth(monthDate))]
-                }]
-            }
-        }
-    },
-    {
         regex: new NamedRegExp("^(year\\s+)?(?<year>\\d{4})$", "i"),
         parse: (groups: { year: string }, options) => {
             const year = Number.parseInt(groups.year)

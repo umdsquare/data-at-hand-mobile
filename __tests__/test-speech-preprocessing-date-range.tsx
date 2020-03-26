@@ -28,7 +28,7 @@ const dayOfWeeks: Array<[string, number]> = [
   ['wednesday', 20200226],
   ['thursday', 20200227],
   ['friday', 20200228],
-  ['saturday', 20200229]
+  ['saturday', 20200229],
 ]
 
 const dayOfWeeksLast: Array<[string, number]> = dayOfWeeks.map(e =>
@@ -67,6 +67,15 @@ const relatives: Array<[string, [number, number]]> = [
   ["this week", [20200224, 20200301]],
   ["last week", [20200217, 20200223]],
   ["last last week", [20200210, 20200216]],
+  ["this year", [20200101, 20201231]],
+  ["last year", [20190101, 20191231]],
+  ["2019", [20190101, 20191231]],
+  ["2020", [20200101, 20201231]],
+  ["year 2020", [20200101, 20201231]],
+  ["recent 10 days", [20200221, 20200301]],
+  ["resent 10 days", [20200221, 20200301]],
+  ["past 10 days", [20200221, 20200301]],
+  ["last 10 days", [20200221, 20200301]],
 ]
 
 const holidays: Array<[string, number]> = [
@@ -101,8 +110,18 @@ const months: Array<[string, [number, number]]> = [
   ["november", [20191101, 20191130]],
   ["december", [20191201, 20191231]],
   ["last january", [20200101, 20200131]],
-  ["past january", [20200101, 20200131]],
+  ["last february", [20200201, 20200229]],
   ["last march", [20190301, 20190331]],
+  ["last april", [20190401, 20190430]],
+  ["last may", [20190501, 20190531]],
+  ["last june", [20190601, 20190630]],
+  ["last july", [20190701, 20190731]],
+  ["last august", [20190801, 20190831]],
+  ["last september", [20190901, 20190930]],
+  ["last october", [20191001, 20191031]],
+  ["last november", [20191101, 20191130]],
+  ["last december", [20191201, 20191231]],
+  ["past january", [20200101, 20200131]],
   ["january 2018", [20180101, 20180131]]
 ]
 
@@ -136,7 +155,9 @@ const manualPeriods: Array<[string, [number, number]]> = [
   ["from November to March", [20191101, 20200331]],
   ["from Sunday to Thursday", [20200223, 20200227]],
   ["from Thursday to Tuesday", [20200220, 20200225]],
-  ["from Monday to Wednesday", [20200224, 20200226]]
+  ["from Monday to Wednesday", [20200224, 20200226]],
+  ["from last Monday to this Wednesday", [20200217, 20200226]],
+  ["from 2019 to 2020", [20190101, 20201231]]
 ]
 
 const dayExpressions = dayOfWeeks.concat(dayOfWeeksLast).concat(dayOfWeeksLastLast).concat(specificDays).concat(holidays)
@@ -180,15 +201,16 @@ const dataSources = [
 ]
 
 
-describe.skip("[DataSource] on [Date]", () => {
+describe("[DataSource] on [Date]", () => {
   for (const dayExpression of dayExpressions) {
     for (const dataSource of dataSources) {
       const sentence = `${dataSource[0]} on ${dayExpression[0]}`
       it(sentence, async () => {
         const result = await preprocess(sentence, speechOptions)
-        const dataSourceId = Object.keys(result.variables)[0]
-        const dateId = Object.keys(result.variables)[1]
+        const dataSourceId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.DataSource)
+        const dateId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.Date)
 
+        expect(Object.keys(result.variables).length).toBe(2)
         expect(result.variables[dataSourceId].type).toBe(VariableType.DataSource)
         expect(result.variables[dataSourceId].value).toEqual(dataSource[1])
         expect(result.variables[dateId].type).toBe(VariableType.Date)
@@ -198,15 +220,16 @@ describe.skip("[DataSource] on [Date]", () => {
   }
 })
 
-describe.skip("[DataSource] of/in/during [Period]", () => {
+describe("[DataSource] of/in/during [Period]", () => {
   for (const preposition of ["of", "in", "during"]) {
     for (const periodExpression of periodExpressions) {
       for (const dataSource of dataSources) {
         const sentence = `${dataSource[0]} ${preposition} ${periodExpression[0]}`
         it(sentence, async () => {
           const result = await preprocess(sentence, speechOptions)
-          const dataSourceId = Object.keys(result.variables)[0]
-          const rangeId = Object.keys(result.variables)[1]
+
+          const dataSourceId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.DataSource)
+          const rangeId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.Period)
 
           expect(result.variables[dataSourceId].type).toBe(VariableType.DataSource)
           expect(result.variables[dataSourceId].value).toEqual(dataSource[1])

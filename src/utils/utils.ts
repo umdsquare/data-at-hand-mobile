@@ -12,16 +12,17 @@ export function getNumberSequence(from: number, to: number): Array<number> {
 }
 
 
-export function noop(k) { return k }
+export function noop(k: any) { return k }
 
 
-const alphabets = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+export const STRING_SET_ALPHABETS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+export const STRING_SET_NUMBERS = '0123456789'
 
-export function randomString(length: number = 5): string {
+export function randomString(length: number = 5, set: string = STRING_SET_ALPHABETS): string {
 
     const result = new Array<String>(length)
     for (let i = 0; i < result.length; i++) {
-        result[i] = alphabets.charAt(Math.random() * (alphabets.length - 1))
+        result[i] = set.charAt(Math.random() * (set.length - 1))
     }
     return result.join("")
 }
