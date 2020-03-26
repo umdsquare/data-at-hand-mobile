@@ -9,11 +9,11 @@ import chronoRefinerApi from 'chrono-node/src/refiners/refiner';
 import chronoOptions from 'chrono-node/src/options';
 import { HOLIDAY_PARSERS } from "./chrono-holidays";
 import { CHRONO_EXTENSION_PARSERS, CHRONO_EXTENSION_REFINERS, makeENMergeDateRangeRefiner } from "./chrono-extension";
-import { makeWeekdayParser } from "./chrono-extensions/chrono-weekdays";
+import { makeWeekdayParser } from "./chrono-replacers/chrono-weekdays";
 import NamedRegExp from "named-regexp-groups";
-import { makeMonthNameParser } from "./chrono-extensions/chrono-monthnames";
-import { makeRelativeDateFormatParser } from "./chrono-extensions/chrono-relative";
-import { makeNoopParser } from "./chrono-extensions/chrono-noop";
+import { makeMonthNameParser } from "./chrono-replacers/chrono-monthnames";
+import { makeRelativeDateFormatParser } from "./chrono-replacers/chrono-relative";
+import { makeNoopParser } from "./chrono-replacers/chrono-noop";
 
 
 let _chrono: Chrono | undefined = undefined
@@ -56,7 +56,8 @@ type TimeVariable = {
     type: VariableType.Date | VariableType.Period,
     value: number | [number, number],
     index: number,
-    text: string
+    text: string,
+    additionalInfo?: any
 }
 
 export function extractTimeExpressions(speech: string, ref: Date): Array<TimeVariable>{
@@ -99,7 +100,8 @@ function processChronoResult(chronoResult: ParsedResult): TimeVariable {
                 type: VariableType.Date,
                 value: DateTimeHelper.toNumberedDateFromDate(chronoResult.start.date()),
                 text: chronoResult.text,
-                index: chronoResult.index
+                index: chronoResult.index,
+                additionalInfo: chronoResult.tags["Preposition"]
             }
         } else if (chronoResult.start.isCertain('month')) {
             const date = chronoResult.start.date()
@@ -123,7 +125,8 @@ function processChronoResult(chronoResult: ParsedResult): TimeVariable {
                 type: VariableType.Date,
                 value: DateTimeHelper.toNumberedDateFromDate(date),
                 text: chronoResult.text,
-                index: chronoResult.index
+                index: chronoResult.index,
+                additionalInfo: chronoResult.tags["Preposition"]
             }
         }
     }

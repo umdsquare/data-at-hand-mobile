@@ -17,6 +17,7 @@ export enum VariableType {
 export interface VariableInfo {
     type: VariableType,
     value: any,
+    additionalInfo?: any,
     originalText: string,
     id: string
 }

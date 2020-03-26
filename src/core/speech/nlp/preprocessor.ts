@@ -59,7 +59,8 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
                     id,
                     originalText: variable.text,
                     type: variable.type,
-                    value: variable.value
+                    value: variable.value,
+                    additionalInfo: variable.additionalInfo
                 }
                 input.processedSpeech = input.processedSpeech.substr(0, variable.index) + id + input.processedSpeech.substring(variable.index + variable.text.length, input.processedSpeech.length)
             })
@@ -165,11 +166,11 @@ function inferHighlight(nlp: compromise.Document, original: string, options: NLU
 
     const durationComparisonInfo = normalizeCompromiseGroup(durationComparisonMatch.groups())
     if (durationComparisonInfo) {
-        console.log("duration comparison info found:", durationComparisonInfo)
+        console.debug("duration comparison info found:", durationComparisonInfo)
         const comparisonTermInfo = findComparisonTermInfo(durationComparisonInfo.comparison)
         if (comparisonTermInfo) {
             if (comparisonTermInfo.valueType.indexOf("duration") !== -1) {
-                console.log("Treat as a duration")
+                console.debug("Treat as a duration")
                 return {
                     conditionInfo: {
                         type: comparisonTermInfo.conditionType,
@@ -179,7 +180,7 @@ function inferHighlight(nlp: compromise.Document, original: string, options: NLU
                     match: durationComparisonMatch
                 }
             } else if (comparisonTermInfo.valueType.indexOf("time") !== -1) {
-                console.log("Treat as a time")
+                console.debug("Treat as a time")
                 const isBedtimePassed = isBedtimeReferred(original)
                 const isWakeTimePassed = isWaketimeReferred(original)
                 if (isBedtimePassed || isWakeTimePassed) {
@@ -203,14 +204,14 @@ function inferHighlight(nlp: compromise.Document, original: string, options: NLU
         const numericComparisonInfo = normalizeCompromiseGroup(numericComparisonMatch.groups())
         if (numericComparisonInfo) {
             //numeric condition
-            console.log("numeric comparison info found.", numericComparisonInfo)
+            console.debug("numeric comparison info found.", numericComparisonInfo)
             const comparisonTermInfo = findComparisonTermInfo(numericComparisonInfo.comparison)
             if (comparisonTermInfo) {
                 const parseDecimalNumber = require('parse-decimal-number');
                 for (const prioritizedValueType of comparisonTermInfo.valueType) {
                     switch (prioritizedValueType) {
                         case "duration":
-                            console.log("treated as duration")
+                            console.debug("treated as duration")
                             return {
                                 conditionInfo: {
                                     type: comparisonTermInfo.conditionType,
@@ -221,7 +222,7 @@ function inferHighlight(nlp: compromise.Document, original: string, options: NLU
                             }
                         case "time":
                             {
-                                console.log("treated as time")
+                                console.debug("treated as time")
                                 const isBedtimePassed = isBedtimeReferred(original)
                                 const isWakeTimePassed = isWaketimeReferred(original)
                                 if (isBedtimePassed || isWakeTimePassed) {
@@ -238,7 +239,7 @@ function inferHighlight(nlp: compromise.Document, original: string, options: NLU
                             }
                             break;
                         case "scalar":
-                            console.log("treated as scalar")
+                            console.debug("treated as scalar")
                             return {
                                 conditionInfo: {
                                     type: comparisonTermInfo.conditionType,

@@ -7,7 +7,7 @@ declare module "chrono-node" {
         index: number;
         text: string;
         ref: Date;
-        tags: { [key: string]: boolean | undefined }
+        tags: { [key: string]: boolean | string | undefined }
 
         isOnlyWeekday(): boolean
 
@@ -17,7 +17,7 @@ declare module "chrono-node" {
             index?: number,
             start?: ParsedComponents | ComponentParams,
             end?: ParsedComponents | ComponentParams,
-            tags?: { [key: string]: boolean | undefined }
+            tags?: { [key: string]: boolean | string | undefined }
         })
     }
 

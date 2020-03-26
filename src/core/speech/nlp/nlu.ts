@@ -74,7 +74,7 @@ export class NLUCommandResolver {
         const cyclicTimeFrames = this.extractVariablesWithType(preprocessed, VariableType.TimeCycle)
         const conditions = this.extractVariablesWithType(preprocessed, VariableType.Condition)
 
-        console.log(preprocessed)
+        console.debug(preprocessed)
 
         const toldDataSources = dataSources.length > 0
         const toldDates = dates.length > 0
@@ -274,6 +274,12 @@ export class NLUCommandResolver {
                         } else if (timeContext.timeElementType === 'to') {
                             return createSetRangeAction(InteractionType.Speech, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])])
                         }
+                    }
+
+                    if(dates[0].additionalInfo === 'from'){
+                        return createSetRangeAction(InteractionType.Speech, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])])
+                    }else if(dates[0].additionalInfo === 'to'){
+                        return createSetRangeAction(InteractionType.Speech, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])])
                     }
 
                     if (date < currentRange[0]) {

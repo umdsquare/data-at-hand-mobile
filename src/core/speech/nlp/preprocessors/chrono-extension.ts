@@ -129,7 +129,8 @@ recentDurationParser.extract = (text, ref, match, opt) => {
 
 const aroundRefiner = new chrono.Refiner();
 aroundRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
-    if (/(around|near)\s+/i.test(text) === true
+    const match = text.match(/(around|near)\s+/i)
+    if (match != null
         && results.length === 1
         && results[0].start != null
         && results[0].end == null
@@ -141,8 +142,8 @@ aroundRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
         return [
             new chrono.ParsedResult({
                 ref: results[0].ref,
-                text,
-                index: 0,
+                text: match[0] + results[0].text,
+                index: match.index,
                 start: {
                     day: getDate(start),
                     month: getMonth(start) + 1,
@@ -170,6 +171,7 @@ sinceRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
         && results[0].start.isCertain('day') === true) {
 
         results[0].text = match[0] + results[0].text
+        results[0].index = match.index
         results[0].end = new ParsedComponents({
             year: getYear(results[0].ref),
             month: getMonth(results[0].ref) + 1,
@@ -177,6 +179,23 @@ sinceRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
         }, results[0].ref)
         return results
     }
+    return results
+}
+
+const prepositionTagRefiner = new Refiner()
+const prepositionPattern = new NamedRegExp("((?<from>(start with)|from)|(?<to>to))(\\s+)?$", "i")
+prepositionTagRefiner.refine = function (text, results, opt) {
+    results.forEach(result => {
+        const matchPreposition = text.substring(0, result.index).match(prepositionPattern)
+        if (matchPreposition != null) {
+            if (matchPreposition.groups.from) {
+                result.tags["Preposition"] = "from"
+            } else if (matchPreposition.groups.to) {
+                result.tags["Preposition"] = "to"
+            }
+        }
+    })
+
     return results
 }
 
@@ -312,4 +331,4 @@ export const makeENMergeDateRangeRefiner = () => {
 }
 
 export const CHRONO_EXTENSION_PARSERS = [seasonParser, yearParser, recentDurationParser]
-export const CHRONO_EXTENSION_REFINERS: Array<Refiner> = []
+export const CHRONO_EXTENSION_REFINERS: Array<Refiner> = [aroundRefiner, sinceRefiner, prepositionTagRefiner]
