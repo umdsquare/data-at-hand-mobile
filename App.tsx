@@ -6,6 +6,7 @@
  * https://github.com/react-native-community/react-native-template-typescript
  *
  * @format
+ * @flow strict-local
  */
 
 import React from 'react';
