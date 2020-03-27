@@ -3,21 +3,12 @@
  */
 
 import { preprocess } from '@core/speech/nlp/preprocessor';
-import { NLUOptions, VariableType } from '@core/speech/nlp/types';
-import { MeasureUnitType, DataSourceType } from '@measure/DataSourceSpec';
-import { subDays } from 'date-fns';
-import { DateTimeHelper } from '@utils/time';
-import { dataSources } from '../jest.setup';
+import { VariableType } from '@core/speech/nlp/types';
+import { dataSources, speechOptions } from '../jest.setup';
 
 /*it('renders correctly', () => {
   renderer.create(<App />);
 });*/
-
-const speechOptions = {
-  getToday: () => new Date(2020, 2, 1), // today is 2020 3/1
-  measureUnit: MeasureUnitType.Metric
-} as NLUOptions
-
 
 const relatives: Array<[string, [number, number]]> = [
   ["this month", [20200301, 20200331]],

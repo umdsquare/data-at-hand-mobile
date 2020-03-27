@@ -68,13 +68,32 @@ seasonParser.extract = function (text, ref, match, opt) {
 }
 
 const yearParser = new Parser();
-yearParser.pattern = () => new NamedRegExp("(year\\s+)?(?<year>\\d{4})", "i")
+yearParser.pattern = () => new NamedRegExp("((?<prefixword>year\\s+)|^|\\s+)(?<year>[12]\\d{3})($|\\s+)", "i")
 yearParser.extract = (text, ref, match, opt) => {
+
+
     const year = Number.parseInt(match.groups.year)
+    const prefixWord = match.groups.prefixword
+    let index, realText
+
+    if (prefixWord && prefixWord.length > 0) {
+        index = match.index
+        realText = prefixWord + year
+    } else {
+        index = match.index + match[1].length
+        realText = match.groups.year
+    }
+
+
+    //check if the year is prefixed with 'than'
+    if (/\s+than\s+$/i.test(text.substring(0, index)) === true) {
+        return null
+    }
+
     const result = new ParsedResult({
         ref,
-        text: match[0],
-        index: match.index,
+        text: realText,
+        index,
         start: {
             year,
         },

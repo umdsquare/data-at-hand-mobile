@@ -97,6 +97,7 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
             nlpCasted.numbers().toCardinal().toNumber()
 
             input.payload.nlp = nlp
+            input.processedSpeech = nlp.text()
 
             return input
         }),

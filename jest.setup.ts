@@ -1,4 +1,5 @@
-import { DataSourceType } from "@measure/DataSourceSpec";
+import { DataSourceType, MeasureUnitType } from "@measure/DataSourceSpec";
+import { NLUOptions } from "@core/speech/nlp/types";
 
 
 console.log = jest.fn()
@@ -14,3 +15,9 @@ export const dataSources = [
     ["hours slept", DataSourceType.HoursSlept],
     ["sleep length", DataSourceType.HoursSlept],
   ]
+
+
+export const speechOptions = {
+  getToday: () => new Date(2020, 2, 1), // today is 2020 3/1
+  measureUnit: MeasureUnitType.Metric
+} as NLUOptions

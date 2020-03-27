@@ -3,19 +3,12 @@
  */
 
 import { preprocess } from '@core/speech/nlp/preprocessor';
-import { NLUOptions, VariableType } from '@core/speech/nlp/types';
-import { MeasureUnitType, DataSourceType } from '@measure/DataSourceSpec';
+import { VariableType } from '@core/speech/nlp/types';
 import { subDays } from 'date-fns';
 import { DateTimeHelper } from '@utils/time';
-import { dataSources } from '../jest.setup';
+import { dataSources, speechOptions } from '../jest.setup';
 
 console.log = jest.fn()
-
-const speechOptions = {
-    getToday: () => new Date(2020, 2, 1), // today is 2020 3/1
-    measureUnit: MeasureUnitType.Metric
-} as NLUOptions
-
 
 const specificDays: Array<[string, number]> = [
     ["january 1", 20200101],

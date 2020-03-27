@@ -75,7 +75,7 @@ interface Template {
 
 const templates: Array<Template> = [
     {
-        regex: new NamedRegExp("^(year\\s+)?(?<year>\\d{4})$", "i"),
+        regex: new NamedRegExp("^(year\\s+)?(?<year>[12]\\d{3})$", "i"),
         parse: (groups: { year: string }, options) => {
             const year = Number.parseInt(groups.year)
             return {
