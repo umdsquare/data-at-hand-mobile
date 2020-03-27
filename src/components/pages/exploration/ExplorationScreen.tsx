@@ -110,13 +110,20 @@ export interface ExplorationProps {
     dispatchSetShowGlobalPopup: (value: boolean, sessionId: string) => void
 }
 
+enum PrepareStatus {
+    FAILED = -1,
+    INITIAL = 0,
+    ACQUIRING_PERMISSION = 1,
+    ACTIVATING_SERVICE = 2,
+    PREPARED = 3,
+}
+
 interface State {
     appState: AppStateStatus,
-    initialLoadingFinished: boolean,
     loadingMessage: string,
     globalSpeechSessionId: string,
     undoIgnored: boolean,
-    isInPermissionPhase: boolean
+    prepareStatus: PrepareStatus
 }
 
 
@@ -131,14 +138,14 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
 
     private readonly subscriptions = new Subscription()
 
-    private onAppStateChange = (nextAppState: AppStateStatus) => {
+    private onAppStateChange = async (nextAppState: AppStateStatus) => {
         if (
             this.state.appState.match(/inactive|background/) &&
             nextAppState === 'active'
         ) {
             console.log('App has come to the foreground!');
-            if (this.state.isInPermissionPhase === false) {
-                this.checkPermission()
+            if (this.state.prepareStatus === PrepareStatus.ACQUIRING_PERMISSION) {
+                await this.prepare()
             }
         }
         this.setState({ appState: nextAppState });
@@ -155,11 +162,10 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
         super(props)
         this.state = {
             appState: AppState.currentState,
-            initialLoadingFinished: false,
             loadingMessage: null,
             globalSpeechSessionId: null,
             undoIgnored: false,
-            isInPermissionPhase: false
+            prepareStatus: PrepareStatus.INITIAL
         }
     }
 
@@ -179,7 +185,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
         })
     }
 
-    private async checkPermission(): Promise<boolean> {
+    private async checkPermission(): Promise<"granted" | "denied" | "forwarded"> {
         //permissions
         if (Platform.OS === 'ios') {
 
@@ -188,16 +194,16 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
             console.log("micro:", microphonePermissionStatus, "speech:", speechRecognitionPermissionStatus)
             if (microphonePermissionStatus === RESULTS.GRANTED && speechRecognitionPermissionStatus === RESULTS.GRANTED) {
                 console.log("All required permissions are met.")
-                return true
+                return "granted"
             } else if (microphonePermissionStatus === RESULTS.BLOCKED && speechRecognitionPermissionStatus === RESULTS.BLOCKED) {
                 console.log("Both permissions are blocked.")
                 await this.forwardUserToPermissionSettings('Permissions required', "Please grant permission for microphone and speech recognition in the settings.")
-                return false
+                return "forwarded"
             } else {
                 if (microphonePermissionStatus === RESULTS.BLOCKED) {
                     console.log("Microphone permission is blocked.")
                     await this.forwardUserToPermissionSettings('Microphone permission required', "Please grant permission for the microphone access.")
-                    return false
+                    return "forwarded"
                 } else if (microphonePermissionStatus !== RESULTS.GRANTED && microphonePermissionStatus !== RESULTS.UNAVAILABLE) {
                     microphonePermissionStatus = await request(PERMISSIONS.IOS.MICROPHONE)
                 }
@@ -205,32 +211,39 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
                 if (speechRecognitionPermissionStatus === RESULTS.BLOCKED) {
                     console.log("Speech recognition permission is blocked.")
                     await this.forwardUserToPermissionSettings('Speech recognition permission required', "Please grant permission for speech recognition.")
-                    return false
+                    return "forwarded"
                 } else if (speechRecognitionPermissionStatus !== RESULTS.GRANTED && speechRecognitionPermissionStatus !== RESULTS.UNAVAILABLE) {
                     speechRecognitionPermissionStatus = await request(PERMISSIONS.IOS.SPEECH_RECOGNITION)
                 }
 
                 if (microphonePermissionStatus === RESULTS.GRANTED && speechRecognitionPermissionStatus === RESULTS.GRANTED) {
                     console.log("All required permissions are met.")
-                    return true
+                    return "forwarded"
                 } else {
                     return this.checkPermission()
                 }
             }
-        }else if(Platform.OS === 'android') {
+        } else if (Platform.OS === 'android') {
             let audioRecordPermissionStatus = await check(PERMISSIONS.ANDROID.RECORD_AUDIO)
 
-            if(audioRecordPermissionStatus === RESULTS.GRANTED){
-                return true
-            }else if(audioRecordPermissionStatus === RESULTS.DENIED){
+            if (audioRecordPermissionStatus === RESULTS.GRANTED) {
+                return "granted"
+            } else if (audioRecordPermissionStatus === RESULTS.DENIED) {
                 audioRecordPermissionStatus = await request(PERMISSIONS.ANDROID.RECORD_AUDIO)
                 return this.checkPermission()
-            }else if(audioRecordPermissionStatus === RESULTS.BLOCKED){
+            } else if (audioRecordPermissionStatus === RESULTS.BLOCKED) {
                 await this.forwardUserToPermissionSettings('Speech recognition permission required', "Please grant permission for speech recognition.")
-                return false
+                return "forwarded"
             }
-            
+
         }
+    }
+
+    private setPrepareStatus(status: PrepareStatus) {
+        this.setState({
+            ...this.state,
+            prepareStatus: status
+        })
     }
 
     async componentDidMount() {
@@ -250,33 +263,33 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
 
         BackHandler.addEventListener('hardwareBackPress', this.onHardwareBackPress)
 
-        this.setState({
-            ...this.state,
-            isInPermissionPhase: true
-        })
-        const permissionPassed = await this.checkPermission()
-        this.setState({
-            ...this.state,
-            isInPermissionPhase: false
-        })
-        if (permissionPassed === true) {
+        await this.prepare()
+    }
+
+    private async prepare() {
+        this.setPrepareStatus(PrepareStatus.ACQUIRING_PERMISSION)
+        const permissionResult = await this.checkPermission()
+        if (permissionResult === 'granted') {
             console.log("All permissions are granted. Proceed to activation..")
-            if (Platform.OS === 'ios') {
-                console.log("App is currently not in foregroud. Defer the activation to the app state listener.")
-                while (AppState.currentState !== 'active') {
-                    await sleep(100)
-                }
-                console.log("Okay now the app is in foregroud. Try activation now.")
-                await this.activateCurrentService()
-            } else {
-                await this.activateCurrentService()
-            }
-        } else {
-            console.log("Not all permissions are granted.")
+            await this.performServiceActivationPhase()
+        }else if(permissionResult === 'forwarded'){
+            console.log("I will wait the user to return from the permission settings.")
+        }else{
+            this.setPrepareStatus(PrepareStatus.FAILED)
         }
     }
 
-    private async activateCurrentService() {
+    private async performServiceActivationPhase() {
+        this.setPrepareStatus(PrepareStatus.ACTIVATING_SERVICE)
+
+        if (Platform.OS === 'ios') {
+            console.log("App is currently not in foregroud. Defer the activation to the app state listener.")
+            while (AppState.currentState !== 'active') {
+                await sleep(100)
+            }
+            console.log("Okay now the app is in foregroud. Try activation now.")
+        }
+
         try {
             const serviceActivationResult = await DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).activateInSystem((progressInfo) => {
                 this.setState({
@@ -291,15 +304,14 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
                 })
                 console.log("activated ", this.props.selectedServiceKey, "successfully.")
                 this.props.dispatchDataReload(this.props.explorationInfo)
+                this.setPrepareStatus(PrepareStatus.PREPARED)
+            } else {
+                this.setPrepareStatus(PrepareStatus.FAILED)
             }
         } catch (error) {
             console.log("service activation error: ", this.props.selectedServiceKey, error)
+            this.setPrepareStatus(PrepareStatus.FAILED)
         }
-
-        this.setState({
-            ...this.state,
-            initialLoadingFinished: true
-        });
     }
 
     async componentDidUpdate(prevProps: ExplorationProps, prevState: State) {
@@ -309,7 +321,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
         const isExplorationInfoChanged = explorationInfoHelper.equals(prevProps.explorationInfo, this.props.explorationInfo) === false
 
         if (this.props.explorationInfo.type !== prevProps.explorationInfo.type || isExplorationInfoChanged === true) {
-            if (this.state.initialLoadingFinished === true) {
+            if (this.state.prepareStatus === PrepareStatus.PREPARED) {
                 dataReloadNeeded = true
             }
         }
@@ -441,9 +453,9 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
             <TooltipOverlay />
             <GlobalSpeechOverlay isGlobalSpeechButtonPressed={this.props.showGlobalSpeechPopup} />
 
-            <DataBusyOverlay isBusy={this.props.isDataLoading === true || this.state.initialLoadingFinished === false} />
+            <DataBusyOverlay isBusy={this.props.isDataLoading === true || this.state.prepareStatus !== PrepareStatus.PREPARED} />
             {
-                this.state.initialLoadingFinished === false ? <InitialLoadingIndicator loadingMessage={this.state.loadingMessage} /> : <></>
+                this.state.prepareStatus !== PrepareStatus.PREPARED ? <InitialLoadingIndicator loadingMessage={this.state.loadingMessage} /> : <></>
             }
 
             <SpeechEventNotificationOverlay ref={this.speechFeedbackRef} />
