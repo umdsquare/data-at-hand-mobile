@@ -56,6 +56,7 @@ target 'DataAtHand' do
 
   permissions_path = '../node_modules/react-native-permissions/ios'
   pod 'Permission-Microphone', :path => "#{permissions_path}/Microphone.podspec"
+  pod 'Permission-SpeechRecognition', :path => "#{permissions_path}/SpeechRecognition.podspec"
 
 
   target 'DataAtHandTests' do

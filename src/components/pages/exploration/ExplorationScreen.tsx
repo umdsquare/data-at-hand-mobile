@@ -41,6 +41,7 @@ import { Subscription } from "rxjs";
 import { SpeechEventQueue } from "@core/speech/SpeechEventQueue";
 import { SpeechEventNotificationOverlay } from "@components/pages/exploration/SpeechEventNotificationOverlay";
 import { SystemLogger } from "@core/logging/SystemLogger";
+import { sleep } from "@utils/utils";
 
 test().then()
 
@@ -114,7 +115,8 @@ interface State {
     initialLoadingFinished: boolean,
     loadingMessage: string,
     globalSpeechSessionId: string,
-    undoIgnored: boolean
+    undoIgnored: boolean,
+    isInPermissionPhase: boolean
 }
 
 
@@ -135,7 +137,9 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
             nextAppState === 'active'
         ) {
             console.log('App has come to the foreground!');
-            this.checkPermission()
+            if (this.state.isInPermissionPhase === false) {
+                this.checkPermission()
+            }
         }
         this.setState({ appState: nextAppState });
     }
@@ -154,37 +158,83 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
             initialLoadingFinished: false,
             loadingMessage: null,
             globalSpeechSessionId: null,
-            undoIgnored: false
+            undoIgnored: false,
+            isInPermissionPhase: false
         }
     }
 
-    private async checkPermission() {
+    private forwardUserToPermissionSettings(title: string, content: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            Alert.alert(title, content, [
+                {
+                    text: "Open settings",
+                    onPress: async () => {
+                        await openSettings()
+                        resolve()
+                    }
+                }
+            ], {
+                cancelable: false
+            })
+        })
+    }
+
+    private async checkPermission(): Promise<boolean> {
         //permissions
         if (Platform.OS === 'ios') {
-            const microphonePermissionStatus = await check(PERMISSIONS.IOS.MICROPHONE)
-            console.log("Microphone permission:", microphonePermissionStatus)
-            if (microphonePermissionStatus === RESULTS.BLOCKED) {
-                console.log("Microphone permission is blocked.")
-                Alert.alert('Microphone permission required', "Please grant permission for the microphone access.", [
-                    {
-                        text: "Open settings",
-                        onPress: async () => {
-                            await openSettings()
-                        }
-                    }
-                ], {
-                    cancelable: false
-                })
-            } else if (microphonePermissionStatus !== RESULTS.GRANTED && microphonePermissionStatus !== RESULTS.UNAVAILABLE) {
-                const permissionRequestResult = await request(PERMISSIONS.IOS.MICROPHONE)
-                if (permissionRequestResult !== RESULTS.UNAVAILABLE) {
-                    await this.checkPermission()
+
+            let [microphonePermissionStatus, speechRecognitionPermissionStatus] = await Promise.all([PERMISSIONS.IOS.MICROPHONE, PERMISSIONS.IOS.SPEECH_RECOGNITION].map(p => check(p)))
+
+            console.log("micro:", microphonePermissionStatus, "speech:", speechRecognitionPermissionStatus)
+            if (microphonePermissionStatus === RESULTS.GRANTED && speechRecognitionPermissionStatus === RESULTS.GRANTED) {
+                console.log("All required permissions are met.")
+                return true
+            } else if (microphonePermissionStatus === RESULTS.BLOCKED && speechRecognitionPermissionStatus === RESULTS.BLOCKED) {
+                console.log("Both permissions are blocked.")
+                await this.forwardUserToPermissionSettings('Permissions required', "Please grant permission for microphone and speech recognition in the settings.")
+                return false
+            } else {
+                if (microphonePermissionStatus === RESULTS.BLOCKED) {
+                    console.log("Microphone permission is blocked.")
+                    await this.forwardUserToPermissionSettings('Microphone permission required', "Please grant permission for the microphone access.")
+                    return false
+                } else if (microphonePermissionStatus !== RESULTS.GRANTED && microphonePermissionStatus !== RESULTS.UNAVAILABLE) {
+                    microphonePermissionStatus = await request(PERMISSIONS.IOS.MICROPHONE)
+                }
+
+                if (speechRecognitionPermissionStatus === RESULTS.BLOCKED) {
+                    console.log("Speech recognition permission is blocked.")
+                    await this.forwardUserToPermissionSettings('Speech recognition permission required', "Please grant permission for speech recognition.")
+                    return false
+                } else if (speechRecognitionPermissionStatus !== RESULTS.GRANTED && speechRecognitionPermissionStatus !== RESULTS.UNAVAILABLE) {
+                    speechRecognitionPermissionStatus = await request(PERMISSIONS.IOS.SPEECH_RECOGNITION)
+                }
+
+                if (microphonePermissionStatus === RESULTS.GRANTED && speechRecognitionPermissionStatus === RESULTS.GRANTED) {
+                    console.log("All required permissions are met.")
+                    return true
+                } else {
+                    return this.checkPermission()
                 }
             }
+        }else if(Platform.OS === 'android') {
+            let audioRecordPermissionStatus = await check(PERMISSIONS.ANDROID.RECORD_AUDIO)
+
+            if(audioRecordPermissionStatus === RESULTS.GRANTED){
+                return true
+            }else if(audioRecordPermissionStatus === RESULTS.DENIED){
+                audioRecordPermissionStatus = await request(PERMISSIONS.ANDROID.RECORD_AUDIO)
+                return this.checkPermission()
+            }else if(audioRecordPermissionStatus === RESULTS.BLOCKED){
+                await this.forwardUserToPermissionSettings('Speech recognition permission required', "Please grant permission for speech recognition.")
+                return false
+            }
+            
         }
     }
 
     async componentDidMount() {
+        console.log("Component was mount.")
 
         this.subscriptions.add(SpeechEventQueue.instance.onNewEventPushed.subscribe(
             (event) => {
@@ -200,34 +250,56 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
 
         BackHandler.addEventListener('hardwareBackPress', this.onHardwareBackPress)
 
-        if (this.props.selectedServiceKey) {
-            try {
-                await DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).activateInSystem((progressInfo) => {
-                    this.setState({
-                        ...this.state,
-                        loadingMessage: progressInfo.message
-                    })
+        this.setState({
+            ...this.state,
+            isInPermissionPhase: true
+        })
+        const permissionPassed = await this.checkPermission()
+        this.setState({
+            ...this.state,
+            isInPermissionPhase: false
+        })
+        if (permissionPassed === true) {
+            console.log("All permissions are granted. Proceed to activation..")
+            if (Platform.OS === 'ios') {
+                console.log("App is currently not in foregroud. Defer the activation to the app state listener.")
+                while (AppState.currentState !== 'active') {
+                    await sleep(100)
+                }
+                console.log("Okay now the app is in foregroud. Try activation now.")
+                await this.activateCurrentService()
+            } else {
+                await this.activateCurrentService()
+            }
+        } else {
+            console.log("Not all permissions are granted.")
+        }
+    }
+
+    private async activateCurrentService() {
+        try {
+            const serviceActivationResult = await DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).activateInSystem((progressInfo) => {
+                this.setState({
+                    ...this.state,
+                    loadingMessage: progressInfo.message
                 })
+            })
+            if (serviceActivationResult.success == true) {
                 this.setState({
                     ...this.state,
                     loadingMessage: null
                 })
                 console.log("activated ", this.props.selectedServiceKey, "successfully.")
                 this.props.dispatchDataReload(this.props.explorationInfo)
-            } catch (error) {
-                console.log("service activation error: ", this.props.selectedServiceKey, error)
             }
+        } catch (error) {
+            console.log("service activation error: ", this.props.selectedServiceKey, error)
         }
-        this.setState({
-            ...this.state,
-            loadingMessage: "Checking permission..."
-        })
-        await this.checkPermission()
 
         this.setState({
             ...this.state,
             initialLoadingFinished: true
-        })
+        });
     }
 
     async componentDidUpdate(prevProps: ExplorationProps, prevState: State) {
@@ -355,7 +427,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
                 }
 
             </View>
-            
+
             <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationInfo)}
                 onModePress={this.onBottomBarButtonPress}
                 onVoiceButtonPressIn={this.onGlobalSpeechInputPressIn}

@@ -1,4 +1,4 @@
-import { refresh, authorize, revoke } from 'react-native-app-auth';
+import { refresh, authorize, revoke, AuthConfiguration } from 'react-native-app-auth';
 import { FitbitServiceCore, FitbitDailyActivityHeartRateQueryResult, FitbitDailyActivityStepsQueryResult, FitbitWeightTrendQueryResult, FitbitWeightQueryResult, FitbitSleepQueryResult, FitbitIntradayStepDayQueryResult, FitbitHeartRateIntraDayQueryResult, FitbitUserProfile, FitbitDeviceListQueryResult } from "../types";
 import { makeFitbitIntradayActivityApiUrl, makeFitbitHeartRateIntraDayLogApiUrl, makeFitbitWeightTrendApiUrl, makeFitbitWeightLogApiUrl, makeFitbitDayLevelActivityLogsUrl, makeFitbitSleepApiUrl, FITBIT_PROFILE_URL, FITBIT_DEVICES_URL } from "../api";
 import { LocalAsyncStorageHelper } from "@utils/AsyncStorageHelper";
@@ -25,7 +25,7 @@ const STORAGE_KEY_USER_MEMBER_SINCE =
 export class FitbitOfficialServiceCore implements FitbitServiceCore {
 
     private _credential: FitbitCredential = null;
-    private _authConfig = null;
+    private _authConfig: AuthConfiguration = null;
 
     private _fitbitLocalDbManager: FitbitLocalDbManager = null
     private _asyncStorage: LocalAsyncStorageHelper = null
@@ -41,22 +41,10 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
     }
 
     get localAsyncStorage(): LocalAsyncStorageHelper {
-        if(this._asyncStorage == null){
+        if (this._asyncStorage == null) {
             this._asyncStorage = new LocalAsyncStorageHelper("fitbit:official")
         }
         return this._asyncStorage
-    }
-
-    private get credential(): FitbitCredential {
-        return this._credential;
-    }
-
-    private async checkTokenValid(): Promise<boolean> {
-        const state = await this.localAsyncStorage.getObject(STORAGE_KEY_AUTH_STATE);
-        return (
-            state != null &&
-            new Date(state.accessTokenExpirationDate).getTime() > Date.now()
-        );
     }
 
     private async updateUserProfile(): Promise<boolean> {
@@ -121,6 +109,10 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
                     tokenEndpoint: 'https://api.fitbit.com/oauth2/token',
                     revocationEndpoint: 'https://api.fitbit.com/oauth2/revoke',
                 },
+                additionalParameters: {
+                    expires_in: "31536000", // 1 year
+                    prompt: "none"
+                }
             };
             return Promise.resolve({ supported: true });
         } catch (e) {
@@ -250,7 +242,7 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
         return new Date()
     }
 
-    async fetchLastSyncTime(): Promise<{tracker?: Date, scale?: Date}> {
+    async fetchLastSyncTime(): Promise<{ tracker?: Date, scale?: Date }> {
         const devices: FitbitDeviceListQueryResult = await this.fetchFitbitQuery(FITBIT_DEVICES_URL)
         const trackerTimes = devices.filter(d => d.type === 'TRACKER').map(d => parseISO(d.lastSyncTime))
         const scaleTimes = devices.filter(d => d.type === 'SCALE').map(d => parseISO(d.lastSyncTime))
