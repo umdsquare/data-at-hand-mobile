@@ -16,7 +16,8 @@
         tools:replace="android:label">
         <activity
             android:name=".MainActivity"
-            android:configChanges="keyboard|keyboardHidden|orientation|screenSize"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|uiMode"
+            android:launchMode="singleTask"
             android:label="${appNamePrefix}${appName}"
             android:screenOrientation="portrait"
             android:theme="@style/SplashTheme"

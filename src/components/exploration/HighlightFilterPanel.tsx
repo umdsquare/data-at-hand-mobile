@@ -1,6 +1,6 @@
-import React, { useCallback, useMemo, useState, useEffect } from 'react'
+import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react'
 import { HighlightFilter, NumericConditionType } from '@core/exploration/types'
-import { View, StyleSheet, Text, Animated, Platform } from 'react-native'
+import { View, StyleSheet, Text, Animated, Platform, ActionSheetIOS, UIManager, findNodeHandle } from 'react-native'
 import Colors from '@style/Colors'
 import { DataSourceManager } from '@measure/DataSourceManager'
 import { StyleTemplates } from '@style/Styles'
@@ -8,7 +8,6 @@ import { Sizes } from '@style/Sizes'
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { RectButton } from 'react-native-gesture-handler'
 import { DataSourceType, MeasureUnitType } from '@measure/DataSourceSpec'
-import { useActionSheet } from '@expo/react-native-action-sheet'
 import pluralize from 'pluralize';
 import deepEqual from 'deep-equal';
 import Dialog from 'react-native-dialog'
@@ -21,7 +20,6 @@ import { DurationWheelPicker } from '@components/common/DurationWheelPicker'
 import { BEDTIME_SHIFT_HOUR_OF_DAY } from '@measure/consts'
 import { useSelector } from 'react-redux'
 import { ReduxAppState } from '@state/types'
-import convert from 'convert-units'
 import { getNumberSequence, clamp } from '@utils/utils'
 
 const HEART_RATE_RANGE = getNumberSequence(0, 150)
@@ -294,7 +292,7 @@ export const HighlightFilterPanel = React.memo((props: {
 
     const [showReferenceEditView, setShowReferenceEditView] = useState(false)
 
-    const [inputReferenceValue, setInputReferenceValue] = useState<number|undefined|null>(null)
+    const [inputReferenceValue, setInputReferenceValue] = useState<number | undefined | null>(null)
 
     useEffect(() => {
         setInputReferenceValue(props.filter.ref)
@@ -366,7 +364,7 @@ export const HighlightFilterPanel = React.memo((props: {
 
             case DataSourceType.HeartRate:
                 {
-                    const index = clamp(Math.round(inputReferenceValue) - HEART_RATE_RANGE[0], 0, HEART_RATE_RANGE.length-1)
+                    const index = clamp(Math.round(inputReferenceValue) - HEART_RATE_RANGE[0], 0, HEART_RATE_RANGE.length - 1)
                     return <WheelPicker
                         selectedItemTextFontFamily={undefined}
                         itemTextFontFamily={undefined}
@@ -482,22 +480,28 @@ interface CategoryFormButtonProps<T, KeyType> {
 
 function CategoryFormButton<T, KeyType>(props: CategoryFormButtonProps<T, KeyType>) {
 
-    const { showActionSheetWithOptions } = useActionSheet();
+    const buttonRef = useRef()
 
     const onPress = useCallback(() => {
         const selections = props.values.map(v => props.getLabel(v))
-        selections.push("Cancel")
-        showActionSheetWithOptions(
-            {
-                options: selections,
-                cancelButtonIndex: selections.length - 1,
-                destructiveButtonIndex: selections.length - 1,
-                showSeparators: true,
-            }, buttonIndex => {
-                if (buttonIndex != selections.length - 1 && props.getKey(props.values[buttonIndex]) !== props.currentKey) {
+        if (Platform.OS === 'ios') {
+            selections.push("Cancel")
+            ActionSheetIOS.showActionSheetWithOptions(
+                {
+                    options: selections,
+                    cancelButtonIndex: selections.length - 1,
+                }, buttonIndex => {
+                    if (buttonIndex != selections.length - 1 && props.getKey(props.values[buttonIndex]) !== props.currentKey) {
+                        props.onChanged(props.getKey(props.values[buttonIndex]))
+                    }
+                })
+        } else if (Platform.OS === 'android') {
+            UIManager.showPopupMenu(findNodeHandle(buttonRef.current), selections, () => { }, (item, buttonIndex) => {
+                if (props.getKey(props.values[buttonIndex]) !== props.currentKey) {
                     props.onChanged(props.getKey(props.values[buttonIndex]))
                 }
             })
+        }
     }, [props.values, props.getLabel, props.currentKey, props.getKey])
 
     const value = useMemo(() => props.getLabel(props.values.find((v) => {
@@ -506,16 +510,17 @@ function CategoryFormButton<T, KeyType>(props: CategoryFormButtonProps<T, KeyTyp
         } else return props.getKey(v) === props.currentKey
     })), [props.getLabel, props.values, props.currentKey, props.getKey])
 
-    return <FormButton
+    return <FormButton ref={buttonRef}
         onPress={onPress}
         value={value} />
 }
 
-const FormButton = (props: {
+const FormButton = React.forwardRef((props: {
     value: string,
-    onPress: () => void
-}) => {
-    return <RectButton hitSlop={{ top: 10, bottom: 10 }} style={styles.formButtonStyle} onPress={props.onPress}>
+    onPress: () => void,
+    children?: any
+}, ref: any) => {
+    return <RectButton ref={ref} hitSlop={{ top: 10, bottom: 10 }} style={styles.formButtonStyle} onPress={props.onPress}>
         <Text style={styles.formButtonLabelStyle}>{props.value}</Text>
     </RectButton>
-}
+})

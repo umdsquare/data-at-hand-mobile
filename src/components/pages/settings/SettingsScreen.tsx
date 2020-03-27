@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { View, Text, StyleSheet, TouchableHighlight, Alert, ScrollView, Switch, ViewStyle, Platform, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, TouchableHighlight, Alert, ScrollView, Switch, ViewStyle, Platform, SafeAreaView, ActionSheetIOS, UIManager, findNodeHandle } from "react-native";
 import { MeasureUnitType } from "@measure/DataSourceSpec";
 import { Dispatch } from "redux";
 import { ReduxAppState } from "@state/types";
@@ -8,7 +8,6 @@ import { setUnit, setRecordLogs, setRecordScreens } from '@state/settings/action
 import { Sizes } from "@style/Sizes";
 import Colors from "@style/Colors";
 import { DataServiceManager } from "@measure/DataServiceManager";
-import { connectActionSheet } from '@expo/react-native-action-sheet'
 import { SvgIcon, SvgIconType } from "@components/common/svg/SvgIcon";
 import { InitialLoadingIndicator } from "@components/pages/exploration/parts/main/InitialLoadingIndicator";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -76,8 +75,8 @@ const styles = StyleSheet.create({
     }
 })
 
-const SettingsRow = (props: { title: string, subtitle?: string, value?: string, showArrow?: boolean, onClick: () => void }) => {
-    return <TouchableHighlight underlayColor="#00000050" onPress={() => { props.onClick() }}>
+const SettingsRow = React.forwardRef((props: { title: string, subtitle?: string, value?: string, showArrow?: boolean, onClick: () => void }, ref: any) => {
+    return <TouchableHighlight ref={ref} underlayColor="#00000050" onPress={() => { props.onClick() }}>
         <View style={rowContainerStyle}>
             {
                 props.subtitle != null ? <View>
@@ -89,7 +88,7 @@ const SettingsRow = (props: { title: string, subtitle?: string, value?: string, 
             {(props.showArrow !== false) && <SvgIcon type={SvgIconType.ArrowRight} color='gray' />}
         </View>
     </TouchableHighlight>
-}
+})
 
 const BooleanSettingsRow = (props: { title: string, value: boolean, onChange?: (value: boolean) => void }) => {
 
@@ -115,7 +114,6 @@ const Subheader = (props: { title: string }) => {
 
 interface Props {
     navigation: StackNavigationProp<SettingsSteckParamList, "Main">,
-    showActionSheetWithOptions,
 
     //redux
     selectedUnitType: MeasureUnitType,
@@ -124,7 +122,7 @@ interface Props {
     recordScreens: boolean,
     loggingSessionId?: string,
 
-    setUnitType: (index) => void,
+    setUnitType: (index: number) => void,
     setRecordLogs: (record: boolean, id?: string) => void
     setRecordScreens: (record: boolean) => void
 }
@@ -137,6 +135,7 @@ interface State {
 
 class SettingsScreen extends React.PureComponent<Props, State>{
 
+    private unitRowRef = React.createRef()
 
     constructor(props: Props) {
         super(props)
@@ -149,16 +148,21 @@ class SettingsScreen extends React.PureComponent<Props, State>{
 
     readonly onPressUnitRow = () => {
         const selections = unitTypes.map(t => t.label)
-        selections.push("Cancel")
-        this.props.showActionSheetWithOptions({
-            options: selections,
-            cancelButtonIndex: selections.length - 1,
-
-        }, buttonIndex => {
-            if (buttonIndex != selections.length - 1) {
+        if (Platform.OS === 'ios') {
+            selections.push("Cancel")
+            ActionSheetIOS.showActionSheetWithOptions({
+                options: selections,
+                cancelButtonIndex: selections.length - 1,
+            }, buttonIndex => {
+                if (buttonIndex != selections.length - 1) {
+                    this.props.setUnitType(buttonIndex)
+                }
+            })
+        } else if (Platform.OS === 'android') {
+            UIManager.showPopupMenu(findNodeHandle(this.unitRowRef.current as any), selections, ()=>{}, (item, buttonIndex) => {
                 this.props.setUnitType(buttonIndex)
-            }
-        })
+            })
+        }
     }
 
     readonly onPressServiceButton = () => { this.props.navigation.navigate("ServiceWizardModal") }
@@ -304,7 +308,7 @@ class SettingsScreen extends React.PureComponent<Props, State>{
 
 
                         <Subheader title={"Display Settings"} />
-                        <SettingsRow title="Unit" value={unitTypes.find(t => t.key === this.props.selectedUnitType).label}
+                        <SettingsRow ref={this.unitRowRef} title="Unit" value={unitTypes.find(t => t.key === this.props.selectedUnitType).label}
                             onClick={this.onPressUnitRow} />
 
 
@@ -357,5 +361,5 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
 }
 
 
-const settingsScreen = connectActionSheet(connect(mapStateToProps, mapDispatchToProps)(SettingsScreen))
+const settingsScreen = connect(mapStateToProps, mapDispatchToProps)(SettingsScreen)
 export { settingsScreen as SettingsScreen }

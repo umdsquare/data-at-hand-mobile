@@ -6,6 +6,7 @@
  * https://github.com/react-native-community/react-native-template-typescript
  *
  * @format
+ * @flow strict-local
  */
 
 import React from 'react';
@@ -17,7 +18,6 @@ import { DataServiceManager } from '@measure/DataServiceManager';
 import { VoiceDictator } from '@core/speech/VoiceDictator';
 import { ThemeProvider } from 'react-native-elements';
 import { Platform, UIManager } from 'react-native';
-import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { theme } from '@style/Theme';
@@ -73,9 +73,7 @@ class App extends React.Component {
         <PersistGate loading={null} persistor={persistor}>
           <SafeAreaProvider>
             <ThemeProvider theme={theme}>
-              <ActionSheetProvider>
                 <AppNavigator />
-              </ActionSheetProvider>
             </ThemeProvider>
           </SafeAreaProvider>
         </PersistGate>
