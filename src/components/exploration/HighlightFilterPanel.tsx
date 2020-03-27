@@ -21,6 +21,7 @@ import { BEDTIME_SHIFT_HOUR_OF_DAY } from '@measure/consts'
 import { useSelector } from 'react-redux'
 import { ReduxAppState } from '@state/types'
 import { getNumberSequence, clamp } from '@utils/utils'
+import { Button } from 'react-native-elements'
 
 const HEART_RATE_RANGE = getNumberSequence(0, 150)
 const HEART_RATE_RANGE_TEXTS = HEART_RATE_RANGE.map(v => `${v.toString()} bpm`)
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
 
     dialogPresetButtonStyle: { marginLeft: 4, marginRight: 4, borderRadius: 6 },
 
-    dialogPresetButtonContentStyle: { borderColor: Colors.accent + "88", borderWidth: 1, borderRadius: 6, padding: 6 },
+    dialogPresetButtonContentStyle: { borderColor: Colors.accent + "88", borderWidth: 1, borderRadius: 6, padding: 6, backgroundColor: 'transparent' },
 
     dialogPresetButtonTextStyle: { fontSize: Sizes.smallFontSize, color: Colors.accent, fontWeight: '500' },
 
@@ -445,11 +446,16 @@ export const HighlightFilterPanel = React.memo((props: {
                     dataSourcePresets != null ? <View style={styles.dialogPresetViewStyle}>
                         {
                             dataSourcePresets.map((preset, i) =>
-                                <RectButton key={i.toString()} style={styles.dialogPresetButtonStyle} onPress={() => { setInputReferenceValue(preset) }}>
-                                    <View style={styles.dialogPresetButtonContentStyle}>
-                                        <Text style={styles.dialogPresetButtonTextStyle}>{valueFormatter(preset)}</Text>
-                                    </View>
-                                </RectButton>)
+                                <Button key={i.toString()} 
+                                containerStyle={styles.dialogPresetButtonStyle} 
+                                buttonStyle={styles.dialogPresetButtonContentStyle}
+                                titleStyle={styles.dialogPresetButtonTextStyle}
+                                title={valueFormatter(preset)}
+                                
+                                onPress={() => { 
+                                    console.log("set input reference:", preset)
+                                    setInputReferenceValue(preset) 
+                                    }}/>)
                         }
                     </View> : null
                 }
