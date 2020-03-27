@@ -74,13 +74,3 @@ target 'DataAtHand' do
     flipper_post_install(installer)
   end
 end
-
-target 'DataAtHand-tvOS' do
-  # Pods for DataAtHand-tvOS
-
-  target 'DataAtHand-tvOSTests' do
-    inherit! :search_paths
-    # Pods for testing
-  end
-
-end
