@@ -1,12 +1,11 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, LayoutAnimation } from 'react-native';
+import React, { useMemo } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { Sizes } from '@style/Sizes';
-import { connect, useSelector, shallowEqual } from 'react-redux';
+import { useSelector, shallowEqual } from 'react-redux';
 import { ReduxAppState } from '@state/types';
-import { SpeechRecognizerState, SpeechRecognizerSessionStatus } from '@state/speech/types';
+import { SpeechRecognizerSessionStatus } from '@state/speech/types';
 import Colors from '@style/Colors';
 import Spinner from 'react-native-spinkit';
-import { generateExampleSentences } from '@core/speech/ExampleSentenceRecommender';
 import { DataServiceManager } from '@measure/DataServiceManager';
 
 const styles = StyleSheet.create({
@@ -78,7 +77,7 @@ export const SpeechInputPanel = React.memo(() => {
     }, [dictationResult])
 
     const examples = useMemo(() => {
-        return generateExampleSentences(explorationInfo, speechContext, selectedService.getToday())
+        return require('@core/speech/ExampleSentenceRecommender').generateExampleSentences(explorationInfo, speechContext, selectedService.getToday())
     }, [explorationInfo, speechContext])
 
     switch (speechStatus) {
@@ -122,7 +121,7 @@ export const SpeechInputPanel = React.memo(() => {
                                         justifyContent: 'space-around',
                                     }}>
                                         {
-                                            examples.map((example, i) => <Text key={i.toString()} style={styles.exampleTextSentenceStyle}>"{example}"</Text>)
+                                            examples.map((example: string, i: number) => <Text key={i.toString()} style={styles.exampleTextSentenceStyle}>"{example}"</Text>)
                                         }
                                     </View>
                                 </> : <Text style={styles.exampleTextTitleStyle}>What can I do for you?</Text>

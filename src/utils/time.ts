@@ -52,7 +52,7 @@ export class DateTimeHelper {
         if (wholeDiff <= maxNumDays) {
             return [[start, end]]
         } else {
-            var chunks = []
+            var chunks: Array<[number, number]> = []
             var pointer: Date = endDate
             var leftDays = wholeDiff
             while (leftDays >= maxNumDays) {
@@ -126,16 +126,16 @@ export class DateTimeHelper {
         return null
     }
 
-    static mondayWeekStartFunc = date => startOfWeek(date, { weekStartsOn: 1 })
-    static mondayWeekEndFunc = date => endOfWeek(date, { weekStartsOn: 1 })
-    static sundayWeekStartFunc = date => startOfWeek(date, { weekStartsOn: 0 })
-    static sundayWeekEndFunc = date => endOfWeek(date, { weekStartsOn: 0 })
+    static mondayWeekStartFunc = (date: Date) => startOfWeek(date, { weekStartsOn: 1 })
+    static mondayWeekEndFunc = (date: Date) => endOfWeek(date, { weekStartsOn: 1 })
+    static sundayWeekStartFunc = (date: Date) => startOfWeek(date, { weekStartsOn: 0 })
+    static sundayWeekEndFunc = (date: Date) => endOfWeek(date, { weekStartsOn: 0 })
 
 
     static getSemanticRange(ref: Date, semantic: 'year' | 'month' | 'sundayWeek' | 'mondayWeek', offset: number = 0): [number, number] {
-        let startFunc: (Date) => Date
-        let endFunc: (Date) => Date
-        let offsetFunc: (Date, offset) => Date
+        let startFunc: (date: Date) => Date
+        let endFunc: (date: Date) => Date
+        let offsetFunc: (date: Date, offset: number) => Date
         switch (semantic) {
             case 'year':
                 startFunc = startOfYear
@@ -292,7 +292,7 @@ export class DateTimeHelper {
 }
 
 
-export function pad(n, len) {
+export function pad(n: number, len: number) {
 
     var s = n.toString();
     if (s.length < len) {

@@ -94,13 +94,13 @@ export class DataSourceManager {
 
     this.specMap = new Map<DataSourceType, DataSourceSpec>();
     this.supportedDataSources.forEach(spec => {
-      this.specMap[spec.type] = spec;
+      this.specMap.set(spec.type, spec)
     });
 
   }
 
   getSpec(key: DataSourceType): DataSourceSpec {
-    return this.specMap[key];
+    return this.specMap.get(key);
   }
 
   formatValue(value: any, type: DataSourceType): string {

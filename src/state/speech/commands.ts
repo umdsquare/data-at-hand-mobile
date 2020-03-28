@@ -6,13 +6,15 @@ import { DictationResult } from "../../core/speech/types";
 import { SpeechRecognizerSessionStatus } from "./types";
 import { Mutex } from 'async-mutex';
 import { SpeechContext } from "../../core/speech/nlp/context";
-import { NLUCommandResolver } from "../../core/speech/nlp/nlu";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { SpeechEventQueue } from "../../core/speech/SpeechEventQueue";
 import { SystemLogger, VerboseEventTypes } from "@core/logging/SystemLogger";
-import { NLUResultType } from "@core/speech/nlp/types";
+import { NLUResultType, NLUCommandResolver } from "@core/speech/nlp/types";
+import { Lazy } from "@utils/utils";
 
 const sessionMutex = new Mutex()
+
+const nluCommandResolver = new Lazy(()=> require("../../core/speech/nlp/nlu").default.instance as NLUCommandResolver)
 
 export function startSpeechSession(sessionId: string, speechContext: SpeechContext): (dispatch: Dispatch, getState: () => ReduxAppState) => void {
     return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
@@ -87,7 +89,7 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                         console.log(sessionId, "Analyze the phrase, ", dictationResult.text, "with context: ", context)
 
                         try {
-                            const nluResult = await NLUCommandResolver.instance.resolveSpeechCommand(
+                            const nluResult = await nluCommandResolver.get().resolveSpeechCommand(
                                 dictationResult.text,
                                 context,
                                 currentState.explorationState.info,

@@ -35,15 +35,12 @@ import { createSetShowGlobalPopupAction } from "@state/speech/actions";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@components/Routes";
 import { SpeechContextHelper } from "@core/speech/nlp/context";
-import { test } from "@core/speech/nlp/preprocessor";
 import { TouchSafeBottomSheet } from "@components/common/TouchSafeBottomSheet";
 import { Subscription } from "rxjs";
 import { SpeechEventQueue } from "@core/speech/SpeechEventQueue";
 import { SpeechEventNotificationOverlay } from "@components/pages/exploration/SpeechEventNotificationOverlay";
 import { SystemLogger } from "@core/logging/SystemLogger";
 import { sleep } from "@utils/utils";
-
-test().then()
 
 const styles = StyleSheet.create({
 

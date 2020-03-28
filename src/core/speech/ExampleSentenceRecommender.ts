@@ -1,4 +1,4 @@
-import { ExplorationInfo, ParameterType, inferIntraDayDataSourceType, IntraDayDataSourceType, getIntraDayDataSourceName, ExplorationType } from "@core/exploration/types";
+import { ExplorationInfo, ParameterType, inferIntraDayDataSourceType, getIntraDayDataSourceName, ExplorationType } from "@core/exploration/types";
 import { SpeechContext, SpeechContextType, DateElementSpeechContext, RangeElementSpeechContext } from "./nlp/context";
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
 import { DataSourceType } from "@measure/DataSourceSpec";

@@ -1,7 +1,8 @@
-import { NumericConditionType } from "../../exploration/types"
+import { NumericConditionType, ExplorationInfo } from "../../exploration/types"
 import { randomString, STRING_SET_ALPHABETS, STRING_SET_NUMBERS } from "@utils/utils"
 import { DataSourceType, MeasureUnitType } from "@measure/DataSourceSpec"
 import { ActionTypeBase } from "@state/types"
+import { SpeechContext } from "./context"
 
 export const MONTH_NAMES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
 
@@ -73,4 +74,8 @@ export enum NLUResultType {
 export interface NLUResult {
     type: NLUResultType,
     action?: ActionTypeBase | null,
+}
+
+export interface NLUCommandResolver{
+    resolveSpeechCommand(speech: string, context: SpeechContext, explorationInfo: ExplorationInfo, options: NLUOptions): Promise<NLUResult>
 }

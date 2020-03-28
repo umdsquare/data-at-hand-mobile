@@ -1,8 +1,5 @@
-import { IOSDictatorImpl } from "./IOSDictatorImpl";
 import { Platform } from "react-native";
-import { DictationResult, VoiceDictatorStatus, IVoiceDictatorNative } from "./types";
-import { BehaviorSubject, Observable } from "rxjs";
-import { AndroidMicrosoftDictatorImpl } from "./AndroidMicrosoftDictatorImpl";
+import { DictationResult, IVoiceDictatorNative } from "./types";
 
 export class VoiceDictator {
 
@@ -18,12 +15,7 @@ export class VoiceDictator {
     private voiceDictatorNative: IVoiceDictatorNative
 
     private constructor() {
-        this.voiceDictatorNative = Platform.OS === 'ios' ? new IOSDictatorImpl() : new AndroidMicrosoftDictatorImpl()
-    }
-
-    private readonly statusSubject = new BehaviorSubject<VoiceDictatorStatus>(VoiceDictatorStatus.INITIAL)
-    public get statusObservable(): Observable<VoiceDictatorStatus> {
-        return this.statusSubject
+        this.voiceDictatorNative = Platform.OS === 'ios' ? new (require("./IOSDictatorImpl").IOSDictatorImpl)() : new (require("./AndroidMicrosoftDictatorImpl").AndroidMicrosoftDictatorImpl)()
     }
 
     private startEventListener: () => void = null
@@ -31,7 +23,6 @@ export class VoiceDictator {
     private stopEventListener: (error: any) => void = null
 
     async install(): Promise<boolean> {
-        this.statusSubject.next(VoiceDictatorStatus.INSTALLING)
         const installed = await this.voiceDictatorNative.install()
 
         if (installed === true) {
@@ -54,10 +45,8 @@ export class VoiceDictator {
                 }
             })
 
-            this.statusSubject.next(VoiceDictatorStatus.IDLE)
             return true
         } else {
-            this.statusSubject.next(VoiceDictatorStatus.INITIAL)
             return false
         }
     }
@@ -88,24 +77,18 @@ export class VoiceDictator {
 
     async start(): Promise<boolean> {
         console.log("Start voice dictator.")
-        this.statusSubject.next(VoiceDictatorStatus.STARTING)
         const started = await this.voiceDictatorNative.start()
         if (started === true) {
-            this.statusSubject.next(VoiceDictatorStatus.LISTENING)
             return true
         } else {
-            this.statusSubject.next(VoiceDictatorStatus.IDLE)
             return false
         }
     }
     async stop(): Promise<boolean> {
-        this.statusSubject.next(VoiceDictatorStatus.STOPPING)
         const stopped = await this.voiceDictatorNative.stop()
         if (stopped === true) {
-            this.statusSubject.next(VoiceDictatorStatus.IDLE)
             return true
         } else {
-            this.statusSubject.next(VoiceDictatorStatus.LISTENING)
             return false
         }
     }
