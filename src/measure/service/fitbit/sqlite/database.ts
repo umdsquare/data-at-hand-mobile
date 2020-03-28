@@ -3,9 +3,9 @@ import { SQLiteHelper } from '@utils/sqlite-helper';
 import stringFormat from 'string-format';
 import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension } from '@core/exploration/cyclic_time';
 import { IIntraDayHeartRatePoint, BoxPlotInfo } from '@core/exploration/data/types';
-import Papa from 'papaparse';
 import { DateTimeHelper } from '@utils/time';
 import merge from 'merge';
+import { Lazy } from '@utils/utils';
 
 SQLite.DEBUG(false);
 SQLite.enablePromise(true);
@@ -332,7 +332,7 @@ export class FitbitLocalDbManager {
 
     console.log("try open the database:", this._dbConfig)
 
-    this._dbInitPromise = SQLite.openDatabase({...this._dbConfig})
+    this._dbInitPromise = SQLite.openDatabase({ ...this._dbConfig })
       .then(db => {
         console.log("db opened.")
         return db
@@ -620,6 +620,8 @@ export class FitbitLocalDbManager {
     else return null
   }
 
+  private readonly csvParser = new Lazy(() => require('papaparse'))
+
   async exportToCsv(): Promise<Array<{ name: string, csv: string }>> {
 
     const joinedTable = await this.exportDailySummaryColumn(
@@ -651,7 +653,7 @@ export class FitbitLocalDbManager {
       }
     )
 
-    const result = [{ name: "daily_summary", csv: Papa.unparse(joinedTable) }]
+    const result = [{ name: "daily_summary", csv: this.csvParser.get().unparse(joinedTable) }]
 
     const schemas = [
       StepCountSchema,
@@ -674,7 +676,7 @@ export class FitbitLocalDbManager {
                 row["date"] = DateTimeHelper.toFormattedString(row["numberedDate"])
               })
             }
-            result.push({ name: schema.name, csv: Papa.unparse(rows) })
+            result.push({ name: schema.name, csv: this.csvParser.get().unparse(rows) })
           }
         }
       }

@@ -65,7 +65,7 @@ interface ComponentState {
 
 export class VoiceInputButton extends React.PureComponent<Props, ComponentState> {
 
-    constructor(props) {
+    constructor(props: Props) {
         super(props)
 
         this.state = {

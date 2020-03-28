@@ -39,7 +39,6 @@ import { TouchSafeBottomSheet } from "@components/common/TouchSafeBottomSheet";
 import { Subscription } from "rxjs";
 import { SpeechEventQueue } from "@core/speech/SpeechEventQueue";
 import { SpeechEventNotificationOverlay } from "@components/pages/exploration/SpeechEventNotificationOverlay";
-import { SystemLogger } from "@core/logging/SystemLogger";
 import { sleep } from "@utils/utils";
 
 const styles = StyleSheet.create({
@@ -303,6 +302,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
                 this.props.dispatchDataReload(this.props.explorationInfo)
                 this.setPrepareStatus(PrepareStatus.PREPARED)
             } else {
+                console.log("service not activated:", serviceActivationResult.error)
                 this.setPrepareStatus(PrepareStatus.FAILED)
             }
         } catch (error) {

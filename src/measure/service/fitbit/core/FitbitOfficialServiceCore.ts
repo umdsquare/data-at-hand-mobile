@@ -32,7 +32,7 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
     nameOverride?: string;
     descriptionOverride?: string;
     thumbnailOverride?: any;
-    
+
     readonly isQuotaLimited: boolean = true
 
     getLeftQuota(): Promise<number> {
@@ -82,35 +82,46 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
         } else return false;
     }
 
-    async authenticate(): Promise<string> {
-        const state = await this.localAsyncStorage.getObject(STORAGE_KEY_AUTH_STATE);
-        if (state) {
-            try {
-                console.log("refresh token found. try refreshing it with token...")
-                const newState = await refresh(this._authConfig, {
-                    refreshToken: state.refreshToken,
-                });
-                if (newState) {
-                    console.log("token refresh succeeded.")
-                    await this.localAsyncStorage.set(STORAGE_KEY_AUTH_STATE, newState);
-                    return newState.accessToken;
+    private _authenticationFlow: Promise<string> | undefined = undefined
+
+    authenticate(): Promise<string> {
+        if (this._authenticationFlow == null) {
+            this._authenticationFlow = new Promise<string>(async (resolve, reject) => {
+                const state = await this.localAsyncStorage.getObject(STORAGE_KEY_AUTH_STATE);
+                if (state) {
+                    try {
+                        console.log("refresh token found. try refreshing it with token...")
+                        const newState = await refresh(this._authConfig, {
+                            refreshToken: state.refreshToken,
+                        });
+                        if (newState) {
+                            console.log("token refresh succeeded.")
+                            await this.localAsyncStorage.set(STORAGE_KEY_AUTH_STATE, newState);
+                            resolve(newState.accessToken)
+                        }
+                    } catch (e) {
+                        console.log("token refresh failed. try re-authorize.")
+                        console.log(e);
+                    }
                 }
-            } catch (e) {
-                console.log("token refresh failed. try re-authorize.")
-                console.log(e);
-            }
+
+                try {
+                    console.log("try re-authorization.")
+                    const newState = await authorize(this._authConfig);
+                    await this.localAsyncStorage.set(STORAGE_KEY_AUTH_STATE, newState);
+                    resolve(newState.accessToken)
+                } catch (e) {
+                    console.log("Authorization failed.")
+                    console.log(e, JSON.stringify(e))
+                    resolve(null);
+                }
+            }).then(res => {
+                this._authenticationFlow = null
+                return res
+            })
         }
 
-        try {
-            console.log("try re-authorization.")
-            const newState = await authorize(this._authConfig);
-            await this.localAsyncStorage.set(STORAGE_KEY_AUTH_STATE, newState);
-            return newState.accessToken;
-        } catch (e) {
-            console.log("Authorization failed.")
-            console.log(e, JSON.stringify(e))
-            return null;
-        }
+        return this._authenticationFlow
     }
 
     onCheckSupportedInSystem(): Promise<{ supported: boolean, reason?: UnSupportedReason }> {
