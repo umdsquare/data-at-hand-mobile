@@ -96,6 +96,8 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
 
             nlpCasted.numbers().toCardinal().toNumber()
 
+            console.log(nlp.termList())
+
             input.payload.nlp = nlp
             input.processedSpeech = nlp.text()
 
@@ -163,7 +165,7 @@ function isWaketimeReferred(speech: string): boolean {
 function inferHighlight(nlp: compromise.Document, original: string, options: NLUOptions): { conditionInfo: ConditionInfo, match: compromise.Document } | null {
     //try to find the condition
 
-    const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time)+]`)
+    const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time|am|pm)+]`)
 
     const durationComparisonInfo = normalizeCompromiseGroup(durationComparisonMatch.groups())
     if (durationComparisonInfo) {

@@ -53,7 +53,6 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
     }
 
     private String accumulatedTextToPrevCycle = null;
-    private String currentCycleRecognizedText = null;
 
     @NonNull
     @Override
@@ -121,7 +120,6 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
             this.currentRecognizer = null;
         }
 
-        this.currentCycleRecognizedText = null;
         this.accumulatedTextToPrevCycle = null;
 
         final AudioConfig audioInput = AudioConfig.fromStreamInput(createMicrophoneStream());
@@ -141,13 +139,26 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
             Log.d(TAG, "Partial result received");
             final String s = eventArgs.getResult().getText();
             final String stitchedResult = joinTexts(accumulatedTextToPrevCycle, s);
-            currentCycleRecognizedText = s;
+            //currentCycleRecognizedText = s;
             emitReceivedEvent(stitchedResult);
         });
 
         recognizer.recognized.addEventListener((o, eventArgs) -> {
-            final String s = eventArgs.getResult().getText();
-            accumulatedTextToPrevCycle = joinTexts(accumulatedTextToPrevCycle, currentCycleRecognizedText);
+            String s = eventArgs.getResult().getText();
+
+            Log.d(TAG, "Recognized: " + s);
+
+            if(s.lastIndexOf('.') == s.length()-1){
+                s = s.substring(0, s.length()-1);
+            }
+
+            if(s.length() > 1 && !s.matches("I\\s+")){
+                
+                s = s.substring(0,1).toLowerCase() + s.substring(1);
+            }
+
+            accumulatedTextToPrevCycle = joinTexts(accumulatedTextToPrevCycle, s);
+            emitReceivedEvent(accumulatedTextToPrevCycle);
         });
 
 
@@ -180,7 +191,6 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
                 this.currentRecognizer.close();
                 this.currentRecognizer = null;
 
-                this.currentCycleRecognizedText = null;
                 this.accumulatedTextToPrevCycle = null;
 
                 if (this.microphoneStream != null) {
