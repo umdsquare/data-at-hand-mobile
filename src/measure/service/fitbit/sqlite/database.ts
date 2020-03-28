@@ -4,7 +4,6 @@ import stringFormat from 'string-format';
 import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension } from '@core/exploration/cyclic_time';
 import { IIntraDayHeartRatePoint, BoxPlotInfo } from '@core/exploration/data/types';
 import { DateTimeHelper } from '@utils/time';
-import merge from 'merge';
 import { Lazy } from '@utils/utils';
 
 SQLite.DEBUG(false);
@@ -589,7 +588,7 @@ export class FitbitLocalDbManager {
 
         if (matchedElements.length > 1) {
           for (let i = 1; i < matchedElements.length; i++) {
-            merged = merge(merged, matchedElements[i])
+            merged = require('merge')(merged, matchedElements[i])
           }
         }
 

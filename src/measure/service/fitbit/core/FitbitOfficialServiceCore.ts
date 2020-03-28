@@ -27,7 +27,7 @@ const STORAGE_KEY_LEFT_QUOTA = DataService.STORAGE_PREFIX + 'fitbit:left_quota';
 const STORAGE_KEY_QUOTA_RESET_AT = DataService.STORAGE_PREFIX + 'fitbit:quota_reset_at';
 
 
-export class FitbitOfficialServiceCore implements FitbitServiceCore {
+export default class FitbitOfficialServiceCore implements FitbitServiceCore {
     keyOverride?: string;
     nameOverride?: string;
     descriptionOverride?: string;

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { ExplorationType, ParameterKey, ParameterType, IntraDayDataSourceType, getIntraDayDataSourceName, inferIntraDayDataSourceType, inferDataSource } from "@core/exploration/types";
+import { ExplorationType, ParameterKey, ParameterType, IntraDayDataSourceType, getIntraDayDataSourceName, inferDataSource } from "@core/exploration/types";
 import { SafeAreaView, View, Text, StyleSheet, TextStyle, ViewStyle, LayoutAnimation, ViewProps } from 'react-native';
 import { CategoricalRow, CategoricalRowProps } from '@components/exploration/CategoricalRow';
 import { DataSourceIcon } from '@components/common/DataSourceIcon';
@@ -22,7 +22,6 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@components/Routes';
 import { SpeechContextHelper } from '@core/speech/nlp/context';
-import { HighlightFilterPanel } from '@components/exploration/HighlightFilterPanel';
 
 const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={'white'} />
 

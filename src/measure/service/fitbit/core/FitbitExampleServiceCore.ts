@@ -25,7 +25,7 @@ interface ExampleDayRow {
 
 }
 
-export class FitbitExampleServiceCore implements FitbitServiceCore {
+export default class FitbitExampleServiceCore implements FitbitServiceCore {
     descriptionOverride?: string;
     thumbnailOverride?: any;
 

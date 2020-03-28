@@ -19,7 +19,7 @@ import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
 import { FitbitLocalTableName } from './sqlite/database';
 
 
-export class FitbitService extends DataService {
+export default class FitbitService extends DataService {
   readonly key: string
   readonly name: string
   readonly description: string

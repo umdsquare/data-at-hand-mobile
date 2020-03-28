@@ -295,7 +295,7 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filte
             return <DailyBarChart
                 {...commonProps}
                 dataSource={DataSourceType.HoursSlept}
-                data={data.data.map(d => ({ numberedDate: d.numberedDate, value: d.lengthInSeconds }))}
+                data={data.data.map((d: any) => ({ numberedDate: d.numberedDate, value: d.lengthInSeconds }))}
                 valueTickFormat={(tick: number) => { return DateTimeHelper.formatDuration(tick, true) }}
                 valueTicksOverride={(maxValue: number) => {
                     const scale = scaleLinear().domain([0, Math.ceil(maxValue / 3600)]).nice()
