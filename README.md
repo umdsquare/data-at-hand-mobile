@@ -1,6 +1,11 @@
 # Data@Hand
 
-This project is under active development.
+<img src="https://img.shields.io/badge/platform-ios%7Candroid-green"/> <img src="https://img.shields.io/badge/framework-react%20native-blue"/> <img src="https://img.shields.io/badge/language-typescript%20%7C%20swift%20%7C%20java-lightblue"/> 
+
+A multimodal fitness application supporting both touch and speech input for data exploration.
+
+**This project is currently under heavy development.**
+
 
 ### How to build & run
 
