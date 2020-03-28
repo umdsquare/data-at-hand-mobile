@@ -196,4 +196,9 @@ export interface FitbitServiceCore {
   localAsyncStorage: LocalAsyncStorageHelper
 
   getToday: () => Date
+
+  isQuotaLimited: boolean
+  getLeftQuota(): Promise<number>
+  getQuotaResetEpoch(): Promise<number>
+  
 }

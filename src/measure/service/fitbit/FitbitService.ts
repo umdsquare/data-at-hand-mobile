@@ -372,4 +372,17 @@ export class FitbitService extends DataService {
   get getToday(){ 
     return this.core.getToday
   }
+
+  get isQuotaLimited(): boolean{
+    return this.core.isQuotaLimited
+  }
+
+  getLeftQuota(): Promise<number>{
+    return this.core.getLeftQuota()
+  }
+
+  getQuotaResetEpoch(): Promise<number>{
+    return this.core.getQuotaResetEpoch()
+  }
+  
 }

@@ -26,6 +26,8 @@ interface ExampleDayRow {
 }
 
 export class FitbitExampleServiceCore implements FitbitServiceCore {
+    descriptionOverride?: string;
+    thumbnailOverride?: any;
 
     nameOverride = "Fitbit (Example Data)"
     keyOverride = "fitbit_example"
@@ -203,5 +205,13 @@ export class FitbitExampleServiceCore implements FitbitServiceCore {
             tracker: this.latestDate,
             scale: this.latestDate
         }
+    }
+
+    isQuotaLimited: boolean = false
+    getLeftQuota(): Promise<number> {
+        return Promise.resolve(Number.MAX_SAFE_INTEGER)
+    }
+    getQuotaResetEpoch(): Promise<number> {
+        return Promise.resolve(Number.NaN)
     }
 }

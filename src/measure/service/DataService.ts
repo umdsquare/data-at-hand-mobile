@@ -14,6 +14,11 @@ export interface ServiceActivationResult {
   error?: any
 }
 
+export enum ServiceApiErrorType{
+  CredentialError="credential",
+  QuotaLimitReached="quota-limit",
+}
+
 export abstract class DataService {
   static readonly STORAGE_PREFIX = "@source_service:"
 
@@ -136,6 +141,10 @@ export abstract class DataService {
 
   abstract onSystemExit(): Promise<void>
 
+  abstract isQuotaLimited: boolean
+  abstract getLeftQuota(): Promise<number>
+  abstract getQuotaResetEpoch(): Promise<number>
+  
   protected abstract exportToCsv(): Promise<Array<{ name: string, csv: string }>>
 
   async exportData(): Promise<boolean> {

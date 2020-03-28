@@ -2,11 +2,12 @@ import { refresh, authorize, revoke, AuthConfiguration } from 'react-native-app-
 import { FitbitServiceCore, FitbitDailyActivityHeartRateQueryResult, FitbitDailyActivityStepsQueryResult, FitbitWeightTrendQueryResult, FitbitWeightQueryResult, FitbitSleepQueryResult, FitbitIntradayStepDayQueryResult, FitbitHeartRateIntraDayQueryResult, FitbitUserProfile, FitbitDeviceListQueryResult } from "../types";
 import { makeFitbitIntradayActivityApiUrl, makeFitbitHeartRateIntraDayLogApiUrl, makeFitbitWeightTrendApiUrl, makeFitbitWeightLogApiUrl, makeFitbitDayLevelActivityLogsUrl, makeFitbitSleepApiUrl, FITBIT_PROFILE_URL, FITBIT_DEVICES_URL } from "../api";
 import { LocalAsyncStorageHelper } from "@utils/AsyncStorageHelper";
-import { DataService, UnSupportedReason } from "../../DataService";
+import { DataService, UnSupportedReason, ServiceApiErrorType } from "../../DataService";
 import { DateTimeHelper } from "@utils/time";
 import { FitbitLocalDbManager } from '../sqlite/database';
 import { DatabaseParams } from 'react-native-sqlite-storage';
 import { parseISO, max } from 'date-fns';
+import { SystemError } from '@utils/errors';
 
 
 interface FitbitCredential {
@@ -22,7 +23,24 @@ const STORAGE_KEY_USER_TIMEZONE =
 const STORAGE_KEY_USER_MEMBER_SINCE =
     DataService.STORAGE_PREFIX + 'fitbit:user_memberSince';
 
+const STORAGE_KEY_LEFT_QUOTA = DataService.STORAGE_PREFIX + 'fitbit:left_quota';
+const STORAGE_KEY_QUOTA_RESET_AT = DataService.STORAGE_PREFIX + 'fitbit:quota_reset_at';
+
+
 export class FitbitOfficialServiceCore implements FitbitServiceCore {
+    keyOverride?: string;
+    nameOverride?: string;
+    descriptionOverride?: string;
+    thumbnailOverride?: any;
+    
+    readonly isQuotaLimited: boolean = true
+
+    getLeftQuota(): Promise<number> {
+        return this.localAsyncStorage.getInt(STORAGE_KEY_LEFT_QUOTA)
+    }
+    getQuotaResetEpoch(): Promise<number> {
+        return this.localAsyncStorage.getLong(STORAGE_KEY_QUOTA_RESET_AT)
+    }
 
     private _credential: FitbitCredential = null;
     private _authConfig: AuthConfiguration = null;
@@ -172,10 +190,13 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
             },
         }).then(async result => {
             const quota = result.headers.get('Fitbit-Rate-Limit-Limit');
-            const remainedCalls = result.headers.get('Fitbit-Rate-Limit-Remaining');
-            const secondsLeftToNextReset = result.headers.get(
+            const remainedCalls = Number.parseInt(result.headers.get('Fitbit-Rate-Limit-Remaining'));
+            const secondsLeftToNextReset = Number.parseInt(result.headers.get(
                 'Fitbit-Rate-Limit-Reset',
-            );
+            ));
+
+            await this.localAsyncStorage.set(STORAGE_KEY_LEFT_QUOTA, remainedCalls)
+            await this.localAsyncStorage.set(STORAGE_KEY_QUOTA_RESET_AT, secondsLeftToNextReset * 1000 + Date.now())
 
             if (result.ok === false) {
                 const json = await result.json();
@@ -186,15 +207,10 @@ export class FitbitOfficialServiceCore implements FitbitServiceCore {
                                 'Fitbit token is expired. refresh token and try once again.',
                             );
                             return this.authenticate().then(() => this.fetchFitbitQuery(url));
-                        } else throw { error: 'Access token invalid.' };
+                        } else throw new SystemError(ServiceApiErrorType.CredentialError, "Access token invalid.");
 
                     case 429:
-                        throw {
-                            error:
-                                'Fitbit quota limit reached. Next reset: ' +
-                                secondsLeftToNextReset +
-                                ' secs.',
-                        };
+                        throw new SystemError(ServiceApiErrorType.QuotaLimitReached, "Quota limit reached.")
                     default:
                         throw { error: result.status };
                 }

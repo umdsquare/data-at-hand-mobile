@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState, useMemo, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableHighlight, Alert, ScrollView, Switch, ViewStyle, Platform, SafeAreaView, ActionSheetIOS, UIManager, findNodeHandle } from "react-native";
 import { MeasureUnitType } from "@measure/DataSourceSpec";
 import { Dispatch } from "redux";
@@ -13,10 +13,10 @@ import { InitialLoadingIndicator } from "@components/pages/exploration/parts/mai
 import { StackNavigationProp } from "@react-navigation/stack";
 import { SettingsSteckParamList } from "@components/Routes";
 import { SystemLogger } from "@core/logging/SystemLogger";
-import { Logo } from "@components/Logo";
 import { StyleTemplates } from "@style/Styles";
 import { SafeAreaConsumer } from "react-native-safe-area-context";
 import { AboutPanel } from "./AbountPanel";
+import { format } from "date-fns";
 
 
 const unitTypes = [{
@@ -72,7 +72,11 @@ const styles = StyleSheet.create({
         color: Colors.textGray,
         fontWeight: '500',
         backgroundColor: Colors.backPanelColor
-    }
+    },
+
+    smallTextStyle: { 
+        color: Colors.textColorLight
+     }
 })
 
 const SettingsRow = React.forwardRef((props: { title: string, subtitle?: string, value?: string, showArrow?: boolean, onClick: () => void }, ref: any) => {
@@ -107,9 +111,44 @@ const BooleanSettingsRow = (props: { title: string, value: boolean, onChange?: (
     </View>
 }
 
-const Subheader = (props: { title: string }) => {
+const Subheader = React.memo((props: { title: string }) => {
     return <Text style={styles.subheaderStyle}>{props.title}</Text>
-}
+})
+
+
+const ServiceQuotaMeter = React.memo((props: { serviceKey: string }) => {
+
+    const [isLoading, setIsLoading] = useState(false)
+    const [leftQuota, setLeftQuota] = useState(Number.MAX_SAFE_INTEGER)
+    const [quotaResetAt, setQuotaResetAt] = useState(Number.NaN)
+
+    const service = useMemo(() => DataServiceManager.instance.getServiceByKey(props.serviceKey), [props.serviceKey])
+
+    const quotaLimited = useMemo(() => service.isQuotaLimited, [service])
+
+    const reloadQuotaInfo = useCallback(async () => {
+        if (quotaLimited === true) {
+            setIsLoading(true)
+            setLeftQuota(await service.getLeftQuota())
+            setQuotaResetAt(await service.getQuotaResetEpoch())
+            setIsLoading(false)
+        }
+    }, [quotaLimited, service])
+
+    useEffect(() => {
+        reloadQuotaInfo()
+    }, [])
+
+    if (quotaLimited === true) {
+        return <View style={styles.rowContainerStyleNormalPadding}>
+            <Text style={styles.rowTitleStyle}>Service Quota</Text>
+            {
+                quotaResetAt >= Date.now() ? <Text style={styles.smallTextStyle}>{leftQuota} Calls left (refilled at {format(quotaResetAt, "h:mm a")}).</Text>
+                    : <Text style={styles.smallTextStyle}>Full quota left.</Text>
+            }
+        </View>
+    } else return null
+})
 
 
 interface Props {
@@ -159,7 +198,7 @@ class SettingsScreen extends React.PureComponent<Props, State>{
                 }
             })
         } else if (Platform.OS === 'android') {
-            UIManager.showPopupMenu(findNodeHandle(this.unitRowRef.current as any), selections, ()=>{}, (item, buttonIndex) => {
+            UIManager.showPopupMenu(findNodeHandle(this.unitRowRef.current as any), selections, () => { }, (item, buttonIndex) => {
                 this.props.setUnitType(buttonIndex)
             })
         }
@@ -296,6 +335,7 @@ class SettingsScreen extends React.PureComponent<Props, State>{
                         <Subheader title={"Measure Data Source"} />
                         <SettingsRow title="Service" value={DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).name}
                             onClick={this.onPressServiceButton} />
+                        <ServiceQuotaMeter serviceKey={this.props.selectedServiceKey} />
                         <SettingsRow title="Refresh all data cache" onClick={this.onPressRefreshAllCache} showArrow={false} />
                         {
                             __DEV__ === true ?
