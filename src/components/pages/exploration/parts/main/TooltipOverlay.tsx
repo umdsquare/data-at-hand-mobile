@@ -24,6 +24,7 @@ import { ZIndices } from '../zIndices'
 import { DataServiceManager } from '@measure/DataServiceManager'
 import { SpeechContext, SpeechContextHelper } from '@core/speech/nlp/context'
 import { createSetSpeechContextAction } from '@state/speech/actions'
+import { Lazy } from '@utils/utils'
 
 const borderRadius = 8
 
@@ -132,6 +133,20 @@ interface State {
 }
 
 class TooltipOverlay extends React.PureComponent<Props, State>{
+
+    private static appearAnimConfig = new Lazy(() => ({
+        duration: 300,
+        easing: Easing.inOut(Easing.linear),
+        toValue: 1,
+        useNativeDriver: true
+    }))
+
+    private static disappearAnimConfig = new Lazy(() => ({
+        duration: 200,
+        easing: Easing.linear,
+        toValue: 0,
+        useNativeDriver: true
+    }))
 
     constructor(props: Props) {
         super(props)
@@ -284,12 +299,7 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
                     useNativeDriver: true
                 }).start()
 
-                Animated.timing(this.state.emergingProgress, {
-                    duration: 300,
-                    easing: Easing.inOut(Easing.linear),
-                    toValue: 1,
-                    useNativeDriver: true
-                }).start()
+                Animated.timing(this.state.emergingProgress, TooltipOverlay.appearAnimConfig.get()).start()
 
                 this.props.dispatchStartSpeechSession(speechSessionId, this.makeSpeechContextFromTouchingInfo(this.props.touchingInfo))
 
@@ -299,12 +309,7 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
                 })
             } else if (this.props.touchingInfo == null) {
 
-                Animated.timing(this.state.emergingProgress, {
-                    duration: 200,
-                    easing: Easing.linear,
-                    toValue: 0,
-                    useNativeDriver: true
-                }).start(() => {
+                Animated.timing(this.state.emergingProgress, TooltipOverlay.disappearAnimConfig.get()).start(() => {
                     this.setState({
                         ...this.state,
                         touchingInfo: null

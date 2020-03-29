@@ -6,6 +6,7 @@ import LinearGradient from 'react-native-linear-gradient'
 import { StyleTemplates } from '@style/Styles'
 import { Platform } from 'react-native'
 import Colors from '@style/Colors'
+import { Lazy } from '@utils/utils'
 
 interface State {
     swipeDirection: "left" | "right"
@@ -17,6 +18,18 @@ interface State {
 }
 
 export class SwipedFeedback extends React.PureComponent<any, State>{
+
+    private static appearAnimConfig = new Lazy(()=>({
+        toValue: 1,
+        duration: 300,
+        easing: Easing.in(Easing.linear)
+    }))
+
+    private static disappearAnimConfig = new Lazy(()=>({
+        toValue: 1,
+        duration: Platform.OS === 'ios'? 800 : 600,
+        easing: Easing.in(Easing.linear)
+    }))
 
     constructor(props: any) {
         super(props)
@@ -39,16 +52,8 @@ export class SwipedFeedback extends React.PureComponent<any, State>{
         })
         this.state.progress.setValue(0)
         this.state.alphaProgress.setValue(0)
-        Animated.timing(this.state.progress, {
-            toValue: 1,
-            duration: 300,
-            easing: Easing.in(Easing.linear)
-        }).start()
-        Animated.timing(this.state.alphaProgress, {
-            toValue: 1,
-            duration: Platform.OS === 'ios'? 800 : 600,
-            easing: Easing.in(Easing.linear)
-        }).start(()=>{
+        Animated.timing(this.state.progress, SwipedFeedback.appearAnimConfig.get()).start()
+        Animated.timing(this.state.alphaProgress, SwipedFeedback.disappearAnimConfig.get()).start(()=>{
             this.setState({
                 ...this.state,
                 feedbackShowing: false
@@ -67,7 +72,7 @@ export class SwipedFeedback extends React.PureComponent<any, State>{
 
     render() {
         return <SizeWatcher containerStyle={StyleTemplates.fitParent} onSizeChange={this.onSizeChanged}>
-            <Animated.View style={{
+            <Animated.View pointerEvents='none' style={{
                 ...StyleTemplates.fitParent,
                 opacity: this.state.alphaProgress.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0] }),
 

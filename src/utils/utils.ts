@@ -32,7 +32,7 @@ export function clamp(value: number, min: number, max: number): number {
 }
 
 export class Lazy<T>{
-    _instance: T | undefined = undefined
+    private _instance: T | undefined = undefined
     constructor(readonly generator: () => T) { }
 
     get(): T {

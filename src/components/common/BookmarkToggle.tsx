@@ -31,7 +31,8 @@ export class BookmarkToggle extends React.PureComponent<Props, State> {
             this.currentAnimation = Animated.timing(this.state.animationTransition, {
                 toValue: 1,
                 duration: 400,
-                easing: Easing.elastic(2)
+                easing: Easing.elastic(2),
+                useNativeDriver: true
             })
     
             this.currentAnimation.start(() => {

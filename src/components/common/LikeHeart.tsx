@@ -51,7 +51,7 @@ export class LikeHeart extends React.PureComponent<Props, State>{
 
                 if (newValence === Valence.Positive) {
                     this.state.heartInterpolation.setValue(0);
-                    Animated.timing(this.state.heartInterpolation, { toValue: 1, duration: 600, easing: Easing.elastic(4) }).start(()=>{
+                    Animated.timing(this.state.heartInterpolation, { toValue: 1, duration: 600, easing: Easing.elastic(4), useNativeDriver: true }).start(()=>{
                         this.currentAnimation = null
                     })
                 }

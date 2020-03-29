@@ -68,6 +68,12 @@ export const HorizontalPullToActionContainer = React.memo((props: {
         }
     }, [minDist, props.enabled, onPanGestureEvent])
 
+    const returnAnimConfig = useMemo(() => ({
+            toValue: 0,
+            duration: 600,
+            easing: Easing.out(Easing.cubic)
+        }), [])
+
     const createHandlerStateChangeCallback = useMemo(() => {
         return (from: 'left' | 'right') => {
             return (ev: PanGestureHandlerStateChangeEvent) => {
@@ -80,11 +86,7 @@ export const HorizontalPullToActionContainer = React.memo((props: {
                 }
 
                 if (ev.nativeEvent.state === State.END || ev.nativeEvent.state === State.CANCELLED || ev.nativeEvent.state === State.FAILED) {
-                    Animated.timing(pullIndicatorTransformAmount, {
-                        toValue: 0,
-                        duration: 600,
-                        easing: Easing.out(Easing.cubic)
-                    }).start(() => {
+                    Animated.timing(pullIndicatorTransformAmount, returnAnimConfig).start(() => {
                         setPullingOrigin(null)
                     })
                 }

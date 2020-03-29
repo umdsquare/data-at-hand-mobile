@@ -1,8 +1,9 @@
 import React from 'react';
 import { StyleTemplates } from '@style/Styles';
-import { ViewStyle, Animated, Easing} from 'react-native';
+import { ViewStyle, Animated, Easing } from 'react-native';
 import { ZIndices } from '../zIndices';
 import Colors from '@style/Colors';
+import { Lazy } from '@utils/utils';
 
 const styleBase = { ...StyleTemplates.fitParent, backgroundColor: Colors.WHITE, zIndex: ZIndices.dataBusyOverlay, elevation: 4 } as ViewStyle
 
@@ -15,7 +16,21 @@ interface State {
     appearAnimProgress: Animated.Value
 }
 
-export class DataBusyOverlay extends React.Component<Props, State>{
+export class DataBusyOverlay extends React.PureComponent<Props, State>{
+
+    static appearAnimInfo = new Lazy(() => ({
+        toValue: 1,
+        duration: 300,
+        easing: Easing.linear,
+        useNativeDriver: true
+    }))
+
+    static disappearAnimInfo = new Lazy(() => ({
+        toValue: 0,
+        duration: 250,
+        easing: Easing.linear,
+        useNativeDriver: true
+    }))
 
     static getDerivedStateFromProps(nextProps: Props, currentState: State): State {
         if (nextProps.isBusy === true && currentState.isRendered === false) {
@@ -40,33 +55,23 @@ export class DataBusyOverlay extends React.Component<Props, State>{
     }
 
     componentDidUpdate(prevProps: Props) {
-            if (prevProps.isBusy !== this.props.isBusy) {
-                if (this.props.isBusy === true) {
-                    this.animation?.stop()
-                    this.animation = Animated.timing(this.state.appearAnimProgress, {
-                        toValue: 1,
-                        duration: 300,
-                        easing: Easing.linear,
-                        useNativeDriver: true
+        if (prevProps.isBusy !== this.props.isBusy) {
+            if (this.props.isBusy === true) {
+                this.animation?.stop()
+                this.animation = Animated.timing(this.state.appearAnimProgress, DataBusyOverlay.appearAnimInfo.get())
+                this.animation.start()
+            } else {
+                this.animation?.stop()
+                this.animation = Animated.timing(this.state.appearAnimProgress, DataBusyOverlay.disappearAnimInfo.get())
+                this.animation.start(() => {
+                    this.animation = null
+                    this.setState({
+                        ...this.state,
+                        isRendered: false
                     })
-                    this.animation.start()
-                } else {
-                    this.animation?.stop()
-                    this.animation = Animated.timing(this.state.appearAnimProgress, {
-                        toValue: 0,
-                        duration: 250,
-                        easing: Easing.linear,
-                        useNativeDriver: true
-                    })
-                    this.animation.start(() => {
-                        this.animation = null
-                        this.setState({
-                            ...this.state,
-                            isRendered: false
-                        })
-                    })
-                }
+                })
             }
+        }
 
     }
 

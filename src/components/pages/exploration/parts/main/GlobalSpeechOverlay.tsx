@@ -6,6 +6,7 @@ import { Sizes } from '@style/Sizes'
 import LinearGradient from 'react-native-linear-gradient'
 import { ZIndices } from '../zIndices'
 import Colors from '@style/Colors'
+import { Lazy } from '@utils/utils'
 
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
@@ -52,6 +53,20 @@ export class GlobalSpeechOverlay extends React.PureComponent<Props, State> {
         } else return null
     }
 
+    private static appearAnimConfig = new Lazy(() => ({
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true
+    }))
+
+    private static disappearAnimConfig = new Lazy(() => ({
+        toValue: 0,
+        duration: 500,
+        easing: Easing.in(Easing.cubic),
+        useNativeDriver: true
+    }))
+
+
     private currentAnimation: Animated.CompositeAnimation
 
     constructor(props: Props) {
@@ -69,23 +84,15 @@ export class GlobalSpeechOverlay extends React.PureComponent<Props, State> {
                 this.currentAnimation?.stop()
 
                 this.state.animatedProgress.setValue(0)
-                this.currentAnimation = Animated.timing(this.state.animatedProgress, {
-                    toValue: 1,
-                    duration: 400,
-                    useNativeDriver: true
-                })
+                this.currentAnimation = Animated.timing(this.state.animatedProgress, GlobalSpeechOverlay.appearAnimConfig.get())
                 this.currentAnimation.start()
 
 
             } else if (prevProps.isGlobalSpeechButtonPressed === true) {
                 //hide
                 this.currentAnimation?.stop()
-                this.currentAnimation = Animated.timing(this.state.animatedProgress, {
-                    toValue: 0,
-                    duration: 500,
-                    easing: Easing.in(Easing.cubic),
-                    useNativeDriver: true
-                })
+                this.currentAnimation = Animated.timing(this.state.animatedProgress, GlobalSpeechOverlay.disappearAnimConfig.get())
+                
                 this.currentAnimation.start(() => {
                     this.setState({
                         ...this.state,
@@ -113,7 +120,7 @@ export class GlobalSpeechOverlay extends React.PureComponent<Props, State> {
                         inputRange: [0, 1],
                         outputRange: [0, 0.25]
                     })
-                }}/>
+                }} />
             })
             }
 
@@ -137,7 +144,7 @@ export class GlobalSpeechOverlay extends React.PureComponent<Props, State> {
                 },
             }}
             >
-                <SpeechInputPanel/>
+                <SpeechInputPanel />
             </Animated.View>
         </View> : null
     }
