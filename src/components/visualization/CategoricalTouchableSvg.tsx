@@ -6,7 +6,7 @@ import { LongPressGestureHandler, LongPressGestureHandlerStateChangeEvent, State
 import Svg, { Rect, G } from "react-native-svg";
 import { getScaleStepLeft } from '@components/visualization/d3-utils';
 
-export interface CategoricalTouchableSvgProps {
+interface CategoricalTouchableSvgProps {
     chartContainerWidth: number,
     chartContainerHeight: number,
     chartArea: LayoutRectangle,
@@ -81,7 +81,7 @@ export const CategoricalTouchableSvg = React.memo((props: CategoricalTouchableSv
         } else if (ev.nativeEvent.state === State.ACTIVE) {
             props.onClickElement(props.scaleX.domain()[currentTouchedIndex])
             setCurrentTouchedIndex(null)
-        } else if (ev.nativeEvent.state === State.FAILED && isLongPressHolding === false) {
+        } else if ((ev.nativeEvent.state === State.FAILED && isLongPressHolding === false) || ev.nativeEvent.state === State.END) {
             setCurrentTouchedIndex(null)
         }
 
