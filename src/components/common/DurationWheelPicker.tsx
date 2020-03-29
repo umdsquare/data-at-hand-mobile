@@ -24,7 +24,7 @@ const pickerProps = {
     selectedItemTextFontFamily: undefined,
     itemTextFontFamily: undefined,
     style: styles.pickerStyle
-}
+} as any
 
 export const DurationWheelPicker = (props: { 
     durationSeconds: number 

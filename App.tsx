@@ -32,14 +32,16 @@ if (
 }
 
 setJSExceptionHandler((error, isFatal) => {
-  SystemLogger.instance.logVerboseToInteractionStateTransition(isFatal === true ? VerboseEventTypes.FatalError : VerboseEventTypes.NonFatalError, {
-    name: error.name,
-    message: error.message,
-    stack: error.stack
-  })
+  if (error) {
+    SystemLogger.instance.logVerboseToInteractionStateTransition(isFatal === true ? VerboseEventTypes.FatalError : VerboseEventTypes.NonFatalError, {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    })
+  }
 }, true)
 
-setNativeExceptionHandler((exceptionMessage)=>{
+setNativeExceptionHandler((exceptionMessage) => {
 
 })
 
@@ -73,7 +75,7 @@ class App extends React.Component {
         <PersistGate loading={null} persistor={persistor}>
           <SafeAreaProvider>
             <ThemeProvider theme={theme}>
-                <AppNavigator />
+              <AppNavigator />
             </ThemeProvider>
           </SafeAreaProvider>
         </PersistGate>
