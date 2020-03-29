@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Colors from '@style/Colors';
 import { Sizes } from '@style/Sizes';
@@ -82,15 +82,14 @@ const styles = StyleSheet.create({
         fontWeight: 'bold'
     },
 
-    iconContainerStyle: {
-        paddingLeft: Sizes.horizontalPadding,
-        paddingRight: 8,
-        alignItems: 'center',
-        justifyContent: 'center'
+    iconStyle: {
+        marginLeft: Sizes.horizontalPadding,
+        marginRight: 8,
     },
 
     chartAreaStyle: {
         padding: 0,
+        aspectRatio: 3
     },
 
     footerStyle: {
@@ -117,12 +116,12 @@ export interface TodayInfo {
     formatted: Array<{ text: string; type: 'unit' | 'value' }> | null;
 }
 
-function formatTodayValue(data: OverviewSourceRow, unitType: MeasureUnitType): TodayInfo {
+function formatTodayValue(dataSource: DataSourceType, todayData: number | [number, number] | null, unitType: MeasureUnitType): TodayInfo {
     const info = {
 
     } as TodayInfo
 
-    switch (data.source) {
+    switch (dataSource) {
         case DataSourceType.Weight:
             info.label = "Recently"
             break;
@@ -134,20 +133,20 @@ function formatTodayValue(data: OverviewSourceRow, unitType: MeasureUnitType): T
             break;
     }
 
-    switch (data.source) {
+    switch (dataSource) {
         case DataSourceType.StepCount:
-            info.formatted = data.today != null ? [
+            info.formatted = todayData != null ? [
                 {
-                    text: commaNumber(data.today),
+                    text: commaNumber(todayData as number),
                     type: 'value',
                 },
                 { text: ' steps', type: 'unit' },
             ] : null
             break;
         case DataSourceType.HeartRate:
-            info.formatted = data.today != null ? [
+            info.formatted = todayData != null ? [
                 {
-                    text: data.today.toString(),
+                    text: todayData.toString(),
                     type: 'value',
                 },
                 {
@@ -157,14 +156,14 @@ function formatTodayValue(data: OverviewSourceRow, unitType: MeasureUnitType): T
             ] : null
             break;
         case DataSourceType.Weight:
-            if (data.today) {
+            if (todayData) {
                 switch (unitType) {
                     case MeasureUnitType.Metric:
-                        info.formatted = [{ type: 'value', text: data.today.toFixed(1) }, { type: 'unit', text: ' kg' }]
+                        info.formatted = [{ type: 'value', text: (todayData as number).toFixed(1) }, { type: 'unit', text: ' kg' }]
                         break;
                     case MeasureUnitType.US:
                         const convert = require('convert-units')
-                        info.formatted = [{ type: 'value', text: convert(data.today).from('kg').to('lb').toFixed(1) }, { type: 'unit', text: ' lb' }]
+                        info.formatted = [{ type: 'value', text: convert(todayData).from('kg').to('lb').toFixed(1) }, { type: 'unit', text: ' lb' }]
                         break;
                 }
             } else {
@@ -172,11 +171,11 @@ function formatTodayValue(data: OverviewSourceRow, unitType: MeasureUnitType): T
             }
             break;
         case DataSourceType.HoursSlept:
-            if (data.today) {
-                var roundedSecs = data.today
+            if (todayData) {
+                var roundedSecs = todayData as number
                 info.formatted = []
-                if (data.today % 60 >= 30) {
-                    roundedSecs = data.today - (data.today % 60) + 60
+                if (roundedSecs % 60 >= 30) {
+                    roundedSecs = roundedSecs - (roundedSecs % 60) + 60
                 }
                 const hours = Math.floor(roundedSecs / 3600)
                 const minutes = Math.floor((roundedSecs % 3600) / 60)
@@ -194,10 +193,10 @@ function formatTodayValue(data: OverviewSourceRow, unitType: MeasureUnitType): T
             }
             break;
         case DataSourceType.SleepRange:
-            if (data.today) {
+            if (todayData) {
                 const pivot = startOfDay(new Date())
-                const actualBedTime = addSeconds(pivot, Math.round(data.today[0]))
-                const actualWakeTime = addSeconds(pivot, Math.round(data.today[1]))
+                const actualBedTime = addSeconds(pivot, Math.round((todayData as any)[0]))
+                const actualWakeTime = addSeconds(pivot, Math.round((todayData as any)[1]))
 
                 info.formatted = [
                     { type: 'value', text: format(actualBedTime, 'hh:mm ') },
@@ -349,40 +348,40 @@ export const DataSourceChartFrame = React.memo((props: {
 
 
     const spec = DataSourceManager.instance.getSpec(props.data.source)
-    const todayInfo = formatTodayValue(props.data, props.measureUnitType)
+
+
+    const todayInfo = useMemo(() => formatTodayValue(props.data.source, props.data.today, props.measureUnitType),
+        [props.data.source, props.data.today, props.measureUnitType])
 
     return <View style={props.flat === true ? styles.containerStyleFlat : styles.containerStyle}>
-        {props.showHeader !== false && <View style={styles.headerStyle}>
-            <View style={styles.headerClickRegionWrapperStyle}>
-                <TouchableOpacity onPress={onHeaderPress} disabled={props.onHeaderPressed == null} activeOpacity={0.7} style={styles.headerClickRegionStyle}>
-                    <View style={styles.iconContainerStyle}>
-                        <DataSourceIcon size={18} type={props.data.source} color={Colors.accent} />
-                    </View>
-                    <Text style={styles.headerTitleStyle}>{spec.name}</Text>
-                </TouchableOpacity>
-            </View>
+        {props.showHeader !== false ?
+            <View style={styles.headerStyle}>
+                <View style={styles.headerClickRegionWrapperStyle}>
+                    <TouchableOpacity onPress={onHeaderPress} disabled={props.onHeaderPressed == null} activeOpacity={0.7} style={styles.headerClickRegionStyle}>
+                        <DataSourceIcon style={styles.iconStyle} size={18} type={props.data.source} color={Colors.accent} />
+                        <Text style={styles.headerTitleStyle}>{spec.name}</Text>
+                    </TouchableOpacity>
+                </View>
 
-            {
-                props.showToday !== false && props.data.today != null ?
-                    <TouchableOpacity style={styles.todayButtonStyle}
-                        onPress={onTodayPress} disabled={props.onTodayPressed == null}><Text style={styles.headerDescriptionTextStyle}>
-                            <Text>{todayInfo.label + ": "}</Text>
-                            {
-                                todayInfo.formatted != null ? todayInfo.formatted.map((chunk, index) =>
-                                    <Text key={index} style={chunk.type === 'unit' ? styles.todayUnitStyle : styles.todayValueStyle}>{chunk.text}</Text>)
-                                    :
-                                    (<Text style={styles.todayValueStyle}>no value</Text>)
-                            }
-                        </Text></TouchableOpacity> : <></>
-            }
-        </View>}
-        <View style={styles.chartAreaStyle}>
-            <SizeWatcher containerStyle={{ aspectRatio: 3 }} onSizeChange={onSizeChanged}>
                 {
-                    getChartView(spec.type, props.data, props.filter, props.highlightedDays, chartContainerWidth, chartContainerHeight, props.measureUnitType)
+                    props.showToday !== false && props.data.today != null ?
+                        <TouchableOpacity style={styles.todayButtonStyle}
+                            onPress={onTodayPress} disabled={props.onTodayPressed == null}><Text style={styles.headerDescriptionTextStyle}>
+                                <Text>{todayInfo.label + ": "}</Text>
+                                {
+                                    todayInfo.formatted != null ? todayInfo.formatted.map((chunk, index) =>
+                                        <Text key={index} style={chunk.type === 'unit' ? styles.todayUnitStyle : styles.todayValueStyle}>{chunk.text}</Text>)
+                                        :
+                                        (<Text style={styles.todayValueStyle}>no value</Text>)
+                                }
+                            </Text></TouchableOpacity> : <></>
                 }
-            </SizeWatcher>
-        </View>
+            </View> : null}
+        <SizeWatcher containerStyle={styles.chartAreaStyle} onSizeChange={onSizeChanged}>
+            {
+                getChartView(spec.type, props.data, props.filter, props.highlightedDays, chartContainerWidth, chartContainerHeight, props.measureUnitType)
+            }
+        </SizeWatcher>
         <View style={styles.footerStyle}>{
             props.data.statistics && props.data.statistics.map(stat => {
                 return <Text key={stat.type} style={styles.statValueStyle}>

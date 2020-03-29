@@ -101,7 +101,7 @@ class BrowseRangeMainPanel extends React.PureComponent<Props, State>{
 
 
     componentDidUpdate(prevProps: Props) {
-        if(prevProps.highlightFilter !== this.props.highlightFilter){
+        if (prevProps.highlightFilter !== this.props.highlightFilter) {
             LayoutAnimation.configureNext(
                 LayoutAnimation.create(
                     500, LayoutAnimation.Types.easeInEaseOut, "opacity")
@@ -129,15 +129,15 @@ class BrowseRangeMainPanel extends React.PureComponent<Props, State>{
         this.props.dispatchExplorationAction(setHighlightFilter(InteractionType.TouchOnly, newFilter))
     }
 
-    private getItemLayout = (_, index) => {
+    private getItemLayout = (_: any, index: number) => {
         const height = (this.props.source === DataSourceType.HoursSlept || this.props.source === DataSourceType.SleepRange) ? listItemHeightTall : listItemHeightNormal
         return { length: height, offset: height * index, index }
     }
 
-    private renderItem = (entry) => <Item date={entry.item["numberedDate"]}
-        today={this.state.today} item={entry.item} type={this.props.source}
+    private renderItem = ({ item }: { item: any }) => <Item date={item["numberedDate"]}
+        today={this.state.today} item={item} type={this.props.source}
         unitType={this.props.measureUnitType}
-        isHighlighted={entry.item["numberedDate"] === this.props.highlightedDate}
+        isHighlighted={item["numberedDate"] === this.props.highlightedDate}
         onClick={this.onListElementClick}
         onLongPressIn={this.onListElementLongPressIn}
         onLongPressOut={this.onListElementLongPressOut}
@@ -149,14 +149,14 @@ class BrowseRangeMainPanel extends React.PureComponent<Props, State>{
             const dataList: Array<any> = (this.props.source === DataSourceType.Weight ? sourceRangedData.data.logs : sourceRangedData.data).slice(0)
             dataList.sort((a: any, b: any) => b["numberedDate"] - a["numberedDate"])
 
-            return <View style={StyleTemplates.fillFlex}>
+            return <>
                 {
-                    this.props.highlightFilter != null? <HighlightFilterPanel 
-                    filter={this.props.highlightFilter}
-                    highlightedDays={this.props.data.highlightedDays}
-                    onDiscardFilterPressed={this.onDiscardFilter}
-                    onFilterModified={this.onFilterModified}
-                    />:<></>
+                    this.props.highlightFilter != null ? <HighlightFilterPanel
+                        filter={this.props.highlightFilter}
+                        highlightedDays={this.props.data.highlightedDays}
+                        onDiscardFilterPressed={this.onDiscardFilter}
+                        onFilterModified={this.onFilterModified}
+                    /> : null
                 }
                 <DataSourceChartFrame data={sourceRangedData}
                     filter={this.props.highlightFilter}
@@ -179,10 +179,8 @@ class BrowseRangeMainPanel extends React.PureComponent<Props, State>{
                         <Text style={styles.noItemIndicatorStyle}>No data during this range.</Text>
                     </View>
                 }
-            </View>
-        } else return <View style={StyleTemplates.fillFlex}>
-            <ActivityIndicator />
-        </View>
+            </>
+        } else return <ActivityIndicator />
     }
 }
 
@@ -229,16 +227,19 @@ const Item = React.memo((prop: {
     type: DataSourceType,
     unitType: MeasureUnitType,
     isHighlighted: boolean,
-    onClick: (date) => void,
-    onLongPressIn: (date, touchingElement: TouchingElementInfo) => void,
-    onLongPressOut: (date) => void
+    onClick: (date: number) => void,
+    onLongPressIn: (date: number, touchingElement: TouchingElementInfo) => void,
+    onLongPressOut: (date: number) => void
 }) => {
-    var dateString
-    if (prop.date === prop.today) {
-        dateString = "Today"
-    } else if (prop.today - prop.date === 1) {
-        dateString = 'Yesterday'
-    } else dateString = format(DateTimeHelper.toDate(prop.date), "MMM dd, eee")
+    const dateString = useMemo(() => {
+        var dateString
+        if (prop.date === prop.today) {
+            dateString = "Today"
+        } else if (prop.today - prop.date === 1) {
+            dateString = 'Yesterday'
+        } else dateString = format(DateTimeHelper.toDate(prop.date), "MMM dd, eee")
+        return dateString
+    }, [prop.date, prop.today])
 
     const listItemStyle = useMemo(() => {
         if (prop.type === DataSourceType.SleepRange || prop.type === DataSourceType.HoursSlept) return { ...styles.listItemStyle, height: listItemHeightTall }

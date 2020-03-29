@@ -159,7 +159,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
 
     render() {
         if (this.props.data != null) {
-            return <View style={StyleTemplates.fillFlex}>
+            return <>
                 {
                     this.props.highlightFilter != null ? <HighlightFilterPanel
                         filter={this.props.highlightFilter}
@@ -179,7 +179,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
                     onScroll={this.onScroll}
                     refreshing={this.state.refreshingSince != null}
                     onRefresh={this.onRefresh}
-                /></View>
+                /></>
         } else return <></>
     }
 }
