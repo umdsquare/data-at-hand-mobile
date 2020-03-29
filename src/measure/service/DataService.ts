@@ -14,9 +14,9 @@ export interface ServiceActivationResult {
   error?: any
 }
 
-export enum ServiceApiErrorType{
-  CredentialError="credential",
-  QuotaLimitReached="quota-limit",
+export enum ServiceApiErrorType {
+  CredentialError = "credential",
+  QuotaLimitReached = "quota-limit",
 }
 
 export abstract class DataService {
@@ -60,6 +60,10 @@ export abstract class DataService {
       return this.fetchDataImpl(dataSource, level, start, Math.min(end, today))
     }*/
     return this.fetchDataImpl(dataSource, start, end, includeStatistics, includeToday)
+  }
+
+  async refreshDataToReflectRecentInfo(): Promise<void> {
+    return
   }
 
   abstract getPreferredValueRange(dataSource: DataSourceType): Promise<[number, number]>
@@ -144,7 +148,7 @@ export abstract class DataService {
   abstract isQuotaLimited: boolean
   abstract getLeftQuota(): Promise<number>
   abstract getQuotaResetEpoch(): Promise<number>
-  
+
   protected abstract exportToCsv(): Promise<Array<{ name: string, csv: string }>>
 
   async exportData(): Promise<boolean> {

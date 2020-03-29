@@ -2,11 +2,10 @@ import { createGoToBrowseRangeAction, InteractionType, memoUIStatus, Exploration
 import React from "react";
 import { connect } from "react-redux";
 import { ReduxAppState } from "@state/types";
-import { FlatList, View, LayoutAnimation } from "react-native";
+import { FlatList, View, LayoutAnimation, NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { DataSourceChartFrame } from "@components/exploration/DataSourceChartFrame";
-import { OverviewData } from "@core/exploration/data/types";
+import { OverviewData, OverviewSourceRow } from "@core/exploration/data/types";
 import { MeasureUnitType, DataSourceType } from "@measure/DataSourceSpec";
-import { Dispatch } from "redux";
 import { Sizes } from "@style/Sizes";
 import { DateTimeHelper } from "@utils/time";
 import { inferIntraDayDataSourceType, HighlightFilter } from "@core/exploration/types";
@@ -14,6 +13,11 @@ import { DataServiceManager } from "@measure/DataServiceManager";
 import { HighlightFilterPanel } from "@components/exploration/HighlightFilterPanel";
 import { DataSourceManager } from "@measure/DataSourceManager";
 import { StyleTemplates } from "@style/Styles";
+import { startLoadingForInfo } from "@state/exploration/data/reducers";
+import { ThunkDispatch } from "redux-thunk";
+import { DataService } from "@measure/service/DataService";
+
+const MIN_REFRESH_TIME_FOR_PERCEPTION = 1000
 
 const separatorStyle = { height: Sizes.verticalPadding }
 
@@ -23,18 +27,29 @@ interface Props {
     measureUnitType?: MeasureUnitType,
     overviewScrollY?: any,
     highlightFilter?: HighlightFilter,
-    getToday?: () => Date,
-    dispatchAction?: (action: ExplorationAction) => void
+    selectedService?: DataService,
+    dispatchAction?: (action: ExplorationAction) => void,
+    dispatchDataReload?: () => void,
 }
 
-class OverviewMainPanel extends React.PureComponent<Props> {
+interface State {
+    refreshingSince?: number | null
+}
+
+class OverviewMainPanel extends React.PureComponent<Props, State> {
 
     private _listRef = React.createRef<FlatList<any>>()
 
     currentListScrollOffset: number
 
-    constructor(props) {
+    currentTimeoutForRefreshingFlag: NodeJS.Timeout | undefined = undefined
+
+    constructor(props: Props) {
         super(props)
+
+        this.state = {
+            refreshingSince: null
+        }
     }
 
     componentDidMount() {
@@ -58,6 +73,31 @@ class OverviewMainPanel extends React.PureComponent<Props> {
                     animated: true,
                     index: this.props.data.sourceDataList.findIndex(d => d.source === this.props.highlightFilter.dataSource)
                 })
+            }
+        }
+
+        if (prevProps.isLoading === true && this.props.isLoading === false && this.state.refreshingSince != null) {
+
+            if (this.currentTimeoutForRefreshingFlag) {
+                clearTimeout(this.currentTimeoutForRefreshingFlag)
+            }
+
+            const minLoadingTimeLeft = Math.max(MIN_REFRESH_TIME_FOR_PERCEPTION, Date.now() - this.state.refreshingSince)
+            if (minLoadingTimeLeft > 0) {
+                this.currentTimeoutForRefreshingFlag = setTimeout(() => {
+                    this.setState({
+                        ...this.state,
+                        refreshingSince: null
+                    })
+                    console.log("finished refreshing.")
+                }, minLoadingTimeLeft)
+            } else {
+                this.setState({
+                    ...this.state,
+                    refreshingSince: null
+                })
+
+                console.log("finished refreshing.")
             }
         }
     }
@@ -86,15 +126,15 @@ class OverviewMainPanel extends React.PureComponent<Props> {
 
     private readonly onTodayPressed = (source: DataSourceType) => {
         this.props.dispatchAction(createGoToBrowseDayAction(InteractionType.TouchOnly,
-            inferIntraDayDataSourceType(source), DateTimeHelper.toNumberedDateFromDate(this.props.getToday())))
+            inferIntraDayDataSourceType(source), DateTimeHelper.toNumberedDateFromDate(this.props.selectedService.getToday())))
     }
 
-    private readonly onScroll = (event) => {
+    private readonly onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const scrollY = event.nativeEvent.contentOffset.y
         this.currentListScrollOffset = scrollY
     }
 
-    private readonly renderItem = ({ item }) => <DataSourceChartFrame key={item.source.toString()}
+    private readonly renderItem = ({ item }: { item: OverviewSourceRow }) => <DataSourceChartFrame key={item.source.toString()}
         data={item}
         filter={this.props.highlightFilter}
         highlightedDays={this.props.data.highlightedDays}
@@ -103,7 +143,19 @@ class OverviewMainPanel extends React.PureComponent<Props> {
         onTodayPressed={inferIntraDayDataSourceType(item.source) != null ? this.onTodayPressed : null}
     />
 
-    private readonly keyExtractor = (item) => item.source
+    private readonly keyExtractor = (item: OverviewSourceRow) => item.source
+
+    private readonly onRefresh = async () => {
+        console.log("start refresh")
+        this.setState({
+            ...this.state,
+            refreshingSince: Date.now()
+        })
+
+        await this.props.selectedService.refreshDataToReflectRecentInfo()
+
+        this.props.dispatchDataReload()
+    }
 
     render() {
         if (this.props.data != null) {
@@ -125,6 +177,8 @@ class OverviewMainPanel extends React.PureComponent<Props> {
                     ItemSeparatorComponent={this.Separator}
                     renderItem={this.renderItem}
                     onScroll={this.onScroll}
+                    refreshing={this.state.refreshingSince != null}
+                    onRefresh={this.onRefresh}
                 /></View>
         } else return <></>
     }
@@ -133,6 +187,8 @@ class OverviewMainPanel extends React.PureComponent<Props> {
 
 function mapStateToProps(state: ReduxAppState, ownProps: Props): Props {
 
+    const selectedService = DataServiceManager.instance.getServiceByKey(state.settingsState.serviceKey)
+
     return {
         ...ownProps,
         isLoading: state.explorationDataState.isBusy,
@@ -140,14 +196,15 @@ function mapStateToProps(state: ReduxAppState, ownProps: Props): Props {
         measureUnitType: state.settingsState.unit,
         overviewScrollY: state.explorationState.uiStatus.overviewScrollY,
         highlightFilter: state.explorationState.info.highlightFilter,
-        getToday: DataServiceManager.instance.getServiceByKey(state.settingsState.serviceKey).getToday
+        selectedService,
     }
 }
 
-function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props {
+function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Props): Props {
     return {
         ...ownProps,
-        dispatchAction: (action) => dispatch(action)
+        dispatchAction: (action) => dispatch(action),
+        dispatchDataReload: () => dispatch(startLoadingForInfo(undefined, true))
     }
 }
 

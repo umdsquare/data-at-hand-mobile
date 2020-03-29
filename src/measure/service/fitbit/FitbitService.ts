@@ -85,7 +85,7 @@ export default class FitbitService extends DataService {
   }
 
 
-  async fetchFilteredDates(filter: HighlightFilter, start: number, end: number): Promise<{[key:number]:boolean|undefined}> {
+  async fetchFilteredDates(filter: HighlightFilter, start: number, end: number): Promise<{ [key: number]: boolean | undefined }> {
     let tableName
     let valueColumnName = 'value'
     let selectClause = 'SELECT numberedDate'
@@ -133,13 +133,13 @@ export default class FitbitService extends DataService {
         break;
     }
 
-    const query = `${selectClause} from ${tableName} where ${whereClause!=null? `${whereClause} AND ` : ""} numberedDate BETWEEN ${start} AND ${end}`
+    const query = `${selectClause} from ${tableName} where ${whereClause != null ? `${whereClause} AND ` : ""} numberedDate BETWEEN ${start} AND ${end}`
     const queryResult: Array<any> = await this.core.fitbitLocalDbManager.selectQuery(query)
-    if(queryResult.length > 0){
+    if (queryResult.length > 0) {
       const result: any = {}
       queryResult.forEach(v => result[v["numberedDate"]] = true)
       return result
-    }else return null
+    } else return null
   }
 
   protected async fetchDataImpl(
@@ -283,6 +283,15 @@ export default class FitbitService extends DataService {
     await this.core.fitbitLocalDbManager.deleteDatabase();
   }
 
+  async refreshDataToReflectRecentInfo(): Promise<void> {
+    const now = DateTimeHelper.toNumberedDateFromDate(this.core.getToday());
+
+    for (const measure of this.preloadableMeasures) {
+      await measure.cacheServerData(now);
+    }
+
+  }
+
 
   async activateInSystem(progressHandler: (progressInfo: {
     progress: number; message: string;
@@ -369,20 +378,20 @@ export default class FitbitService extends DataService {
     return this.core.fitbitLocalDbManager.exportToCsv()
   }
 
-  get getToday(){ 
+  get getToday() {
     return this.core.getToday
   }
 
-  get isQuotaLimited(): boolean{
+  get isQuotaLimited(): boolean {
     return this.core.isQuotaLimited
   }
 
-  getLeftQuota(): Promise<number>{
+  getLeftQuota(): Promise<number> {
     return this.core.getLeftQuota()
   }
 
-  getQuotaResetEpoch(): Promise<number>{
+  getQuotaResetEpoch(): Promise<number> {
     return this.core.getQuotaResetEpoch()
   }
-  
+
 }

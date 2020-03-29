@@ -185,7 +185,7 @@ class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
             height: this.state.chartContainerHeight - xAxisHeight - topPadding
         }
 
-        const indices = []
+        const indices: Array<number> = []
         this.props.data.data.forEach((d, i) => indices.push(i))
 
         const scaleX = scaleBand<number>().domain(indices).range([0, chartArea.width]).padding(0.55).paddingOuter(0.25)

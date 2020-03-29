@@ -6,7 +6,7 @@ import {
   FinishLoadingData,
 } from './actions';
 import { Dispatch } from 'redux';
-import uuid from 'uuid/v4';
+import uuid from 'uuid';
 import { explorationDataResolver } from '@core/exploration/data/ExplorationDataResolver';
 
 export interface ExplorationDataState {
@@ -17,8 +17,6 @@ export interface ExplorationDataState {
   data?: any;
   ongoingTaskId?: string;
 }
-
-uuid
 
 const INITIAL_STATE = {
   isBusy: false,
@@ -58,12 +56,13 @@ export const explorationDataStateReducer = (
   }
 };
 
-export function startLoadingForInfo(explorationInfo: ExplorationInfo) {
+export function startLoadingForInfo(info?: ExplorationInfo, force?: boolean) {
   return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
-    const taskId = uuid();
+    const taskId = uuid.v4();
     //set to loading status
 
     var currentAppState = getState();
+    const explorationInfo = info || currentAppState.explorationState.info
 
     dispatch({
       type: ExplorationDataActionType.StartLoadingDataAction,
@@ -83,8 +82,8 @@ export function startLoadingForInfo(explorationInfo: ExplorationInfo) {
         explorationInfo,
         currentAppState.settingsState.serviceKey,
         currentAppState.explorationDataState.info,
-        currentAppState.explorationDataState.serviceKey,
-        currentAppState.explorationDataState.data,
+        force !==true ? currentAppState.explorationDataState.serviceKey : undefined,
+        force !==true ? currentAppState.explorationDataState.data : undefined,
       );
 
       currentAppState = getState();

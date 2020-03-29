@@ -113,7 +113,7 @@
     "@types/react-redux": "^7.1.7",
     "@types/react-test-renderer": "16.9.2",
     "@types/string-format": "^2.0.0",
-    "@types/uuid": "^2.0.30",
+    "@types/uuid": "^2.0.29",
     "babel-jest": "^25.2.3",
     "babel-plugin-module-resolver": "^4.0.0",
     "babel-plugin-transform-remove-console": "^6.9.4",
