@@ -23,7 +23,7 @@ const lightTextColor = "#8b8b8b"
 const headerHeight = 60
 
 const containerStyle = {
-    backgroundColor: 'white',
+    backgroundColor: Colors.WHITE,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 8,
     shadowColor: 'black',

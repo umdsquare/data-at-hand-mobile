@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
 
     },
     discardButtonTextStyle: {
-        color: 'white',
+        color: Colors.WHITE,
         fontSize: Sizes.smallFontSize,
         fontWeight: '500',
     },
@@ -142,12 +142,12 @@ const styles = StyleSheet.create({
     },
 
     formButtonLabelStyle: {
-        color: 'white',
+        color: Colors.WHITE,
         fontSize: Sizes.smallFontSize
     },
 
     numDaysLabelStyle: {
-        color: 'white',
+        color: Colors.WHITE,
         fontWeight: 'bold',
         flex: 1,
         textAlign: 'right'

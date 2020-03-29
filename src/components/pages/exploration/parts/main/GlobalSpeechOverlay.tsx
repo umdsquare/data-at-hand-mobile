@@ -5,6 +5,7 @@ import { SpeechInputPanel } from '@components/exploration/SpeechInputPanel'
 import { Sizes } from '@style/Sizes'
 import LinearGradient from 'react-native-linear-gradient'
 import { ZIndices } from '../zIndices'
+import Colors from '@style/Colors'
 
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
@@ -17,7 +18,7 @@ const styles = StyleSheet.create({
         elevation: 8
     },
     popupStyle: {
-        backgroundColor: 'white',
+        backgroundColor: Colors.WHITE,
         marginLeft: Sizes.horizontalPadding * 2,
         marginRight: Sizes.horizontalPadding * 2,
         borderRadius: 8,

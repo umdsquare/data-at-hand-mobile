@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
         marginTop: 16,
         fontSize: Sizes.tinyFontSize,
         fontWeight: '500',
-        color: 'white'
+        color: Colors.WHITE
     }
 })
 
@@ -41,7 +41,7 @@ export const InitialLoadingIndicator = (props: {
 }) => {
     return <View style={styles.container}>
         <View style={styles.popup}>
-            <Spinner type="9CubeGrid" color={"white"} />
+            <Spinner type="9CubeGrid" color={Colors.WHITE} />
             {<Text style={styles.message}>{props.loadingMessage || "Preparing..."}</Text>}
         </View>
     </View>

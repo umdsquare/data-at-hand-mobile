@@ -24,7 +24,7 @@ module.exports = function (api) {
   api.cache(true);
   if (process.env.NODE_ENV === 'production' || process.env.BABEL_ENV === 'production') {
     commonConfig.plugins = commonConfig.plugins.concat([
-      //"transform-remove-console"
+      "transform-remove-console"
     ])
   }
 

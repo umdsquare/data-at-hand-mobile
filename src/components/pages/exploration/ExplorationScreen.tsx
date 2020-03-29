@@ -82,12 +82,12 @@ const styles = StyleSheet.create({
 
     historyButtonTitleStyle: {
         fontSize: Sizes.smallFontSize,
-        color: 'white',
+        color: Colors.WHITE,
         fontWeight: 'bold'
     }
 })
 
-const undoIconStyle = <SvgIcon type={SvgIconType.Reset} size={20} color={'white'} />
+const undoIconStyle = <SvgIcon type={SvgIconType.Reset} size={20} color={Colors.WHITE} />
 
 
 export interface ExplorationProps {

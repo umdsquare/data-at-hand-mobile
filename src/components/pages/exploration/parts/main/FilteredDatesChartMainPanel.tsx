@@ -42,7 +42,7 @@ interface State {
 
 class FilteredDatesChartMainPanel extends React.Component<Props, State> {
 
-    private onSizeChange = (width, height) => {
+    private onSizeChange = (width: number, height: number) => {
         this.setState({
             ...this.state,
             containerWidth: width,
@@ -50,7 +50,7 @@ class FilteredDatesChartMainPanel extends React.Component<Props, State> {
         })
     }
 
-    constructor(props) {
+    constructor(props: Props) {
         super(props)
 
         this.state = {
@@ -186,7 +186,7 @@ class FilteredDatesChartMainPanel extends React.Component<Props, State> {
                                             key={datum.numberedDate}
                                             x={scaleX(datum.numberedDate) + (scaleX.bandwidth() * 0.5)}
                                             y={scaleY(converter(datum.value))}
-                                            fill="white"
+                                            fill={Colors.WHITE}
                                             stroke={Colors.chartElementDefault}
                                             strokeWidth={2.5}
                                             r={Math.min(scaleX.bandwidth(), 6)}

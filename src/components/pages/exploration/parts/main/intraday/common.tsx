@@ -6,7 +6,7 @@ import { Sizes } from '@style/Sizes'
 import Colors from '@style/Colors'
 
 export const commonIntraDayPanelStyles = StyleSheet.create({
-    containerStyle: { ...StyleTemplates.fillFlex, backgroundColor: 'white' },
+    containerStyle: { ...StyleTemplates.fillFlex, backgroundColor: Colors.WHITE },
     summaryTextGlobalStyle: { textAlign: 'center', fontSize: Sizes.BigFontSize },
     summaryTextTitleStyle: { marginRight: 20, fontSize: Sizes.normalFontSize, color: Colors.textGray },
     summaryTextUnitStyle: { fontSize: Sizes.smallFontSize, color: Colors.textColorLight },

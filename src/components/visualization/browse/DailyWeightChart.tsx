@@ -90,7 +90,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
                         y={scaleY(convert(d.value))}
                         r={Math.min(scaleX.bandwidth(), 8) / 2}
                         strokeWidth={2}
-                        fill='white'
+                        fill={Colors.WHITE}
                         stroke={getChartElementColor(shouldHighlightElements, prop.highlightedDays? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
                         opacity={0.62}
                     />

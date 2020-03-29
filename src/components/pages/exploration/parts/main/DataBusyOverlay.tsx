@@ -2,8 +2,9 @@ import React from 'react';
 import { StyleTemplates } from '@style/Styles';
 import { ViewStyle, Animated, Easing} from 'react-native';
 import { ZIndices } from '../zIndices';
+import Colors from '@style/Colors';
 
-const styleBase = { ...StyleTemplates.fitParent, backgroundColor: 'white', zIndex: ZIndices.dataBusyOverlay, elevation: 4 } as ViewStyle
+const styleBase = { ...StyleTemplates.fitParent, backgroundColor: Colors.WHITE, zIndex: ZIndices.dataBusyOverlay, elevation: 4 } as ViewStyle
 
 interface Props {
     isBusy: boolean

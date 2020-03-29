@@ -15,7 +15,7 @@ const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep
 
 const calendarTheme: CalendarTheme = {
     selectedDayBackgroundColor: Colors.accent,
-    selectedDayTextColor: 'white',
+    selectedDayTextColor: Colors.WHITE,
     arrowColor: Colors.textColorLight,
     todayTextColor: Colors.today,
     textDayFontSize: 13,

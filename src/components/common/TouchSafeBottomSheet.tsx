@@ -4,6 +4,7 @@ import { StyleTemplates } from '@style/Styles';
 import { SafeAreaConsumer } from 'react-native-safe-area-context';
 import { TapGestureHandler, TapGestureHandlerStateChangeEvent, State as GestureState } from 'react-native-gesture-handler';
 import { ZIndices } from '../pages/exploration/parts/zIndices';
+import Colors from '@style/Colors';
 
 const styles = StyleSheet.create({
     containerStyle: {
@@ -20,7 +21,7 @@ const styles = StyleSheet.create({
     },
 
     panelStyle: {
-        backgroundColor: 'white',
+        backgroundColor: Colors.WHITE,
         alignSelf: 'stretch',
         borderTopLeftRadius: 18,
         borderTopRightRadius: 18,
@@ -42,7 +43,7 @@ export class TouchSafeBottomSheet extends React.PureComponent<Props, State> {
 
     private animation: Animated.CompositeAnimation | null = null
 
-    constructor(props) {
+    constructor(props: Props) {
         super(props)
 
         this.state = {
@@ -68,7 +69,7 @@ export class TouchSafeBottomSheet extends React.PureComponent<Props, State> {
 
     public close() {
         this.animation?.stop()
-        
+
         this.animation = Animated.timing(this.appearProgress, {
             toValue: 0,
             duration: 400,

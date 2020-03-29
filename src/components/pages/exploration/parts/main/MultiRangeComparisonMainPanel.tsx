@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper'
 import { ParameterType, TouchingElementInfo, TouchingElementValueType } from '@core/exploration/types'
-import { ReduxAppState } from '@state/types'
+import { ReduxAppState, ActionTypeBase } from '@state/types'
 import { RangeAggregatedComparisonData, IAggregatedRangeValue, IAggregatedValue } from '@core/exploration/data/types'
 import { DataSourceType, MeasureUnitType } from '@measure/DataSourceSpec'
 import { Dispatch } from 'redux'
@@ -42,7 +42,7 @@ const rightPadding = 20
 const styles = StyleSheet.create({
     containerStyle: {
         ...StyleTemplates.fillFlex,
-        backgroundColor: 'white'
+        backgroundColor: Colors.WHITE
     },
     segmentedControlContainer: {
         margin: Sizes.horizontalPadding,
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     androidButtonGroupTextStyle: {
         fontSize: Sizes.smallFontSize,
     },
-    androidButtonGroupSelectedButtonStyle: { backgroundColor: "white" },
+    androidButtonGroupSelectedButtonStyle: { backgroundColor: Colors.WHITE },
     androidButtonGroupSelectedTextStyle: { color: Colors.textColorDark, fontWeight: '700' },
     androidButtonGroupButtonStyle: { backgroundColor: "#76768025" },
 
@@ -69,7 +69,7 @@ interface Props {
     source?: DataSourceType,
     sumSupported?: boolean,
     measureUnitType?: MeasureUnitType,
-    dispatchExplorationAction?: (ExplorationAction) => void,
+    dispatchExplorationAction?: (explorationAction: ActionTypeBase) => void,
 }
 
 interface State {
@@ -80,7 +80,7 @@ interface State {
 
 class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
 
-    constructor(props) {
+    constructor(props: Props) {
         super(props)
 
         this.state = {

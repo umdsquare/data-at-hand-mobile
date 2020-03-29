@@ -23,7 +23,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@components/Routes';
 import { SpeechContextHelper } from '@core/speech/nlp/context';
 
-const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={'white'} />
+const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={Colors.WHITE} />
 
 const styles = StyleSheet.create({
     titleBarStyle: {

@@ -5,6 +5,7 @@ import { SizeWatcher } from '../visualization/SizeWatcher'
 import LinearGradient from 'react-native-linear-gradient'
 import { StyleTemplates } from '@style/Styles'
 import { Platform } from 'react-native'
+import Colors from '@style/Colors'
 
 interface State {
     swipeDirection: "left" | "right"
@@ -80,7 +81,7 @@ export class SwipedFeedback extends React.PureComponent<any, State>{
                 ]
             } as any}>
                 {this.state.feedbackShowing && <LinearGradient
-                    colors={this.state.swipeDirection === 'left' ? ['transparent', "white"] : ["white", "transparent"]}
+                    colors={this.state.swipeDirection === 'left' ? ['transparent', Colors.WHITE] : [Colors.WHITE, "transparent"]}
                     style={StyleTemplates.fitParent}
                     start={{ x: this.state.swipeDirection === 'left' ? 0 : 0.7, y: 0 }}
                     end={{ x: this.state.swipeDirection === 'left' ? 0.3 : 1, y: 0 }} />}

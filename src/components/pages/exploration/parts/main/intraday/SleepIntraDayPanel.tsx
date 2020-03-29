@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
 
 const stageNameSpacing = 16
 
-const xTickFormat = (diffSeconds) => {
+const xTickFormat = (diffSeconds: number) => {
 
     if (diffSeconds < 0) {
         diffSeconds = 24 * 3600 + diffSeconds
@@ -163,20 +163,20 @@ export const SleepIntraDayPanel = () => {
                         }
                     </G>
                     <G x={chartArea.x} y={chartArea.y + chartArea.height}>
-                        <Line x1={0} x2={chartArea.width} y={0} stroke={'white'} strokeWidth={0.5} />
+                        <Line x1={0} x2={chartArea.width} y={0} stroke={Colors.WHITE} strokeWidth={0.5} />
 
                         {
                             ticks.map(t => t * 3600).map((tick, i) => {
                                 return <G key={tick.toString()} x={scaleX(tick)}>
-                                    <Line x={0} y1={0} y2={-5} stroke={'white'} />
+                                    <Line x={0} y1={0} y2={-5} stroke={Colors.WHITE} />
                                     {i === Math.floor(ticks.length / 2) && ticks.length > 3 &&
-                                        <SvgText textAnchor="middle" y={Sizes.horizontalPadding} fill={'white'}>{xTickFormat(tick)}</SvgText>}
+                                        <SvgText textAnchor="middle" y={Sizes.horizontalPadding} fill={Colors.WHITE}>{xTickFormat(tick)}</SvgText>}
                                 </G>
                             })
                         }
 
-                        <SvgText textAnchor="start" y={Sizes.horizontalPadding} fill={'white'}>{xTickFormat(data.bedTimeDiffSeconds)}</SvgText>
-                        <SvgText textAnchor="end" x={scaleX(data.wakeTimeDiffSeconds)} y={Sizes.horizontalPadding} fill={'white'}>{xTickFormat(data.wakeTimeDiffSeconds)}</SvgText>
+                        <SvgText textAnchor="start" y={Sizes.horizontalPadding} fill={Colors.WHITE}>{xTickFormat(data.bedTimeDiffSeconds)}</SvgText>
+                        <SvgText textAnchor="end" x={scaleX(data.wakeTimeDiffSeconds)} y={Sizes.horizontalPadding} fill={Colors.WHITE}>{xTickFormat(data.wakeTimeDiffSeconds)}</SvgText>
                     </G>
 
                 </Svg>

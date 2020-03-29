@@ -26,7 +26,7 @@ const titleStyleBase = {
 } as TextStyle
 
 const valueStyleBase = {
-    color: 'white',
+    color: Colors.WHITE,
     fontSize: Sizes.normalFontSize,
     fontWeight: '500',
     marginLeft: 4,
@@ -165,7 +165,7 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
                         }}>
                             {
                                 prop.IconComponent ? <prop.IconComponent
-                                    {...{ color: prop.isLightMode === true ? Colors.textGray : 'white', size: 20 }}
+                                    {...{ color: prop.isLightMode === true ? Colors.textGray : Colors.WHITE, size: 20 }}
                                     {...(prop.iconProps && prop.iconProps(prop.values.indexOf(prop.value)))} /> : null
                             }
                             <Text style={prop.isLightMode === true ? styles.valueStyelLight : styles.valueStyle}>{prop.value}</Text>

@@ -187,11 +187,11 @@ export class SpeechEventNotificationOverlay extends React.PureComponent<any, Sta
                 }>
                     <SvgIcon type={this.state.currentEvent.type !== NLUResultType.Fail ?
                         SvgIconType.Check : SvgIconType.QuestionMark}
-                        color={'white'} size={this.state.currentEvent.type !== NLUResultType.Fail ? 34 : 28} />
+                        color={Colors.WHITE} size={this.state.currentEvent.type !== NLUResultType.Fail ? 34 : 28} />
                 </Animated.View>
 
 
-                <Text style={{ marginLeft: 8, color: 'white', fontSize: Sizes.normalFontSize }}>{
+                <Text style={{ marginLeft: 8, color: Colors.WHITE, fontSize: Sizes.normalFontSize }}>{
                     branchByType(this.state.currentEvent!.type, "Got it.", "Got it, but no effect.", "Unapplicable command for now.", "Sorry, I couldn\'t understand.")
                 }</Text>
             </AnimatedLinearGradient> : null}

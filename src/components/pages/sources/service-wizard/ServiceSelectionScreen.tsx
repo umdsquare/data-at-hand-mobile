@@ -28,7 +28,7 @@ interface State {
 
 class ServiceSelectionScreen extends React.Component<Prop, State>{
 
-    constructor(props) {
+    constructor(props: Prop) {
         super(props)
 
         this.state = {
@@ -170,13 +170,13 @@ const ServiceElement = (props: ServiceElementProps) => {
                     fontSize: 36,
                     alignContent: 'center',
                     fontWeight: '600',
-                    color: "white"
+                    color: Colors.WHITE
                 }}>{props.source.name}</Text>
             </ImageBackground>
             {props.selectedAlready === true ?
                 (<View
                     style={{ position: 'absolute', right: 12, top: 8, backgroundColor: Colors.accent, borderRadius: 12, padding: 4, paddingLeft: 8, paddingRight: 8 }}>
-                    <Text style={{ fontSize: Sizes.descriptionFontSize, fontWeight: 'bold', color: 'white' }}>
+                    <Text style={{ fontSize: Sizes.descriptionFontSize, fontWeight: 'bold', color: Colors.WHITE }}>
                         Already Selected
                         </Text>
                 </View>) : (<></>)}

@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useMemo, useEffect } from "react";
-import { View, Text, StyleSheet, TouchableHighlight, Alert, ScrollView, Switch, ViewStyle, Platform, SafeAreaView, ActionSheetIOS, UIManager, findNodeHandle } from "react-native";
+import { View, Text, StyleSheet, TouchableHighlight, Alert, ScrollView, Switch, ViewStyle, Platform, ActionSheetIOS, UIManager, findNodeHandle } from "react-native";
 import { MeasureUnitType } from "@measure/DataSourceSpec";
 import { Dispatch } from "redux";
 import { ReduxAppState } from "@state/types";
@@ -36,7 +36,7 @@ const rowContainerStyle = {
     paddingLeft: Sizes.horizontalPadding,
 
     paddingRight: Sizes.horizontalPadding / 2,
-    backgroundColor: 'white'
+    backgroundColor: Colors.WHITE
 } as ViewStyle
 
 const styles = StyleSheet.create({
@@ -118,7 +118,7 @@ const Subheader = React.memo((props: { title: string }) => {
 
 const ServiceQuotaMeter = React.memo((props: { serviceKey: string }) => {
 
-    const [isLoading, setIsLoading] = useState(false)
+    const [, setIsLoading] = useState(false)
     const [leftQuota, setLeftQuota] = useState(Number.MAX_SAFE_INTEGER)
     const [quotaResetAt, setQuotaResetAt] = useState(Number.NaN)
 

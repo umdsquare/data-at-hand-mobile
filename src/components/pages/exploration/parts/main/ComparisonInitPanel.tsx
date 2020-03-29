@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     buttonContainerStyle: { marginTop: Sizes.verticalPadding, marginLeft: Sizes.horizontalPadding * .5, marginRight: Sizes.horizontalPadding * .5 },
     buttonStyle: { borderRadius: 50, paddingTop: Sizes.verticalPadding, paddingBottom: Sizes.verticalPadding },
     titleStyle: { fontSize: Sizes.normalFontSize, fontWeight: 'bold' },
-    disabledTitleStyle: { color: 'white' },
+    disabledTitleStyle: { color: Colors.WHITE },
     disabledStyle: { opacity: 0.5 },
 
     rangeSeparatorLineStyle: { height: 1, flex: 1, backgroundColor: Colors.lightBorderColor },
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
         paddingRight: Sizes.horizontalPadding,
     }
 })
-const iconInfo = <SvgIcon style={{marginLeft: 4}} type={SvgIconType.ArrowForward} color={'white'}/>
+const iconInfo = <SvgIcon style={{marginLeft: 4}} type={SvgIconType.ArrowForward} color={Colors.WHITE}/>
 
 const gradientProps = { colors: Colors.decisionButtonGradient, start: { x: 0, y: 0 }, end: { x: 1, y: 0 } }
 

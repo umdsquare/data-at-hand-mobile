@@ -1,6 +1,10 @@
 'use strict';
 
 export default {
+
+  WHITE: 'white',
+  TRANSPARENT: 'transparent',
+
   backPanelColor: '#EFEFF4',
 
   lightBackgroundGradient: ["#e0e8ee", "#eeeaec"],

@@ -73,7 +73,7 @@ const StyleTemplates = StyleSheet.create({
   headerTitleStyle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: 'white',
+    color: Colors.WHITE,
   },
 
   dataSourceCardHeaderTitleStyle: {
@@ -108,7 +108,7 @@ const StyleTemplates = StyleSheet.create({
 
   bottomSheetModalViewStyle: {
     alignSelf: 'flex-end',
-    backgroundColor: 'white',
+    backgroundColor: Colors.WHITE,
     flex: 1,
     borderTopLeftRadius: 18,
     borderTopRightRadius: 18,

@@ -40,7 +40,7 @@ const conatinerStyleBase = {
 
 const dateButtonDateTextStyleBase = {
     fontSize: Sizes.normalFontSize,
-    color: 'white',
+    color: Colors.WHITE,
     fontWeight: '600',
     marginRight: 4,
 } as TextStyle

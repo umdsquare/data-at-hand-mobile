@@ -4,6 +4,7 @@ import { Dimensions, View, ViewStyle, StyleSheet, Text } from "react-native"
 import { Sizes } from '@style/Sizes';
 import Svg, { Circle } from 'react-native-svg';
 import Animated, { Easing } from 'react-native-reanimated';
+import Colors from '@style/Colors';
 
 const AnimatedSvgCircle = Animated.createAnimatedComponent(Circle)
 
@@ -31,7 +32,7 @@ const styles = StyleSheet.create({
     indicatorTextStyle: {
         fontSize: Sizes.tinyFontSize,
         fontWeight: 'bold',
-        color: 'white',
+        color: Colors.WHITE,
         textAlign: 'center',
         marginTop: 8,
         marginRight: 4,
@@ -55,7 +56,7 @@ export const HorizontalPullToActionContainer = React.memo((props: {
 
     const onPanGestureEvent = useCallback(Animated.event([{
         nativeEvent: {
-            translationX: x => Animated.set(pullIndicatorTransformAmount, x)
+            translationX: (x: number) => Animated.set(pullIndicatorTransformAmount, x)
         }
     }]), [])
 
@@ -134,8 +135,8 @@ export const HorizontalPullToActionContainer = React.memo((props: {
                                 right: currentPullingOrigin === 'right' ? undefined : 0,
                             }}>
                                 <Svg width="30" height="30" pointerEvents="none">
-                                    <Circle stroke={"white"} strokeWidth={1} x={15} y={15} r={14.5} />
-                                    <AnimatedSvgCircle fill='white' x={15} y={15} r={Animated.multiply(14, pullIndicatorTransformAmount.interpolate({
+                                    <Circle stroke={Colors.WHITE} strokeWidth={1} x={15} y={15} r={14.5} />
+                                    <AnimatedSvgCircle fill={Colors.WHITE} x={15} y={15} r={Animated.multiply(14, pullIndicatorTransformAmount.interpolate({
                                         inputRange: currentPullingOrigin === 'left' ? [0, minDragAmount] : [-minDragAmount, 0],
                                         outputRange: currentPullingOrigin === 'left' ? [0, 1] : [1, 0],
                                         extrapolateLeft: Animated.Extrapolate.CLAMP,

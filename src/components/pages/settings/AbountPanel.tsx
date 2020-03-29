@@ -16,7 +16,7 @@ const styles = StyleSheet.create({
     versionInfo: {
         marginTop: 18,
         textAlign: 'center',
-        color: 'white',
+        color: Colors.WHITE,
     }
 })
 

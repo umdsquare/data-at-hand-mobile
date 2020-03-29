@@ -18,11 +18,12 @@ import { timeTickFormat } from '@components/visualization/compare/common';
 import { CyclicTimeFrame } from '@core/exploration/cyclic_time';
 import { HorizontalPullToActionContainer } from '@components/common/HorizontalPullToActionContainer';
 import { shiftAllRanges, InteractionType } from '@state/exploration/interaction/actions';
+import Colors from '@style/Colors';
 
 const styles = StyleSheet.create({
     containerStyle: {
         ...StyleTemplates.fillFlex,
-        backgroundColor: 'white'
+        backgroundColor: Colors.WHITE
     }
 })
 

@@ -73,7 +73,7 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
                         y={scaleY(d.value)}
                         r={Math.min(scaleX.bandwidth(), 8) / 2}
                         strokeWidth={2}
-                        fill='white'
+                        fill={Colors.WHITE}
                         stroke={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
                         opacity={getChartElementOpacity(today === d.numberedDate)}
                     />

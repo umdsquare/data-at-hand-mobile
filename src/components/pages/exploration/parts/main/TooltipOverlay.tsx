@@ -28,7 +28,7 @@ import { createSetSpeechContextAction } from '@state/speech/actions'
 const borderRadius = 8
 
 const tooltipTextStyleBase = {
-    color: 'white',
+    color: Colors.WHITE,
     fontSize: Sizes.smallFontSize,
     fontWeight: '500'
 } as TextStyle
@@ -133,7 +133,7 @@ interface State {
 
 class TooltipOverlay extends React.PureComponent<Props, State>{
 
-    constructor(props) {
+    constructor(props: Props) {
         super(props)
 
         this.state = {
@@ -370,7 +370,7 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
                         />
                         {this.makeContentView(this.state.touchingInfo)}
                     </View>
-                    <View style={{ backgroundColor: 'white', borderBottomLeftRadius: borderRadius, borderBottomRightRadius: borderRadius }}>
+                    <View style={{ backgroundColor: Colors.WHITE, borderBottomLeftRadius: borderRadius, borderBottomRightRadius: borderRadius }}>
                         <SpeechInputPanel />
                     </View>
                 </Animated.View>}
