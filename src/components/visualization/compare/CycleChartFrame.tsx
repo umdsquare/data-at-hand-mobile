@@ -16,8 +16,8 @@ export const CycleChartFrame = React.memo((props: {
     scaleY: ScaleLinear<number, number>,
     ticks?: number[],
     yTickFormat?: (num: number) => string,
-    onLongPressIn: (timeKey, x, y, screenX, screenY, touchId) => void,
-    onLongPressMove: (timeKey, x, y, screenX, screenY, touchId) => void,
+    onLongPressIn: (timeKey: number, x: number, y: number, screenX: number, screenY: number, touchId: string) => void,
+    onLongPressMove: (timeKey: number, x: number, y: number, screenX: number, screenY: number, touchId: string) => void,
     onLongPressOut: () => void,
     onClickElement: (timeKey: number) => void,
     children?: any

@@ -1,12 +1,12 @@
 import React from 'react'
 import { ScaleBand } from "d3-scale"
 import Colors from "@style/Colors"
-import { G, Circle, Text, Line } from "react-native-svg"
+import { G, Text, Line } from "react-native-svg"
 import { Sizes } from '@style/Sizes'
 import { LayoutRectangle } from 'react-native'
 
 
-export const DateBandAxis = (props: { scale: ScaleBand<number>, chartArea: LayoutRectangle, dateSequence: number[], today: number, tickFormat: (date: number) => string }) => {
+export const DateBandAxis = React.memo((props: { scale: ScaleBand<number>, chartArea: LayoutRectangle, dateSequence: number[], today: number, tickFormat: (date: number) => string }) => {
 
     const divider = Math.ceil(props.dateSequence.length / 8)
 
@@ -27,4 +27,4 @@ export const DateBandAxis = (props: { scale: ScaleBand<number>, chartArea: Layou
             })
         }
     </G>
-}
+})

@@ -41,10 +41,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
     const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
 
     const scaleX = CommonBrowsingChartStyles
-        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
-        .padding(0.2)
-        .range([0, chartArea.width])
-
+        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1], chartArea.width)
 
     const today = DateTimeHelper.toNumberedDateFromDate(getToday())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)

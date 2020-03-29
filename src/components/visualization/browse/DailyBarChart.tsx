@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Rect, Line, G } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartProps, getChartElementColor, getChartElementOpacity } from './common';
 import { AxisSvg } from '@components/visualization/axis';
@@ -27,40 +27,35 @@ export const DailyBarChart = React.memo((prop: Props) => {
     const { shouldHighlightElements, highlightReference } = CommonBrowsingChartStyles.makeHighlightInformation(prop, prop.dataSource)
 
     const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
-    const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
+    const today = useMemo(() => DateTimeHelper.toNumberedDateFromDate(DataServiceManager.instance.getServiceByKey(serviceKey).getToday()), [serviceKey])
+    const chartArea = useMemo(() => CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight), [prop.containerWidth, prop.containerHeight])
+    const scaleX = useMemo(() => CommonBrowsingChartStyles
+        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1], chartArea.width),
+        
+        [prop.dateRange[0], prop.dateRange[1], chartArea.width])
 
-    const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
+    const xTickFormat = useMemo(() => CommonBrowsingChartStyles.dateTickFormat(today), [today])
 
-    const scaleX = CommonBrowsingChartStyles
-        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
-        .padding(0.2)
-        .range([0, chartArea.width])
-
-
-    const today = DateTimeHelper.toNumberedDateFromDate(getToday())
-    const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
-
-    const valueRange = coverValueInRange(
+    const valueRange = useMemo(() => coverValueInRange(
         [0, Math.max(d3Array.max(prop.data, d => d.value)!, prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)],
         highlightReference
-    )
+    ), [prop.data, prop.preferredValueRange[1], highlightReference])
 
-    const scaleY = scaleLinear()
+    const scaleY = useMemo(() => scaleLinear()
         .domain(valueRange)
         .range([chartArea.height, 0])
-        .nice()
+        .nice(), [valueRange, chartArea.height])
 
-    const mean = prop.data.length > 0 ? d3Array.mean(prop.data, d => d.value) : null
+    const mean = useMemo(() => prop.data.length > 0 ? d3Array.mean(prop.data, d => d.value) : null, [prop.data])
 
-    let ticks: number[]
-    if (prop.valueTicksOverride) {
-        const tickInfo = prop.valueTicksOverride(scaleY.domain()[1])
-        scaleY.domain(tickInfo.newDomain)
-        ticks = tickInfo.ticks
-    }
-    else {
-        ticks = scaleY.ticks(5)
-    }
+    const ticks: number[] = useMemo(() => {
+        if (prop.valueTicksOverride) {
+            const tickInfo = prop.valueTicksOverride(scaleY.domain()[1])
+            scaleY.domain(tickInfo.newDomain)
+            return tickInfo.ticks
+        }
+        else return scaleY.ticks(5)
+    }, [prop.valueTicksOverride, scaleY])
 
     return <BandScaleChartTouchHandler
         chartContainerWidth={prop.containerWidth}

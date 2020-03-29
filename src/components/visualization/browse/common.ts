@@ -69,10 +69,13 @@ export namespace CommonBrowsingChartStyles {
     base: ScaleBand<number> | undefined,
     startDate: number,
     endDate: number,
+    width: number,
+    padding: number=0.2,
   ): ScaleBand<number> {
     return (base || scaleBand<number>()).domain(
       DateTimeHelper.rangeToSequence(startDate, endDate),
-    );
+    ).padding(padding)
+    .range([0, width])
   }
 
   export function dateTickFormat(today: number): (date: number) => string {
