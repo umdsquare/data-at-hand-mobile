@@ -3,7 +3,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { ReduxAppState } from "@state/types";
 import { FlatList, View, LayoutAnimation, NativeScrollEvent, NativeSyntheticEvent } from "react-native";
-import { DataSourceChartFrame } from "@components/exploration/DataSourceChartFrame";
+import { DataSourceChartFrame, HEADER_HEIGHT, FOOTER_HEIGHT } from "@components/exploration/DataSourceChartFrame";
 import { OverviewData, OverviewSourceRow } from "@core/exploration/data/types";
 import { MeasureUnitType, DataSourceType } from "@measure/DataSourceSpec";
 import { Sizes } from "@style/Sizes";
@@ -16,6 +16,7 @@ import { StyleTemplates } from "@style/Styles";
 import { startLoadingForInfo } from "@state/exploration/data/reducers";
 import { ThunkDispatch } from "redux-thunk";
 import { DataService } from "@measure/service/DataService";
+import { CommonBrowsingChartStyles } from "@components/visualization/browse/common";
 
 const MIN_REFRESH_TIME_FOR_PERCEPTION = 1000
 
@@ -134,6 +135,13 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
         this.currentListScrollOffset = scrollY
     }
 
+    
+    private readonly getItemLayout = (_: any, index: number) => {
+        const height = CommonBrowsingChartStyles.CHART_HEIGHT + HEADER_HEIGHT + FOOTER_HEIGHT + separatorStyle.height
+        return { length: height, offset: height * index, index }
+    }
+
+
     private readonly renderItem = ({ item }: { item: OverviewSourceRow }) => <DataSourceChartFrame key={item.source.toString()}
         data={item}
         filter={this.props.highlightFilter}
@@ -179,6 +187,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
                     onScroll={this.onScroll}
                     refreshing={this.state.refreshingSince != null}
                     onRefresh={this.onRefresh}
+                    getItemLayout = {this.getItemLayout}
                 /></>
         } else return <></>
     }

@@ -23,10 +23,10 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
     const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
 
-    const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
+    const chartArea = CommonBrowsingChartStyles.CHART_AREA
 
     const scaleX = CommonBrowsingChartStyles
-        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1], chartArea.width)
+        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
 
     const today = DateTimeHelper.toNumberedDateFromDate(getToday())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
@@ -47,8 +47,8 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
     const avg = d3Array.mean(prop.data, d => d.value)!
 
     return <BandScaleChartTouchHandler
-        chartContainerWidth={prop.containerWidth}
-        chartContainerHeight={prop.containerHeight}
+        chartContainerWidth={CommonBrowsingChartStyles.CHART_WIDTH}
+        chartContainerHeight={CommonBrowsingChartStyles.CHART_HEIGHT}
         chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource}
         getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date)!.value}
         highlightedDays={prop.highlightFilter != null ? prop.highlightedDays : undefined}>

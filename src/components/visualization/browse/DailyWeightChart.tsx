@@ -38,10 +38,10 @@ export const DailyWeightChart = React.memo((prop: Props) => {
 
     const convert = prop.measureUnitType === MeasureUnitType.Metric ? noop : (n: number) => unitConvert(n).from('kg').to('lb')
 
-    const chartArea = CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight)
+    const chartArea = CommonBrowsingChartStyles.CHART_AREA
 
     const scaleX = CommonBrowsingChartStyles
-        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1], chartArea.width)
+        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
 
     const today = DateTimeHelper.toNumberedDateFromDate(getToday())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
@@ -71,7 +71,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
 
     const veryLastLog = prop.futureNearestLog == null ? (prop.data.logs.length > 0 ? prop.data.logs[prop.data.logs.length - 1] : prop.pastNearestLog) : null
 
-    return <Svg pointerEvents="none" width={prop.containerWidth} height={prop.containerHeight}>
+    return <Svg pointerEvents="none" width={CommonBrowsingChartStyles.CHART_WIDTH} height={CommonBrowsingChartStyles.CHART_HEIGHT}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={scaleY.ticks(5)} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
         <G key="chart" {...chartArea}>

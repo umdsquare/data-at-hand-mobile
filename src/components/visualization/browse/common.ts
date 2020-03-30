@@ -1,6 +1,6 @@
 import { ScaleBand, scaleBand } from 'd3-scale';
 import { DateTimeHelper } from '@utils/time';
-import { LayoutRectangle } from 'react-native';
+import { LayoutRectangle, Dimensions } from 'react-native';
 import { DataSourceType } from '@measure/DataSourceSpec';
 import { HighlightFilter, NumericConditionType } from '@core/exploration/types';
 import { useMemo } from 'react';
@@ -10,8 +10,6 @@ export interface ChartPropsBase<T> {
   dateRange: number[],
   preferredValueRange: number[],
   data: T,
-  containerWidth: number,
-  containerHeight: number,
   highlightFilter?: HighlightFilter,
   highlightedDays?: { [key: number]: boolean | undefined }
 }
@@ -22,6 +20,8 @@ export interface ChartProps extends ChartPropsBase<Array<{ value: number, number
 
 
 export namespace CommonBrowsingChartStyles {
+
+
   export const xAxisHeight = 26;
   export const yAxisWidth = 50;
   export const rightPadding = 18;
@@ -45,6 +45,17 @@ export namespace CommonBrowsingChartStyles {
     bottom: -chartAreaPadding.bottom
   }
 
+
+  export const CHART_WIDTH = Dimensions.get("window").width
+  export const CHART_HEIGHT = Math.round(CHART_WIDTH / 3)
+
+  export const CHART_AREA: LayoutRectangle = {
+    x: yAxisWidth,
+    y: topPadding,
+    width: CHART_WIDTH - yAxisWidth - rightPadding,
+    height: CHART_HEIGHT - xAxisHeight - topPadding,
+  }
+
   export function transformViewXToChartAreaLocalX(x: number): number {
     return x - yAxisWidth;
   }
@@ -53,29 +64,16 @@ export namespace CommonBrowsingChartStyles {
     return y - topPadding;
   }
 
-  export function makeChartArea(
-    containerWidth: number,
-    containerHeight: number,
-  ): LayoutRectangle {
-    return {
-      x: yAxisWidth,
-      y: topPadding,
-      width: containerWidth - yAxisWidth - rightPadding,
-      height: containerHeight - xAxisHeight - topPadding,
-    }
-  }
-
   export function makeDateScale(
     base: ScaleBand<number> | undefined,
     startDate: number,
     endDate: number,
-    width: number,
     padding: number=0.2,
   ): ScaleBand<number> {
     return (base || scaleBand<number>()).domain(
       DateTimeHelper.rangeToSequence(startDate, endDate),
     ).padding(padding)
-    .range([0, width])
+    .range([0, CHART_AREA.width])
   }
 
   export function dateTickFormat(today: number): (date: number) => string {

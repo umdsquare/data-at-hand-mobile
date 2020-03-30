@@ -28,11 +28,11 @@ export const DailyBarChart = React.memo((prop: Props) => {
 
     const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
     const today = useMemo(() => DateTimeHelper.toNumberedDateFromDate(DataServiceManager.instance.getServiceByKey(serviceKey).getToday()), [serviceKey])
-    const chartArea = useMemo(() => CommonBrowsingChartStyles.makeChartArea(prop.containerWidth, prop.containerHeight), [prop.containerWidth, prop.containerHeight])
+    const chartArea = CommonBrowsingChartStyles.CHART_AREA
     const scaleX = useMemo(() => CommonBrowsingChartStyles
-        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1], chartArea.width),
-        
-        [prop.dateRange[0], prop.dateRange[1], chartArea.width])
+        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1]),
+
+        [prop.dateRange[0], prop.dateRange[1]])
 
     const xTickFormat = useMemo(() => CommonBrowsingChartStyles.dateTickFormat(today), [today])
 
@@ -58,8 +58,8 @@ export const DailyBarChart = React.memo((prop: Props) => {
     }, [prop.valueTicksOverride, scaleY])
 
     return <BandScaleChartTouchHandler
-        chartContainerWidth={prop.containerWidth}
-        chartContainerHeight={prop.containerHeight}
+        chartContainerWidth={CommonBrowsingChartStyles.CHART_WIDTH}
+        chartContainerHeight={CommonBrowsingChartStyles.CHART_HEIGHT}
         chartArea={chartArea}
         scaleX={scaleX}
         dataSource={prop.dataSource}

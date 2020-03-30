@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Colors from '@style/Colors';
 import { Sizes } from '@style/Sizes';
@@ -10,17 +10,18 @@ import { DateTimeHelper } from '@utils/time';
 import { startOfDay, addSeconds, format } from 'date-fns';
 import { scaleLinear } from 'd3-scale';
 import { HighlightFilter } from '@core/exploration/types';
-import { SizeWatcher } from '@components/visualization/SizeWatcher';
 import { DataSourceIcon } from '@components/common/DataSourceIcon';
 import { DailyBarChart } from '@components/visualization/browse/DailyBarChart';
 import { DailyHeartRateChart } from '@components/visualization/browse/DailyHeartRateChart';
 import { DailySleepRangeChart } from '@components/visualization/browse/DailySleepRangeChart';
 import { DailyWeightChart } from '@components/visualization/browse/DailyWeightChart';
+import { StyleTemplates } from '@style/Styles';
 
 
 const lightTextColor = "#8b8b8b"
 
-const headerHeight = 60
+export const HEADER_HEIGHT = 60
+export const FOOTER_HEIGHT = 52
 
 const containerStyle = {
     backgroundColor: Colors.WHITE,
@@ -45,7 +46,7 @@ const styles = StyleSheet.create({
     },
 
     headerStyle: {
-        height: headerHeight,
+        height: HEADER_HEIGHT,
         flexDirection: "row",
         alignItems: 'center',
     },
@@ -59,7 +60,7 @@ const styles = StyleSheet.create({
 
     headerClickRegionWrapperStyle: { flex: 1, marginRight: 15 },
 
-    headerClickRegionStyle: { flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch', height: headerHeight },
+    headerClickRegionStyle: { flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch', height: HEADER_HEIGHT },
 
     headerDescriptionTextStyle: {
         fontWeight: '500',
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
     },
 
     todayButtonStyle: {
-        height: headerHeight * 0.7, justifyContent: 'center',
+        height: HEADER_HEIGHT * 0.7, justifyContent: 'center',
         paddingRight: Sizes.horizontalPadding, paddingLeft: Sizes.horizontalPadding
     },
 
@@ -93,9 +94,10 @@ const styles = StyleSheet.create({
     },
 
     footerStyle: {
+        ...StyleTemplates.flexHorizontalCenteredListContainer,
         padding: Sizes.horizontalPadding,
-        flexDirection: 'row',
-        justifyContent: 'space-around'
+        justifyContent: 'space-around',
+        height: FOOTER_HEIGHT
     },
 
     statValueStyle: {
@@ -272,15 +274,13 @@ function formatStatistics(sourceType: DataSourceType, statisticsType: Statistics
     }
 }
 
-function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filter: HighlightFilter | undefined, highlightedDays: { [key: number]: boolean | undefined } | undefined, width: number, height: number, measureUnitType: MeasureUnitType): any {
+function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filter: HighlightFilter | undefined, highlightedDays: { [key: number]: boolean | undefined } | undefined, measureUnitType: MeasureUnitType): any {
 
     const commonProps = {
         preferredValueRange: data.preferredValueRange,
         highlightFilter: filter,
         highlightedDays: highlightedDays,
         dateRange: data.range,
-        containerWidth: width,
-        containerHeight: height,
         data: data.data
     }
 
@@ -337,12 +337,6 @@ export const DataSourceChartFrame = React.memo((props: {
     onTodayPressed?: (source: DataSourceType) => void
 }) => {
 
-    const [chartContainerWidth, setChartContainerWidth] = useState(-1)
-    const [chartContainerHeight, setChartContainerHeight] = useState(-1)
-
-    const onSizeChanged = useCallback((width, height) => { setChartContainerWidth(width); setChartContainerHeight(height) },
-        [setChartContainerWidth, setChartContainerHeight])
-
     const onHeaderPress = useCallback(() => props.onHeaderPressed && props.onHeaderPressed(props.data.source), [props.onHeaderPressed, props.data.source])
     const onTodayPress = useCallback(() => props.onTodayPressed && props.onTodayPressed(props.data.source), [props.onTodayPressed, props.data.source])
 
@@ -377,11 +371,9 @@ export const DataSourceChartFrame = React.memo((props: {
                             </Text></TouchableOpacity> : <></>
                 }
             </View> : null}
-        <SizeWatcher containerStyle={styles.chartAreaStyle} onSizeChange={onSizeChanged}>
-            {
-                getChartView(spec.type, props.data, props.filter, props.highlightedDays, chartContainerWidth, chartContainerHeight, props.measureUnitType)
-            }
-        </SizeWatcher>
+        {
+            getChartView(spec.type, props.data, props.filter, props.highlightedDays, props.measureUnitType)
+        }
         <View style={styles.footerStyle}>{
             props.data.statistics && props.data.statistics.map(stat => {
                 return <Text key={stat.type} style={styles.statValueStyle}>

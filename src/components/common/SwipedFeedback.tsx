@@ -1,34 +1,27 @@
 import React from 'react'
-import Animated, { Easing } from 'react-native-reanimated'
+import { Animated, Easing } from 'react-native'
 
-import { SizeWatcher } from '../visualization/SizeWatcher'
 import LinearGradient from 'react-native-linear-gradient'
 import { StyleTemplates } from '@style/Styles'
-import { Platform } from 'react-native'
+import { Platform, Dimensions } from 'react-native'
 import Colors from '@style/Colors'
 import { Lazy } from '@utils/utils'
 
 interface State {
     swipeDirection: "left" | "right"
-    progress: Animated.Value<number>,
-    alphaProgress: Animated.Value<number>,
-    width: number,
-    height: number,
+    progress: Animated.Value,
     feedbackShowing: boolean
 }
 
+const width = Dimensions.get('window').width
+
 export class SwipedFeedback extends React.PureComponent<any, State>{
 
-    private static appearAnimConfig = new Lazy(()=>({
-        toValue: 1,
-        duration: 300,
-        easing: Easing.in(Easing.linear)
-    }))
-
-    private static disappearAnimConfig = new Lazy(()=>({
+    private static animConfig = new Lazy(()=>({
         toValue: 1,
         duration: Platform.OS === 'ios'? 800 : 600,
-        easing: Easing.in(Easing.linear)
+        easing: Easing.in(Easing.linear),
+        useNativeDriver: true
     }))
 
     constructor(props: any) {
@@ -37,23 +30,23 @@ export class SwipedFeedback extends React.PureComponent<any, State>{
         this.state = {
             swipeDirection: 'left',
             progress: new Animated.Value(0),
-            alphaProgress: new Animated.Value(0),
-            width: 0,
-            height: 0,
-            feedbackShowing: false
+            feedbackShowing: false,
         }
     }
 
     public startFeedback(direction: 'left' | 'right') {
+
+
+        this.state.progress.stopAnimation()
+        this.state.progress.setValue(0)
+
         this.setState({
             ...this.state,
             swipeDirection: direction,
             feedbackShowing: true
         })
-        this.state.progress.setValue(0)
-        this.state.alphaProgress.setValue(0)
-        Animated.timing(this.state.progress, SwipedFeedback.appearAnimConfig.get()).start()
-        Animated.timing(this.state.alphaProgress, SwipedFeedback.disappearAnimConfig.get()).start(()=>{
+
+        Animated.timing(this.state.progress, SwipedFeedback.animConfig.get()).start(()=>{
             this.setState({
                 ...this.state,
                 feedbackShowing: false
@@ -62,35 +55,26 @@ export class SwipedFeedback extends React.PureComponent<any, State>{
 
     }
 
-    private onSizeChanged = (width: number, height: number) => {
-        this.setState({
-            ...this.state,
-            width,
-            height
-        })
-    }
-
     render() {
-        return <SizeWatcher containerStyle={StyleTemplates.fitParent} onSizeChange={this.onSizeChanged}>
-            <Animated.View pointerEvents='none' style={{
+        return <Animated.View pointerEvents='none' style={{
                 ...StyleTemplates.fitParent,
-                opacity: this.state.alphaProgress.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0] }),
+                opacity: this.state.progress.interpolate({ inputRange: [0, 1], outputRange: [0.3, 0] }),
 
                 transform: [
                     {
                         translateX: this.state.progress.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: [this.state.swipeDirection === 'left' ? this.state.width : -this.state.width, 0]
+                            inputRange: [0, 0.4],
+                            outputRange: [this.state.swipeDirection === 'left' ? width : -width, 0],
+                            extrapolate: 'clamp'
                         }),
                     }
                 ]
             } as any}>
-                {this.state.feedbackShowing && <LinearGradient
+                {this.state.feedbackShowing === true && <LinearGradient
                     colors={this.state.swipeDirection === 'left' ? ['transparent', Colors.WHITE] : [Colors.WHITE, "transparent"]}
                     style={StyleTemplates.fitParent}
                     start={{ x: this.state.swipeDirection === 'left' ? 0 : 0.7, y: 0 }}
                     end={{ x: this.state.swipeDirection === 'left' ? 0.3 : 1, y: 0 }} />}
             </Animated.View>
-        </SizeWatcher>
     }
 }
