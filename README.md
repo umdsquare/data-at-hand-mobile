@@ -48,7 +48,15 @@ Install dependencies
   > react-native run-android
   ```
   
-  
+
+---
+## Third-party Services Used
+- [Fitbit REST API](https://dev.fitbit.com/build/reference/web-api/) (Setup required)
+- [Microsoft Cognitive Service (Speech-to-Text)](https://azure.microsoft.com/en-us/services/cognitive-services/speech-to-text/) (Optional. Android only)
+- [Bugsnag](https://www.bugsnag.com/) (Optional. Error reporting)
+
+
+---
   
 ## Author
 
