@@ -1,7 +1,7 @@
 import React from 'react'
-import { Animated, View, Text, StyleSheet, TextStyle, LayoutAnimation, Dimensions, LayoutRectangle, Easing, LayoutChangeEvent, Platform } from 'react-native'
+import { Animated, View, Text, StyleSheet, TextStyle, Dimensions, LayoutRectangle, Easing, LayoutChangeEvent, Platform } from 'react-native'
 import { StyleTemplates } from '@style/Styles'
-import { TouchingElementInfo, TouchingElementValueType, ParameterType, ExplorationType, ParameterKey } from '@core/exploration/types'
+import { TouchingElementInfo, TouchingElementValueType, ParameterType, ExplorationType } from '@core/exploration/types'
 import { ReduxAppState } from '@state/types'
 import { connect } from 'react-redux'
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper'
@@ -21,10 +21,10 @@ import { startSpeechSession, requestStopDictation, makeNewSessionId } from '@sta
 import Haptic from 'react-native-haptic-feedback';
 import Insets from 'react-native-static-safe-area-insets';
 import { ZIndices } from '../zIndices'
-import { DataServiceManager } from '@measure/DataServiceManager'
 import { SpeechContext, SpeechContextHelper } from '@core/speech/nlp/context'
 import { createSetSpeechContextAction } from '@state/speech/actions'
 import { Lazy } from '@utils/utils'
+import { TodayContext } from '../../contexts'
 
 const borderRadius = 8
 
@@ -115,7 +115,6 @@ interface Props {
     touchingInfo?: TouchingElementInfo,
     measureUnitType?: MeasureUnitType,
     explorationType?: ExplorationType,
-    getToday?: () => Date,
     dispatchStartSpeechSession?: (sessionId: string, context: SpeechContext) => void,
     dispatchUpdateSpeechContext?: (sessionId: string, context: SpeechContext) => void,
     dispatchStopDictation?: (sessionId: string) => void,
@@ -424,19 +423,26 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
                         valueText = "No value"
                     }
 
-                    let dayOfWeekLabel = format(date, "EEEE")
-                    if (isToday(date, this.props.getToday()) === true) {
-                        dayOfWeekLabel += " (Today)"
-                    } else if (isYesterday(date, this.props.getToday()) === true) {
-                        dayOfWeekLabel += " (Yesterday)"
-                    }
+                    return <TodayContext.Consumer>
+                        {
+                            today =>
+                                {
+                                    const todayDate = DateTimeHelper.toDate(today)
+                                    let dayOfWeekLabel = format(date, "EEEE")
+                                    if (isToday(date, todayDate) === true) {
+                                        dayOfWeekLabel += " (Today)"
+                                    } else if (isYesterday(date, todayDate) === true) {
+                                        dayOfWeekLabel += " (Yesterday)"
+                                    }
 
-
-                    return <View style={styles.tooltipContentContainerStyle}>
-                        <Text style={styles.tooltipTimeMainLabelStyle}>{format(date, "MMM dd, yyyy")}</Text>
-                        <Text style={styles.tooltipTimeSubLabelStyle}>{dayOfWeekLabel}</Text>
-                        <Text style={styles.tooltipValueLabelStyle}>{valueText}</Text>
-                    </View>
+                                return <View style={styles.tooltipContentContainerStyle}>
+                                    <Text style={styles.tooltipTimeMainLabelStyle}>{format(date, "MMM dd, yyyy")}</Text>
+                                    <Text style={styles.tooltipTimeSubLabelStyle}>{dayOfWeekLabel}</Text>
+                                    <Text style={styles.tooltipValueLabelStyle}>{valueText}</Text>
+                                </View>
+                                }
+                        }
+                    </TodayContext.Consumer>
                 }
 
             case TouchingElementValueType.CycleDimension:
@@ -562,8 +568,7 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
         ...ownProps,
         touchingInfo: appState.explorationState.touchingElement,
         measureUnitType: appState.settingsState.unit,
-        explorationType: appState.explorationState.info.type,
-        getToday: DataServiceManager.instance.getServiceByKey(appState.settingsState.serviceKey).getToday
+        explorationType: appState.explorationState.info.type
     }
 }
 

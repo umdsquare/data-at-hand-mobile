@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import Svg, { G, Circle, Path, Line, Rect } from 'react-native-svg';
-import { CommonBrowsingChartStyles, ChartPropsBase, getChartElementColor } from './common';
+import { CommonBrowsingChartStyles, ChartPropsBase, getChartElementColor, DateRangeScaleContext } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
 import { DateBandAxis } from './DateBandAxis';
@@ -31,13 +31,11 @@ export const DailyWeightChart = React.memo((prop: Props) => {
     const { shouldHighlightElements, highlightReference } = CommonBrowsingChartStyles.makeHighlightInformation(prop, DataSourceType.Weight)
 
     const today = useContext(TodayContext)
+    const scaleX = useContext(DateRangeScaleContext) || CommonBrowsingChartStyles.makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
 
     const convert = prop.measureUnitType === MeasureUnitType.Metric ? noop : (n: number) => unitConvert(n).from('kg').to('lb')
 
     const chartArea = CommonBrowsingChartStyles.CHART_AREA
-
-    const scaleX = CommonBrowsingChartStyles
-        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
 
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 

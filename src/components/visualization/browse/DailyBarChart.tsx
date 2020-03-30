@@ -1,6 +1,6 @@
 import React, { useMemo, useContext } from 'react';
 import { Rect, Line, G } from 'react-native-svg';
-import { CommonBrowsingChartStyles, ChartProps, getChartElementColor, getChartElementOpacity } from './common';
+import { CommonBrowsingChartStyles, ChartProps, getChartElementColor, getChartElementOpacity, DateRangeScaleContext } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
 import { DateBandAxis } from './DateBandAxis';
@@ -26,12 +26,8 @@ export const DailyBarChart = React.memo((prop: Props) => {
     const today = useContext(TodayContext)
 
     const chartArea = CommonBrowsingChartStyles.CHART_AREA
-    const scaleX = useMemo(() => CommonBrowsingChartStyles
-        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1]),
-        [prop.dateRange[0], prop.dateRange[1]])
-
-    
-
+    const scaleX = useContext(DateRangeScaleContext) || CommonBrowsingChartStyles
+    .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
 
     const xTickFormat = useMemo(() => CommonBrowsingChartStyles.dateTickFormat(today), [today])
 

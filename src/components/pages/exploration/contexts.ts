@@ -1,2 +1,3 @@
 import React from 'react';
-export const TodayContext = React.createContext<number>(null)
+import { DateTimeHelper } from '@utils/time';
+export const TodayContext = React.createContext<number>(DateTimeHelper.toNumberedDateFromDate(new Date()))

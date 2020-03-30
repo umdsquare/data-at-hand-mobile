@@ -406,8 +406,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
 
     render() {
 
-        return <TodayContext.Provider value={DateTimeHelper
-            .toNumberedDateFromDate(
+        return <TodayContext.Provider value={DateTimeHelper.toNumberedDateFromDate(
                 DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).getToday()
             )}>
             <View style={StyleTemplates.screenDefaultStyle}>

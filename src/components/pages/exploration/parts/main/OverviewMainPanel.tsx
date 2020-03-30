@@ -15,7 +15,8 @@ import { DataSourceManager } from "@measure/DataSourceManager";
 import { startLoadingForInfo } from "@state/exploration/data/reducers";
 import { ThunkDispatch } from "redux-thunk";
 import { DataService } from "@measure/service/DataService";
-import { CommonBrowsingChartStyles } from "@components/visualization/browse/common";
+import { CommonBrowsingChartStyles, DateRangeScaleContext } from "@components/visualization/browse/common";
+import { ScaleBand } from "d3-scale";
 
 const MIN_REFRESH_TIME_FOR_PERCEPTION = 1000
 
@@ -33,10 +34,25 @@ interface Props {
 }
 
 interface State {
+    scaleX: ScaleBand<number>,
     refreshingSince?: number | null
 }
 
 class OverviewMainPanel extends React.PureComponent<Props, State> {
+
+    static getDerivedStateFromProps(nextProps: Props, currentState: State): State | null {
+
+        if (nextProps.data != null && nextProps.data.range != null) {
+
+            const currentRange = currentState.scaleX.range()
+            if (currentRange[0] !== nextProps.data.range[0] || currentRange[1] !== nextProps.data.range[1]){
+                return {
+                    ...currentState,
+                    scaleX: CommonBrowsingChartStyles.makeDateScale(currentState.scaleX.copy(), nextProps.data.range[0], nextProps.data.range[1])
+                }
+            }else return null
+        } else return null
+    }
 
     private _listRef = React.createRef<FlatList<any>>()
 
@@ -48,6 +64,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
         super(props)
 
         this.state = {
+            scaleX: CommonBrowsingChartStyles.makeDateScale(undefined, 0, 0),
             refreshingSince: null
         }
     }
@@ -166,7 +183,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
 
     render() {
         if (this.props.data != null) {
-            return <>
+            return <DateRangeScaleContext.Provider value={this.state.scaleX}>
                 {
                     this.props.highlightFilter != null ? <HighlightFilterPanel
                         filter={this.props.highlightFilter}
@@ -188,7 +205,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
                     onRefresh={this.onRefresh}
                     getItemLayout={this.getItemLayout}
                 />
-            </>
+            </DateRangeScaleContext.Provider>
         } else return <></>
     }
 }
