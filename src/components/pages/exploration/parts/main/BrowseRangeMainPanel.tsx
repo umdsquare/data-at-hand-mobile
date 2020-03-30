@@ -5,7 +5,7 @@ import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, Inte
 import { connect } from "react-redux";
 import { ReduxAppState } from "@state/types";
 import { Dispatch } from "redux";
-import { OverviewSourceRow, DataSourceBrowseData } from "@core/exploration/data/types";
+import { DataSourceBrowseData } from "@core/exploration/data/types";
 import { DataSourceChartFrame } from "@components/exploration/DataSourceChartFrame";
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
 import { ParameterType, TouchingElementInfo, inferIntraDayDataSourceType, TouchingElementValueType, HighlightFilter } from "@core/exploration/types";

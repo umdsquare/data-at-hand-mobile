@@ -64,7 +64,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
         super(props)
 
         this.state = {
-            scaleX: CommonBrowsingChartStyles.makeDateScale(undefined, 0, 0),
+            scaleX: CommonBrowsingChartStyles.makeDateScale(undefined, props.data.range[0], props.data.range[1]),
             refreshingSince: null
         }
     }

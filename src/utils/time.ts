@@ -71,20 +71,6 @@ export class DateTimeHelper {
         }
     }
 
-    static rangeToSequence(start: number, end: number): Array<number> {
-        const startDate = this.toDate(start)
-        const endDate = this.toDate(end)
-        const diff = differenceInDays(endDate, startDate) + 1
-
-        const seq = [start]
-
-        for (let i = 1; i < diff; i++) {
-            seq.push(this.toNumberedDateFromDate(addDays(startDate, i)))
-        }
-
-        return seq
-    }
-
     static getNumDays(start: number | Date, end: number | Date): number {
         const fromDate: Date = typeof start === 'number' ? DateTimeHelper.toDate(start) : start
         const toDate: Date = typeof end === 'number' ? DateTimeHelper.toDate(end) : end

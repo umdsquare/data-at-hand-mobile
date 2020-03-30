@@ -6,6 +6,7 @@ import { HighlightFilter, NumericConditionType } from '@core/exploration/types';
 import { useMemo } from 'react';
 import Colors from '@style/Colors';
 import React from 'react';
+import { DateSequenceCache } from '@utils/DateSequenceCache';
 
 export const DateRangeScaleContext = React.createContext<ScaleBand<number>>(null)
 
@@ -71,12 +72,15 @@ export namespace CommonBrowsingChartStyles {
     base: ScaleBand<number> | undefined,
     startDate: number,
     endDate: number,
-    padding: number=0.2,
+    padding: number = 0.2,
   ): ScaleBand<number> {
+
+    const sequence = DateSequenceCache.instance.getSequence(startDate, endDate)
+
     return (base || scaleBand<number>()).domain(
-      DateTimeHelper.rangeToSequence(startDate, endDate),
+      sequence,
     ).padding(padding)
-    .range([0, CHART_AREA.width])
+      .range([0, CHART_AREA.width])
   }
 
   export function dateTickFormat(today: number): (date: number) => string {
