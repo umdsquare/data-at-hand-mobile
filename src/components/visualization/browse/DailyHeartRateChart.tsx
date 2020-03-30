@@ -1,34 +1,29 @@
-import React from 'react';
-import Svg, { Circle, Line, Path, G } from 'react-native-svg';
+import React, { useContext } from 'react';
+import { Circle, Line, Path, G } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartProps, getChartElementColor, getChartElementOpacity } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
-import { DateTimeHelper } from '@utils/time';
 import { DateBandAxis } from './DateBandAxis';
 import { scaleLinear } from 'd3-scale';
 import * as d3Array from 'd3-array';
 import * as d3Shape from 'd3-shape';
 import Colors from '@style/Colors';
-import { useSelector } from 'react-redux';
-import { ReduxAppState } from '@state/types';
-import { DataServiceManager } from '@measure/DataServiceManager';
 import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
 import { coverValueInRange } from '@utils/utils';
+import { TodayContext } from '@components/pages/exploration/contexts';
 
 
 export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
 
     const { shouldHighlightElements, highlightReference } = CommonBrowsingChartStyles.makeHighlightInformation(prop, prop.dataSource)
-
-    const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
-    const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
-
+   
+    const today = useContext(TodayContext)
+   
     const chartArea = CommonBrowsingChartStyles.CHART_AREA
 
     const scaleX = CommonBrowsingChartStyles
         .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
 
-    const today = DateTimeHelper.toNumberedDateFromDate(getToday())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
     const valueMin = Math.min(d3Array.min(prop.data, d => d.value)!, prop.preferredValueRange[0] || Number.MAX_SAFE_INTEGER)

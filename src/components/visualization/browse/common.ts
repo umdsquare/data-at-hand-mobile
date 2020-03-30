@@ -5,6 +5,9 @@ import { DataSourceType } from '@measure/DataSourceSpec';
 import { HighlightFilter, NumericConditionType } from '@core/exploration/types';
 import { useMemo } from 'react';
 import Colors from '@style/Colors';
+import React from 'react';
+
+export const DateRangeScaleContext = React.createContext<ScaleBand<number>>(null)
 
 export interface ChartPropsBase<T> {
   dateRange: number[],

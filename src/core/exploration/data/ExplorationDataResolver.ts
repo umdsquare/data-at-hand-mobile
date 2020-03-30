@@ -248,7 +248,10 @@ class ExplorationDataResolver {
 
         return this.loadBrowseRangeDataImpl(range, source.type, selectedService, prevSourceRowData!)
       }))
-      .then(async dataPerSource => ({ sourceDataList: dataPerSource, highlightedDays: info.highlightFilter ? (await selectedService.fetchFilteredDates(info.highlightFilter!, range[0], range[1])) : undefined }));
+      .then(async dataPerSource => ({ 
+        range,
+        sourceDataList: dataPerSource, 
+        highlightedDays: info.highlightFilter ? (await selectedService.fetchFilteredDates(info.highlightFilter!, range[0], range[1])) : undefined }));
   }
 
   private loadIntraDayData(

@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import Svg, { G, Circle, Path, Line, Rect } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartPropsBase, getChartElementColor } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
-import { DateTimeHelper } from '@utils/time';
 import { DateBandAxis } from './DateBandAxis';
 import { scaleLinear } from 'd3-scale';
 import * as d3Array from 'd3-array';
@@ -13,10 +12,8 @@ import { IWeightIntraDayLogEntry } from '@core/exploration/data/types';
 import { MeasureUnitType, DataSourceType } from '@measure/DataSourceSpec';
 import unitConvert from 'convert-units';
 import { noop, coverValueInRange } from '@utils/utils';
-import { useSelector } from 'react-redux';
-import { ReduxAppState } from '@state/types';
-import { DataServiceManager } from '@measure/DataServiceManager';
 import { getScaleStepLeft } from '../d3-utils';
+import { TodayContext } from '@components/pages/exploration/contexts';
 
 interface Props extends ChartPropsBase<{
     trend: Array<{ numberedDate: number, value: number }>,
@@ -33,8 +30,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
 
     const { shouldHighlightElements, highlightReference } = CommonBrowsingChartStyles.makeHighlightInformation(prop, DataSourceType.Weight)
 
-    const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
-    const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
+    const today = useContext(TodayContext)
 
     const convert = prop.measureUnitType === MeasureUnitType.Metric ? noop : (n: number) => unitConvert(n).from('kg').to('lb')
 
@@ -43,7 +39,6 @@ export const DailyWeightChart = React.memo((prop: Props) => {
     const scaleX = CommonBrowsingChartStyles
         .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
 
-    const today = DateTimeHelper.toNumberedDateFromDate(getToday())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
     const trendMin = prop.data.trend.length > 0 ? d3Array.min(prop.data.trend, d => convert(d.value)) : Number.MAX_SAFE_INTEGER

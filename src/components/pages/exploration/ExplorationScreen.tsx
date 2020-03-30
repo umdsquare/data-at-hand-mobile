@@ -40,6 +40,8 @@ import { Subscription } from "rxjs";
 import { SpeechEventQueue } from "@core/speech/SpeechEventQueue";
 import { SpeechEventNotificationOverlay } from "@components/pages/exploration/SpeechEventNotificationOverlay";
 import { sleep } from "@utils/utils";
+import { TodayContext } from "./contexts";
+import { DateTimeHelper } from "@utils/time";
 
 const styles = StyleSheet.create({
 
@@ -268,9 +270,9 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
         if (permissionResult === 'granted') {
             console.log("All permissions are granted. Proceed to activation..")
             await this.performServiceActivationPhase()
-        }else if(permissionResult === 'forwarded'){
+        } else if (permissionResult === 'forwarded') {
             console.log("I will wait the user to return from the permission settings.")
-        }else{
+        } else {
             this.setPrepareStatus(PrepareStatus.FAILED)
         }
     }
@@ -404,59 +406,64 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
 
     render() {
 
-        return <View style={StyleTemplates.screenDefaultStyle}>
-            <StatusBar barStyle="light-content" backgroundColor={Colors.headerBackground} />
-            <View style={styles.headerContainerStyle}>
-                <ExplorationViewHeader />
-            </View>
-            <View style={styles.mainContainerStyle}>
-                {/* main data panel ===================================================================*/}
-
-                {
-                    this.props.isDataLoading === true && <BusyHorizontalIndicator />
-                }
-
-                {
-                    this.props.loadedDataInfo != null ?
-                        this.makeMainPanel(this.props.loadedDataInfo.type) : <></>
-                }
-
-                {/* history panel ===================================================================*/}
-                {this.props.isUndoAvailable === true && this.state.undoIgnored === false && <View style={styles.historyPanelStyle}>
-                    <Button
-                        ref={this.speechUndoButtonRef}
-                        key="undo"
-                        containerStyle={styles.historyButtonContainerStyle}
-                        buttonStyle={styles.historyButtonStyle}
-                        icon={undoIconStyle} onPress={this.undo}
-                        title="Cancel latest"
-                        titleStyle={styles.historyButtonTitleStyle}
-                    />
+        return <TodayContext.Provider value={DateTimeHelper
+            .toNumberedDateFromDate(
+                DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).getToday()
+            )}>
+            <View style={StyleTemplates.screenDefaultStyle}>
+                <StatusBar barStyle="light-content" backgroundColor={Colors.headerBackground} />
+                <View style={styles.headerContainerStyle}>
+                    <ExplorationViewHeader />
                 </View>
+                <View style={styles.mainContainerStyle}>
+                    {/* main data panel ===================================================================*/}
+
+                    {
+                        this.props.isDataLoading === true && <BusyHorizontalIndicator />
+                    }
+
+                    {
+                        this.props.loadedDataInfo != null ?
+                            this.makeMainPanel(this.props.loadedDataInfo.type) : <></>
+                    }
+
+                    {/* history panel ===================================================================*/}
+                    {this.props.isUndoAvailable === true && this.state.undoIgnored === false && <View style={styles.historyPanelStyle}>
+                        <Button
+                            ref={this.speechUndoButtonRef}
+                            key="undo"
+                            containerStyle={styles.historyButtonContainerStyle}
+                            buttonStyle={styles.historyButtonStyle}
+                            icon={undoIconStyle} onPress={this.undo}
+                            title="Cancel latest"
+                            titleStyle={styles.historyButtonTitleStyle}
+                        />
+                    </View>
+                    }
+
+                </View>
+
+                <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationInfo)}
+                    onModePress={this.onBottomBarButtonPress}
+                    onVoiceButtonPressIn={this.onGlobalSpeechInputPressIn}
+                    onVoiceButtonPressOut={this.onGlobalSpeechInputPressOut}
+                />
+
+                <TouchSafeBottomSheet ref={this.comparisonBottomSheetRef}>
+                    <ComparisonInitPanel info={this.props.explorationInfo} onCompleted={() => { this.comparisonBottomSheetRef.current?.close() }} />
+                </TouchSafeBottomSheet>
+
+                <TooltipOverlay />
+                <GlobalSpeechOverlay isGlobalSpeechButtonPressed={this.props.showGlobalSpeechPopup} />
+
+                <DataBusyOverlay isBusy={this.props.isDataLoading === true || this.state.prepareStatus !== PrepareStatus.PREPARED} />
+                {
+                    this.state.prepareStatus !== PrepareStatus.PREPARED ? <InitialLoadingIndicator loadingMessage={this.state.loadingMessage} /> : <></>
                 }
 
+                <SpeechEventNotificationOverlay ref={this.speechFeedbackRef} />
             </View>
-
-            <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationInfo)}
-                onModePress={this.onBottomBarButtonPress}
-                onVoiceButtonPressIn={this.onGlobalSpeechInputPressIn}
-                onVoiceButtonPressOut={this.onGlobalSpeechInputPressOut}
-            />
-
-            <TouchSafeBottomSheet ref={this.comparisonBottomSheetRef}>
-                <ComparisonInitPanel info={this.props.explorationInfo} onCompleted={() => { this.comparisonBottomSheetRef.current?.close() }} />
-            </TouchSafeBottomSheet>
-
-            <TooltipOverlay />
-            <GlobalSpeechOverlay isGlobalSpeechButtonPressed={this.props.showGlobalSpeechPopup} />
-
-            <DataBusyOverlay isBusy={this.props.isDataLoading === true || this.state.prepareStatus !== PrepareStatus.PREPARED} />
-            {
-                this.state.prepareStatus !== PrepareStatus.PREPARED ? <InitialLoadingIndicator loadingMessage={this.state.loadingMessage} /> : <></>
-            }
-
-            <SpeechEventNotificationOverlay ref={this.speechFeedbackRef} />
-        </View>
+        </TodayContext.Provider>
     }
 
     makeMainPanel(type: ExplorationType): any {

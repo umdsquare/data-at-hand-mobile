@@ -1,6 +1,3 @@
-import { Animated, Easing } from "react-native";
-
-
 export function interpWithFunction(callback:(value: number) => number, toValue: number, steps = 60) {
     let inputRange = [], outputRange = []
     /// input range 0-1

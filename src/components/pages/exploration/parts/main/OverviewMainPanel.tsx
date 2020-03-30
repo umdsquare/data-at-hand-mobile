@@ -12,7 +12,6 @@ import { inferIntraDayDataSourceType, HighlightFilter } from "@core/exploration/
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { HighlightFilterPanel } from "@components/exploration/HighlightFilterPanel";
 import { DataSourceManager } from "@measure/DataSourceManager";
-import { StyleTemplates } from "@style/Styles";
 import { startLoadingForInfo } from "@state/exploration/data/reducers";
 import { ThunkDispatch } from "redux-thunk";
 import { DataService } from "@measure/service/DataService";
@@ -135,7 +134,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
         this.currentListScrollOffset = scrollY
     }
 
-    
+
     private readonly getItemLayout = (_: any, index: number) => {
         const height = CommonBrowsingChartStyles.CHART_HEIGHT + HEADER_HEIGHT + FOOTER_HEIGHT + separatorStyle.height
         return { length: height, offset: height * index, index }
@@ -187,8 +186,9 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
                     onScroll={this.onScroll}
                     refreshing={this.state.refreshingSince != null}
                     onRefresh={this.onRefresh}
-                    getItemLayout = {this.getItemLayout}
-                /></>
+                    getItemLayout={this.getItemLayout}
+                />
+            </>
         } else return <></>
     }
 }

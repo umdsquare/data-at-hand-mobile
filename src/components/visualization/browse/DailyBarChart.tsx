@@ -1,18 +1,15 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useContext } from 'react';
 import { Rect, Line, G } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartProps, getChartElementColor, getChartElementOpacity } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
-import { DateTimeHelper } from '@utils/time';
 import { DateBandAxis } from './DateBandAxis';
 import { scaleLinear } from 'd3-scale';
 import * as d3Array from 'd3-array';
 import Colors from '@style/Colors';
-import { useSelector } from 'react-redux';
-import { ReduxAppState } from '@state/types';
-import { DataServiceManager } from '@measure/DataServiceManager';
 import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
 import { coverValueInRange } from '@utils/utils';
+import { TodayContext } from '@components/pages/exploration/contexts';
 
 interface Props extends ChartProps {
     valueTickFormat?: (num: number) => string,
@@ -26,13 +23,15 @@ export const DailyBarChart = React.memo((prop: Props) => {
 
     const { shouldHighlightElements, highlightReference } = CommonBrowsingChartStyles.makeHighlightInformation(prop, prop.dataSource)
 
-    const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
-    const today = useMemo(() => DateTimeHelper.toNumberedDateFromDate(DataServiceManager.instance.getServiceByKey(serviceKey).getToday()), [serviceKey])
+    const today = useContext(TodayContext)
+
     const chartArea = CommonBrowsingChartStyles.CHART_AREA
     const scaleX = useMemo(() => CommonBrowsingChartStyles
         .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1]),
-
         [prop.dateRange[0], prop.dateRange[1]])
+
+    
+
 
     const xTickFormat = useMemo(() => CommonBrowsingChartStyles.dateTickFormat(today), [today])
 

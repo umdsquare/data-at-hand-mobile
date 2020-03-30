@@ -1,19 +1,16 @@
-import React from 'react';
-import Svg, { Rect, Line, G } from 'react-native-svg';
+import React, { useContext } from 'react';
+import { Rect, Line, G } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartProps, getChartElementColor, getChartElementOpacity } from './common';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
-import { DateTimeHelper } from '@utils/time';
 import { DateBandAxis } from './DateBandAxis';
 import { scaleLinear } from 'd3-scale';
 import * as d3Array from 'd3-array';
 import Colors from '@style/Colors';
 import { startOfDay, addSeconds, format } from 'date-fns';
-import { useSelector } from 'react-redux';
-import { ReduxAppState } from '@state/types';
-import { DataServiceManager } from '@measure/DataServiceManager';
 import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
 import { coverValueInRange } from '@utils/utils';
+import { TodayContext } from '@components/pages/exploration/contexts';
 
 interface Props extends ChartProps {
     data: Array<{ numberedDate: number, value: number, bedTimeDiffSeconds: number, wakeTimeDiffSeconds: number }>
@@ -31,17 +28,16 @@ const tickFormat = (tick: number) => {
 export const DailySleepRangeChart = React.memo((prop: Props) => {
 
 
+    const today = useContext(TodayContext)
+    
     const { shouldHighlightElements, highlightReference } = CommonBrowsingChartStyles.makeHighlightInformation(prop, prop.dataSource)
 
-    const serviceKey = useSelector((appState: ReduxAppState) => appState.settingsState.serviceKey)
-    const getToday = DataServiceManager.instance.getServiceByKey(serviceKey).getToday
 
     const chartArea = CommonBrowsingChartStyles.CHART_AREA
 
     const scaleX = CommonBrowsingChartStyles
         .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
 
-    const today = DateTimeHelper.toNumberedDateFromDate(getToday())
     const xTickFormat = CommonBrowsingChartStyles.dateTickFormat(today)
 
     const latestTimeDiff = Math.max(d3Array.max(prop.data, d => d.wakeTimeDiffSeconds)!, d3Array.max(prop.data, d => d.bedTimeDiffSeconds)!, prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)

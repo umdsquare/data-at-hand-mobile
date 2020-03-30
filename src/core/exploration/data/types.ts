@@ -87,6 +87,7 @@ export interface IWeightIntraDayLogEntry extends IIntraDayLogEntry {
 }
 
 export interface OverviewData {
+  range: [number, number];
   sourceDataList: Array<OverviewSourceRow>;
   highlightedDays: {[key:number]:boolean|undefined}
 }
