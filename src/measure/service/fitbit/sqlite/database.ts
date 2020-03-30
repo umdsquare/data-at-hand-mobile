@@ -5,6 +5,7 @@ import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOf
 import { IIntraDayHeartRatePoint, BoxPlotInfo } from '@core/exploration/data/types';
 import { DateTimeHelper } from '@utils/time';
 import { Lazy } from '@utils/utils';
+import { notifyError } from '@core/logging/ErrorReportingService';
 
 SQLite.DEBUG(false);
 SQLite.enablePromise(true);
@@ -470,7 +471,9 @@ export class FitbitLocalDbManager {
         return result.rows.raw();
       } else return [];
     } catch (ex) {
-      console.log(ex);
+      notifyError(ex, (report) => {
+        report.context = "Fetching data from Fitbit local cache database"
+      })
       return [];
     }
   }

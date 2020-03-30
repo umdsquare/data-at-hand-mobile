@@ -8,6 +8,7 @@ import { FitbitLocalDbManager } from '../sqlite/database';
 import { DatabaseParams } from 'react-native-sqlite-storage';
 import { parseISO, max } from 'date-fns';
 import { SystemError } from '@utils/errors';
+import { notifyError } from '@core/logging/ErrorReportingService';
 
 
 interface FitbitCredential {
@@ -113,6 +114,9 @@ export default class FitbitOfficialServiceCore implements FitbitServiceCore {
                 } catch (e) {
                     console.log("Authorization failed.")
                     console.log(e, JSON.stringify(e))
+                    notifyError(e, report => {
+                        report.context="Fitbit sign in"
+                    })
                     resolve(null);
                 }
             }).then(res => {

@@ -21,8 +21,6 @@ import { Platform, UIManager } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { theme } from '@style/Theme';
-import { setJSExceptionHandler, setNativeExceptionHandler } from 'react-native-exception-handler';
-import { SystemLogger, VerboseEventTypes } from '@core/logging/SystemLogger';
 
 if (
   Platform.OS === 'android' &&
@@ -30,20 +28,6 @@ if (
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
-
-setJSExceptionHandler((error, isFatal) => {
-  if (error) {
-    SystemLogger.instance.logVerboseToInteractionStateTransition(isFatal === true ? VerboseEventTypes.FatalError : VerboseEventTypes.NonFatalError, {
-      name: error.name,
-      message: error.message,
-      stack: error.stack
-    })
-  }
-}, true)
-
-setNativeExceptionHandler((exceptionMessage) => {
-
-})
 
 const { store, persistor } = CreateStore()
 

@@ -11,10 +11,11 @@ import { SpeechEventQueue } from "../../core/speech/SpeechEventQueue";
 import { SystemLogger, VerboseEventTypes } from "@core/logging/SystemLogger";
 import { NLUResultType, NLUCommandResolver } from "@core/speech/nlp/types";
 import { Lazy } from "@utils/utils";
+import { notifyError } from "@core/logging/ErrorReportingService";
 
 const sessionMutex = new Mutex()
 
-const nluCommandResolver = new Lazy(()=> require("../../core/speech/nlp/nlu").default.instance as NLUCommandResolver)
+const nluCommandResolver = new Lazy(() => require("../../core/speech/nlp/nlu").default.instance as NLUCommandResolver)
 
 export function startSpeechSession(sessionId: string, speechContext: SpeechContext): (dispatch: Dispatch, getState: () => ReduxAppState) => void {
     return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
@@ -130,6 +131,12 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                         } catch (err) {
                             console.log("speech analyze error - ", dictationResult.text)
                             console.log(err)
+                            notifyError(err, report => {
+                                report.context = "Speech command analysis"
+                                report.metadata = {
+                                    dictatedText: dictationResult.text
+                                }
+                            })
                             terminate(releaseMutex, dispatch, TerminationReason.Fail, sessionId)
                         }
                     } else {
