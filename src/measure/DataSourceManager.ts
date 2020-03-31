@@ -1,7 +1,6 @@
-import { DataSourceSpec, DataSourceType, DataSourceCategory, DataSourceCategorySpec, MeasureUnitType } from "@data-at-hand/core/measure/DataSourceSpec";
+import { DataSourceSpec, DataSourceType, DataSourceCategory, DataSourceCategorySpec, MeasureUnitType, IntraDayDataSourceType, inferIntraDayDataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import commaNumber from 'comma-number';
 import convert from "convert-units";
-import { IntraDayDataSourceType, inferIntraDayDataSourceType } from "@core/exploration/types";
 import { Lazy } from "@data-at-hand/core/utils";
 
 export class DataSourceManager {

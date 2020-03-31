@@ -5,7 +5,7 @@ import { ActionTypeBase } from "@state/types"
 import Share from 'react-native-share'
 import { randomString } from "@data-at-hand/core/utils"
 import { NLUResult } from "@core/speech/nlp/types"
-import { InteractionTransitionLogType } from '@data-at-hand/core/logging/types'
+import { InteractionTransitionLogType, VerboseEventTypes } from '@data-at-hand/core/logging/types'
 
 enum LogFileName {
     SpeechCommandLogs = "speech_command.jsonl",
@@ -76,7 +76,7 @@ export class SystemLogger {
         return "log_" + timestamp + "_" + randomString(10)
     }
 
-    logVerboseToInteractionStateTransition(event: string, content: Object, logId?: string, timestamp?: number): void {
+    logVerboseToInteractionStateTransition(event: VerboseEventTypes, content: Object, logId?: string, timestamp?: number): void {
         if (this.currentLogger && this.enabled === true) {
 
             if (timestamp == null) {

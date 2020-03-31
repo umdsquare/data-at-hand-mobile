@@ -1,9 +1,6 @@
 import { ActionTypeBase } from '@state/types';
-import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
-import {
-  TouchingElementInfo,
-  IntraDayDataSourceType,
-} from '@core/exploration/types';
+import { DataSourceType, IntraDayDataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
+import { TouchingElementInfo } from '@data-at-hand/core/exploration/TouchingElementInfo';
 import { CyclicTimeFrame, CycleDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { startOfDay, subDays, endOfDay } from 'date-fns';
 import { DateTimeHelper } from '@data-at-hand/core/utils/time';
@@ -117,13 +114,14 @@ export interface SetCycleDimensionAction extends ExplorationActionBase {
   cycleDimension: CycleDimension;
 }
 
+export interface ShiftAllRangesAction extends ExplorationActionBase {
+  direction: 'past' | 'future'
+}
+
 export interface SetTouchingElementInfoAction extends ActionTypeBase {
   info: TouchingElementInfo | null;
 }
 
-export interface ShiftAllRangesAction extends ExplorationActionBase {
-  direction: 'past' | 'future'
-}
 
 
 export type ExplorationAction =

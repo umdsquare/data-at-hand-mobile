@@ -1,10 +1,4 @@
 import {
-  makeInitialStateInfo,
-  TouchingElementInfo,
-  inferIntraDayDataSourceType,
-  shallowCopyExplorationInfo,
-} from '@core/exploration/types';
-import {
   ExplorationAction,
   ExplorationActionType,
   SetRangeAction,
@@ -28,8 +22,9 @@ import {
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
 import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
 import { DateTimeHelper } from '@data-at-hand/core/utils/time';
-import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
+import { DataSourceType, inferIntraDayDataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { ExplorationInfo, ParameterType, ExplorationType, ParameterKey } from '@data-at-hand/core/exploration/ExplorationInfo';
+import { TouchingElementInfo } from '@data-at-hand/core/exploration/TouchingElementInfo';
 
 export interface ExplorationState {
   info: ExplorationInfo;
@@ -490,3 +485,29 @@ export const explorationStateReducer = (
     return newState;
   }
 };
+
+
+
+function shallowCopyExplorationInfo(original: ExplorationInfo): ExplorationInfo {
+  return {
+    ...original,
+    values: original.values.map(v => ({ ...v })),
+    highlightFilter: original.highlightFilter
+  }
+}
+
+function makeInitialStateInfo(): ExplorationInfo {
+  const now = startOfDay(new Date());
+  return {
+    type: ExplorationType.B_Overview,
+    values: [
+      {
+        parameter: ParameterType.Range,
+        value: [
+          DateTimeHelper.toNumberedDateFromDate(subDays(now, 6)),
+          DateTimeHelper.toNumberedDateFromDate(endOfDay(now)),
+        ],
+      },
+    ],
+  };
+}

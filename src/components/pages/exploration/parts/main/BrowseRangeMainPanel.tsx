@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useMemo } from "react";
 import { View, FlatList, Text, StyleSheet, ActivityIndicator, LayoutAnimation, UIManager, findNodeHandle } from 'react-native';
-import { MeasureUnitType, DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
+import { MeasureUnitType, DataSourceType, inferIntraDayDataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, InteractionType, setHighlightFilter } from "@state/exploration/interaction/actions";
 import { connect } from "react-redux";
 import { ReduxAppState } from "@state/types";
@@ -8,7 +8,7 @@ import { Dispatch } from "redux";
 import { DataSourceBrowseData } from "@core/exploration/data/types";
 import { DataSourceChartFrame } from "@components/exploration/DataSourceChartFrame";
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
-import { TouchingElementInfo, inferIntraDayDataSourceType, TouchingElementValueType } from "@core/exploration/types";
+import { TouchingElementInfo, TouchingElementValueType } from "@data-at-hand/core/exploration/TouchingElementInfo";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import { format, startOfDay, addSeconds } from "date-fns";
 import { StyleTemplates } from "@style/Styles";

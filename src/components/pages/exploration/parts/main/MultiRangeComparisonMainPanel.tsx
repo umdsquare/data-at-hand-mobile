@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper'
-import { TouchingElementInfo, TouchingElementValueType } from '@core/exploration/types'
+import { TouchingElementInfo, TouchingElementValueType } from '@data-at-hand/core/exploration/TouchingElementInfo'
 import { ReduxAppState, ActionTypeBase } from '@state/types'
 import { RangeAggregatedComparisonData, IAggregatedRangeValue, IAggregatedValue } from '@core/exploration/data/types'
 import { DataSourceType, MeasureUnitType } from '@data-at-hand/core/measure/DataSourceSpec'

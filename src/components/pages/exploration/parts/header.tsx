@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { IntraDayDataSourceType, getIntraDayDataSourceName, inferDataSource } from "@core/exploration/types";
 import { SafeAreaView, View, Text, StyleSheet, TextStyle, ViewStyle, LayoutAnimation, ViewProps } from 'react-native';
 import { CategoricalRow, CategoricalRowProps } from '@components/exploration/CategoricalRow';
 import { DataSourceIcon } from '@components/common/DataSourceIcon';
@@ -9,7 +8,7 @@ import { Button } from 'react-native-elements';
 import { Sizes } from '@style/Sizes';
 import { StyleTemplates } from '@style/Styles';
 import { DataSourceManager } from '@measure/DataSourceManager';
-import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
+import { DataSourceType, IntraDayDataSourceType, getIntraDayDataSourceName, inferDataSource } from '@data-at-hand/core/measure/DataSourceSpec';
 import { createSetRangeAction, setDataSourceAction, InteractionType, goBackAction, setDateAction, setIntraDayDataSourceAction, setCycleTypeAction, setCycleDimensionAction } from '@state/exploration/interaction/actions';
 import Colors from '@style/Colors';
 import { useDispatch, useSelector } from 'react-redux';

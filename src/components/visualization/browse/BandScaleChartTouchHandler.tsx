@@ -1,8 +1,8 @@
 import React, { useMemo, useCallback } from 'react';
 import { LayoutRectangle } from 'react-native';
 import { ScaleBand } from 'd3-scale';
-import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
-import { TouchingElementInfo, TouchingElementValueType, inferIntraDayDataSourceType } from '@core/exploration/types';
+import { DataSourceType, inferIntraDayDataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
+import { TouchingElementInfo, TouchingElementValueType } from '@data-at-hand/core/exploration/TouchingElementInfo';
 import { CategoricalTouchableSvg } from '../CategoricalTouchableSvg';
 import { Rect, G } from 'react-native-svg';
 import { getScaleStepLeft } from '../d3-utils';

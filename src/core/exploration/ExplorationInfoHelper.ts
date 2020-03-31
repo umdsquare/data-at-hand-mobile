@@ -1,8 +1,4 @@
-import {
-  IntraDayDataSourceType,
-  getIntraDayDataSourceName,
-} from './types';
-import { DataSourceType, DataSourceSpec } from '@data-at-hand/core/measure/DataSourceSpec';
+import { DataSourceType, DataSourceSpec, IntraDayDataSourceType, getIntraDayDataSourceName } from '@data-at-hand/core/measure/DataSourceSpec';
 import { DataSourceManager } from '@measure/DataSourceManager';
 import {
   ExplorationInfo,

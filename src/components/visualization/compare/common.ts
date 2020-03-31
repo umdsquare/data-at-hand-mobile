@@ -2,7 +2,7 @@ import { startOfDay, format, addSeconds } from 'date-fns';
 import { CyclicTimeFrame, getCycleDimensionWithTimeKey } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { ScaleBand } from 'd3-scale';
 import { LayoutRectangle } from 'react-native';
-import { TouchingElementInfo, TouchingElementValueType } from '@core/exploration/types';
+import { TouchingElementInfo, TouchingElementValueType } from '@data-at-hand/core/exploration/TouchingElementInfo';
 import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { getScaleStepLeft } from '../d3-utils';
 import { ParameterType } from '@data-at-hand/core/exploration/ExplorationInfo';

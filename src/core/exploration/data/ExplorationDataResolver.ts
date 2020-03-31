@@ -1,9 +1,8 @@
-import { IntraDayDataSourceType } from '@core/exploration/types';
 import { OverviewData, OverviewSourceRow, GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData, FilteredDailyValues, StepCountRangedData, WeightRangedData, DataSourceBrowseData } from './types';
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
 import { DataSourceManager } from '@measure/DataSourceManager';
 import { DataServiceManager } from '@measure/DataServiceManager';
-import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
+import { DataSourceType, IntraDayDataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { CyclicTimeFrame, CycleDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { DataService } from '@measure/service/DataService';

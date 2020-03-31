@@ -1,7 +1,6 @@
-import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
-import { IntraDayDataSourceType } from '@core/exploration/types';
+import { DataSourceType, IntraDayDataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData, FilteredDailyValues, OverviewSourceRow } from '../../core/exploration/data/types';
-import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension, getFilteredCycleDimensionList } from '@data-at-hand/core/exploration/CyclicTimeFrame';
+import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { startOfMonth, endOfMonth, addMonths } from 'date-fns';
 import { getNumberSequence } from '@data-at-hand/core/utils';

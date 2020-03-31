@@ -117,7 +117,7 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                                     SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.VoidSpeechAction, { action: inferredActionWithMetadata, speechLogId: speechCommandLogId })
                                     break;
                                 case NLUResultType.Fail:
-                                    SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.SpeechFail, { speech: dictationResult.text, speechLogId: speechCommandLogId })
+                                    SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.SpeechFail, { speechLogId: speechCommandLogId })
                                     break;
                             }
 

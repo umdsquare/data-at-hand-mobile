@@ -1,7 +1,7 @@
 import React from 'react'
 import { Animated, View, Text, StyleSheet, TextStyle, Dimensions, LayoutRectangle, Easing, LayoutChangeEvent, Platform } from 'react-native'
 import { StyleTemplates } from '@style/Styles'
-import { TouchingElementInfo, TouchingElementValueType } from '@core/exploration/types'
+import { TouchingElementInfo, TouchingElementValueType } from '@data-at-hand/core/exploration/TouchingElementInfo'
 import { ReduxAppState } from '@state/types'
 import { connect } from 'react-redux'
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper'
