@@ -44,8 +44,8 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
 
         if (nextProps.data != null && nextProps.data.range != null) {
 
-            const currentRange = currentState.scaleX.range()
-            if (currentRange[0] !== nextProps.data.range[0] || currentRange[1] !== nextProps.data.range[1]){
+            const currenDomain = currentState.scaleX.domain()
+            if (currenDomain[0] !== nextProps.data.range[0] || currenDomain[1] !== nextProps.data.range[1]){
                 return {
                     ...currentState,
                     scaleX: CommonBrowsingChartStyles.makeDateScale(currentState.scaleX.copy(), nextProps.data.range[0], nextProps.data.range[1])
@@ -183,6 +183,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
 
     render() {
         if (this.props.data != null) {
+            console.log("scale X:", this.state.scaleX.domain())
             return <DateRangeScaleContext.Provider value={this.state.scaleX}>
                 {
                     this.props.highlightFilter != null ? <HighlightFilterPanel

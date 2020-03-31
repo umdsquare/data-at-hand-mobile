@@ -51,3 +51,37 @@ export function coverValueInRange(range: [number, number], value: number | undef
     }
     return range
 }
+
+export function clusterSortedNumbers(arr: Array<number>, minDensity = 5): Array<Array<number>> {
+    if (arr.length > 2) {
+        const clusters: Array<Array<number>> = []
+        let currentCluster: Array<number> = [arr[0]]
+        let pointer = 0
+        while (++pointer < arr.length) {
+            const prev = arr[pointer - 1]
+            const curr = arr[pointer]
+            if (curr - prev <= minDensity) {
+                currentCluster.push(curr)
+            } else {
+                //separate cluster
+                clusters.push(currentCluster)
+                currentCluster = [curr]
+            }
+        }
+        clusters.push(currentCluster)
+        return clusters
+    } else if (arr.length <= 2) {
+        return [arr]
+    }
+}
+
+export function fastConcatTo<T>(arr1: Array<T>, arr2: Array<T>): Array<T>{
+    const arr1Length = arr1.length
+    const arr2Length = arr2.length
+    arr1.length = arr1Length + arr2Length
+    for(let i = 0; i<arr2Length; i++){
+        arr1[arr1Length + i] = arr2[i]
+    }
+
+    return arr1
+}

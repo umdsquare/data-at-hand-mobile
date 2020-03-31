@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Circle, Line, Path, G } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartProps, getChartElementColor, getChartElementOpacity, DateRangeScaleContext } from './common';
 import { AxisSvg } from '@components/visualization/axis';
@@ -9,7 +9,7 @@ import * as d3Array from 'd3-array';
 import * as d3Shape from 'd3-shape';
 import Colors from '@style/Colors';
 import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
-import { coverValueInRange } from '@utils/utils';
+import { coverValueInRange, clusterSortedNumbers } from '@utils/utils';
 import { TodayContext } from '@components/pages/exploration/contexts';
 
 
@@ -40,6 +40,12 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
         .curve(d3Shape.curveCardinal)
 
     const avg = d3Array.mean(prop.data, d => d.value)!
+
+/*
+    const clusters = useMemo(() => {
+        return clusterSortedNumbers(prop.data.map(d => scaleX.domain().indexOf(d.numberedDate)))
+    }, [prop.dateRange, prop.data, scaleX])
+    console.log("clusters:", clusters)    */
 
     return <BandScaleChartTouchHandler
         chartContainerWidth={CommonBrowsingChartStyles.CHART_WIDTH}

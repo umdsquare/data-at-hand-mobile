@@ -1,6 +1,7 @@
 import { DateTimeHelper } from "./time"
 import { differenceInDays, addDays, subDays } from "date-fns"
 import binarySearch from 'binary-search';
+import { fastConcatTo } from "./utils";
 
 const compareFunc = (element: number, needle: number) => element - needle
 
@@ -45,13 +46,10 @@ export class DateSequenceCache {
 
                     if(range[1] < this.currentCache[0]){
                         //left
-                        rangeToAttach.length += this.currentCache.length
-                        rangeToAttach.push(...this.currentCache)
-                        this.currentCache = rangeToAttach
+                        this.currentCache = fastConcatTo(rangeToAttach, this.currentCache)
                     }else{
                         //right
-                        this.currentCache.length += rangeToAttach.length
-                        this.currentCache.push(...rangeToAttach)
+                        fastConcatTo(this.currentCache, rangeToAttach)
                     }
                 }
             } else {
@@ -61,9 +59,7 @@ export class DateSequenceCache {
                         start,
                         DateTimeHelper.toNumberedDateFromDate(subDays(DateTimeHelper.toDate(this.currentCache[0]), 1))
                     )
-                    rangeToAttach.length += this.currentCache.length
-                    rangeToAttach.push(...this.currentCache)
-                    this.currentCache = rangeToAttach
+                    this.currentCache = fastConcatTo(rangeToAttach, this.currentCache)
                     return
                 } else {
                     //right
@@ -71,8 +67,7 @@ export class DateSequenceCache {
                         DateTimeHelper.toNumberedDateFromDate(addDays(DateTimeHelper.toDate(this.currentCache[0]), 1)),
                         end
                     )
-                    this.currentCache.length += rangeToAttach.length
-                    this.currentCache.push(...rangeToAttach)
+                    fastConcatTo(this.currentCache, rangeToAttach)
                     return
                 }
             }

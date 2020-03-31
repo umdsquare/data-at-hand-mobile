@@ -8,6 +8,7 @@ import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
 import { DateTimeHelper } from '@utils/time';
 import { DataService } from '@measure/service/DataService';
 import { sum, mean, min, max } from 'd3-array';
+import { fastConcatTo } from '@utils/utils';
 
 
 const dateSortFunc = (a: { numberedDate: number; }, b: { numberedDate: number; }) => {
@@ -106,8 +107,7 @@ class ExplorationDataResolver {
             {
               newData.data = prevData.data.filter((datum: { numberedDate: number; }) => datum.numberedDate <= range[1] && datum.numberedDate >= range[0])
               if (newPart) {
-                newData.data.length += newPart.data.length
-                newData.data.push(...newPart.data)
+                fastConcatTo(newData.data, newPart.data)
               }
               newData.data.sort(dateSortFunc)
             }
@@ -121,11 +121,8 @@ class ExplorationDataResolver {
               }
 
               if (newPart) {
-                newData.data.trend.length += newPart.data.trend.length
-                newData.data.trend.push(...newPart.data.trend)
-
-                newData.data.logs.length += newPart.data.logs.length
-                newData.data.logs.push(...newPart.data.logs)
+                fastConcatTo(newData.data.trend, newPart.data.trend)
+                fastConcatTo(newData.data.logs, newPart.data.logs)
               }
 
               newData.data.logs.sort(dateSortFunc)
