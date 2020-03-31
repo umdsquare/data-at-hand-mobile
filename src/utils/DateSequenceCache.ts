@@ -45,10 +45,13 @@ export class DateSequenceCache {
 
                     if(range[1] < this.currentCache[0]){
                         //left
-                        this.currentCache = rangeToAttach.concat(this.currentCache)
+                        rangeToAttach.length += this.currentCache.length
+                        rangeToAttach.push(...this.currentCache)
+                        this.currentCache = rangeToAttach
                     }else{
                         //right
-                        this.currentCache = this.currentCache.concat(rangeToAttach)
+                        this.currentCache.length += rangeToAttach.length
+                        this.currentCache.push(...rangeToAttach)
                     }
                 }
             } else {
@@ -58,7 +61,9 @@ export class DateSequenceCache {
                         start,
                         DateTimeHelper.toNumberedDateFromDate(subDays(DateTimeHelper.toDate(this.currentCache[0]), 1))
                     )
-                    this.currentCache = rangeToAttach.concat(this.currentCache)
+                    rangeToAttach.length += this.currentCache.length
+                    rangeToAttach.push(...this.currentCache)
+                    this.currentCache = rangeToAttach
                     return
                 } else {
                     //right
@@ -66,7 +71,8 @@ export class DateSequenceCache {
                         DateTimeHelper.toNumberedDateFromDate(addDays(DateTimeHelper.toDate(this.currentCache[0]), 1)),
                         end
                     )
-                    this.currentCache = this.currentCache.concat(rangeToAttach)
+                    this.currentCache.length += rangeToAttach.length
+                    this.currentCache.push(...rangeToAttach)
                     return
                 }
             }

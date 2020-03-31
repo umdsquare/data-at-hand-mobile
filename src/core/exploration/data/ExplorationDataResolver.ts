@@ -106,7 +106,8 @@ class ExplorationDataResolver {
             {
               newData.data = prevData.data.filter((datum: { numberedDate: number; }) => datum.numberedDate <= range[1] && datum.numberedDate >= range[0])
               if (newPart) {
-                newData.data = newData.data.concat(newPart.data)
+                newData.data.length += newPart.data.length
+                newData.data.push(...newPart.data)
               }
               newData.data.sort(dateSortFunc)
             }
@@ -120,8 +121,11 @@ class ExplorationDataResolver {
               }
 
               if (newPart) {
-                newData.data.trend = newData.data.trend.concat(newPart.data.trend)
-                newData.data.logs = newData.data.logs.concat(newPart.data.logs)
+                newData.data.trend.length += newPart.data.trend.length
+                newData.data.trend.push(...newPart.data.trend)
+
+                newData.data.logs.length += newPart.data.logs.length
+                newData.data.logs.push(...newPart.data.logs)
               }
 
               newData.data.logs.sort(dateSortFunc)
