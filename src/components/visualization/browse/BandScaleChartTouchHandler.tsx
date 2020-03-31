@@ -2,7 +2,7 @@ import React, { useMemo, useCallback } from 'react';
 import { LayoutRectangle } from 'react-native';
 import { ScaleBand } from 'd3-scale';
 import { DataSourceType } from '@measure/DataSourceSpec';
-import { TouchingElementInfo, ParameterType, TouchingElementValueType, inferIntraDayDataSourceType } from '@core/exploration/types';
+import { TouchingElementInfo, TouchingElementValueType, inferIntraDayDataSourceType } from '@core/exploration/types';
 import { CategoricalTouchableSvg } from '../CategoricalTouchableSvg';
 import { Rect, G } from 'react-native-svg';
 import { getScaleStepLeft } from '../d3-utils';
@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createGoToBrowseDayAction, InteractionType, setTouchElementInfo } from '@state/exploration/interaction/actions';
 import { ReduxAppState } from '@state/types';
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
+import { ParameterType } from '@core/exploration/ExplorationInfo';
 
 export const BandScaleChartTouchHandler = (props: {
     chartContainerWidth: number,

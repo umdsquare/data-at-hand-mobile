@@ -8,7 +8,8 @@ import { Mutex } from 'async-mutex';
 import { SpeechContext } from "../../core/speech/nlp/context";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { SpeechEventQueue } from "../../core/speech/SpeechEventQueue";
-import { SystemLogger, VerboseEventTypes } from "@core/logging/SystemLogger";
+import { SystemLogger } from "@core/logging/SystemLogger";
+import { VerboseEventTypes } from '@data-at-hand/logging/types';
 import { NLUResultType, NLUCommandResolver } from "@core/speech/nlp/types";
 import { Lazy } from "@utils/utils";
 import { notifyError } from "@core/logging/ErrorReportingService";
@@ -100,22 +101,23 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                                 }
                             )
 
-                            SystemLogger.instance.logSpeechCommandResult(
+                            const speechCommandLogId = SystemLogger.instance.logSpeechCommandResult(
                                 dictationResult.text,
                                 currentState.explorationState.info,
                                 context,
                                 nluResult
-                            ).then()
+                            )
 
                             switch (nluResult.type) {
                                 case NLUResultType.Effective:
-                                    const inferredActionWithMetadata = setMetadataToAction(nluResult.action!, { speech: dictationResult.text })
+                                    const inferredActionWithMetadata = setMetadataToAction(nluResult.action!, { speechLogId: speechCommandLogId })
                                     dispatch(inferredActionWithMetadata)
                                     break;
                                 case NLUResultType.Void:
+                                    SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.VoidSpeechAction, { action: inferredActionWithMetadata, speechLogId: speechCommandLogId })
                                     break;
                                 case NLUResultType.Fail:
-                                    SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.SpeechFail, { speech: dictationResult.text })
+                                    SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.SpeechFail, { speech: dictationResult.text, speechLogId: speechCommandLogId })
                                     break;
                             }
 

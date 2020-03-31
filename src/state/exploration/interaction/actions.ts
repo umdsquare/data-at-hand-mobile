@@ -3,11 +3,11 @@ import { DataSourceType } from '@measure/DataSourceSpec';
 import {
   TouchingElementInfo,
   IntraDayDataSourceType,
-  HighlightFilter,
 } from '@core/exploration/types';
 import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
 import { startOfDay, subDays, endOfDay } from 'date-fns';
 import { DateTimeHelper } from '@utils/time';
+import { HighlightFilter } from '@core/exploration/ExplorationInfo';
 
 export const USER_INTERACTION_ACTION_PREFIX = "exploration:interaction:user"
 

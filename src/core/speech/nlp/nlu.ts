@@ -2,13 +2,14 @@ import { SpeechContext, SpeechContextType, TimeSpeechContext, RangeElementSpeech
 import { preprocess } from "./preprocessor";
 import { ActionTypeBase } from "../../../state/types";
 import { VariableType, VariableInfo, PreProcessedInputText, Intent, NLUOptions, ConditionInfo, NLUResult, NLUResultType, NLUCommandResolver } from "./types";
-import { ExplorationInfo, ExplorationType, ParameterType, inferIntraDayDataSourceType, inferDataSource, HighlightFilter } from "../../exploration/types";
+import { inferIntraDayDataSourceType, inferDataSource } from "../../exploration/types";
 import { setDateAction, InteractionType, createSetRangeAction, setDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, createGoToComparisonCyclicAction, setCycleTypeAction, setHighlightFilter } from "../../../state/exploration/interaction/actions";
 import { explorationInfoHelper } from "../../exploration/ExplorationInfoHelper";
 import { differenceInDays } from "date-fns";
 import { DateTimeHelper } from "@utils/time";
 import { DataSourceType } from "../../../measure/DataSourceSpec";
 import { ExplorationState, explorationStateReducer } from "@state/exploration/interaction/reducers";
+import { ExplorationInfo, ParameterType, HighlightFilter, ExplorationType } from "@core/exploration/ExplorationInfo";
 
 enum EntityPriority {
     None = 0,

@@ -1,5 +1,5 @@
 import { DataSourceType } from '@measure/DataSourceSpec';
-import { IntraDayDataSourceType, HighlightFilter } from '@core/exploration/types';
+import { IntraDayDataSourceType } from '@core/exploration/types';
 import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData, FilteredDailyValues, OverviewSourceRow } from '../../core/exploration/data/types';
 import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension, getFilteredCycleDimensionList } from '../../core/exploration/cyclic_time';
 import { DateTimeHelper } from '@utils/time';
@@ -8,6 +8,7 @@ import { getNumberSequence } from '@utils/utils';
 import { writeFile, TemporaryDirectoryPath, exists, mkdir } from 'react-native-fs';
 import { zip } from 'react-native-zip-archive'
 import Share from 'react-native-share'
+import { HighlightFilter } from '@core/exploration/ExplorationInfo';
 
 export interface ServiceActivationResult {
   success: boolean,

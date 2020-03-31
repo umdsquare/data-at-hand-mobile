@@ -9,7 +9,7 @@ import commaNumber from 'comma-number';
 import { DateTimeHelper } from '@utils/time';
 import { startOfDay, addSeconds, format } from 'date-fns';
 import { scaleLinear } from 'd3-scale';
-import { HighlightFilter } from '@core/exploration/types';
+import { HighlightFilter } from '@core/exploration/ExplorationInfo';
 import { DataSourceIcon } from '@components/common/DataSourceIcon';
 import { DailyBarChart } from '@components/visualization/browse/DailyBarChart';
 import { DailyHeartRateChart } from '@components/visualization/browse/DailyHeartRateChart';

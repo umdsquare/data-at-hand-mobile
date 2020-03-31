@@ -31,7 +31,7 @@ export namespace SQLiteHelper {
   ): {createQuery: string; indexQueries: string[]} {
     const result = {
       createQuery: '',
-      indexQueries: [],
+      indexQueries: new Array<string>(),
     };
 
     //CREATE TABLE query

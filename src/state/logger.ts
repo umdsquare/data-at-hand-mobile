@@ -1,7 +1,8 @@
 import { MiddlewareAPI, Dispatch } from "redux"
 import { ActionTypeBase, ReduxAppState } from "@state/types"
 import { USER_INTERACTION_ACTION_PREFIX, ExplorationActionType } from "@state/exploration/interaction/actions"
-import { SystemLogger, VerboseEventTypes } from "@core/logging/SystemLogger"
+import { SystemLogger } from "@core/logging/SystemLogger"
+import { VerboseEventTypes } from '@data-at-hand/logging/src/logging/types'
 import { captureScreen } from "react-native-view-shot";
 import { moveFile, exists, mkdir } from "react-native-fs";
 import path from 'react-native-path'

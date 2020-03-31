@@ -1,4 +1,4 @@
-import { NumericConditionType, ExplorationInfo } from "../../exploration/types"
+import { NumericConditionType, ExplorationInfo } from "@core/exploration/ExplorationInfo"
 import { randomString, STRING_SET_ALPHABETS, STRING_SET_NUMBERS } from "@utils/utils"
 import { DataSourceType, MeasureUnitType } from "@measure/DataSourceSpec"
 import { ActionTypeBase } from "@state/types"

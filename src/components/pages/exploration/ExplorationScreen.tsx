@@ -9,7 +9,7 @@ import { BottomBar } from "@components/pages/exploration/parts/main/BottomBar";
 import { ExplorationViewHeader } from '@components/pages/exploration/parts/header';
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
 import { DataServiceManager } from "@measure/DataServiceManager";
-import { ExplorationInfo, ExplorationType, ExplorationMode } from "@core/exploration/types";
+import { ExplorationInfo, ExplorationType, ExplorationMode } from "@core/exploration/ExplorationInfo";
 import { startLoadingForInfo } from "@state/exploration/data/reducers";
 import { ExplorationAction, InteractionType, createGoToBrowseOverviewAction, createRestorePreviousInfoAction, goBackAction } from "@state/exploration/interaction/actions";
 import { Button } from "react-native-elements";

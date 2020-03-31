@@ -1,4 +1,10 @@
 import {
+  IntraDayDataSourceType,
+  getIntraDayDataSourceName,
+} from './types';
+import { DataSourceType, DataSourceSpec } from '@measure/DataSourceSpec';
+import { DataSourceManager } from '@measure/DataSourceManager';
+import {
   ExplorationInfo,
   ParameterType,
   ParameterKey,
@@ -6,12 +12,7 @@ import {
   ExplorationMode,
   ExplorationInfoParameter,
   ExplorationInfoParams,
-  IntraDayDataSourceType,
-  getIntraDayDataSourceName,
-} from './types';
-import { DataSourceType, DataSourceSpec } from '@measure/DataSourceSpec';
-import { DataSourceManager } from '@measure/DataSourceManager';
-import { ActionTypeBase } from '@state/types';
+} from './ExplorationInfo';
 
 class ExplorationInfoHelper {
   getParameterValue<T>(

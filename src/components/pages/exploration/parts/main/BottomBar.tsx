@@ -5,7 +5,7 @@ import { Sizes } from '@style/Sizes';
 import { StyleTemplates } from '@style/Styles';
 import Svg, { Path } from 'react-native-svg';
 import { VoiceInputButton } from '@components/exploration/VoiceInputButton';
-import { ExplorationMode } from '@core/exploration/types';
+import { ExplorationMode } from '@core/exploration/ExplorationInfo';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
 import { SpeechRecognizerSessionStatus } from '@state/speech/types';

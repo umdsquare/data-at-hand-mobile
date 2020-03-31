@@ -6,7 +6,7 @@ import { Dispatch } from 'redux';
 import { ReduxAppState, ActionTypeBase } from '@state/types';
 import { DataSourceType, MeasureUnitType } from '@measure/DataSourceSpec';
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
-import { ParameterType } from '@core/exploration/types';
+import { ParameterType } from '@core/exploration/ExplorationInfo';
 import { connect } from 'react-redux';
 import { SingleValueCyclicChart } from '@components/visualization/compare/SingleValueCyclicChart';
 import commaNumber from 'comma-number';

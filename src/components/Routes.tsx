@@ -1,4 +1,4 @@
-import { createStackNavigator, HeaderBackButton, TransitionPresets, StackNavigationProp } from '@react-navigation/stack';
+import { createStackNavigator, HeaderBackButton, TransitionPresets } from '@react-navigation/stack';
 import { ExplorationScreen } from '@components/pages/exploration/ExplorationScreen';
 import { SettingsScreen } from '@components/pages/settings/SettingsScreen';
 import { ServiceSelectionScreen } from '@components/pages/sources/service-wizard/ServiceSelectionScreen';

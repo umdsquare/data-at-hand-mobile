@@ -1,7 +1,7 @@
 import React from 'react'
 import { Animated, View, Text, StyleSheet, TextStyle, Dimensions, LayoutRectangle, Easing, LayoutChangeEvent, Platform } from 'react-native'
 import { StyleTemplates } from '@style/Styles'
-import { TouchingElementInfo, TouchingElementValueType, ParameterType, ExplorationType } from '@core/exploration/types'
+import { TouchingElementInfo, TouchingElementValueType } from '@core/exploration/types'
 import { ReduxAppState } from '@state/types'
 import { connect } from 'react-redux'
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper'
@@ -25,6 +25,7 @@ import { SpeechContext, SpeechContextHelper } from '@core/speech/nlp/context'
 import { createSetSpeechContextAction } from '@state/speech/actions'
 import { Lazy } from '@utils/utils'
 import { TodayContext } from '../../contexts'
+import { ExplorationType, ParameterType } from '@core/exploration/ExplorationInfo'
 
 const borderRadius = 8
 

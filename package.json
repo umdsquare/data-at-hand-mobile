@@ -1,5 +1,5 @@
 {
-  "name": "data-at-hand",
+  "name": "@data-at-hand/mobile",
   "description": "Mobile application for exploring fitness data using both speech and touch interaction.",
   "author": "Young-Ho Kim (http://younghokim.net)",
   "license": "MIT",
@@ -27,6 +27,7 @@
     "postversion": "react-native-version --target ios"
   },
   "dependencies": {
+    "@data-at-hand/logging": "github:data-at-hand/data-at-hand-logging",
     "@date/holidays-us": "^0.4.0",
     "@react-native-community/async-storage": "^1.8.1",
     "@react-native-community/datetimepicker": "^2.3.0",

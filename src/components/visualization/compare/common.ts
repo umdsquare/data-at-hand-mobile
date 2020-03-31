@@ -2,9 +2,10 @@ import { startOfDay, format, addSeconds } from 'date-fns';
 import { CyclicTimeFrame, getCycleDimensionWithTimeKey } from '@core/exploration/cyclic_time';
 import { ScaleBand } from 'd3-scale';
 import { LayoutRectangle } from 'react-native';
-import { TouchingElementInfo, TouchingElementValueType, ParameterType } from '@core/exploration/types';
+import { TouchingElementInfo, TouchingElementValueType } from '@core/exploration/types';
 import { DataSourceType } from '@measure/DataSourceSpec';
 import { getScaleStepLeft } from '../d3-utils';
+import { ParameterType } from '@core/exploration/ExplorationInfo';
 
 const dowNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const monthNames = [

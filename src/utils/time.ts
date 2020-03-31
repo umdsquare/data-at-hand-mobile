@@ -1,4 +1,7 @@
-import { getYear, getMonth, getDate, differenceInDays, subDays, addDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, addMonths, lastDayOfMonth, isSameYear, startOfMonth, endOfMonth, format, isSameDay, differenceInCalendarDays, isMonday, isSunday, getDayOfYear, isLeapYear, startOfWeek, startOfYear, endOfYear, addYears, endOfWeek, addWeeks } from "date-fns"
+import {
+    getYear, getMonth, getDate, differenceInDays, subDays, addDays, isSameMonth, isFirstDayOfMonth, isLastDayOfMonth, addMonths,
+    isSameYear, startOfMonth, endOfMonth, format, isSameDay, differenceInCalendarDays, isMonday, isSunday, getDayOfYear, isLeapYear, startOfWeek, startOfYear, endOfYear, addYears, endOfWeek, addWeeks
+} from "date-fns"
 import { toDate } from "date-fns-tz"
 
 /**
@@ -207,7 +210,7 @@ export class DateTimeHelper {
 
     static pageRange(start: number | Date, end: number | Date, direction: -1 | 1): [number, number] {
         const startDate: Date = typeof start === 'number' ? DateTimeHelper.toDate(start) : start
-        const endDate: Date = typeof end === 'number'? DateTimeHelper.toDate(end) : end
+        const endDate: Date = typeof end === 'number' ? DateTimeHelper.toDate(end) : end
         const semanticTest = this.rangeSemantic(startDate, endDate)
         if (semanticTest) {
             return this.getSemanticRange(startDate, semanticTest.semantic, direction)

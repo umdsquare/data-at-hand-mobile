@@ -1,4 +1,3 @@
-import { FitbitService } from './FitbitService';
 import { FitbitWeightQueryResult, FitbitWeightTrendQueryResult } from './types';
 import { FitbitServiceMeasure } from './FitbitServiceMeasure';
 import { FitbitSummaryLogMeasure } from './FitbitSummaryLogMeasure';
@@ -14,6 +13,7 @@ import { WeightRangedData, GroupedData, IAggregatedValue, FilteredDailyValues, B
 import { DataSourceType } from '../../DataSourceSpec';
 import { FitbitLocalTableName } from './sqlite/database';
 import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
+import { DataService } from '../DataService';
 
 export class FitbitWeightMeasure extends FitbitServiceMeasure {
   key: string = 'weight';
@@ -22,7 +22,7 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
   private trendMeasure: FitbitWeightTrendMeasure;
   private logMeasure: FitbitWeightLogMeasure;
 
-  constructor(service: FitbitService) {
+  constructor(service: DataService) {
     super(service);
     this.trendMeasure = new FitbitWeightTrendMeasure(service);
     this.logMeasure = new FitbitWeightLogMeasure(service);

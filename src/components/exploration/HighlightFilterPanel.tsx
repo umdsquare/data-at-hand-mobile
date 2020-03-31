@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react'
-import { HighlightFilter, NumericConditionType } from '@core/exploration/types'
+import { HighlightFilter, NumericConditionType } from '@core/exploration/ExplorationInfo'
 import { View, StyleSheet, Text, Animated, Platform, ActionSheetIOS, UIManager, findNodeHandle } from 'react-native'
 import Colors from '@style/Colors'
 import { DataSourceManager } from '@measure/DataSourceManager'

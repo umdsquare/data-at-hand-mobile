@@ -1,4 +1,4 @@
-import { ExplorationInfo, ExplorationType, ParameterType, IntraDayDataSourceType, ParameterKey } from '@core/exploration/types';
+import { IntraDayDataSourceType } from '@core/exploration/types';
 import { OverviewData, OverviewSourceRow, GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData, FilteredDailyValues, StepCountRangedData, WeightRangedData, DataSourceBrowseData } from './types';
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
 import { DataSourceManager } from '@measure/DataSourceManager';
@@ -9,6 +9,7 @@ import { DateTimeHelper } from '@utils/time';
 import { DataService } from '@measure/service/DataService';
 import { sum, mean, min, max } from 'd3-array';
 import { fastConcatTo } from '@utils/utils';
+import { ExplorationInfo, ExplorationType, ParameterType, ParameterKey } from '../ExplorationInfo';
 
 
 const dateSortFunc = (a: { numberedDate: number; }, b: { numberedDate: number; }) => {

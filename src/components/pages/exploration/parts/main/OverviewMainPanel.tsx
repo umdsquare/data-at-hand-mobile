@@ -8,7 +8,7 @@ import { OverviewData, OverviewSourceRow } from "@core/exploration/data/types";
 import { MeasureUnitType, DataSourceType } from "@measure/DataSourceSpec";
 import { Sizes } from "@style/Sizes";
 import { DateTimeHelper } from "@utils/time";
-import { inferIntraDayDataSourceType, HighlightFilter } from "@core/exploration/types";
+import { inferIntraDayDataSourceType } from "@core/exploration/types";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { HighlightFilterPanel } from "@components/exploration/HighlightFilterPanel";
 import { DataSourceManager } from "@measure/DataSourceManager";
@@ -17,6 +17,7 @@ import { ThunkDispatch } from "redux-thunk";
 import { DataService } from "@measure/service/DataService";
 import { CommonBrowsingChartStyles, DateRangeScaleContext } from "@components/visualization/browse/common";
 import { ScaleBand } from "d3-scale";
+import { HighlightFilter } from "@core/exploration/ExplorationInfo";
 
 const MIN_REFRESH_TIME_FOR_PERCEPTION = 1000
 

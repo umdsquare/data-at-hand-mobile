@@ -1,11 +1,7 @@
 import {
-  ExplorationInfo,
   makeInitialStateInfo,
-  ExplorationType,
-  ParameterType,
   TouchingElementInfo,
   inferIntraDayDataSourceType,
-  ParameterKey,
   shallowCopyExplorationInfo,
 } from '@core/exploration/types';
 import {
@@ -33,6 +29,7 @@ import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
 import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
 import { DateTimeHelper } from '@utils/time';
 import { DataSourceType } from '@measure/DataSourceSpec';
+import { ExplorationInfo, ParameterType, ExplorationType, ParameterKey } from '@core/exploration/ExplorationInfo';
 
 export interface ExplorationState {
   info: ExplorationInfo;

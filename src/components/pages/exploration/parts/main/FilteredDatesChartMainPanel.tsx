@@ -6,7 +6,7 @@ import { G, Line, Text as SvgText, Rect, Circle } from 'react-native-svg';
 import { Dispatch } from 'redux';
 import { ReduxAppState } from '@state/types';
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
-import { ParameterType } from '@core/exploration/types';
+import { ParameterType } from '@core/exploration/ExplorationInfo';
 import { connect } from 'react-redux';
 import { DataSourceType, MeasureUnitType } from '@measure/DataSourceSpec';
 import { FilteredDailyValues } from '@core/exploration/data/types';

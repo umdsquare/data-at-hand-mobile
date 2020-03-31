@@ -8,7 +8,7 @@ import { Dispatch } from "redux";
 import { DataSourceBrowseData } from "@core/exploration/data/types";
 import { DataSourceChartFrame } from "@components/exploration/DataSourceChartFrame";
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
-import { ParameterType, TouchingElementInfo, inferIntraDayDataSourceType, TouchingElementValueType, HighlightFilter } from "@core/exploration/types";
+import { TouchingElementInfo, inferIntraDayDataSourceType, TouchingElementValueType } from "@core/exploration/types";
 import { DateTimeHelper } from "@utils/time";
 import { format, startOfDay, addSeconds } from "date-fns";
 import { StyleTemplates } from "@style/Styles";
@@ -20,6 +20,7 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 import { SvgIcon, SvgIconType } from "@components/common/svg/SvgIcon";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { HighlightFilterPanel } from "@components/exploration/HighlightFilterPanel";
+import { HighlightFilter, ParameterType } from "@core/exploration/ExplorationInfo";
 
 const listItemHeightNormal = 52
 const listItemHeightTall = 70

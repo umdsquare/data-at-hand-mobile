@@ -1,5 +1,5 @@
-import React, { Fragment } from 'react';
-import Svg, { G, Path, Circle } from "react-native-svg"
+import React from 'react';
+import Svg, { Path, Circle } from "react-native-svg"
 import { ViewStyle } from 'react-native';
 
 export enum SvgIconType {

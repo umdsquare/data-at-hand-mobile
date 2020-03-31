@@ -8,7 +8,6 @@ import {
 import { MeasureUnitType } from '@measure/DataSourceSpec';
 import { ActionTypeBase } from '@state/types';
 import { randomString } from '@utils/utils';
-import { SystemLogger } from '@core/logging/SystemLogger';
 
 export interface SettingsState {
   serviceKey: string,

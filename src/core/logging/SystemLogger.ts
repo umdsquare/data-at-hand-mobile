@@ -1,28 +1,15 @@
 import { DirectoryLogger } from "@core/logging/DirectoryLogger"
-import { ExplorationInfo } from "@core/exploration/types"
+import { ExplorationInfo } from "@core/exploration/ExplorationInfo"
 import { SpeechContext } from "@core/speech/nlp/context"
 import { ActionTypeBase } from "@state/types"
 import Share from 'react-native-share'
 import { randomString } from "@utils/utils"
 import { NLUResult } from "@core/speech/nlp/types"
+import { InteractionTransitionLogType } from '@data-at-hand/logging/types'
 
 enum LogFileName {
     SpeechCommandLogs = "speech_command.jsonl",
     InteractionTransitionLogs = "interaction_state_transition.jsonl"
-}
-
-enum InteractionTransitionLogType {
-    Transition = "trans",
-    VerboseEvent = "event"
-}
-
-export enum VerboseEventTypes {
-    Reset = "Reset",
-    LoggingTurnedOn = "LoggingTurnedOn",
-    LoggingTurnedOff = "LoggingTurnedOff",
-    SpeechFail = "SpeechFail",
-    FatalError = "ErrorFatal",
-    NonFatalError = "ErrorNonFatal"
 }
 
 export class SystemLogger {
@@ -69,16 +56,20 @@ export class SystemLogger {
         }
     }
 
-    async logSpeechCommandResult(text: string, explorationInfo: ExplorationInfo, context: SpeechContext, result: NLUResult): Promise<void> {
+    logSpeechCommandResult(text: string, explorationInfo: ExplorationInfo, context: SpeechContext, result: NLUResult): string {
         if (this.currentLogger && this.enabled === true) {
-            await this.currentLogger.appendJsonLine(LogFileName.SpeechCommandLogs,
+
+            const logId = this.makeLogId(Date.now());
+            this.currentLogger.appendJsonLine(LogFileName.SpeechCommandLogs,
                 {
+                    id: logId,
                     inputText: text,
                     explorationInfo,
                     speechContext: context,
                     result
                 })
-        } else return;
+            return logId
+        } else return null;
     }
 
     makeLogId(timestamp: number): string {
