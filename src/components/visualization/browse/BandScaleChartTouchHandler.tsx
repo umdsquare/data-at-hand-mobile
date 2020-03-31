@@ -8,10 +8,11 @@ import { Rect, G } from 'react-native-svg';
 import { getScaleStepLeft } from '../d3-utils';
 import Colors from '@style/Colors';
 import { useDispatch, useSelector } from 'react-redux';
-import { createGoToBrowseDayAction, InteractionType, setTouchElementInfo } from '@state/exploration/interaction/actions';
+import { createGoToBrowseDayAction, setTouchElementInfo } from '@state/exploration/interaction/actions';
 import { ReduxAppState } from '@state/types';
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
 import { ParameterType } from '@data-at-hand/core/exploration/ExplorationInfo';
+import { InteractionType } from '@data-at-hand/core/exploration/actions';
 
 export const BandScaleChartTouchHandler = (props: {
     chartContainerWidth: number,

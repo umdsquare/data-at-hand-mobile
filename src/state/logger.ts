@@ -1,6 +1,5 @@
 import { MiddlewareAPI, Dispatch } from "redux"
 import { ActionTypeBase, ReduxAppState } from "@state/types"
-import { USER_INTERACTION_ACTION_PREFIX, ExplorationActionType } from "@state/exploration/interaction/actions"
 import { SystemLogger } from "@core/logging/SystemLogger"
 import { VerboseEventTypes } from '@data-at-hand/core/logging/types'
 import { captureScreen } from "react-native-view-shot";
@@ -9,6 +8,7 @@ import path from 'react-native-path'
 import { Dimensions, PixelRatio, Platform } from "react-native";
 import { SettingsActionTypes, SetRecordLogsAction } from "@state/settings/actions";
 import { ExplorationDataActionType } from "./exploration/data/actions";
+import { ExplorationActionType, USER_INTERACTION_ACTION_PREFIX } from "@data-at-hand/core/exploration/actions";
 
 const whitelistForScreenshot = [ExplorationActionType.SetTouchElementInfo];
 

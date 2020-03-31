@@ -2,13 +2,14 @@ import { SpeechContext, SpeechContextType, TimeSpeechContext, RangeElementSpeech
 import { preprocess } from "./preprocessor";
 import { ActionTypeBase } from "../../../state/types";
 import { VariableType, VariableInfo, PreProcessedInputText, Intent, NLUOptions, ConditionInfo, NLUResult, NLUResultType, NLUCommandResolver } from "./types";
-import { setDateAction, InteractionType, createSetRangeAction, setDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, createGoToComparisonCyclicAction, setCycleTypeAction, setHighlightFilter } from "../../../state/exploration/interaction/actions";
+import { setDateAction, createSetRangeAction, setDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, createGoToComparisonCyclicAction, setCycleTypeAction, setHighlightFilter } from "../../../state/exploration/interaction/actions";
 import { explorationInfoHelper } from "../../exploration/ExplorationInfoHelper";
 import { differenceInDays } from "date-fns";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import { DataSourceType, inferIntraDayDataSourceType, inferDataSource } from "@data-at-hand/core/measure/DataSourceSpec";
 import { ExplorationState, explorationStateReducer } from "@state/exploration/interaction/reducers";
 import { ExplorationInfo, ParameterType, HighlightFilter, ExplorationType } from "@data-at-hand/core/exploration/ExplorationInfo";
+import { InteractionType } from "@data-at-hand/core/exploration/actions";
 
 enum EntityPriority {
     None = 0,

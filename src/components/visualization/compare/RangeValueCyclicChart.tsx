@@ -13,9 +13,10 @@ import { CycleChartFrame } from './CycleChartFrame';
 import { RangeValueElement } from './RangeValueElement';
 import { RangeValueElementLegend } from './RangeValueElementLegend';
 import { useDispatch } from 'react-redux';
-import { createGoToCyclicDetailDailyAction, createGoToCyclicDetailRangeAction, InteractionType, setTouchElementInfo } from '@state/exploration/interaction/actions';
+import { createGoToCyclicDetailDailyAction, createGoToCyclicDetailRangeAction, setTouchElementInfo } from '@state/exploration/interaction/actions';
 import { CyclicTimeFrame, getCycleDimensionWithTimeKey, getCycleLevelOfDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
+import { InteractionType } from '@data-at-hand/core/exploration/actions';
 
 
 const xAxisHeight = 100

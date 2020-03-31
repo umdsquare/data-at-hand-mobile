@@ -9,7 +9,7 @@ import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec'
 import { CyclicTimeFrame, cyclicTimeFrameSpecs } from '@data-at-hand/core/exploration/CyclicTimeFrame'
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper'
 import { useDispatch } from 'react-redux'
-import { createGoToComparisonTwoRangesAction, InteractionType, createGoToComparisonCyclicAction } from '@state/exploration/interaction/actions'
+import { createGoToComparisonTwoRangesAction, createGoToComparisonCyclicAction } from '@state/exploration/interaction/actions'
 import { CategoricalRow } from '@components/exploration/CategoricalRow'
 import { DataSourceManager } from '@measure/DataSourceManager'
 import { DataSourceIcon } from '@components/common/DataSourceIcon'
@@ -18,6 +18,7 @@ import { StyleTemplates } from '@style/Styles'
 import { DateTimeHelper } from '@data-at-hand/core/utils/time'
 import { subDays } from 'date-fns'
 import { SvgIcon, SvgIconType } from '@components/common/svg/SvgIcon'
+import { InteractionType } from '@data-at-hand/core/exploration/actions'
 
 const styles = StyleSheet.create({
     containerStyle: { paddingLeft: Sizes.horizontalPadding * .5, paddingRight: Sizes.horizontalPadding * .5 },

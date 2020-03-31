@@ -1,4 +1,4 @@
-import { createGoToBrowseRangeAction, InteractionType, memoUIStatus, ExplorationAction, createGoToBrowseDayAction, setHighlightFilter } from "@state/exploration/interaction/actions";
+import { createGoToBrowseRangeAction, memoUIStatus, ExplorationAction, createGoToBrowseDayAction, setHighlightFilter } from "@state/exploration/interaction/actions";
 import React from "react";
 import { connect } from "react-redux";
 import { ReduxAppState } from "@state/types";
@@ -17,6 +17,7 @@ import { DataService } from "@measure/service/DataService";
 import { CommonBrowsingChartStyles, DateRangeScaleContext } from "@components/visualization/browse/common";
 import { ScaleBand } from "d3-scale";
 import { HighlightFilter } from "@data-at-hand/core/exploration/ExplorationInfo";
+import { InteractionType } from "@data-at-hand/core/exploration/actions";
 
 const MIN_REFRESH_TIME_FOR_PERCEPTION = 1000
 

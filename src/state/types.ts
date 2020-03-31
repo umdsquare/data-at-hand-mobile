@@ -18,4 +18,4 @@ export interface ActionTypeBase{
 export function setMetadataToAction(action: ActionTypeBase, metadata: Object | string | null): ActionTypeBase{
     (action as any)._metadata = metadata
     return action
-  }
+}

@@ -5,128 +5,10 @@ import { CyclicTimeFrame, CycleDimension } from '@data-at-hand/core/exploration/
 import { startOfDay, subDays, endOfDay } from 'date-fns';
 import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { HighlightFilter } from '@data-at-hand/core/exploration/ExplorationInfo';
-
-export const USER_INTERACTION_ACTION_PREFIX = "exploration:interaction:user"
-
-export enum ExplorationActionType {
-  MemoUiStatus = 'exploration:interaction:system:memoUIStatus',
-
-  SetRange = 'exploration:interaction:user:setRange',
-  SetDataSource = 'exploration:interaction:user:setDataSource',
-  SetIntraDayDataSource = 'exploration:interaction:user:setIntraDayDataSource',
-  SetDate = 'exploration:interaction:user:setDate',
-  SetCycleType = 'exploration:interaction:user:etCycleType',
-  SetCycleDimension = 'exploration:interaction:user:setCycleDimension',
-
-  SetHighlightFilter = 'exploration:interaction:user:setHighlightFilter',
-
-  ShiftAllRanges = 'exploration:interaction:user:shiftAllRanges',
-
-  GoToBrowseRange = 'exploration:interaction:user:goToBrowseRange',
-  GoToBrowseOverview = 'exploration:interaction:user:goToBrowseOverview',
-  GoToBrowseDay = 'exploration:interaction:user:goToBrowseDay',
-  GoToComparisonCyclic = 'exploration:interaction:user:goToComparisonCyclic',
-  GoToComparisonToRanges = 'exploration:interaction:user:goToComparisonTwoRanges',
-  GoToCyclicDetailDaily = "exploration:interaction:user:goToCyclicDetailDaily",
-  GoToCyclicDetailRange = "exploration:interaction:user:goToCyclicDetailRange",
-
-  //History
-  RestorePreviousInfo = 'exploration:interaction:user:restorePreviousInfo',
-  GoBack = 'exploration:interaction:user:goBack',
-  Reset = 'exploration:interaction:system:reset',
-
-  //Touch
-  SetTouchElementInfo = 'exploration:interaction:user:setTouchElementInfo',
-}
-
-export enum InteractionType {
-  TouchOnly = 'touchonly',
-  Speech = 'speech',
-}
-
-interface ExplorationActionBase extends ActionTypeBase {
-  interactionType: InteractionType;
-}
-
-export interface MemoUIStatusAction extends ActionTypeBase {
-  key: string;
-  value: any;
-}
-
-export interface ResetAction extends ActionTypeBase {
-  resetRange: [number, number]
-}
-
-export interface SetRangeAction extends ExplorationActionBase {
-  range: [number, number];
-  key?: string;
-}
-
-export interface SetDateAction extends ExplorationActionBase {
-  date: number;
-}
-
-export interface SetDataSourceAction extends ExplorationActionBase {
-  dataSource: DataSourceType;
-}
-
-export interface SetIntraDayDataSourceAction extends ExplorationActionBase {
-  intraDayDataSource: IntraDayDataSourceType;
-}
-
-export interface SetCycleTypeAction extends ExplorationActionBase {
-  cycleType: CyclicTimeFrame;
-}
-
-export interface SetHighlightFilterAction extends ExplorationActionBase {
-  highlightFilter: HighlightFilter | null
-}
-
-export interface GoToBrowseRangeAction extends ExplorationActionBase {
-  dataSource?: DataSourceType;
-  range?: [number, number];
-}
-
-export interface GoToBrowseDayAction extends ExplorationActionBase {
-  intraDayDataSource?: IntraDayDataSourceType;
-  date?: number;
-}
-
-export interface GoToComparisonCyclicAction extends ExplorationActionBase {
-  dataSource?: DataSourceType;
-  range?: [number, number];
-  cycleType?: CyclicTimeFrame;
-}
-
-export interface GoToComparisonTwoRangesAction extends ExplorationActionBase {
-  dataSource?: DataSourceType;
-  rangeA?: [number, number];
-  rangeB?: [number, number];
-}
-
-export interface GoToCyclicDetailAction extends ExplorationActionBase {
-  dataSource?: DataSourceType;
-  range?: [number, number];
-  cycleDimension?: CycleDimension;
-}
-
-export interface SetCycleDimensionAction extends ExplorationActionBase {
-  cycleDimension: CycleDimension;
-}
-
-export interface ShiftAllRangesAction extends ExplorationActionBase {
-  direction: 'past' | 'future'
-}
-
-export interface SetTouchingElementInfoAction extends ActionTypeBase {
-  info: TouchingElementInfo | null;
-}
-
-
+import { InteractionType, SetRangeAction, SetDateAction, SetIntraDayDataSourceAction, GoToBrowseRangeAction, GoToBrowseDayAction, GoToComparisonCyclicAction, GoToComparisonTwoRangesAction, GoToCyclicDetailAction, MemoUIStatusAction, SetDataSourceAction, SetTouchingElementInfoAction, SetCycleDimensionAction, ShiftAllRangesAction, SetHighlightFilterAction, ExplorationActionType, SetCycleTypeAction, ResetAction } from '@data-at-hand/core/exploration/actions';
 
 export type ExplorationAction =
   | ActionTypeBase
-  | ExplorationActionBase
   | SetRangeAction
   | SetDateAction
   | SetIntraDayDataSourceAction
@@ -170,11 +52,11 @@ export function createGoToBrowseRangeAction(
 
 export function createGoToBrowseOverviewAction(
   interactionType: InteractionType,
-): ExplorationActionBase {
+): ActionTypeBase {
   return {
     type: ExplorationActionType.GoToBrowseOverview,
     interactionType,
-  };
+  } as any;
 }
 
 export function createGoToBrowseDayAction(

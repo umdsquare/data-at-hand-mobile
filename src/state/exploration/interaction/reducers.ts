@@ -1,30 +1,11 @@
-import {
-  ExplorationAction,
-  ExplorationActionType,
-  SetRangeAction,
-  GoToBrowseRangeAction,
-  MemoUIStatusAction,
-  SetDataSourceAction,
-  SetTouchingElementInfoAction,
-  InteractionType,
-  GoToBrowseDayAction,
-  SetDateAction,
-  SetIntraDayDataSourceAction,
-  GoToComparisonCyclicAction,
-  SetCycleTypeAction,
-  GoToComparisonTwoRangesAction,
-  GoToCyclicDetailAction,
-  SetCycleDimensionAction,
-  ShiftAllRangesAction,
-  SetHighlightFilterAction,
-  ResetAction,
-} from '@state/exploration/interaction/actions';
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
 import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
 import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { DataSourceType, inferIntraDayDataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { ExplorationInfo, ParameterType, ExplorationType, ParameterKey } from '@data-at-hand/core/exploration/ExplorationInfo';
 import { TouchingElementInfo } from '@data-at-hand/core/exploration/TouchingElementInfo';
+import { ExplorationActionType, SetTouchingElementInfoAction, MemoUIStatusAction, ResetAction, InteractionType, SetRangeAction, SetDateAction, SetDataSourceAction, SetIntraDayDataSourceAction, SetCycleTypeAction, SetCycleDimensionAction, SetHighlightFilterAction, ShiftAllRangesAction, GoToBrowseRangeAction, GoToBrowseDayAction, GoToComparisonCyclicAction, GoToComparisonTwoRangesAction, GoToCyclicDetailAction } from '@data-at-hand/core/exploration/actions';
+import { ExplorationAction } from './actions';
 
 export interface ExplorationState {
   info: ExplorationInfo;

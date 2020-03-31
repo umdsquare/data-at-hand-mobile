@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useMemo } from "react";
 import { View, FlatList, Text, StyleSheet, ActivityIndicator, LayoutAnimation, UIManager, findNodeHandle } from 'react-native';
 import { MeasureUnitType, DataSourceType, inferIntraDayDataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
-import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, InteractionType, setHighlightFilter } from "@state/exploration/interaction/actions";
+import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, setHighlightFilter } from "@state/exploration/interaction/actions";
 import { connect } from "react-redux";
 import { ReduxAppState } from "@state/types";
 import { Dispatch } from "redux";
@@ -21,6 +21,7 @@ import { SvgIcon, SvgIconType } from "@components/common/svg/SvgIcon";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { HighlightFilterPanel } from "@components/exploration/HighlightFilterPanel";
 import { HighlightFilter, ParameterType } from "@data-at-hand/core/exploration/ExplorationInfo";
+import { InteractionType } from "@data-at-hand/core/exploration/actions";
 
 const listItemHeightNormal = 52
 const listItemHeightTall = 70

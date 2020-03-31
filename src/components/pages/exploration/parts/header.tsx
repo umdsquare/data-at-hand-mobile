@@ -9,7 +9,7 @@ import { Sizes } from '@style/Sizes';
 import { StyleTemplates } from '@style/Styles';
 import { DataSourceManager } from '@measure/DataSourceManager';
 import { DataSourceType, IntraDayDataSourceType, getIntraDayDataSourceName, inferDataSource } from '@data-at-hand/core/measure/DataSourceSpec';
-import { createSetRangeAction, setDataSourceAction, InteractionType, goBackAction, setDateAction, setIntraDayDataSourceAction, setCycleTypeAction, setCycleDimensionAction } from '@state/exploration/interaction/actions';
+import { createSetRangeAction, setDataSourceAction, goBackAction, setDateAction, setIntraDayDataSourceAction, setCycleTypeAction, setCycleDimensionAction } from '@state/exploration/interaction/actions';
 import Colors from '@style/Colors';
 import { useDispatch, useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
@@ -22,6 +22,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@components/Routes';
 import { SpeechContextHelper } from '@data-at-hand/core/speech/SpeechContext';
 import { ExplorationType, ParameterKey, ParameterType } from '@data-at-hand/core/exploration/ExplorationInfo';
+import { InteractionType } from '@data-at-hand/core/exploration/actions';
 
 const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={Colors.WHITE} />
 

@@ -6,7 +6,6 @@ import { Sizes } from "@style/Sizes";
 import Dash from 'react-native-dash';
 import { format, differenceInCalendarDays, addDays, startOfMonth, endOfMonth, addMonths, getYear } from "date-fns";
 import { DatePicker, WeekPicker, MonthPicker } from "@components/common/CalendarPickers";
-import { InteractionType } from "@state/exploration/interaction/actions";
 import { DateTimeHelper, isToday, isYesterday } from "@data-at-hand/core/utils/time";
 import { SwipedFeedback } from "@components/common/SwipedFeedback";
 import { BottomSheet } from "@components/common/BottomSheet";
@@ -20,6 +19,7 @@ import { WheelPicker } from "react-native-wheel-picker-android";
 import { StyleTemplates } from "@style/Styles";
 import { getNumberSequence } from "@data-at-hand/core/utils";
 import { Button } from "react-native-elements";
+import { InteractionType } from "@data-at-hand/core/exploration/actions";
 
 const dateButtonWidth = 140
 const barHeight = 60
