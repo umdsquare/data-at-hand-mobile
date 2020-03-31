@@ -16,9 +16,9 @@ import { TodayContext } from '@components/pages/exploration/contexts';
 export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
 
     const { shouldHighlightElements, highlightReference } = CommonBrowsingChartStyles.makeHighlightInformation(prop, prop.dataSource)
-   
+
     const today = useContext(TodayContext)
-   
+
     const chartArea = CommonBrowsingChartStyles.CHART_AREA
 
     const scaleX = useContext(DateRangeScaleContext) || CommonBrowsingChartStyles
@@ -41,11 +41,25 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
 
     const avg = d3Array.mean(prop.data, d => d.value)!
 
-/*
+
     const clusters = useMemo(() => {
-        return clusterSortedNumbers(prop.data.map(d => scaleX.domain().indexOf(d.numberedDate)))
+
+        if (prop.data.length === scaleX.domain().length) {
+            return [prop.data]
+        } else {
+            const clusteredIndices = clusterSortedNumbers(prop.data.map(d => scaleX.domain().indexOf(d.numberedDate)))
+
+            let pointer = 0
+            const clusters = clusteredIndices.map(indexCluster => {
+                const cluster = indexCluster.map((index: number, order: number) => {
+                    return prop.data[pointer + order]
+                })
+                pointer += indexCluster.length
+                return cluster
+            })
+            return clusters
+        }
     }, [prop.dateRange, prop.data, scaleX])
-    console.log("clusters:", clusters)    */
 
     return <BandScaleChartTouchHandler
         chartContainerWidth={CommonBrowsingChartStyles.CHART_WIDTH}
@@ -57,12 +71,14 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
         <AxisSvg key="yAxis" tickMargin={0} ticks={scaleY.ticks(5)} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
         <G pointerEvents="none" {...chartArea}>
             {
-                <Path d={line(prop.data)!}
-                    strokeWidth={2.5}
-                    fill="transparent"
-                    stroke={Colors.chartElementDefault}
-                    opacity={0.3}
-                />
+                clusters.map((cluster, i) => {
+                    return <Path key={i.toString()} d={line(cluster)!}
+                        strokeWidth={2.5}
+                        fill="transparent"
+                        stroke={Colors.chartElementDefault}
+                        opacity={0.3}
+                    />
+                })
             }
             {
                 prop.data.map(d => {

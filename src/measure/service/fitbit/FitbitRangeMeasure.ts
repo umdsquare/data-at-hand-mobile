@@ -1,5 +1,6 @@
 import { DateTimeHelper } from '@utils/time';
 import { FitbitServiceMeasure } from './FitbitServiceMeasure';
+import { fastConcatTo } from '@utils/utils';
 
 export abstract class FitbitRangeMeasure<
   QueryResultType> extends FitbitServiceMeasure {
@@ -29,17 +30,17 @@ export abstract class FitbitRangeMeasure<
       chunks.map(chunk => this.queryFunc(chunk[0], chunk[1]))
     );
 
-    const result: QueryResultType = {} as any;
-    result[this.resourcePropertyKey] = [].concat.apply(
-      [],
-      queryResult.map(r => r[this.resourcePropertyKey]),
-    );
+    const result: Array<any> = []
+    
+    for(let i = 0; i < queryResult.length; i ++){
+      fastConcatTo(result, (queryResult[i] as any)[this.resourcePropertyKey])
+    }
 
     console.log(
       'Finished Loading',
       this.key,
       'data - ',
-      result[this.resourcePropertyKey].length,
+      result.length,
       'rows. Took',
       Date.now() - benchMarkStart,
       'millis.',
@@ -54,7 +55,7 @@ export abstract class FitbitRangeMeasure<
       });
     });*/
 
-    this.handleQueryResultEntry(result[this.resourcePropertyKey], now)
+    this.handleQueryResultEntry(result, now)
 
     console.log('Finish storing data into DB.');
   }

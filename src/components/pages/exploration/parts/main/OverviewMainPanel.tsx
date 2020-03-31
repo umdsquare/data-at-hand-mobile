@@ -183,7 +183,6 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
 
     render() {
         if (this.props.data != null) {
-            console.log("scale X:", this.state.scaleX.domain())
             return <DateRangeScaleContext.Provider value={this.state.scaleX}>
                 {
                     this.props.highlightFilter != null ? <HighlightFilterPanel
