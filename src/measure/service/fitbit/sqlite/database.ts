@@ -3,8 +3,8 @@ import { SQLiteHelper } from '@utils/sqlite-helper';
 import stringFormat from 'string-format';
 import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension } from '@core/exploration/cyclic_time';
 import { IIntraDayHeartRatePoint, BoxPlotInfo } from '@core/exploration/data/types';
-import { DateTimeHelper } from '@utils/time';
-import { Lazy } from '@utils/utils';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
+import { Lazy } from '@data-at-hand/core/utils';
 import { notifyError } from '@core/logging/ErrorReportingService';
 
 SQLite.DEBUG(false);

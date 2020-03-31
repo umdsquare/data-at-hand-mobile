@@ -1,7 +1,7 @@
-import { DateTimeHelper } from "./time"
+import { DateTimeHelper } from "@data-at-hand/core/utils/time"
 import { differenceInDays, addDays, subDays } from "date-fns"
 import binarySearch from 'binary-search';
-import { fastConcatTo } from "./utils";
+import { fastConcatTo } from "@data-at-hand/core/utils";
 
 const compareFunc = (element: number, needle: number) => element - needle
 

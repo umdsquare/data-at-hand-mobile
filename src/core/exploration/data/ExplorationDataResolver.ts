@@ -5,10 +5,10 @@ import { DataSourceManager } from '@measure/DataSourceManager';
 import { DataServiceManager } from '@measure/DataServiceManager';
 import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
-import { DateTimeHelper } from '@utils/time';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { DataService } from '@measure/service/DataService';
 import { sum, mean, min, max } from 'd3-array';
-import { fastConcatTo } from '@utils/utils';
+import { fastConcatTo } from '@data-at-hand/core/utils';
 import { ExplorationInfo, ExplorationType, ParameterType, ParameterKey } from '@data-at-hand/core/exploration/ExplorationInfo';
 
 

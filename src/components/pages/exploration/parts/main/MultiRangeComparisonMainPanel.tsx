@@ -18,14 +18,14 @@ import { SingleValueElementLegend } from '@components/visualization/compare/Sing
 import { G, Line, Text as SvgText, Rect } from 'react-native-svg'
 import { scaleBand, scaleLinear, ScaleBand } from 'd3-scale'
 import commaNumber from 'comma-number';
-import { DateTimeHelper } from '@utils/time'
+import { DateTimeHelper } from '@data-at-hand/core/utils/time'
 import convertUnit from 'convert-units';
 import { timeTickFormat } from '@components/visualization/compare/common'
 import { min, max } from 'd3-array'
 import { SingleValueElement } from '@components/visualization/compare/SingleValueElement'
 import { RangeValueElement } from '@components/visualization/compare/RangeValueElement'
 import { createGoToBrowseRangeAction, InteractionType, setTouchElementInfo, shiftAllRanges } from '@state/exploration/interaction/actions'
-import { noop } from '@utils/utils'
+import { noop } from '@data-at-hand/core/utils'
 import { CategoricalTouchableSvg } from '@components/visualization/CategoricalTouchableSvg'
 import { HorizontalPullToActionContainer } from '@components/common/HorizontalPullToActionContainer'
 import { getScaleStepLeft } from '@components/visualization/d3-utils'

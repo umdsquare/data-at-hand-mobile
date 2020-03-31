@@ -2,7 +2,7 @@ import { DataSourceSpec, DataSourceType, DataSourceCategory, DataSourceCategoryS
 import commaNumber from 'comma-number';
 import convert from "convert-units";
 import { IntraDayDataSourceType, inferIntraDayDataSourceType } from "@core/exploration/types";
-import { Lazy } from "@utils/utils";
+import { Lazy } from "@data-at-hand/core/utils";
 
 export class DataSourceManager {
 

@@ -27,7 +27,7 @@ import {
 } from '@state/exploration/interaction/actions';
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
 import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
-import { DateTimeHelper } from '@utils/time';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { ExplorationInfo, ParameterType, ExplorationType, ParameterKey } from '@data-at-hand/core/exploration/ExplorationInfo';
 

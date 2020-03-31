@@ -15,7 +15,7 @@ import { DataSourceManager } from '@measure/DataSourceManager'
 import { DataSourceIcon } from '@components/common/DataSourceIcon'
 import { DateRangeBar } from '@components/exploration/DateRangeBar'
 import { StyleTemplates } from '@style/Styles'
-import { DateTimeHelper } from '@utils/time'
+import { DateTimeHelper } from '@data-at-hand/core/utils/time'
 import { subDays } from 'date-fns'
 import { SvgIcon, SvgIconType } from '@components/common/svg/SvgIcon'
 

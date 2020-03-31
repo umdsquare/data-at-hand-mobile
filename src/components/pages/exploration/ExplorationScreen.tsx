@@ -39,9 +39,9 @@ import { TouchSafeBottomSheet } from "@components/common/TouchSafeBottomSheet";
 import { Subscription } from "rxjs";
 import { SpeechEventQueue } from "@core/speech/SpeechEventQueue";
 import { SpeechEventNotificationOverlay } from "@components/pages/exploration/SpeechEventNotificationOverlay";
-import { sleep } from "@utils/utils";
+import { sleep } from "@data-at-hand/core/utils";
 import { TodayContext } from "./contexts";
-import { DateTimeHelper } from "@utils/time";
+import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 
 const styles = StyleSheet.create({
 

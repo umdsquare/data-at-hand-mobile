@@ -7,7 +7,7 @@ import {
 } from '@state/settings/actions';
 import { MeasureUnitType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { ActionTypeBase } from '@state/types';
-import { randomString } from '@utils/utils';
+import { randomString } from '@data-at-hand/core/utils';
 
 export interface SettingsState {
   serviceKey: string,

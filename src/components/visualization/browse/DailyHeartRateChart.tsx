@@ -9,7 +9,7 @@ import * as d3Array from 'd3-array';
 import * as d3Shape from 'd3-shape';
 import Colors from '@style/Colors';
 import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
-import { coverValueInRange, clusterSortedNumbers } from '@utils/utils';
+import { coverValueInRange, clusterSortedNumbers } from '@data-at-hand/core/utils';
 import { TodayContext } from '@components/pages/exploration/contexts';
 
 

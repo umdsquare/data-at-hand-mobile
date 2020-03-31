@@ -7,7 +7,7 @@ import { FitbitServiceCore } from './types';
 import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { FitbitDailyStepMeasure } from './FitbitDailyStepMeasure';
 import { FitbitDailyHeartRateMeasure } from './FitbitDailyHeartRateMeasure';
-import { DateTimeHelper } from '@utils/time';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { FitbitServiceMeasure } from './FitbitServiceMeasure';
 import { FitbitWeightMeasure } from './FitbitWeightMeasure';
 import { FitbitSleepMeasure } from './FitbitSleepMeasure';

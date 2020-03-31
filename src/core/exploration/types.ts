@@ -1,5 +1,5 @@
 import { startOfDay, subDays, endOfDay } from 'date-fns';
-import { DateTimeHelper } from '@utils/time';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { LayoutRectangle } from 'react-native';
 import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { ExplorationInfoParams, ExplorationInfo, ExplorationType, ParameterType } from '@data-at-hand/core/exploration/ExplorationInfo';

@@ -1,4 +1,4 @@
-import { DateTimeHelper } from '@utils/time';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { parse, getDay } from 'date-fns';
 import { FITBIT_DATE_FORMAT } from './api';
 import { FitbitRangeMeasure } from './FitbitRangeMeasure';

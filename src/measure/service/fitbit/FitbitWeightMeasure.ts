@@ -7,7 +7,7 @@ import {
   FITBIT_DATE_FORMAT,
 } from './api';
 import { FitbitRangeMeasure } from './FitbitRangeMeasure';
-import { DateTimeHelper } from '@utils/time';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { parse, getDay } from 'date-fns';
 import { WeightRangedData, GroupedData, IAggregatedValue, FilteredDailyValues, BoxPlotInfo } from '@core/exploration/data/types';
 import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';

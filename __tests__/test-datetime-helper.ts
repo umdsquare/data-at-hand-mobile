@@ -2,7 +2,7 @@
  * @format
  */
 
-import { DateTimeHelper } from '@utils/time';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 
 describe("DateTimeHelper API", () => {
     const fitRangeTestSet: Array<[number, number, Date, string, number]> = [

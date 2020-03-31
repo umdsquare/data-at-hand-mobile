@@ -3,7 +3,7 @@ import { ExplorationInfo } from "@data-at-hand/core/exploration/ExplorationInfo"
 import { SpeechContext } from "@core/speech/nlp/context"
 import { ActionTypeBase } from "@state/types"
 import Share from 'react-native-share'
-import { randomString } from "@utils/utils"
+import { randomString } from "@data-at-hand/core/utils"
 import { NLUResult } from "@core/speech/nlp/types"
 import { InteractionTransitionLogType } from '@data-at-hand/core/logging/types'
 

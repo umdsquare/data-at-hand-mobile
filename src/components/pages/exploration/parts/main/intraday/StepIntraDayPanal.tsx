@@ -13,7 +13,7 @@ import Colors from '@style/Colors'
 import { AxisSvg } from '@components/visualization/axis'
 import { Padding } from '@components/visualization/types'
 import commaNumber from 'comma-number';
-import { pad } from '@utils/time'
+import { pad } from '@data-at-hand/core/utils/time'
 import { commonIntraDayPanelStyles, NoDataFallbackView } from './common'
 
 const xAxisHeight = 50

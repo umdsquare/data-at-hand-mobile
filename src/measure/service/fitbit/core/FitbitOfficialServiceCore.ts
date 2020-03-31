@@ -3,7 +3,7 @@ import { FitbitServiceCore, FitbitDailyActivityHeartRateQueryResult, FitbitDaily
 import { makeFitbitIntradayActivityApiUrl, makeFitbitHeartRateIntraDayLogApiUrl, makeFitbitWeightTrendApiUrl, makeFitbitWeightLogApiUrl, makeFitbitDayLevelActivityLogsUrl, makeFitbitSleepApiUrl, FITBIT_PROFILE_URL, FITBIT_DEVICES_URL } from "../api";
 import { LocalAsyncStorageHelper } from "@utils/AsyncStorageHelper";
 import { DataService, UnSupportedReason, ServiceApiErrorType } from "../../DataService";
-import { DateTimeHelper } from "@utils/time";
+import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import { FitbitLocalDbManager } from '../sqlite/database';
 import { DatabaseParams } from 'react-native-sqlite-storage';
 import { parseISO, max } from 'date-fns';

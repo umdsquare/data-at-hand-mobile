@@ -5,7 +5,7 @@ import LinearGradient from 'react-native-linear-gradient'
 import { StyleTemplates } from '@style/Styles'
 import { Platform, Dimensions } from 'react-native'
 import Colors from '@style/Colors'
-import { Lazy } from '@utils/utils'
+import { Lazy } from '@data-at-hand/core/utils'
 
 interface State {
     swipeDirection: "left" | "right"

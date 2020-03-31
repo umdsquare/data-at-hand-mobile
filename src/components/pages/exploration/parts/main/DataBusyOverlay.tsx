@@ -3,7 +3,7 @@ import { StyleTemplates } from '@style/Styles';
 import { ViewStyle, Animated, Easing } from 'react-native';
 import { ZIndices } from '../zIndices';
 import Colors from '@style/Colors';
-import { Lazy } from '@utils/utils';
+import { Lazy } from '@data-at-hand/core/utils';
 
 const styleBase = { ...StyleTemplates.fitParent, backgroundColor: Colors.WHITE, zIndex: ZIndices.dataBusyOverlay, elevation: 4 } as ViewStyle
 

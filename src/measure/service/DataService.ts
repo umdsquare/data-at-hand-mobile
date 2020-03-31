@@ -2,9 +2,9 @@ import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { IntraDayDataSourceType } from '@core/exploration/types';
 import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, RangeAggregatedComparisonData, FilteredDailyValues, OverviewSourceRow } from '../../core/exploration/data/types';
 import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension, getFilteredCycleDimensionList } from '../../core/exploration/cyclic_time';
-import { DateTimeHelper } from '@utils/time';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { startOfMonth, endOfMonth, addMonths } from 'date-fns';
-import { getNumberSequence } from '@utils/utils';
+import { getNumberSequence } from '@data-at-hand/core/utils';
 import { writeFile, TemporaryDirectoryPath, exists, mkdir } from 'react-native-fs';
 import { zip } from 'react-native-zip-archive'
 import Share from 'react-native-share'

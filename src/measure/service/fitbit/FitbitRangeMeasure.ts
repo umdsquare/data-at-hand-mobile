@@ -1,6 +1,6 @@
-import { DateTimeHelper } from '@utils/time';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { FitbitServiceMeasure } from './FitbitServiceMeasure';
-import { fastConcatTo } from '@utils/utils';
+import { fastConcatTo } from '@data-at-hand/core/utils';
 
 export abstract class FitbitRangeMeasure<
   QueryResultType> extends FitbitServiceMeasure {

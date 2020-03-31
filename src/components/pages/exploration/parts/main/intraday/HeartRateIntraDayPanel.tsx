@@ -11,7 +11,7 @@ import { SizeWatcher } from '@components/visualization/SizeWatcher';
 import Svg, { G, Path, Line, Text as SvgText } from 'react-native-svg';
 import { AxisSvg } from '@components/visualization/axis';
 import { Padding } from '@components/visualization/types';
-import { pad, DateTimeHelper } from '@utils/time';
+import { pad, DateTimeHelper } from '@data-at-hand/core/utils/time';
 import * as d3Shape from 'd3-shape';
 import { commonIntraDayPanelStyles, NoDataFallbackView } from './common';
 

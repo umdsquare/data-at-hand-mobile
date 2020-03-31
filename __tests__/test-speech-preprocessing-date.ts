@@ -5,7 +5,7 @@
 import { preprocess } from '@core/speech/nlp/preprocessor';
 import { VariableType } from '@core/speech/nlp/types';
 import { subDays } from 'date-fns';
-import { DateTimeHelper } from '@utils/time';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { dataSources, speechOptions } from '../jest.setup';
 
 console.log = jest.fn()

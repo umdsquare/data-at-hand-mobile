@@ -3,7 +3,7 @@ import { SpeechContext, SpeechContextType, DateElementSpeechContext, RangeElemen
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
 import { DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { DataSourceManager } from "@measure/DataSourceManager";
-import { DateTimeHelper } from "@utils/time";
+import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import holidays from '@date/holidays-us';
 import { isSameDay, getYear, isAfter } from "date-fns";
 import { ExplorationInfo, ParameterType, ExplorationType } from "@data-at-hand/core/exploration/ExplorationInfo";

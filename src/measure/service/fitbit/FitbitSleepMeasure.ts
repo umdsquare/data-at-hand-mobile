@@ -1,7 +1,7 @@
 import { FitbitSleepQueryResult } from './types';
 import { FitbitRangeMeasure } from './FitbitRangeMeasure';
 import { makeFitbitSleepApiUrl, FITBIT_DATE_FORMAT } from './api';
-import { DateTimeHelper } from '@utils/time';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import {
   parse,
   getDay,

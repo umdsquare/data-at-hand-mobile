@@ -1,6 +1,6 @@
 import {FitbitServiceMeasureBase} from './FitbitServiceMeasureBase';
 import {differenceInMinutes, endOfDay, isAfter} from 'date-fns';
-import {DateTimeHelper} from '@utils/time';
+import {DateTimeHelper} from '@data-at-hand/core/utils/time';
 
 export abstract class FitbitIntraDayMeasure<
   DataType

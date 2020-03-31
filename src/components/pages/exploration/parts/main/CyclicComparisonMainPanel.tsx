@@ -10,7 +10,7 @@ import { ParameterType } from '@data-at-hand/core/exploration/ExplorationInfo';
 import { connect } from 'react-redux';
 import { SingleValueCyclicChart } from '@components/visualization/compare/SingleValueCyclicChart';
 import commaNumber from 'comma-number';
-import { DateTimeHelper } from '@utils/time';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { scaleLinear } from 'd3-scale';
 import convertUnit from 'convert-units';
 import { RangeValueCyclicChart } from '@components/visualization/compare/RangeValueCyclicChart';

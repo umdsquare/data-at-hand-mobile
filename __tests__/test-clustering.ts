@@ -2,7 +2,7 @@
  * @format
  */
 
-import { clusterSortedNumbers } from "@utils/utils"
+import { clusterSortedNumbers } from "@data-at-hand/core/utils"
 
 describe("test 1-D clustering", () => {
     test("case 1", () => {

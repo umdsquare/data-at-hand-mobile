@@ -11,7 +11,7 @@ import { DataSourceType, MeasureUnitType } from '@data-at-hand/core/measure/Data
 import pluralize from 'pluralize';
 import deepEqual from 'deep-equal';
 import Dialog from 'react-native-dialog'
-import { DateTimeHelper } from '@utils/time'
+import { DateTimeHelper } from '@data-at-hand/core/utils/time'
 import { startOfDay, addSeconds, format, getHours, getMinutes } from 'date-fns'
 import commaNumber from 'comma-number'
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -20,7 +20,7 @@ import { DurationWheelPicker } from '@components/common/DurationWheelPicker'
 import { BEDTIME_SHIFT_HOUR_OF_DAY } from '@measure/consts'
 import { useSelector } from 'react-redux'
 import { ReduxAppState } from '@state/types'
-import { getNumberSequence, clamp } from '@utils/utils'
+import { getNumberSequence, clamp } from '@data-at-hand/core/utils'
 import { Button } from 'react-native-elements'
 
 const HEART_RATE_RANGE = getNumberSequence(0, 150)

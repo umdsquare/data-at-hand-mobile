@@ -11,7 +11,7 @@ import { SpeechEventQueue } from "../../core/speech/SpeechEventQueue";
 import { SystemLogger } from "@core/logging/SystemLogger";
 import { VerboseEventTypes } from '@data-at-hand/core/logging/types';
 import { NLUResultType, NLUCommandResolver } from "@core/speech/nlp/types";
-import { Lazy } from "@utils/utils";
+import { Lazy } from "@data-at-hand/core/utils";
 import { notifyError } from "@core/logging/ErrorReportingService";
 
 const sessionMutex = new Mutex()

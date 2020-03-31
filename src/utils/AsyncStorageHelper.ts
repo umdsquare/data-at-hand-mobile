@@ -1,4 +1,4 @@
-import { Lazy } from './utils';
+import { Lazy } from '@data-at-hand/core/utils';
 
 let AsyncStorage = new Lazy(() => require('@react-native-community/async-storage').default);
 

@@ -6,7 +6,7 @@ import { DataSourceType, MeasureUnitType } from '@data-at-hand/core/measure/Data
 import { DataSourceManager } from '@measure/DataSourceManager';
 import { OverviewSourceRow, StatisticsType, WeightRangedData } from '@core/exploration/data/types';
 import commaNumber from 'comma-number';
-import { DateTimeHelper } from '@utils/time';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { startOfDay, addSeconds, format } from 'date-fns';
 import { scaleLinear } from 'd3-scale';
 import { HighlightFilter } from '@data-at-hand/core/exploration/ExplorationInfo';

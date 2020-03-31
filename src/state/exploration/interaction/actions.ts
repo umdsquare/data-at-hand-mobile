@@ -6,7 +6,7 @@ import {
 } from '@core/exploration/types';
 import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
 import { startOfDay, subDays, endOfDay } from 'date-fns';
-import { DateTimeHelper } from '@utils/time';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { HighlightFilter } from '@data-at-hand/core/exploration/ExplorationInfo';
 
 export const USER_INTERACTION_ACTION_PREFIX = "exploration:interaction:user"

@@ -5,7 +5,7 @@ import { TouchingElementInfo, TouchingElementValueType } from '@core/exploration
 import { ReduxAppState } from '@state/types'
 import { connect } from 'react-redux'
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper'
-import { DateTimeHelper, isToday, isYesterday } from '@utils/time'
+import { DateTimeHelper, isToday, isYesterday } from '@data-at-hand/core/utils/time'
 import { format, startOfDay, differenceInDays } from 'date-fns'
 import { Sizes } from '@style/Sizes'
 import { DataSourceType, MeasureUnitType } from '@data-at-hand/core/measure/DataSourceSpec'
@@ -23,7 +23,7 @@ import Insets from 'react-native-static-safe-area-insets';
 import { ZIndices } from '../zIndices'
 import { SpeechContext, SpeechContextHelper } from '@core/speech/nlp/context'
 import { createSetSpeechContextAction } from '@state/speech/actions'
-import { Lazy } from '@utils/utils'
+import { Lazy } from '@data-at-hand/core/utils'
 import { TodayContext } from '../../contexts'
 import { ExplorationType, ParameterType } from '@data-at-hand/core/exploration/ExplorationInfo'
 

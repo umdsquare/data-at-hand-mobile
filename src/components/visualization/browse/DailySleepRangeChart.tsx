@@ -9,7 +9,7 @@ import * as d3Array from 'd3-array';
 import Colors from '@style/Colors';
 import { startOfDay, addSeconds, format } from 'date-fns';
 import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
-import { coverValueInRange } from '@utils/utils';
+import { coverValueInRange } from '@data-at-hand/core/utils';
 import { TodayContext } from '@components/pages/exploration/contexts';
 
 interface Props extends ChartProps {

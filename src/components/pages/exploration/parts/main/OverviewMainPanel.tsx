@@ -7,7 +7,7 @@ import { DataSourceChartFrame, HEADER_HEIGHT, FOOTER_HEIGHT } from "@components/
 import { OverviewData, OverviewSourceRow } from "@core/exploration/data/types";
 import { MeasureUnitType, DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { Sizes } from "@style/Sizes";
-import { DateTimeHelper } from "@utils/time";
+import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import { inferIntraDayDataSourceType } from "@core/exploration/types";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { HighlightFilterPanel } from "@components/exploration/HighlightFilterPanel";

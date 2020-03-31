@@ -9,7 +9,7 @@ import { DataSourceBrowseData } from "@core/exploration/data/types";
 import { DataSourceChartFrame } from "@components/exploration/DataSourceChartFrame";
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
 import { TouchingElementInfo, inferIntraDayDataSourceType, TouchingElementValueType } from "@core/exploration/types";
-import { DateTimeHelper } from "@utils/time";
+import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import { format, startOfDay, addSeconds } from "date-fns";
 import { StyleTemplates } from "@style/Styles";
 import { Sizes } from "@style/Sizes";

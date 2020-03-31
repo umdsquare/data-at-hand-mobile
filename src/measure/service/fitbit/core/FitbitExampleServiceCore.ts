@@ -3,7 +3,7 @@ import { FitbitLocalDbManager } from "../sqlite/database";
 import { DatabaseParams } from "react-native-sqlite-storage";
 import { UnSupportedReason } from "../../DataService";
 import { max, min } from "d3-array";
-import { DateTimeHelper } from "@utils/time";
+import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import { addSeconds, format } from "date-fns";
 import { LocalAsyncStorageHelper } from "@utils/AsyncStorageHelper";
 

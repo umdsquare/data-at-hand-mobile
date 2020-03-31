@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useCallback } from 'react'
 import { View, StyleSheet, Platform } from 'react-native'
 import { WheelPicker } from 'react-native-wheel-picker-android'
-import { getNumberSequence } from '@utils/utils'
+import { getNumberSequence } from '@data-at-hand/core/utils'
 import pluralize from 'pluralize'
 import { StyleTemplates } from '@style/Styles'
 

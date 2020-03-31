@@ -1,5 +1,5 @@
 import { NumericConditionType, ExplorationInfo } from "@data-at-hand/core/exploration/ExplorationInfo"
-import { randomString, STRING_SET_ALPHABETS, STRING_SET_NUMBERS } from "@utils/utils"
+import { randomString, STRING_SET_ALPHABETS, STRING_SET_NUMBERS } from "@data-at-hand/core/utils"
 import { DataSourceType, MeasureUnitType } from "@data-at-hand/core/measure/DataSourceSpec"
 import { ActionTypeBase } from "@state/types"
 import { SpeechContext } from "./context"

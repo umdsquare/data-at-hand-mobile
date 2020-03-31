@@ -1,7 +1,7 @@
 import chrono from 'chrono-node';
 import { getYear, isAfter, getDate, getMonth } from 'date-fns';
 import Holidays from '@date/holidays-us';
-import { Lazy } from '@utils/utils';
+import { Lazy } from '@data-at-hand/core/utils';
 
 import NamedRegExp from 'named-regexp-groups'
 /*

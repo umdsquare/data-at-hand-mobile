@@ -6,7 +6,7 @@ import { Sizes } from '@style/Sizes'
 import LinearGradient from 'react-native-linear-gradient'
 import { ZIndices } from '../zIndices'
 import Colors from '@style/Colors'
-import { Lazy } from '@utils/utils'
+import { Lazy } from '@data-at-hand/core/utils'
 
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)

@@ -11,7 +11,7 @@ import Colors from '@style/Colors';
 import { IWeightIntraDayLogEntry } from '@core/exploration/data/types';
 import { MeasureUnitType, DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import unitConvert from 'convert-units';
-import { noop, coverValueInRange } from '@utils/utils';
+import { noop, coverValueInRange } from '@data-at-hand/core/utils';
 import { getScaleStepLeft } from '../d3-utils';
 import { TodayContext } from '@components/pages/exploration/contexts';
 

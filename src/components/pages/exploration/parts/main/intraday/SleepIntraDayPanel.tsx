@@ -11,7 +11,7 @@ import { scaleLinear, scaleBand } from 'd3-scale';
 import { group, sum } from 'd3-array';
 import { format } from 'date-fns';
 import Colors from '@style/Colors';
-import { DateTimeHelper } from '@utils/time';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { DurationText } from '@components/common/DurationText';
 
 const xAxisHeight = 30
