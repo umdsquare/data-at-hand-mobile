@@ -5,7 +5,7 @@ import {
   SetRecordLogsAction,
   SetRecordScreensAction,
 } from '@state/settings/actions';
-import { MeasureUnitType } from '@measure/DataSourceSpec';
+import { MeasureUnitType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { ActionTypeBase } from '@state/types';
 import { randomString } from '@utils/utils';
 

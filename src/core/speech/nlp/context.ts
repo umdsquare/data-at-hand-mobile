@@ -1,6 +1,6 @@
-import { ExplorationType, ParameterKey, ParameterType } from "@core/exploration/ExplorationInfo"
+import { ExplorationType, ParameterKey, ParameterType } from "@data-at-hand/core/exploration/ExplorationInfo"
 import { ElementType } from "@components/exploration/DateRangeBar"
-import { DataSourceType } from "@measure/DataSourceSpec"
+import { DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec"
 import { CycleDimension } from "@core/exploration/cyclic_time"
 
 export enum SpeechContextType {

@@ -15,7 +15,7 @@ import { CycleChartFrame } from './CycleChartFrame';
 import { useDispatch } from 'react-redux';
 import { createGoToCyclicDetailDailyAction, InteractionType, createGoToCyclicDetailRangeAction, setTouchElementInfo } from '@state/exploration/interaction/actions';
 import { CyclicTimeFrame, getCycleDimensionWithTimeKey, getCycleLevelOfDimension } from '@core/exploration/cyclic_time';
-import { DataSourceType } from '@measure/DataSourceSpec';
+import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 
 const dummyConverter = (num: number) => num
 

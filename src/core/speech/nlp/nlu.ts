@@ -7,9 +7,9 @@ import { setDateAction, InteractionType, createSetRangeAction, setDataSourceActi
 import { explorationInfoHelper } from "../../exploration/ExplorationInfoHelper";
 import { differenceInDays } from "date-fns";
 import { DateTimeHelper } from "@utils/time";
-import { DataSourceType } from "../../../measure/DataSourceSpec";
+import { DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { ExplorationState, explorationStateReducer } from "@state/exploration/interaction/reducers";
-import { ExplorationInfo, ParameterType, HighlightFilter, ExplorationType } from "@core/exploration/ExplorationInfo";
+import { ExplorationInfo, ParameterType, HighlightFilter, ExplorationType } from "@data-at-hand/core/exploration/ExplorationInfo";
 
 enum EntityPriority {
     None = 0,

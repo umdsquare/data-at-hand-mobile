@@ -1,7 +1,7 @@
 import { FitbitDailyActivityStepsQueryResult } from "./types";
 import { FitbitSummaryLogMeasure } from "./FitbitSummaryLogMeasure";
 import { StepCountRangedData } from "../../../core/exploration/data/types";
-import { DataSourceType } from "../../DataSourceSpec";
+import { DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { FitbitLocalTableName } from "./sqlite/database";
 
 export class FitbitDailyStepMeasure extends FitbitSummaryLogMeasure<FitbitDailyActivityStepsQueryResult> {

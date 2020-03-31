@@ -1,8 +1,8 @@
 import { startOfDay, subDays, endOfDay } from 'date-fns';
 import { DateTimeHelper } from '@utils/time';
 import { LayoutRectangle } from 'react-native';
-import { DataSourceType } from '@measure/DataSourceSpec';
-import { ExplorationInfoParams, ExplorationInfo, ExplorationType, ParameterType } from './ExplorationInfo';
+import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
+import { ExplorationInfoParams, ExplorationInfo, ExplorationType, ParameterType } from '@data-at-hand/core/exploration/ExplorationInfo';
 
 
 export enum TouchingElementValueType {

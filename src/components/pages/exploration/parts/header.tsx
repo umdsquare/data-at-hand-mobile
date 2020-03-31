@@ -9,7 +9,7 @@ import { Button } from 'react-native-elements';
 import { Sizes } from '@style/Sizes';
 import { StyleTemplates } from '@style/Styles';
 import { DataSourceManager } from '@measure/DataSourceManager';
-import { DataSourceType } from '@measure/DataSourceSpec';
+import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { createSetRangeAction, setDataSourceAction, InteractionType, goBackAction, setDateAction, setIntraDayDataSourceAction, setCycleTypeAction, setCycleDimensionAction } from '@state/exploration/interaction/actions';
 import Colors from '@style/Colors';
 import { useDispatch, useSelector } from 'react-redux';
@@ -22,7 +22,7 @@ import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@components/Routes';
 import { SpeechContextHelper } from '@core/speech/nlp/context';
-import { ExplorationType, ParameterKey, ParameterType } from '@core/exploration/ExplorationInfo';
+import { ExplorationType, ParameterKey, ParameterType } from '@data-at-hand/core/exploration/ExplorationInfo';
 
 const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={Colors.WHITE} />
 

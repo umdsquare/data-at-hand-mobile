@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react'
-import { HighlightFilter, NumericConditionType } from '@core/exploration/ExplorationInfo'
+import { HighlightFilter, NumericConditionType } from '@data-at-hand/core/exploration/ExplorationInfo'
 import { View, StyleSheet, Text, Animated, Platform, ActionSheetIOS, UIManager, findNodeHandle } from 'react-native'
 import Colors from '@style/Colors'
 import { DataSourceManager } from '@measure/DataSourceManager'
@@ -7,7 +7,7 @@ import { StyleTemplates } from '@style/Styles'
 import { Sizes } from '@style/Sizes'
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { RectButton } from 'react-native-gesture-handler'
-import { DataSourceType, MeasureUnitType } from '@measure/DataSourceSpec'
+import { DataSourceType, MeasureUnitType } from '@data-at-hand/core/measure/DataSourceSpec'
 import pluralize from 'pluralize';
 import deepEqual from 'deep-equal';
 import Dialog from 'react-native-dialog'

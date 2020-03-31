@@ -2,7 +2,7 @@ import { PreProcessedInputText, Intent, VariableType, NLUOptions, makeVariableId
 import { DateTimeHelper } from "@utils/time";
 import NamedRegExp from 'named-regexp-groups'
 import { parseTimeText } from "./preprocessor-time";
-import { DataSourceType } from "@measure/DataSourceSpec";
+import { DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { CyclicTimeFrame } from "@core/exploration/cyclic_time";
 
 const REGEX_RANDOM_ELEMENT = "[a-zA-Z0-9\\s]+"

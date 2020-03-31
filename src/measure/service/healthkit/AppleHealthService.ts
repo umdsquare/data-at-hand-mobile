@@ -3,7 +3,7 @@ import {Platform} from 'react-native';
 import {AppleHealthStepMeasure} from './AppleHealthStepMeasure';
 import * as HK from './HealthKitManager';
 import {DataServiceManager} from '@measure/DataServiceManager';
-import { DataSourceType } from '../../DataSourceSpec';
+import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { DataLevel, IDatumBase } from '../../../database/types';
 
 export class AppleHealthService extends DataService {

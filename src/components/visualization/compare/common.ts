@@ -3,9 +3,9 @@ import { CyclicTimeFrame, getCycleDimensionWithTimeKey } from '@core/exploration
 import { ScaleBand } from 'd3-scale';
 import { LayoutRectangle } from 'react-native';
 import { TouchingElementInfo, TouchingElementValueType } from '@core/exploration/types';
-import { DataSourceType } from '@measure/DataSourceSpec';
+import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { getScaleStepLeft } from '../d3-utils';
-import { ParameterType } from '@core/exploration/ExplorationInfo';
+import { ParameterType } from '@data-at-hand/core/exploration/ExplorationInfo';
 
 const dowNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const monthNames = [

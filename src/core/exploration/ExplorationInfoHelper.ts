@@ -2,7 +2,7 @@ import {
   IntraDayDataSourceType,
   getIntraDayDataSourceName,
 } from './types';
-import { DataSourceType, DataSourceSpec } from '@measure/DataSourceSpec';
+import { DataSourceType, DataSourceSpec } from '@data-at-hand/core/measure/DataSourceSpec';
 import { DataSourceManager } from '@measure/DataSourceManager';
 import {
   ExplorationInfo,
@@ -12,7 +12,7 @@ import {
   ExplorationMode,
   ExplorationInfoParameter,
   ExplorationInfoParams,
-} from './ExplorationInfo';
+} from '@data-at-hand/core/exploration/ExplorationInfo';
 
 class ExplorationInfoHelper {
   getParameterValue<T>(

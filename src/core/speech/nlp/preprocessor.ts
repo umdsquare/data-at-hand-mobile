@@ -5,7 +5,7 @@ import { inferVerbType } from "./preprocessors/preprocessor-verb";
 import { categorizeExtreme, findComparisonTermInfo, inferScalarValue } from "./preprocessors/preprocessor-condition";
 import { tryPreprocessingByTemplates, DATASOURCE_VARIABLE_RULES, CYCLIC_TIME_RULES } from "./preprocessors/preprocessor-templates";
 import { parseTimeOfTheDayTextToDiffSeconds } from "./preprocessors/preprocessor-time-clock";
-import { DataSourceType } from "@measure/DataSourceSpec";
+import { DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { runPipe, definePipe } from "./preprocessors/preprosessor-pipe";
 
 compromise.extend(require('compromise-numbers'))

@@ -28,8 +28,8 @@ import {
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
 import { startOfDay, subDays, endOfDay, startOfWeek, endOfWeek } from 'date-fns';
 import { DateTimeHelper } from '@utils/time';
-import { DataSourceType } from '@measure/DataSourceSpec';
-import { ExplorationInfo, ParameterType, ExplorationType, ParameterKey } from '@core/exploration/ExplorationInfo';
+import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
+import { ExplorationInfo, ParameterType, ExplorationType, ParameterKey } from '@data-at-hand/core/exploration/ExplorationInfo';
 
 export interface ExplorationState {
   info: ExplorationInfo;

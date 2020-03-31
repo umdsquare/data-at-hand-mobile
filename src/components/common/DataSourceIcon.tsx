@@ -1,6 +1,6 @@
 import React from 'react'
 import Svg, { Path, Rect } from "react-native-svg"
-import { DataSourceType } from '@measure/DataSourceSpec'
+import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec'
 import { ViewStyle } from 'react-native'
 
 

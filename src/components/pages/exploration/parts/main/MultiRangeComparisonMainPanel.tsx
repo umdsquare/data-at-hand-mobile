@@ -4,7 +4,7 @@ import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper'
 import { TouchingElementInfo, TouchingElementValueType } from '@core/exploration/types'
 import { ReduxAppState, ActionTypeBase } from '@state/types'
 import { RangeAggregatedComparisonData, IAggregatedRangeValue, IAggregatedValue } from '@core/exploration/data/types'
-import { DataSourceType, MeasureUnitType } from '@measure/DataSourceSpec'
+import { DataSourceType, MeasureUnitType } from '@data-at-hand/core/measure/DataSourceSpec'
 import { Dispatch } from 'redux'
 import { View, StyleSheet, Platform, LayoutRectangle } from 'react-native'
 import { StyleTemplates } from '@style/Styles'
@@ -29,7 +29,7 @@ import { noop } from '@utils/utils'
 import { CategoricalTouchableSvg } from '@components/visualization/CategoricalTouchableSvg'
 import { HorizontalPullToActionContainer } from '@components/common/HorizontalPullToActionContainer'
 import { getScaleStepLeft } from '@components/visualization/d3-utils'
-import { ParameterType } from '@core/exploration/ExplorationInfo'
+import { ParameterType } from '@data-at-hand/core/exploration/ExplorationInfo'
 
 const INDEX_AGGREGATED = 0
 const INDEX_SUM = 1

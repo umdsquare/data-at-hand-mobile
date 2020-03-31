@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useMemo } from "react";
 import { View, FlatList, Text, StyleSheet, ActivityIndicator, LayoutAnimation, UIManager, findNodeHandle } from 'react-native';
-import { MeasureUnitType, DataSourceType } from "@measure/DataSourceSpec";
+import { MeasureUnitType, DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, InteractionType, setHighlightFilter } from "@state/exploration/interaction/actions";
 import { connect } from "react-redux";
 import { ReduxAppState } from "@state/types";
@@ -20,7 +20,7 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 import { SvgIcon, SvgIconType } from "@components/common/svg/SvgIcon";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { HighlightFilterPanel } from "@components/exploration/HighlightFilterPanel";
-import { HighlightFilter, ParameterType } from "@core/exploration/ExplorationInfo";
+import { HighlightFilter, ParameterType } from "@data-at-hand/core/exploration/ExplorationInfo";
 
 const listItemHeightNormal = 52
 const listItemHeightTall = 70

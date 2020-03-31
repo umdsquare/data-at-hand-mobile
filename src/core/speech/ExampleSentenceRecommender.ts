@@ -1,12 +1,12 @@
 import { inferIntraDayDataSourceType, getIntraDayDataSourceName } from "@core/exploration/types";
 import { SpeechContext, SpeechContextType, DateElementSpeechContext, RangeElementSpeechContext } from "./nlp/context";
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
-import { DataSourceType } from "@measure/DataSourceSpec";
+import { DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { DataSourceManager } from "@measure/DataSourceManager";
 import { DateTimeHelper } from "@utils/time";
 import holidays from '@date/holidays-us';
 import { isSameDay, getYear, isAfter } from "date-fns";
-import { ExplorationInfo, ParameterType, ExplorationType } from "@core/exploration/ExplorationInfo";
+import { ExplorationInfo, ParameterType, ExplorationType } from "@data-at-hand/core/exploration/ExplorationInfo";
 
 const holidayRecommendationList: ReadonlyArray<{ func: string | ((year: number) => Date), casualName: string }> = [
     {

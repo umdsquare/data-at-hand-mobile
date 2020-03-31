@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useMemo, useEffect } from "react";
 import { View, Text, StyleSheet, TouchableHighlight, Alert, ScrollView, Switch, ViewStyle, Platform, ActionSheetIOS, UIManager, findNodeHandle } from "react-native";
-import { MeasureUnitType } from "@measure/DataSourceSpec";
+import { MeasureUnitType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { Dispatch } from "redux";
 import { ReduxAppState } from "@state/types";
 import { connect } from "react-redux";

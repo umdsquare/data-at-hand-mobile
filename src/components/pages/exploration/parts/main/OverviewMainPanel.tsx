@@ -5,7 +5,7 @@ import { ReduxAppState } from "@state/types";
 import { FlatList, View, LayoutAnimation, NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { DataSourceChartFrame, HEADER_HEIGHT, FOOTER_HEIGHT } from "@components/exploration/DataSourceChartFrame";
 import { OverviewData, OverviewSourceRow } from "@core/exploration/data/types";
-import { MeasureUnitType, DataSourceType } from "@measure/DataSourceSpec";
+import { MeasureUnitType, DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { Sizes } from "@style/Sizes";
 import { DateTimeHelper } from "@utils/time";
 import { inferIntraDayDataSourceType } from "@core/exploration/types";
@@ -17,7 +17,7 @@ import { ThunkDispatch } from "redux-thunk";
 import { DataService } from "@measure/service/DataService";
 import { CommonBrowsingChartStyles, DateRangeScaleContext } from "@components/visualization/browse/common";
 import { ScaleBand } from "d3-scale";
-import { HighlightFilter } from "@core/exploration/ExplorationInfo";
+import { HighlightFilter } from "@data-at-hand/core/exploration/ExplorationInfo";
 
 const MIN_REFRESH_TIME_FOR_PERCEPTION = 1000
 

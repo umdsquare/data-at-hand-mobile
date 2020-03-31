@@ -1,5 +1,5 @@
 import { ActionTypeBase } from '@state/types';
-import { DataSourceType } from '@measure/DataSourceSpec';
+import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import {
   TouchingElementInfo,
   IntraDayDataSourceType,
@@ -7,7 +7,7 @@ import {
 import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
 import { startOfDay, subDays, endOfDay } from 'date-fns';
 import { DateTimeHelper } from '@utils/time';
-import { HighlightFilter } from '@core/exploration/ExplorationInfo';
+import { HighlightFilter } from '@data-at-hand/core/exploration/ExplorationInfo';
 
 export const USER_INTERACTION_ACTION_PREFIX = "exploration:interaction:user"
 

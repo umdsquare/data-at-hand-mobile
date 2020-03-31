@@ -7,7 +7,7 @@ import { VariableType, Intent, ConditionInfo } from '@core/speech/nlp/types';
 import { subDays } from 'date-fns';
 import { DateTimeHelper } from '@utils/time';
 import { dataSources, speechOptions } from '../jest.setup';
-import { DataSourceType } from '@measure/DataSourceSpec';
+import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { NumericConditionType } from '@core/exploration/types';
 
 console.log = jest.fn()

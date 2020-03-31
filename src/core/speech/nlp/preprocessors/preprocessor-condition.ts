@@ -1,7 +1,7 @@
-import { DataSourceType, MeasureUnitType } from "@measure/DataSourceSpec"
+import { DataSourceType, MeasureUnitType } from "@data-at-hand/core/measure/DataSourceSpec"
 import convert from "convert-units"
 import { DataSourceManager } from "@measure/DataSourceManager"
-import { NumericConditionType } from "@core/exploration/ExplorationInfo"
+import { NumericConditionType } from "@data-at-hand/core/exploration/ExplorationInfo"
 
 type TermInfo = { term: string, conditionType: NumericConditionType, valueType: Array<"scalar" | "duration" | "time"> | null, impliedSource: DataSourceType | null }
 

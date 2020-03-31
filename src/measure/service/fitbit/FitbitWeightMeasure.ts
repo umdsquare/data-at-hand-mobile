@@ -10,7 +10,7 @@ import { FitbitRangeMeasure } from './FitbitRangeMeasure';
 import { DateTimeHelper } from '@utils/time';
 import { parse, getDay } from 'date-fns';
 import { WeightRangedData, GroupedData, IAggregatedValue, FilteredDailyValues, BoxPlotInfo } from '@core/exploration/data/types';
-import { DataSourceType } from '../../DataSourceSpec';
+import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { FitbitLocalTableName } from './sqlite/database';
 import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
 import { DataService } from '../DataService';

@@ -9,7 +9,7 @@ import * as d3Array from 'd3-array';
 import * as d3Shape from 'd3-shape';
 import Colors from '@style/Colors';
 import { IWeightIntraDayLogEntry } from '@core/exploration/data/types';
-import { MeasureUnitType, DataSourceType } from '@measure/DataSourceSpec';
+import { MeasureUnitType, DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import unitConvert from 'convert-units';
 import { noop, coverValueInRange } from '@utils/utils';
 import { getScaleStepLeft } from '../d3-utils';

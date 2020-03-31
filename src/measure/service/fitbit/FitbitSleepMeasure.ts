@@ -20,7 +20,7 @@ import {
   BoxPlotInfo,
   OverviewSourceRow,
 } from '@core/exploration/data/types';
-import { DataSourceType } from '../../DataSourceSpec';
+import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import {
   FitbitLocalTableName,
   makeCyclicGroupQuery,
@@ -110,7 +110,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
             stageType: entry.type === 'classic' ? 'simple' : entry.type,
 
             listOfLevels: entry.levels.data
-              .map(levelEntry => {
+              .map((levelEntry: { level: string; dateTime: string; seconds: string; }) => {
                 return (
                   levelEntry.level +
                   '|' +
@@ -243,7 +243,7 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
       const dailyLog = dailyLogs[0];
       if (dailyLog.listOfLevels && dailyLog.listOfLevels.length > 0) {
         const split = (dailyLog.listOfLevels as any).split(',');
-        dailyLog.listOfLevels = split.map(elm => {
+        dailyLog.listOfLevels = split.map((elm: string) => {
           const elmSplit = elm.split('|');
           return {
             type: elmSplit[0],

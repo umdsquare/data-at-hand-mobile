@@ -1,4 +1,4 @@
-import { DataSourceType } from '@measure/DataSourceSpec';
+import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 export type StatisticsType = 'avg' | 'range' | 'total' | 'bedtime' | 'waketime';
 
 export interface BoxPlotInfo {

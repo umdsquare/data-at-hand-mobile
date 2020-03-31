@@ -8,7 +8,7 @@ import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper'
 import { DateTimeHelper, isToday, isYesterday } from '@utils/time'
 import { format, startOfDay, differenceInDays } from 'date-fns'
 import { Sizes } from '@style/Sizes'
-import { DataSourceType, MeasureUnitType } from '@measure/DataSourceSpec'
+import { DataSourceType, MeasureUnitType } from '@data-at-hand/core/measure/DataSourceSpec'
 import commaNumber from 'comma-number';
 import unitConvert from 'convert-units'
 import { addSeconds } from 'date-fns/esm'
@@ -25,7 +25,7 @@ import { SpeechContext, SpeechContextHelper } from '@core/speech/nlp/context'
 import { createSetSpeechContextAction } from '@state/speech/actions'
 import { Lazy } from '@utils/utils'
 import { TodayContext } from '../../contexts'
-import { ExplorationType, ParameterType } from '@core/exploration/ExplorationInfo'
+import { ExplorationType, ParameterType } from '@data-at-hand/core/exploration/ExplorationInfo'
 
 const borderRadius = 8
 

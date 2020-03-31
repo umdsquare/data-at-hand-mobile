@@ -4,7 +4,7 @@ import {
   ServiceActivationResult,
 } from '../DataService';
 import { FitbitServiceCore } from './types';
-import { DataSourceType } from '../../DataSourceSpec';
+import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { FitbitDailyStepMeasure } from './FitbitDailyStepMeasure';
 import { FitbitDailyHeartRateMeasure } from './FitbitDailyHeartRateMeasure';
 import { DateTimeHelper } from '@utils/time';
@@ -17,7 +17,7 @@ import { FitbitIntraDayHeartRateMeasure } from './FitbitIntraDayHeartRateMeasure
 import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, FilteredDailyValues, BoxPlotInfo } from '@core/exploration/data/types';
 import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
 import { FitbitLocalTableName } from './sqlite/database';
-import { HighlightFilter, NumericConditionType } from '@core/exploration/ExplorationInfo';
+import { HighlightFilter, NumericConditionType } from '@data-at-hand/core/exploration/ExplorationInfo';
 
 
 export default class FitbitService extends DataService {

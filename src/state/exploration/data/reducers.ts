@@ -1,4 +1,4 @@
-import { ExplorationInfo } from '@core/exploration/ExplorationInfo';
+import { ExplorationInfo } from '@data-at-hand/core/exploration/ExplorationInfo';
 import { ActionTypeBase, ReduxAppState } from '@state/types';
 import {
   ExplorationDataActionType,

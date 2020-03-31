@@ -1,11 +1,11 @@
 import { DirectoryLogger } from "@core/logging/DirectoryLogger"
-import { ExplorationInfo } from "@core/exploration/ExplorationInfo"
+import { ExplorationInfo } from "@data-at-hand/core/exploration/ExplorationInfo"
 import { SpeechContext } from "@core/speech/nlp/context"
 import { ActionTypeBase } from "@state/types"
 import Share from 'react-native-share'
 import { randomString } from "@utils/utils"
 import { NLUResult } from "@core/speech/nlp/types"
-import { InteractionTransitionLogType } from '@data-at-hand/logging/types'
+import { InteractionTransitionLogType } from '@data-at-hand/core/logging/types'
 
 enum LogFileName {
     SpeechCommandLogs = "speech_command.jsonl",

@@ -3,13 +3,13 @@ import { OverviewData, OverviewSourceRow, GroupedData, GroupedRangeData, IAggreg
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
 import { DataSourceManager } from '@measure/DataSourceManager';
 import { DataServiceManager } from '@measure/DataServiceManager';
-import { DataSourceType } from '@measure/DataSourceSpec';
+import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
 import { DateTimeHelper } from '@utils/time';
 import { DataService } from '@measure/service/DataService';
 import { sum, mean, min, max } from 'd3-array';
 import { fastConcatTo } from '@utils/utils';
-import { ExplorationInfo, ExplorationType, ParameterType, ParameterKey } from '../ExplorationInfo';
+import { ExplorationInfo, ExplorationType, ParameterType, ParameterKey } from '@data-at-hand/core/exploration/ExplorationInfo';
 
 
 const dateSortFunc = (a: { numberedDate: number; }, b: { numberedDate: number; }) => {

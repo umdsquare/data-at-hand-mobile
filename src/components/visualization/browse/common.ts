@@ -1,8 +1,8 @@
 import { ScaleBand, scaleBand } from 'd3-scale';
 import { DateTimeHelper } from '@utils/time';
 import { LayoutRectangle, Dimensions } from 'react-native';
-import { DataSourceType } from '@measure/DataSourceSpec';
-import { HighlightFilter, NumericConditionType } from '@core/exploration/ExplorationInfo';
+import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
+import { HighlightFilter, NumericConditionType } from '@data-at-hand/core/exploration/ExplorationInfo';
 import { useMemo } from 'react';
 import Colors from '@style/Colors';
 import React from 'react';

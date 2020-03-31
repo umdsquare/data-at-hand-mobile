@@ -1,4 +1,4 @@
-import { DataSourceType, MeasureUnitType } from "@measure/DataSourceSpec";
+import { DataSourceType, MeasureUnitType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { NLUOptions } from "@core/speech/nlp/types";
 
 

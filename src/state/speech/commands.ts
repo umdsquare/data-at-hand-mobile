@@ -9,7 +9,7 @@ import { SpeechContext } from "../../core/speech/nlp/context";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { SpeechEventQueue } from "../../core/speech/SpeechEventQueue";
 import { SystemLogger } from "@core/logging/SystemLogger";
-import { VerboseEventTypes } from '@data-at-hand/logging/types';
+import { VerboseEventTypes } from '@data-at-hand/core/logging/types';
 import { NLUResultType, NLUCommandResolver } from "@core/speech/nlp/types";
 import { Lazy } from "@utils/utils";
 import { notifyError } from "@core/logging/ErrorReportingService";
