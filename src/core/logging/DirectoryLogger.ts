@@ -13,7 +13,7 @@ export class DirectoryLogger {
         this.fullDirectoryPath = path.resolve(CachesDirectoryPath, directoryPath)
     }
 
-    appendJsonLine(filename: string, object: Object, timestamp = Date.now()) {
+    appendJsonLine(filename: string, object: any, timestamp = Date.now()) {
         object["timestamp"] = timestamp
         const line = JSON.stringify(object)
 
