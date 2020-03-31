@@ -2,7 +2,7 @@ import { NumericConditionType, ExplorationInfo } from "@data-at-hand/core/explor
 import { randomString, STRING_SET_ALPHABETS, STRING_SET_NUMBERS } from "@data-at-hand/core/utils"
 import { DataSourceType, MeasureUnitType } from "@data-at-hand/core/measure/DataSourceSpec"
 import { ActionTypeBase } from "@state/types"
-import { SpeechContext } from "./context"
+import { SpeechContext } from "@data-at-hand/core/speech/SpeechContext"
 
 export const MONTH_NAMES = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
 

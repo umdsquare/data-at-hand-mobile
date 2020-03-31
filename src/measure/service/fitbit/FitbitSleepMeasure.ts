@@ -34,7 +34,7 @@ import {
   CycleDimension,
   getCycleTypeOfDimension,
   getTimeKeyOfDimension,
-} from '@core/exploration/cyclic_time';
+} from '@data-at-hand/core/exploration/CyclicTimeFrame';
 
 const columnNamesForRangeData = [
   'numberedDate',

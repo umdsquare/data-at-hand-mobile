@@ -5,7 +5,7 @@ import { FitbitRangeMeasure } from './FitbitRangeMeasure';
 import { FitbitLocalTableName, makeCyclicGroupQuery, makeAggregatedQuery, makeCycleDimensionRangeQuery } from './sqlite/database';
 import { SQLiteHelper } from '@utils/sqlite-helper';
 import { GroupedData, IAggregatedValue, GroupedRangeData, FilteredDailyValues, BoxPlotInfo } from '@core/exploration/data/types';
-import { CyclicTimeFrame, CycleDimension, getCycleTypeOfDimension, getTimeKeyOfDimension } from '@core/exploration/cyclic_time';
+import { CyclicTimeFrame, CycleDimension, getCycleTypeOfDimension, getTimeKeyOfDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 
 export abstract class FitbitSummaryLogMeasure<
   QueryResultType> extends FitbitRangeMeasure<QueryResultType> {

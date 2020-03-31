@@ -15,7 +15,7 @@ import { scaleLinear } from 'd3-scale';
 import convertUnit from 'convert-units';
 import { RangeValueCyclicChart } from '@components/visualization/compare/RangeValueCyclicChart';
 import { timeTickFormat } from '@components/visualization/compare/common';
-import { CyclicTimeFrame } from '@core/exploration/cyclic_time';
+import { CyclicTimeFrame } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { HorizontalPullToActionContainer } from '@components/common/HorizontalPullToActionContainer';
 import { shiftAllRanges, InteractionType } from '@state/exploration/interaction/actions';
 import Colors from '@style/Colors';

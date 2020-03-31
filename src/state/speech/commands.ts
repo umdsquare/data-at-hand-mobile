@@ -5,7 +5,7 @@ import { VoiceDictator } from "../../core/speech/VoiceDictator";
 import { DictationResult } from "../../core/speech/types";
 import { SpeechRecognizerSessionStatus } from "./types";
 import { Mutex } from 'async-mutex';
-import { SpeechContext } from "../../core/speech/nlp/context";
+import { SpeechContext } from "@data-at-hand/core/speech/SpeechContext";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { SpeechEventQueue } from "../../core/speech/SpeechEventQueue";
 import { SystemLogger } from "@core/logging/SystemLogger";

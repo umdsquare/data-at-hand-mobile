@@ -1,5 +1,5 @@
 import { DictationResult } from '@core/speech/types';
-import { SpeechContext } from '@core/speech/nlp/context';
+import { SpeechContext } from '@data-at-hand/core/speech/SpeechContext';
 
 export enum SpeechRecognizerSessionStatus {
     Idle = "idle",

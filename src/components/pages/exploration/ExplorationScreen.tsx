@@ -34,7 +34,7 @@ import { InitialLoadingIndicator } from "@components/pages/exploration/parts/mai
 import { createSetShowGlobalPopupAction } from "@state/speech/actions";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "@components/Routes";
-import { SpeechContextHelper } from "@core/speech/nlp/context";
+import { SpeechContextHelper } from "@data-at-hand/core/speech/SpeechContext";
 import { TouchSafeBottomSheet } from "@components/common/TouchSafeBottomSheet";
 import { Subscription } from "rxjs";
 import { SpeechEventQueue } from "@core/speech/SpeechEventQueue";

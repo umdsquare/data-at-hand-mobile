@@ -15,7 +15,7 @@ import { FitbitIntraDayStepMeasure } from './FitbitIntraDayStepMeasure';
 import { IntraDayDataSourceType } from '@core/exploration/types';
 import { FitbitIntraDayHeartRateMeasure } from './FitbitIntraDayHeartRateMeasure';
 import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, FilteredDailyValues, BoxPlotInfo } from '@core/exploration/data/types';
-import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
+import { CyclicTimeFrame, CycleDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { FitbitLocalTableName } from './sqlite/database';
 import { HighlightFilter, NumericConditionType } from '@data-at-hand/core/exploration/ExplorationInfo';
 

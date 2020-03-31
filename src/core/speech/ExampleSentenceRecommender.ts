@@ -1,5 +1,5 @@
 import { inferIntraDayDataSourceType, getIntraDayDataSourceName } from "@core/exploration/types";
-import { SpeechContext, SpeechContextType, DateElementSpeechContext, RangeElementSpeechContext } from "./nlp/context";
+import { SpeechContext, SpeechContextType, DateElementSpeechContext, RangeElementSpeechContext } from "@data-at-hand/core/speech/SpeechContext";
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
 import { DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { DataSourceManager } from "@measure/DataSourceManager";

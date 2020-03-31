@@ -3,7 +3,7 @@ import {FitbitSummaryLogMeasure} from './FitbitSummaryLogMeasure';
 import { RestingHeartRateRangedData, FilteredDailyValues } from '@core/exploration/data/types';
 import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { FitbitLocalTableName } from './sqlite/database';
-import { CycleDimension } from '@core/exploration/cyclic_time';
+import { CycleDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 
 export class FitbitDailyHeartRateMeasure extends FitbitSummaryLogMeasure<FitbitDailyActivityHeartRateQueryResult> {
   

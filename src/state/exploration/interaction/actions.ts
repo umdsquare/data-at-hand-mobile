@@ -4,7 +4,7 @@ import {
   TouchingElementInfo,
   IntraDayDataSourceType,
 } from '@core/exploration/types';
-import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
+import { CyclicTimeFrame, CycleDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { startOfDay, subDays, endOfDay } from 'date-fns';
 import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { HighlightFilter } from '@data-at-hand/core/exploration/ExplorationInfo';

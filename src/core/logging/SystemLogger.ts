@@ -1,6 +1,6 @@
 import { DirectoryLogger } from "@core/logging/DirectoryLogger"
 import { ExplorationInfo } from "@data-at-hand/core/exploration/ExplorationInfo"
-import { SpeechContext } from "@core/speech/nlp/context"
+import { SpeechContext } from "@data-at-hand/core/speech/SpeechContext"
 import { ActionTypeBase } from "@state/types"
 import Share from 'react-native-share'
 import { randomString } from "@data-at-hand/core/utils"

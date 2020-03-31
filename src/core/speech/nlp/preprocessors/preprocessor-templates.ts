@@ -3,7 +3,7 @@ import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import NamedRegExp from 'named-regexp-groups'
 import { parseTimeText } from "./preprocessor-time";
 import { DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
-import { CyclicTimeFrame } from "@core/exploration/cyclic_time";
+import { CyclicTimeFrame } from "@data-at-hand/core/exploration/CyclicTimeFrame";
 
 const REGEX_RANDOM_ELEMENT = "[a-zA-Z0-9\\s]+"
 

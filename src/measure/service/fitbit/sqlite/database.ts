@@ -1,7 +1,7 @@
 import SQLite, { DatabaseParams } from 'react-native-sqlite-storage';
 import { SQLiteHelper } from '@utils/sqlite-helper';
 import stringFormat from 'string-format';
-import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension } from '@core/exploration/cyclic_time';
+import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { IIntraDayHeartRatePoint, BoxPlotInfo } from '@core/exploration/data/types';
 import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { Lazy } from '@data-at-hand/core/utils';

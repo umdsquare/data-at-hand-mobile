@@ -1,4 +1,4 @@
-import { SpeechContext, SpeechContextType, TimeSpeechContext, RangeElementSpeechContext } from "./context"
+import { SpeechContext, SpeechContextType, TimeSpeechContext, RangeElementSpeechContext } from "@data-at-hand/core/speech/SpeechContext"
 import { preprocess } from "./preprocessor";
 import { ActionTypeBase } from "../../../state/types";
 import { VariableType, VariableInfo, PreProcessedInputText, Intent, NLUOptions, ConditionInfo, NLUResult, NLUResultType, NLUCommandResolver } from "./types";

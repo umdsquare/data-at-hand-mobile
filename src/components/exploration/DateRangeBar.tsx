@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     yearPopupButtonStyle: { alignSelf: 'flex-end', marginRight: Sizes.horizontalPadding }
 })
 
-export type ElementType = 'from' | 'to' | 'period'
+type ElementType = 'from' | 'to' | 'period'
 
 interface Props {
     from: number,

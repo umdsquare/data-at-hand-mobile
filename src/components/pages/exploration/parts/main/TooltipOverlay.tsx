@@ -14,14 +14,14 @@ import unitConvert from 'convert-units'
 import { addSeconds } from 'date-fns/esm'
 import LinearGradient from 'react-native-linear-gradient'
 import Colors from '@style/Colors'
-import { CycleDimension, getCycleDimensionSpec } from '@core/exploration/cyclic_time'
+import { CycleDimension, getCycleDimensionSpec } from '@data-at-hand/core/exploration/CyclicTimeFrame'
 import { SpeechInputPanel } from '@components/exploration/SpeechInputPanel';
 import { ThunkDispatch } from 'redux-thunk'
 import { startSpeechSession, requestStopDictation, makeNewSessionId } from '@state/speech/commands';
 import Haptic from 'react-native-haptic-feedback';
 import Insets from 'react-native-static-safe-area-insets';
 import { ZIndices } from '../zIndices'
-import { SpeechContext, SpeechContextHelper } from '@core/speech/nlp/context'
+import { SpeechContext, SpeechContextHelper } from '@data-at-hand/core/speech/SpeechContext'
 import { createSetSpeechContextAction } from '@state/speech/actions'
 import { Lazy } from '@data-at-hand/core/utils'
 import { TodayContext } from '../../contexts'

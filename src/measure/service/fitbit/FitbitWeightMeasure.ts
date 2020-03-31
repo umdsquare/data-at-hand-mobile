@@ -12,7 +12,7 @@ import { parse, getDay } from 'date-fns';
 import { WeightRangedData, GroupedData, IAggregatedValue, FilteredDailyValues, BoxPlotInfo } from '@core/exploration/data/types';
 import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { FitbitLocalTableName } from './sqlite/database';
-import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
+import { CyclicTimeFrame, CycleDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { DataService } from '../DataService';
 
 export class FitbitWeightMeasure extends FitbitServiceMeasure {

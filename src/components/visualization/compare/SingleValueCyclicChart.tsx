@@ -14,7 +14,7 @@ import { getDomainAndTickFormat, makeTouchingInfoForCycle } from './common';
 import { CycleChartFrame } from './CycleChartFrame';
 import { useDispatch } from 'react-redux';
 import { createGoToCyclicDetailDailyAction, InteractionType, createGoToCyclicDetailRangeAction, setTouchElementInfo } from '@state/exploration/interaction/actions';
-import { CyclicTimeFrame, getCycleDimensionWithTimeKey, getCycleLevelOfDimension } from '@core/exploration/cyclic_time';
+import { CyclicTimeFrame, getCycleDimensionWithTimeKey, getCycleLevelOfDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 
 const dummyConverter = (num: number) => num

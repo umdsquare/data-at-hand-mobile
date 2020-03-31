@@ -14,14 +14,14 @@ import { createSetRangeAction, setDataSourceAction, InteractionType, goBackActio
 import Colors from '@style/Colors';
 import { useDispatch, useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
-import { CyclicTimeFrame, cyclicTimeFrameSpecs, CycleDimension, getHomogeneousCycleDimensionList, getCycleDimensionSpec } from '@core/exploration/cyclic_time';
+import { CyclicTimeFrame, cyclicTimeFrameSpecs, CycleDimension, getHomogeneousCycleDimensionList, getCycleDimensionSpec } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { SvgIcon, SvgIconType } from '@components/common/svg/SvgIcon';
 import { makeNewSessionId, startSpeechSession, requestStopDictation } from '@state/speech/commands';
 import { createSetShowGlobalPopupAction } from '@state/speech/actions';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamList } from '@components/Routes';
-import { SpeechContextHelper } from '@core/speech/nlp/context';
+import { SpeechContextHelper } from '@data-at-hand/core/speech/SpeechContext';
 import { ExplorationType, ParameterKey, ParameterType } from '@data-at-hand/core/exploration/ExplorationInfo';
 
 const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={Colors.WHITE} />

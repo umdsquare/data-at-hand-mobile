@@ -4,7 +4,7 @@ import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
 import { DataSourceManager } from '@measure/DataSourceManager';
 import { DataServiceManager } from '@measure/DataServiceManager';
 import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
-import { CyclicTimeFrame, CycleDimension } from '@core/exploration/cyclic_time';
+import { CyclicTimeFrame, CycleDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { DataService } from '@measure/service/DataService';
 import { sum, mean, min, max } from 'd3-array';
