@@ -34,7 +34,7 @@ export class SystemLogger {
         this._sessionId = id;
         if (id) {
             if (this.currentLogger && this.currentLogger.directoryPath === "logs/" + id) {
-            } else this.currentLogger = new DirectoryLogger("logs/" + id)
+            } else this.currentLogger = new DirectoryLogger("logs/" + id, id)
         } else {
             this.currentLogger = null
         }

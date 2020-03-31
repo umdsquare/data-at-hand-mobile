@@ -2,6 +2,8 @@ import { CachesDirectoryPath, exists, mkdir, writeFile, appendFile, unlink } fro
 import path from 'react-native-path'
 import { zip } from 'react-native-zip-archive';
 import { Mutex } from 'async-mutex';
+import { getDeviceName, getVersion, getUniqueId } from 'react-native-device-info';
+import { Platform } from 'react-native';
 
 export class DirectoryLogger {
 
@@ -9,7 +11,7 @@ export class DirectoryLogger {
 
     private readonly fileLoggerMap = new Map<string, DebouncedFileLogger>()
 
-    constructor(readonly directoryPath: string) {
+    constructor(readonly directoryPath: string, readonly sessionId: string) {
         this.fullDirectoryPath = path.resolve(CachesDirectoryPath, directoryPath)
     }
 
@@ -17,7 +19,7 @@ export class DirectoryLogger {
         object["timestamp"] = timestamp
         const line = JSON.stringify(object)
 
-        if(this.fileLoggerMap.has(filename) === false){
+        if (this.fileLoggerMap.has(filename) === false) {
             this.fileLoggerMap.set(filename, new DebouncedFileLogger(this.fullDirectoryPath, filename))
         }
 
@@ -59,6 +61,16 @@ export class DirectoryLogger {
 
     async zipLogs(): Promise<{ filePath: string, mimeType: string } | null> {
         if (await exists(this.fullDirectoryPath) === true) {
+            await writeFile(
+                path.resolve(this.fullDirectoryPath, "info.json"),
+                JSON.stringify({
+                    sessionId: this.sessionId,
+                    platform: Platform.OS,
+                    instanceUID: getUniqueId(),
+                    device: await getDeviceName(),
+                    appVersion: getVersion()
+                }), 
+                'utf8')
             let finalFilePath = path.resolve(CachesDirectoryPath, 'logs_' + path.basename(this.fullDirectoryPath) + '.zip')
             finalFilePath = await zip(this.fullDirectoryPath, finalFilePath)
             return {
