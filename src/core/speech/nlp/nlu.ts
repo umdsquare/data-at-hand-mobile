@@ -142,14 +142,14 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                     //only if the exploration info supports the data source
                     if (explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource) != null) {
                         return NLUCommandResolverImpl.convertActionToNLUResult(
-                            setDataSourceAction(InteractionType.Speech, dataSources[0].value),
+                            setDataSourceAction(InteractionType.Speech, undefined, dataSources[0].value),
                             explorationInfo)
                     }
                 } else if (!toldDataSources && toldCyclicTimeFrames && toldDates === false && toldRanges === false) {
                     //only time cycle
                     if (explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.CycleType) === cyclicTimeFrames[0].value) {
                         return NLUCommandResolverImpl.convertActionToNLUResult(
-                            setCycleTypeAction(InteractionType.Speech, cyclicTimeFrames[0].value),
+                            setCycleTypeAction(InteractionType.Speech, null, cyclicTimeFrames[0].value),
                             explorationInfo)
                     }
                 }
@@ -199,7 +199,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                     explorationInfo)
                             } else {
                                 return NLUCommandResolverImpl.convertActionToNLUResult(
-                                    createSetRangeAction(InteractionType.Speech, cascadedRange),
+                                    createSetRangeAction(InteractionType.Speech, undefined, cascadedRange),
                                     explorationInfo)
                             }
                         } else {
@@ -250,7 +250,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
         switch (explorationInfo.type) {
             case ExplorationType.B_Day:
                 if (dates.length > 0) {
-                    return setDateAction(InteractionType.Speech, dates[0].value as number)
+                    return setDateAction(InteractionType.Speech, undefined, dates[0].value as number)
                 } else if (ranges.length > 0) {
                     return createGoToBrowseRangeAction(InteractionType.Speech, inferDataSource(explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.IntraDayDataSource))
                         , ranges[0].value)
@@ -261,7 +261,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
             case ExplorationType.C_CyclicDetail_Daily:
             case ExplorationType.C_CyclicDetail_Range:
                 if (ranges.length > 0) {
-                    return createSetRangeAction(InteractionType.Speech, ranges[0].value as [number, number])
+                    return createSetRangeAction(InteractionType.Speech, undefined, ranges[0].value as [number, number])
                 }
                 if (dates.length > 0) {
                     const date = dates[0].value
@@ -271,29 +271,29 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                         const timeContext = context as TimeSpeechContext
 
                         if (timeContext.timeElementType === 'from') {
-                            return createSetRangeAction(InteractionType.Speech, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])])
+                            return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])])
                         } else if (timeContext.timeElementType === 'to') {
-                            return createSetRangeAction(InteractionType.Speech, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])])
+                            return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])])
                         }
                     }
 
                     if(dates[0].additionalInfo === 'from'){
-                        return createSetRangeAction(InteractionType.Speech, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])])
+                        return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])])
                     }else if(dates[0].additionalInfo === 'to'){
-                        return createSetRangeAction(InteractionType.Speech, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])])
+                        return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])])
                     }
 
                     if (date < currentRange[0]) {
-                        return createSetRangeAction(InteractionType.Speech, [date, currentRange[1]])
+                        return createSetRangeAction(InteractionType.Speech, undefined, [date, currentRange[1]])
                     } else if (date > currentRange[1]) {
-                        return createSetRangeAction(InteractionType.Speech, [currentRange[0], date])
+                        return createSetRangeAction(InteractionType.Speech, undefined, [currentRange[0], date])
                     } else {
                         //middle. change more near one
                         const differLeft = differenceInDays(DateTimeHelper.toDate(date), DateTimeHelper.toDate(currentRange[0]))
                         const differRight = differenceInDays(DateTimeHelper.toDate(currentRange[1]), DateTimeHelper.toDate(date))
                         if (differLeft <= differRight) {
-                            return createSetRangeAction(InteractionType.Speech, [date, currentRange[1]])
-                        } else return createSetRangeAction(InteractionType.Speech, [currentRange[0], date])
+                            return createSetRangeAction(InteractionType.Speech, undefined, [date, currentRange[1]])
+                        } else return createSetRangeAction(InteractionType.Speech, undefined, [currentRange[0], date])
                     }
                 }
                 break;
@@ -306,7 +306,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                 const parameter = explorationInfo.values.find(parameter => parameter.parameter === ParameterType.Range && parameter.value[0] === c.range[0] && parameter.value[1] === c.range[1])
 
                                 if (parameter) {
-                                    return createSetRangeAction(InteractionType.Speech, ranges[0].value, parameter.key)
+                                    return createSetRangeAction(InteractionType.Speech, undefined, ranges[0].value, parameter.key)
                                 }
                             }
                         }
@@ -318,13 +318,13 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                             if (dates.length > 0) {
                                 const date = dates[0].value
                                 if (timeContext.timeElementType === 'from') {
-                                    return createSetRangeAction(InteractionType.Speech, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])], timeContext.parameterKey)
+                                    return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])], timeContext.parameterKey)
                                 } else if (timeContext.timeElementType === 'to') {
-                                    return createSetRangeAction(InteractionType.Speech, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])], timeContext.parameterKey)
+                                    return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])], timeContext.parameterKey)
                                 }
                             }
                             if (ranges.length > 0) {
-                                return createSetRangeAction(InteractionType.Speech, ranges[0].value, timeContext.parameterKey)
+                                return createSetRangeAction(InteractionType.Speech, undefined, ranges[0].value, timeContext.parameterKey)
                             }
                         }
                         break;

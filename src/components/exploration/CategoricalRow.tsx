@@ -64,6 +64,14 @@ const styles = StyleSheet.create({
     indicatorStyle: {
         marginBottom: Sizes.normalFontSize,
         marginLeft: 3
+    },
+
+    bottomSheetElementStyle: {
+        ...StyleTemplates.flexHorizontalCenteredListContainer,
+        paddingLeft: Sizes.horizontalPadding, paddingRight: Sizes.horizontalPadding,
+        paddingTop: Sizes.verticalPadding, paddingBottom: Sizes.verticalPadding,
+        borderBottomColor: '#00000015',
+        borderBottomWidth: 1
     }
 })
 
@@ -81,7 +89,7 @@ export interface CategoricalRowProps {
     onPress?: () => void,
     onLongPressIn?: () => void,
     onLongPressOut?: () => void,
-    onValueChange?: (newValue: string, newIndex: number) => void,
+    onValueChange?: (newValue: string, newIndex: number, interactionContext: 'swipe' | 'picker') => void,
 }
 
 export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
@@ -101,7 +109,7 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
                 }
 
                 if (prop.onValueChange) {
-                    prop.onValueChange(prop.values[currentIndex], currentIndex)
+                    prop.onValueChange(prop.values[currentIndex], currentIndex, 'swipe')
                 }
                 swipedFeedbackRef.current?.startFeedback(direction)
             }
@@ -127,7 +135,7 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
             if (prop.onLongPressIn) {
                 prop.onLongPressIn()
             } else {
-                requestAnimationFrame(()=>{
+                requestAnimationFrame(() => {
                     movement.setValue(0)
                     Animated.timing(movement, denialAnimationSettings.timingConfig).start()
                 })
@@ -136,7 +144,6 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
             if (prop.onLongPressOut) prop.onLongPressOut()
         }
     }, [prop.onLongPressIn, prop.onLongPressOut])
-
 
     const [movement] = useState(new Animated.Value(0))
 
@@ -190,18 +197,12 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
                                     onPress={
                                         () => {
                                             if (prop.onValueChange) {
-                                                prop.onValueChange(prop.values[entry.index], entry.index)
+                                                prop.onValueChange(prop.values[entry.index], entry.index, 'picker')
                                             }
                                             bottomSheetRef.current?.close()
                                         }
                                     }
-                                    style={{
-                                        ...StyleTemplates.flexHorizontalCenteredListContainer,
-                                        paddingLeft: Sizes.horizontalPadding, paddingRight: Sizes.horizontalPadding,
-                                        paddingTop: Sizes.verticalPadding, paddingBottom: Sizes.verticalPadding,
-                                        borderBottomColor: '#00000015',
-                                        borderBottomWidth: 1
-                                    }}>
+                                    style={styles.bottomSheetElementStyle}>
                                     {
                                         prop.IconComponent ? <prop.IconComponent {...{ color: Colors.textGray, size: 20 }} {...(prop.iconProps && prop.iconProps(entry.index))} /> : null
                                     }

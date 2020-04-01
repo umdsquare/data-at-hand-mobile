@@ -26,12 +26,14 @@ export type ExplorationAction =
 
 export function createSetRangeAction(
   interactionType: InteractionType,
+  interactionContext: string,
   range: [number, number],
   key?: string,
 ): SetRangeAction {
   return {
     type: ExplorationActionType.SetRange,
     interactionType,
+    interactionContext,
     range,
     key,
   };
@@ -146,52 +148,61 @@ export function memoUIStatus(key: string, value: any): MemoUIStatusAction {
 
 export function setDataSourceAction(
   interactionType: InteractionType,
+  interactionContext: string | undefined,
   dataSource: DataSourceType,
 ): SetDataSourceAction {
   return {
     type: ExplorationActionType.SetDataSource,
     interactionType,
+    interactionContext,
     dataSource,
   };
 }
 
 export function setIntraDayDataSourceAction(
   interactionType: InteractionType,
+  interactionContext: string | undefined,
   intraDayDataSource: IntraDayDataSourceType,
 ): SetIntraDayDataSourceAction {
   return {
     type: ExplorationActionType.SetIntraDayDataSource,
     interactionType,
+    interactionContext,
     intraDayDataSource,
   };
 }
 
 export function setCycleTypeAction(
   interactionType: InteractionType,
+  interactionContext: string | undefined,
   cycleType: CyclicTimeFrame,
 ): SetCycleTypeAction {
   return {
     type: ExplorationActionType.SetCycleType,
     interactionType,
+    interactionContext,
     cycleType,
   };
 }
 
 export function setDateAction(
   interactionType: InteractionType,
+  interactionContext: string | undefined,
   date: number,
 ): SetDateAction {
   return {
     type: ExplorationActionType.SetDate,
     interactionType,
+    interactionContext,
     date,
   };
 }
 
-export function setCycleDimensionAction(interactionType: InteractionType, cycleDimension: CycleDimension): SetCycleDimensionAction {
+export function setCycleDimensionAction(interactionType: InteractionType, interactionContext: string | undefined, cycleDimension: CycleDimension): SetCycleDimensionAction {
   return {
     type: ExplorationActionType.SetCycleDimension,
     interactionType,
+    interactionContext,
     cycleDimension
   }
 }

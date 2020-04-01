@@ -11,7 +11,7 @@ import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { ExplorationInfo, ExplorationType, ExplorationMode } from "@data-at-hand/core/exploration/ExplorationInfo";
 import { startLoadingForInfo } from "@state/exploration/data/reducers";
-import { ExplorationAction, InteractionType, createGoToBrowseOverviewAction, createRestorePreviousInfoAction, goBackAction } from "@state/exploration/interaction/actions";
+import { ExplorationAction, createGoToBrowseOverviewAction, createRestorePreviousInfoAction, goBackAction } from "@state/exploration/interaction/actions";
 import { Button } from "react-native-elements";
 import { Sizes } from "@style/Sizes";
 import { OverviewMainPanel } from "@components/pages/exploration/parts/main/OverviewMainPanel";
@@ -42,6 +42,7 @@ import { SpeechEventNotificationOverlay } from "@components/pages/exploration/Sp
 import { sleep } from "@data-at-hand/core/utils";
 import { TodayContext } from "./contexts";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
+import { InteractionType } from "@data-at-hand/core/exploration/actions";
 
 const styles = StyleSheet.create({
 

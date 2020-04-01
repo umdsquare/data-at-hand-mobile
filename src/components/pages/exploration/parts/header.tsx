@@ -187,8 +187,8 @@ const HeaderRangeBar = React.memo((props: { parameterKey?: ParameterKey, showBor
 
     const range = explorationInfoHelper.getParameterValue<[number, number]>(explorationInfo, ParameterType.Range, props.parameterKey)!
 
-    const onRangeChanged = useCallback((from, to, xType) => {
-        dispatch(createSetRangeAction(xType, [from, to], props.parameterKey))
+    const onRangeChanged = useCallback((from, to, xType: InteractionType, xContext: string) => {
+        dispatch(createSetRangeAction(xType, xContext, [from, to], props.parameterKey))
     }, [dispatch, props.parameterKey])
 
     const onLongPressIn = useCallback((position) => {
@@ -220,8 +220,8 @@ const HeaderDateBar = React.memo(() => {
     const dispatch = useDispatch()
     const date = explorationInfoHelper.getParameterValue<number>(explorationInfo, ParameterType.Date)!
 
-    const onDateChanged = useCallback((date: number, interactionType: InteractionType) => {
-        dispatch(setDateAction(interactionType, date))
+    const onDateChanged = useCallback((date: number, interactionType: InteractionType, interactionContext: string) => {
+        dispatch(setDateAction(interactionType, interactionContext, date))
     }, [dispatch])
 
     const onLongPressIn = useCallback(() => {
@@ -290,8 +290,8 @@ const DataSourceBar = React.memo((props: { showBorder: boolean }) => {
         IconComponent={DataSourceIcon}
         iconProps={iconProps}
         values={values}
-        onValueChange={(newValue, newIndex) =>
-            dispatch(setDataSourceAction(InteractionType.TouchOnly, DataSourceManager.instance.supportedDataSources[newIndex].type))
+        onValueChange={(newValue, newIndex, xContext) =>
+            dispatch(setDataSourceAction(InteractionType.TouchOnly, xContext, DataSourceManager.instance.supportedDataSources[newIndex].type))
         }
     />
 })
@@ -319,8 +319,8 @@ const IntraDayDataSourceBar = React.memo((props: { showBorder: boolean }) => {
             }
         }}
         values={values}
-        onValueChange={(value, index) => {
-            dispatch(setIntraDayDataSourceAction(InteractionType.TouchOnly, supportedIntraDayDataSourceTypes[index]))
+        onValueChange={(value, index, xContext) => {
+            dispatch(setIntraDayDataSourceAction(InteractionType.TouchOnly, xContext, supportedIntraDayDataSourceTypes[index]))
         }}
     />
 })
@@ -333,8 +333,8 @@ const CyclicComparisonTypeBar = (props: { showBorder: boolean }) => {
 
     return <SpeechSupportedCategoricalRow parameterType={ParameterType.CycleType} title="Group By" showBorder={props.showBorder} value={cyclicTimeFrameSpecs[cycleType].name}
         values={cycles.map(key => cyclicTimeFrameSpecs[key].name)}
-        onValueChange={(value, index) => {
-            dispatch(setCycleTypeAction(InteractionType.TouchOnly, cycles[index] as any))
+        onValueChange={(value, index, interactionContext) => {
+            dispatch(setCycleTypeAction(InteractionType.TouchOnly, interactionContext, cycles[index] as any))
         }}
     />
 }
@@ -349,8 +349,8 @@ const CycleDimensionBar = (props: { showBorder: boolean }) => {
 
     return <SpeechSupportedCategoricalRow parameterType={ParameterType.CycleDimension} title="Cycle Filter" showBorder={props.showBorder} value={spec.name}
         values={dimensionNames}
-        onValueChange={(value, index) => {
-            dispatch(setCycleDimensionAction(InteractionType.TouchOnly, selectableDimensions[index].dimension))
+        onValueChange={(value, index, interactionContext) => {
+            dispatch(setCycleDimensionAction(InteractionType.TouchOnly, interactionContext, selectableDimensions[index].dimension))
         }}
     />
 }
