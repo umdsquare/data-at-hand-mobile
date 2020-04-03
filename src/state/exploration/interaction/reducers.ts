@@ -357,7 +357,7 @@ export const explorationStateReducer = (
         }
         break;
 
-      case ExplorationActionType.GoToComparisonToRanges:
+      case ExplorationActionType.GoToComparisonTwoRanges:
         const comparisonRangesAction = action as GoToComparisonTwoRangesAction;
         {
           const dataSource =

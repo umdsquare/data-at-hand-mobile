@@ -7,7 +7,7 @@ import { SvgIcon, SvgIconType } from '@components/common/svg/SvgIcon';
 import { Sizes } from '@style/Sizes';
 import LinearGradient from 'react-native-linear-gradient';
 import Colors from '@style/Colors';
-import { NLUResultType } from '@core/speech/nlp/types';
+import { NLUResultType } from '@data-at-hand/core/speech/types';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
 

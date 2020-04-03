@@ -1,4 +1,4 @@
-import { Intent } from "../types";
+import { Intent } from "@data-at-hand/core/speech/types"
 
 const verbTypes: {[verbType: string]: Array<string>} = {}
 verbTypes[Intent.AssignTrivial]=["set", "assign", "put", "change", "modify", "edit", "replace"]

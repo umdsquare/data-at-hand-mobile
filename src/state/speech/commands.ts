@@ -10,9 +10,10 @@ import { DataServiceManager } from "@measure/DataServiceManager";
 import { SpeechEventQueue } from "../../core/speech/SpeechEventQueue";
 import { SystemLogger } from "@core/logging/SystemLogger";
 import { VerboseEventTypes } from '@data-at-hand/core/logging/types';
-import { NLUResultType, NLUCommandResolver } from "@core/speech/nlp/types";
+import { NLUCommandResolver } from "@core/speech/nlp/types";
 import { Lazy } from "@data-at-hand/core/utils";
 import { notifyError } from "@core/logging/ErrorReportingService";
+import { NLUResultType } from "@data-at-hand/core/speech/types";
 
 const sessionMutex = new Mutex()
 
@@ -117,7 +118,7 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                                     SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.VoidSpeechAction, { action: inferredActionWithMetadata, speechLogId: speechCommandLogId })
                                     break;
                                 case NLUResultType.Fail:
-                                    SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.SpeechFail, { speechLogId: speechCommandLogId })
+                                    SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.SpeechCommandFail, { speechLogId: speechCommandLogId })
                                     break;
                             }
 

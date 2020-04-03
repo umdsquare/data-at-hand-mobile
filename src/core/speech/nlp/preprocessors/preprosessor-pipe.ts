@@ -1,5 +1,5 @@
-import { VariableInfo, Intent } from "../types";
 import compromise from 'compromise';
+import { VariableInfo, Intent } from '@data-at-hand/core/speech/types';
 
 export interface PipelineResult {
     processedSpeech: string,

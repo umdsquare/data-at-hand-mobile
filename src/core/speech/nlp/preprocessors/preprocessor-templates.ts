@@ -1,9 +1,10 @@
-import { PreProcessedInputText, Intent, VariableType, NLUOptions, makeVariableId } from "../types";
+import { NLUOptions, makeVariableId } from "../types";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import NamedRegExp from 'named-regexp-groups'
 import { parseTimeText } from "./preprocessor-time";
 import { DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { CyclicTimeFrame } from "@data-at-hand/core/exploration/CyclicTimeFrame";
+import { VariableType, Intent, PreProcessedInputText } from '@data-at-hand/core/speech/types';
 
 const REGEX_RANDOM_ELEMENT = "[a-zA-Z0-9\\s]+"
 

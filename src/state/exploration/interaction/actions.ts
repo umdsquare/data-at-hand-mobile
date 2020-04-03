@@ -96,7 +96,7 @@ export function createGoToComparisonTwoRangesAction(
   rangeB?: [number, number],
 ): GoToComparisonTwoRangesAction {
   return {
-    type: ExplorationActionType.GoToComparisonToRanges,
+    type: ExplorationActionType.GoToComparisonTwoRanges,
     interactionType,
     dataSource,
     rangeA,

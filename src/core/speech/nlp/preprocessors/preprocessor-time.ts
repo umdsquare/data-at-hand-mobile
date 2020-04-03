@@ -1,4 +1,3 @@
-import { VariableType } from "../types";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import { startOfMonth, startOfYear, endOfMonth, endOfYear, getYear, isAfter, subYears } from "date-fns";
 import { mergeChronoOptions } from "./chrono-merge";
@@ -14,6 +13,7 @@ import NamedRegExp from "named-regexp-groups";
 import { makeMonthNameParser } from "./chrono-replacers/chrono-monthnames";
 import { makeRelativeDateFormatParser } from "./chrono-replacers/chrono-relative";
 import { makeNoopParser } from "./chrono-replacers/chrono-noop";
+import { VariableType } from "@data-at-hand/core/speech/types";
 
 
 let _chrono: Chrono | undefined = undefined

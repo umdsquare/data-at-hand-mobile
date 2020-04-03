@@ -4,8 +4,8 @@ import { SpeechContext } from "@data-at-hand/core/speech/SpeechContext"
 import { ActionTypeBase } from "@state/types"
 import Share from 'react-native-share'
 import { randomString } from "@data-at-hand/core/utils"
-import { NLUResult } from "@core/speech/nlp/types"
 import { InteractionTransitionLogType, VerboseEventTypes } from '@data-at-hand/core/logging/types'
+import { NLUResult } from "@data-at-hand/core/speech/types"
 
 enum LogFileName {
     SpeechCommandLogs = "speech_command.jsonl",

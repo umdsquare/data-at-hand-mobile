@@ -1,4 +1,4 @@
-import { PreProcessedInputText, VariableType, VariableInfoDict, VerbInfo, NLUOptions, Intent, ConditionInfo, makeVariableId } from "./types";
+import { NLUOptions, makeVariableId } from "./types";
 import compromise from 'compromise';
 import { parseDurationTextToSeconds, extractTimeExpressions } from "./preprocessors/preprocessor-time";
 import { inferVerbType } from "./preprocessors/preprocessor-verb";
@@ -7,6 +7,7 @@ import { tryPreprocessingByTemplates, DATASOURCE_VARIABLE_RULES, CYCLIC_TIME_RUL
 import { parseTimeOfTheDayTextToDiffSeconds } from "./preprocessors/preprocessor-time-clock";
 import { DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { runPipe, definePipe } from "./preprocessors/preprosessor-pipe";
+import { VariableType, PreProcessedInputText, VerbInfo, Intent, ConditionInfo } from "@data-at-hand/core/speech/types";
 
 compromise.extend(require('compromise-numbers'))
 
