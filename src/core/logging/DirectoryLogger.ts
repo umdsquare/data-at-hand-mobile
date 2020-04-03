@@ -2,7 +2,7 @@ import { CachesDirectoryPath, exists, mkdir, writeFile, appendFile, unlink } fro
 import path from 'react-native-path'
 import { zip } from 'react-native-zip-archive';
 import { Mutex } from 'async-mutex';
-import { getDeviceName, getVersion, getUniqueId } from 'react-native-device-info';
+import { getVersion, getUniqueId } from 'react-native-device-info';
 import { Platform } from 'react-native';
 
 export class DirectoryLogger {
@@ -67,8 +67,8 @@ export class DirectoryLogger {
                     sessionId: this.sessionId,
                     platform: Platform.OS,
                     instanceUID: getUniqueId(),
-                    device: await getDeviceName(),
-                    appVersion: getVersion()
+                    appVersion: getVersion(),
+                    environment: __DEV__? "development" : "production"
                 }), 
                 'utf8')
             let finalFilePath = path.resolve(CachesDirectoryPath, 'logs_' + path.basename(this.fullDirectoryPath) + '.zip')
