@@ -3,7 +3,7 @@ import { ExplorationInfo } from "@data-at-hand/core/exploration/ExplorationInfo"
 import { SpeechContext } from "@data-at-hand/core/speech/SpeechContext"
 import { ActionTypeBase } from "@state/types"
 import Share from 'react-native-share'
-import { randomString } from "@data-at-hand/core/utils"
+import { randomString, Lazy } from "@data-at-hand/core/utils"
 import { InteractionTransitionLogType, VerboseEventTypes } from '@data-at-hand/core/logging/types'
 import { NLUResult } from "@data-at-hand/core/speech/types"
 
@@ -21,6 +21,8 @@ export class SystemLogger {
         }
         return this._instance
     }
+
+    private shortId = new Lazy(()=> require('shortid'))
 
     private constructor() { }
 
@@ -73,7 +75,7 @@ export class SystemLogger {
     }
 
     makeLogId(timestamp: number): string {
-        return randomString(15)
+        return this.shortId.get().generate()
     }
 
     logVerboseToInteractionStateTransition(event: VerboseEventTypes, content: Object, logId?: string, timestamp?: number): void {

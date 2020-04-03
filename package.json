@@ -89,6 +89,7 @@
     "redux-persist": "^6.0.0",
     "redux-thunk": "^2.3.0",
     "rxjs": "^6.5.5",
+    "shortid": "^2.2.15",
     "string-format": "^2.0.0",
     "uuid": "~3.4.0",
     "ws": "^7.2.3"

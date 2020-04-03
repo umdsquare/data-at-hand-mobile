@@ -7,7 +7,7 @@ import {
 } from '@state/settings/actions';
 import { MeasureUnitType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { ActionTypeBase } from '@state/types';
-import { randomString, STRING_SET_NUMBERS } from '@data-at-hand/core/utils';
+const shortid = require('shortid');
 
 export interface SettingsState {
   serviceKey: string,
@@ -52,7 +52,7 @@ export const settingsStateReducer = (
 
           if(state.recordLogs=== false && a.recordLogs === true && newState.loggingSessionId == null){
             //cold start of the logging
-            const id = randomString(10) + randomString(5, STRING_SET_NUMBERS)
+            const id = shortid.generate()
             console.log("Start recording logs in session id", id)
             newState.loggingSessionId = id
             newState.recordScreens = true
