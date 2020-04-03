@@ -73,7 +73,7 @@ export class SystemLogger {
     }
 
     makeLogId(timestamp: number): string {
-        return "log_" + timestamp + "_" + randomString(10)
+        return randomString(15)
     }
 
     logVerboseToInteractionStateTransition(event: VerboseEventTypes, content: Object, logId?: string, timestamp?: number): void {
