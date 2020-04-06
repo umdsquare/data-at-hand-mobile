@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import Colors from '@style/Colors';
 import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { DurationText } from '@components/common/DurationText';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const xAxisHeight = 30
 const yAxisWidth = 80
@@ -36,8 +37,7 @@ stageSpecs[SleepStage.Deep] = { stage: SleepStage.Deep, name: "Deep", color: "#1
 const styles = StyleSheet.create({
     chartContainerStyle: {
         marginTop: Sizes.horizontalPadding,
-        flex: 1,
-        maxHeight: 270,
+        height: 200,
         backgroundColor: "#424254",
         borderRadius: 16,
         marginLeft: Sizes.horizontalPadding,
@@ -91,7 +91,7 @@ const xTickFormat = (diffSeconds: number) => {
     }
 }
 
-export const SleepIntraDayPanel = () => {
+export const SleepIntraDayPanel = React.memo(() => {
 
     const { data } = useSelector((appState: ReduxAppState) => ({
         data: appState.explorationDataState.data as IDailySleepSummaryEntry
@@ -136,7 +136,7 @@ export const SleepIntraDayPanel = () => {
 
         const scaleY = scaleBand().domain(stageSet).padding(0.4).range([0, chartArea.height])
 
-        return <View style={commonIntraDayPanelStyles.containerStyle}>
+        return <ScrollView style={commonIntraDayPanelStyles.containerStyle}>
             <Text style={styles.subTitleStyle}>Sleep Stages</Text>
             <SizeWatcher containerStyle={styles.chartContainerStyle} onSizeChange={(width, height) => { setChartContainerWidth(width); setChartContainerHeight(height) }}>
                 <Svg width={chartContainerWidth} height={chartContainerHeight}>
@@ -227,6 +227,6 @@ export const SleepIntraDayPanel = () => {
                 </View>
             </View>
 
-        </View>
+        </ScrollView>
     } else return <NoDataFallbackView/>
-}
+})

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
 import { HeartRateIntraDayData, IIntraDayHeartRatePoint, HeartRateZone } from '@core/exploration/data/types';
-import { View, StyleSheet, LayoutRectangle, Text } from 'react-native';
+import { View, StyleSheet, LayoutRectangle, Text, ScrollView } from 'react-native';
 import { Sizes } from '@style/Sizes';
 import Colors from '@style/Colors';
 import { scaleLinear } from 'd3-scale';
@@ -18,14 +18,16 @@ import { commonIntraDayPanelStyles, NoDataFallbackView } from './common';
 const xAxisHeight = 50
 const yAxisWidth = 50
 const topPadding = 10
-const rightPadding = 24
+const rightPadding = 10
 
 const styles = StyleSheet.create({
     containerStyle: {
         ...commonIntraDayPanelStyles.containerStyle,
         paddingBottom: Sizes.horizontalPadding * 2
     },
-    chartContainerStyle: { flex: 1, marginTop: Sizes.horizontalPadding, marginBottom: 50 },
+    chartContainerStyle: {
+        aspectRatio: 1.2,
+        marginTop: Sizes.horizontalPadding },
 
     zoneChartContainerStyle: {
         flexDirection: 'row',
@@ -62,7 +64,7 @@ const heartRateZoneSpecs: Array<{ type: HeartRateZone, color: string, name: stri
     },]
 
 
-export const HeartRateIntraDayPanel = () => {
+export const HeartRateIntraDayPanel = React.memo(() => {
     const { data } = useSelector((appState: ReduxAppState) => ({
         data: appState.explorationDataState.data as HeartRateIntraDayData
     }))
@@ -100,7 +102,7 @@ export const HeartRateIntraDayPanel = () => {
 
         const maxZoneLength = max(exerciseZones, zone => zone.minutes)
 
-        return <View style={styles.containerStyle}>
+        return <ScrollView style={styles.containerStyle}>
             <SizeWatcher containerStyle={styles.chartContainerStyle} onSizeChange={(width, height) => { setChartContainerWidth(width); setChartContainerHeight(height) }}>
                 <Svg width={chartContainerWidth} height={chartContainerHeight}>
                     <G {...chartArea}>
@@ -111,7 +113,7 @@ export const HeartRateIntraDayPanel = () => {
 
                     <AxisSvg key="yAxis"
                         tickMargin={0}
-                        ticks={scaleY.ticks()}
+                        ticks={scaleY.ticks(7)}
                         overrideTickLabelStyle={yTickLabelStyle}
                         chartArea={chartArea} scale={scaleY} position={Padding.Left} />
                     <AxisSvg key="xAxis"
@@ -152,10 +154,12 @@ export const HeartRateIntraDayPanel = () => {
                 })
             }
 
-        </View>
+            <View style={{height: Sizes.verticalPadding*2}}/>
+
+        </ScrollView>
 
     } else return <NoDataFallbackView/>
-}
+})
 
 const SummaryTableRow = (prop: { title: string, value: Array<{ type: "unit" | "value", value: string | number }> }) => {
     return <View style={commonIntraDayPanelStyles.summaryRowContainerStyle}>

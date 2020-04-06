@@ -16,20 +16,20 @@ import commaNumber from 'comma-number';
 import { pad } from '@data-at-hand/core/utils/time'
 import { commonIntraDayPanelStyles, NoDataFallbackView } from './common'
 
-const xAxisHeight = 50
+const xAxisHeight = 46
 const yAxisWidth = 60
 const topPadding = 10
 const rightPadding = 10
 const barPadding = 1
 
 const styles = StyleSheet.create({
-    chartContainerStyle: { aspectRatio: 1, marginTop: Sizes.horizontalPadding },
+    chartContainerStyle: { aspectRatio: 1.2, marginTop: Sizes.horizontalPadding },
 })
 
 const yTickLabelStyle = { fontSize: Sizes.smallFontSize }
 const xTickLabelStyle = { fontSize: Sizes.tinyFontSize }
 
-export const StepIntraDayPanel = (props: {
+export const StepIntraDayPanel = React.memo((props: {
 
 }) => {
     const { data } = useSelector((appState: ReduxAppState) => ({
@@ -83,14 +83,13 @@ export const StepIntraDayPanel = (props: {
             </SizeWatcher>
 
             <View style={StyleTemplates.contentVerticalCenteredContainer}>
-                    <Text style={commonIntraDayPanelStyles.summaryTextGlobalStyle}>
-
-                        <Text style={commonIntraDayPanelStyles.summaryTextTitleStyle}>Total    </Text>
-                        <Text>{commaNumber(sum(data.hourlySteps, d => d.value))}</Text>
-                        <Text style={commonIntraDayPanelStyles.summaryTextUnitStyle}> steps</Text>
-                    </Text>
+                <Text style={commonIntraDayPanelStyles.summaryTextGlobalStyle}>
+                    <Text style={commonIntraDayPanelStyles.summaryTextTitleStyle}>Total    </Text>
+                    <Text>{commaNumber(sum(data.hourlySteps, d => d.value))}</Text>
+                    <Text style={commonIntraDayPanelStyles.summaryTextUnitStyle}> steps</Text>
+                </Text>
             </View>
         </View>
-    } return <NoDataFallbackView/>
+    } return <NoDataFallbackView />
 
-}
+})
