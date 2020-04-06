@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useMemo, useEffect, useImperative
 import { View, StyleSheet, Text, ViewStyle, TextStyle, Animated } from "react-native";
 import Colors from "@style/Colors";
 import { SpeechAffordanceIndicator } from "./SpeechAffordanceIndicator";
-import { Sizes } from "@style/Sizes";
+import { Sizes, sizeByScreen } from "@style/Sizes";
 import Dash from 'react-native-dash';
 import { format, differenceInCalendarDays, addDays, startOfMonth, endOfMonth, getYear } from "date-fns";
 import { DatePicker, WeekPicker, MonthPicker } from "@components/common/CalendarPickers";
@@ -21,8 +21,8 @@ import { getNumberSequence } from "@data-at-hand/core/utils";
 import { Button } from "react-native-elements";
 import { InteractionType } from "@data-at-hand/core/exploration/actions";
 
-const dateButtonWidth = 140
-const barHeight = 60
+const dateButtonWidth = sizeByScreen(140, 130)
+const barHeight = sizeByScreen(60, 54)
 
 const dateButtonSubTextStyle = {
     marginTop: 2,

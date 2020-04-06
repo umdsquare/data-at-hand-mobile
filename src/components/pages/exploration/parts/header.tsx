@@ -5,7 +5,7 @@ import { DataSourceIcon } from '@components/common/DataSourceIcon';
 import { DateRangeBar, DateBar } from '@components/exploration/DateRangeBar';
 import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper';
 import { Button } from 'react-native-elements';
-import { Sizes } from '@style/Sizes';
+import { Sizes, sizeByScreen } from '@style/Sizes';
 import { StyleTemplates } from '@style/Styles';
 import { DataSourceManager } from '@measure/DataSourceManager';
 import { DataSourceType, IntraDayDataSourceType, getIntraDayDataSourceName, inferDataSource } from '@data-at-hand/core/measure/DataSourceSpec';
@@ -24,14 +24,15 @@ import { SpeechContextHelper } from '@data-at-hand/core/speech/SpeechContext';
 import { ExplorationType, ParameterKey, ParameterType } from '@data-at-hand/core/exploration/ExplorationInfo';
 import { InteractionType } from '@data-at-hand/core/exploration/actions';
 
-const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={22} color={Colors.WHITE} />
+const iconSize = sizeByScreen(22, 20)
+const titleBarOptionButtonIconInfo = <SvgIcon type={SvgIconType.Settings} size={iconSize} color={Colors.WHITE} />
 
 const styles = StyleSheet.create({
     titleBarStyle: {
         paddingLeft: Sizes.horizontalPadding,
         paddingRight: Sizes.horizontalPadding,
         flexDirection: 'row',
-        height: 50,
+        height: sizeByScreen(50, 42),
         alignItems: 'center',
     },
     titleBarTitleStyle: {
@@ -45,8 +46,8 @@ const styles = StyleSheet.create({
 
     titleBarButtonStyle: {
         backgroundColor: '#ffffff64',
-        width: 28,
-        height: 28,
+        width: sizeByScreen(28, 26),
+        height: sizeByScreen(28, 26),
         borderRadius: 14,
         margin: 0
     }

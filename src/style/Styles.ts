@@ -1,4 +1,4 @@
-import {Sizes} from './Sizes';
+import {Sizes, sizeByScreen} from './Sizes';
 import {StyleSheet, Platform} from 'react-native';
 import Colors from './Colors';
 
@@ -71,7 +71,7 @@ const StyleTemplates = StyleSheet.create({
   headerRightTextButtonStyle: {},
 
   headerTitleStyle: {
-    fontSize: 20,
+    fontSize: sizeByScreen(20, 18),
     fontWeight: 'bold',
     color: Colors.WHITE,
   },

@@ -17,10 +17,12 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { DataServiceManager } from '@measure/DataServiceManager';
 import { VoiceDictator } from '@core/speech/VoiceDictator';
 import { ThemeProvider } from 'react-native-elements';
-import { Platform, UIManager } from 'react-native';
+import { Platform, UIManager, Dimensions } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { theme } from '@style/Theme';
+
+console.log("screen size:", Platform.OS, Dimensions.get('window').width, Dimensions.get('window').height)
 
 if (
   Platform.OS === 'android' &&

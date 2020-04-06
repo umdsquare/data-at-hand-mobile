@@ -9,7 +9,7 @@ import { Dispatch } from 'redux'
 import { View, StyleSheet, Platform, LayoutRectangle } from 'react-native'
 import { StyleTemplates } from '@style/Styles'
 import SegmentedControlIOS from '@react-native-community/segmented-control';
-import { Sizes } from '@style/Sizes'
+import { Sizes, sizeByScreen } from '@style/Sizes'
 import { ButtonGroup } from 'react-native-elements'
 import Colors from '@style/Colors'
 import { SizeWatcher } from '@components/visualization/SizeWatcher'
@@ -41,6 +41,9 @@ const yAxisWidth = 70
 const topPadding = 10
 const rightPadding = 20
 
+const legendVerticalPadding = sizeByScreen(Sizes.verticalPadding, Sizes.verticalPadding * 0.5)
+const segmentControlVerticalMargin = sizeByScreen(Sizes.horizontalPadding, 0)
+
 const styles = StyleSheet.create({
     containerStyle: {
         ...StyleTemplates.fillFlex,
@@ -48,6 +51,7 @@ const styles = StyleSheet.create({
     },
     segmentedControlContainer: {
         margin: Sizes.horizontalPadding,
+        marginBottom: segmentControlVerticalMargin,
         height: 32
     },
 
@@ -60,8 +64,8 @@ const styles = StyleSheet.create({
     androidButtonGroupSelectedTextStyle: { color: Colors.textColorDark, fontWeight: '700' },
     androidButtonGroupButtonStyle: { backgroundColor: "#76768025" },
 
-    rangeLegendContainerStyle: { alignItems: 'flex-end', padding: Sizes.verticalPadding, paddingLeft: 0, paddingRight: 0 },
-    singleLegendContainerStyle: { alignItems: 'flex-end', padding: Sizes.verticalPadding, paddingLeft: Sizes.horizontalPadding, paddingRight: Sizes.horizontalPadding },
+    rangeLegendContainerStyle: { alignItems: 'flex-end', padding: legendVerticalPadding, paddingTop: Sizes.verticalPadding, paddingLeft: Sizes.horizontalPadding*.5, paddingRight: Sizes.horizontalPadding*.5 },
+    singleLegendContainerStyle: { alignItems: 'flex-end', padding: legendVerticalPadding, paddingTop: Sizes.verticalPadding, paddingLeft: Sizes.horizontalPadding, paddingRight: Sizes.horizontalPadding },
 
     chartContainerStyleWithoutLegend: { ...StyleTemplates.fillFlex, marginTop: 20 }
 })
@@ -194,7 +198,7 @@ class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
         const scaleY = scaleLinear().range([chartArea.height, 0])
         const availableData = this.props.data.data.filter(d => d.value != null && d.value.n > 0)
         if (aggregationSettingIndex === INDEX_AGGREGATED) {
-            scaleY.domain([startFromZero === true ? 0 : Math.min(min(availableData, d => {
+            scaleY.domain([startFromZero === true ? 0 : Math.min(min(availableData, (d: any) => {
                 if (isRanged === true) {
                     //range
                     return Math.min(valueConverter(d.value["minA"]), valueConverter(d.value["minB"]))
@@ -203,7 +207,7 @@ class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
                 }
             }), this.props.data.preferredValueRange ? valueConverter(this.props.data.preferredValueRange[0]) : Number.MAX_VALUE),
 
-            Math.max(max(availableData, d => {
+            Math.max(max(availableData, (d: any) => {
                 if (isRanged === true) {
                     //range
                     return Math.max(valueConverter(d.value["maxA"]), valueConverter(d.value["maxB"]))
@@ -213,7 +217,7 @@ class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
             }), this.props.data.preferredValueRange ? valueConverter(this.props.data.preferredValueRange[1]) : Number.MIN_VALUE)])
         } else if (aggregationSettingIndex === INDEX_SUM) {
 
-            scaleY.domain([0, max(availableData, d => {
+            scaleY.domain([0, max(availableData, (d: any) => {
                 if (isRanged === true) {
                     //range
                     return Math.max(valueConverter(d.value["sumA"]), valueConverter(d.value["sumB"]))
@@ -310,7 +314,7 @@ class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
                     </G>
                     <G x={chartArea.x} y={chartArea.y}>
                         {
-                            aggregationSettingIndex === INDEX_AGGREGATED ? this.props.data.data.map((d, i) => {
+                            aggregationSettingIndex === INDEX_AGGREGATED ? this.props.data.data.map((d: any, i) => {
                                 if (d.value != null && d.value.n > 0) {
                                     if (isRanged === true) {
                                         return <RangeValueElement key={i}
@@ -338,7 +342,7 @@ class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
                                         scaleX={scaleX} scaleY={scaleY} maxWidth={40}
                                     />
                                 } else return null
-                            }) : this.props.data.data.map((d, i) => {
+                            }) : this.props.data.data.map((d: any, i) => {
                                 return d.value && d.value.n > 0 ? <Rect
                                     key={i}
                                     x={scaleX(i)}

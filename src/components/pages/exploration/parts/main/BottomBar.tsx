@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, SafeAreaView, StyleSheet, Dimensions, TouchableOpacity, Text, Platform } from 'react-native';
 import Colors from '@style/Colors';
-import { Sizes } from '@style/Sizes';
+import { Sizes, sizeByScreen } from '@style/Sizes';
 import { StyleTemplates } from '@style/Styles';
 import Svg, { Path } from 'react-native-svg';
 import { VoiceInputButton } from '@components/exploration/VoiceInputButton';
@@ -12,20 +12,9 @@ import { SpeechRecognizerSessionStatus } from '@state/speech/types';
 import { useSafeArea } from 'react-native-safe-area-context';
 import { ZIndices } from '@components/pages/exploration/parts/zIndices';
 
-const bottomBarIconSize = 21
+const bottomBarIconSize = sizeByScreen(21, 19)
 
 const Styles = StyleSheet.create({
-    selectMeasureContainerStyle: {
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: Sizes.verticalPadding
-    },
-    selectMeasureMainMessageStyle: {
-        ...StyleTemplates.titleTextStyle,
-        color: Colors.textColorLight
-    },
-
     bottomBarContainerStyle: {
         backgroundColor: "#F5F5F5",
         shadowColor: "#000",
@@ -98,7 +87,7 @@ const BottomBarButton = (prop: { isOn: boolean, mode: ExplorationMode, title: st
 
     return <View style={[Styles.bottomBarButtonStyle, {
         paddingTop: insets.bottom > 0 ? 12 : 0,
-        height: insets.bottom > 0 ? 45 : 70,
+        height: insets.bottom > 0 ? 45 : sizeByScreen(70, 65),
     }]}>
         <TouchableOpacity style={Styles.bottomBarButtonContainerStyle} onPress={prop.onPress}>
 

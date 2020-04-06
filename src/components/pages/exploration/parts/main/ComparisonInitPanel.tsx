@@ -3,7 +3,7 @@ import { View, StyleSheet, Text, LayoutAnimation } from 'react-native'
 import { Button } from 'react-native-elements'
 import LinearGradient from 'react-native-linear-gradient'
 import Colors from '@style/Colors'
-import { Sizes } from '@style/Sizes'
+import { Sizes, sizeByScreen } from '@style/Sizes'
 import { ExplorationInfo, ParameterType, ExplorationType, ParameterKey } from '@data-at-hand/core/exploration/ExplorationInfo'
 import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec'
 import { CyclicTimeFrame, cyclicTimeFrameSpecs } from '@data-at-hand/core/exploration/CyclicTimeFrame'
@@ -33,8 +33,8 @@ const styles = StyleSheet.create({
 
     rangeSeparatorStyle: {
         ...StyleTemplates.flexHorizontalCenteredListContainer,
-        paddingLeft: Sizes.horizontalPadding,
-        paddingRight: Sizes.horizontalPadding,
+        paddingLeft: sizeByScreen(Sizes.horizontalPadding, Sizes.horizontalPadding*0.5),
+        paddingRight: sizeByScreen(Sizes.horizontalPadding, Sizes.horizontalPadding*0.5),
     }
 })
 const iconInfo = <SvgIcon style={{marginLeft: 4}} type={SvgIconType.ArrowForward} color={Colors.WHITE}/>
