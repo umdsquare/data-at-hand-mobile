@@ -3,11 +3,7 @@
 import { Platform, Dimensions, PixelRatio } from "react-native";
 
 const window = Dimensions.get('window')
-const actualScreenWidth = window.width * window.scale
 const screenWidth = window.width
-
-console.info("actual screen width:",actualScreenWidth, window.scale, PixelRatio.get())
-
 
 const GUIDELINE_WIDTH = 380; // ~5.5 inch screen width
 
