@@ -9,12 +9,14 @@ import { DatabaseParams } from 'react-native-sqlite-storage';
 import { parseISO, max } from 'date-fns';
 import { SystemError } from '@utils/errors';
 import { notifyError } from '@core/logging/ErrorReportingService';
+import path from 'react-native-path';
 
 
 interface FitbitCredential {
     readonly client_secret: string;
     readonly client_id: string;
     readonly redirect_uri: string;
+    readonly prefetch_backend_uri?: string;
 }
 
 const STORAGE_KEY_AUTH_STATE = DataService.STORAGE_PREFIX + 'fitbit:state';
@@ -43,11 +45,11 @@ export default class FitbitOfficialServiceCore implements FitbitServiceCore {
         return this.localAsyncStorage.getLong(STORAGE_KEY_QUOTA_RESET_AT)
     }
 
-    private _credential: FitbitCredential = null;
-    private _authConfig: AuthConfiguration = null;
+    private _credential: FitbitCredential | null = null;
+    private _authConfig: AuthConfiguration | null = null;
 
-    private _fitbitLocalDbManager: FitbitLocalDbManager = null
-    private _asyncStorage: LocalAsyncStorageHelper = null
+    private _fitbitLocalDbManager: FitbitLocalDbManager | null = null
+    private _asyncStorage: LocalAsyncStorageHelper | null = null
 
     get fitbitLocalDbManager(): FitbitLocalDbManager {
         if (this._fitbitLocalDbManager == null) {
@@ -115,7 +117,7 @@ export default class FitbitOfficialServiceCore implements FitbitServiceCore {
                     console.log("Authorization failed.")
                     console.log(e, JSON.stringify(e))
                     notifyError(e, report => {
-                        report.context="Fitbit sign in"
+                        report.context = "Fitbit sign in"
                     })
                     resolve(null);
                 }
@@ -241,32 +243,84 @@ export default class FitbitOfficialServiceCore implements FitbitServiceCore {
         });
     }
 
-    fetchHeartRateDailySummary(start: number, end: number): Promise<FitbitDailyActivityHeartRateQueryResult> {
-        return this.fetchFitbitQuery(makeFitbitDayLevelActivityLogsUrl('activities/heart', start, end))
+    private async fetchDataFromPrefetchBackend(dataSourceTableType: string, start: number, end: number): Promise<{ queryEndDate: number, rawData: Array<any> } | null> {
+        try {
+            if (this._credential?.prefetch_backend_uri != null) {
+                console.log("Try getting prefetched data from server")
+                const state = await this.localAsyncStorage.getObject(STORAGE_KEY_AUTH_STATE);
+                const fitbitId = state.tokenAdditionalParameters.user_id
+                const fetchResult = await fetch(path.resolve(this._credential.prefetch_backend_uri, fitbitId, dataSourceTableType) + `?start=${start}&end=${end}`, {
+                    method: "GET"
+                })
+                if (fetchResult.status === 200) {
+                    const { crawlLog, data } = await fetchResult.json()
+                    const prefetchedBy = crawlLog.queried_by_numbered_date
+                    return {
+                        queryEndDate: prefetchedBy,
+                        rawData: data
+                    }
+                } else return null
+            } else return null
+        } catch (err) {
+            console.log("error while using prefetch server:", err)
+            return null
+        }
+    }
+
+    private async fetchImpl<T>(dataSourceTableType: string, start: number, end: number, propertyName: string, serverFetch: (start: number, end: number) => Promise<T>): Promise<T> {
+        const prefetched = await this.fetchDataFromPrefetchBackend(dataSourceTableType, start, end)
+        if (prefetched) {
+            if (prefetched.queryEndDate > end) {
+                return { [propertyName]: prefetched.rawData } as any as T
+            } else if (prefetched.queryEndDate < start) {
+                return serverFetch(start, end)
+            } else {
+                const serverFetchedData = serverFetch(prefetched.queryEndDate, end)
+                return {
+                    [propertyName]: prefetched.rawData.filter(d => d["numbered_date"] !== prefetched.queryEndDate).concat((serverFetchedData as any)[propertyName])
+                } as any as T
+            }
+        } else return serverFetch(start, end)
+    }
+
+    async fetchHeartRateDailySummary(start: number, end: number): Promise<FitbitDailyActivityHeartRateQueryResult> {
+        return this.fetchImpl<FitbitDailyActivityHeartRateQueryResult>
+            ("heartrate_daily", start, end, "activities-heart",
+                (start, end) => this.fetchFitbitQuery(makeFitbitDayLevelActivityLogsUrl('activities/heart', start, end)))
     }
 
     fetchStepDailySummary(start: number, end: number): Promise<FitbitDailyActivityStepsQueryResult> {
-        return this.fetchFitbitQuery(makeFitbitDayLevelActivityLogsUrl("activities/steps", start, end))
+        return this.fetchImpl<FitbitDailyActivityStepsQueryResult>
+            ("step_daily", start, end, "activities-steps", (start, end) => this.fetchFitbitQuery(makeFitbitDayLevelActivityLogsUrl("activities/steps", start, end)))
     }
 
     fetchWeightTrend(start: number, end: number): Promise<FitbitWeightTrendQueryResult> {
-        return this.fetchFitbitQuery(makeFitbitWeightTrendApiUrl(start, end))
+        return this.fetchImpl<FitbitWeightTrendQueryResult>
+            ("weight_trend", start, end, "body-weight", (start, end) => this.fetchFitbitQuery(makeFitbitWeightTrendApiUrl(start, end)))
     }
 
     fetchWeightLogs(start: number, end: number): Promise<FitbitWeightQueryResult> {
-        return this.fetchFitbitQuery(makeFitbitWeightLogApiUrl(start, end))
+        return this.fetchImpl<FitbitWeightQueryResult>
+            ("weight_log", start, end, "weight", (start, end) => this.fetchFitbitQuery(makeFitbitWeightLogApiUrl(start, end)))
     }
 
     fetchSleepLogs(start: number, end: number): Promise<FitbitSleepQueryResult> {
-        return this.fetchFitbitQuery(makeFitbitSleepApiUrl(start, end))
+        return this.fetchImpl<FitbitSleepQueryResult>
+            ("sleep", start, end, "sleep", (start, end) => this.fetchFitbitQuery(makeFitbitSleepApiUrl(start, end)))
     }
 
-    fetchIntradayStepCount(date: number): Promise<FitbitIntradayStepDayQueryResult> {
-        return this.fetchFitbitQuery(makeFitbitIntradayActivityApiUrl("activities/steps", date))
+    async fetchIntradayStepCount(date: number): Promise<FitbitIntradayStepDayQueryResult> {
+        const prefetchedData = await this.fetchDataFromPrefetchBackend("step_intraday", date, date)
+        if (prefetchedData && prefetchedData.queryEndDate >= date) {
+            return prefetchedData.rawData[0]
+        } else return this.fetchFitbitQuery(makeFitbitIntradayActivityApiUrl("activities/steps", date))
     }
 
-    fetchIntradayHeartRate(date: number): Promise<FitbitHeartRateIntraDayQueryResult> {
-        return this.fetchFitbitQuery(makeFitbitHeartRateIntraDayLogApiUrl(date))
+    async fetchIntradayHeartRate(date: number): Promise<FitbitHeartRateIntraDayQueryResult> {
+        const prefetchedData = await this.fetchDataFromPrefetchBackend("heartrate_intraday", date, date)
+        if (prefetchedData && prefetchedData.queryEndDate >= date) {
+            return prefetchedData.rawData[0]
+        } else return this.fetchFitbitQuery(makeFitbitHeartRateIntraDayLogApiUrl(date))
     }
 
     readonly getToday = () => {
