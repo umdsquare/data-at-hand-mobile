@@ -445,11 +445,27 @@ export class FitbitLocalDbManager {
     } else return null;
   }
 
-  async upsertCachedIntraDayDate(obj: ICachedIntraDayDateEntry): Promise<void> {
-    if (obj.queriedAt) {
-      obj.queriedAt = obj.queriedAt.toString() as any;
-    }
-    return this.insert(FitbitLocalTableName.CachedIntraDayDates, [obj]);
+  async getLatestCachedIntraDayDate(measureKey: string): Promise<ICachedIntraDayDateEntry>{
+    const query =
+      'SELECT * FROM ' +
+      FitbitLocalTableName.CachedIntraDayDates +
+      ' WHERE `measureKey` = ? ORDER BY `date` DESC LIMIT 1';
+    const [result] = await (await this.open()).executeSql(query, [measureKey]);
+    if (result.rows.length > 0) {
+      const entry = result.rows.item(0);
+      entry.queriedAt = new Date(entry.queriedAt);
+      return entry;
+    } else return null;
+  }
+
+  async upsertCachedIntraDayDate(...objs: ICachedIntraDayDateEntry[]): Promise<void> {
+    objs.forEach(obj => {
+      if (obj.queriedAt) {
+        obj.queriedAt = obj.queriedAt.toString() as any;
+      }
+    })
+
+    return this.insert(FitbitLocalTableName.CachedIntraDayDates, objs);
   }
 
   async fetchData<T>(

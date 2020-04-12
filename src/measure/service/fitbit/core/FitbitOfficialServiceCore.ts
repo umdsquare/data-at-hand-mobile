@@ -34,6 +34,7 @@ const STORAGE_KEY_QUOTA_RESET_AT = DataService.STORAGE_PREFIX + 'fitbit:quota_re
 
 
 export default class FitbitOfficialServiceCore implements FitbitServiceCore {
+    
     isPrefetchAvailable(): boolean {
         return this._credential?.prefetch_backend_uri != null
     }
@@ -272,7 +273,7 @@ export default class FitbitOfficialServiceCore implements FitbitServiceCore {
         });
     }
 
-    private async fetchDataFromPrefetchBackend(dataSourceTableType: string, start: number, end: number): Promise<{ queryEndDate: number, rawData: Array<any> } | null> {
+    private async fetchDataFromPrefetchBackend(dataSourceTableType: string, start: number, end: number): Promise<{ queryEndDate: number, queriedAt: number, result: Array<any> } | null> {
         try {
             if (this._credential?.prefetch_backend_uri != null) {
                 console.log("Try getting prefetched data from server")
@@ -288,7 +289,8 @@ export default class FitbitOfficialServiceCore implements FitbitServiceCore {
                     const prefetchedBy = crawlLog.queried_by_numbered_date
                     return {
                         queryEndDate: prefetchedBy,
-                        rawData: data
+                        queriedAt: crawlLog.queried_at,
+                        result: data
                     }
                 } else return null
             } else return null
@@ -304,7 +306,7 @@ export default class FitbitOfficialServiceCore implements FitbitServiceCore {
         console.log("queried ", start, end)
         if (prefetched) {
             console.log("prefetched til", prefetched.queryEndDate)
-            return { [propertyName]: prefetched.rawData } as any as T
+            return { [propertyName]: prefetched.result } as any as T
         } else return null
     }
 
@@ -340,17 +342,19 @@ export default class FitbitOfficialServiceCore implements FitbitServiceCore {
     }
 
     async fetchIntradayStepCount(date: number): Promise<FitbitIntradayStepDayQueryResult> {
-        const prefetchedData = await this.fetchDataFromPrefetchBackend("step_intraday", date, date)
-        if (prefetchedData && prefetchedData.queryEndDate >= date) {
-            return prefetchedData.rawData[0]
-        } else return this.fetchFitbitQuery(makeFitbitIntradayActivityApiUrl("activities/steps", date))
+       return this.fetchFitbitQuery(makeFitbitIntradayActivityApiUrl("activities/steps", date))
     }
 
     async fetchIntradayHeartRate(date: number): Promise<FitbitHeartRateIntraDayQueryResult> {
-        const prefetchedData = await this.fetchDataFromPrefetchBackend("heartrate_intraday", date, date)
-        if (prefetchedData && prefetchedData.queryEndDate >= date) {
-            return prefetchedData.rawData[0]
-        } else return this.fetchFitbitQuery(makeFitbitHeartRateIntraDayLogApiUrl(date))
+        return this.fetchFitbitQuery(makeFitbitHeartRateIntraDayLogApiUrl(date))
+    }
+
+    async prefetchIntradayStepCount(start: number, end: number): Promise<{ result: FitbitIntradayStepDayQueryResult[]; queriedAt: number; }> {
+        return this.fetchDataFromPrefetchBackend("step_intraday", start, end)
+    }
+    
+    prefetchIntradayHeartRate(start: number, end: number): Promise<{ result: FitbitHeartRateIntraDayQueryResult[]; queriedAt: number; }> {
+        return this.fetchDataFromPrefetchBackend("heartrate_intraday", start, end)
     }
 
     readonly getToday = () => {

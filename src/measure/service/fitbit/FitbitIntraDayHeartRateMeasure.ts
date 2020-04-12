@@ -2,8 +2,10 @@ import { FitbitIntraDayMeasure } from './FitbitIntraDayMeasure';
 import { FitbitHeartRateIntraDayQueryResult } from './types';
 import { FitbitLocalTableName, HeartRateIntraDayInfo } from './sqlite/database';
 import { IIntraDayHeartRatePoint, HeartRateIntraDayData, HeartRateZone } from '@core/exploration/data/types';
+import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 
-export class FitbitIntraDayHeartRateMeasure extends FitbitIntraDayMeasure<HeartRateIntraDayData> {
+export class FitbitIntraDayHeartRateMeasure extends FitbitIntraDayMeasure<HeartRateIntraDayData, FitbitHeartRateIntraDayQueryResult> {
+  displayName: string = "Heart rate intraday"
   key = 'intraday-heartrate';
 
   private convertHeartRateZone(fitbitName: string): HeartRateZone {
@@ -18,39 +20,57 @@ export class FitbitIntraDayHeartRateMeasure extends FitbitIntraDayMeasure<HeartR
 
   protected async fetchAndCacheFitbitData(date: number): Promise<void> {
     const result: FitbitHeartRateIntraDayQueryResult = await this.core.fetchIntradayHeartRate(date);
+    await this.storeServerDataEntry(result)
+  }
 
-    const points: Array<IIntraDayHeartRatePoint> = result[
-      'activities-heart-intraday'
-    ].dataset.map(entry => {
-      const split = entry.time.split(':');
-      const hours = Number.parseInt(split[0]);
-      const minutes = Number.parseInt(split[1]);
-      const seconds = Number.parseInt(split[2]);
+  protected async storeServerDataEntry(...dataset: FitbitHeartRateIntraDayQueryResult[]): Promise<number[]> {
+    console.log("cache:", dataset)
+    const dbEntries = dataset.map(result => {
+      const date = DateTimeHelper.fromFormattedString(result["activities-heart"][0].dateTime)
 
-      return {
-        secondOfDay: hours * 3600 + minutes * 60 + seconds,
-        value: entry.value,
-      };
-    });
+      const points: Array<IIntraDayHeartRatePoint> = result[
+        'activities-heart-intraday'
+      ].dataset.map(entry => {
+        const split = entry.time.split(':');
+        const hours = Number.parseInt(split[0]);
+        const minutes = Number.parseInt(split[1]);
+        const seconds = Number.parseInt(split[2]);
 
-    if (points.length > 0) {
+        return {
+          secondOfDay: hours * 3600 + minutes * 60 + seconds,
+          value: entry.value,
+        };
+      });
 
-      result["activities-heart"][0].value.heartRateZones.forEach(zone => {
-        zone.name = this.convertHeartRateZone(zone.name)
-      })
+      if (points.length > 0) {
 
-      result["activities-heart"][0].value.customHeartRateZones.forEach(zone => {
-        zone.name = this.convertHeartRateZone(zone.name)
-      })
+        result["activities-heart"][0].value.heartRateZones.forEach(zone => {
+          zone.name = this.convertHeartRateZone(zone.name)
+        })
 
-      await this.core.fitbitLocalDbManager.insert(FitbitLocalTableName.HeartRateIntraDayInfo, [{
-        numberedDate: date,
-        restingHeartRate: result["activities-heart"][0].value.restingHeartRate,
-        points: JSON.stringify(points),
-        customZones: JSON.stringify(result["activities-heart"][0].value.customHeartRateZones),
-        zones: JSON.stringify(result["activities-heart"][0].value.heartRateZones)
-      }])
-    } else return
+        result["activities-heart"][0].value.customHeartRateZones.forEach(zone => {
+          zone.name = this.convertHeartRateZone(zone.name)
+        })
+
+        return {
+          numberedDate: date,
+          restingHeartRate: result["activities-heart"][0].value.restingHeartRate,
+          points: JSON.stringify(points),
+          customZones: JSON.stringify(result["activities-heart"][0].value.customHeartRateZones),
+          zones: JSON.stringify(result["activities-heart"][0].value.heartRateZones)
+        }
+      } else return null
+    }).filter(d => d != null)
+
+    if (dbEntries.length > 0) {
+      await this.core.fitbitLocalDbManager.insert(FitbitLocalTableName.HeartRateIntraDayInfo, dbEntries)
+    }
+
+    return dbEntries.map(d => d.numberedDate)
+  }
+
+  protected prefetchFunc(start: number, end: number): Promise<{ result: FitbitHeartRateIntraDayQueryResult[]; queriedAt: number; }> {
+    return this.core.prefetchIntradayHeartRate(start, end)
   }
 
   protected async fetchLocalData(date: number): Promise<HeartRateIntraDayData> {

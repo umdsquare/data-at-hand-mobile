@@ -17,6 +17,7 @@ import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue,
 import { CyclicTimeFrame, CycleDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { FitbitLocalTableName } from './sqlite/database';
 import { HighlightFilter, NumericConditionType } from '@data-at-hand/core/exploration/ExplorationInfo';
+import { FitbitServiceMeasureBase } from './FitbitServiceMeasureBase';
 
 
 export default class FitbitService extends DataService {
@@ -52,6 +53,8 @@ export default class FitbitService extends DataService {
       this.dailyHeartRateMeasure,
       this.weightLogMeasure,
       this.sleepMeasure,
+      this.intradayStepMeasure,
+      this.intradayHeartRateMeasure
     ];
   }
 
@@ -67,7 +70,7 @@ export default class FitbitService extends DataService {
   readonly intradayStepMeasure: FitbitIntraDayStepMeasure;
   readonly intradayHeartRateMeasure: FitbitIntraDayHeartRateMeasure;
 
-  private readonly preloadableMeasures: Array<FitbitServiceMeasure>
+  private readonly preloadableMeasures: Array<FitbitServiceMeasureBase>
 
 
   async getPreferredValueRange(dataSource: DataSourceType): Promise<[number, number]> {

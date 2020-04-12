@@ -193,8 +193,10 @@ export interface FitbitServiceCore {
   fetchIntradayStepCount(date: number): Promise<FitbitIntradayStepDayQueryResult>
   fetchIntradayHeartRate(date: number): Promise<FitbitHeartRateIntraDayQueryResult>
 
-  fetchLastSyncTime(): Promise<{tracker?: Date, scale?: Date}>
+  prefetchIntradayStepCount(start: number, end: number): Promise<{result: FitbitIntradayStepDayQueryResult[], queriedAt: number}>
+  prefetchIntradayHeartRate(start: number, end: number): Promise<{result: FitbitHeartRateIntraDayQueryResult[], queriedAt: number}>
 
+  fetchLastSyncTime(): Promise<{tracker?: Date, scale?: Date}>
 
   fitbitLocalDbManager: FitbitLocalDbManager
   localAsyncStorage: LocalAsyncStorageHelper

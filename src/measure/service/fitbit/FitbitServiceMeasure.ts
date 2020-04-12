@@ -6,7 +6,6 @@ import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 
 export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
   abstract key: string;
-  abstract displayName: string;
 
   protected abstract fetchAndCacheFitbitData(
     startDate: number,
