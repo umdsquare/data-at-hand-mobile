@@ -5,7 +5,7 @@ import { ReduxAppState } from "@state/types";
 import { FlatList, View, LayoutAnimation, NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { DataSourceChartFrame, HEADER_HEIGHT, FOOTER_HEIGHT } from "@components/exploration/DataSourceChartFrame";
 import { OverviewData, OverviewSourceRow } from "@core/exploration/data/types";
-import { MeasureUnitType, DataSourceType, inferIntraDayDataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
+import { DataSourceType, inferIntraDayDataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { Sizes } from "@style/Sizes";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import { DataServiceManager } from "@measure/DataServiceManager";
@@ -26,7 +26,6 @@ const separatorStyle = { height: Sizes.verticalPadding }
 interface Props {
     data?: OverviewData,
     isLoading?: boolean,
-    measureUnitType?: MeasureUnitType,
     overviewScrollY?: any,
     highlightFilter?: HighlightFilter,
     selectedService?: DataService,
@@ -163,7 +162,6 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
         data={item}
         filter={this.props.highlightFilter}
         highlightedDays={this.props.data.highlightedDays}
-        measureUnitType={this.props.measureUnitType}
         onHeaderPressed={this.onHeaderPressed}
         onTodayPressed={inferIntraDayDataSourceType(item.source) != null ? this.onTodayPressed : null}
     />
@@ -220,7 +218,6 @@ function mapStateToProps(state: ReduxAppState, ownProps: Props): Props {
         ...ownProps,
         isLoading: state.explorationDataState.isBusy,
         data: state.explorationDataState.data,
-        measureUnitType: state.settingsState.unit,
         overviewScrollY: state.explorationState.uiStatus.overviewScrollY,
         highlightFilter: state.explorationState.info.highlightFilter,
         selectedService,

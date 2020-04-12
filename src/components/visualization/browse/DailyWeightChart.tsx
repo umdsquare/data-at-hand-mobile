@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import Svg, { G, Circle, Path, Line, Rect } from 'react-native-svg';
 import { CommonBrowsingChartStyles, ChartPropsBase, getChartElementColor, DateRangeScaleContext } from './common';
 import { AxisSvg } from '@components/visualization/axis';
@@ -14,12 +14,13 @@ import unitConvert from 'convert-units';
 import { noop, coverValueInRange } from '@data-at-hand/core/utils';
 import { getScaleStepLeft } from '../d3-utils';
 import { TodayContext } from '@components/pages/exploration/contexts';
+import { useSelector } from 'react-redux';
+import { ReduxAppState } from '@state/types';
 
 interface Props extends ChartPropsBase<{
     trend: Array<{ numberedDate: number, value: number }>,
     logs: Array<IWeightIntraDayLogEntry>
 }> {
-    measureUnitType: MeasureUnitType,
     futureNearestLog: IWeightIntraDayLogEntry,
     pastNearestLog: IWeightIntraDayLogEntry,
 
@@ -33,7 +34,10 @@ export const DailyWeightChart = React.memo((prop: Props) => {
     const today = useContext(TodayContext)
     const scaleX = useContext(DateRangeScaleContext) || CommonBrowsingChartStyles.makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
 
-    const convert = prop.measureUnitType === MeasureUnitType.Metric ? noop : (n: number) => (n != null ? unitConvert(n).from('kg').to('lb') : null)
+    const measureUnitType = useSelector((appContext:ReduxAppState) => appContext.settingsState.unit)
+
+    const convert = useMemo(() => measureUnitType === MeasureUnitType.Metric ? noop : (n: number) => (n != null ? unitConvert(n).from('kg').to('lb') : null), 
+        [measureUnitType])
 
     const chartArea = CommonBrowsingChartStyles.CHART_AREA
 

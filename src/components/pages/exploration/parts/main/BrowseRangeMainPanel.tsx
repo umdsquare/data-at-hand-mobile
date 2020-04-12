@@ -163,7 +163,6 @@ class BrowseRangeMainPanel extends React.PureComponent<Props, State>{
                 <DataSourceChartFrame data={sourceRangedData}
                     filter={this.props.highlightFilter}
                     highlightedDays={sourceRangedData.highlightedDays}
-                    measureUnitType={this.props.measureUnitType}
                     showToday={false}
                     flat={true}
                     showHeader={false}

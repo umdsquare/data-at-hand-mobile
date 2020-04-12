@@ -16,6 +16,8 @@ import { DailyHeartRateChart } from '@components/visualization/browse/DailyHeart
 import { DailySleepRangeChart } from '@components/visualization/browse/DailySleepRangeChart';
 import { DailyWeightChart } from '@components/visualization/browse/DailyWeightChart';
 import { StyleTemplates } from '@style/Styles';
+import { useSelector } from 'react-redux';
+import { ReduxAppState } from '@state/types';
 
 
 const lightTextColor = "#8b8b8b"
@@ -274,7 +276,7 @@ function formatStatistics(sourceType: DataSourceType, statisticsType: Statistics
     }
 }
 
-function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filter: HighlightFilter | undefined, highlightedDays: { [key: number]: boolean | undefined } | undefined, measureUnitType: MeasureUnitType): any {
+function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filter: HighlightFilter | undefined, highlightedDays: { [key: number]: boolean | undefined } | undefined): any {
 
     const commonProps = {
         preferredValueRange: data.preferredValueRange,
@@ -320,7 +322,6 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filte
                 {...commonProps}
                 pastNearestLog={weightData.pastNearestLog}
                 futureNearestLog={weightData.futureNearestLog}
-                measureUnitType={measureUnitType}
             />
     }
 }
@@ -328,8 +329,7 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filte
 export const DataSourceChartFrame = React.memo((props: {
     data: OverviewSourceRow,
     filter: HighlightFilter,
-    highlightedDays?: { [key: number]: boolean | undefined },
-    measureUnitType: MeasureUnitType,
+    highlightedDays?: { [key: number]: boolean | undefined }
     showToday?: boolean
     flat?: boolean
     showHeader?: boolean
@@ -343,9 +343,10 @@ export const DataSourceChartFrame = React.memo((props: {
 
     const spec = DataSourceManager.instance.getSpec(props.data.source)
 
+    const measureUnitType = useSelector((appState: ReduxAppState) => appState.settingsState.unit)
 
-    const todayInfo = useMemo(() => formatTodayValue(props.data.source, props.data.today, props.measureUnitType),
-        [props.data.source, props.data.today, props.measureUnitType])
+    const todayInfo = useMemo(() => formatTodayValue(props.data.source, props.data.today, measureUnitType),
+        [props.data.source, props.data.today, measureUnitType])
 
     return <View style={props.flat === true ? styles.containerStyleFlat : styles.containerStyle}>
         {props.showHeader !== false ?
@@ -372,13 +373,13 @@ export const DataSourceChartFrame = React.memo((props: {
                 }
             </View> : null}
         {
-            getChartView(spec.type, props.data, props.filter, props.highlightedDays, props.measureUnitType)
+            getChartView(spec.type, props.data, props.filter, props.highlightedDays)
         }
         <View style={styles.footerStyle}>{
             props.data.statistics && props.data.statistics.map(stat => {
                 return <Text key={stat.type} style={styles.statValueStyle}>
                     <Text style={styles.statLabelStyle}>{getStatisticsLabel(stat.type) + " "}</Text>
-                    <Text>{stat.value != null && (typeof stat.value == "number" || (stat.value[0] != null && stat.value[1] != null)) ? formatStatistics(props.data.source, stat.type, props.measureUnitType, stat.value) : "no value"}</Text>
+                    <Text>{stat.value != null && (typeof stat.value == "number" || (stat.value[0] != null && stat.value[1] != null)) ? formatStatistics(props.data.source, stat.type, measureUnitType, stat.value) : "no value"}</Text>
                 </Text>
             })
         }
