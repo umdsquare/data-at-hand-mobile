@@ -39,26 +39,35 @@ export default class FitbitService extends DataService {
     this.description = core.descriptionOverride || 'Fitbit Fitness Tracker'
     this.thumbnail = core.thumbnailOverride || require('@assets/images/services/service_fitbit.jpg')
 
+    this.dailyStepMeasure = new FitbitDailyStepMeasure(core);
+    this.dailyHeartRateMeasure = new FitbitDailyHeartRateMeasure(core);
+    this.weightLogMeasure = new FitbitWeightMeasure(core);
+    this.sleepMeasure = new FitbitSleepMeasure(core);
+  
+    this.intradayStepMeasure = new FitbitIntraDayStepMeasure(core);
+    this.intradayHeartRateMeasure = new FitbitIntraDayHeartRateMeasure(core);
+
+    this.preloadableMeasures = [
+      this.dailyStepMeasure,
+      this.dailyHeartRateMeasure,
+      this.weightLogMeasure,
+      this.sleepMeasure,
+    ];
   }
 
   isDataSourceSupported(dataSource: DataSourceType): boolean {
     return true;
   }
 
-  readonly dailyStepMeasure = new FitbitDailyStepMeasure(this);
-  readonly dailyHeartRateMeasure = new FitbitDailyHeartRateMeasure(this);
-  readonly weightLogMeasure = new FitbitWeightMeasure(this);
-  readonly sleepMeasure = new FitbitSleepMeasure(this);
+  readonly dailyStepMeasure: FitbitDailyStepMeasure;
+  readonly dailyHeartRateMeasure: FitbitDailyHeartRateMeasure;
+  readonly weightLogMeasure: FitbitWeightMeasure;
+  readonly sleepMeasure: FitbitSleepMeasure;
 
-  readonly intradayStepMeasure = new FitbitIntraDayStepMeasure(this);
-  readonly intradayHeartRateMeasure = new FitbitIntraDayHeartRateMeasure(this);
+  readonly intradayStepMeasure: FitbitIntraDayStepMeasure;
+  readonly intradayHeartRateMeasure: FitbitIntraDayHeartRateMeasure;
 
-  private preloadableMeasures: Array<FitbitServiceMeasure> = [
-    this.dailyStepMeasure,
-    this.dailyHeartRateMeasure,
-    this.weightLogMeasure,
-    this.sleepMeasure,
-  ];
+  private readonly preloadableMeasures: Array<FitbitServiceMeasure>
 
 
   async getPreferredValueRange(dataSource: DataSourceType): Promise<[number, number]> {
@@ -340,17 +349,6 @@ export default class FitbitService extends DataService {
 
   async onSystemExit(): Promise<void> {
     await this.core.fitbitLocalDbManager.close();
-  }
-
-  private _lastSyncTimePromise?: Promise<{ tracker?: Date, scale?: Date }> = null
-  private _lastSyncTimeInvokedAt?: number = null
-
-  async getLastSyncTime(): Promise<{ tracker?: Date, scale?: Date }> {
-    if (this._lastSyncTimePromise == null || (Date.now() - this._lastSyncTimeInvokedAt) > 5 * 60 * 1000) {
-      this._lastSyncTimePromise = this.core.fetchLastSyncTime()
-      this._lastSyncTimeInvokedAt = Date.now()
-    }
-    return this._lastSyncTimePromise
   }
 
   getMembershipStartDate(): Promise<number> {

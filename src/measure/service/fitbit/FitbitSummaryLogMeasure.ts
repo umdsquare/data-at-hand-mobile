@@ -25,7 +25,7 @@ export abstract class FitbitSummaryLogMeasure<
   protected shouldReject(rowValue: number): boolean { return false }
 
   protected getBoxPlotInfoOfDatasetFromDb(): Promise<BoxPlotInfo> {
-    return this.service.core.fitbitLocalDbManager.getBoxplotInfo(this.dbTableName)
+    return this.core.fitbitLocalDbManager.getBoxplotInfo(this.dbTableName)
   }
 
   async fetchPreliminaryData(
@@ -43,22 +43,13 @@ export abstract class FitbitSummaryLogMeasure<
 
     const condition = "`numberedDate` BETWEEN ? AND ? ORDER BY `numberedDate`"
     const params = [startDate, endDate]
-    const list = await this.service.core.fitbitLocalDbManager.fetchData(this.dbTableName, condition, params)
+    const list = await this.core.fitbitLocalDbManager.fetchData(this.dbTableName, condition, params)
 
     const boxPlotInfo = await this.getBoxPlotInfoOfDataset()
-    /*
-        const filtered = this.service.realm
-          .objects<RealmEntryClassType>(this.realmEntryClassType)
-          .filtered(this.getLocalRangeQueryCondition(startDate, endDate))
-          .sorted('numberedDate');
-    
-        const avg = filtered.avg('value') as number;
-        const min = filtered.min('value') as number;
-        const max = filtered.max('value') as number;
-        const sum = filtered.sum('value') as number;*/
+
     let statistics
     if (includeStatistics === true) {
-      statistics = await this.service.core.fitbitLocalDbManager.getAggregatedValue(this.dbTableName, [
+      statistics = await this.core.fitbitLocalDbManager.getAggregatedValue(this.dbTableName, [
         {type: SQLiteHelper.AggregationType.AVG, aggregatedColumnName: 'value', as: 'avg'},
         {type: SQLiteHelper.AggregationType.MIN, aggregatedColumnName: 'value', as: 'min'},
         {type: SQLiteHelper.AggregationType.MAX, aggregatedColumnName: 'value', as: 'max'},
@@ -77,11 +68,11 @@ export abstract class FitbitSummaryLogMeasure<
   }
 
   async  fetchTodayValue(): Promise<number> {
-    const today = DateTimeHelper.toNumberedDateFromDate(this.service.core.getToday());
+    const today = DateTimeHelper.toNumberedDateFromDate(this.core.getToday());
 
-    const todayResult = await this.service.core.fitbitLocalDbManager.fetchData(this.dbTableName, "`numberedDate` = ?", [today])
+    const todayResult = await this.core.fitbitLocalDbManager.fetchData(this.dbTableName, "`numberedDate` = ?", [today])
 
-    return todayResult.length > 0 ? todayResult[0]['value'] : null;
+    return todayResult.length > 0 ? (todayResult[0] as any).value : null;
   }
 
   //abstract formatTodayValue(value: number): Array<{text: string, type: 'unit'|'value'}>
@@ -105,25 +96,25 @@ export abstract class FitbitSummaryLogMeasure<
       })
       .filter(e => e != null);
 
-    return this.service.core.fitbitLocalDbManager.insert(this.dbTableName, entriesReady)
+    return this.core.fitbitLocalDbManager.insert(this.dbTableName, entriesReady)
   }
 
   async fetchCyclicGroupedData(start: number, end: number, cycleType: CyclicTimeFrame): Promise<GroupedData> {
-    const result = await this.service.core.fitbitLocalDbManager.selectQuery(makeCyclicGroupQuery(this.dbTableName, start, end, cycleType))
+    const result = await this.core.fitbitLocalDbManager.selectQuery(makeCyclicGroupQuery(this.dbTableName, start, end, cycleType))
     return {
       data: result as any
     }
   }
 
   async fetchRangeGroupedData(start: number, end: number): Promise<IAggregatedValue> {
-    const result = await this.service.core.fitbitLocalDbManager.selectQuery(makeAggregatedQuery(this.dbTableName, start, end))
+    const result = await this.core.fitbitLocalDbManager.selectQuery(makeAggregatedQuery(this.dbTableName, start, end))
     if (result.length > 0) {
       return result[0] as any
     } else return null
   }
 
   async fetchCycleRangeDimensionData(start: number, end: number, cycleDimension: CycleDimension): Promise<IAggregatedValue[]> {
-    const result = await this.service.core.fitbitLocalDbManager.selectQuery<IAggregatedValue>(makeCycleDimensionRangeQuery(this.dbTableName, start, end, cycleDimension))
+    const result = await this.core.fitbitLocalDbManager.selectQuery<IAggregatedValue>(makeCycleDimensionRangeQuery(this.dbTableName, start, end, cycleDimension))
     return result
   }
 
@@ -141,7 +132,7 @@ export abstract class FitbitSummaryLogMeasure<
     const params = [start, end]
 
 
-    const list = await this.service.core.fitbitLocalDbManager.fetchData<{ numberedDate: number, value: number }>(this.dbTableName, condition, params)
+    const list = await this.core.fitbitLocalDbManager.fetchData<{ numberedDate: number, value: number }>(this.dbTableName, condition, params)
 
     return {
       type: 'length',

@@ -7,13 +7,15 @@ export abstract class FitbitRangeMeasure<
 
   protected abstract resourcePropertyKey: string;
   protected abstract maxQueryRangeLength: number;
-  protected abstract queryFunc(startDate: number, endDate: number): Promise<QueryResultType>
+  protected abstract queryFunc(startDate: number, endDate: number, prefetchMode: boolean): Promise<QueryResultType>
+
 
   protected abstract handleQueryResultEntry(entries: any[], now: Date): Promise<void>
 
   protected async fetchAndCacheFitbitData(
     startDate: number,
     endDate: number,
+    tryPrefetch: boolean
   ): Promise<void> {
     console.log(
       'Load Fitbit ',
@@ -24,15 +26,28 @@ export abstract class FitbitRangeMeasure<
       endDate,
     );
     const benchMarkStart = Date.now();
-    const chunks = DateTimeHelper.splitRange(startDate, endDate, this.maxQueryRangeLength);
 
-    const queryResult: Array<QueryResultType> = await Promise.all(
-      chunks.map(chunk => this.queryFunc(chunk[0], chunk[1]))
-    );
+    let queryResult: Array<QueryResultType>
+
+    if (tryPrefetch === true && this.core.isPrefetchAvailable() === true) {
+      try {
+        queryResult = [await this.queryFunc(startDate, endDate, true)]
+      } catch (ex) {
+        console.log("prefetch error in ", this.resourcePropertyKey)
+      }
+    }
+
+    if (queryResult == null) {
+      const chunks = DateTimeHelper.splitRange(startDate, endDate, this.maxQueryRangeLength);
+
+      queryResult = await Promise.all(
+        chunks.map(chunk => this.queryFunc(chunk[0], chunk[1], false))
+      );
+    }
+
 
     const result: Array<any> = []
-    
-    for(let i = 0; i < queryResult.length; i ++){
+    for (let i = 0; i < queryResult.length; i++) {
       fastConcatTo(result, (queryResult[i] as any)[this.resourcePropertyKey])
     }
 
@@ -46,14 +61,7 @@ export abstract class FitbitRangeMeasure<
       'millis.',
     );
 
-    const now = this.service.core.getToday()
-
-    /*
-    this.service.realm.write(() => {
-      result[this.resourcePropertyKey].forEach(entry => {
-        this.handleQueryResultEntry(this.service.realm, entry, now)
-      });
-    });*/
+    const now = this.core.getToday()
 
     this.handleQueryResultEntry(result, now)
 

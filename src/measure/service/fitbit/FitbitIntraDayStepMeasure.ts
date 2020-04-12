@@ -10,10 +10,10 @@ export class FitbitIntraDayStepMeasure extends FitbitIntraDayMeasure<StepCountIn
     protected async fetchAndCacheFitbitData(date: number): Promise<void> {
 
         //first, check whether the day summary data exists.
-        const total = await this.service.core.fitbitLocalDbManager.selectQuery<{ value: number }>(`SELECT value FROM ${FitbitLocalTableName.StepCount} WHERE numberedDate = ${date}`)
+        const total = await this.core.fitbitLocalDbManager.selectQuery<{ value: number }>(`SELECT value FROM ${FitbitLocalTableName.StepCount} WHERE numberedDate = ${date}`)
         if (total != null && total.length > 0 && total[0].value > 0) {
 
-            const data: FitbitIntradayStepDayQueryResult = await this.service.core.fetchIntradayStepCount(date)
+            const data: FitbitIntradayStepDayQueryResult = await this.core.fetchIntradayStepCount(date)
 
             //bin the data into one hour
             const grouped = Array.from(d3Array.group(data["activities-steps-intraday"].dataset, entry => Number.parseInt(entry.time.split(":")[0])))
@@ -25,7 +25,7 @@ export class FitbitIntraDayStepMeasure extends FitbitIntraDayMeasure<StepCountIn
 
             if (hourlyEntries.length > 0) {
 
-                await this.service.core.fitbitLocalDbManager.insert(FitbitLocalTableName.StepCountIntraDay,
+                await this.core.fitbitLocalDbManager.insert(FitbitLocalTableName.StepCountIntraDay,
                     [{
                         numberedDate: date,
                         hourlySteps: JSON.stringify(hourlyEntries)
@@ -35,7 +35,7 @@ export class FitbitIntraDayStepMeasure extends FitbitIntraDayMeasure<StepCountIn
     }
 
     protected async fetchLocalData(date: number): Promise<StepCountIntraDayData> {
-        const list = await this.service.core.fitbitLocalDbManager.fetchData<StepCountIntraDayData>(FitbitLocalTableName.StepCountIntraDay, "`numberedDate` = ?", [date])
+        const list = await this.core.fitbitLocalDbManager.fetchData<StepCountIntraDayData>(FitbitLocalTableName.StepCountIntraDay, "`numberedDate` = ?", [date])
         if (list.length > 0) {
             const result = list[0]
             result.hourlySteps = JSON.parse(result.hourlySteps as any)

@@ -68,6 +68,10 @@ export class LocalAsyncStorageHelper {
     return AsyncStorageHelper.getObject(this.getKey(key))
   }
 
+  getString(key: string): Promise<string>{
+    return AsyncStorageHelper.getString(this.getKey(key))
+  }
+
   getLong(key: string): Promise<number> {
     return AsyncStorageHelper.getLong(this.getKey(key))
   }

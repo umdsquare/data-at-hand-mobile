@@ -1,5 +1,5 @@
 import React from "react";
-import { StatusBar, View, StyleSheet, Platform, BackHandler, Alert, AppState, AppStateStatus } from "react-native";
+import { StatusBar, View, StyleSheet, Platform, BackHandler, Alert, AppState, AppStateStatus, Text } from "react-native";
 import Colors from "@style/Colors";
 import { StyleTemplates } from "@style/Styles";
 import { ThunkDispatch } from "redux-thunk";
@@ -56,6 +56,17 @@ const styles = StyleSheet.create({
         ...StyleTemplates.screenDefaultStyle,
         backgroundColor: "#EFEFF4",
         zIndex: Platform.OS === 'android' ? 50 : undefined,
+    },
+
+    perpareFailedContainerStyle: {
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+
+    prepareFailedTextStyle: {
+        fontSize: Sizes.normalFontSize,
+        fontWeight: '600',
+        marginBottom: 20
     },
 
     historyPanelStyle: {
@@ -328,6 +339,12 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
 
         if (this.props.selectedServiceKey !== prevProps.selectedServiceKey) {
             dataReloadNeeded = true
+            if(this.state.prepareStatus === PrepareStatus.FAILED){
+                this.setState({
+                    ...this.state,
+                    prepareStatus: PrepareStatus.PREPARED
+                })
+            }
         }
 
         if (dataReloadNeeded === true) {
@@ -405,63 +422,74 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
         })
     }
 
+    private readonly onPressActivateButton = async () => {
+        await this.prepare()
+    }
+
     render() {
 
         return <TodayContext.Provider value={DateTimeHelper.toNumberedDateFromDate(
-                DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).getToday()
-            )}>
+            DataServiceManager.instance.getServiceByKey(this.props.selectedServiceKey).getToday()
+        )}>
             <View style={StyleTemplates.screenDefaultStyle}>
                 <StatusBar barStyle="light-content" backgroundColor={Colors.headerBackground} />
                 <View style={styles.headerContainerStyle}>
                     <ExplorationViewHeader />
                 </View>
-                <View style={styles.mainContainerStyle}>
-                    {/* main data panel ===================================================================*/}
-
-                    {
-                        this.props.isDataLoading === true && <BusyHorizontalIndicator />
-                    }
-
-                    {
-                        this.props.loadedDataInfo != null ?
-                            this.makeMainPanel(this.props.loadedDataInfo.type) : <></>
-                    }
-
-                    {/* history panel ===================================================================*/}
-                    {this.props.isUndoAvailable === true && this.state.undoIgnored === false && <View style={styles.historyPanelStyle}>
-                        <Button
-                            ref={this.speechUndoButtonRef}
-                            key="undo"
-                            containerStyle={styles.historyButtonContainerStyle}
-                            buttonStyle={styles.historyButtonStyle}
-                            icon={undoIconStyle} onPress={this.undo}
-                            title="Cancel latest"
-                            titleStyle={styles.historyButtonTitleStyle}
-                        />
-                    </View>
-                    }
-
-                </View>
-
-                <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationInfo)}
-                    onModePress={this.onBottomBarButtonPress}
-                    onVoiceButtonPressIn={this.onGlobalSpeechInputPressIn}
-                    onVoiceButtonPressOut={this.onGlobalSpeechInputPressOut}
-                />
-
-                <TouchSafeBottomSheet ref={this.comparisonBottomSheetRef}>
-                    <ComparisonInitPanel info={this.props.explorationInfo} onCompleted={() => { this.comparisonBottomSheetRef.current?.close() }} />
-                </TouchSafeBottomSheet>
-
-                <TooltipOverlay />
-                <GlobalSpeechOverlay isGlobalSpeechButtonPressed={this.props.showGlobalSpeechPopup} />
-
-                <DataBusyOverlay isBusy={this.props.isDataLoading === true || this.state.prepareStatus !== PrepareStatus.PREPARED} />
                 {
-                    this.state.prepareStatus !== PrepareStatus.PREPARED ? <InitialLoadingIndicator loadingMessage={this.state.loadingMessage} /> : <></>
-                }
+                    this.state.prepareStatus === PrepareStatus.FAILED ? <View style={[styles.mainContainerStyle, styles.perpareFailedContainerStyle]}>
+                        <Text style={styles.prepareFailedTextStyle}>Activate to use Data@Hand.</Text>
+                        <Button type="outline" title="Activate Again" onPress={this.onPressActivateButton} />
+                    </View> : <>
+                            <View style={styles.mainContainerStyle}>
+                                {/* main data panel ===================================================================*/}
 
-                <SpeechEventNotificationOverlay ref={this.speechFeedbackRef} />
+                                {
+                                    this.props.isDataLoading === true && <BusyHorizontalIndicator />
+                                }
+
+                                {
+                                    this.props.loadedDataInfo != null ?
+                                        this.makeMainPanel(this.props.loadedDataInfo.type) : <></>
+                                }
+
+                                {/* history panel ===================================================================*/}
+                                {this.props.isUndoAvailable === true && this.state.undoIgnored === false && <View style={styles.historyPanelStyle}>
+                                    <Button
+                                        ref={this.speechUndoButtonRef}
+                                        key="undo"
+                                        containerStyle={styles.historyButtonContainerStyle}
+                                        buttonStyle={styles.historyButtonStyle}
+                                        icon={undoIconStyle} onPress={this.undo}
+                                        title="Cancel latest"
+                                        titleStyle={styles.historyButtonTitleStyle}
+                                    />
+                                </View>
+                                }
+
+                            </View>
+                            <BottomBar mode={explorationInfoHelper.getMode(this.props.explorationInfo)}
+                                onModePress={this.onBottomBarButtonPress}
+                                onVoiceButtonPressIn={this.onGlobalSpeechInputPressIn}
+                                onVoiceButtonPressOut={this.onGlobalSpeechInputPressOut}
+                            />
+
+                            <TouchSafeBottomSheet ref={this.comparisonBottomSheetRef}>
+                                <ComparisonInitPanel info={this.props.explorationInfo} onCompleted={() => { this.comparisonBottomSheetRef.current?.close() }} />
+                            </TouchSafeBottomSheet>
+
+                            <TooltipOverlay />
+                            <GlobalSpeechOverlay isGlobalSpeechButtonPressed={this.props.showGlobalSpeechPopup} />
+
+                            <DataBusyOverlay isBusy={this.props.isDataLoading === true || this.state.prepareStatus !== PrepareStatus.PREPARED} />
+                            {
+                                this.state.prepareStatus !== PrepareStatus.PREPARED ? <InitialLoadingIndicator loadingMessage={this.state.loadingMessage} /> : <></>
+                            }
+
+                            <SpeechEventNotificationOverlay ref={this.speechFeedbackRef} />
+                        </>
+
+                }
             </View>
         </TodayContext.Provider>
     }

@@ -15,8 +15,8 @@ export class FitbitDailyHeartRateMeasure extends FitbitSummaryLogMeasure<FitbitD
   protected resourcePropertyKey: string = 'activities-heart';
   key: string = 'resting_heart_rate';
 
-  protected queryFunc(startDate: number, endDate: number): Promise<FitbitDailyActivityHeartRateQueryResult> {
-    return this.service.core.fetchHeartRateDailySummary(startDate, endDate)
+  protected queryFunc(startDate: number, endDate: number, prefetchMode: boolean): Promise<FitbitDailyActivityHeartRateQueryResult> {
+    return this.core.fetchHeartRateDailySummary(startDate, endDate, prefetchMode)
   }
 
   protected getQueryResultEntryValue(queryResultEntry: any) {

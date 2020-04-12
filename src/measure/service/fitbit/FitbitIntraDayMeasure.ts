@@ -8,7 +8,7 @@ export abstract class FitbitIntraDayMeasure<
   abstract key: string;
 
   async fetchData(date: number): Promise<DataType> {
-    const cacheInfo = await this.service.core.fitbitLocalDbManager.getCachedIntraDayDate(
+    const cacheInfo = await this.core.fitbitLocalDbManager.getCachedIntraDayDate(
       this.key,
       date,
     );
@@ -25,7 +25,7 @@ export abstract class FitbitIntraDayMeasure<
     //fetch Fitbit data and cache, then return
     try {
       await this.fetchAndCacheFitbitData(date);
-      await this.service.core.fitbitLocalDbManager.upsertCachedIntraDayDate({
+      await this.core.fitbitLocalDbManager.upsertCachedIntraDayDate({
           id: this.key + "|" + date,
           measureKey: this.key,
           date: date,

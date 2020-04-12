@@ -1,7 +1,7 @@
-import { FitbitService } from "./FitbitService";
+import { FitbitServiceCore } from "./types";
 
 export class FitbitServiceMeasureBase {
-    constructor(protected readonly service: FitbitService) {}
+    constructor(protected readonly core: FitbitServiceCore) {}
 
     clearLocalCache(): Promise<void>{
         return Promise.resolve()

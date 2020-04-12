@@ -11,12 +11,13 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
   protected abstract fetchAndCacheFitbitData(
     startDate: number,
     endDate: number,
+    tryPrefetch: boolean
   ): Promise<void>;
 
   async cacheServerData(
     endDate: number,
   ): Promise<{ success: boolean; skipped?: boolean }> {
-    const cachedRange = await this.service.core.fitbitLocalDbManager.getCachedRange(this.key);
+    const cachedRange = await this.core.fitbitLocalDbManager.getCachedRange(this.key);
     if (cachedRange != null) {
       console.log(
         this.key,
@@ -30,15 +31,15 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
         console.log("Don't need to cache again for", this.key);
         return { success: true, skipped: true };
       } else {
-        const now = this.service.core.getToday();
+        const now = this.core.getToday();
         if (differenceInMinutes(now, cachedRange.queriedAt) > 15) { //check with 15 minute gap
-          const lastFitbitSyncTime = await this.service.getLastSyncTime()
+          const lastFitbitSyncTime = await this.core.fetchLastSyncTime()
           if ((lastFitbitSyncTime.tracker || lastFitbitSyncTime.scale || Number.MAX_SAFE_INTEGER) > cachedRange.lastFitbitSyncAt) {
             console.log("Fitbit server data was updated after the last caching.")
             const queryEndDate = DateTimeHelper.toNumberedDateFromDate(lastFitbitSyncTime.tracker || lastFitbitSyncTime.scale) || endDate
 
-            await this.fetchAndCacheFitbitData(cachedRange.endDate, endDate);
-            await this.service.core.fitbitLocalDbManager.upsertCachedRange({
+            await this.fetchAndCacheFitbitData(cachedRange.endDate, endDate, false);
+            await this.core.fitbitLocalDbManager.upsertCachedRange({
               measureKey: this.key,
               endDate: queryEndDate,
               queriedAt: now,
@@ -57,14 +58,14 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
     } else {
       //cache the full region
       console.log('no cache. should cache the full region.');
-      const startDate = await this.service.getMembershipStartDate();
-      const lastFitbitSyncTime = await this.service.getLastSyncTime();
+      const startDate = await this.core.getMembershipStartDate();
+      const lastFitbitSyncTime = await this.core.fetchLastSyncTime();
 
       const queryEndDate = DateTimeHelper.toNumberedDateFromDate(lastFitbitSyncTime.tracker || lastFitbitSyncTime.scale) || endDate
 
-      const queriedAt = this.service.core.getToday()
-      await this.fetchAndCacheFitbitData(startDate, queryEndDate);
-      await this.service.core.fitbitLocalDbManager.upsertCachedRange({
+      const queriedAt = this.core.getToday()
+      await this.fetchAndCacheFitbitData(startDate, queryEndDate, true);
+      await this.core.fitbitLocalDbManager.upsertCachedRange({
         measureKey: this.key,
         endDate: queryEndDate,
         lastFitbitSyncAt: lastFitbitSyncTime.tracker || lastFitbitSyncTime.scale,
@@ -76,18 +77,18 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
   }
 
   private async invalidateBoxPlotInfoCache(key: string = null): Promise<void> {
-    return this.service.core.localAsyncStorage.remove("fitbit:value_range:" + this.key + ":" + key)
+    return this.core.localAsyncStorage.remove("fitbit:value_range:" + this.key + ":" + key)
   }
 
   async getBoxPlotInfoOfDataset(key: string = null): Promise<BoxPlotInfo> {
     const cacheKey = "fitbit:value_range:" + this.key + ":" + key
-    const cached = await this.service.core.localAsyncStorage.getObject(cacheKey)
+    const cached = await this.core.localAsyncStorage.getObject(cacheKey)
     if (cached) {
       return cached
     } else {
       const result = await this.getBoxPlotInfoOfDatasetFromDb(key)
       if (result.median != null) {
-        this.service.core.localAsyncStorage.set(cacheKey, result)
+        this.core.localAsyncStorage.set(cacheKey, result)
       }
       return result
     }
@@ -95,7 +96,7 @@ export abstract class FitbitServiceMeasure extends FitbitServiceMeasureBase {
 
   async clearLocalCache() {
     await super.clearLocalCache()
-    await this.service.core.localAsyncStorage.clear()
+    await this.core.localAsyncStorage.clear()
   }
 
   protected abstract getBoxPlotInfoOfDatasetFromDb(key: string): Promise<BoxPlotInfo>

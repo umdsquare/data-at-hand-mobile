@@ -87,7 +87,7 @@ export default class FitbitExampleServiceCore implements FitbitServiceCore {
     }
 
     get localAsyncStorage(): LocalAsyncStorageHelper {
-        if(this._asyncStorage == null){
+        if (this._asyncStorage == null) {
             this._asyncStorage = new LocalAsyncStorageHelper("fitbit:official")
         }
         return this._asyncStorage
@@ -95,7 +95,7 @@ export default class FitbitExampleServiceCore implements FitbitServiceCore {
 
     private _latestDate: Date = null
     private get latestDate(): Date {
-        if(this._latestDate == null){
+        if (this._latestDate == null) {
             this._latestDate = DateTimeHelper.toDate(max(this.exampleData, d => d.numberedDate))
         }
         return this._latestDate
@@ -106,7 +106,7 @@ export default class FitbitExampleServiceCore implements FitbitServiceCore {
 
     async authenticate(): Promise<string> {
         this._earliestNumberedDate = min(this.exampleData, d => d.numberedDate)
-        
+
         //number of weeks to add to cover today. (To maintain Days of the week in the data)
         //const deltaDays = differenceInDays(now, latestDateInData) + ((7 + latestDateDayOfWeek - nowDayOfWeek)%7)
 
@@ -123,6 +123,10 @@ export default class FitbitExampleServiceCore implements FitbitServiceCore {
 
     async getMembershipStartDate(): Promise<number> {
         return this._earliestNumberedDate
+    }
+
+    isPrefetchAvailable() {
+        return false
     }
 
     async fetchHeartRateDailySummary(start: number, end: number): Promise<FitbitDailyActivityHeartRateQueryResult> {

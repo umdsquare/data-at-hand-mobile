@@ -11,6 +11,7 @@ export interface FitbitUserProfile {
     timezone: string;
     memberSince: any;
     weightUnit: any;
+    encodedId: string;
   };
 }
 
@@ -180,11 +181,14 @@ export interface FitbitServiceCore {
 
   getMembershipStartDate(): Promise<number>
 
-  fetchHeartRateDailySummary(start: number, end: number): Promise<FitbitDailyActivityHeartRateQueryResult>
-  fetchStepDailySummary(start: number, end: number): Promise<FitbitDailyActivityStepsQueryResult>
-  fetchWeightTrend(start: number, end: number): Promise<FitbitWeightTrendQueryResult>
-  fetchWeightLogs(start: number, end: number): Promise<FitbitWeightQueryResult>
-  fetchSleepLogs(start: number, end: number): Promise<FitbitSleepQueryResult>
+  //Prefetch data if possible
+  isPrefetchAvailable(): boolean
+
+  fetchHeartRateDailySummary(start: number, end: number, prefetchMode: boolean): Promise<FitbitDailyActivityHeartRateQueryResult>
+  fetchStepDailySummary(start: number, end: number, prefetchMode: boolean): Promise<FitbitDailyActivityStepsQueryResult>
+  fetchWeightTrend(start: number, end: number, prefetchMode: boolean): Promise<FitbitWeightTrendQueryResult>
+  fetchWeightLogs(start: number, end: number, prefetchMode: boolean): Promise<FitbitWeightQueryResult>
+  fetchSleepLogs(start: number, end: number, prefetchMode: boolean): Promise<FitbitSleepQueryResult>
 
   fetchIntradayStepCount(date: number): Promise<FitbitIntradayStepDayQueryResult>
   fetchIntradayHeartRate(date: number): Promise<FitbitHeartRateIntraDayQueryResult>
