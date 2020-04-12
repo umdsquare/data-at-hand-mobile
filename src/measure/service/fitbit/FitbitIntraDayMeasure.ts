@@ -43,8 +43,7 @@ export abstract class FitbitIntraDayMeasure<
   async cacheServerData(until: number): Promise<{ success: boolean, skipped?: boolean }> {
     if (this.core.isPrefetchAvailable() === true) {
       const recentPrefetched = await this.core.fitbitLocalDbManager.getLatestCachedIntraDayDate(this.key)
-
-      const start = Math.max(await this.core.getMembershipStartDate(), recentPrefetched.date)
+      const start = Math.max(await this.core.getMembershipStartDate(), recentPrefetched != null? recentPrefetched.date : Number.MIN_SAFE_INTEGER)
       if (start <= until) {
         const fetchedData = await this.prefetchFunc(start, until)
         const cachedDates = await this.storeServerDataEntry(...fetchedData.result)

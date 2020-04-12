@@ -27,6 +27,8 @@ import {
   makeGroupSelectClause,
   makeAggregatedQuery,
   makeCycleDimensionRangeQuery,
+  INTRADAY_SEPARATOR_WITHIN,
+  INTRADAY_SEPARATOR_BETWEEN,
 } from './sqlite/database';
 import { SQLiteHelper } from '@utils/sqlite-helper';
 import {
@@ -35,6 +37,7 @@ import {
   getCycleTypeOfDimension,
   getTimeKeyOfDimension,
 } from '@data-at-hand/core/exploration/CyclicTimeFrame';
+
 
 const columnNamesForRangeData = [
   'numberedDate',
@@ -113,13 +116,13 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
               .map((levelEntry: { level: string; dateTime: string; seconds: string; }) => {
                 return (
                   levelEntry.level +
-                  '|' +
+                  INTRADAY_SEPARATOR_WITHIN +
                   differenceInSeconds(parseISO(levelEntry.dateTime), bedTime) +
-                  '|' +
+                  INTRADAY_SEPARATOR_WITHIN +
                   levelEntry.seconds
                 );
               })
-              .join(','),
+              .join(INTRADAY_SEPARATOR_BETWEEN),
             numberedDate,
             year: DateTimeHelper.getYear(numberedDate),
             month: DateTimeHelper.getMonth(numberedDate),
@@ -242,9 +245,9 @@ export class FitbitSleepMeasure extends FitbitRangeMeasure<
     if (dailyLogs.length > 0) {
       const dailyLog = dailyLogs[0];
       if (dailyLog.listOfLevels && dailyLog.listOfLevels.length > 0) {
-        const split = (dailyLog.listOfLevels as any).split(',');
+        const split = (dailyLog.listOfLevels as any).split(INTRADAY_SEPARATOR_BETWEEN);
         dailyLog.listOfLevels = split.map((elm: string) => {
-          const elmSplit = elm.split('|');
+          const elmSplit = elm.split(INTRADAY_SEPARATOR_WITHIN);
           return {
             type: elmSplit[0],
             startBedtimeDiff: Number.parseInt(elmSplit[1]),

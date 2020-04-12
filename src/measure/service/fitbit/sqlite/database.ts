@@ -4,11 +4,15 @@ import stringFormat from 'string-format';
 import { CyclicTimeFrame, CycleDimension, getCycleLevelOfDimension, getTimeKeyOfDimension, getCycleTypeOfDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { IIntraDayHeartRatePoint, BoxPlotInfo } from '@core/exploration/data/types';
 import { DateTimeHelper } from '@data-at-hand/core/utils/time';
-import { Lazy } from '@data-at-hand/core/utils';
+import { Lazy, fastConcatTo } from '@data-at-hand/core/utils';
 import { notifyError } from '@core/logging/ErrorReportingService';
 
 SQLite.DEBUG(false);
 SQLite.enablePromise(true);
+
+
+export const INTRADAY_SEPARATOR_BETWEEN = "|"
+export const INTRADAY_SEPARATOR_WITHIN = "&"
 
 export interface ICachedRangeEntry {
   measureKey: string;
@@ -671,34 +675,38 @@ export class FitbitLocalDbManager {
       }
     )
 
-    const result = [{ name: "daily_summary", csv: this.csvParser.get().unparse(joinedTable) }]
-
+    console.log("append intraday logs into table...")
+    
     const schemas = [
-      StepCountSchema,
-      RestingHeartRateSchema,
-      WeightTrendSchema,
-      WeightLogSchema,
-      MainSleepLogSchema,
-      IntraDayStepCountSchema,
-      IntraDayHeartRateInfoSchema,
+      {schema: WeightLogSchema, valueColumnName: ["value"], valueColumnNameConvert: ["kg_log"]},
+      {schema: MainSleepLogSchema, valueColumnName: ["listOfLevels"], valueColumnNameConvert: ["sleep_stages"]},
+      {schema: IntraDayStepCountSchema, valueColumnName: ["hourlySteps"], valueColumnNameConvert: ["hourly_steps"]},
+      {schema: IntraDayHeartRateInfoSchema, valueColumnName: ["points", "zones"], valueColumnNameConvert:["bpm_points", "hr_zones"]},
+      
     ]
 
-    for (const schema of schemas) {
-      const [queryResult] = await (await this.open()).executeSql(`SELECT * FROM ${schema.name}`)
+    for (const schemaInfo of schemas) {
+      fastConcatTo(joinedTable.fields, schemaInfo.valueColumnNameConvert)
+      
+      const [queryResult] = await (await this.open()).executeSql(`SELECT * FROM ${schemaInfo.schema.name}`)
       if (queryResult) {
         if (queryResult.rows) {
           if (queryResult.rows.length > 0) {
             const rows = queryResult.rows.raw()
-            if (schema.columns.numberedDate) {
+            if (schemaInfo.schema.columns.numberedDate) {
               rows.forEach(row => {
-                row["date"] = DateTimeHelper.toFormattedString(row["numberedDate"])
+                const rowInJoinedTable = joinedTable.data.find(d => d.numberedDate === row["numberedDate"])
+                schemaInfo.valueColumnNameConvert.forEach((columnName, i) => {
+                  rowInJoinedTable[columnName] = row[schemaInfo.valueColumnName[i]]
+                })
               })
             }
-            result.push({ name: schema.name, csv: this.csvParser.get().unparse(rows) })
           }
         }
       }
     }
-    return result
+
+
+    return [{ name: "dataset", csv: this.csvParser.get().unparse(joinedTable) }]
   }
 }

@@ -2,8 +2,11 @@ import { StepCountIntraDayData, IIntraDayStepCountLog } from "@core/exploration/
 import { FitbitIntraDayMeasure } from "./FitbitIntraDayMeasure";
 import { FitbitIntradayStepDayQueryResult } from "./types";
 import * as d3Array from 'd3-array';
-import { FitbitLocalTableName } from "./sqlite/database";
+import { FitbitLocalTableName, INTRADAY_SEPARATOR_BETWEEN } from "./sqlite/database";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
+import { getNumberSequence } from "@data-at-hand/core/utils";
+
+const HOUR_OF_DAY_SEQUENCE = getNumberSequence(0, 23)
 
 export class FitbitIntraDayStepMeasure extends FitbitIntraDayMeasure<StepCountIntraDayData, FitbitIntradayStepDayQueryResult>{
     displayName: string = "Step intraday"
@@ -32,10 +35,17 @@ export class FitbitIntraDayStepMeasure extends FitbitIntraDayMeasure<StepCountIn
                 value: d3Array.sum(group[1], e => e.value)
             })).filter(entry => entry.value > 0)
 
+            const entries = HOUR_OF_DAY_SEQUENCE.map(h => {
+                const e = hourlyEntries.find(entry => entry.hourOfDay === h)
+                if (e) {
+                    return e.value
+                } else return 0
+            })
+
             if (hourlyEntries.length > 0) {
                 return {
                     numberedDate: date,
-                    hourlySteps: JSON.stringify(hourlyEntries)
+                    hourlySteps: entries.join(INTRADAY_SEPARATOR_BETWEEN)
                 }
             } else null
         }).filter(d => d != null)
@@ -55,7 +65,7 @@ export class FitbitIntraDayStepMeasure extends FitbitIntraDayMeasure<StepCountIn
         const list = await this.core.fitbitLocalDbManager.fetchData<StepCountIntraDayData>(FitbitLocalTableName.StepCountIntraDay, "`numberedDate` = ?", [date])
         if (list.length > 0) {
             const result = list[0]
-            result.hourlySteps = JSON.parse(result.hourlySteps as any)
+            result.hourlySteps = (result.hourlySteps as any as string).split(INTRADAY_SEPARATOR_BETWEEN).map((e, i) => ({ hourOfDay: i, value: Number.parseInt(e) }))
             return result
         }
         else return null

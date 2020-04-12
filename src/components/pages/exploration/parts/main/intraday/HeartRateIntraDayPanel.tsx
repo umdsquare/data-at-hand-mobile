@@ -27,7 +27,8 @@ const styles = StyleSheet.create({
     },
     chartContainerStyle: {
         aspectRatio: 1.2,
-        marginTop: Sizes.horizontalPadding },
+        marginTop: Sizes.horizontalPadding
+    },
 
     zoneChartContainerStyle: {
         flexDirection: 'row',
@@ -135,30 +136,32 @@ export const HeartRateIntraDayPanel = React.memo(() => {
             {
                 heartRateZoneSpecs.map(spec => {
                     const zoneInfo = data.zones.find(z => z.name === spec.type)
+                    if (zoneInfo != null) {
+                        const isMax = zoneInfo.minutes === maxZoneLength
 
-                    const isMax = zoneInfo.minutes === maxZoneLength
-
-                    return <View key={spec.type} style={styles.zoneChartContainerStyle}>
-                        <Text style={styles.zoneChartTitleStyle}>{spec.name}</Text>
-                        <SizeWatcher containerStyle={{ 
-                            flex: isMax===true ? 1 : null, 
-                            width: isMax===false ? Math.max(1, zoneInfo.minutes/maxZoneLength * maxZoneBarWidth) : null,
-                            backgroundColor: spec.color, alignSelf: 'stretch' }}
-                            onSizeChange={(width) => {
-                                if(isMax===true){
-                                    setMaxZoneBarWidth(width)
-                                }
-                             }} />
-                        <Text style={styles.zoneChartValueStyle}>{zoneInfo ? DateTimeHelper.formatDuration(zoneInfo.minutes * 60, true) : 0}</Text>
-                    </View>
+                        return <View key={spec.type} style={styles.zoneChartContainerStyle}>
+                            <Text style={styles.zoneChartTitleStyle}>{spec.name}</Text>
+                            <SizeWatcher containerStyle={{
+                                flex: isMax === true ? 1 : null,
+                                width: isMax === false ? Math.max(1, zoneInfo.minutes / maxZoneLength * maxZoneBarWidth) : null,
+                                backgroundColor: spec.color, alignSelf: 'stretch'
+                            }}
+                                onSizeChange={(width) => {
+                                    if (isMax === true) {
+                                        setMaxZoneBarWidth(width)
+                                    }
+                                }} />
+                            <Text style={styles.zoneChartValueStyle}>{zoneInfo ? DateTimeHelper.formatDuration(zoneInfo.minutes * 60, true) : 0}</Text>
+                        </View>
+                    }else return null
                 })
             }
 
-            <View style={{height: Sizes.verticalPadding*2}}/>
+            <View style={{ height: Sizes.verticalPadding * 2 }} />
 
         </ScrollView>
 
-    } else return <NoDataFallbackView/>
+    } else return <NoDataFallbackView />
 })
 
 const SummaryTableRow = (prop: { title: string, value: Array<{ type: "unit" | "value", value: string | number }> }) => {

@@ -18,7 +18,7 @@ export interface SettingsState {
 }
 
 const INITIAL_STATE = {
-  serviceKey: 'fitbit',
+  serviceKey: 'fitbit_example', //"fitbit"
   unit: MeasureUnitType.Metric,
   recordLogs: true,
   recordScreens: false,

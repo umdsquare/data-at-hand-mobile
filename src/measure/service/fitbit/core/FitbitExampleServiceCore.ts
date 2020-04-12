@@ -1,11 +1,12 @@
 import { FitbitServiceCore, FitbitDailyActivityHeartRateQueryResult, FitbitDailyActivityStepsQueryResult, FitbitWeightTrendQueryResult, FitbitWeightQueryResult, FitbitSleepQueryResult, FitbitIntradayStepDayQueryResult, FitbitHeartRateIntraDayQueryResult } from "../types";
-import { FitbitLocalDbManager } from "../sqlite/database";
+import { FitbitLocalDbManager, INTRADAY_SEPARATOR_BETWEEN, INTRADAY_SEPARATOR_WITHIN } from "../sqlite/database";
 import { DatabaseParams } from "react-native-sqlite-storage";
 import { UnSupportedReason } from "../../DataService";
 import { max, min } from "d3-array";
-import { DateTimeHelper } from "@data-at-hand/core/utils/time";
-import { addSeconds, format } from "date-fns";
+import { DateTimeHelper, pad } from "@data-at-hand/core/utils/time";
+import { addSeconds, format, formatISO, startOfDay } from "date-fns";
 import { LocalAsyncStorageHelper } from "@utils/AsyncStorageHelper";
+import { SleepStage } from "@core/exploration/data/types";
 
 interface ExampleDayRow {
     index: number,
@@ -23,10 +24,14 @@ interface ExampleDayRow {
     step_fake: boolean,
     sleep_fake: boolean,
 
+    sleep_stages: string,
+    hourly_steps: string,
+    bpm_points: string,
+    hr_zones: string,
 }
 
 export default class FitbitExampleServiceCore implements FitbitServiceCore {
-    
+
     descriptionOverride?: string;
     thumbnailOverride?: any;
 
@@ -165,26 +170,61 @@ export default class FitbitExampleServiceCore implements FitbitServiceCore {
     }
 
     async fetchSleepLogs(start: number, end: number): Promise<FitbitSleepQueryResult> {
+
         const result = {
-            sleep: this.filterRowsWithinRange(start, end).map(e => ({
-                isMainSleep: true,
-                dateOfSleep: DateTimeHelper.toFormattedString(e.numberedDate),
-                minutesAsleep: e.sleepLengthSeconds / 60,
-                duration: e.sleepLengthSeconds * 1000,
-                startTime: format(addSeconds(DateTimeHelper.toDate(e.numberedDate), e.bedTimeDiffSeconds), "yyyy-MM-dd'T'HH:mm:ss"),
-                endTime: format(addSeconds(DateTimeHelper.toDate(e.numberedDate), e.wakeTimeDiffSeconds), "yyyy-MM-dd'T'HH:mm:ss"),
-                type: 'stages' as any,
-                levels: { data: [] },
-                summary: {},
-                efficiency: 100,
-                logId: e.index
-            }))
+            sleep: this.filterRowsWithinRange(start, end).map(e => {
+
+                const bedTimeDate: Date = addSeconds(DateTimeHelper.toDate(e.numberedDate), e.bedTimeDiffSeconds)
+                return {
+                    isMainSleep: true,
+                    dateOfSleep: DateTimeHelper.toFormattedString(e.numberedDate),
+                    minutesAsleep: e.sleepLengthSeconds / 60,
+                    duration: e.sleepLengthSeconds * 1000,
+                    startTime: format(bedTimeDate, "yyyy-MM-dd'T'HH:mm:ss"),
+                    endTime: format(addSeconds(DateTimeHelper.toDate(e.numberedDate), e.wakeTimeDiffSeconds), "yyyy-MM-dd'T'HH:mm:ss"),
+                    type: 'stages' as any,
+                    levels: {
+                        data: e.sleep_stages != null && e.sleep_stages.length > 0 ? e.sleep_stages.split(INTRADAY_SEPARATOR_BETWEEN).map(s => {
+                            const split = s.split(INTRADAY_SEPARATOR_WITHIN)
+                            return {
+                                dateTime: format(addSeconds(bedTimeDate, Number.parseInt(split[1])), "yyyy-MM-dd'T'HH:mm:ss"),
+                                level: split[0] as SleepStage,
+                                seconds: Number.parseInt(split[2])
+                            }
+                        }) : []
+                    },
+                    summary: {},
+                    efficiency: 100,
+                    logId: e.index
+                }
+            })
         }
         return result
     }
 
     async fetchIntradayStepCount(date: number): Promise<FitbitIntradayStepDayQueryResult> {
-        return {
+
+        const data = this.filterRowsWithinRange(date, date)
+        if (data.length > 0) {
+            const datum = data[0]
+            
+            let points;
+            if (datum.hourly_steps && datum.hourly_steps.length > 0) {
+                points = datum.hourly_steps.split(INTRADAY_SEPARATOR_BETWEEN).map((s, index) => {
+                    return {
+                        time: pad(index, 2) + ":00:00",
+                        value: Number.parseInt(s)
+                    }
+                })
+            }
+
+            return {
+                'activities-steps': [{ dateTime: DateTimeHelper.toFormattedString(date), value: datum.step.toString() }],
+                'activities-steps-intraday': {
+                    dataset: points || []
+                }
+            }
+        } else return {
             'activities-steps': [{ dateTime: DateTimeHelper.toFormattedString(date), value: "0" }],
             'activities-steps-intraday': {
                 dataset: []
@@ -193,7 +233,38 @@ export default class FitbitExampleServiceCore implements FitbitServiceCore {
     }
 
     async fetchIntradayHeartRate(date: number): Promise<FitbitHeartRateIntraDayQueryResult> {
-        return {
+        const data = this.filterRowsWithinRange(date, date)
+        if (data.length > 0) {
+            const datum = data[0]
+
+            let points;
+            if(datum.bpm_points && datum.bpm_points.length > 0){
+                points = datum.bpm_points.split(INTRADAY_SEPARATOR_BETWEEN).map(s => {
+                    const split = s.split(INTRADAY_SEPARATOR_WITHIN)
+                    const secondsOfDay = Number.parseInt(split[0])
+                    const value = Number.parseInt(split[1])
+                    return {
+                        time: format(addSeconds(startOfDay(new Date()), secondsOfDay), "HH:mm:ss"),
+                        value
+                    }                    
+                })
+            }
+
+            return {
+                "activities-heart-intraday": {
+                    dataset: points || []
+                },
+                "activities-heart": [{
+                    dateTime: DateTimeHelper.toFormattedString(date),
+                    value: {
+                        restingHeartRate: datum.bpm,
+                        customHeartRateZones: [],
+                        heartRateZones: []
+                    }
+                }]
+            }
+
+        } else return {
             "activities-heart-intraday": {
                 dataset: []
             },
