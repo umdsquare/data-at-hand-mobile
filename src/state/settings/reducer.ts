@@ -19,9 +19,9 @@ export interface SettingsState {
 
 const INITIAL_STATE = {
   serviceKey: 'fitbit_example', //"fitbit"
-  unit: MeasureUnitType.Metric,
-  recordLogs: true,
-  recordScreens: false,
+  unit: MeasureUnitType.US,
+  recordLogs: true, // opt out
+  recordScreens: true, // opt out
   loggingSessionId: undefined,
 } as SettingsState;
 

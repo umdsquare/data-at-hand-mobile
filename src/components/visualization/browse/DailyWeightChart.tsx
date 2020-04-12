@@ -33,7 +33,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
     const today = useContext(TodayContext)
     const scaleX = useContext(DateRangeScaleContext) || CommonBrowsingChartStyles.makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
 
-    const convert = prop.measureUnitType === MeasureUnitType.Metric ? noop : (n: number) => unitConvert(n).from('kg').to('lb')
+    const convert = prop.measureUnitType === MeasureUnitType.Metric ? noop : (n: number) => (n != null ? unitConvert(n).from('kg').to('lb') : null)
 
     const chartArea = CommonBrowsingChartStyles.CHART_AREA
 
@@ -47,6 +47,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
 
     const preferredMin = prop.preferredValueRange[0] != null ? convert(prop.preferredValueRange[0]) : null
     const preferredMax = prop.preferredValueRange[1] != null ? convert(prop.preferredValueRange[1]) : null
+
     const weightDomain = coverValueInRange([
         Math.floor(((trendMin === Number.MAX_SAFE_INTEGER && logMin === Number.MAX_SAFE_INTEGER && preferredMin == null) ? 0 : Math.min(trendMin, logMin, preferredMin || Number.MAX_SAFE_INTEGER)) - 1),
         Math.ceil(((trendMax === Number.MIN_SAFE_INTEGER && logMax === Number.MIN_SAFE_INTEGER && preferredMax == null) ? 0 : Math.max(trendMax, logMax, preferredMax || Number.MIN_SAFE_INTEGER)) + 1),
@@ -81,7 +82,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
                         r={Math.min(scaleX.bandwidth(), 8) / 2}
                         strokeWidth={2}
                         fill={Colors.WHITE}
-                        stroke={getChartElementColor(shouldHighlightElements, prop.highlightedDays? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
+                        stroke={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
                         opacity={0.62}
                     />
                 })

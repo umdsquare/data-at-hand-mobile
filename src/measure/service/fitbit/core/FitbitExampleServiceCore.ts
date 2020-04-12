@@ -158,7 +158,7 @@ export default class FitbitExampleServiceCore implements FitbitServiceCore {
         return {
             "body-weight": this.filterRowsWithinRange(start, end).map(e => ({
                 dateTime: DateTimeHelper.toFormattedString(e.numberedDate),
-                value: e.kg.toFixed(0)
+                value: e.kg.toFixed(2)
             }))
         }
     }
