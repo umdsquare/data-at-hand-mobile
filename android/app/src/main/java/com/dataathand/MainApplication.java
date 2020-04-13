@@ -53,7 +53,7 @@ public class MainApplication extends Application implements ReactApplication {
         initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
 
         //noinspection ConstantConditions
-        if(BuildConfig.BUGSNAG_API_KEY != null && BuildConfig.BUGSNAG_API_KEY.length() > 0) {
+        if(!BuildConfig.DEBUG && BuildConfig.BUGSNAG_API_KEY != null && BuildConfig.BUGSNAG_API_KEY.length() > 0) {
             Configuration bugsnagConfig = new Configuration(BuildConfig.BUGSNAG_API_KEY);
             bugsnagConfig.setDetectNdkCrashes(true);
             Bugsnag.init(this, bugsnagConfig);
