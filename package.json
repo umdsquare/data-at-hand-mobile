@@ -16,7 +16,7 @@
     "hci",
     "infovis"
   ],
-  "version": "0.2.10",
+  "version": "0.2.11",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
