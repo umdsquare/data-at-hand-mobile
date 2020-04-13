@@ -21,6 +21,17 @@ def gitCountProcessResult = "git rev-list master --first-parent --count".execute
 def _gitCount = gitCountProcessResult.text.toInteger()
 println("git revision count (used as versionCode): " + _gitCount)
 
+
+def bugsnagCredentialConfigFile = rootProject.file('../credentials/bugsnag.json')
+def _bugsnagApiKey = null
+if(bugsnagCredentialConfigFile.exists()){
+    def props = new JsonSlurper().parseText(bugsnagCredentialConfigFile.text)
+    if(props != null && props.api_key != null){
+        println("found bugsnag api key: " + props.api_key)
+        _bugsnagApiKey = props.api_key
+    }
+}
+
 buildscript {
     ext {
         buildToolsVersion = "28.0.3"
@@ -36,6 +47,7 @@ buildscript {
         classpath('com.android.tools.build:gradle:3.6.2')
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+        classpath 'com.bugsnag:bugsnag-android-gradle-plugin:4.7.4'
     }
 }
 
@@ -44,6 +56,7 @@ allprojects {
         releaseSigningProperties = releaseSigningProps
         npmVersion = _npmVersion
         gitCount = _gitCount
+        bugsnagApiKey = _bugsnagApiKey
     }
 
     repositories {

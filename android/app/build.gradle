@@ -143,6 +143,8 @@ android {
                 appAuthRedirectScheme: 'edu.umd.hcil.data-at-hand',
                 appName              : 'Data@Hand'
         ]
+
+        buildConfigField 'String', 'BUGSNAG_API_KEY', rootProject.ext.bugsnagApiKey != null ? "\"rootProject.ext.bugsnagApiKey\"" : "null"
     }
     splits {
         abi {
@@ -166,6 +168,7 @@ android {
             signingConfig signingConfigs.debug
             applicationIdSuffix ".debug"
             manifestPlaceholders.appNamePrefix = "(Dbg) "
+
         }
         release {
             manifestPlaceholders.appNamePrefix = ""
@@ -251,6 +254,8 @@ dependencies {
 
     // Speech SDK
     implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.10.0'
+
+    implementation 'com.bugsnag:bugsnag-android:4.22.3'
 
 
     if (enableHermes) {
