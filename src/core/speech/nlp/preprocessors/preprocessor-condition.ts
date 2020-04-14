@@ -2,6 +2,7 @@ import { DataSourceType, MeasureUnitType } from "@data-at-hand/core/measure/Data
 import convert from "convert-units"
 import { DataSourceManager } from "@measure/DataSourceManager"
 import { NumericConditionType } from "@data-at-hand/core/exploration/ExplorationInfo"
+import { parseDurationTextToSeconds } from "./preprocessor-time"
 
 type TermInfo = { term: string, conditionType: NumericConditionType, valueType: Array<"scalar" | "duration" | "time"> | null, impliedSource: DataSourceType | null }
 
@@ -29,6 +30,7 @@ const lexicon: Array<TermInfo> = [
     { term: 'heav', conditionType: NumericConditionType.More, valueType: ["scalar"], impliedSource: DataSourceType.Weight },
 ]
 
+
 export function categorizeExtreme(extreme: string): NumericConditionType.Max | NumericConditionType.Min | null {
     if (/(max)|(maximum)|(latest)|(fastest)|(most)/gi.test(extreme)) {
         return NumericConditionType.Max
@@ -53,6 +55,8 @@ export function inferScalarValue(value: number, valueUnit: string | undefined, d
             }
             //number only
             return Math.round(DataSourceManager.instance.convertValueReverse(value, dataSource, measureUnit))
+        case DataSourceType.HoursSlept:
+            return parseDurationTextToSeconds(valueUnit != null? (value + " " + valueUnit) : value.toString())
         default: return DataSourceManager.instance.convertValueReverse(value, dataSource, measureUnit)
     }
 }

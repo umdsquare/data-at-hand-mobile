@@ -127,7 +127,8 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
             return input
         }),
         definePipe("infer-highlight", (input) => {
-            const inferredConditionInfoResult = inferHighlight(input.payload.nlp, speech, options)
+            const dataSourceVariableId = Object.keys(input.variables).find(key => input.variables[key].type === VariableType.DataSource)
+            const inferredConditionInfoResult = inferHighlight(input.payload.nlp, speech, dataSourceVariableId != null ? input.variables[dataSourceVariableId].value : null, options)
             if (inferredConditionInfoResult) {
                 const id = makeVariableId()
                 input.variables[id] = {
@@ -163,10 +164,10 @@ function isWaketimeReferred(speech: string): boolean {
     return /(wake)|(woke)|(g(o|e)t(ting)?\s+up)/gi.test(speech)
 }
 
-function inferHighlight(nlp: compromise.Document, original: string, options: NLUOptions): { conditionInfo: ConditionInfo, match: compromise.Document } | null {
+function inferHighlight(nlp: compromise.Document, original: string, guidedDataSource: DataSourceType | undefined, options: NLUOptions): { conditionInfo: ConditionInfo, match: compromise.Document } | null {
     //try to find the condition
 
-    const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time|am|pm)+]`)
+    const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time|am|pm|hour|hours|minute|minutes)+]`)
 
     const durationComparisonInfo = normalizeCompromiseGroup(durationComparisonMatch.groups())
     if (durationComparisonInfo) {
@@ -220,7 +221,7 @@ function inferHighlight(nlp: compromise.Document, original: string, options: NLU
                                 conditionInfo: {
                                     type: comparisonTermInfo.conditionType,
                                     impliedDataSource: DataSourceType.HoursSlept,
-                                    ref: parseDurationTextToSeconds(numericComparisonInfo.number)
+                                    ref: parseDurationTextToSeconds([numericComparisonInfo.number, numericComparisonInfo.unit].join(" "))
                                 } as ConditionInfo,
                                 match: numericComparisonMatch
                             }
@@ -244,13 +245,14 @@ function inferHighlight(nlp: compromise.Document, original: string, options: NLU
                             break;
                         case "scalar":
                             console.debug("treated as scalar")
+                            const impliedDataSource = comparisonTermInfo.impliedSource || guidedDataSource
                             return {
                                 conditionInfo: {
                                     type: comparisonTermInfo.conditionType,
-                                    impliedDataSource: comparisonTermInfo.impliedSource,
-                                    ref: comparisonTermInfo.impliedSource ?
+                                    impliedDataSource,
+                                    ref: impliedDataSource != null ?
                                         inferScalarValue(parseDecimalNumber(numericComparisonInfo.number),
-                                            numericComparisonInfo.unit, comparisonTermInfo.impliedSource, options.measureUnit)
+                                            numericComparisonInfo.unit, impliedDataSource, options.measureUnit)
                                         : parseDecimalNumber(numericComparisonInfo.number)
                                 } as ConditionInfo,
                                 match: numericComparisonMatch
@@ -292,23 +294,4 @@ function inferHighlight(nlp: compromise.Document, original: string, options: NLU
         }
     }
     return null
-}
-
-export async function test() {
-
-    /*await preprocess("Show my resting heart rate from the last sunday to February 5")
-    await preprocess("Show my resting heart rate for recent tenth days")
-    await preprocess("Show my resting heart rate since the last Thanksgiving")
-    await preprocess("Step count of the last Martin Luther King day")
-    await preprocess("May I go to the step count from March to May")
-    await preprocess("May I go to the step count from March to June")
-    await preprocess("Went to the step count from the last March through May")
-    await preprocess("I want more than 10,000 steps", { getToday: () => new Date() })
-    await preprocess("What's the days I slept shorter than 8 and a half hours", { getToday: () => new Date() })
-    await preprocess("What's the days I woke up earlier than half past ten", { getToday: () => new Date() })
-    await preprocess("What's the day with the maximum step count", { getToday: () => new Date() })
-    */
-    //await preprocess("step count by day of the week", { getToday: () => new Date() })
-    //await preprocess("2019", { getToday: () => new Date() })
-
 }

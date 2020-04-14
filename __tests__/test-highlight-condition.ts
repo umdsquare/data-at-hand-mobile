@@ -26,6 +26,10 @@ const conditions: Array<[string, DataSourceType, ConditionInfo]> = [
     ["with weight more than 100", DataSourceType.Weight, { ref: 100, type: NumericConditionType.More }],
     ["with weight higher than 100", DataSourceType.Weight, { ref: 100, type: NumericConditionType.More }],
     ["with weight lower than 100", DataSourceType.Weight, { ref: 100, type: NumericConditionType.Less }],
+    ["I slept less than five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.Less }],
+    ["I slept shorter than five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.Less }],
+    ["I slept more than five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.More }],
+    ["I slept longer than five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.More }],
 ]
 
 describe("Inequation condition", () => {
