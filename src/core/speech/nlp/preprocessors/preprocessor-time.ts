@@ -86,9 +86,11 @@ function processChronoResult(chronoResult: ParsedResult): TimeVariable {
         } else endDate = chronoResult.end.date()
 
         if (startDate != null && endDate != null) {
+            const start = DateTimeHelper.toNumberedDateFromDate(startDate)
+            const end = DateTimeHelper.toNumberedDateFromDate(endDate)
             return {
                 type: VariableType.Period,
-                value: [DateTimeHelper.toNumberedDateFromDate(startDate), DateTimeHelper.toNumberedDateFromDate(endDate)],
+                value: [Math.min(start, end), Math.max(start, end)],
                 text: chronoResult.text,
                 index: chronoResult.index
             }
