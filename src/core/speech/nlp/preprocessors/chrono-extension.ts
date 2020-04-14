@@ -221,7 +221,7 @@ prepositionTagRefiner.refine = function (text, results, opt) {
 export const makeENMergeDateRangeRefiner = () => {
     const refiner = new Refiner()
 
-    refiner.pattern = function () { return /^\s*(to|\-)\s*$/i };
+    refiner.pattern = function () { return /^\s*(to|through|two|\-)\s*$/i };
 
     refiner.refine = function (text, results, opt) {
 

@@ -83,7 +83,11 @@ const seasons: Array<[string, [number, number]]> = [
 
 const manualPeriods: Array<[string, [number, number]]> = [
   ["from February 1 to March 10", [20200201, 20200310]],
+  ["from February 1 through March 10", [20200201, 20200310]],
+  ["from February 1 two March 10", [20200201, 20200310]],
   ["from October 10 to January 20", [20191010, 20200120]],
+  ["from October 10 two January 20", [20191010, 20200120]],
+  ["from October 10 through January 20", [20191010, 20200120]],
   ["from February to April", [20200201, 20200430]],
   ["from November to March", [20191101, 20200331]],
   ["from Sunday to Thursday", [20200223, 20200227]],
