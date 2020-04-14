@@ -82,9 +82,9 @@ PODS:
   - OpenSSL-Universal (1.0.2.19):
     - OpenSSL-Universal/Static (= 1.0.2.19)
   - OpenSSL-Universal/Static (1.0.2.19)
-  - Permission-Microphone (2.1.0):
+  - Permission-Microphone (2.1.1):
     - RNPermissions
-  - Permission-SpeechRecognition (2.1.0):
+  - Permission-SpeechRecognition (2.1.1):
     - RNPermissions
   - RCTRequired (0.62.2)
   - RCTTypeSafety (0.62.2):
@@ -333,7 +333,7 @@ PODS:
     - React
   - RNGestureHandler (1.6.1):
     - React
-  - RNPermissions (2.1.0):
+  - RNPermissions (2.1.1):
     - React
   - RNReactNativeHapticFeedback (1.9.0):
     - React
@@ -560,8 +560,8 @@ SPEC CHECKSUMS:
   Folly: 30e7936e1c45c08d884aa59369ed951a8e68cf51
   glog: 1f3da668190260b06b429bb211bfbee5cd790c28
   OpenSSL-Universal: 8b48cc0d10c1b2923617dfe5c178aa9ed2689355
-  Permission-Microphone: e7973f79ad5013b5110dc4b243507b76af894c91
-  Permission-SpeechRecognition: 33f14a786963329696630c280ed7a9deac297f9e
+  Permission-Microphone: fe399ae21eaa4ed4f606e27b37ee69da1f89618f
+  Permission-SpeechRecognition: f8581bdace11a274ec840a41d112720b7b6b1aa5
   RCTRequired: cec6a34b3ac8a9915c37e7e4ad3aa74726ce4035
   RCTTypeSafety: 93006131180074cffa227a1075802c89a49dd4ce
   React: 29a8b1a02bd764fb7644ef04019270849b9a7ac3
@@ -593,7 +593,7 @@ SPEC CHECKSUMS:
   RNDeviceInfo: 82e0a23d22ec73b2f71bd686a95d3dd278f223d7
   RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
   RNGestureHandler: 8f09cd560f8d533eb36da5a6c5a843af9f056b38
-  RNPermissions: 16f2ece72dd212e877ac69dccfd8bb9cc39211db
+  RNPermissions: 6912fff6c835fd071b61515405cce27a438027f9
   RNReactNativeHapticFeedback: 2566b468cc8d0e7bb2f84b23adc0f4614594d071
   RNReanimated: 955cf4068714003d2f1a6e2bae3fb1118f359aff
   RNScreens: b5c0e1b2b04512919e78bd3898e144a157ce2363

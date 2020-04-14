@@ -35,6 +35,8 @@ const lexicon = {
     'compare': 'Verb',
     'compared': 'Verb',
     'less': 'Adjective',
+    'noon': 'Time',
+    'midnight': 'Time'
 }
 
 export async function preprocess(speech: string, options: NLUOptions): Promise<PreProcessedInputText> {
@@ -166,8 +168,8 @@ function isWaketimeReferred(speech: string): boolean {
 
 function inferHighlight(nlp: compromise.Document, original: string, guidedDataSource: DataSourceType | undefined, options: NLUOptions): { conditionInfo: ConditionInfo, match: compromise.Document } | null {
     //try to find the condition
-
-    const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time|am|pm|hour|hours|minute|minutes)+]`)
+    console.log("infer highlight")
+    const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time|am|pm|hour|hours|minute|minutes)+?]`)
 
     const durationComparisonInfo = normalizeCompromiseGroup(durationComparisonMatch.groups())
     if (durationComparisonInfo) {
@@ -230,13 +232,13 @@ function inferHighlight(nlp: compromise.Document, original: string, guidedDataSo
                                 console.debug("treated as time")
                                 const isBedtimePassed = isBedtimeReferred(original)
                                 const isWakeTimePassed = isWaketimeReferred(original)
-                                if (isBedtimePassed || isWakeTimePassed) {
+                                if (isBedtimePassed === true || isWakeTimePassed === true) {
                                     return {
                                         conditionInfo: {
                                             type: comparisonTermInfo.conditionType,
                                             impliedDataSource: DataSourceType.SleepRange,
                                             propertyKey: isBedtimePassed === true ? 'bedtime' : (isWakeTimePassed === true ? 'waketime' : undefined),
-                                            ref: parseTimeOfTheDayTextToDiffSeconds(numericComparisonInfo.number, isBedtimePassed === true ? 'night' : (isWakeTimePassed === true ? 'day' : undefined)),
+                                            ref: parseTimeOfTheDayTextToDiffSeconds([numericComparisonInfo.number, numericComparisonInfo.unit].join(" "), isBedtimePassed === true ? 'night' : (isWakeTimePassed === true ? 'day' : undefined)),
                                         },
                                         match: durationComparisonMatch
                                     }

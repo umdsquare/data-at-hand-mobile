@@ -30,6 +30,18 @@ const conditions: Array<[string, DataSourceType, ConditionInfo]> = [
     ["I slept shorter than five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.Less }],
     ["I slept more than five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.More }],
     ["I slept longer than five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.More }],
+    ["I went to bed earlier than 12 am", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
+    ["I went to bed earlier than 12:00 AM", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
+    ["I went to bed earlier than 12 pm", DataSourceType.SleepRange, { ref: 3600*12, type: NumericConditionType.Less }],
+    ["I went to bed earlier than 12:00 PM", DataSourceType.SleepRange, { ref: 3600*12, type: NumericConditionType.Less }],
+    ["I went to bed earlier than 12", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
+
+    ["I went to bed earlier than 11", DataSourceType.SleepRange, { ref: -3600, type: NumericConditionType.Less }],
+    ["I went to bed earlier than Midnight", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
+    ["I got up later than Noon", DataSourceType.SleepRange, { ref: 3600*12, type: NumericConditionType.More }],
+    ["I got up earlier than Noon", DataSourceType.SleepRange, { ref: 3600*12, type: NumericConditionType.Less }],
+    ["I woke up later than 12", DataSourceType.SleepRange, { ref: 3600*12, type: NumericConditionType.More }],
+    
 ]
 
 describe("Inequation condition", () => {
@@ -50,6 +62,8 @@ describe("Inequation condition", () => {
                     if(conditionId){
                         condition = result.variables[conditionId].value
                     }
+
+                    expect(condition).toBeDefined()
 
                     if(dataSource == null){
                         dataSource = condition.impliedDataSource

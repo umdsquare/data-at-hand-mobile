@@ -4,7 +4,7 @@ import { BEDTIME_SHIFT_HOUR_OF_DAY } from '@measure/consts'
 const PLACEHOLDER_CLOCKTIME = "CLOCK_TIME"
 
 const SECONDS_HOUR = 3600
-const SECONDS_DAY = 24*SECONDS_HOUR
+const SECONDS_DAY = 24 * SECONDS_HOUR
 
 //define template using h, m, and a
 const clockTimeRules: Array<{
@@ -12,17 +12,32 @@ const clockTimeRules: Array<{
     parser: (obj: any, preferred: "day" | "night") => { h: number, m: number } | null
 }> = [
         {
+            //noon / midnight
+            regex: [new NamedRegExp("(^|\\s+)(?<noon>noon)|(?<midnight>midnight)($|\\s+)", "i")],
+            parser: (obj: { noon?: string, midnight?: string }, preferred) => {
+                if (obj.noon) {
+                    return { h: 12, m: 0 }
+                } else if (obj.midnight) {
+                    return preferred === 'day' ? { h: 24, m: 0 } : { h: 0, m: 0 }
+                } else return null
+            }
+        },
+        {
             //normal expression
             regex: [
-                new NamedRegExp("(?<h>[0-9]+)\\s+(?<m>[0-9]+)$", "i"),
-                new NamedRegExp("(?<h>[0-9]+)(:(?<m>[0-9]+))?(\\s+(?<a>am|pm))?$", "i"),]
-            ,
+                new NamedRegExp("(^|\\s+)(?<h>[0-9]+)(:(?<m>[0-9]+))?(\\s+(?<a>am|pm))?($|\\s+)", "i"),
+                new NamedRegExp("(^|\\s+)(?<h>[0-9]+)\\s+(?<m>[0-9]+)($|\\s+)", "i"),
+            ],
             parser: (obj: { h: string, m?: string, a?: string }, preferred) => {
+
+                let h: number
+                let m: number
+                let amPm: "am" | "pm"
+
                 if (obj.m == null && obj.a == null) {
                     //number-only. consider cases such as 730 (seven thirty)
+                    m = 0
 
-                    let h: number = undefined
-                    let m: number = 0
                     const number = Number.parseInt(obj.h)
                     if (number <= 12) {
                         h = number
@@ -36,76 +51,79 @@ const clockTimeRules: Array<{
                         }
                     }
 
-                    let amPm: string
-                    if (preferred === 'day') {
-                        amPm = h < 4 ? 'pm' : 'am'
-                    } else {
-                        amPm = h < 7 ? 'am' : 'pm'
-                    }
-
-                    return {
-                        h: h + (12 * (amPm === 'am' ? 0 : 1)),
-                        m
-                    }
                 } else {
 
-                    const h = Number.parseInt(obj.h)
-                    const m = obj.m ? Number.parseInt(obj.m) : 0
+                    h = Number.parseInt(obj.h)
+                    m = obj.m ? Number.parseInt(obj.m) : 0
 
                     if (h > 12) {
                         return { h, m: 0 }
                     } else {
-                        let amPm
                         if (obj.a) {
                             amPm = obj.a as any
-                        } else {
-                            //infer am pm
-                            //infer it
-                            //day(waketime)
-                            /*
-                            1 -> 1pm (same day)
-                            2 -> 2pm (same day)
-                            3 -> 3pm (same day)
-                            4 -> 4am (same day)
-                            5 -> 5am (same day)
-                            6 -> 6am (same day)
-                            7 -> 7am (same day)
-                            8 -> 8am (same day)
-                            9 -> 9am (same day)
-                            10 -> 10am (same day)
-                            11 -> 11am (same day)
-                            12 -> 12am (noon) (same day)
-                            */
-
-                            //night (bedtime)
-                            /* 
-                            1 -> 1am (same day)
-                            2 -> 2am (same day)
-                            3 -> 3am (same day)
-                            4 -> 4am (same day)
-                            5 -> 5am (same day)
-                            6 -> 6am (same day)
-                            7 -> 7pm (a day before)
-                            8 -> 8pm (a day before)
-                            9 -> 9pm (a day before)
-                            10 -> 10pm (a day before)
-                            11 -> 11pm (a day before)
-                            12 -> 12pm (midnight) (a day before)
-                            */
-
-                            if (preferred === 'day') {
-                                amPm = h < 4 ? 'pm' : 'am'
-                            } else {
-                                amPm = h < 7 ? 'am' : 'pm'
-                            }
                         }
-
-                        return {
-                            h: h + (12 * (amPm === 'am' ? 0 : 1)),
-                            m
-                        }
-
                     }
+                }
+
+                if (amPm == null) {
+
+                    //infer am pm
+                    //infer it
+                    //day(waketime)
+                    /*
+                    1 -> 1pm (same day)
+                    2 -> 2pm (same day)
+                    3 -> 3pm (same day)
+                    4 -> 4am (same day)
+                    5 -> 5am (same day)
+                    6 -> 6am (same day)
+                    7 -> 7am (same day)
+                    8 -> 8am (same day)
+                    9 -> 9am (same day)
+                    10 -> 10am (same day)
+                    11 -> 11am (same day)
+
+                    12 -> 12pm (noon) (same day)
+                    */
+
+                    //night (bedtime)
+                    /* 
+                    1 -> 1am (same day)
+                    2 -> 2am (same day)
+                    3 -> 3am (same day)
+                    4 -> 4am (same day)
+                    5 -> 5am (same day)
+                    6 -> 6am (same day)
+                    7 -> 7pm (a day before)
+                    8 -> 8pm (a day before)
+                    9 -> 9pm (a day before)
+                    10 -> 10pm (a day before)
+                    11 -> 11pm (a day before)
+
+                    12 -> 12am (midnight) (a day before)
+                    */
+
+                    if (preferred === 'day') {
+                        amPm = h < 4 ? 'pm' : 'am'
+                        if (h === 12) {
+                            amPm = 'pm'
+                        }
+                    } else {
+                        amPm = h < 7 ? 'am' : 'pm'
+                        if (h === 12) {
+                            amPm = 'am'
+                        }
+                    }
+                }
+
+                if (h === 12 && m === 0) {
+                    return {
+                        h: amPm === 'am' ? (preferred === 'day' ? 24 : 0) : 12,
+                        m: 0
+                    }
+                } else return {
+                    h: h + (12 * (amPm === 'am' ? 0 : 1)),
+                    m
                 }
             }
         },
@@ -155,7 +173,6 @@ const templates: Array<{
 
 
 export function parseTimeOfTheDayTextToDiffSeconds(text: string, preferred: "day" | "night"): number {
-
     //Inspired by https://dlc.hypotheses.org/698
     //Test set
 
@@ -204,12 +221,12 @@ export function parseTimeOfTheDayTextToDiffSeconds(text: string, preferred: "day
         }
     }
 
-    if(anchorTime){
+    if (anchorTime) {
 
         let result: number = anchorTime.h * SECONDS_HOUR + anchorTime.m * 60
-        for(const template of templates){
+        for (const template of templates) {
             const match = text.match(template.regex)
-            if(match){
+            if (match) {
                 result = template.parser(match.groups, anchorTime)
                 break;
             }
@@ -217,21 +234,14 @@ export function parseTimeOfTheDayTextToDiffSeconds(text: string, preferred: "day
 
         //
         result = result % SECONDS_DAY
-        if(preferred === 'night'){
-            if(result >= BEDTIME_SHIFT_HOUR_OF_DAY * SECONDS_HOUR){
+        if (preferred === 'night') {
+            if (result >= BEDTIME_SHIFT_HOUR_OF_DAY * SECONDS_HOUR) {
                 return result - SECONDS_DAY
             }
         }
 
         return result
     }
-    
+
     return 0
 }
-
-/*
-const a = ["half past 10", "10 to 6", "4:30 am", "13:00", "4:20 pm", "8"]
-a.forEach(test => {
-    console.log(test, ":", parseTimeOfTheDayTextToDiffSeconds(test, "night"))
-})*/
-
