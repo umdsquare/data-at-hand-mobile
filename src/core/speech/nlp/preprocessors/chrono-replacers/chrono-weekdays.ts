@@ -11,13 +11,14 @@ const PATTERN = new NamedRegExp('(on\\s*?)?' +
     '(?<prefix>((this|last|past|next)\\s+)+)?' +
     '(?<dow>' + Object.keys(DAYS_OFFSET).join('|') + ')' +
     '((on|of|in)\s+)?' +
-    '(?:\s*(?<suffix>((this|last|past|next)\\s*)+)week)?', 'i');
+    '(?:\s*(?<suffix>((this|last|past|next)\\s*)+)week)?($|\\s)', 'i');
 
 export const makeWeekdayParser = () => {
     const weekdayParser = new Parser()
 
     weekdayParser.pattern = () => PATTERN
     weekdayParser.extract = function (text, ref: Date, match, opt) {
+        console.log(text, match)
         var index = match.index;
         var text = match[0];
         var result: ParsedResult = new ParsedResult({

@@ -46,7 +46,7 @@ export const DATASOURCE_VARIABLE_RULES: Array<VariableParsingRule> = [
         value: DataSourceType.SleepRange,
     },
     {
-        regex: /((body\s+)?weight)|(how heavy i (was|am))/gi,
+        regex: /((body\s+)?weight)|(wait)|(how heavy i (was|am))/gi,
         variableType: VariableType.DataSource,
         value: DataSourceType.Weight
     }

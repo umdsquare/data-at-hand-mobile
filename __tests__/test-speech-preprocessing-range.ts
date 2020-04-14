@@ -3,8 +3,8 @@
  */
 
 import { preprocess } from '@core/speech/nlp/preprocessor';
-import { VariableType } from '@core/speech/nlp/types';
 import { dataSources, speechOptions } from '../jest.setup';
+import { VariableType } from '@data-at-hand/core';
 
 /*it('renders correctly', () => {
   renderer.create(<App />);

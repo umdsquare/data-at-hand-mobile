@@ -1,8 +1,8 @@
 import { ExplorationInfo } from "@data-at-hand/core/exploration/ExplorationInfo"
-import { randomString, STRING_SET_ALPHABETS, STRING_SET_NUMBERS } from "@data-at-hand/core/utils"
 import { MeasureUnitType } from "@data-at-hand/core/measure/DataSourceSpec"
 import { SpeechContext } from "@data-at-hand/core/speech/SpeechContext"
 import { NLUResult } from "@data-at-hand/core/speech/types"
+import { STRING_SET_ALPHABETS, randomString, STRING_SET_NUMBERS } from "@data-at-hand/core/utils"
 
 export interface NLUOptions {
     getToday: () => Date,

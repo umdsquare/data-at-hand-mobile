@@ -3,12 +3,10 @@
  */
 
 import { preprocess } from '@core/speech/nlp/preprocessor';
-import { VariableType, Intent, ConditionInfo } from '@core/speech/nlp/types';
-import { subDays } from 'date-fns';
-import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { dataSources, speechOptions } from '../jest.setup';
 import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
-import { NumericConditionType } from '@core/exploration/types';
+import { NumericConditionType, Intent, VariableType } from '@data-at-hand/core';
+import { ConditionInfo } from '@data-at-hand/core/speech/types';
 
 console.log = jest.fn()
 
