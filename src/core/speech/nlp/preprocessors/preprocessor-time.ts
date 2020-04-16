@@ -31,7 +31,12 @@ export function getChrono(): Chrono {
         chronoParserApi.ENWeekdayParser = makeWeekdayParser
         chronoParserApi.ENMonthNameParser = makeMonthNameParser
         chronoParserApi.ENRelativeDateFormatParser = makeRelativeDateFormatParser
+
+        //Noop
         chronoParserApi.ENTimeExpressionParser = makeNoopParser
+        chronoParserApi.ENMonthNameLittleEndianParser = makeNoopParser
+        //
+
         chronoRefinerApi.ENMergeDateRangeRefiner = makeENMergeDateRangeRefiner
 
         //initialize chrono
