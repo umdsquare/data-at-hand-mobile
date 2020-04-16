@@ -96,7 +96,9 @@ const manualPeriods: Array<[string, [number, number]]> = [
   ["from Monday to Wednesday", [20200224, 20200226]],
   ["from last Monday to this Wednesday", [20200217, 20200226]],
   ["from 2019 to 2020", [20190101, 20201231]],
-  ["the range of January 20th 2 February 10th", [20200120, 2020210]]
+  ["the range of January 20th 2 February 10th", [20200120, 20200210]],
+
+  ["the range of January 2 2 February 10th", [20200102, 20200210]],
 ]
 
 const periodExpressions = relatives.concat(months).concat(seasons).concat(manualPeriods)
