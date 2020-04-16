@@ -56,7 +56,7 @@ const months: Array<[string, [number, number]]> = [
   ["last december", [20191201, 20191231]],
   ["past january", [20200101, 20200131]],
   ["january 2018", [20180101, 20180131]],
-  ["january 20:19", [20190101, 2019013]]
+  ["january 20:19", [20190101, 20190131]]
 ]
 
 const seasons: Array<[string, [number, number]]> = [
@@ -97,7 +97,6 @@ const manualPeriods: Array<[string, [number, number]]> = [
   ["from last Monday to this Wednesday", [20200217, 20200226]],
   ["from 2019 to 2020", [20190101, 20201231]],
   ["the range of January 20th 2 February 10th", [20200120, 20200210]],
-
   ["the range of January 2 2 February 10th", [20200102, 20200210]],
 ]
 

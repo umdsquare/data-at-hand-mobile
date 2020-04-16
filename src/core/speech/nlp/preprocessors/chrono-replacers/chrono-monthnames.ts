@@ -4,7 +4,7 @@ import util from 'chrono-node/src/utils/EN';
 import parserApi from "chrono-node/src/parsers/parser";
 import { startOfMonth, getYear, isAfter, addYears, endOfMonth } from "date-fns";
 
-const PATTERN = new NamedRegExp(`(?:in\\s*?)?(the\\s+)?(?<prefix>((this|last|past|next)\\s+)+)?(?<month>${util.MONTH_PATTERN})(\\s+(of|in))?(\\s+the)?(?:\\s*(?<suffix>((this|last|past|next)\\s*)+)year)?(\\s+(?<year>[0-9]{4})(\\s+(?<yearBe>BE|AD|BC))?)?`, 'i')
+const PATTERN = new NamedRegExp(`(?:in\\s*?)?(the\\s+)?(?<prefix>((this|last|past|next)\\s+)+)?(?<month>${util.MONTH_PATTERN})(\\s+(of|in))?(\\s+the)?(?:\\s*(?<suffix>((this|last|past|next)\\s*)+)year)?(\\s+(?<year>[12]\\d:?\\d{2}))?`, 'i')
 export const makeMonthNameParser = () => {
     const parser = new Parser()
     parser.pattern = () => PATTERN
@@ -22,7 +22,7 @@ export const makeMonthNameParser = () => {
 
         let year = null;
         if (match.groups.year) {
-            year = match.groups.year;
+            year = match.groups.year.replace(":", "");
             year = parseInt(year);
 
             if (match.groups.yearBe) {
