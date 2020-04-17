@@ -1,16 +1,15 @@
 import { refresh, authorize, revoke, AuthConfiguration } from 'react-native-app-auth';
 import { FitbitServiceCore, FitbitDailyActivityHeartRateQueryResult, FitbitDailyActivityStepsQueryResult, FitbitWeightTrendQueryResult, FitbitWeightQueryResult, FitbitSleepQueryResult, FitbitIntradayStepDayQueryResult, FitbitHeartRateIntraDayQueryResult, FitbitUserProfile, FitbitDeviceListQueryResult } from "../types";
-import { makeFitbitIntradayActivityApiUrl, makeFitbitHeartRateIntraDayLogApiUrl, makeFitbitWeightTrendApiUrl, makeFitbitWeightLogApiUrl, makeFitbitDayLevelActivityLogsUrl, makeFitbitSleepApiUrl, FITBIT_PROFILE_URL, FITBIT_DEVICES_URL } from "../api";
+import { makeFitbitIntradayActivityApiUrl, makeFitbitHeartRateIntraDayLogApiUrl, makeFitbitWeightTrendApiUrl, makeFitbitWeightLogApiUrl, makeFitbitDayLevelActivityLogsUrl, makeFitbitSleepApiUrl, FITBIT_PROFILE_URL, FITBIT_DEVICES_URL, FITBIT_DAILY_STEP_GOAL_URL, FITBIT_SLEEP_GOAL_URL, FITBIT_WEIGHT_GOAL_URL } from "../api";
 import { LocalAsyncStorageHelper } from "@utils/AsyncStorageHelper";
 import { DataService, UnSupportedReason, ServiceApiErrorType } from "../../DataService";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
-import { FitbitLocalDbManager } from '../sqlite/database';
+import { FitbitLocalDbManager, INTRADAY_SEPARATOR_BETWEEN } from '../sqlite/database';
 import { DatabaseParams } from 'react-native-sqlite-storage';
 import { parseISO, max } from 'date-fns';
 import { SystemError } from '@utils/errors';
 import { notifyError } from '@core/logging/ErrorReportingService';
 import path from 'react-native-path';
-import { fastConcatTo } from '@data-at-hand/core/utils';
 
 
 interface FitbitCredential {
@@ -32,9 +31,12 @@ const STORAGE_KEY_USER_MEMBER_SINCE =
 const STORAGE_KEY_LEFT_QUOTA = DataService.STORAGE_PREFIX + 'fitbit:left_quota';
 const STORAGE_KEY_QUOTA_RESET_AT = DataService.STORAGE_PREFIX + 'fitbit:quota_reset_at';
 
+const STORAGE_KEY_GOAL_STEP = DataService.STORAGE_PREFIX + "fitbit:goal:step:daily";
+const STORAGE_KEY_GOAL_WEIGHT = DataService.STORAGE_PREFIX + "fitbit:goal:weight";
+const STORAGE_KEY_GOAL_SLEEP_DURATION = DataService.STORAGE_PREFIX + "fitbit:goal:sleep:duration";
 
 export default class FitbitOfficialServiceCore implements FitbitServiceCore {
-    
+
     isPrefetchAvailable(): boolean {
         return this._credential?.prefetch_backend_uri != null
     }
@@ -342,7 +344,7 @@ export default class FitbitOfficialServiceCore implements FitbitServiceCore {
     }
 
     async fetchIntradayStepCount(date: number): Promise<FitbitIntradayStepDayQueryResult> {
-       return this.fetchFitbitQuery(makeFitbitIntradayActivityApiUrl("activities/steps", date))
+        return this.fetchFitbitQuery(makeFitbitIntradayActivityApiUrl("activities/steps", date))
     }
 
     async fetchIntradayHeartRate(date: number): Promise<FitbitHeartRateIntraDayQueryResult> {
@@ -352,10 +354,57 @@ export default class FitbitOfficialServiceCore implements FitbitServiceCore {
     async prefetchIntradayStepCount(start: number, end: number): Promise<{ result: FitbitIntradayStepDayQueryResult[]; queriedAt: number; }> {
         return this.fetchDataFromPrefetchBackend("step_intraday", start, end)
     }
-    
+
     prefetchIntradayHeartRate(start: number, end: number): Promise<{ result: FitbitHeartRateIntraDayQueryResult[]; queriedAt: number; }> {
         return this.fetchDataFromPrefetchBackend("heartrate_intraday", start, end)
     }
+
+    private async fetchGoalValueImpl(storageKey: string, url: string, propertyName: string): Promise<number | undefined> {
+        const stored = await this.localAsyncStorage.getString(storageKey)
+        if (stored != null) {
+            const split = stored.split(INTRADAY_SEPARATOR_BETWEEN)
+            const value = Number.parseFloat(split[0])
+            const queriedAt = Number.parseInt(split[1])
+            if (Date.now() - queriedAt < 36000000) {
+                //people seldom change their goals
+                return value
+            }
+        }
+
+        //query
+        try {
+            const queryResult = await this.fetchFitbitQuery(url)
+            let value: number
+            if (queryResult.goal) {
+                value = Number.parseFloat(queryResult.goal[propertyName])
+            } else if (queryResult.goals) {
+                value = Number.parseFloat(queryResult.goals[propertyName])
+            }
+
+            await this.localAsyncStorage.set(storageKey, `${value}|${Date.now()}`)
+
+            return value
+        } catch (err) {
+            console.log(err)
+            return undefined;
+        }
+    }
+
+    fetchStepCountGoal(): Promise<number | undefined> {
+        return this.fetchGoalValueImpl(STORAGE_KEY_GOAL_STEP, FITBIT_DAILY_STEP_GOAL_URL, "steps")
+    }
+
+    async fetchMinSleepDurationGoal(): Promise<number | undefined> {
+        const value = await this.fetchGoalValueImpl(STORAGE_KEY_GOAL_SLEEP_DURATION, FITBIT_SLEEP_GOAL_URL, "minDuration")
+        if (value != null) {
+            return value * 60
+        } else return value
+    }
+
+    fetchWeightGoal(): Promise<number | undefined> {
+        return this.fetchGoalValueImpl(STORAGE_KEY_GOAL_WEIGHT, FITBIT_WEIGHT_GOAL_URL, "weight")
+    }
+
 
     readonly getToday = () => {
         return new Date()

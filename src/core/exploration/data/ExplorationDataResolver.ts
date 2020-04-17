@@ -220,6 +220,9 @@ class ExplorationDataResolver {
 
     const data = await service.fetchData(source, range[0], range[1])
     data.preferredValueRange = await service.getPreferredValueRange(source)
+
+    data.goal = await service.getGoalValue(source)
+    
     return data
   }
 

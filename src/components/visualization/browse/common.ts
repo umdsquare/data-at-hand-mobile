@@ -14,6 +14,7 @@ export interface ChartPropsBase<T> {
   dateRange: number[],
   preferredValueRange: number[],
   data: T,
+  goalValue?: number,
   highlightFilter?: HighlightFilter,
   highlightedDays?: { [key: number]: boolean | undefined }
 }
@@ -24,7 +25,6 @@ export interface ChartProps extends ChartPropsBase<Array<{ value: number, number
 
 
 export namespace CommonBrowsingChartStyles {
-
 
   export const xAxisHeight = 26;
   export const yAxisWidth = 50;

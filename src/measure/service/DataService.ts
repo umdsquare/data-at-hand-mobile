@@ -66,6 +66,8 @@ export abstract class DataService {
     return
   }
 
+  abstract getGoalValue(dataSource: DataSourceType): Promise<number | undefined>
+
   abstract getPreferredValueRange(dataSource: DataSourceType): Promise<[number, number]>
 
   abstract fetchFilteredDates(filter: HighlightFilter, start: number, end: number): Promise<{ [key: number]: boolean | undefined }>

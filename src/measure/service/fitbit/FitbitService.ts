@@ -282,6 +282,19 @@ export default class FitbitService extends DataService {
     }
   }
 
+
+  getGoalValue(dataSource: DataSourceType): Promise<number | undefined> {
+    switch(dataSource){
+      case DataSourceType.StepCount:
+        return this.core.fetchStepCountGoal()
+      case DataSourceType.HoursSlept:
+        return this.core.fetchMinSleepDurationGoal()
+      case DataSourceType.Weight:
+        return this.core.fetchWeightGoal()
+      default: return Promise.resolve(undefined)
+    }
+  }
+
   /***
    * return: Access token
    */

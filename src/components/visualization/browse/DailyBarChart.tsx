@@ -10,6 +10,7 @@ import Colors from '@style/Colors';
 import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
 import { coverValueInRange } from '@data-at-hand/core/utils';
 import { TodayContext } from '@components/pages/exploration/contexts';
+import { GoalValueIndicator } from './GoalValueIndicator';
 
 interface Props extends ChartProps {
     valueTickFormat?: (num: number) => string,
@@ -80,6 +81,7 @@ export const DailyBarChart = React.memo((prop: Props) => {
             {
                 mean != null && <Line x1={0} x2={chartArea.width} y={scaleY(mean)} stroke={Colors.chartAvgLineColor} strokeWidth={CommonBrowsingChartStyles.AVERAGE_LINE_WIDTH} strokeDasharray={"2"} />
             }
+            <GoalValueIndicator yScale={scaleY} goal={prop.goalValue} lineLength={chartArea.width} labelAreaWidth={CommonBrowsingChartStyles.yAxisWidth} valueFormatter={prop.valueTickFormat}/>
             {
                 highlightReference != null ? <Line x1={0} x2={chartArea.width} y={scaleY(highlightReference)} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
             }

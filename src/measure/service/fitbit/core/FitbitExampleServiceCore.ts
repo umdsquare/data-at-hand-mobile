@@ -31,6 +31,7 @@ interface ExampleDayRow {
 }
 
 export default class FitbitExampleServiceCore implements FitbitServiceCore {
+  
 
     descriptionOverride?: string;
     thumbnailOverride?: any;
@@ -277,6 +278,16 @@ export default class FitbitExampleServiceCore implements FitbitServiceCore {
     }
     prefetchIntradayHeartRate(start: number, end: number): Promise<{ result: FitbitHeartRateIntraDayQueryResult[]; queriedAt: number; }> {
         return Promise.resolve(null)
+    }
+
+    fetchStepCountGoal(): Promise<number | undefined> {
+        return Promise.resolve(10000)
+    }
+    fetchMinSleepDurationGoal(): Promise<number | undefined> {
+        return Promise.resolve(7 * 3600)
+    }
+    fetchWeightGoal(): Promise<number | undefined> {
+        return Promise.resolve(70)
     }
 
     readonly getToday = () => {

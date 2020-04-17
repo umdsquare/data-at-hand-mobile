@@ -153,13 +153,39 @@ export interface FitbitIntradayHeartRateResult {
 }
 
 export type FitbitDeviceListQueryResult = Array<{
-      battery: "High",
-      batteryLevel: number,
-      deviceVersion: "MobileTrack" | string,
-      id: string,
-      lastSyncTime: string, //ISO8601
-      type: "TRACKER" | "SCALE"
-  }>
+  battery: "High",
+  batteryLevel: number,
+  deviceVersion: "MobileTrack" | string,
+  id: string,
+  lastSyncTime: string, //ISO8601
+  type: "TRACKER" | "SCALE"
+}>
+
+
+
+export type FitbitActivityGoalQueryResult = {
+  goals: {
+    caloriesOut: number,
+    distance: number,
+    floors: number,
+    steps: number
+  }
+}
+
+export type FitbitWeightGoalQueryResult = {
+  goal: {
+    startDate: string,
+    startWeight: number,
+    weight: number;
+  }
+}
+
+export type FitbitSleepDurationGoalQueryResult = {
+  goal: {
+      minDuration: number,
+      updatedOn: string
+  }
+}
 
 export interface FitbitServiceCore {
 
@@ -172,7 +198,7 @@ export interface FitbitServiceCore {
    * return: accessToken
    */
   authenticate(): Promise<string>
-  signOut(): Promise<void> 
+  signOut(): Promise<void>
 
   onCheckSupportedInSystem(): Promise<{
     supported: boolean;
@@ -193,10 +219,15 @@ export interface FitbitServiceCore {
   fetchIntradayStepCount(date: number): Promise<FitbitIntradayStepDayQueryResult>
   fetchIntradayHeartRate(date: number): Promise<FitbitHeartRateIntraDayQueryResult>
 
-  prefetchIntradayStepCount(start: number, end: number): Promise<{result: FitbitIntradayStepDayQueryResult[], queriedAt: number}>
-  prefetchIntradayHeartRate(start: number, end: number): Promise<{result: FitbitHeartRateIntraDayQueryResult[], queriedAt: number}>
+  prefetchIntradayStepCount(start: number, end: number): Promise<{ result: FitbitIntradayStepDayQueryResult[], queriedAt: number }>
+  prefetchIntradayHeartRate(start: number, end: number): Promise<{ result: FitbitHeartRateIntraDayQueryResult[], queriedAt: number }>
 
-  fetchLastSyncTime(): Promise<{tracker?: Date, scale?: Date}>
+
+  fetchStepCountGoal(): Promise<number | undefined>
+  fetchMinSleepDurationGoal(): Promise<number | undefined>
+  fetchWeightGoal(): Promise<number | undefined>
+
+  fetchLastSyncTime(): Promise<{ tracker?: Date, scale?: Date }>
 
   fitbitLocalDbManager: FitbitLocalDbManager
   localAsyncStorage: LocalAsyncStorageHelper
@@ -206,5 +237,5 @@ export interface FitbitServiceCore {
   isQuotaLimited: boolean
   getLeftQuota(): Promise<number>
   getQuotaResetEpoch(): Promise<number>
-  
+
 }

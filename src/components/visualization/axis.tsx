@@ -5,6 +5,8 @@ import Colors from '@style/Colors';
 import { getHours, format } from 'date-fns';
 import { LayoutRectangle } from 'react-native';
 
+export const minimumVerticalAxisTickMargin = 8;
+
 interface Props<T> {
     ticks: Array<T>
     tickMargin: number
@@ -37,7 +39,7 @@ export const AxisSvg = (props: Props<any>) => {
                 props.ticks.map(tick => {
                     return <G key={tick} y={props.scale(tick)}>
                         <Line x1={props.chartArea.x - props.tickMargin} x2={props.chartArea.x + props.chartArea.width} stroke="rgba(0,0,0,0.07)" />
-                        <Text {...props.overrideTickLabelStyle} alignmentBaseline="central" fontWeight={500} textAnchor="end" x={props.chartArea.x - props.tickMargin - 8} fill={Colors.chartElementDefault}>{props.tickFormat? props.tickFormat(tick): tick}</Text>
+                        <Text {...props.overrideTickLabelStyle} alignmentBaseline="central" fontWeight={500} textAnchor="end" x={props.chartArea.x - props.tickMargin - minimumVerticalAxisTickMargin} fill={Colors.chartElementDefault}>{props.tickFormat? props.tickFormat(tick): tick}</Text>
                     </G>
 
                 })

@@ -16,6 +16,9 @@ import { getScaleStepLeft } from '../d3-utils';
 import { TodayContext } from '@components/pages/exploration/contexts';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
+import { GoalValueIndicator } from './GoalValueIndicator';
+
+const weightTickFormat = (weight: number) => weight.toFixed(1)
 
 interface Props extends ChartPropsBase<{
     trend: Array<{ numberedDate: number, value: number }>,
@@ -34,9 +37,9 @@ export const DailyWeightChart = React.memo((prop: Props) => {
     const today = useContext(TodayContext)
     const scaleX = useContext(DateRangeScaleContext) || CommonBrowsingChartStyles.makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
 
-    const measureUnitType = useSelector((appContext:ReduxAppState) => appContext.settingsState.unit)
+    const measureUnitType = useSelector((appContext: ReduxAppState) => appContext.settingsState.unit)
 
-    const convert = useMemo(() => measureUnitType === MeasureUnitType.Metric ? noop : (n: number) => (n != null ? unitConvert(n).from('kg').to('lb') : null), 
+    const convert = useMemo(() => measureUnitType === MeasureUnitType.Metric ? noop : (n: number) => (n != null ? unitConvert(n).from('kg').to('lb') : null),
         [measureUnitType])
 
     const chartArea = CommonBrowsingChartStyles.CHART_AREA
@@ -108,6 +111,9 @@ export const DailyWeightChart = React.memo((prop: Props) => {
                     strokeWidth={2}
                 />
             }
+
+            <GoalValueIndicator yScale={scaleY} goal={prop.goalValue} lineLength={chartArea.width} 
+                labelAreaWidth={CommonBrowsingChartStyles.yAxisWidth} valueConverter={convert} valueFormatter={weightTickFormat}/>
             {
                 highlightReference != null ? <Line x1={0} x2={chartArea.width} y={scaleY(convert(highlightReference))} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
             }

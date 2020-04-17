@@ -102,6 +102,7 @@ export interface OverviewSourceRow {
   data: any;
   today: any;
   preferredValueRange?: number[],
+  goal?: number,
   statistics: Array<{ type: StatisticsType; value: any }>;
 }
 

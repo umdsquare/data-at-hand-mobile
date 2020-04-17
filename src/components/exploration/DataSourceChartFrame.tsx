@@ -283,7 +283,8 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filte
         highlightFilter: filter,
         highlightedDays: highlightedDays,
         dateRange: data.range,
-        data: data.data
+        data: data.data,
+        goalValue: data.goal
     }
 
     switch (sourceType) {

@@ -28,6 +28,10 @@ export const FITBIT_PROFILE_URL =
 
 export const FITBIT_DEVICES_URL = "https://api.fitbit.com/1/user/-/devices.json"
 
+export const FITBIT_SLEEP_GOAL_URL = "https://api.fitbit.com/1/user/-/sleep/goal.json"
+export const FITBIT_WEIGHT_GOAL_URL = "https://api.fitbit.com/1/user/-/body/log/weight/goal.json"
+export const FITBIT_DAILY_STEP_GOAL_URL = "https://api.fitbit.com/1/user/-/activities/goals/daily.json"
+
 /**
  *
  *
