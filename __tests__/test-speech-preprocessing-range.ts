@@ -98,6 +98,9 @@ const manualPeriods: Array<[string, [number, number]]> = [
   ["from 2019 to 2020", [20190101, 20201231]],
   ["the range of January 20th 2 February 10th", [20200120, 20200210]],
   ["the range of January 2 2 February 10th", [20200102, 20200210]],
+  ["Date for december 12th, two december 16th", [20191212, 20191216],
+    //["from January 2022. February 2020", [20200101, 20200229]]
+  ]
 ]
 
 const periodExpressions = relatives.concat(months).concat(seasons).concat(manualPeriods)
@@ -106,7 +109,7 @@ describe("Periods", () => {
   periodExpressions.forEach(r => {
     it(r[0], async () => {
       const result = await preprocess(r[0], speechOptions)
-      expect(Object.keys(result.variables).length).toEqual(1)
+      expect(Object.keys(result.variables).length).toBeGreaterThanOrEqual(1)
       const id = Object.keys(result.variables)[0]
       expect(result.variables[id].type).toBe(VariableType.Period)
       expect(result.variables[id].value[0]).toEqual(r[1][0])
