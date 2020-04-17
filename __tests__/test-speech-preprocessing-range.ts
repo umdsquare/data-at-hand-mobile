@@ -55,7 +55,8 @@ const months: Array<[string, [number, number]]> = [
   ["last november", [20191101, 20191130]],
   ["last december", [20191201, 20191231]],
   ["past january", [20200101, 20200131]],
-  ["january 2018", [20180101, 20180131]]
+  ["january 2018", [20180101, 20180131]],
+  ["january 20:19", [20190101, 20190131]]
 ]
 
 const seasons: Array<[string, [number, number]]> = [
@@ -94,16 +95,38 @@ const manualPeriods: Array<[string, [number, number]]> = [
   ["from Thursday to Tuesday", [20200220, 20200225]],
   ["from Monday to Wednesday", [20200224, 20200226]],
   ["from last Monday to this Wednesday", [20200217, 20200226]],
-  ["from 2019 to 2020", [20190101, 20201231]]
+  ["from 2019 to 2020", [20190101, 20201231]],
 ]
 
-const periodExpressions = relatives.concat(months).concat(seasons).concat(manualPeriods)
+const dictationErrorPeriods: Array<[string, [number, number]]> = [
+  ["the range of January 20th 2 February 10th", [20200120, 20200210]],
+  ["the range of January 2 2 February 10th", [20200102, 20200210]],
+  ["Date for december 12th, two december 16th", [20191212, 20191216]],
+  ["from January 2022. February 2020", [20200101, 20200229]],
+  ["from February 22, February 28", [20200220, 20200228]],  
+]
 
-describe("Periods", () => {
-  periodExpressions.forEach(r => {
+const periodExpressions = relatives.concat(months).concat(seasons).concat(manualPeriods).concat(dictationErrorPeriods)
+
+describe("Normal Periods", () => {
+  relatives.concat(months).concat(seasons).concat(manualPeriods).forEach(r => {
     it(r[0], async () => {
       const result = await preprocess(r[0], speechOptions)
-      expect(Object.keys(result.variables).length).toEqual(1)
+      expect(Object.keys(result.variables).length).toBeGreaterThanOrEqual(1)
+      const id = Object.keys(result.variables)[0]
+      expect(result.variables[id].type).toBe(VariableType.Period)
+      expect(result.variables[id].value[0]).toEqual(r[1][0])
+      expect(result.variables[id].value[1]).toEqual(r[1][1])
+    });
+  })
+})
+
+
+describe("Dictation Error Periods", () => {
+  dictationErrorPeriods.forEach(r => {
+    it(r[0], async () => {
+      const result = await preprocess(r[0], speechOptions)
+      expect(Object.keys(result.variables).length).toBeGreaterThanOrEqual(1)
       const id = Object.keys(result.variables)[0]
       expect(result.variables[id].type).toBe(VariableType.Period)
       expect(result.variables[id].value[0]).toEqual(r[1][0])

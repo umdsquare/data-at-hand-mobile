@@ -7,13 +7,14 @@ import chronoRefinerApi from 'chrono-node/src/refiners/refiner';
 
 import chronoOptions from 'chrono-node/src/options';
 import { HOLIDAY_PARSERS } from "./chrono-holidays";
-import { CHRONO_EXTENSION_PARSERS, CHRONO_EXTENSION_REFINERS, makeENMergeDateRangeRefiner } from "./chrono-extension";
+import { CHRONO_EXTENSION_PARSERS, CHRONO_EXTENSION_REFINERS } from "./chrono-extension";
 import { makeWeekdayParser } from "./chrono-replacers/chrono-weekdays";
 import NamedRegExp from "named-regexp-groups";
 import { makeMonthNameParser } from "./chrono-replacers/chrono-monthnames";
 import { makeRelativeDateFormatParser } from "./chrono-replacers/chrono-relative";
 import { makeNoopParser } from "./chrono-replacers/chrono-noop";
 import { VariableType } from "@data-at-hand/core/speech/types";
+import { makeENMergeDateRangeRefiner } from "./chrono-replacers/chrono-mergedates";
 
 
 let _chrono: Chrono | undefined = undefined
@@ -31,7 +32,12 @@ export function getChrono(): Chrono {
         chronoParserApi.ENWeekdayParser = makeWeekdayParser
         chronoParserApi.ENMonthNameParser = makeMonthNameParser
         chronoParserApi.ENRelativeDateFormatParser = makeRelativeDateFormatParser
+
+        //Noop
         chronoParserApi.ENTimeExpressionParser = makeNoopParser
+        chronoParserApi.ENMonthNameLittleEndianParser = makeNoopParser
+        //
+
         chronoRefinerApi.ENMergeDateRangeRefiner = makeENMergeDateRangeRefiner
 
         //initialize chrono
