@@ -195,6 +195,8 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
                     ref={this._listRef}
                     windowSize={DataSourceManager.instance.supportedDataSources.length}
 
+                    extraData={this.props.highlightFilter}
+
                     data={this.props.data.sourceDataList}
                     keyExtractor={this.keyExtractor}
                     ItemSeparatorComponent={this.Separator}

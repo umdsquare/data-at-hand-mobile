@@ -99,7 +99,7 @@ export namespace CommonBrowsingChartStyles {
     dataSource: DataSourceType,
     getDataArray?: (data: T) => Array<{ numberedDate: number, value: number }>) {
 
-    const shouldHighlightElements = useMemo(() => prop.highlightFilter && prop.highlightFilter.dataSource === dataSource && prop.highlightedDays != null, [
+    const shouldHighlightElements = useMemo(() => prop.highlightFilter != null && prop.highlightFilter.dataSource === dataSource && prop.highlightedDays != null, [
       prop.highlightFilter,
       (prop as any)["dataSource"],
       prop.highlightedDays
@@ -136,7 +136,6 @@ export namespace CommonBrowsingChartStyles {
     return {
       shouldHighlightElements,
       highlightReference
-
     }
   }
 }
