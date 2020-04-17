@@ -20,34 +20,68 @@ export const makeENMergeDateRangeRefiner = () => {
             currResult = results[i];
             prevResult = results[i - 1];
 
-            if (!prevResult.end && !currResult.end
-                && isAbleToMerge(text, prevResult, currResult)) {
+            if (!prevResult.end && !currResult.end) {
+                let merge: boolean = false
+                if (refiner.pattern().test(getBetweenText(text, prevResult, currResult)) === true) {
+                    merge = true
+                } else if (isTwoSuspiciousTobeTo(text, prevResult, currResult) === true) {
+                    //infer what finishes with two
+                    const yearEndsWith2 = isEndingWith2("year", prevResult)
+                    const dayEndsWith2 = isEndingWith2("day", prevResult)
 
-                prevResult = mergeResult(text, prevResult, currResult);
-                currResult = null;
-                i += 1;
+                    if (yearEndsWith2 === true || dayEndsWith2 === true) {
+                        if (yearEndsWith2 === true && dayEndsWith2 === true) {
+                            //TODO throughly check which one was spoken lastly
+                            if (prevResult.start.knownValues.year > getYear(prevResult.ref)) {
+                                prevResult.start.assign("year", prevResult.start.knownValues.year - 2)
+                            } else {
+                                prevResult.start.assign("day", prevResult.start.knownValues.day - 2)
+                            }
+
+                        } else if (yearEndsWith2 === true) {
+                            //year
+                            prevResult.start.assign("year", prevResult.start.knownValues.year - 2)
+                        } else {
+                            //date
+                            prevResult.start.assign("day", prevResult.start.knownValues.day - 2)
+                        }
+                        merge = true
+                    }
+                }
+
+                if (merge === true) {
+                    prevResult = mergeResult(text, prevResult, currResult);
+                    currResult = null;
+                    i += 1;
+                }
             }
 
             mergedResult.push(prevResult);
         }
 
-        /*
+
         if (currResult != null) {
             mergedResult.push(currResult);
-        }*/
+        }
 
 
 
         return mergedResult;
     };
 
-    function isAbleToMerge(text: string, result1: ParsedResult, result2: ParsedResult) {
-        var begin = result1.index + result1.text.length;
-        var end = result2.index;
-        var textBetween = text.substring(begin, end);
+    function isEndingWith2(valueName: string, result: ParsedResult): boolean {
+        return result.start.knownValues[valueName] != null && (result.start.knownValues[valueName] % 10) === 2 && result.start.knownValues[valueName] > 20
+    }
 
-        return textBetween.match(refiner.pattern());
-    };
+    function getBetweenText(text: string, result1: ParsedResult, result2: ParsedResult): string {
+        const begin = result1.index + result1.text.length;
+        const end = result2.index;
+        return text.substring(begin, end);
+    }
+
+    function isTwoSuspiciousTobeTo(text: string, result1: ParsedResult, result2: ParsedResult) {
+        return /^[,.]?\s*$/i.test(getBetweenText(text, result1, result2)) === true && /(2nd)|2$/i.test(result1.text) === true
+    }
 
     function mergeResult(text: string, fromResult: ParsedResult, toResult: ParsedResult) {
 
@@ -128,7 +162,7 @@ export const makeENMergeDateRangeRefiner = () => {
 
         fromResult.index = startIndex;
         fromResult.text = text.substring(startIndex, endIndex);
-        fromResult.tags["ENMergeDateRangeRefinerDataAtHand"] = true;
+        fromResult.tags["ENMergeDateRangeRefiner"] = true;
         return fromResult;
     }
 
