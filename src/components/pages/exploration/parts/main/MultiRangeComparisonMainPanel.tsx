@@ -6,11 +6,10 @@ import { ReduxAppState, ActionTypeBase } from '@state/types'
 import { RangeAggregatedComparisonData, IAggregatedRangeValue, IAggregatedValue } from '@core/exploration/data/types'
 import { DataSourceType, MeasureUnitType } from '@data-at-hand/core/measure/DataSourceSpec'
 import { Dispatch } from 'redux'
-import { View, StyleSheet, Platform, LayoutRectangle } from 'react-native'
+import { View, StyleSheet, LayoutRectangle } from 'react-native'
 import { StyleTemplates } from '@style/Styles'
-import SegmentedControlIOS from '@react-native-community/segmented-control';
+import SegmentedControl from '@react-native-community/segmented-control';
 import { Sizes, sizeByScreen } from '@style/Sizes'
-import { ButtonGroup } from 'react-native-elements'
 import Colors from '@style/Colors'
 import { SizeWatcher } from '@components/visualization/SizeWatcher'
 import { RangeValueElementLegend } from '@components/visualization/compare/RangeValueElementLegend'
@@ -55,16 +54,7 @@ const styles = StyleSheet.create({
         height: 32
     },
 
-    androidButtonGroupWrapperStyle: { margin: Sizes.horizontalPadding * 0.5 },
-    androidButtonGroupContainerStyle: { borderRadius: 8, height: 32 },
-    androidButtonGroupTextStyle: {
-        fontSize: Sizes.smallFontSize,
-    },
-    androidButtonGroupSelectedButtonStyle: { backgroundColor: Colors.WHITE },
-    androidButtonGroupSelectedTextStyle: { color: Colors.textColorDark, fontWeight: '700' },
-    androidButtonGroupButtonStyle: { backgroundColor: "#76768025" },
-
-    rangeLegendContainerStyle: { alignItems: 'flex-end', padding: legendVerticalPadding, paddingTop: Sizes.verticalPadding, paddingLeft: Sizes.horizontalPadding*.5, paddingRight: Sizes.horizontalPadding*.5 },
+    rangeLegendContainerStyle: { alignItems: 'flex-end', padding: legendVerticalPadding, paddingTop: Sizes.verticalPadding, paddingLeft: Sizes.horizontalPadding * .5, paddingRight: Sizes.horizontalPadding * .5 },
     singleLegendContainerStyle: { alignItems: 'flex-end', padding: legendVerticalPadding, paddingTop: Sizes.verticalPadding, paddingLeft: Sizes.horizontalPadding, paddingRight: Sizes.horizontalPadding },
 
     chartContainerStyleWithoutLegend: { ...StyleTemplates.fillFlex, marginTop: 20 }
@@ -100,13 +90,6 @@ class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
         this.setState({
             ...this.state,
             aggregationSettingIndex: SEGEMENTED_VALUES.indexOf(value)
-        })
-    }
-
-    private onButtonGroupIndexChange = (index: number) => {
-        this.setState({
-            ...this.state,
-            aggregationSettingIndex: index
         })
     }
 
@@ -240,22 +223,10 @@ class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
             style={styles.containerStyle}
             onPulled={this.onPulledFromSide}
         >{
-                this.props.sumSupported === true ? (Platform.OS === 'ios' ?
-                    <SegmentedControlIOS values={SEGEMENTED_VALUES}
-                        selectedIndex={this.state.aggregationSettingIndex}
-                        style={styles.segmentedControlContainer}
-                        onValueChange={this.onSegmentedValueChange} /> :
-                    <View style={styles.androidButtonGroupWrapperStyle}><ButtonGroup
-                        buttons={SEGEMENTED_VALUES}
-                        textStyle={styles.androidButtonGroupTextStyle}
-                        containerStyle={styles.androidButtonGroupContainerStyle}
-                        selectedButtonStyle={styles.androidButtonGroupSelectedButtonStyle}
-                        selectedTextStyle={styles.androidButtonGroupSelectedTextStyle}
-                        buttonStyle={styles.androidButtonGroupButtonStyle}
-                        selectedIndex={this.state.aggregationSettingIndex}
-
-                        onPress={this.onButtonGroupIndexChange}
-                    /></View>) : null
+                this.props.sumSupported === true ? <SegmentedControl values={SEGEMENTED_VALUES}
+                    selectedIndex={this.state.aggregationSettingIndex}
+                    style={styles.segmentedControlContainer}
+                    onValueChange={this.onSegmentedValueChange} /> : null
             }
 
             {
