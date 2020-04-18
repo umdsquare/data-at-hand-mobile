@@ -3,7 +3,7 @@
  */
 
 import { preprocess } from '@core/speech/nlp/preprocessor';
-import { dataSources, speechOptions } from '../jest.setup';
+import { dataSources, speechOptions, HOURS_SLEPT_GOAL, STEP_COUNT_GOAL, WEIGHT_GOAL } from '../jest.setup';
 import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { NumericConditionType, Intent, VariableType } from '@data-at-hand/core';
 import { ConditionInfo } from '@data-at-hand/core/speech/types';
@@ -21,27 +21,47 @@ const prefixes = [
 const conditions: Array<[string, DataSourceType, ConditionInfo]> = [
     ["I walked more than 1000", DataSourceType.StepCount, { ref: 1000, type: NumericConditionType.More }],
     ["with step count more than 5000", DataSourceType.StepCount, { ref: 5000, type: NumericConditionType.More }],
+    ["with step count more than my goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
+    ["with step count more than my current goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
+    ["with step count more than the current goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
+    
+    
     ["I was heavier than 150", DataSourceType.Weight, { ref: 150, type: NumericConditionType.More }],
     ["I was lighter than 150", DataSourceType.Weight, { ref: 150, type: NumericConditionType.Less }],
     ["with weight more than 100", DataSourceType.Weight, { ref: 100, type: NumericConditionType.More }],
     ["with weight higher than 100", DataSourceType.Weight, { ref: 100, type: NumericConditionType.More }],
     ["with weight lower than 100", DataSourceType.Weight, { ref: 100, type: NumericConditionType.Less }],
+
+
+    ["I was lighter than the goal", DataSourceType.Weight, { ref: WEIGHT_GOAL, type: NumericConditionType.Less }],
+
+
     ["I slept less than five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.Less }],
     ["I slept shorter than five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.Less }],
     ["I slept more than five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.More }],
     ["I slept longer than five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.More }],
+
+    ["I slept less than the goal", DataSourceType.HoursSlept, { ref: HOURS_SLEPT_GOAL, type: NumericConditionType.Less }],
+    
     ["I went to bed earlier than 12 am", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
     ["I went to bed earlier than 12:00 AM", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
     ["I went to bed earlier than 12 pm", DataSourceType.SleepRange, { ref: 3600*12, type: NumericConditionType.Less }],
     ["I went to bed earlier than 12:00 PM", DataSourceType.SleepRange, { ref: 3600*12, type: NumericConditionType.Less }],
     ["I went to bed earlier than 12", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
+    
+    ["I went to bed earlier than 10 o'clock", DataSourceType.SleepRange, { ref: -7200, type: NumericConditionType.Less }],
+    ["I woke up earlier than 10 o'clock", DataSourceType.SleepRange, { ref: 3600*10, type: NumericConditionType.Less }],
+    ["I woke up earlier than 7 o'clock", DataSourceType.SleepRange, { ref: 3600*7, type: NumericConditionType.Less }],
+    ["I woke up earlier than seven o'clock", DataSourceType.SleepRange, { ref: 3600*7, type: NumericConditionType.Less }],
+    
 
     ["I went to bed earlier than 11", DataSourceType.SleepRange, { ref: -3600, type: NumericConditionType.Less }],
     ["I went to bed earlier than Midnight", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
     ["I got up later than Noon", DataSourceType.SleepRange, { ref: 3600*12, type: NumericConditionType.More }],
     ["I got up earlier than Noon", DataSourceType.SleepRange, { ref: 3600*12, type: NumericConditionType.Less }],
     ["I woke up later than 12", DataSourceType.SleepRange, { ref: 3600*12, type: NumericConditionType.More }],
-    
+
+
 ]
 
 describe("Inequation condition", () => {

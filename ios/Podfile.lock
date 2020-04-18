@@ -254,7 +254,7 @@ PODS:
     - React
   - react-native-safe-area-context (0.7.3):
     - React
-  - react-native-segmented-control (1.2.1):
+  - react-native-segmented-control (1.4.0):
     - React
   - react-native-spinkit (1.4.1):
     - React
@@ -343,7 +343,7 @@ PODS:
     - React
   - RNShare (3.2.0):
     - React
-  - RNStaticSafeAreaInsets (2.0.0):
+  - RNStaticSafeAreaInsets (2.1.0):
     - React
   - RNSVG (12.1.0):
     - React
@@ -573,7 +573,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 512e560d0e985d0e8c479a54a4e5c147a9c83493
   react-native-app-auth: 048f9ea8c2358ce1207207a0e74fb16563a3a2bd
   react-native-safe-area-context: 8260e5157617df4b72865f44006797f895b2ada7
-  react-native-segmented-control: ed19b78ec28ece7953088495cb9ba33cbafe2590
+  react-native-segmented-control: ae3a95b43eb80dac57e1f3f0ef01f1292b45dfcc
   react-native-spinkit: da294fd828216ad211fe36a5c14c1e09f09e62db
   react-native-sqlite-storage: ce71689c5a73b79390a1ab213555ae80979a5dc7
   react-native-view-shot: 08c46c9e8e92f6681e8f2ffa55ac3d06e7e99070
@@ -598,7 +598,7 @@ SPEC CHECKSUMS:
   RNReanimated: 955cf4068714003d2f1a6e2bae3fb1118f359aff
   RNScreens: ac02d0e4529f08ced69f5580d416f968a6ec3a1d
   RNShare: 13f1b72aab353c3092b30dce99d212871bb2a8a1
-  RNStaticSafeAreaInsets: e4450176adbf197061543e4a4aa82036b3d7abe0
+  RNStaticSafeAreaInsets: 5a2652147cfff45100fb155da5a90f180b3cdfb8
   RNSVG: ce9d996113475209013317e48b05c21ee988d42e
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   RNZipArchive: f06fe0dcfb9e2fa7437fc7f6c03d5400952f2d57

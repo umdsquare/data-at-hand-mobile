@@ -53,7 +53,7 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
 
     //Find time========================================================================================
 
-    const pipeResult = runPipe(speech,
+    const pipeResult = await runPipe(speech,
         definePipe("extract-time-expressions", (input) => {
             const parsedTimeVariables = extractTimeExpressions(input.processedSpeech, options.getToday())
             parsedTimeVariables.forEach(variable => {
@@ -128,9 +128,9 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
             input.processedSpeech = input.payload.nlp.text()
             return input
         }),
-        definePipe("infer-highlight", (input) => {
+        definePipe("infer-highlight", async (input) => {
             const dataSourceVariableId = Object.keys(input.variables).find(key => input.variables[key].type === VariableType.DataSource)
-            const inferredConditionInfoResult = inferHighlight(input.payload.nlp, speech, dataSourceVariableId != null ? input.variables[dataSourceVariableId].value : null, options)
+            const inferredConditionInfoResult = await inferHighlight(input.payload.nlp, speech, dataSourceVariableId != null ? input.variables[dataSourceVariableId].value : null, options)
             if (inferredConditionInfoResult) {
                 const id = makeVariableId()
                 input.variables[id] = {
@@ -166,7 +166,7 @@ function isWaketimeReferred(speech: string): boolean {
     return /(wake)|(woke)|(g(o|e)t(ting)?\s+up)/gi.test(speech)
 }
 
-function inferHighlight(nlp: compromise.Document, original: string, guidedDataSource: DataSourceType | undefined, options: NLUOptions): { conditionInfo: ConditionInfo, match: compromise.Document } | null {
+async function inferHighlight(nlp: compromise.Document, original: string, guidedDataSource: DataSourceType | undefined, options: NLUOptions): Promise<{ conditionInfo: ConditionInfo, match: compromise.Document } | null> {
     //try to find the condition
     console.log("infer highlight")
     const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time|am|pm|hour|hours|minute|minutes)+?]`)
@@ -190,7 +190,7 @@ function inferHighlight(nlp: compromise.Document, original: string, guidedDataSo
                 console.debug("Treat as a time")
                 const isBedtimePassed = isBedtimeReferred(original)
                 const isWakeTimePassed = isWaketimeReferred(original)
-                if (isBedtimePassed || isWakeTimePassed) {
+                if (isBedtimePassed === true || isWakeTimePassed === true) {
                     return {
                         conditionInfo: {
                             type: comparisonTermInfo.conditionType,
@@ -206,9 +206,9 @@ function inferHighlight(nlp: compromise.Document, original: string, guidedDataSo
         }
     }
     else {
-        const numericComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than? [<number>#Value+] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
-
+        const numericComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than? [<number>(#Value+)] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
         const numericComparisonInfo = normalizeCompromiseGroup(numericComparisonMatch.groups())
+
         if (numericComparisonInfo) {
             //numeric condition
             console.debug("numeric comparison info found.", numericComparisonInfo)
@@ -275,6 +275,28 @@ function inferHighlight(nlp: compromise.Document, original: string, guidedDataSo
                 }
             }
         } else {
+            const goalComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than * goal`)
+            const goalComparisonInfo = normalizeCompromiseGroup(goalComparisonMatch.groups())
+            if (goalComparisonInfo) {
+                const comparisonTermInfo = findComparisonTermInfo(goalComparisonInfo.comparison)
+
+                const dataSource = comparisonTermInfo.impliedSource || guidedDataSource
+                if (dataSource != null) {
+                    const goalValue = await options.getGoal(dataSource)
+                    if (goalValue != null) {
+                        return {
+                            conditionInfo: {
+                                type: comparisonTermInfo.conditionType,
+                                impliedDataSource: comparisonTermInfo.impliedSource,
+                                ref: goalValue
+                            } as ConditionInfo,
+                            match: goalComparisonMatch
+                        }
+                    }
+                }
+
+            }
+
             const match = nlp.match("[<extreme>(max|maximum|min|minimum|earliest|latest|slowest|fastest|most|least)]")
             const extremeInfo = normalizeCompromiseGroup(match.groups())
             if (extremeInfo) {

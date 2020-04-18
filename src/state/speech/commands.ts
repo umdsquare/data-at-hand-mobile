@@ -92,12 +92,14 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                         console.log(sessionId, "Analyze the phrase, ", dictationResult.text, "with context: ", context)
 
                         try {
+                            const service = DataServiceManager.instance.getServiceByKey(currentState.settingsState.serviceKey)
                             const nluResult = await nluCommandResolver.get().resolveSpeechCommand(
                                 dictationResult.text,
                                 context,
                                 currentState.explorationState.info,
                                 {
-                                    getToday: DataServiceManager.instance.getServiceByKey(currentState.settingsState.serviceKey).getToday,
+                                    getToday: service.getToday,
+                                    getGoal: (dataSource) => service.getGoalValue(dataSource),
                                     measureUnit: currentState.settingsState.unit
                                 }
                             )

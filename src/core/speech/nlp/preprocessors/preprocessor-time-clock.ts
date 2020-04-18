@@ -25,7 +25,7 @@ const clockTimeRules: Array<{
         {
             //normal expression
             regex: [
-                new NamedRegExp("(^|\\s+)(?<h>[0-9]+)(:(?<m>[0-9]+))?(\\s+(?<a>am|pm))?($|\\s+)", "i"),
+                new NamedRegExp("(^|\\s+)(?<h>[0-9]+)(:(?<m>[0-9]+))?(\\s+o'clock)?(\\s+(?<a>am|pm))?($|\\s+)", "i"),
                 new NamedRegExp("(^|\\s+)(?<h>[0-9]+)\\s+(?<m>[0-9]+)($|\\s+)", "i"),
             ],
             parser: (obj: { h: string, m?: string, a?: string }, preferred) => {
