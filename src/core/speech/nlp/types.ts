@@ -20,3 +20,6 @@ export function makeVariableId() {
 export interface NLUCommandResolver {
     resolveSpeechCommand(speech: string, context: SpeechContext, explorationInfo: ExplorationInfo, options: NLUOptions): Promise<NLUResult>
 }
+
+
+export const PARSED_TAG = "ReplacedId"
