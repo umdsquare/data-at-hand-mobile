@@ -111,8 +111,8 @@ const styles = StyleSheet.create({
     periodButtonStyle: {
         backgroundColor: Colors.speechAffordanceColorText,
         borderRadius: 100,
-        paddingLeft: 12,
-        paddingRight: 12,
+        paddingLeft: sizeByScreen(12, 9),
+        paddingRight: sizeByScreen(12, 9),
         paddingTop: 2,
         paddingBottom: 2
     },
