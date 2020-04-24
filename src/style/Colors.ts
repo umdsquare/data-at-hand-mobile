@@ -45,7 +45,7 @@ export default {
   chartLightText: "#BABABA",
   chartAvgLineColor: "#505050ee",
 
-  chartGoalValueColor: "#505050cc",
+  chartGoalValueColor: "#718098dd",
 
   chartAxisLightColor: "#00000015",
 

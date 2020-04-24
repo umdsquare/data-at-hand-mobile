@@ -82,9 +82,9 @@ PODS:
   - OpenSSL-Universal (1.0.2.19):
     - OpenSSL-Universal/Static (= 1.0.2.19)
   - OpenSSL-Universal/Static (1.0.2.19)
-  - Permission-Microphone (2.1.2):
+  - Permission-Microphone (2.1.3):
     - RNPermissions
-  - Permission-SpeechRecognition (2.1.2):
+  - Permission-SpeechRecognition (2.1.3):
     - RNPermissions
   - RCTRequired (0.62.2)
   - RCTTypeSafety (0.62.2):
@@ -323,25 +323,25 @@ PODS:
     - ReactCommon/callinvoker (= 0.62.2)
   - RNCAsyncStorage (1.9.0):
     - React
-  - RNCMaskedView (0.1.9):
+  - RNCMaskedView (0.1.10):
     - React
   - RNDateTimePicker (2.3.2):
     - React
-  - RNDeviceInfo (5.5.5):
+  - RNDeviceInfo (5.5.6):
     - React
   - RNFS (2.16.6):
     - React
   - RNGestureHandler (1.6.1):
     - React
-  - RNPermissions (2.1.2):
+  - RNPermissions (2.1.3):
     - React
   - RNReactNativeHapticFeedback (1.9.0):
     - React
   - RNReanimated (1.8.0):
     - React
-  - RNScreens (2.5.0):
+  - RNScreens (2.6.0):
     - React
-  - RNShare (3.2.0):
+  - RNShare (3.3.0):
     - React
   - RNStaticSafeAreaInsets (2.1.0):
     - React
@@ -560,8 +560,8 @@ SPEC CHECKSUMS:
   Folly: 30e7936e1c45c08d884aa59369ed951a8e68cf51
   glog: 1f3da668190260b06b429bb211bfbee5cd790c28
   OpenSSL-Universal: 8b48cc0d10c1b2923617dfe5c178aa9ed2689355
-  Permission-Microphone: 80e83ed15d61740e48a1b34a73f89302411ca005
-  Permission-SpeechRecognition: ba8003d69ca5afce62d496daa1f9e6d80b8a9897
+  Permission-Microphone: e35622c29cd8811498de947fd32116593d917997
+  Permission-SpeechRecognition: b66e300d540a9da3ba762663e2c578601ca52f92
   RCTRequired: cec6a34b3ac8a9915c37e7e4ad3aa74726ce4035
   RCTTypeSafety: 93006131180074cffa227a1075802c89a49dd4ce
   React: 29a8b1a02bd764fb7644ef04019270849b9a7ac3
@@ -588,16 +588,16 @@ SPEC CHECKSUMS:
   React-RCTVibration: 4356114dbcba4ce66991096e51a66e61eda51256
   ReactCommon: ed4e11d27609d571e7eee8b65548efc191116eb3
   RNCAsyncStorage: b16697280b08bab4b5f2f67f752d93d13a52e9ed
-  RNCMaskedView: 5dba3cb07493765fb66156c83c3dd281ca709a48
+  RNCMaskedView: f5c7d14d6847b7b44853f7acb6284c1da30a3459
   RNDateTimePicker: 0f657a34a0f6465ab7d0255c24954693bc7a8cf6
-  RNDeviceInfo: 59d3d9a0ac50adfc3a2d3c27bbbb4efc7ae8984c
+  RNDeviceInfo: c3ea4a4d4547740c548cdd1e5a78f9b04e524688
   RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
   RNGestureHandler: 8f09cd560f8d533eb36da5a6c5a843af9f056b38
-  RNPermissions: c6ef18d3f039ddf72f05da3ad0e712b7f494b76d
+  RNPermissions: 69dc24ae1a9507576e2e9cf70ceed51065311da8
   RNReactNativeHapticFeedback: 2566b468cc8d0e7bb2f84b23adc0f4614594d071
   RNReanimated: 955cf4068714003d2f1a6e2bae3fb1118f359aff
-  RNScreens: ac02d0e4529f08ced69f5580d416f968a6ec3a1d
-  RNShare: 13f1b72aab353c3092b30dce99d212871bb2a8a1
+  RNScreens: 19fee34a46de81b66e26960f5ac14ea616a5d089
+  RNShare: fea1801315aa8875d6db73a4010b14afcd568765
   RNStaticSafeAreaInsets: 5a2652147cfff45100fb155da5a90f180b3cdfb8
   RNSVG: ce9d996113475209013317e48b05c21ee988d42e
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
