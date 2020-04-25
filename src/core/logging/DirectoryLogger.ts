@@ -5,11 +5,29 @@ import { Mutex } from 'async-mutex';
 import { getVersion, getUniqueId } from 'react-native-device-info';
 import { Platform } from 'react-native';
 
+const studyCredentials = readStudyConfig()
+
+function readStudyConfig() {
+    try {
+        return require('@credentials/study.json')
+    } catch (ex) {
+        return null
+    }
+}
+
 export class DirectoryLogger {
 
     readonly fullDirectoryPath: string
 
     private readonly fileLoggerMap = new Map<string, DebouncedFileLogger>()
+
+    private readonly sessionInfo = {
+        sessionId: this.sessionId,
+        platform: Platform.OS,
+        instanceUID: getUniqueId(),
+        appVersion: getVersion(),
+        environment: __DEV__ ? "development" : "production"
+    }
 
     constructor(readonly directoryPath: string, readonly sessionId: string) {
         this.fullDirectoryPath = path.resolve(CachesDirectoryPath, directoryPath)
@@ -20,38 +38,11 @@ export class DirectoryLogger {
         const line = JSON.stringify(object)
 
         if (this.fileLoggerMap.has(filename) === false) {
-            this.fileLoggerMap.set(filename, new DebouncedFileLogger(this.fullDirectoryPath, filename))
+            this.fileLoggerMap.set(filename, new DebouncedFileLogger(this.fullDirectoryPath, filename, this.sessionInfo))
         }
 
         this.fileLoggerMap.get(filename).appendLine(line)
     }
-    /*
-        async appendCsvFile(filename: string, columns: string[], object: { [key: string]: string | number | boolean }, timestamp = Date.now()): Promise<boolean> {
-            const directoryPrepared = await this.prepareDirectory()
-            if (directoryPrepared === true) {
-                const filePath = path.resolve(this.fullDirectoryPath, filename)
-                if (await exists(filePath) === false) {
-                    await writeFile(filePath, columns.map(c => `\"${c}\"`).join(",") + ",timestamp\n", 'utf8')
-                }else{
-                    //exist. append
-                    await appendFile(filePath, columns.map(column => {
-                        const value = object[column]
-                        if(value){
-                            switch(typeof value){
-                                case 'string':
-                                    return `\"${escape(value)}\"`
-                                case 'boolean':
-                                case 'number':
-                                    return value
-                            }
-                        }else return ""
-                    }).join(",") + timestamp + "\n")
-                }
-            } else {
-                console.log("Something went wrong when directory creation for logger.: ", this.fullDirectoryPath)
-                return false
-            }
-        }*/
 
     async removeAllFilesInDirectory(): Promise<void> {
         if (await exists(this.fullDirectoryPath) === true) {
@@ -68,8 +59,8 @@ export class DirectoryLogger {
                     platform: Platform.OS,
                     instanceUID: getUniqueId(),
                     appVersion: getVersion(),
-                    environment: __DEV__? "development" : "production"
-                }), 
+                    environment: __DEV__ ? "development" : "production"
+                }),
                 'utf8')
             let finalFilePath = path.resolve(CachesDirectoryPath, 'logs_' + path.basename(this.fullDirectoryPath) + '.zip')
             finalFilePath = await zip(this.fullDirectoryPath, finalFilePath)
@@ -91,7 +82,7 @@ class DebouncedFileLogger {
     private timeout: NodeJS.Timeout | null = null
     private writeTaskMutex = new Mutex()
 
-    constructor(readonly fullDirectoryPath: string, readonly fileName: string) {
+    constructor(readonly fullDirectoryPath: string, readonly fileName: string, readonly sessionInfo: any) {
         this.filePath = path.resolve(this.fullDirectoryPath, this.fileName)
     }
 
@@ -110,7 +101,11 @@ class DebouncedFileLogger {
         this.nextTimeoutAt = Date.now() + 700
         this.timeout = setTimeout(async () => {
             const release = await this.writeTaskMutex.acquire()
-            await this.writeQueueToFile()
+            if (studyCredentials != null && studyCredentials.backend_logging_url != null) {
+                await this.writeQueueToBackend(studyCredentials.backend_logging_url)
+            } else await this.writeQueueToFile()
+
+
             this.nextTimeoutAt = null
             this.timeout = null
             release()
@@ -145,6 +140,28 @@ class DebouncedFileLogger {
                 await this.writeQueueToFile()
             } else {
 
+            }
+        }
+    }
+
+    async writeQueueToBackend(host: string): Promise<void> {
+        console.log("send a queue to backend - ", this.queue.length)
+        if (this.queue.length > 0) {
+
+            const result = await fetch(path.resolve(host, "logs"), {
+                method: 'POST',
+                headers: {
+                    ...this.sessionInfo,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    fileName: this.fileName,
+                    lines: this.queue
+                })
+            })
+            if (result.status === 200) {
+                this.queue.splice(0)
+                console.log(`successfully uploaded ${this.queue.length} logs.`)
             }
         }
     }
