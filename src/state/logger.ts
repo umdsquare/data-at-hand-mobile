@@ -99,13 +99,7 @@ export const makeLogger = () => {
                     width: Math.round(imageWidth / pixelRatio),
                     height: Math.round(imageHeight / pixelRatio)
                 }).then(async uri => {
-                    const directoryPath = path.resolve(SystemLogger.instance.logDirectoryPath, "screens")
-                    const directoryExists = await exists(directoryPath)
-                    if (directoryExists === false) {
-                        await mkdir(directoryPath)
-                    }
-
-                    return moveFile(uri, path.resolve(directoryPath, logId + ".jpg"))
+                    return SystemLogger.instance.handleScreenshot(logId, uri)
                 }, error => {
                     console.log("Screenshot error: ", error)
                 }).then()

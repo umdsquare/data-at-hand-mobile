@@ -6,6 +6,10 @@ import Share from 'react-native-share'
 import { randomString, Lazy } from "@data-at-hand/core/utils"
 import { InteractionTransitionLogType, VerboseEventTypes } from '@data-at-hand/core/logging/types'
 import { NLUResult } from "@data-at-hand/core/speech/types"
+import path from 'react-native-path';
+import { exists, mkdir, moveFile } from "react-native-fs"
+import { getUploadServerHostUrl } from "./common"
+import { getUniqueId } from "react-native-device-info"
 
 enum LogFileName {
     SpeechCommandLogs = "speech_command.jsonl",
@@ -22,7 +26,7 @@ export class SystemLogger {
         return this._instance
     }
 
-    private shortId = new Lazy(()=> require('shortid'))
+    private shortId = new Lazy(() => require('shortid'))
 
     private constructor() { }
 
@@ -120,6 +124,36 @@ export class SystemLogger {
                     nextInfo
                 }, timestamp)
         } else return
+    }
+
+    async handleScreenshot(logId: string, uri: string): Promise<void> {
+        const directoryPath = path.resolve(this.logDirectoryPath, "screens")
+        const directoryExists = await exists(directoryPath)
+        if (directoryExists === false) {
+            await mkdir(directoryPath)
+        }
+
+        const finalScreenshotPath = path.resolve(directoryPath, logId + ".jpg")
+        await moveFile(uri, finalScreenshotPath)
+
+        const backendUrl = getUploadServerHostUrl()
+        if(backendUrl != null){
+            const formData = new FormData()
+            formData.append("logId", logId)
+            formData.append("screenshot", {uri: "file://" + finalScreenshotPath, name: logId + ".jpg", type: "image/jpeg"})
+
+            fetch(path.resolve(backendUrl, "screenshot"), {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    sessionid: this.sessionId,
+                    instanceuid: getUniqueId()
+                },
+                body: formData
+            }).then(result => {
+                console.log("screenshot upload result: ", result.status)
+            })
+        }
     }
 
     async exportLogs(): Promise<boolean> {

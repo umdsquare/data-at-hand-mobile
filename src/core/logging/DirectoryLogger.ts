@@ -4,16 +4,7 @@ import { zip } from 'react-native-zip-archive';
 import { Mutex } from 'async-mutex';
 import { getVersion, getUniqueId } from 'react-native-device-info';
 import { Platform } from 'react-native';
-
-const studyCredentials = readStudyConfig()
-
-function readStudyConfig() {
-    try {
-        return require('@credentials/study.json')
-    } catch (ex) {
-        return null
-    }
-}
+import { getUploadServerHostUrl } from './common';
 
 export class DirectoryLogger {
 
@@ -101,8 +92,9 @@ class DebouncedFileLogger {
         this.nextTimeoutAt = Date.now() + 700
         this.timeout = setTimeout(async () => {
             const release = await this.writeTaskMutex.acquire()
-            if (studyCredentials != null && studyCredentials.backend_logging_url != null) {
-                await this.writeQueueToBackend(studyCredentials.backend_logging_url)
+            const backendUrl = getUploadServerHostUrl()
+            if (backendUrl != null) {
+                await this.writeQueueToBackend(backendUrl)
             } else await this.writeQueueToFile()
 
 
