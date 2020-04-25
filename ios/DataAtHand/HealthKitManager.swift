@@ -39,6 +39,10 @@ struct MergedSleepLog{
   }
 }
 
+enum DailyAggregationType{
+  case sum, average
+}
+
 @objc(HealthKitManager)
 class HealthKitManager: NSObject{
   
@@ -50,6 +54,30 @@ class HealthKitManager: NSObject{
   static func convertDateToUnix(_ date: Date) -> Int{
     return Int(date.timeIntervalSince1970*1000)
   }
+  
+  static func convertNumberedDateToDate(_ numberedDate: Int) -> Date{
+    let year = numberedDate / 10000
+    let month = (numberedDate % 10000)/100
+    let day = numberedDate % 100
+    
+    var components = DateComponents()
+    components.year = year
+    components.month = month
+    components.day = day
+    return Calendar.current.date(from: components)!
+  }
+  
+  static func convertDateToNumberedDate(_ date: Date) -> Int{
+    let components = Calendar.current.dateComponents([.year, .month, .day], from: date)
+    return components.year! * 10000 + components.month! * 100 + components.day!
+  }
+  
+  static var permissionSet = Set([
+    HKObjectType.quantityType(forIdentifier: .heartRate)!,
+    HKObjectType.quantityType(forIdentifier: .stepCount)!,
+    HKObjectType.quantityType(forIdentifier: .bodyMass)!,
+    HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!
+  ])
   
   private let dateFormatter = DateFormatter()
   private let bpmUnit: HKUnit = HKUnit.count().unitDivided(by: HKUnit.minute())
@@ -66,22 +94,14 @@ class HealthKitManager: NSObject{
   
   override init(){
     dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZ"
+    
+    if #available(iOS 11.0, *) {
+      HealthKitManager.permissionSet.insert(HKObjectType.quantityType(forIdentifier: .restingHeartRate)!)
+    }
   }
   
   deinit {
     
-  }
-  
-  private func convertTextToObjectType(text: String) -> HKObjectType?
-  {
-    switch text {
-    case "heartrate": return HKObjectType.quantityType(forIdentifier: .heartRate)
-    case "step": return HKObjectType.quantityType(forIdentifier: .stepCount)
-    case "weight": return HKObjectType.quantityType(forIdentifier: .bodyMass)
-    case "sleep": return HKObjectType.categoryType(forIdentifier: .sleepAnalysis)
-    case "workout": return HKObjectType.workoutType()
-    default: return nil
-    }
   }
   
   @objc
@@ -90,13 +110,9 @@ class HealthKitManager: NSObject{
   }
   
   @objc
-  func requestPermissions(_ permissions: NSArray, completion callback: @escaping RCTResponseSenderBlock) -> Void{
+  func requestPermissions(_ callback: @escaping RCTResponseSenderBlock) -> Void{
     
-    let objectTypes = permissions.map{ self.convertTextToObjectType(text: $0 as! String) }.filter{ $0 != nil }.map{ $0! }
-    
-    
-    let permissionSet = Set(objectTypes)
-    getHealthStore().requestAuthorization(toShare: nil, read: permissionSet, completion: {(success, error) in
+    getHealthStore().requestAuthorization(toShare: nil, read: HealthKitManager.permissionSet, completion: {(success, error) in
       if !success {
         print(error?.localizedDescription)
         callback([NSNull(), ["approved": false]])
@@ -107,157 +123,135 @@ class HealthKitManager: NSObject{
     )
   }
   
+  private func firstDateOfSource(_ dataSourceType: HKSampleType, callback: @escaping (Int?)->Void) -> Void{
+    let calendar = Calendar.current
+    let fromDate = getHealthStore().earliestPermittedSampleDate()
+    let toDate = calendar.startOfDay(for: Date()).addingTimeInterval(TimeInterval(24*60*60))
+    let predicate = HKQuery.predicateForSamples(withStart: fromDate, end: toDate, options: [.strictStartDate, .strictEndDate])
+    
+    
+    let query = HKSampleQuery(sampleType: dataSourceType, predicate: predicate,
+                              limit: 1,
+                              sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)],
+                              resultsHandler: {query, results, error in
+                                if error == nil {
+                                  if (results?.count ?? 0) > 0 {
+                                    callback(HealthKitManager.convertDateToNumberedDate(results!.first!.startDate))
+                                  }else{
+                                    callback(nil)
+                                  }
+                                } else{
+                                  callback(nil)
+                                }
+    })
+    
+    getHealthStore().execute(query)
+  }
   
   @objc
-  func queryHealthData(_ params: NSDictionary, completion callback: @escaping RCTResponseSenderBlock) -> Void{
-    if(params.value(forKey: "to") != nil && params.value(forKey: "from") != nil && params.value(forKey: "dataType") != nil){
-      let fromEpoch = params.value(forKey: "from") as! Double
-      let toEpoch = params.value(forKey: "to") as! Double
-      let dataType = params.value(forKey: "dataType") as! String
-      
-      switch dataType{
-        
-      case "step":
-        queryHourlySteps(from: fromEpoch, to: toEpoch, completion: callback)
-        break;
-        
-      case "heartrate":
-        querySamples(from: fromEpoch, to: toEpoch, type: HKObjectType.quantityType(forIdentifier: .heartRate)!, convert: { (sample) in
-          let qSample = sample as! HKQuantitySample
-          return [
-            "measuredAt": HealthKitManager.convertDateToUnix(qSample.startDate),
-            "value": Int(round(qSample.quantity.doubleValue(for: self.bpmUnit)))
-          ]
-        }, postprocess: nil, completion: callback)
-        break;
-        
-      case "sleep":
-        querySamples(from: fromEpoch, to: toEpoch, type: HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!, convert: { (sample) in
-          let qSample = sample as! HKCategorySample
-          let type: String
-          switch qSample.value {
-          case HKCategoryValueSleepAnalysis.asleep.rawValue:
-            type = "asleep"
-            break;
-          case HKCategoryValueSleepAnalysis.awake.rawValue:
-            type = "awake"
-            break;
-          case HKCategoryValueSleepAnalysis.inBed.rawValue:
-            type = "inBed"
-            break;
-          default:
-            type = "unknown"
-            break;
+  func getInitialTrackingDate(_ callback: @escaping RCTResponseSenderBlock) -> Void{
+    
+    let types = [
+      HKObjectType.quantityType(forIdentifier: .heartRate)!,
+      HKObjectType.quantityType(forIdentifier: .stepCount)!,
+      HKObjectType.quantityType(forIdentifier: .bodyMass)!,
+      HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!
+    ]
+    
+    let group = DispatchGroup()
+    let queue = DispatchQueue.global(qos: .background)
+    
+    var minimumInitialDate: Int?
+    
+    types.forEach { (type: HKSampleType) in
+      group.enter()
+      queue.async {
+        self.firstDateOfSource(type) { (initialDate: Int?) in
+          if minimumInitialDate == nil{
+            minimumInitialDate = initialDate
+          } else if initialDate != nil{
+            minimumInitialDate = min(minimumInitialDate!, initialDate!)
           }
           
-          return SleepAnalysisLog(
-            type: type,
-            startedAt: HealthKitManager.convertDateToUnix(qSample.startDate),
-            endedAt: HealthKitManager.convertDateToUnix(qSample.endDate))
-        }, postprocess: {
-          (list) in
-          //Merge the overlapping logs
-          let sessionUnits = list as! [SleepAnalysisLog]
-          
-          if sessionUnits.count > 0 {
-            var mergedLogs: [MergedSleepLog] = []
-            var currentSession: MergedSleepLog? = nil
-            
-            sessionUnits.forEach { log in
-              if currentSession != nil && currentSession!.startedAt <= log.endedAt && currentSession!.endedAt >= log.startedAt {
-                //overlap, expand the range first
-                currentSession!.startedAt = min(log.startedAt, currentSession!.startedAt)
-                currentSession!.endedAt = max(log.endedAt, currentSession!.endedAt)
-              } else {
-                if currentSession != nil {
-                  mergedLogs.append(currentSession!)
-                }
-                currentSession = MergedSleepLog(startedAt: log.startedAt, endedAt: log.endedAt, mergedAsleeps: [])
-              }
-              
-              if log.type == "asleep" { //if the log is an asleep log, merge it to the asleepLogs.
-                //compare only with the last log
-                if currentSession!.mergedAsleeps.count == 0 {
-                  currentSession!.mergedAsleeps.append(RangeLog(startedAt: log.startedAt, endedAt: log.endedAt))
-                } else {
-                  var lastSession = currentSession!.mergedAsleeps.last!
-                  if lastSession.startedAt <= log.endedAt && lastSession.endedAt >= log.startedAt {
-                    //overlaps. merge
-                    lastSession.startedAt = min(log.startedAt, lastSession.startedAt)
-                    lastSession.endedAt = max(log.endedAt, lastSession.endedAt)
-                    currentSession!.mergedAsleeps.removeLast()
-                    currentSession!.mergedAsleeps.append(lastSession)
-                  }else {
-                    //not overlaps. append.
-                    currentSession!.mergedAsleeps.append(RangeLog(startedAt: log.startedAt, endedAt: log.endedAt))
-                  }
-                }
-              }
-            }
-            if currentSession != nil {
-              mergedLogs.append(currentSession!)
-            }
-            
-            return mergedLogs.map{ $0.toDictionary() }
-          }else{
-            return []
-          }
-        }, completion: callback)
-        break;
-        
-      case "weight":
-        querySamples(from: fromEpoch, to: toEpoch, type: HKObjectType.quantityType(forIdentifier: .bodyMass)!, convert: { (sample) in
-          let wSample = sample as! HKQuantitySample
-          return [
-            "measuredAt": HealthKitManager.convertDateToUnix(wSample.startDate),
-            "value": wSample.quantity.doubleValue(for: HKUnit.gramUnit(with: HKMetricPrefix.kilo))
-          ]
-        }, postprocess: nil, completion: callback)
-        break;
-        
-      case "workout":
-        querySamples(from: fromEpoch, to: toEpoch, type: HKObjectType.workoutType(), convert: { (sample) in
-          let wSample = sample as! HKWorkout
-          return [
-            "startedAt": HealthKitManager.convertDateToUnix(wSample.startDate),
-            "endedAt": HealthKitManager.convertDateToUnix(wSample.endDate),
-            "activityTypeCode": wSample.workoutActivityType.rawValue
-          ]
-        }, postprocess: nil, completion: callback)
-        break;
-        
-      default:
-        callback([["error": "UnsupportedDataType"], NSNull()])
-        return
+          group.leave()
+        }
       }
-    }else{
-      callback([["error":"ParameterError"], NSNull()])
+    }
+    
+    group.notify(queue: queue){
+      callback([["initialDate": minimumInitialDate], NSNull()])
     }
   }
   
-  private func queryHourlySteps(from: Double, to: Double, completion callback: @escaping RCTResponseSenderBlock){
-    let calendar = Calendar.current
+  @objc
+  func queryDailySummaryData(_ start: Int, end: Int, source: String, completion callback: @escaping RCTResponseSenderBlock) -> Void{
+    switch source {
+    case "stepcount":
+      
+      break;
+    case "heart_rate":
+      break;
+      
+    case "sleep_duration":
+      break;
+    case "sleep_range":
+      break;
+    case "weight":
+      break;
+    default:
+      break;
+    }
+  }
+  
+  @objc
+  func queryIntradayData(_ date: Int, type: String, completion callback: @escaping RCTResponseSenderBlock) -> Void{
+    let dateDate = HealthKitManager.convertNumberedDateToDate(date)
+    switch type {
+    case "step":
+      queryHourlySteps(numberedDate: date, completion: callback)
+      break;
+    case "heart_rate":
+      querySamples(start: date, end: date, type: HKObjectType.quantityType(forIdentifier: .heartRate)!, convert: { (sample) in
+        let qSample = sample as! HKQuantitySample
+        return [
+          "secondOfDay": Int(qSample.startDate.timeIntervalSince1970 - dateDate.timeIntervalSince1970),
+          "value": Int(round(qSample.quantity.doubleValue(for: self.bpmUnit)))
+        ]
+      }, postprocess: nil, completion: callback)
+      break;
+    case "sleep":
+      break;
+    default:
+      callback([["error": "UnsupportedDataType"], NSNull()])
+      break;
+    }
+  }
+  
+  
+  private func queryHourlySteps(numberedDate: Int, completion callback: @escaping RCTResponseSenderBlock){
     var interval = DateComponents()
     interval.hour = 1
     
-    let fromDate = calendar.startOfDay(for: Date.init(timeIntervalSince1970: TimeInterval(from/1000)))
-    let toDate = calendar.startOfDay(for: Date.init(timeIntervalSince1970: TimeInterval(to/1000))).addingTimeInterval(TimeInterval(24*60*60))
+    let date = HealthKitManager.convertNumberedDateToDate(numberedDate)
+    let dateEnd = Calendar.current.startOfDay(for: date).addingTimeInterval(TimeInterval(24*60*60))
     
     let query = HKStatisticsCollectionQuery(
       quantityType: HKObjectType.quantityType(forIdentifier: .stepCount)!,
       quantitySamplePredicate: nil,
       options: HKStatisticsOptions.cumulativeSum,
-      anchorDate: fromDate, intervalComponents: interval)
+      anchorDate: date, intervalComponents: interval)
     
     query.initialResultsHandler = {
       query, results, error in
       
       if error == nil {
         var dataList: [[String:Any]] = []
-        results?.enumerateStatistics(from: fromDate, to: toDate, with: {(datum, stop) in
+        results?.enumerateStatistics(from: date, to: dateEnd, with: {(datum, stop) in
+          
+          let components = Calendar.current.dateComponents([.hour], from: datum.startDate)
           dataList.append(
             [
-              "startedAt": HealthKitManager.convertDateToUnix(datum.startDate),
+              "hourOfDay": components.hour!,
               "value": Int(round(datum.sumQuantity()?.doubleValue(for: HKUnit.count()) ?? 0))
             ]
           )
@@ -271,13 +265,64 @@ class HealthKitManager: NSObject{
     getHealthStore().execute(query)
   }
   
-  private func querySamples(from: Double, to: Double, type: HKSampleType,
+  
+  private func queryDailyAggregatedValues(start: Int, end: Int, type: HKQuantityType, aggregation: DailyAggregationType = .average, completion callback: @escaping ([[String:Any]]?)->Void){
+    var interval = DateComponents()
+    interval.day = 1
+    
+    let startDate = HealthKitManager.convertNumberedDateToDate(start)
+    let endDate = HealthKitManager.convertNumberedDateToDate(end).addingTimeInterval(TimeInterval(24*60*60))
+    
+    let query = HKStatisticsCollectionQuery(
+      quantityType: HKObjectType.quantityType(forIdentifier: .stepCount)!,
+      quantitySamplePredicate: nil,
+      options: HKStatisticsOptions.cumulativeSum,
+      anchorDate: startDate, intervalComponents: interval)
+    
+    query.initialResultsHandler = {
+      query, results, error in
+      
+      if error == nil {
+        var dataList: [[String:Any]] = []
+        results?.enumerateStatistics(from: startDate, to: endDate, with: {(datum, stop) in
+          
+          let components = Calendar.current.dateComponents([.year, .month, .weekday], from: datum.startDate)
+          var value: Double? = nil
+          if type.identifier == HKQuantityTypeIdentifier.stepCount.rawValue {
+            value = datum.sumQuantity()?.doubleValue(for: .count())
+          }else if #available(iOS 11.0, *), type.identifier == HKQuantityTypeIdentifier.restingHeartRate.rawValue {
+            value = datum.averageQuantity()?.doubleValue(for: self.bpmUnit)
+          }
+          
+          if value != nil {
+            dataList.append(
+              [
+                "numberedDate": HealthKitManager.convertDateToNumberedDate(datum.startDate),
+                "year": components.year!,
+                "month": components.month!,
+                "dayOfWeek": components.weekday! - 1,
+                "value": round(value!)
+              ]
+            )
+          }
+          
+        })
+        callback(dataList)
+      } else {
+        callback(nil)
+      }
+    }
+    
+    getHealthStore().execute(query)
+  }
+  
+  
+  private func querySamples(start: Int, end: Int, type: HKSampleType,
                             convert: @escaping (HKSample)->Any,
                             postprocess: (([Any])->[NSDictionary])?,
                             completion callback: @escaping RCTResponseSenderBlock){
-    let calendar = Calendar.current
-    let fromDate = calendar.startOfDay(for: Date.init(timeIntervalSince1970: TimeInterval(from/1000)))
-    let toDate = calendar.startOfDay(for: Date.init(timeIntervalSince1970: TimeInterval(to/1000))).addingTimeInterval(TimeInterval(24*60*60))
+    let fromDate = HealthKitManager.convertNumberedDateToDate(start)
+    let toDate = Calendar.current.startOfDay(for: HealthKitManager.convertNumberedDateToDate(end)).addingTimeInterval(TimeInterval(24*60*60))
     
     let predicate = HKQuery.predicateForSamples(withStart: fromDate, end: toDate, options: [.strictStartDate, .strictEndDate])
     
@@ -305,5 +350,136 @@ class HealthKitManager: NSObject{
     
     getHealthStore().execute(query)
   }
+  
+  
+  
+  /*
+   @objc
+   func queryHealthData(_ params: NSDictionary, completion callback: @escaping RCTResponseSenderBlock) -> Void{
+   if(params.value(forKey: "to") != nil && params.value(forKey: "from") != nil && params.value(forKey: "dataType") != nil){
+   let fromEpoch = params.value(forKey: "from") as! Double
+   let toEpoch = params.value(forKey: "to") as! Double
+   let dataType = params.value(forKey: "dataType") as! String
+   
+   switch dataType{
+   
+   case "step":
+   queryHourlySteps(from: fromEpoch, to: toEpoch, completion: callback)
+   break;
+   
+   case "heartrate":
+   querySamples(from: fromEpoch, to: toEpoch, type: HKObjectType.quantityType(forIdentifier: .heartRate)!, convert: { (sample) in
+   let qSample = sample as! HKQuantitySample
+   return [
+   "measuredAt": HealthKitManager.convertDateToUnix(qSample.startDate),
+   "value": Int(round(qSample.quantity.doubleValue(for: self.bpmUnit)))
+   ]
+   }, postprocess: nil, completion: callback)
+   break;
+   
+   case "sleep":
+   querySamples(from: fromEpoch, to: toEpoch, type: HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!, convert: { (sample) in
+   let qSample = sample as! HKCategorySample
+   let type: String
+   switch qSample.value {
+   case HKCategoryValueSleepAnalysis.asleep.rawValue:
+   type = "asleep"
+   break;
+   case HKCategoryValueSleepAnalysis.awake.rawValue:
+   type = "awake"
+   break;
+   case HKCategoryValueSleepAnalysis.inBed.rawValue:
+   type = "inBed"
+   break;
+   default:
+   type = "unknown"
+   break;
+   }
+   
+   return SleepAnalysisLog(
+   type: type,
+   startedAt: HealthKitManager.convertDateToUnix(qSample.startDate),
+   endedAt: HealthKitManager.convertDateToUnix(qSample.endDate))
+   }, postprocess: {
+   (list) in
+   //Merge the overlapping logs
+   let sessionUnits = list as! [SleepAnalysisLog]
+   
+   if sessionUnits.count > 0 {
+   var mergedLogs: [MergedSleepLog] = []
+   var currentSession: MergedSleepLog? = nil
+   
+   sessionUnits.forEach { log in
+   if currentSession != nil && currentSession!.startedAt <= log.endedAt && currentSession!.endedAt >= log.startedAt {
+   //overlap, expand the range first
+   currentSession!.startedAt = min(log.startedAt, currentSession!.startedAt)
+   currentSession!.endedAt = max(log.endedAt, currentSession!.endedAt)
+   } else {
+   if currentSession != nil {
+   mergedLogs.append(currentSession!)
+   }
+   currentSession = MergedSleepLog(startedAt: log.startedAt, endedAt: log.endedAt, mergedAsleeps: [])
+   }
+   
+   if log.type == "asleep" { //if the log is an asleep log, merge it to the asleepLogs.
+   //compare only with the last log
+   if currentSession!.mergedAsleeps.count == 0 {
+   currentSession!.mergedAsleeps.append(RangeLog(startedAt: log.startedAt, endedAt: log.endedAt))
+   } else {
+   var lastSession = currentSession!.mergedAsleeps.last!
+   if lastSession.startedAt <= log.endedAt && lastSession.endedAt >= log.startedAt {
+   //overlaps. merge
+   lastSession.startedAt = min(log.startedAt, lastSession.startedAt)
+   lastSession.endedAt = max(log.endedAt, lastSession.endedAt)
+   currentSession!.mergedAsleeps.removeLast()
+   currentSession!.mergedAsleeps.append(lastSession)
+   }else {
+   //not overlaps. append.
+   currentSession!.mergedAsleeps.append(RangeLog(startedAt: log.startedAt, endedAt: log.endedAt))
+   }
+   }
+   }
+   }
+   if currentSession != nil {
+   mergedLogs.append(currentSession!)
+   }
+   
+   return mergedLogs.map{ $0.toDictionary() }
+   }else{
+   return []
+   }
+   }, completion: callback)
+   break;
+   
+   case "weight":
+   querySamples(from: fromEpoch, to: toEpoch, type: HKObjectType.quantityType(forIdentifier: .bodyMass)!, convert: { (sample) in
+   let wSample = sample as! HKQuantitySample
+   return [
+   "measuredAt": HealthKitManager.convertDateToUnix(wSample.startDate),
+   "value": wSample.quantity.doubleValue(for: HKUnit.gramUnit(with: HKMetricPrefix.kilo))
+   ]
+   }, postprocess: nil, completion: callback)
+   break;
+   
+   case "workout":
+   querySamples(from: fromEpoch, to: toEpoch, type: HKObjectType.workoutType(), convert: { (sample) in
+   let wSample = sample as! HKWorkout
+   return [
+   "startedAt": HealthKitManager.convertDateToUnix(wSample.startDate),
+   "endedAt": HealthKitManager.convertDateToUnix(wSample.endDate),
+   "activityTypeCode": wSample.workoutActivityType.rawValue
+   ]
+   }, postprocess: nil, completion: callback)
+   break;
+   
+   default:
+   callback([["error": "UnsupportedDataType"], NSNull()])
+   return
+   }
+   }else{
+   callback([["error":"ParameterError"], NSNull()])
+   }
+   }*/
+  
   
 }

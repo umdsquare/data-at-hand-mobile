@@ -21,10 +21,12 @@ export class DataServiceManager {
     const FitbitService = require('@measure/service/fitbit/FitbitService').default
     const FitbitOfficialServiceCore = require('@measure/service/fitbit/core/FitbitOfficialServiceCore').default
     const FitbitExampleServiceCore = require('@measure/service/fitbit/core/FitbitExampleServiceCore').default
+    //const AppleHealthService = require('@measure/service/healthkit/AppleHealthService').default
     
     this.installedServices = [
       new FitbitService(new FitbitOfficialServiceCore()),
-      new FitbitService(new FitbitExampleServiceCore())
+      new FitbitService(new FitbitExampleServiceCore()),
+      //new AppleHealthService()
     ];
   }
 

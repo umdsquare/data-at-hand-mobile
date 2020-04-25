@@ -10,7 +10,7 @@ export enum HealthDataType {
 
 export function isHealthDataAvailable(): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    NativeModules.HealthKitManager.isAvailableInSystem((error, result) => {
+    NativeModules.HealthKitManager.isAvailableInSystem((error: any | undefined | null, result: {available: boolean}) => {
       if (error) {
         reject(error);
       } else {
@@ -20,11 +20,9 @@ export function isHealthDataAvailable(): Promise<boolean> {
   });
 }
 
-export function requestPermissions(
-  permissions: Array<HealthDataType>,
-): Promise<boolean> {
+export function requestPermissions(): Promise<boolean> {
   return new Promise((resolve, reject) => {
-      NativeModules.HealthKitManager.requestPermissions(permissions, (error, result)=>{
+      NativeModules.HealthKitManager.requestPermissions((error: any | undefined | null, result: {approved: boolean})=>{
           if(error){
             reject(error)
           }else{
@@ -34,20 +32,13 @@ export function requestPermissions(
   });
 }
 
-export function queryHealthData(
-  from: Date,
-  to: Date,
-  dataType: HealthDataType
-): Promise<Array<any>>{
+export function getInitialTrackingDate(): Promise<number>{
   return new Promise((resolve, reject)=>{
-    NativeModules.HealthKitManager.queryHealthData({
-      from: from.getTime(), to: to.getTime(),
-      dataType: dataType
-    }, (error, result)=>{
+    NativeModules.HealthKitManager.getInitialTrackingDate((error: any | undefined | null, result: {initialDate: number})=>{
       if(error){
         reject(error)
       }else{
-        resolve(result)
+        resolve(result.initialDate)
       }
     })
   })

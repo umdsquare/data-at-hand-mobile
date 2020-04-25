@@ -14,8 +14,13 @@
 @interface RCT_EXTERN_MODULE(HealthKitManager, NSObject)
 
   RCT_EXTERN_METHOD(isAvailableInSystem:(RCTResponseSenderBlock*)callback)
-  RCT_EXTERN_METHOD(requestPermissions:(NSArray)permissions completion:(RCTResponseSenderBlock*)callback)
-  RCT_EXTERN_METHOD(queryHealthData: (NSDictionary*)params completion:(RCTResponseSenderBlock*)callback)
+  RCT_EXTERN_METHOD(requestPermissions:(RCTResponseSenderBlock*)callback)
+  
+  RCT_EXTERN_METHOD(getInitialTrackingDate: (RCTResponseSenderBlock*)callback)
+  RCT_EXTERN_METHOD(queryDailySummaryData: (NSInteger *)start (NSInteger *)end (NSString *)source completion:(RCTResponseSenderBlock*)callback)
+  RCT_EXTERN_METHOD(queryIntradayData: (NSInteger *)date (NSString *)source completion:(RCTResponseSenderBlock*)callback)
+
+
 
 @end
 
