@@ -20,6 +20,7 @@ import { StyleTemplates } from "@style/Styles";
 import { getNumberSequence } from "@data-at-hand/core/utils";
 import { Button } from "react-native-elements";
 import { InteractionType } from "@data-at-hand/core/exploration/actions";
+import pluralize from "pluralize";
 
 const dateButtonWidth = sizeByScreen(140, 130)
 const barHeight = sizeByScreen(60, 54)
@@ -430,7 +431,7 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
 
                                         </BorderlessButton></LongPressGestureHandler>
                                 ) : (
-                                        <Text style={styles.midViewDescriptionTextStyle}>{this.state.numDays} Days</Text>
+                                        <Text style={styles.midViewDescriptionTextStyle}>{pluralize("Day", this.state.numDays, true)}</Text>
                                     )
                             }
 
