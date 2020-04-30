@@ -11,6 +11,7 @@ import { ExplorationState, explorationStateReducer } from "@state/exploration/in
 import { ExplorationInfo, ParameterType, HighlightFilter, ExplorationType } from "@data-at-hand/core/exploration/ExplorationInfo";
 import { InteractionType } from "@data-at-hand/core/exploration/actions";
 import { NLUResult, NLUResultType, VariableType, Intent, ConditionInfo, PreProcessedInputText, VariableInfo } from "@data-at-hand/core/speech/types";
+import { fastConcatTo } from "@data-at-hand/core/utils";
 
 enum EntityPriority {
     None = 0,
@@ -34,7 +35,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
     private static convertActionToNLUResult(action: ActionTypeBase | undefined | null, currentInfo: ExplorationInfo, preprocessed: PreProcessedInputText): NLUResult {
         if (action) {
-            
+
             //effective/void/unapplicable
             const fakeFormerState = {
                 info: currentInfo,
@@ -45,13 +46,13 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
             let type: NLUResultType
 
-            if(nextState == fakeFormerState){
+            if (nextState == fakeFormerState) {
                 //state did not change.
                 type = NLUResultType.Unapplicable
-            }else if(explorationInfoHelper.equals(fakeFormerState.info, nextState.info)){
+            } else if (explorationInfoHelper.equals(fakeFormerState.info, nextState.info)) {
                 //void
                 type = NLUResultType.Void
-            }else{
+            } else {
                 type = NLUResultType.Effective
             }
 
@@ -107,6 +108,8 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
             }
         }
 
+
+
         //First, cover the cases with a reliable intent======================================================================================================
         switch (preprocessed.intent) {
 
@@ -115,22 +118,28 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                     console.log("Comparison intent")
                     const cascadedDataSource: DataSourceType = toldDataSources === true ? dataSources[0].value :
                         ((context as any)["dataSource"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
-                    if (toldRanges) {
-                        let rangeA, rangeB
-                        if (ranges.length > 1) {
-                            rangeA = ranges[0].value
-                            rangeB = ranges[1].value
-                        } else {
-                            rangeA = (context as any)["range"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range)
-                            rangeB = ranges[0].value
-                        }
+                    let extractedRanges: Array<[number, number]> = []
 
-                        if (cascadedDataSource && rangeA && rangeB) {
-                            return NLUCommandResolverImpl.convertActionToNLUResult(
-                                createGoToComparisonTwoRangesAction(InteractionType.Speech, cascadedDataSource, rangeA, rangeB),
-                                explorationInfo, preprocessed)
+                    if (toldRanges) {
+                        fastConcatTo(extractedRanges, ranges.map(r => r.value))
+                    }
+
+                    if(toldDates){
+                        fastConcatTo(extractedRanges, dates.map(d => [d.value, d.value]))
+                    }
+                    
+                    if(extractedRanges.length < 2){
+                        const cascadedRange = (context as any)["range"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range)
+                        if(cascadedRange != null){
+                            extractedRanges.unshift(cascadedRange)
                         }
-                    }//Todo cover before and after cases
+                    }
+
+                    if (cascadedDataSource && extractedRanges.length >= 2 ) {
+                        return NLUCommandResolverImpl.convertActionToNLUResult(
+                            createGoToComparisonTwoRangesAction(InteractionType.Speech, cascadedDataSource, extractedRanges[0], extractedRanges[1]),
+                            explorationInfo, preprocessed)
+                    }
                 }
                 break;
             case Intent.AssignTrivial:
@@ -282,9 +291,9 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                         }
                     }
 
-                    if(dates[0].additionalInfo === 'from'){
+                    if (dates[0].additionalInfo === 'from') {
                         return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])])
-                    }else if(dates[0].additionalInfo === 'to'){
+                    } else if (dates[0].additionalInfo === 'to') {
                         return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])])
                     }
 
