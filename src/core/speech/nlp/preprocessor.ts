@@ -6,6 +6,8 @@ import { tryPreprocessingByTemplates, DATASOURCE_VARIABLE_RULES, CYCLIC_TIME_RUL
 import { runPipe, definePipe } from "./preprocessors/preprosessor-pipe";
 import { VariableType, PreProcessedInputText, VerbInfo, Intent } from "@data-at-hand/core/speech/types";
 import { inferHighlight } from "./preprocessors/preprocessor-condition";
+import { NumericConditionType } from "@data-at-hand/core/exploration/ExplorationInfo";
+import { DataSourceType } from "@data-at-hand/core";
 
 compromise.extend(require('compromise-numbers'))
 
@@ -125,6 +127,19 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
                 tag(inferredConditionInfoResult.match.replaceWith(id), VariableType.Condition)
                 input.processedSpeech = input.payload.nlp.text()
                 input.intent = Intent.Highlight
+
+                //check some nonsense cases
+                if (inferredConditionInfoResult.conditionInfo.type === NumericConditionType.Max || inferredConditionInfoResult.conditionInfo.type === NumericConditionType.Min) {
+                    //extreme case
+                    const dataSourceVariableId = Object.keys(input.variables).find(id => input.variables[id].type === VariableType.DataSource)
+                    if (dataSourceVariableId != null) {
+                        const dataSource = input.variables[dataSourceVariableId]
+                        if (dataSource.value === DataSourceType.SleepRange && inferredConditionInfoResult.conditionInfo.propertyKey == null) {
+                            //if sleep range was specified but no clues for wake time / bed time
+                            dataSource.value = DataSourceType.HoursSlept
+                        }
+                    }
+                }
             }
             return input
         })

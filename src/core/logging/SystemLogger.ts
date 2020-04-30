@@ -152,6 +152,8 @@ export class SystemLogger {
                 body: formData
             }).then(result => {
                 console.log("screenshot upload result: ", result.status)
+            }).catch(err => {
+                console.log("screenshot upload error: ", err)
             })
         }
     }

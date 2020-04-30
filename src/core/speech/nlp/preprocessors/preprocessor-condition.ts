@@ -36,9 +36,9 @@ const lexicon: Array<TermInfo> = [
 
 
 function categorizeExtreme(extreme: string): NumericConditionType.Max | NumericConditionType.Min | null {
-    if (/(max)|(maximum)|(latest)|(fastest)|(most)/gi.test(extreme)) {
+    if (/(max)|(maximum)|(latest)|(fastest)|(most)|(highest)/gi.test(extreme)) {
         return NumericConditionType.Max
-    } else if (/(min)|(minimum)|(earliest)|(slowest)|(least)/gi) {
+    } else if (/(min)|(minimum)|(earliest)|(slowest)|(least)|(lowest)/gi.test(extreme)) {
         return NumericConditionType.Min
     } else return null
 }
@@ -196,7 +196,7 @@ export async function inferHighlight(nlp: compromise.Document, original: string,
             }
         } else {
             //check extreme
-            const match = nlp.match("[<extreme>(max|maximum|min|minimum|earliest|latest|slowest|fastest|most|least)]")
+            const match = nlp.match("[<extreme>(max|maximum|min|minimum|earliest|latest|slowest|fastest|lowest|highest|most|least)]")
             const extremeInfo = normalizeCompromiseGroup(match.groups())
             if (extremeInfo) {
                 const category = categorizeExtreme(extremeInfo.extreme)
@@ -216,7 +216,7 @@ export async function inferHighlight(nlp: compromise.Document, original: string,
             }
 
             //goal
-            const goalComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than * goal`)
+            const goalComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than * (goal|gol|gold)`)
             const goalComparisonInfo = normalizeCompromiseGroup(goalComparisonMatch.groups())
             if (goalComparisonInfo) {
                 const comparisonTermInfo = findComparisonTermInfo(goalComparisonInfo.comparison)

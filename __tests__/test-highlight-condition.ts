@@ -16,6 +16,7 @@ const prefixes = [
     "What are the days",
     "Number of days",
     "How many days",
+    ""
 ]
 
 const conditions: Array<[string, DataSourceType, ConditionInfo]> = [
@@ -25,6 +26,9 @@ const conditions: Array<[string, DataSourceType, ConditionInfo]> = [
     ["with step count more than my current goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
     ["with step count more than the current goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
     
+
+    ["step count less than gold", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.Less }],
+    ["step count more than gold", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
     
     ["I was heavier than 150", DataSourceType.Weight, { ref: 150, type: NumericConditionType.More }],
     ["I was lighter than 150", DataSourceType.Weight, { ref: 150, type: NumericConditionType.Less }],
@@ -60,8 +64,6 @@ const conditions: Array<[string, DataSourceType, ConditionInfo]> = [
     ["I got up later than Noon", DataSourceType.SleepRange, { ref: 3600*12, type: NumericConditionType.More }],
     ["I got up earlier than Noon", DataSourceType.SleepRange, { ref: 3600*12, type: NumericConditionType.Less }],
     ["I woke up later than 12", DataSourceType.SleepRange, { ref: 3600*12, type: NumericConditionType.More }],
-
-
 ]
 
 describe("Inequation condition", () => {
@@ -96,6 +98,43 @@ describe("Inequation condition", () => {
                     
                 })
             }
+        })
+    }
+})
+
+const directSentences: Array<[string, DataSourceType, ConditionInfo]> = [
+    ["Lowest sleep range", DataSourceType.HoursSlept, { type: NumericConditionType.Min }],
+    ["Earliest asleep time", DataSourceType.SleepRange, { propertyKey: "bedtime", type: NumericConditionType.Min }]
+    
+]
+
+describe("Extreme condition", () => {
+    for(const testcase of directSentences){
+        it(testcase[0], async () => {
+            const result = await preprocess(testcase[0], speechOptions)
+
+            const dataSourceId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.DataSource)
+                    const conditionId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.Condition)
+                    
+                    let dataSource: DataSourceType
+                    let condition: ConditionInfo
+                    if(dataSourceId){
+                        dataSource = result.variables[dataSourceId].value     
+                    }
+                    if(conditionId){
+                        condition = result.variables[conditionId].value
+                    }
+
+                    expect(condition).toBeDefined()
+
+                    if(dataSource == null){
+                        dataSource = condition.impliedDataSource
+                    }
+
+                    expect(result.intent).toBe(Intent.Highlight)
+                    expect(dataSource).toEqual(testcase[1])
+                    expect(condition.type).toEqual(testcase[2].type)
+                    expect(condition.ref).toEqual(testcase[2].ref)             
         })
     }
 })

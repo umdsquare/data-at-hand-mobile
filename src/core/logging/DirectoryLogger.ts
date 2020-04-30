@@ -154,6 +154,8 @@ class DebouncedFileLogger {
             if (result.status === 200) {
                 this.queue.splice(0)
                 console.log(`successfully uploaded ${this.queue.length} logs.`)
+            }else{
+                console.log(`uploading logs was unsuccessful: ${result.status}`)
             }
         }
     }
