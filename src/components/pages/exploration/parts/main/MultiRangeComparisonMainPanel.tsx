@@ -64,6 +64,7 @@ interface Props {
     data?: RangeAggregatedComparisonData<IAggregatedRangeValue | IAggregatedValue>,
     source?: DataSourceType,
     sumSupported?: boolean,
+    allRangesAreSingleDay?: boolean,
     measureUnitType?: MeasureUnitType,
     dispatchExplorationAction?: (explorationAction: ActionTypeBase) => void,
 }
@@ -133,7 +134,7 @@ class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
 
 
     render() {
-        const aggregationSettingIndex = this.props.sumSupported === true ? this.state.aggregationSettingIndex : INDEX_AGGREGATED
+        const aggregationSettingIndex = this.props.sumSupported === true ? (this.props.allRangesAreSingleDay === true? INDEX_SUM : this.state.aggregationSettingIndex) : INDEX_AGGREGATED
 
         let isRanged = false
         let startFromZero = true
@@ -224,8 +225,9 @@ class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
             onPulled={this.onPulledFromSide}
         >{
                 this.props.sumSupported === true ? <SegmentedControl values={SEGEMENTED_VALUES}
-                    selectedIndex={this.state.aggregationSettingIndex}
+                    selectedIndex={aggregationSettingIndex}
                     style={styles.segmentedControlContainer}
+                    enabled={this.props.allRangesAreSingleDay !== true}
                     onValueChange={this.onSegmentedValueChange} /> : null
             }
 
@@ -342,11 +344,17 @@ function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props {
 function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
     const source = explorationInfoHelper.getParameterValue<DataSourceType>(appState.explorationDataState.info, ParameterType.DataSource)
 
+    const sumSupported = source === DataSourceType.HoursSlept || source === DataSourceType.StepCount
+    const data: RangeAggregatedComparisonData<IAggregatedRangeValue | IAggregatedValue> = appState.explorationDataState.data
+
+    let allRangesAreSingleDay = data.data.find(d => d.range[0] !== d.range[1]) == null
+
     return {
         ...ownProps,
         source,
-        sumSupported: source === DataSourceType.HoursSlept || source === DataSourceType.StepCount,
-        data: appState.explorationDataState.data,
+        sumSupported,
+        data,
+        allRangesAreSingleDay,
         measureUnitType: appState.settingsState.unit
     }
 }
