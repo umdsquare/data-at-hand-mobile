@@ -4,7 +4,7 @@ import { explorationInfoHelper } from '@core/exploration/ExplorationInfoHelper'
 import { TouchingElementInfo, TouchingElementValueType } from '@data-at-hand/core/exploration/TouchingElementInfo'
 import { ReduxAppState, ActionTypeBase } from '@state/types'
 import { RangeAggregatedComparisonData, IAggregatedRangeValue, IAggregatedValue } from '@core/exploration/data/types'
-import { DataSourceType, MeasureUnitType } from '@data-at-hand/core/measure/DataSourceSpec'
+import { DataSourceType, MeasureUnitType, inferIntraDayDataSourceType } from '@data-at-hand/core/measure/DataSourceSpec'
 import { Dispatch } from 'redux'
 import { View, StyleSheet, LayoutRectangle } from 'react-native'
 import { StyleTemplates } from '@style/Styles'
@@ -23,7 +23,7 @@ import { timeTickFormat } from '@components/visualization/compare/common'
 import { min, max } from 'd3-array'
 import { SingleValueElement } from '@components/visualization/compare/SingleValueElement'
 import { RangeValueElement } from '@components/visualization/compare/RangeValueElement'
-import { createGoToBrowseRangeAction, setTouchElementInfo, shiftAllRanges } from '@state/exploration/interaction/actions'
+import { createGoToBrowseRangeAction, setTouchElementInfo, shiftAllRanges, createGoToBrowseDayAction } from '@state/exploration/interaction/actions'
 import { noop } from '@data-at-hand/core/utils'
 import { CategoricalTouchableSvg } from '@components/visualization/CategoricalTouchableSvg'
 import { HorizontalPullToActionContainer } from '@components/common/HorizontalPullToActionContainer'
@@ -95,6 +95,15 @@ class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
     }
 
     private onElementClick = (timeKey: number) => {
+        const range = this.props.data.data[timeKey].range
+        if(range[0] === range[1]){
+            const intradayDataSource = inferIntraDayDataSourceType(this.props.source)
+            if(intradayDataSource != null){
+                this.props.dispatchExplorationAction(createGoToBrowseDayAction(InteractionType.TouchOnly, intradayDataSource, range[0]))
+                return
+            }
+        }
+
         this.props.dispatchExplorationAction(createGoToBrowseRangeAction(InteractionType.TouchOnly, null,
             this.props.data.data[timeKey].range
         ))
