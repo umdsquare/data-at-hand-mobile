@@ -4,7 +4,7 @@
 
 import { preprocess } from '@core/speech/nlp/preprocessor';
 import { dataSources, speechOptions } from '../jest.setup';
-import { VariableType } from '@data-at-hand/core';
+import { VariableType, Intent } from '@data-at-hand/core';
 
 /*it('renders correctly', () => {
   renderer.create(<App />);
@@ -103,7 +103,7 @@ const dictationErrorPeriods: Array<[string, [number, number]]> = [
   ["the range of January 2 2 February 10th", [20200102, 20200210]],
   ["Date for december 12th, two december 16th", [20191212, 20191216]],
   ["from January 2022. February 2020", [20200101, 20200229]],
-  ["from February 22, February 28", [20200220, 20200228]],  
+  ["from February 22, February 28", [20200220, 20200228]],
 ]
 
 const periodExpressions = relatives.concat(months).concat(seasons).concat(manualPeriods).concat(dictationErrorPeriods)
@@ -155,4 +155,41 @@ describe("[DataSource] of/in/during [Period]", () => {
       }
     }
   }
+})
+
+
+
+const comparisonPrefixes = ["compare"]
+const comparisonConjunction = ["with", "to", "and"]
+
+const ranges = [...relatives, ...months.filter(m => /20:19/i.test(m[0]) === false )]
+
+describe("Comparison between ranges", () => {
+  ranges.forEach((rA, iA) => {
+    ranges.forEach((rB, iB) => {
+      if (iA !== iB && iA > iB) {
+        comparisonPrefixes.forEach((p, iP) => {
+          comparisonConjunction.forEach((c, iC) => {
+
+            const sentence = `${p} ${rA[0]} ${c} ${rB[0]}`
+
+            it(sentence, async ()=>{
+              const result = await preprocess(sentence, speechOptions)
+              
+              expect(result.intent).toEqual(Intent.Compare)
+              
+              const rangeVariables = Object.keys(result.variables).filter(k => result.variables[k].type === VariableType.Period).map(id => result.variables[id])
+              expect(rangeVariables.length).toEqual(2)
+
+              const parsedRangeA = rangeVariables.find(v => v.value[0] === rA[1][0] && v.value[1] === rA[1][1])
+              const parsedRangeB = rangeVariables.find(v => v.value[0] === rB[1][0] && v.value[1] === rB[1][1])
+              
+              expect(parsedRangeA.value).toEqual(rA[1])
+              expect(parsedRangeB.value).toEqual(rB[1])
+            })
+          })
+        })
+      }
+    })
+  })
 })

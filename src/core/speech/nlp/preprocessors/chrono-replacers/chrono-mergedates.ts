@@ -1,5 +1,6 @@
 import { Refiner, ParsedResult, ComponentName } from "chrono-node";
 import { isAfter, addYears, getDate, getMonth, getYear } from "date-fns";
+import { getBetweenText } from "../chrono-utils";
 
 export const makeENMergeDateRangeRefiner = () => {
 
@@ -71,12 +72,6 @@ export const makeENMergeDateRangeRefiner = () => {
 
     function isEndingWith2(valueName: string, result: ParsedResult): boolean {
         return result.start.knownValues[valueName] != null && (result.start.knownValues[valueName] % 10) === 2 && result.start.knownValues[valueName] > 20
-    }
-
-    function getBetweenText(text: string, result1: ParsedResult, result2: ParsedResult): string {
-        const begin = result1.index + result1.text.length;
-        const end = result2.index;
-        return text.substring(begin, end);
     }
 
     function isTwoSuspiciousTobeTo(text: string, result1: ParsedResult, result2: ParsedResult) {

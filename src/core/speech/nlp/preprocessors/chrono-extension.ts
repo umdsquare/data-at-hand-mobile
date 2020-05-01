@@ -2,6 +2,7 @@ import chrono, { ParsedResult, Refiner, ParsedComponents, ComponentParams, Compo
 import { getYear, isAfter, addYears, getDate, getMonth, addDays, subYears, subWeeks, subMonths, startOfMonth, endOfMonth, isBefore, startOfYear, endOfYear, addMonths, startOfWeek, endOfWeek, addWeeks, subDays } from 'date-fns';
 
 import NamedRegExp from 'named-regexp-groups'
+import { getBetweenText } from './chrono-utils';
 
 function getSeasonOfYear(season: string, year: number): [Date, Date] {
     switch (season) {
@@ -70,7 +71,6 @@ seasonParser.extract = function (text, ref, match, opt) {
 const yearParser = new Parser();
 yearParser.pattern = () => new NamedRegExp("((?<prefixword>year\\s+)|^|\\s+)(?<year>[12]\\d{3})($|\\s+)", "i")
 yearParser.extract = (text, ref, match, opt) => {
-
 
     const year = Number.parseInt(match.groups.year)
     const prefixWord = match.groups.prefixword
@@ -218,5 +218,34 @@ prepositionTagRefiner.refine = function (text, results, opt) {
     return results
 }
 
+//e.g., Christmas of 2018 and 2019
+const optimizedConjunctionRefiner = new Refiner()
+optimizedConjunctionRefiner.pattern = function () { return /^[,.]?\s*(and)\s*$/i };
+optimizedConjunctionRefiner.refine = (text, results, opt) => {
+    if (results.length >= 2 &&
+        results[0].end == null && results[1].end == null &&
+        //check conjunction
+        /^[,.]?\s*(and|\-)\s*$/i.test(getBetweenText(text, results[0], results[1])) === true) {
+
+         //1. optimized by year
+        if (results[0].start.isCertain('year') === true && results[1].start.isCertain('year')
+            && Object.keys(results[0].start.knownValues).length > 1
+            && Object.keys(results[1].start.knownValues).length === 1
+        ) {
+
+            const year = results[1].start.get('year')
+            results[1].start.knownValues = {
+                ...results[0].start.knownValues,
+                year
+            }
+            results[1].tags["OptimizedConjunctionRefiner"] = true
+        }
+
+    }
+
+    return results
+}
+
+
 export const CHRONO_EXTENSION_PARSERS = [seasonParser, yearParser, recentDurationParser]
-export const CHRONO_EXTENSION_REFINERS: Array<Refiner> = [aroundRefiner, sinceRefiner, prepositionTagRefiner]
+export const CHRONO_EXTENSION_REFINERS: Array<Refiner> = [aroundRefiner, sinceRefiner, prepositionTagRefiner, optimizedConjunctionRefiner]

@@ -1,10 +1,11 @@
 import { NLUOptions, makeVariableId } from "../types";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import NamedRegExp from 'named-regexp-groups'
-import { parseTimeText } from "./preprocessor-time";
+import { parseTimeText, extractTimeExpressions } from "./preprocessor-time";
 import { DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { CyclicTimeFrame } from "@data-at-hand/core/exploration/CyclicTimeFrame";
 import { VariableType, Intent, PreProcessedInputText } from '@data-at-hand/core/speech/types';
+import { fastConcatTo } from "@data-at-hand/core/utils";
 
 const REGEX_RANDOM_ELEMENT = "[a-zA-Z0-9\\s]+"
 
@@ -91,8 +92,8 @@ const templates: Array<Template> = [
         }
     },
     {
-        regex: new NamedRegExp(`(compare|compel|(difference between))\\s+((?<dataSource>[a-zA-Z0-9\\s]+)\\s+(?<dataSourcePreposition>of|in|on|at)\\s+)?(?<compareA>${REGEX_RANDOM_ELEMENT})\\s+(with|to|and)\\s+(?<compareB>${REGEX_RANDOM_ELEMENT})`, 'i'),
-        parse: (groups: { compareA: string, compareB: string, dataSource?: string }, options) => {
+        regex: new NamedRegExp(`(compare|compared|compel|compelled|(difference between))\\s+((?<dataSource>[a-zA-Z0-9\\s]+)\\s+(?<dataSourcePreposition>of|in|on|at)\\s+)?(?<compareA>${REGEX_RANDOM_ELEMENT})\\s+(?<conjunction>with|to|and)\\s+(?<compareB>${REGEX_RANDOM_ELEMENT})`, 'i'),
+        parse: (groups: { compareA: string, compareB: string, conjunction: string, dataSource?: string }, options) => {
             const today = options.getToday()
             
             const variables = []
@@ -104,11 +105,12 @@ const templates: Array<Template> = [
                 }
             }
 
+            let timeVariables = []
 
             for (const elementText of [groups.compareA, groups.compareB]) {
                 const timeParsingResult = parseTimeText(elementText, today)
                 if (timeParsingResult) {
-                    variables.push(timeParsingResult)
+                    timeVariables.push(timeParsingResult)
                     continue;
                 } else if (PRONOUNS_REGEX.test(elementText)) {
                     continue;
@@ -120,6 +122,13 @@ const templates: Array<Template> = [
                     }
                 }
             }
+
+            if(timeVariables.length >= 2 && timeVariables[0].type != timeVariables[1].type){
+                //two time variables should be parsed in the same way.
+                timeVariables = extractTimeExpressions(`${groups.compareA} and ${groups.compareB}`, today)
+            }
+
+            fastConcatTo(variables, timeVariables)
 
             if (variables.length > 0) {
                 return {
