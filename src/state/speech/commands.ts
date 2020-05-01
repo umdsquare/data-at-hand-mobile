@@ -86,6 +86,7 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                     const currentState = getState()
 
                     const context = currentState.speechRecognizerState.currentSpeechContext
+                    context.uiStatus = currentState.explorationState.uiStatus
                     const dictationResult = currentState.speechRecognizerState.dictationResult
                     if (dictationResult != null && dictationResult.text != null && dictationResult.text.length > 0) {
                         //can start analyzing

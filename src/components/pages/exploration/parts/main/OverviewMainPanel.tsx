@@ -2,7 +2,7 @@ import { createGoToBrowseRangeAction, memoUIStatus, ExplorationAction, createGoT
 import React from "react";
 import { connect } from "react-redux";
 import { ReduxAppState } from "@state/types";
-import { FlatList, View, LayoutAnimation, NativeScrollEvent, NativeSyntheticEvent } from "react-native";
+import { FlatList, View, LayoutAnimation, NativeScrollEvent, NativeSyntheticEvent, ViewabilityConfig, ViewToken } from "react-native";
 import { DataSourceChartFrame, HEADER_HEIGHT, FOOTER_HEIGHT } from "@components/exploration/DataSourceChartFrame";
 import { OverviewData, OverviewSourceRow } from "@core/exploration/data/types";
 import { DataSourceType, inferIntraDayDataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
@@ -122,6 +122,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
     componentWillUnmount() {
         console.log("unmount overview main panel.")
         this.props.dispatchAction(memoUIStatus("overviewScrollY", this.currentListScrollOffset))
+        this.props.dispatchAction(memoUIStatus("viewableDataSources", undefined))
     }
 
     private readonly onDiscardFilter = () => {
@@ -133,10 +134,6 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
     }
 
 
-    private readonly Separator = () => {
-        return <View style={separatorStyle} />
-    }
-
     private readonly onHeaderPressed = (source: DataSourceType) => {
         this.props.dispatchAction(createGoToBrowseRangeAction(InteractionType.TouchOnly, source))
     }
@@ -145,6 +142,13 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
         this.props.dispatchAction(createGoToBrowseDayAction(InteractionType.TouchOnly,
             inferIntraDayDataSourceType(source), DateTimeHelper.toNumberedDateFromDate(this.props.selectedService.getToday())))
     }
+
+    //FlatList handlers ==========================================================================================
+
+    private readonly Separator = () => {
+        return <View style={separatorStyle} />
+    }
+
 
     private readonly onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const scrollY = event.nativeEvent.contentOffset.y
@@ -180,6 +184,17 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
         this.props.dispatchDataReload()
     }
 
+    private readonly onViewableItemsChanged = (args: { viewableItems: Array<ViewToken>, changed: Array<ViewToken> }) => {
+        this.props.dispatchAction(memoUIStatus("viewableDataSources", args.viewableItems.map(token => token.key as DataSourceType)))
+    }
+
+    private readonly viewabilityConfig = {
+        itemVisiblePercentThreshold: 95,
+        waitForInteraction: true
+     } as ViewabilityConfig
+
+    //===============================================================================================================
+
     render() {
         if (this.props.data != null) {
             return <DateRangeScaleContext.Provider value={this.state.scaleX}>
@@ -196,6 +211,9 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
                     windowSize={DataSourceManager.instance.supportedDataSources.length}
 
                     extraData={this.props.highlightFilter}
+
+                    viewabilityConfig = {this.viewabilityConfig}
+                    onViewableItemsChanged = {this.onViewableItemsChanged}
 
                     data={this.props.data.sourceDataList}
                     keyExtractor={this.keyExtractor}

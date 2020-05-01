@@ -82,9 +82,9 @@ PODS:
   - OpenSSL-Universal (1.0.2.19):
     - OpenSSL-Universal/Static (= 1.0.2.19)
   - OpenSSL-Universal/Static (1.0.2.19)
-  - Permission-Microphone (2.1.3):
+  - Permission-Microphone (2.1.4):
     - RNPermissions
-  - Permission-SpeechRecognition (2.1.3):
+  - Permission-SpeechRecognition (2.1.4):
     - RNPermissions
   - RCTRequired (0.62.2)
   - RCTTypeSafety (0.62.2):
@@ -249,12 +249,12 @@ PODS:
     - React-cxxreact (= 0.62.2)
     - React-jsi (= 0.62.2)
   - React-jsinspector (0.62.2)
-  - react-native-app-auth (5.1.1):
+  - react-native-app-auth (5.1.2):
     - AppAuth (= 1.2.0)
     - React
   - react-native-safe-area-context (0.7.3):
     - React
-  - react-native-segmented-control (1.4.0):
+  - react-native-segmented-control (1.5.0):
     - React
   - react-native-spinkit (1.4.1):
     - React
@@ -333,13 +333,13 @@ PODS:
     - React
   - RNGestureHandler (1.6.1):
     - React
-  - RNPermissions (2.1.3):
+  - RNPermissions (2.1.4):
     - React
   - RNReactNativeHapticFeedback (1.9.0):
     - React
   - RNReanimated (1.8.0):
     - React
-  - RNScreens (2.6.0):
+  - RNScreens (2.7.0):
     - React
   - RNShare (3.3.0):
     - React
@@ -560,8 +560,8 @@ SPEC CHECKSUMS:
   Folly: 30e7936e1c45c08d884aa59369ed951a8e68cf51
   glog: 1f3da668190260b06b429bb211bfbee5cd790c28
   OpenSSL-Universal: 8b48cc0d10c1b2923617dfe5c178aa9ed2689355
-  Permission-Microphone: e35622c29cd8811498de947fd32116593d917997
-  Permission-SpeechRecognition: b66e300d540a9da3ba762663e2c578601ca52f92
+  Permission-Microphone: 903ab30bd006cb00f646d5a7622c6647f36a8940
+  Permission-SpeechRecognition: e1c18a77502a19936a926e22d4158eb8fb206d0a
   RCTRequired: cec6a34b3ac8a9915c37e7e4ad3aa74726ce4035
   RCTTypeSafety: 93006131180074cffa227a1075802c89a49dd4ce
   React: 29a8b1a02bd764fb7644ef04019270849b9a7ac3
@@ -571,9 +571,9 @@ SPEC CHECKSUMS:
   React-jsi: b6dc94a6a12ff98e8877287a0b7620d365201161
   React-jsiexecutor: 1540d1c01bb493ae3124ed83351b1b6a155db7da
   React-jsinspector: 512e560d0e985d0e8c479a54a4e5c147a9c83493
-  react-native-app-auth: 048f9ea8c2358ce1207207a0e74fb16563a3a2bd
+  react-native-app-auth: d7a1884e56c208d50c3fec8cb5a5b860a6ea1378
   react-native-safe-area-context: 8260e5157617df4b72865f44006797f895b2ada7
-  react-native-segmented-control: ae3a95b43eb80dac57e1f3f0ef01f1292b45dfcc
+  react-native-segmented-control: 25602462a3f01aa4e7d6d481204077b0517362ce
   react-native-spinkit: da294fd828216ad211fe36a5c14c1e09f09e62db
   react-native-sqlite-storage: ce71689c5a73b79390a1ab213555ae80979a5dc7
   react-native-view-shot: 08c46c9e8e92f6681e8f2ffa55ac3d06e7e99070
@@ -593,10 +593,10 @@ SPEC CHECKSUMS:
   RNDeviceInfo: c3ea4a4d4547740c548cdd1e5a78f9b04e524688
   RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
   RNGestureHandler: 8f09cd560f8d533eb36da5a6c5a843af9f056b38
-  RNPermissions: 69dc24ae1a9507576e2e9cf70ceed51065311da8
+  RNPermissions: 8ca17fd6c822eea589fe84709d9426e05cc39c39
   RNReactNativeHapticFeedback: 2566b468cc8d0e7bb2f84b23adc0f4614594d071
   RNReanimated: 955cf4068714003d2f1a6e2bae3fb1118f359aff
-  RNScreens: 19fee34a46de81b66e26960f5ac14ea616a5d089
+  RNScreens: cf198f915f8a2bf163de94ca9f5bfc8d326c3706
   RNShare: fea1801315aa8875d6db73a4010b14afcd568765
   RNStaticSafeAreaInsets: 5a2652147cfff45100fb155da5a90f180b3cdfb8
   RNSVG: ce9d996113475209013317e48b05c21ee988d42e

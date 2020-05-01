@@ -33,6 +33,13 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
     private constructor() { }
 
+    private getCascadedDataSource(dataSourceVariables: VariableInfo[], context: SpeechContext, explorationInfo: ExplorationInfo): DataSourceType | undefined {
+        return dataSourceVariables.length > 0 ? dataSourceVariables[0].value :
+        ((context as any)["dataSource"] 
+        || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
+        || (context.uiStatus["viewableDataSources"] != null && context.uiStatus["viewableDataSources"].length > 0? context.uiStatus["viewableDataSources"][0] as DataSourceType : null)
+    }
+
     private static convertActionToNLUResult(action: ActionTypeBase | undefined | null, currentInfo: ExplorationInfo, preprocessed: PreProcessedInputText): NLUResult {
         if (action) {
 
@@ -99,7 +106,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
         //Cover cyclic time frame first
         if (cyclicTimeFrames.length > 0) {
-            const guaranteedDataSource: DataSourceType = dataSources.length > 0 ? dataSources[0].value : ((context as any)["dataSource"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
+            const guaranteedDataSource = this.getCascadedDataSource(dataSources, context, explorationInfo)
             if (guaranteedDataSource) {
                 const guaranteedRange = ranges.length > 0 ? ranges[0].value : (context.type === SpeechContextType.RangeElement ? (context as RangeElementSpeechContext).range : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range))
                 return NLUCommandResolverImpl.convertActionToNLUResult(
@@ -116,8 +123,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
             case Intent.Compare:
                 {
                     console.log("Comparison intent")
-                    const cascadedDataSource: DataSourceType = toldDataSources === true ? dataSources[0].value :
-                        ((context as any)["dataSource"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
+                    const cascadedDataSource = this.getCascadedDataSource(dataSources, context, explorationInfo)
                     let extractedRanges: Array<[number, number]> = []
 
                     if (toldRanges) {
@@ -170,8 +176,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
             case Intent.Browse:
                 {
                     console.log("Browse intent")
-                    const cascadedDataSource: DataSourceType = toldDataSources === true ? dataSources[0].value :
-                        ((context as any)["dataSource"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
+                    const cascadedDataSource = this.getCascadedDataSource(dataSources, context, explorationInfo)
 
                     let rangePriority: EntityPriority = EntityPriority.None
                     let datePriority: EntityPriority = EntityPriority.None
