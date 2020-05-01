@@ -20,6 +20,14 @@ const expressions = [
   ["Show by days of week", CyclicTimeFrame.DayOfWeek],
   ["Show by day of week", CyclicTimeFrame.DayOfWeek],
   ["Show by day of the week pattern", CyclicTimeFrame.DayOfWeek],
+  ["Get me the weekly pattern", CyclicTimeFrame.DayOfWeek], 
+  ["Weekly pattern", CyclicTimeFrame.DayOfWeek],
+  ["Get me the Weekly data", CyclicTimeFrame.DayOfWeek],
+  ["Weekly data", CyclicTimeFrame.DayOfWeek],
+  ["Yearly data", CyclicTimeFrame.MonthOfYear],
+  ["Yearly pattern", CyclicTimeFrame.MonthOfYear],
+  ["Get me the yearly data", CyclicTimeFrame.MonthOfYear],
+  ["Get me the yearly pattern", CyclicTimeFrame.MonthOfYear],
 ]
 
 
