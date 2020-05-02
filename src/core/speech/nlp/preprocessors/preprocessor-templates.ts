@@ -108,21 +108,28 @@ const templates: Array<Template> = [
     },
     {
         regex: new NamedRegExp(`(compare|compared|compel|compelled|(difference between))\\s+((?<dataSource>[a-zA-Z0-9\\s]+)\\s+(?<dataSourcePreposition>of|in|on|at)\\s+)?(?<compareA>${REGEX_RANDOM_ELEMENT})\\s+(?<conjunction>with|to|and)\\s+(?<compareB>${REGEX_RANDOM_ELEMENT})`, 'i'),
-        parse: (groups: { compareA: string, compareB: string, conjunction: string, dataSource?: string }, options) => {
+        parse: (groups: { compareA: string, compareB: string, conjunction: string, dataSource?: string, dataSourcePreposition?: string }, options) => {
             const today = options.getToday()
 
             const variables = []
+
+            let compareAOverride: string
 
             if (groups.dataSource != null) {
                 const parsedDataSourceInfo = parseVariable(groups.dataSource, DATASOURCE_VARIABLE_RULES)
                 if (parsedDataSourceInfo) {
                     variables.push(parsedDataSourceInfo)
+                }else{
+                    //maybe it could be merged into the time expression.
+                    compareAOverride = `${groups.dataSource} ${groups.dataSourcePreposition} ${groups.compareA}` 
                 }
             }
 
+            compareAOverride = compareAOverride || groups.compareA
+
             let timeVariables = []
 
-            for (const elementText of [groups.compareA, groups.compareB]) {
+            for (const elementText of [compareAOverride, groups.compareB]) {
                 const timeParsingResult = parseTimeText(elementText, today)
                 if (timeParsingResult) {
                     timeVariables.push(timeParsingResult)
@@ -140,7 +147,7 @@ const templates: Array<Template> = [
 
             if (timeVariables.length >= 2 && timeVariables[0].type != timeVariables[1].type) {
                 //two time variables should be parsed in the same way.
-                timeVariables = extractTimeExpressions(`${groups.compareA} and ${groups.compareB}`, today)
+                timeVariables = extractTimeExpressions(`${compareAOverride} and ${groups.compareB}`, today)
             }
 
             fastConcatTo(variables, timeVariables)

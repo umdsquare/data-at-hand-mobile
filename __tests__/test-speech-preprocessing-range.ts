@@ -56,7 +56,10 @@ const months: Array<[string, [number, number]]> = [
   ["last december", [20191201, 20191231]],
   ["past january", [20200101, 20200131]],
   ["january 2018", [20180101, 20180131]],
-  ["january 20:19", [20190101, 20190131]]
+  ["january 20:19", [20190101, 20190131]],
+  ["january of the last year", [20190101, 20190131]],
+  ["january of this year", [20200101, 20200131]],
+  ["january of last year", [20190101, 20190131]],
 ]
 
 const seasons: Array<[string, [number, number]]> = [
