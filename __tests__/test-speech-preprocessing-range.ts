@@ -96,6 +96,7 @@ const manualPeriods: Array<[string, [number, number]]> = [
   ["from Monday to Wednesday", [20200224, 20200226]],
   ["from last Monday to this Wednesday", [20200217, 20200226]],
   ["from 2019 to 2020", [20190101, 20201231]],
+  
 ]
 
 const dictationErrorPeriods: Array<[string, [number, number]]> = [

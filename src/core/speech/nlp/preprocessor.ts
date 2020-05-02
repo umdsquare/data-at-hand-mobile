@@ -56,7 +56,7 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
         }),
         definePipe("extract-data-sources", (input) => {
             DATASOURCE_VARIABLE_RULES.concat(CYCLIC_TIME_RULES).forEach(rule => {
-                input.processedSpeech = input.processedSpeech.replace(rule.regex, (match) => {
+                input.processedSpeech = input.processedSpeech.replace((rule.regex as any).test != null? rule.regex : (rule.regex as any)(), (match) => {
                     const id = makeVariableId()
                     input.variables[id] = {
                         id,

@@ -67,7 +67,9 @@ type TimeVariable = {
 }
 
 export function extractTimeExpressions(speech: string, ref: Date): Array<TimeVariable>{
-    return getChrono().parse(speech, ref).map(result => processChronoResult(result)).filter(r => r != null)
+    const chronoParseResult = getChrono().parse(speech, ref)
+    console.log(chronoParseResult)
+    return chronoParseResult.map(result => processChronoResult(result)).filter(r => r != null)
 }
 
 function processChronoResult(chronoResult: ParsedResult): TimeVariable {

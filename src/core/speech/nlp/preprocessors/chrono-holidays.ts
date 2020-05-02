@@ -23,6 +23,10 @@ christmas() - can calculate observed holiday as well
 
 */
 
+function commonWrapping(format: string): string {
+    return `((a|an|the|recent|last)\\s+)?${format}`
+}
+
 function sdayFormat(core: string): string {
     return `${core}\\'?(s?)(\\s+day)?`
 }
@@ -52,7 +56,7 @@ const holidayRules = new Lazy<Array<{ functionName: string, rule: string }>>(() 
 
 const commonHolidayParsers = holidayRules.get().map(rule => {
     const commonHolidayParser = new chrono.Parser();
-    commonHolidayParser.pattern = function () { return new NamedRegExp(yearFormat(rule.rule), "i") }
+    commonHolidayParser.pattern = function () { return new NamedRegExp(commonWrapping(yearFormat(rule.rule)), "i") }
     commonHolidayParser.extract = function (text, ref, match, opt) {
         const generateFunc: ((year: number) => Date) = Holidays[rule.functionName]
         let date: Date

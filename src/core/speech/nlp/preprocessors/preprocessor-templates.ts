@@ -11,11 +11,11 @@ const REGEX_RANDOM_ELEMENT = "[a-zA-Z0-9\\s]+"
 
 const PRONOUNS_REGEX = /^(this|it|that|these|them)(\s+(ones?|things?|elements?))?$/i
 
-export type VariableParsingRule = { regex: RegExp, variableType: VariableType, value: any }
+export type VariableParsingRule = { regex: RegExp | (() => RegExp), variableType: VariableType, value: any }
 
 export function parseVariable(text: string, rules: Array<VariableParsingRule>): { type: VariableType, value: any } | null {
     for (const rule of rules) {
-        if (rule.regex.test(text)) {
+        if ((rule.regex as any)["test"] != null ? (rule.regex as any).test(text) : (rule.regex as any)().test(text)) {
             return {
                 type: rule.variableType,
                 value: rule.value
@@ -27,27 +27,27 @@ export function parseVariable(text: string, rules: Array<VariableParsingRule>): 
 
 export const DATASOURCE_VARIABLE_RULES: Array<VariableParsingRule> = [
     {
-        regex: /(step count(s|er)?)|(steps?)|(walk)/gi,
+        regex: () => /(step count(s|er)?)|(steps?)|(walk)/gi,
         variableType: VariableType.DataSource,
         value: DataSourceType.StepCount
     },
     {
-        regex: /((resting\s+)?heart rate)|(bpm)|(beats? per minutes?)/gi,
+        regex: () => /((resting\s+)?heart rate)|(bpm)|(beats? per minutes?)/gi,
         variableType: VariableType.DataSource,
         value: DataSourceType.HeartRate
     },
     {
-        regex: /(h?ours?(\s?)+(i|(of))?(\s?)+((slept)|(sleep)))|(sleep length)|((length|duration) of ([a-z]+\s)?sleep)|(sleep duration)|(sleep h?ours?)|(i (slept|sleep))/gi,
+        regex: () => /(h?ours?(\s?)+(i|(of))?(\s?)+((slept)|(sleep)))|(sleep length)|((length|duration) of ([a-z]+\s)?sleep)|(sleep duration)|(sleep h?ours?)|(i (slept|sleep))/gi,
         variableType: VariableType.DataSource,
         value: DataSourceType.HoursSlept
     },
     {
-        regex: /(sleep(\srange)?)|(range of ([a-z]+\s)?sleep)|(sleep schedules?)/gi,
+        regex: () => /(sleep(\srange)?)|(range of ([a-z]+\s)?sleep)|(sleep schedules?)/gi,
         variableType: VariableType.DataSource,
         value: DataSourceType.SleepRange,
     },
     {
-        regex: /((body\s+)?weight)|(wait)|(how heavy i (was|am))/gi,
+        regex: () => /((body\s+)?weight)|(wait)|(how heavy i (was|am))/gi,
         variableType: VariableType.DataSource,
         value: DataSourceType.Weight
     }
@@ -68,7 +68,7 @@ export const CYCLIC_TIME_RULES: Array<VariableParsingRule> = [
         regex: /(months?\s+of\s+(the\s+)?years?)|(monthly pattern)|(by months?)/i,
         variableType: VariableType.TimeCycle,
         value: CyclicTimeFrame.MonthOfYear
-    },    
+    },
     {
         regex: /yearly(\s+(data|pattern))?(\s|$)?/i,
         variableType: VariableType.TimeCycle,
@@ -105,7 +105,7 @@ const templates: Array<Template> = [
         regex: new NamedRegExp(`(compare|compared|compel|compelled|(difference between))\\s+((?<dataSource>[a-zA-Z0-9\\s]+)\\s+(?<dataSourcePreposition>of|in|on|at)\\s+)?(?<compareA>${REGEX_RANDOM_ELEMENT})\\s+(?<conjunction>with|to|and)\\s+(?<compareB>${REGEX_RANDOM_ELEMENT})`, 'i'),
         parse: (groups: { compareA: string, compareB: string, conjunction: string, dataSource?: string }, options) => {
             const today = options.getToday()
-            
+
             const variables = []
 
             if (groups.dataSource != null) {
@@ -133,7 +133,7 @@ const templates: Array<Template> = [
                 }
             }
 
-            if(timeVariables.length >= 2 && timeVariables[0].type != timeVariables[1].type){
+            if (timeVariables.length >= 2 && timeVariables[0].type != timeVariables[1].type) {
                 //two time variables should be parsed in the same way.
                 timeVariables = extractTimeExpressions(`${groups.compareA} and ${groups.compareB}`, today)
             }

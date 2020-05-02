@@ -11,7 +11,7 @@ export interface ErrorReport {
 }
 
 export function initErrorReportingService() {
-    if (__DEV__ === false) {
+    //if (__DEV__ === false) {
         try {
             const bugsnagInfo = require("@credentials/bugsnag.json")
             if (bugsnagInfo != null && bugsnagInfo.api_key != null && bugsnagInfo.api_key.length > 0) {
@@ -20,7 +20,7 @@ export function initErrorReportingService() {
         } catch (ex) {
             console.log(ex)
         }
-    }
+    //}
 }
 
 export function notifyError(error: Error, before?: (report: ErrorReport) => void) {

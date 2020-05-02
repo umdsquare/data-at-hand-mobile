@@ -139,6 +139,7 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                             console.log(err)
                             notifyError(err, report => {
                                 report.context = "Speech command analysis"
+                                report.errorMessage = "Speech command error for dictated text: - " + dictationResult.text
                                 report.metadata = {
                                     dictatedText: dictationResult.text
                                 }

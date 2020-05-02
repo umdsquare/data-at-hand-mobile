@@ -2,7 +2,7 @@ import chrono, { ParsedResult, Refiner, ParsedComponents, ComponentParams, Compo
 import { getYear, isAfter, addYears, getDate, getMonth, addDays, subYears, subWeeks, subMonths, startOfMonth, endOfMonth, isBefore, startOfYear, endOfYear, addMonths, startOfWeek, endOfWeek, addWeeks, subDays } from 'date-fns';
 
 import NamedRegExp from 'named-regexp-groups'
-import { getBetweenText } from './chrono-utils';
+import { getBetweenText, mergeResult } from './chrono-utils';
 
 function getSeasonOfYear(season: string, year: number): [Date, Date] {
     switch (season) {
@@ -218,16 +218,17 @@ prepositionTagRefiner.refine = function (text, results, opt) {
     return results
 }
 
+const middleAndConjunctionRegex = /^[,.]?\s*(and|\-)\s*$/i
+
 //e.g., Christmas of 2018 and 2019
 const optimizedConjunctionRefiner = new Refiner()
-optimizedConjunctionRefiner.pattern = function () { return /^[,.]?\s*(and)\s*$/i };
 optimizedConjunctionRefiner.refine = (text, results, opt) => {
     if (results.length >= 2 &&
         results[0].end == null && results[1].end == null &&
         //check conjunction
-        /^[,.]?\s*(and|\-)\s*$/i.test(getBetweenText(text, results[0], results[1])) === true) {
+        middleAndConjunctionRegex.test(getBetweenText(text, results[0], results[1])) === true) {
 
-         //1. optimized by year
+        //1. optimized by year
         if (results[0].start.isCertain('year') === true && results[1].start.isCertain('year')
             && Object.keys(results[0].start.knownValues).length > 1
             && Object.keys(results[1].start.knownValues).length === 1
@@ -247,5 +248,27 @@ optimizedConjunctionRefiner.refine = (text, results, opt) => {
 }
 
 
+const betweenConjunctionRefiner = new Refiner()
+betweenConjunctionRefiner.refine = (text, results, opt) => {
+    if (results.length >= 2 &&
+        results[0].end == null && results[1].end == null) {
+
+        if (middleAndConjunctionRegex.test(getBetweenText(text, results[0], results[1])) === true
+        ) {
+            const prefixMatch = text.substring(0, results[0].index).match(/(^|\s)(between)\s+/i)
+            if (prefixMatch != null) {
+                const merged = mergeResult(text, results[0], results[1]);
+                merged.index = prefixMatch.index + prefixMatch[1].length
+                merged.text = text.substring(merged.index, results[1].index + results[1].text.length)
+                merged.tags["BetweenConjunctionRefiner"] = true;
+                return [merged]
+            }
+        }
+    }
+
+    return results
+}
+
+
 export const CHRONO_EXTENSION_PARSERS = [seasonParser, yearParser, recentDurationParser]
-export const CHRONO_EXTENSION_REFINERS: Array<Refiner> = [aroundRefiner, sinceRefiner, prepositionTagRefiner, optimizedConjunctionRefiner]
+export const CHRONO_EXTENSION_REFINERS: Array<Refiner> = [aroundRefiner, sinceRefiner, prepositionTagRefiner, betweenConjunctionRefiner, optimizedConjunctionRefiner]
