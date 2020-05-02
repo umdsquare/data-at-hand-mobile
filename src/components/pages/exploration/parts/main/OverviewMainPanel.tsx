@@ -85,7 +85,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
                     500, LayoutAnimation.Types.easeInEaseOut, "opacity")
             )
 
-            if (prevProps.highlightFilter == null && this.props.highlightFilter != null) {
+            if (this.props.highlightFilter != null && (prevProps.highlightFilter == null || prevProps.highlightFilter.dataSource !== this.props.highlightFilter.dataSource)) {
                 this._listRef.current?.scrollToIndex({
                     animated: true,
                     index: this.props.data.sourceDataList.findIndex(d => d.source === this.props.highlightFilter.dataSource)

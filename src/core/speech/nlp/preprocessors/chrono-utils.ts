@@ -8,7 +8,6 @@ export function getBetweenText(text: string, result1: ParsedResult, result2: Par
 
 
 export function mergeResult(text: string, fromResult: ParsedResult, toResult: ParsedResult): ParsedResult {
-    console.log("merge")
     //merge toResult to fromResult.
 
     if (!fromResult.isOnlyWeekday() && !toResult.isOnlyWeekday()) {
@@ -42,11 +41,7 @@ export function mergeResult(text: string, fromResult: ParsedResult, toResult: Pa
             toResult.start.imply('day', toMoment.date());
             toResult.start.imply('month', toMoment.month() + 1);
             toResult.start.imply('year', toMoment.year());
-        } else if (toResult.start.isCertain('day') && toResult.start.isCertain('month') && toResult.start.isCertain('year')){
-            console.log("toResult day is fixed.")
-        }
-        
-        else if (toResult.start.isCertain('year') === false) {
+        }else if (toResult.start.isCertain('year') === false) {
             //our additional logic
             const fromResultDate = fromResult.start.date()
             let toResultDate = toResult.start.date()

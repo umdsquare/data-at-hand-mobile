@@ -28,7 +28,7 @@ export const explorationStateReducer = (
   action: ExplorationAction,
 ): ExplorationState => {
   const newState: ExplorationState = {
-    info: state.info != null? shallowCopyExplorationInfo(state.info) : null,
+    info: state.info != null ? shallowCopyExplorationInfo(state.info) : null,
     prevInfo: null,
     backNavStack: state.backNavStack.slice(0),
     uiStatus: state.uiStatus,
@@ -71,7 +71,7 @@ export const explorationStateReducer = (
         newState.uiStatus = { ...state.uiStatus };
         newState.uiStatus[memoUiStatusAction.key] = memoUiStatusAction.value;
         return newState;
-      
+
       case ExplorationActionType.SetTouchElementInfo:
         const setTouchElementInfoAction = action as SetTouchingElementInfoAction;
         newState.touchingElement = setTouchElementInfoAction.info;
@@ -160,7 +160,17 @@ export const explorationStateReducer = (
         {
           const a = action as SetHighlightFilterAction
           console.log("update filter:", a.highlightFilter)
+          const prevFilter = newState.info.highlightFilter
           newState.info.highlightFilter = a.highlightFilter
+
+          if (newState.info.type === ExplorationType.B_Range && a.highlightFilter != null) {
+            if (prevFilter == null || prevFilter.dataSource !== a.highlightFilter.dataSource) {
+              //highlight filter's data source was changed
+              if (explorationInfoHelper.getParameterValue(newState.info, ParameterType.DataSource) !== a.highlightFilter.dataSource) {
+                explorationInfoHelper.setParameterValue(newState.info, a.highlightFilter.dataSource, ParameterType.DataSource)
+              }
+            }
+          }
         }
         break;
 
@@ -455,7 +465,7 @@ export const explorationStateReducer = (
         return state;
     }
 
-    if(explorationInfoHelper.equals(newState.info, state.info)){
+    if (explorationInfoHelper.equals(newState.info, state.info)) {
       newState.prevInfo = null
     }
 
