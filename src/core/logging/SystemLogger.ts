@@ -62,7 +62,7 @@ export class SystemLogger {
         }
     }
 
-    logSpeechCommandResult(text: string, explorationInfo: ExplorationInfo, context: SpeechContext, result: NLUResult): string {
+    logSpeechCommandResult(text: string, explorationInfo: ExplorationInfo, context: SpeechContext, result: NLUResult | "error"): string {
         if (this.currentLogger && this.enabled === true) {
 
             const logId = this.makeLogId(Date.now());

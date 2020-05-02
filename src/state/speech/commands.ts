@@ -13,7 +13,7 @@ import { VerboseEventTypes } from '@data-at-hand/core/logging/types';
 import { NLUCommandResolver } from "@core/speech/nlp/types";
 import { Lazy } from "@data-at-hand/core/utils";
 import { notifyError } from "@core/logging/ErrorReportingService";
-import { NLUResultType } from "@data-at-hand/core/speech/types";
+import { NLUResultType, NLUResult } from "@data-at-hand/core/speech/types";
 
 const sessionMutex = new Mutex()
 
@@ -92,9 +92,11 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                         //can start analyzing
                         console.log(sessionId, "Analyze the phrase, ", dictationResult.text, "with context: ", context)
 
+                        const service = DataServiceManager.instance.getServiceByKey(currentState.settingsState.serviceKey)
+                        let nluResult: NLUResult | undefined = undefined
+
                         try {
-                            const service = DataServiceManager.instance.getServiceByKey(currentState.settingsState.serviceKey)
-                            const nluResult = await nluCommandResolver.get().resolveSpeechCommand(
+                            nluResult = await nluCommandResolver.get().resolveSpeechCommand(
                                 dictationResult.text,
                                 context,
                                 currentState.explorationState.info,
@@ -104,14 +106,27 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                                     measureUnit: currentState.settingsState.unit
                                 }
                             )
+                        } catch (err) {
+                            console.log("speech analyze error - ", dictationResult.text)
+                            console.log(err)
+                            notifyError(err, report => {
+                                report.context = "Speech command analysis"
+                                report.errorMessage = "Speech command error for dictated text: - " + dictationResult.text
+                                report.metadata = {
+                                    dictatedText: dictationResult.text
+                                }
+                            })
+                        }
 
-                            const speechCommandLogId = SystemLogger.instance.logSpeechCommandResult(
-                                dictationResult.text,
-                                currentState.explorationState.info,
-                                context,
-                                nluResult
-                            )
+                        const speechCommandLogId = SystemLogger.instance.logSpeechCommandResult(
+                            dictationResult.text,
+                            currentState.explorationState.info,
+                            context,
+                            nluResult != null ? nluResult : "error"
+                        )
 
+                        if (nluResult != null) {
+                            //NLU successful
                             switch (nluResult.type) {
                                 case NLUResultType.Effective:
                                     const inferredActionWithMetadata = setMetadataToAction(nluResult.action!, { speechLogId: speechCommandLogId })
@@ -134,16 +149,9 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
 
                             console.log(sessionId, "Finished analyzing.")
                             terminate(releaseMutex, dispatch, TerminationReason.Success, sessionId)
-                        } catch (err) {
-                            console.log("speech analyze error - ", dictationResult.text)
-                            console.log(err)
-                            notifyError(err, report => {
-                                report.context = "Speech command analysis"
-                                report.errorMessage = "Speech command error for dictated text: - " + dictationResult.text
-                                report.metadata = {
-                                    dictatedText: dictationResult.text
-                                }
-                            })
+                        } else {
+                            //NLU failed.
+                            SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.SpeechCommandFail, { speechLogId: speechCommandLogId })
                             terminate(releaseMutex, dispatch, TerminationReason.Fail, sessionId)
                         }
                     } else {
@@ -158,6 +166,12 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
 
         } catch (startError) {
             console.log(startError)
+            console.log("speech start error")
+            
+            notifyError(startError, report => {
+                report.context = "Speech start error"
+            })
+
             terminate(releaseMutex, dispatch, TerminationReason.Fail, sessionId)
         }
     }
