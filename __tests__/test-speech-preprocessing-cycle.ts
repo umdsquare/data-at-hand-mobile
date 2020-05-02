@@ -15,6 +15,8 @@ const expressions = [
   ["Show by month of the year", CyclicTimeFrame.MonthOfYear],
   ["Show by months of the year", CyclicTimeFrame.MonthOfYear],
   ["Show the monthly pattern", CyclicTimeFrame.MonthOfYear],
+  ["Show monthly", CyclicTimeFrame.MonthOfYear],
+  
   ["Show by day of the week", CyclicTimeFrame.DayOfWeek],
   ["Show by days of the week", CyclicTimeFrame.DayOfWeek],
   ["Show by days of week", CyclicTimeFrame.DayOfWeek],

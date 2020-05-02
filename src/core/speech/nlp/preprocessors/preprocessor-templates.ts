@@ -55,22 +55,27 @@ export const DATASOURCE_VARIABLE_RULES: Array<VariableParsingRule> = [
 
 export const CYCLIC_TIME_RULES: Array<VariableParsingRule> = [
     {
-        regex: /days?\s+of\s+(the\s+)?weeks?/i,
+        regex: /(by\s+)?days?\s+of\s+(the\s+)?weeks?/i,
         variableType: VariableType.TimeCycle,
         value: CyclicTimeFrame.DayOfWeek
     },
     {
-        regex: /weekly(\s+(data|pattern))?(\s|$)?/i,
+        regex: /(by\s+)?weekly(\s+(data|pattern))?(\s|$)?/i,
         variableType: VariableType.TimeCycle,
         value: CyclicTimeFrame.DayOfWeek
     },
     {
-        regex: /(months?\s+of\s+(the\s+)?years?)|(monthly pattern)|(by months?)/i,
+        regex: /(by months?)/i,
         variableType: VariableType.TimeCycle,
         value: CyclicTimeFrame.MonthOfYear
     },
     {
-        regex: /yearly(\s+(data|pattern))?(\s|$)?/i,
+        regex: /(by\s+)?(months?\s+of\s+(the\s+)?years?)|(monthly(\s+(data|pattern))?)/i,
+        variableType: VariableType.TimeCycle,
+        value: CyclicTimeFrame.MonthOfYear
+    },
+    {
+        regex: /(by\s+)?yearly(\s+(data|pattern))?(\s|$)?/i,
         variableType: VariableType.TimeCycle,
         value: CyclicTimeFrame.MonthOfYear
     },
