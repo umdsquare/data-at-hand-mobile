@@ -18,7 +18,9 @@ const lexicon: Array<TermInfo> = [
     { term: 'high', conditionType: NumericConditionType.More, valueType: ["scalar"], impliedSource: null, },
 
     { term: 'under', conditionType: NumericConditionType.Less, valueType: ["scalar"], impliedSource: null, },
-    { term: 'below', conditionType: NumericConditionType.Less, valueType: ["scalar"], impliedSource: null, },
+    { term: 'below', conditionType: NumericConditionType.Less, valueType: ["scalar", "duration"], impliedSource: null, },
+    { term: 'above', conditionType: NumericConditionType.More, valueType: ["scalar", 'duration'], impliedSource: null },
+
     { term: 'over', conditionType: NumericConditionType.More, valueType: ["scalar"], impliedSource: null, },
 
     { term: 'short', conditionType: NumericConditionType.Less, valueType: ["duration"], impliedSource: DataSourceType.HoursSlept },
@@ -32,6 +34,7 @@ const lexicon: Array<TermInfo> = [
 
     { term: 'light', conditionType: NumericConditionType.Less, valueType: ["scalar"], impliedSource: DataSourceType.Weight },
     { term: 'heav', conditionType: NumericConditionType.More, valueType: ["scalar"], impliedSource: DataSourceType.Weight },
+
 ]
 
 
@@ -60,7 +63,7 @@ function inferScalarValue(value: number, valueUnit: string | undefined, dataSour
             //number only
             return Math.round(DataSourceManager.instance.convertValueReverse(value, dataSource, measureUnit))
         case DataSourceType.HoursSlept:
-            return parseDurationTextToSeconds(valueUnit != null? (value + " " + valueUnit) : value.toString())
+            return parseDurationTextToSeconds(valueUnit != null ? (value + " " + valueUnit) : value.toString())
         default: return DataSourceManager.instance.convertValueReverse(value, dataSource, measureUnit)
     }
 }
@@ -89,7 +92,7 @@ function isWaketimeReferred(speech: string): boolean {
 export async function inferHighlight(nlp: compromise.Document, original: string, guidedDataSource: DataSourceType | undefined, options: NLUOptions): Promise<{ conditionInfo: ConditionInfo, match: compromise.Document } | null> {
     //try to find the condition
     console.log("infer highlight")
-    const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time|am|pm|hour|hours|minute|minutes)+?]`)
+    const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective|below|above)] than? [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time|am|pm|hour|hours|minute|minutes)+?]`)
 
     const durationComparisonInfo = normalizeCompromiseGroup(durationComparisonMatch.groups())
     if (durationComparisonInfo) {
@@ -126,7 +129,7 @@ export async function inferHighlight(nlp: compromise.Document, original: string,
         }
     }
     else {
-        const numericComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than? [<number>(#Value+)] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
+        const numericComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective|below|above)] than? [<number>(#Value+)] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
         const numericComparisonInfo = normalizeCompromiseGroup(numericComparisonMatch.groups())
 
         if (numericComparisonInfo) {
@@ -216,29 +219,31 @@ export async function inferHighlight(nlp: compromise.Document, original: string,
             }
 
             //goal
-            const goalComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective)] than * (goal|gol|gold)`)
+            const goalComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective|below|above)] than? (#Determiner|#Possessive|#Adjective)?+ (goal|gol|gold)`)
             const goalComparisonInfo = normalizeCompromiseGroup(goalComparisonMatch.groups())
             if (goalComparisonInfo) {
                 const comparisonTermInfo = findComparisonTermInfo(goalComparisonInfo.comparison)
 
-                const dataSource = comparisonTermInfo.impliedSource || guidedDataSource
-                if (dataSource != null) {
-                    const goalValue = await options.getGoal(dataSource)
-                    if (goalValue != null) {
-                        return {
-                            conditionInfo: {
-                                type: comparisonTermInfo.conditionType,
-                                impliedDataSource: comparisonTermInfo.impliedSource,
-                                ref: goalValue
-                            } as ConditionInfo,
-                            match: goalComparisonMatch
+                if (comparisonTermInfo != null) {
+                    const dataSource = comparisonTermInfo.impliedSource || guidedDataSource
+                    if (dataSource != null) {
+                        const goalValue = await options.getGoal(dataSource)
+                        if (goalValue != null) {
+                            return {
+                                conditionInfo: {
+                                    type: comparisonTermInfo.conditionType,
+                                    impliedDataSource: comparisonTermInfo.impliedSource,
+                                    ref: goalValue
+                                } as ConditionInfo,
+                                match: goalComparisonMatch
+                            }
                         }
                     }
                 }
             }
 
             //goal accomplishment
-            
+
         }
     }
     return null

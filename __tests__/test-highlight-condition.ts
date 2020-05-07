@@ -25,7 +25,13 @@ const conditions: Array<[string, DataSourceType, ConditionInfo]> = [
     ["with step count more than my goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
     ["with step count more than my current goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
     ["with step count more than the current goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
+    ["with step count more than a goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
+
+    ["with step count above the current goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
+    ["with step count below the current goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.Less }],
     
+
+    ["with step count over 10,000 steps", DataSourceType.StepCount, { ref: 10000, type: NumericConditionType.More }],
 
     ["step count less than gold", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.Less }],
     ["step count more than gold", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
@@ -44,8 +50,13 @@ const conditions: Array<[string, DataSourceType, ConditionInfo]> = [
     ["I slept shorter than five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.Less }],
     ["I slept more than five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.More }],
     ["I slept longer than five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.More }],
+    ["I slept over five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.More }],
+    ["I slept above five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.More }],
+    ["I slept below five hours", DataSourceType.HoursSlept, { ref: 3600*5, type: NumericConditionType.Less }],
+    
 
     ["I slept less than the goal", DataSourceType.HoursSlept, { ref: HOURS_SLEPT_GOAL, type: NumericConditionType.Less }],
+
     
     ["I went to bed earlier than 12 am", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
     ["I went to bed earlier than 12:00 AM", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
