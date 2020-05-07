@@ -10,6 +10,7 @@ import path from 'react-native-path';
 import { exists, mkdir, moveFile } from "react-native-fs"
 import { getUploadServerHostUrl } from "./common"
 import { getUniqueId } from "react-native-device-info"
+import { notifyError } from "./ErrorReportingService"
 
 enum LogFileName {
     SpeechCommandLogs = "speech_command.jsonl",
@@ -153,7 +154,11 @@ export class SystemLogger {
             }).then(result => {
                 console.log("screenshot upload result: ", result.status)
             }).catch(err => {
-                console.log("screenshot upload error: ", err)
+                notifyError(err, report => {
+                    report.context="screenshot upload error - " + backendUrl
+                    report.errorMessage=`${backendUrl}, ${finalScreenshotPath}`
+                    })
+                console.log(`screenshot upload error: upload to ${backendUrl}, ${finalScreenshotPath}`, err)
             })
         }
     }
