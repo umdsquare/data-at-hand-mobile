@@ -69,12 +69,7 @@ export function getDomainAndTickFormat(
 
 const timePivot = startOfDay(new Date())
 
-export const timeTickFormat = (tick: number) => {
-  if (tick === 0) {
-    return "MN"
-  }
-  else return format(addSeconds(timePivot, tick), "h a").toLowerCase()
-}
+export const timeTickFormat = (tick: number) => format(addSeconds(timePivot, tick), "h a").toLowerCase()
 
 export function makeTouchingInfoForCycle(
   timeKey: number,

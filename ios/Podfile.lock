@@ -254,7 +254,7 @@ PODS:
     - React
   - react-native-safe-area-context (0.7.3):
     - React
-  - react-native-segmented-control (1.5.0):
+  - react-native-segmented-control (1.6.0):
     - React
   - react-native-spinkit (1.4.1):
     - React
@@ -321,13 +321,13 @@ PODS:
     - React-cxxreact (= 0.62.2)
     - React-jsi (= 0.62.2)
     - ReactCommon/callinvoker (= 0.62.2)
-  - RNCAsyncStorage (1.9.0):
+  - RNCAsyncStorage (1.10.0):
     - React
   - RNCMaskedView (0.1.10):
     - React
   - RNDateTimePicker (2.3.2):
     - React
-  - RNDeviceInfo (5.5.6):
+  - RNDeviceInfo (5.5.7):
     - React
   - RNFS (2.16.6):
     - React
@@ -335,13 +335,13 @@ PODS:
     - React
   - RNPermissions (2.1.4):
     - React
-  - RNReactNativeHapticFeedback (1.9.0):
+  - RNReactNativeHapticFeedback (1.10.0):
     - React
   - RNReanimated (1.8.0):
     - React
   - RNScreens (2.7.0):
     - React
-  - RNShare (3.3.0):
+  - RNShare (3.3.2):
     - React
   - RNStaticSafeAreaInsets (2.1.0):
     - React
@@ -573,7 +573,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 512e560d0e985d0e8c479a54a4e5c147a9c83493
   react-native-app-auth: d7a1884e56c208d50c3fec8cb5a5b860a6ea1378
   react-native-safe-area-context: 8260e5157617df4b72865f44006797f895b2ada7
-  react-native-segmented-control: 25602462a3f01aa4e7d6d481204077b0517362ce
+  react-native-segmented-control: db2eb0614fc5d1f9d260329f4bcbb10b181d4c33
   react-native-spinkit: da294fd828216ad211fe36a5c14c1e09f09e62db
   react-native-sqlite-storage: ce71689c5a73b79390a1ab213555ae80979a5dc7
   react-native-view-shot: 08c46c9e8e92f6681e8f2ffa55ac3d06e7e99070
@@ -587,17 +587,17 @@ SPEC CHECKSUMS:
   React-RCTText: fae545b10cfdb3d247c36c56f61a94cfd6dba41d
   React-RCTVibration: 4356114dbcba4ce66991096e51a66e61eda51256
   ReactCommon: ed4e11d27609d571e7eee8b65548efc191116eb3
-  RNCAsyncStorage: b16697280b08bab4b5f2f67f752d93d13a52e9ed
+  RNCAsyncStorage: b34d2399d3e25db01d5b881949b503bd3c224d57
   RNCMaskedView: f5c7d14d6847b7b44853f7acb6284c1da30a3459
   RNDateTimePicker: 0f657a34a0f6465ab7d0255c24954693bc7a8cf6
-  RNDeviceInfo: c3ea4a4d4547740c548cdd1e5a78f9b04e524688
+  RNDeviceInfo: 498ccbf8b1361fe858581e3c1193ecee1a031e62
   RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
   RNGestureHandler: 8f09cd560f8d533eb36da5a6c5a843af9f056b38
   RNPermissions: 8ca17fd6c822eea589fe84709d9426e05cc39c39
-  RNReactNativeHapticFeedback: 2566b468cc8d0e7bb2f84b23adc0f4614594d071
+  RNReactNativeHapticFeedback: 22c5ecf474428766c6b148f96f2ff6155cd7225e
   RNReanimated: 955cf4068714003d2f1a6e2bae3fb1118f359aff
   RNScreens: cf198f915f8a2bf163de94ca9f5bfc8d326c3706
-  RNShare: fea1801315aa8875d6db73a4010b14afcd568765
+  RNShare: bd6518701db274b8ba282b33620885f2225a5bcf
   RNStaticSafeAreaInsets: 5a2652147cfff45100fb155da5a90f180b3cdfb8
   RNSVG: ce9d996113475209013317e48b05c21ee988d42e
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4

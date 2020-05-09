@@ -1,11 +1,11 @@
 {
   "ignore": {
     "uuid": {
-      "versions": "^7.0.0",
+      "versions": ">6",
       "reason": "7.0.0 requires crypto."
     },
     "@types/uuid": {
-      "versions": "^7.0.0",
+      "versions": ">6",
       "reason": "requires crypto."
     }
   }

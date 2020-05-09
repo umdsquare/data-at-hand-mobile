@@ -11,19 +11,13 @@ import { startOfDay, addSeconds, format } from 'date-fns';
 import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
 import { coverValueInRange } from '@data-at-hand/core/utils';
 import { TodayContext } from '@components/pages/exploration/contexts';
+import { timeTickFormat } from '../compare/common';
 
 interface Props extends ChartProps {
     data: Array<{ numberedDate: number, value: number, bedTimeDiffSeconds: number, wakeTimeDiffSeconds: number }>
 }
 
 const pivot = startOfDay(new Date())
-
-const tickFormat = (tick: number) => {
-    if (tick === 0) {
-        return "MN"
-    }
-    else return format(addSeconds(pivot, tick), "h a").toLowerCase()
-}
 
 export const DailySleepRangeChart = React.memo((prop: Props) => {
 
@@ -71,7 +65,7 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
         }}
         highlightedDays={prop.highlightFilter != null ? prop.highlightedDays : undefined}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
-        <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={tickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
+        <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={timeTickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
         <G pointerEvents="none" {...chartArea}>
             {
                 prop.data.map(d => {

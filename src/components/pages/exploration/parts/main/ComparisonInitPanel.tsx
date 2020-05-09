@@ -131,7 +131,7 @@ export const ComparisonInitPanel = (props: { info: ExplorationInfo, onCompleted?
             iconRight={true}
             icon={iconInfo}
             titleStyle={styles.titleStyle}
-            title="Start Comparison"
+            title="Compare"
             disabledStyle={styles.disabledStyle}
             disabledTitleStyle={styles.disabledTitleStyle}
             disabled={dataSource == null || cycleType == null || rangeA == null || (cycleType === 'compareTwoRanges' && rangeB == null)}
