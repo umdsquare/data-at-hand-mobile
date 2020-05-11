@@ -76,6 +76,11 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
                 this._listRef.current.scrollToOffset({ offset: this.props.overviewScrollY, animated: false })
             })
         }
+
+        if(this.props.data != null){
+            const viewableDataSources = this.props.data.sourceDataList.map(d => d.source)
+            this.props.dispatchAction(memoUIStatus("viewableDataSources", viewableDataSources))
+        }
     }
 
     componentDidUpdate(prevProps: Props) {
@@ -185,11 +190,13 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
     }
 
     private readonly onViewableItemsChanged = (args: { viewableItems: Array<ViewToken>, changed: Array<ViewToken> }) => {
-        this.props.dispatchAction(memoUIStatus("viewableDataSources", args.viewableItems.map(token => token.key as DataSourceType)))
+        const viewableDataSources = args.viewableItems.map(token => token.key as DataSourceType)
+        this.props.dispatchAction(memoUIStatus("viewableDataSources", viewableDataSources))
     }
 
     private readonly viewabilityConfig = {
         itemVisiblePercentThreshold: 95,
+        minimumViewTime: 500,
         waitForInteraction: true
      } as ViewabilityConfig
 
