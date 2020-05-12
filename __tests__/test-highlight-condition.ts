@@ -16,6 +16,7 @@ const prefixes = [
     "What are the days",
     "Number of days",
     "How many days",
+    "days",
     ""
 ]
 
@@ -26,6 +27,11 @@ const conditions: Array<[string, DataSourceType, ConditionInfo]> = [
     ["with step count more than my current goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
     ["with step count more than the current goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
     ["with step count more than a goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
+    
+    ["I walked over the goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
+    ["with step count over the goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
+    
+    
 
     ["with step count above the current goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
     ["with step count below the current goal", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.Less }],
