@@ -94,9 +94,12 @@ class DebouncedFileLogger {
             const release = await this.writeTaskMutex.acquire()
             const backendUrl = getUploadServerHostUrl()
             if (backendUrl != null) {
+                console.log("push log queue to backend server - ", this.queue.length, backendUrl)
                 await this.writeQueueToBackend(backendUrl)
-            } else await this.writeQueueToFile()
-
+            } else{
+                console.log("push log queue to file")
+                await this.writeQueueToFile()
+            }
 
             this.nextTimeoutAt = null
             this.timeout = null
