@@ -23,6 +23,10 @@ const specificDays: Array<[string, number]> = [
     ["october 1", 20191001],
     ["november 1", 20191101],
     ["december 1", 20191201],
+
+    ["the day before yesterday", 20200228],
+    ["the day before Christmas", 20191224],
+    ["the day after Christmas", 20191226]
 ]
 
 

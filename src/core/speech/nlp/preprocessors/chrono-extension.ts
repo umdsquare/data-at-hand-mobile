@@ -180,6 +180,38 @@ aroundRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
     return results
 }
 
+const theDayBeforeRefiner = new chrono.Refiner();
+theDayBeforeRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
+    results.forEach((result, i) => {
+        if (result.start != null && result.end == null && result.start.isCertain("day") === true) {
+            const beforeText = text.substring(0, result.index)
+            const match = beforeText.match(new NamedRegExp("(a|the)\\s+day\\s+(?<prefix>before|after)\\s+$", "i"))
+
+            if (match != null) {
+                let date = result.start.date()
+                if (match.groups.prefix === 'before') {
+                    date = addDays(date, -1)
+                } else if (match.groups.prefix === 'after') {
+                    date = addDays(date, 1)
+                }
+
+                results[i] = new chrono.ParsedResult({
+                    ref: result.ref,
+                    text: match[0] + result.text,
+                    index: match.index,
+                    start: {
+                        day: getDate(date),
+                        month: getMonth(date) + 1,
+                        year: getYear(date)
+                    },
+                    tags: result.tags
+                })
+            }
+        }
+    })
+    return results
+}
+
 const sinceRefiner = new Refiner()
 sinceRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
     const match = text.match(/(since)\s+/i)
@@ -271,4 +303,4 @@ betweenConjunctionRefiner.refine = (text, results, opt) => {
 
 
 export const CHRONO_EXTENSION_PARSERS = [seasonParser, yearParser, recentDurationParser]
-export const CHRONO_EXTENSION_REFINERS: Array<Refiner> = [aroundRefiner, sinceRefiner, prepositionTagRefiner, betweenConjunctionRefiner, optimizedConjunctionRefiner]
+export const CHRONO_EXTENSION_REFINERS: Array<Refiner> = [aroundRefiner, theDayBeforeRefiner, sinceRefiner, prepositionTagRefiner, betweenConjunctionRefiner, optimizedConjunctionRefiner]
