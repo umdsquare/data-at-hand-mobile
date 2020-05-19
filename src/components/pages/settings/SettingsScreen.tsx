@@ -40,6 +40,12 @@ const rowContainerStyle = {
 } as ViewStyle
 
 const styles = StyleSheet.create({
+
+    parentStyle: {
+        ...StyleTemplates.backPanelBackgroundColor,
+        flex: 1
+    },
+
     rowContainerStyleNormalPadding: {
         ...rowContainerStyle,
         paddingRight: Sizes.horizontalPadding
@@ -74,9 +80,9 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.backPanelColor
     },
 
-    smallTextStyle: { 
+    smallTextStyle: {
         color: Colors.textColorLight
-     }
+    }
 })
 
 const SettingsRow = React.forwardRef((props: { title: string, subtitle?: string, value?: string, showArrow?: boolean, onClick: () => void }, ref: any) => {
@@ -322,7 +328,7 @@ class SettingsScreen extends React.PureComponent<Props, State>{
     }
 
     render() {
-        return <View style={StyleTemplates.backPanelBackgroundColor}>
+        return <View style={styles.parentStyle}>
             <View style={{
                 ...StyleTemplates.fitParent,
                 top: undefined,
@@ -352,18 +358,24 @@ class SettingsScreen extends React.PureComponent<Props, State>{
                             onClick={this.onPressUnitRow} />
 
 
-                        <Subheader title={"Logging"} />
 
-                        <BooleanSettingsRow title="Record Logs" value={this.props.recordLogs} onChange={this.onSetRecordLogs} />
-                        {
-                            this.props.recordLogs === true ?
-                                <BooleanSettingsRow title="Record Screens" value={this.props.recordScreens} onChange={this.onSetRecordScreens} /> : null
-                        }
-                        {
-                            this.props.loggingSessionId != null ? <>
-                                <SettingsRow title="Clear the current logging session" subtitle={"Current session id: " + this.props.loggingSessionId}
-                                    onClick={this.onClearLoggingSession} showArrow={false} />
-                                <SettingsRow title="Export logs" onClick={this.onExportLogsClick} showArrow={false} />
+                        { //support turning off the logs only in development mode
+                            __DEV__ === true ? <>
+
+                                <Subheader title={"Logging"} />
+                                <BooleanSettingsRow title="Record Logs" value={this.props.recordLogs} onChange={this.onSetRecordLogs} />
+                                {
+                                    this.props.recordLogs === true ?
+                                        <BooleanSettingsRow title="Record Screens" value={this.props.recordScreens} onChange={this.onSetRecordScreens} /> : null
+                                }
+
+                                {
+                                    this.props.loggingSessionId != null ? <>
+                                        <SettingsRow title="Clear the current logging session" subtitle={"Current session id: " + this.props.loggingSessionId}
+                                            onClick={this.onClearLoggingSession} showArrow={false} />
+                                        <SettingsRow title="Export logs" onClick={this.onExportLogsClick} showArrow={false} />
+                                    </> : null
+                                }
                             </> : null
                         }
 
