@@ -2,7 +2,7 @@ import React from 'react'
 import Modal from "react-native-modal";
 import { StyleTemplates } from '@style/Styles';
 import { View } from 'react-native';
-import { SafeAreaConsumer } from 'react-native-safe-area-context';
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
 interface Props {
     closeOnBackdropPress?: boolean
@@ -50,7 +50,7 @@ export class BottomSheet extends React.Component<Props, State>{
             style={StyleTemplates.bottomSheetModalContainerStyle}
             backdropOpacity={0.3}
             >
-            <SafeAreaConsumer>
+            <SafeAreaInsetsContext.Consumer>
                 {
                     insets => <View style={{
                         ...StyleTemplates.bottomSheetModalViewStyle, paddingBottom: Math.max(20, insets!.bottom)
@@ -60,7 +60,7 @@ export class BottomSheet extends React.Component<Props, State>{
                         }
                     </View>
                 }
-            </SafeAreaConsumer>
+            </SafeAreaInsetsContext.Consumer>
         </Modal>
     }
 }

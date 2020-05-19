@@ -461,7 +461,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
                                         containerStyle={styles.historyButtonContainerStyle}
                                         buttonStyle={styles.historyButtonStyle}
                                         icon={undoIconStyle} onPress={this.undo}
-                                        title="Cancel latest"
+                                        title="Undo speech"
                                         titleStyle={styles.historyButtonTitleStyle}
                                     />
                                 </View>

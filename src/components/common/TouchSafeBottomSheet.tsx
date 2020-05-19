@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Animated, Easing } from 'react-native';
 import { StyleTemplates } from '@style/Styles';
-import { SafeAreaConsumer } from 'react-native-safe-area-context';
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { TapGestureHandler, TapGestureHandlerStateChangeEvent, State as GestureState } from 'react-native-gesture-handler';
 import { ZIndices } from '../pages/exploration/parts/zIndices';
 import Colors from '@style/Colors';
@@ -113,7 +113,7 @@ export class TouchSafeBottomSheet extends React.PureComponent<Props, State> {
                         })
                     }]
                 }}>
-                    <SafeAreaConsumer>
+                    <SafeAreaInsetsContext.Consumer>
                         {
                             insets => <View style={{
                                 paddingBottom: Math.max(20, insets!.bottom)
@@ -123,7 +123,7 @@ export class TouchSafeBottomSheet extends React.PureComponent<Props, State> {
                                 }
                             </View>
                         }
-                    </SafeAreaConsumer>
+                    </SafeAreaInsetsContext.Consumer>
                 </Animated.View>
             </View>
         } else return <></>

@@ -14,7 +14,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { SettingsSteckParamList } from "@components/Routes";
 import { SystemLogger } from "@core/logging/SystemLogger";
 import { StyleTemplates } from "@style/Styles";
-import { SafeAreaConsumer } from "react-native-safe-area-context";
+import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { AboutPanel } from "./AbountPanel";
 import { format } from "date-fns";
 
@@ -329,7 +329,7 @@ class SettingsScreen extends React.PureComponent<Props, State>{
                 height: '50%',
                 backgroundColor: Colors.headerBackground
             }} />
-            <SafeAreaConsumer>
+            <SafeAreaInsetsContext.Consumer>
                 {insets =>
                     <ScrollView>
                         <Subheader title={"Measure Data Source"} />
@@ -374,7 +374,7 @@ class SettingsScreen extends React.PureComponent<Props, State>{
                         }} />
                     </ScrollView>
                 }
-            </SafeAreaConsumer>
+            </SafeAreaInsetsContext.Consumer>
         </View>
     }
 }

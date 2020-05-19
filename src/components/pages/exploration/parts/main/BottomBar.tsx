@@ -9,7 +9,7 @@ import { ExplorationMode } from '@data-at-hand/core/exploration/ExplorationInfo'
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
 import { SpeechRecognizerSessionStatus } from '@state/speech/types';
-import { useSafeArea } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ZIndices } from '@components/pages/exploration/parts/zIndices';
 
 const bottomBarIconSize = sizeByScreen(21, 19)
@@ -83,7 +83,7 @@ const BottomBarButton = (prop: { isOn: boolean, mode: ExplorationMode, title: st
     //const color = prop.isOn === true ? Colors.primary : Colors.chartLightText
     const color = Colors.textGray
 
-    const insets = useSafeArea()
+    const insets = useSafeAreaInsets()
 
     return <View style={[Styles.bottomBarButtonStyle, {
         paddingTop: insets.bottom > 0 ? 12 : 0,

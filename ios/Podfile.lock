@@ -252,9 +252,9 @@ PODS:
   - react-native-app-auth (5.1.2):
     - AppAuth (= 1.2.0)
     - React
-  - react-native-safe-area-context (0.7.3):
+  - react-native-safe-area-context (1.0.2):
     - React
-  - react-native-segmented-control (1.6.0):
+  - react-native-segmented-control (1.6.1):
     - React
   - react-native-spinkit (1.4.1):
     - React
@@ -321,13 +321,13 @@ PODS:
     - React-cxxreact (= 0.62.2)
     - React-jsi (= 0.62.2)
     - ReactCommon/callinvoker (= 0.62.2)
-  - RNCAsyncStorage (1.10.0):
+  - RNCAsyncStorage (1.10.3):
     - React
   - RNCMaskedView (0.1.10):
     - React
-  - RNDateTimePicker (2.3.2):
+  - RNDateTimePicker (2.4.0):
     - React
-  - RNDeviceInfo (5.5.7):
+  - RNDeviceInfo (5.5.8):
     - React
   - RNFS (2.16.6):
     - React
@@ -572,8 +572,8 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 1540d1c01bb493ae3124ed83351b1b6a155db7da
   React-jsinspector: 512e560d0e985d0e8c479a54a4e5c147a9c83493
   react-native-app-auth: d7a1884e56c208d50c3fec8cb5a5b860a6ea1378
-  react-native-safe-area-context: 8260e5157617df4b72865f44006797f895b2ada7
-  react-native-segmented-control: db2eb0614fc5d1f9d260329f4bcbb10b181d4c33
+  react-native-safe-area-context: 5292aacb304803e215ff13fd7f01c3577909319f
+  react-native-segmented-control: 83be1bd42d79a1ea0e02b7421c34cd6411ab1ac0
   react-native-spinkit: da294fd828216ad211fe36a5c14c1e09f09e62db
   react-native-sqlite-storage: ce71689c5a73b79390a1ab213555ae80979a5dc7
   react-native-view-shot: 08c46c9e8e92f6681e8f2ffa55ac3d06e7e99070
@@ -587,10 +587,10 @@ SPEC CHECKSUMS:
   React-RCTText: fae545b10cfdb3d247c36c56f61a94cfd6dba41d
   React-RCTVibration: 4356114dbcba4ce66991096e51a66e61eda51256
   ReactCommon: ed4e11d27609d571e7eee8b65548efc191116eb3
-  RNCAsyncStorage: b34d2399d3e25db01d5b881949b503bd3c224d57
+  RNCAsyncStorage: 62559ca9a3e7790bac152a3e69bdd9ca349d37bd
   RNCMaskedView: f5c7d14d6847b7b44853f7acb6284c1da30a3459
-  RNDateTimePicker: 0f657a34a0f6465ab7d0255c24954693bc7a8cf6
-  RNDeviceInfo: 498ccbf8b1361fe858581e3c1193ecee1a031e62
+  RNDateTimePicker: 39a3987baca0848368f71f02c45bf6e1e61041c0
+  RNDeviceInfo: 0d49fb8dd9fec5a239253ec374a07ef0efa9f875
   RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
   RNGestureHandler: 8f09cd560f8d533eb36da5a6c5a843af9f056b38
   RNPermissions: 8ca17fd6c822eea589fe84709d9426e05cc39c39
