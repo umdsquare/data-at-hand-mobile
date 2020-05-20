@@ -33,11 +33,11 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
     private constructor() { }
 
-    private getCascadedDataSource(dataSourceVariables: VariableInfo[], context: SpeechContext, explorationInfo: ExplorationInfo): DataSourceType | undefined {
-        return dataSourceVariables.length > 0 ? dataSourceVariables[0].value :
-        ((context as any)["dataSource"] 
-        || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
-        || (context.uiStatus["viewableDataSources"] != null && context.uiStatus["viewableDataSources"].length > 0? context.uiStatus["viewableDataSources"][0] as DataSourceType : null)
+    private getCascadedDataSource(dataSourceVariables: VariableInfo[] | null | undefined, context: SpeechContext, explorationInfo: ExplorationInfo): DataSourceType | undefined {
+        return dataSourceVariables != null && dataSourceVariables.length > 0 ? dataSourceVariables[0].value :
+            ((context as any)["dataSource"]
+                || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
+            || (context.uiStatus["viewableDataSources"] != null && context.uiStatus["viewableDataSources"].length > 0 ? context.uiStatus["viewableDataSources"][0] as DataSourceType : null)
     }
 
     private static convertActionToNLUResult(action: ActionTypeBase | undefined | null, currentInfo: ExplorationInfo, preprocessed: PreProcessedInputText): NLUResult {
@@ -78,7 +78,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
     async resolveSpeechCommand(speech: string, context: SpeechContext, explorationInfo: ExplorationInfo, options: NLUOptions): Promise<NLUResult> {
 
-        const preprocessed = await preprocess(speech, options)
+        const preprocessed = await preprocess(speech, options, this.getCascadedDataSource(null, context, explorationInfo))
 
         const dataSources = this.extractVariablesWithType(preprocessed, VariableType.DataSource)
         const dates = this.extractVariablesWithType(preprocessed, VariableType.Date)
@@ -130,18 +130,18 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                         fastConcatTo(extractedRanges, ranges.map(r => r.value))
                     }
 
-                    if(toldDates){
+                    if (toldDates) {
                         fastConcatTo(extractedRanges, dates.map(d => [d.value, d.value]))
                     }
-                    
-                    if(extractedRanges.length < 2){
+
+                    if (extractedRanges.length < 2) {
                         const cascadedRange = (context as any)["range"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range)
-                        if(cascadedRange != null){
+                        if (cascadedRange != null) {
                             extractedRanges.unshift(cascadedRange)
                         }
                     }
 
-                    if (cascadedDataSource && extractedRanges.length >= 2 ) {
+                    if (cascadedDataSource && extractedRanges.length >= 2) {
                         return NLUCommandResolverImpl.convertActionToNLUResult(
                             createGoToComparisonTwoRangesAction(InteractionType.Speech, cascadedDataSource, extractedRanges[0], extractedRanges[1]),
                             explorationInfo, preprocessed)

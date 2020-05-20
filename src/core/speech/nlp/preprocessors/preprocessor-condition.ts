@@ -7,6 +7,7 @@ import compromise from 'compromise';
 import { ConditionInfo } from "@data-at-hand/core/speech/types"
 import { parseTimeOfTheDayTextToDiffSeconds } from "./preprocessor-time-clock"
 import { NLUOptions, PARSED_TAG } from "../types"
+import NamedRegExp from "named-regexp-groups"
 
 type TermInfo = { term: string, conditionType: NumericConditionType, valueType: Array<"scalar" | "duration" | "time"> | null, impliedSource: DataSourceType | null }
 
@@ -37,6 +38,7 @@ const lexicon: Array<TermInfo> = [
 
 ]
 
+const accomplishVerbs = ["meet", "met", "reach", "reached", "accomplish", "accomplished", "achieve", "achieved"]
 
 function categorizeExtreme(extreme: string): NumericConditionType.Max | NumericConditionType.Min | null {
     if (/(max)|(maximum)|(latest)|(fastest)|(most)|(highest)/gi.test(extreme)) {
@@ -89,7 +91,7 @@ function isWaketimeReferred(speech: string): boolean {
     return /(wake)|(woke)|(g(o|e)t(ting)?\s+up)/gi.test(speech)
 }
 
-export async function inferHighlight(nlp: compromise.Document, original: string, guidedDataSource: DataSourceType | undefined, options: NLUOptions): Promise<{ conditionInfo: ConditionInfo, match: compromise.Document } | null> {
+export async function inferHighlight(nlp: compromise.Document, original: string, guidedDataSource: DataSourceType | undefined, options: NLUOptions): Promise<{ conditionInfo: ConditionInfo, match: compromise.Document | string } | null> {
     //try to find the condition
     console.log("infer highlight")
     const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective|below|above)] than? [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time|am|pm|hour|hours|minute|minutes)+?]`)
@@ -243,6 +245,68 @@ export async function inferHighlight(nlp: compromise.Document, original: string,
             }
 
             //goal accomplishment
+            const regex = new NamedRegExp(`(?<negation>(n\\'t|not|(fail(ed)? to))\\s+)?(?<verb>${accomplishVerbs.join("|")})\\s+((a|our|my|the)\\s+)?(current\\s+)?(?<source>(step|(step count)|weight|wait|sleep|(hours slept)|)\\s+)?(goal|gold?)`, "i")
+            const regexMatch = original.match(regex)
+            if (regexMatch != null) {
+                const groups: { negation?: string, verb?: string, source?: string } = regexMatch.groups
+
+                let dataSource: DataSourceType = null
+                if (groups.source != null) {
+                    if (groups.source.startsWith("step")) {
+                        dataSource = DataSourceType.StepCount
+                    } else if (groups.source.startsWith("sleep") || groups.source.startsWith("hours")) {
+                        dataSource = DataSourceType.HoursSlept
+                    } else if (groups.source.startsWith("weight") || groups.source.startsWith("wait")) {
+                        dataSource = DataSourceType.Weight
+                    }
+                }
+
+                if (dataSource == null) {
+                    if(guidedDataSource === DataSourceType.SleepRange){
+                        dataSource = DataSourceType.HoursSlept
+                    }else dataSource = guidedDataSource
+                }
+
+                if (dataSource != null) {
+                    const goalValue = await options.getGoal(dataSource)
+                    if (goalValue != null) {
+                        let conditionType: NumericConditionType = undefined
+
+
+                        if (groups.negation == null) {
+                            //met a goal
+                            switch (dataSource) {
+
+                                case DataSourceType.Weight:
+                                    conditionType = NumericConditionType.Less
+                                    break;
+                                default:
+                                    conditionType = NumericConditionType.More
+                            }
+                        } else {
+                            //didn't meet a goal
+                            switch (dataSource) {
+                                case DataSourceType.Weight:
+                                    conditionType = NumericConditionType.More
+                                    break;
+                                default:
+                                    conditionType = NumericConditionType.Less
+                            }
+                        }
+
+                        if (conditionType != null) {
+                            return {
+                                conditionInfo: {
+                                    type: conditionType,
+                                    impliedDataSource: dataSource,
+                                    ref: goalValue
+                                } as ConditionInfo,
+                                match: regexMatch[0]
+                            }
+                        }
+                    }
+                }
+            }
 
         }
     }

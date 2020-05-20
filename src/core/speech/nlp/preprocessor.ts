@@ -24,7 +24,7 @@ const lexicon = {
     'midnight': 'Time'
 }
 
-export async function preprocess(speech: string, options: NLUOptions): Promise<PreProcessedInputText> {
+export async function preprocess(speech: string, options: NLUOptions, guidedDataSource?: DataSourceType): Promise<PreProcessedInputText> {
 
     const t = Date.now()
 
@@ -115,16 +115,21 @@ export async function preprocess(speech: string, options: NLUOptions): Promise<P
         }),
         definePipe("infer-highlight", async (input) => {
             const dataSourceVariableId = Object.keys(input.variables).find(key => input.variables[key].type === VariableType.DataSource)
-            const inferredConditionInfoResult = await inferHighlight(input.payload.nlp, speech, dataSourceVariableId != null ? input.variables[dataSourceVariableId].value : null, options)
+            const inferredConditionInfoResult = await inferHighlight(input.payload.nlp, speech, dataSourceVariableId != null ? input.variables[dataSourceVariableId].value : guidedDataSource, options)
             if (inferredConditionInfoResult) {
                 const id = makeVariableId()
                 input.variables[id] = {
                     id,
-                    originalText: inferredConditionInfoResult.match.text(),
+                    originalText: typeof inferredConditionInfoResult.match === 'string'? typeof inferredConditionInfoResult.match : inferredConditionInfoResult.match.text(),
                     type: VariableType.Condition,
                     value: inferredConditionInfoResult.conditionInfo
                 }
-                tag(inferredConditionInfoResult.match.replaceWith(id), VariableType.Condition)
+                if(typeof inferredConditionInfoResult.match !== 'string'){
+                    tag(inferredConditionInfoResult.match.replaceWith(id), VariableType.Condition)
+                }else{
+                    //TODO tag and replace the goal accomplishment part.
+                }
+
                 input.processedSpeech = input.payload.nlp.text()
                 input.intent = Intent.Highlight
 
