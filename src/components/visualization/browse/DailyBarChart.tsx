@@ -59,7 +59,7 @@ export const DailyBarChart = React.memo((prop: Props) => {
         chartArea={chartArea}
         scaleX={scaleX}
         dataSource={prop.dataSource}
-        getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date)!.value}
+        getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date)?.value}
         highlightedDays={prop.highlightFilter != null ? prop.highlightedDays : undefined}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={prop.valueTickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
