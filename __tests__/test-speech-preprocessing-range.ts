@@ -3,7 +3,7 @@
  */
 
 import { preprocess } from '@core/speech/nlp/preprocessor';
-import { dataSources, speechOptions } from '../jest.setup';
+import { dataSources, speechOptions, TODAY } from '../jest.setup';
 import { VariableType, Intent } from '@data-at-hand/core';
 
 /*it('renders correctly', () => {
@@ -85,6 +85,10 @@ const seasons: Array<[string, [number, number]]> = [
   ["winter of 2017", [20171201, 20180228]],
 ]
 
+const since: Array<[string, [number, number]]> = [...months, ...seasons].map(entry => {
+  return [`since ${entry[0]}`, [entry[1][0], TODAY]]
+})
+
 const manualPeriods: Array<[string, [number, number]]> = [
   ["from February 1 to March 10", [20200201, 20200310]],
   ["from February 1 through March 10", [20200201, 20200310]],
@@ -111,7 +115,7 @@ const dictationErrorPeriods: Array<[string, [number, number]]> = [
   ["from February 22, February 28", [20200220, 20200228]],
 ]
 
-const periodExpressions = relatives.concat(months).concat(seasons).concat(manualPeriods).concat(dictationErrorPeriods)
+const periodExpressions = relatives.concat(months).concat(seasons).concat(manualPeriods).concat(dictationErrorPeriods).concat(since)
 
 describe("Normal Periods", () => {
   relatives.concat(months).concat(seasons).concat(manualPeriods).forEach(r => {

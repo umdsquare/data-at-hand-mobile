@@ -5,6 +5,8 @@ export const STEP_COUNT_GOAL = 10000
 export const HOURS_SLEPT_GOAL = 5 * 3600
 export const WEIGHT_GOAL = 70
 
+export const TODAY = 20200301 // today is 2020 3/1
+
 console.log = jest.fn()
 console.debug = jest.fn()
 

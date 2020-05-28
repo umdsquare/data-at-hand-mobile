@@ -214,22 +214,23 @@ theDayBeforeRefiner.refine = function (text, results: Array<ParsedResult>, opt) 
 
 const sinceRefiner = new Refiner()
 sinceRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
-    const match = text.match(/(since)\s+/i)
-    if (match
-        && results.length === 1
-        && results[0].start != null
-        && results[0].end == null
-        && results[0].start.isCertain('day') === true) {
 
-        results[0].text = match[0] + results[0].text
-        results[0].index = match.index
-        results[0].end = new ParsedComponents({
-            year: getYear(results[0].ref),
-            month: getMonth(results[0].ref) + 1,
-            day: getDate(results[0].ref)
-        }, results[0].ref)
-        return results
-    }
+    results.forEach((result, index) => {
+        const startStringPosition = index === 0 ? 0 : (results[index - 1].index + results[index - 1].text.length)
+        const match = text.substring(startStringPosition, result.index).match(/(?!^|\s)(since)\s+/i)
+        if (match
+            && result.start != null) {
+
+            result.text = match[0] + result.text
+            result.index = startStringPosition + match.index
+            result.end = new ParsedComponents({
+                year: getYear(result.ref),
+                month: getMonth(result.ref) + 1,
+                day: getDate(result.ref)
+            }, result.ref)
+            return results
+        }
+    })
     return results
 }
 
