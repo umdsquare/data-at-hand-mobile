@@ -97,8 +97,17 @@ describe("[DataSource] on [Date]", () => {
             const sentence = `${dataSource[0]} on ${dayExpression[0]}`
             it(sentence, async () => {
                 const result = await preprocess(sentence, speechOptions)
-                const dataSourceId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.DataSource)
-                const dateId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.Date)
+
+                let dataSourceId: string
+                let dateId: string
+
+                Object.keys(result.variables).forEach(id => {
+                    if(result.variables[id].type === VariableType.DataSource){
+                        dataSourceId = id
+                    }else if(result.variables[id].type === VariableType.Date){
+                        dateId = id
+                    }
+                })
 
                 expect(Object.keys(result.variables).length).toBe(2)
                 expect(result.variables[dataSourceId].type).toBe(VariableType.DataSource)

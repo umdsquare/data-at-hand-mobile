@@ -116,9 +116,12 @@ const templates: Array<Template> = [
         parse: (groups: { compareA: string, compareB: string, conjunction: string, dataSource?: string, dataSourcePreposition?: string }, options) => {
             const today = options.getToday()
 
+            console.log(groups)
+
             const variables = []
 
             let compareAOverride: string
+            let compareBOverride: string
 
             if (groups.dataSource != null) {
                 const parsedDataSourceInfo = parseVariable(groups.dataSource, DATASOURCE_VARIABLE_RULES)
@@ -130,20 +133,34 @@ const templates: Array<Template> = [
                 }
             } else {
                 //check the case dataSourcePreposition does not exist.
-                const parsedDataSourceInfo = parseVariable(groups.compareA, DATASOURCE_VARIABLE_RULES)
-                if(parsedDataSourceInfo){
+                {
+                    const parsedDataSourceInfo = parseVariable(groups.compareA, DATASOURCE_VARIABLE_RULES)
+                    if (parsedDataSourceInfo) {
+                        variables.push(parsedDataSourceInfo.info)
+
+                        //discard the data source text from the time expression
+                        compareAOverride = groups.compareA.substring(0, parsedDataSourceInfo.index) + groups.compareA.substring(parsedDataSourceInfo.index + parsedDataSourceInfo.length)
+                    }
+                }
+            }
+            
+            //check the case data source is mentioned at the end.
+            {
+                const parsedDataSourceInfo = parseVariable(groups.compareB, DATASOURCE_VARIABLE_RULES)
+                if (parsedDataSourceInfo) {
                     variables.push(parsedDataSourceInfo.info)
 
                     //discard the data source text from the time expression
-                    compareAOverride = groups.compareA.substring(0, parsedDataSourceInfo.index) + groups.compareA.substring(parsedDataSourceInfo.index + parsedDataSourceInfo.length)
+                    compareBOverride = groups.compareB.substring(0, parsedDataSourceInfo.index) + groups.compareB.substring(parsedDataSourceInfo.index + parsedDataSourceInfo.length)
                 }
             }
 
             compareAOverride = compareAOverride || groups.compareA
+            compareBOverride = compareBOverride || groups.compareB
 
             let timeVariables = []
 
-            for (const elementText of [compareAOverride, groups.compareB]) {
+            for (const elementText of [compareAOverride, compareBOverride]) {
                 const timeParsingResult = parseTimeText(elementText, today)
                 if (timeParsingResult) {
                     timeVariables.push(timeParsingResult)
@@ -161,7 +178,7 @@ const templates: Array<Template> = [
 
             if (timeVariables.length >= 2 && timeVariables[0].type != timeVariables[1].type) {
                 //two time variables should be parsed in the same way.
-                timeVariables = extractTimeExpressions(`${compareAOverride} and ${groups.compareB}`, today)
+                timeVariables = extractTimeExpressions(`${compareAOverride} and ${compareBOverride}`, today)
             }
 
             fastConcatTo(variables, timeVariables)

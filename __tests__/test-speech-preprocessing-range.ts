@@ -104,7 +104,7 @@ const manualPeriods: Array<[string, [number, number]]> = [
   ["from Monday to Wednesday", [20200224, 20200226]],
   ["from last Monday to this Wednesday", [20200217, 20200226]],
   ["from 2019 to 2020", [20190101, 20201231]],
-  
+
 ]
 
 const dictationErrorPeriods: Array<[string, [number, number]]> = [
@@ -152,8 +152,16 @@ describe("[DataSource] of/in/during [Period]", () => {
         it(sentence, async () => {
           const result = await preprocess(sentence, speechOptions)
 
-          const dataSourceId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.DataSource)
-          const rangeId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.Period)
+          let dataSourceId: string
+          let rangeId: string
+
+          Object.keys(result.variables).forEach(id => {
+            if (result.variables[id].type === VariableType.DataSource) {
+              dataSourceId = id
+            } else if (result.variables[id].type === VariableType.Period) {
+              rangeId = id
+            }
+          })
 
           expect(result.variables[dataSourceId].type).toBe(VariableType.DataSource)
           expect(result.variables[dataSourceId].value).toEqual(dataSource[1])
@@ -167,16 +175,82 @@ describe("[DataSource] of/in/during [Period]", () => {
 })
 
 
-
-const comparisonPrefixes = ["compare"]
 const comparisonConjunction = ["with", "to", "and"]
+const comparisonDataSourcePreposition = [" of", " in", " on", " at", ""]
 
-const ranges = [...relatives, ...months.filter(m => /20:19/i.test(m[0]) === false )]
+const comparisonFormat = [
+  "compare {rangeA} {conjunction} {rangeB}",
+  "compare {dataSource}{dataSourcePreposition} {rangeA} {conjunction} {rangeB}",
+  "compare {rangeA} {conjunction} {rangeB}{dataSourcePreposition} {dataSource}"
+]
 
-describe("Comparison between ranges", () => {
+const ranges = [...relatives, ...months.filter(m => /20:19/i.test(m[0]) === false)]
+
+describe.skip("Comparison between ranges", () => {
   ranges.forEach((rA, iA) => {
     ranges.forEach((rB, iB) => {
       if (iA !== iB && iA > iB) {
+
+        comparisonConjunction.forEach((c, iC) => {
+          comparisonFormat.forEach(format => {
+            if (format.includes("{dataSource}") === true) {
+              dataSources.forEach(([dataSourceText, dataSourceValue]) => {
+                comparisonDataSourcePreposition.forEach(dataSourcePreposition => {
+                  const sentence = format
+                    .replace("{rangeA}", rA[0])
+                    .replace("{rangeB}", rB[0])
+                    .replace("{conjunction}", c)
+                    .replace("{dataSource}", dataSourceText)
+                    .replace("{dataSourcePreposition}", dataSourcePreposition)
+
+                  it(sentence, async () => {
+                    const result = await preprocess(sentence, speechOptions)
+
+                    expect(result.intent).toEqual(Intent.Compare)
+
+                    const rangeVariables = Object.keys(result.variables).filter(k => result.variables[k].type === VariableType.Period).map(id => result.variables[id])
+                    expect(rangeVariables.length).toEqual(2)
+
+                    const parsedRangeA = rangeVariables.find(v => v.value[0] === rA[1][0] && v.value[1] === rA[1][1])
+                    const parsedRangeB = rangeVariables.find(v => v.value[0] === rB[1][0] && v.value[1] === rB[1][1])
+
+                    expect(parsedRangeA.value).toEqual(rA[1])
+                    expect(parsedRangeB.value).toEqual(rB[1])
+
+                    const dataSourceId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.DataSource)
+                    expect(result.variables[dataSourceId].type).toBe(VariableType.DataSource)
+                    expect(result.variables[dataSourceId].value).toEqual(dataSourceValue)
+
+                  })
+                })
+
+              })
+            } else {
+              //format without data source
+
+              const sentence = format
+                .replace("{rangeA}", rA[0])
+                .replace("{rangeB}", rB[0])
+                .replace("{conjunction}", c)
+
+              it(sentence, async () => {
+                const result = await preprocess(sentence, speechOptions)
+
+                expect(result.intent).toEqual(Intent.Compare)
+
+                const rangeVariables = Object.keys(result.variables).filter(k => result.variables[k].type === VariableType.Period).map(id => result.variables[id])
+                expect(rangeVariables.length).toEqual(2)
+
+                const parsedRangeA = rangeVariables.find(v => v.value[0] === rA[1][0] && v.value[1] === rA[1][1])
+                const parsedRangeB = rangeVariables.find(v => v.value[0] === rB[1][0] && v.value[1] === rB[1][1])
+
+                expect(parsedRangeA.value).toEqual(rA[1])
+                expect(parsedRangeB.value).toEqual(rB[1])
+              })
+            }
+          })
+        })
+        /*
         comparisonPrefixes.forEach((p, iP) => {
           comparisonConjunction.forEach((c, iC) => {
 
@@ -197,7 +271,7 @@ describe("Comparison between ranges", () => {
               expect(parsedRangeB.value).toEqual(rB[1])
             })
           })
-        })
+        })*/
       }
     })
   })

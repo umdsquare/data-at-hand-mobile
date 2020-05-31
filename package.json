@@ -22,7 +22,7 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
-    "test": "jest",
+    "test": "node --max-old-space-size=8192 ./node_modules/jest/bin/jest.js -w=6 --logHeapUsage",
     "testsilent": "jest --silent",
     "postversion": "react-native-version --target ios"
   },

@@ -24,7 +24,6 @@ export class FitbitIntraDayHeartRateMeasure extends FitbitIntraDayMeasure<HeartR
   }
 
   protected async storeServerDataEntry(...dataset: FitbitHeartRateIntraDayQueryResult[]): Promise<number[]> {
-    console.log("cache:", dataset)
     const dbEntries = dataset.map(result => {
       const date = DateTimeHelper.fromFormattedString(result["activities-heart"][0].dateTime)
 

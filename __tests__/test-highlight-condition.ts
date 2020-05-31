@@ -90,11 +90,21 @@ describe("Inequation condition", () => {
                 it(testcase[0], async () => {
                     const result = await preprocess(prefix + " " + testcase[0], speechOptions)
 
-                    const dataSourceId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.DataSource)
-                    const conditionId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.Condition)
+                    let dataSourceId: string
+                    let conditionId: string
+
+                    Object.keys(result.variables).forEach(id => {
+                        if(result.variables[id].type === VariableType.DataSource){
+                            dataSourceId = id
+                        }else if(result.variables[id].type === VariableType.Condition){
+                            conditionId = id
+                        }
+                    })
+
 
                     let dataSource: DataSourceType
                     let condition: ConditionInfo
+
                     if (dataSourceId) {
                         dataSource = result.variables[dataSourceId].value
                     }
@@ -213,8 +223,17 @@ describe("Extreme condition", () => {
         it(testcase[0], async () => {
             const result = await preprocess(testcase[0], speechOptions)
 
-            const dataSourceId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.DataSource)
-            const conditionId = Object.keys(result.variables).find(k => result.variables[k].type === VariableType.Condition)
+            
+            let dataSourceId: string
+            let conditionId: string
+
+            Object.keys(result.variables).forEach(id => {
+                if(result.variables[id].type === VariableType.DataSource){
+                    dataSourceId = id
+                }else if(result.variables[id].type === VariableType.Condition){
+                    conditionId = id
+                }
+            })
 
             let dataSource: DataSourceType
             let condition: ConditionInfo
