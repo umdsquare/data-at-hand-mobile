@@ -8,6 +8,7 @@ import { ConditionInfo } from "@data-at-hand/core/speech/types"
 import { parseTimeOfTheDayTextToDiffSeconds } from "./preprocessor-time-clock"
 import { NLUOptions, PARSED_TAG } from "../types"
 import NamedRegExp from "named-regexp-groups"
+import { STEP_COUNT_REGEX_STRING, HOURS_SLEPT_REGEX_STRING, WEIGHT_REGEX_STRING, SLEEP_RANGE_REGEX_STRING, parseVariable, DATASOURCE_VARIABLE_RULES } from "./preprocessor-templates"
 
 type TermInfo = { term: string, conditionType: NumericConditionType, valueType: Array<"scalar" | "duration" | "time"> | null, impliedSource: DataSourceType | null }
 
@@ -245,26 +246,28 @@ export async function inferHighlight(nlp: compromise.Document, original: string,
             }
 
             //goal accomplishment
-            const regex = new NamedRegExp(`(?<negation>(n\\'t|not|(fail(ed)? to))\\s+)?(?<verb>${accomplishVerbs.join("|")})\\s+((a|our|my|the)\\s+)?(current\\s+)?(?<source>(step|(step count)|weight|wait|sleep|(hours slept)|)\\s+)?(goal|gold?)`, "i")
+            const regex = new NamedRegExp(`(?<negation>(n\\'t|not|(fail(ed)? to))\\s+)?(?<verb>${accomplishVerbs.join("|")})\\s+((a|our|my|the)\\s+)?(current\\s+)?((?<source>${STEP_COUNT_REGEX_STRING}|${HOURS_SLEPT_REGEX_STRING}|${SLEEP_RANGE_REGEX_STRING}|${WEIGHT_REGEX_STRING})\\s+)?(goal|gold?|call)`, "i")
             const regexMatch = original.match(regex)
+            console.log(regexMatch)
             if (regexMatch != null) {
                 const groups: { negation?: string, verb?: string, source?: string } = regexMatch.groups
 
                 let dataSource: DataSourceType = null
                 if (groups.source != null) {
-                    if (groups.source.startsWith("step")) {
-                        dataSource = DataSourceType.StepCount
-                    } else if (groups.source.startsWith("sleep") || groups.source.startsWith("hours")) {
-                        dataSource = DataSourceType.HoursSlept
-                    } else if (groups.source.startsWith("weight") || groups.source.startsWith("wait")) {
-                        dataSource = DataSourceType.Weight
+                    const parsedDataSourceVariable = parseVariable(groups.source, DATASOURCE_VARIABLE_RULES)
+                    if (parsedDataSourceVariable != null) {
+                        if (parsedDataSourceVariable.info.value === DataSourceType.SleepRange) {
+                            dataSource = DataSourceType.HoursSlept
+                        } else {
+                            dataSource = parsedDataSourceVariable.info.value
+                        }
                     }
                 }
 
                 if (dataSource == null) {
-                    if(guidedDataSource === DataSourceType.SleepRange){
+                    if (guidedDataSource === DataSourceType.SleepRange) {
                         dataSource = DataSourceType.HoursSlept
-                    }else dataSource = guidedDataSource
+                    } else dataSource = guidedDataSource
                 }
 
                 if (dataSource != null) {

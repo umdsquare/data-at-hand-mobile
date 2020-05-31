@@ -30,9 +30,14 @@ export function parseVariable(text: string, rules: Array<VariableParsingRule>): 
     return null
 }
 
+export const STEP_COUNT_REGEX_STRING = "(step count(s|er)?)|(steps?)|(walk)"
+export const WEIGHT_REGEX_STRING = "((body\\s+)?weight)|(wait)|(how heavy i (was|am))"
+export const SLEEP_RANGE_REGEX_STRING = "(sleep(\\srange)?)|(range of ([a-z]+\\s)?sleep)|(sleep schedules?)"
+export const HOURS_SLEPT_REGEX_STRING = "(h?ours?(\\s?)+(i|(of))?(\\s?)+((slept)|(sleep)))|(sleep length)|((length|duration) of ([a-z]+\\s)?sleep)|(sleep duration)|(sleep h?ours?)|(i (slept|sleep))"
+
 export const DATASOURCE_VARIABLE_RULES: Array<VariableParsingRule> = [
     {
-        regex: () => /(step count(s|er)?)|(steps?)|(walk)/i,
+        regex: new RegExp(STEP_COUNT_REGEX_STRING, "i"),
         variableType: VariableType.DataSource,
         value: DataSourceType.StepCount
     },
@@ -42,17 +47,17 @@ export const DATASOURCE_VARIABLE_RULES: Array<VariableParsingRule> = [
         value: DataSourceType.HeartRate
     },
     {
-        regex: () => /(h?ours?(\s?)+(i|(of))?(\s?)+((slept)|(sleep)))|(sleep length)|((length|duration) of ([a-z]+\s)?sleep)|(sleep duration)|(sleep h?ours?)|(i (slept|sleep))/i,
+        regex: new RegExp(HOURS_SLEPT_REGEX_STRING, "i"),
         variableType: VariableType.DataSource,
         value: DataSourceType.HoursSlept
     },
     {
-        regex: () => /(sleep(\srange)?)|(range of ([a-z]+\s)?sleep)|(sleep schedules?)/i,
+        regex: new RegExp(SLEEP_RANGE_REGEX_STRING, "i"),
         variableType: VariableType.DataSource,
         value: DataSourceType.SleepRange,
     },
     {
-        regex: () => /((body\s+)?weight)|(wait)|(how heavy i (was|am))/i,
+        regex: new RegExp(WEIGHT_REGEX_STRING, "i"),
         variableType: VariableType.DataSource,
         value: DataSourceType.Weight
     }
@@ -143,7 +148,7 @@ const templates: Array<Template> = [
                     }
                 }
             }
-            
+
             //check the case data source is mentioned at the end.
             {
                 const parsedDataSourceInfo = parseVariable(groups.compareB, DATASOURCE_VARIABLE_RULES)

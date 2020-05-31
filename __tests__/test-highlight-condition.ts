@@ -144,6 +144,7 @@ prefixes.forEach(prefix => {
                 ["step count ", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.Less }],
                 ["sleep ", DataSourceType.HoursSlept, { ref: HOURS_SLEPT_GOAL, type: NumericConditionType.Less }],
                 ["hours slept ", DataSourceType.HoursSlept, { ref: HOURS_SLEPT_GOAL, type: NumericConditionType.Less }],
+                ["sleep duration ", DataSourceType.HoursSlept, { ref: HOURS_SLEPT_GOAL, type: NumericConditionType.Less }],
                 ["weight ", DataSourceType.Weight, { ref: WEIGHT_GOAL, type: NumericConditionType.More }],
             ].forEach(entry => {
                 goalWordPrefixes.forEach(goalWordPrefix => {
@@ -162,6 +163,8 @@ prefixes.forEach(prefix => {
     })
 })
 
+const postPreposition = ["of ", "for ", ""]
+
 prefixes.forEach(prefix => {
     goalAchieveVerbPast.forEach(pastVerb => {
         [
@@ -170,6 +173,7 @@ prefixes.forEach(prefix => {
             ["step count ", DataSourceType.StepCount, { ref: STEP_COUNT_GOAL, type: NumericConditionType.More }],
             ["sleep ", DataSourceType.HoursSlept, { ref: HOURS_SLEPT_GOAL, type: NumericConditionType.More }],
             ["hours slept ", DataSourceType.HoursSlept, { ref: HOURS_SLEPT_GOAL, type: NumericConditionType.More }],
+            ["sleep duration ", DataSourceType.HoursSlept, { ref: HOURS_SLEPT_GOAL, type: NumericConditionType.More }],
             ["weight ", DataSourceType.Weight, { ref: WEIGHT_GOAL, type: NumericConditionType.Less }],
         ].forEach(entry => {
             goalWordPrefixes.forEach(goalWordPrefix => {
@@ -181,6 +185,17 @@ prefixes.forEach(prefix => {
                             entry[2] as ConditionInfo
                         ]
                     )
+
+                    postPreposition.forEach(preposition => {
+                        goalTestSet.push(
+                            [
+                                `${prefix} ${pastVerb} ${goalWordPrefix}${goalWord} ${preposition}${entry[0]}`,
+                                entry[1] as DataSourceType,
+                                entry[2] as ConditionInfo
+                            ]
+                        )
+                    })
+                    
                 })
             })
         })
