@@ -13,12 +13,17 @@ const PRONOUNS_REGEX = /^(this|it|that|these|them)(\s+(ones?|things?|elements?))
 
 export type VariableParsingRule = { regex: RegExp | (() => RegExp), variableType: VariableType, value: any }
 
-export function parseVariable(text: string, rules: Array<VariableParsingRule>): { type: VariableType, value: any } | null {
+export function parseVariable(text: string, rules: Array<VariableParsingRule>): { info: { type: VariableType, value: any }, index: number, length: number } | null {
     for (const rule of rules) {
-        if ((rule.regex as any)["test"] != null ? (rule.regex as any).test(text) : (rule.regex as any)().test(text)) {
+        const match = text.match((rule.regex as any)["test"] != null ? (rule.regex as any) : ((rule.regex as any)()))
+        if (match != null) {
             return {
-                type: rule.variableType,
-                value: rule.value
+                info: {
+                    type: rule.variableType,
+                    value: rule.value
+                },
+                index: match.index,
+                length: match[0].length
             }
         }
     }
@@ -27,27 +32,27 @@ export function parseVariable(text: string, rules: Array<VariableParsingRule>): 
 
 export const DATASOURCE_VARIABLE_RULES: Array<VariableParsingRule> = [
     {
-        regex: () => /(step count(s|er)?)|(steps?)|(walk)/gi,
+        regex: () => /(step count(s|er)?)|(steps?)|(walk)/i,
         variableType: VariableType.DataSource,
         value: DataSourceType.StepCount
     },
     {
-        regex: () => /((resting\s+)?heart rate)|(bpm)|(beats? per minutes?)/gi,
+        regex: () => /((resting\s+)?heart rate)|(bpm)|(beats? per minutes?)/i,
         variableType: VariableType.DataSource,
         value: DataSourceType.HeartRate
     },
     {
-        regex: () => /(h?ours?(\s?)+(i|(of))?(\s?)+((slept)|(sleep)))|(sleep length)|((length|duration) of ([a-z]+\s)?sleep)|(sleep duration)|(sleep h?ours?)|(i (slept|sleep))/gi,
+        regex: () => /(h?ours?(\s?)+(i|(of))?(\s?)+((slept)|(sleep)))|(sleep length)|((length|duration) of ([a-z]+\s)?sleep)|(sleep duration)|(sleep h?ours?)|(i (slept|sleep))/i,
         variableType: VariableType.DataSource,
         value: DataSourceType.HoursSlept
     },
     {
-        regex: () => /(sleep(\srange)?)|(range of ([a-z]+\s)?sleep)|(sleep schedules?)/gi,
+        regex: () => /(sleep(\srange)?)|(range of ([a-z]+\s)?sleep)|(sleep schedules?)/i,
         variableType: VariableType.DataSource,
         value: DataSourceType.SleepRange,
     },
     {
-        regex: () => /((body\s+)?weight)|(wait)|(how heavy i (was|am))/gi,
+        regex: () => /((body\s+)?weight)|(wait)|(how heavy i (was|am))/i,
         variableType: VariableType.DataSource,
         value: DataSourceType.Weight
     }
@@ -118,10 +123,19 @@ const templates: Array<Template> = [
             if (groups.dataSource != null) {
                 const parsedDataSourceInfo = parseVariable(groups.dataSource, DATASOURCE_VARIABLE_RULES)
                 if (parsedDataSourceInfo) {
-                    variables.push(parsedDataSourceInfo)
-                }else{
+                    variables.push(parsedDataSourceInfo.info)
+                } else {
                     //maybe it could be merged into the time expression.
-                    compareAOverride = `${groups.dataSource} ${groups.dataSourcePreposition} ${groups.compareA}` 
+                    compareAOverride = `${groups.dataSource} ${groups.dataSourcePreposition} ${groups.compareA}`
+                }
+            } else {
+                //check the case dataSourcePreposition does not exist.
+                const parsedDataSourceInfo = parseVariable(groups.compareA, DATASOURCE_VARIABLE_RULES)
+                if(parsedDataSourceInfo){
+                    variables.push(parsedDataSourceInfo.info)
+
+                    //discard the data source text from the time expression
+                    compareAOverride = groups.compareA.substring(0, parsedDataSourceInfo.index) + groups.compareA.substring(parsedDataSourceInfo.index + parsedDataSourceInfo.length)
                 }
             }
 
@@ -139,7 +153,7 @@ const templates: Array<Template> = [
                 } else {
                     const parsedDataSourceInfo = parseVariable(elementText, DATASOURCE_VARIABLE_RULES)
                     if (parsedDataSourceInfo) {
-                        variables.push(parsedDataSourceInfo)
+                        variables.push(parsedDataSourceInfo.info)
                         continue;
                     }
                 }
