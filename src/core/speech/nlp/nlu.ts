@@ -35,8 +35,11 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
     private getCascadedDataSource(dataSourceVariables: VariableInfo[] | null | undefined, context: SpeechContext, explorationInfo: ExplorationInfo): DataSourceType | undefined {
         return dataSourceVariables != null && dataSourceVariables.length > 0 ? dataSourceVariables[0].value :
-            ((context as any)["dataSource"]
-                || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource))
+            (
+                (context as any)["dataSource"]
+                || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
+                || inferDataSource(explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.IntraDayDataSource))
+            )
             || (context.uiStatus["viewableDataSources"] != null && context.uiStatus["viewableDataSources"].length > 0 ? context.uiStatus["viewableDataSources"][0] as DataSourceType : null)
     }
 
