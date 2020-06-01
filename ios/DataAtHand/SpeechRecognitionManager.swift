@@ -20,6 +20,10 @@ class SpeechRecognitionManager: RCTEventEmitter{
                             "last last month",
                             "Spring", "Winter", "Fall", "Autumn", "Summer"]
   
+  let REPLACE_REGEX = [
+    ["regex": try? NSRegularExpression(pattern: "(^|\\s)(h?ours? (s|f)l(u|o|a)t(h|s)?)($|\\s)", options: [.caseInsensitive]) as Any , "replaceWith": "$1hours slept$6"]
+    ]
+  
   @objc
   static override func requiresMainQueueSetup() -> Bool {
     return true
@@ -42,6 +46,18 @@ class SpeechRecognitionManager: RCTEventEmitter{
       _speechRecognizer?.defaultTaskHint = .confirmation
       return _speechRecognizer!
     }
+  }
+  
+  private func preprocessRecognizedText(text: String) -> String {
+    var replaced = text
+    for rule in REPLACE_REGEX {
+      let regex = rule["regex"] as? NSRegularExpression
+      if(regex != nil){
+        replaced = regex?.stringByReplacingMatches(in: replaced, options: .withoutAnchoringBounds, range: NSRange(location: 0, length: replaced.count), withTemplate: rule["replaceWith"] as! String) ?? replaced
+      }
+    }
+    
+    return replaced
   }
   
   @objc
@@ -103,7 +119,7 @@ class SpeechRecognitionManager: RCTEventEmitter{
       print("audiorecord recognition received: ")
       if result != nil {
         self.sendEvent(withName: self.EVENT_RECEIVED, body: [
-          "text": result!.bestTranscription.formattedString,
+          "text": self.preprocessRecognizedText(text: result!.bestTranscription.formattedString),
           "segments": result!.bestTranscription.segments.map{ segment in
             return ["text": segment.substring, "confidence": segment.confidence, ]
           }
