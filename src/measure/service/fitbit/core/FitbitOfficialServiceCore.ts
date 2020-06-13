@@ -308,7 +308,8 @@ export default class FitbitOfficialServiceCore implements FitbitServiceCore {
         console.log("queried ", start, end)
         if (prefetched) {
             console.log("prefetched til", prefetched.queryEndDate)
-            return { [propertyName]: prefetched.result } as any as T
+            //mind the gap between the prefetched server and the queried date
+            return { [propertyName]: prefetched.result, queryEndDate: prefetched.queryEndDate } as any as T
         } else return null
     }
 

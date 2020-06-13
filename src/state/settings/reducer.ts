@@ -21,7 +21,7 @@ const INITIAL_STATE = {
   serviceKey: 'fitbit_example', //"fitbit"
   unit: MeasureUnitType.US,
   recordLogs: true, // opt out
-  recordScreens: true, // opt out
+  recordScreens: false, // opt out
   loggingSessionId: undefined,
 } as SettingsState;
 

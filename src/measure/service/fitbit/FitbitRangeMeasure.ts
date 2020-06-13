@@ -31,7 +31,17 @@ export abstract class FitbitRangeMeasure<
 
     if (tryPrefetch === true && this.core.isPrefetchAvailable() === true) {
       try {
-        queryResult = [await this.queryFunc(startDate, endDate, true)]
+        const prefetchedResult = await this.queryFunc(startDate, endDate, true)
+        if (prefetchedResult != null) {
+          const queryEndDate = (prefetchedResult as any)["queryEndDate"]
+          if(queryEndDate != null && queryEndDate < endDate){
+            console.log("prefetched date is finished earlier than the queried range. Fill the rest with the Fitbit server data.")
+            const serverData = await this.queryFunc(queryEndDate, endDate, false)
+            queryResult = [prefetchedResult, serverData]
+          }else{
+            queryResult = [prefetchedResult]
+          }
+        }
       } catch (ex) {
         console.log("prefetch error in ", this.resourcePropertyKey)
       }
