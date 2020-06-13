@@ -36,6 +36,8 @@ export function getChrono(): Chrono {
         //Noop
         chronoParserApi.ENTimeExpressionParser = makeNoopParser
         chronoParserApi.ENMonthNameLittleEndianParser = makeNoopParser
+
+        chronoParserApi.ENTimeLaterFormatParser = makeNoopParser
         //
 
         chronoRefinerApi.ENMergeDateRangeRefiner = makeENMergeDateRangeRefiner

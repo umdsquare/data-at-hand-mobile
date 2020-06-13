@@ -82,6 +82,7 @@ declare module "chrono-node/src/parsers/parser" {
     export var ENRelativeDateFormatParser: () => any
     export var ENTimeExpressionParser: () => any
     export var ENMonthNameLittleEndianParser: () => any
+    export var ENTimeLaterFormatParser: () => any
 
     export var findYearClosestToRef: (ref: Date, day: number, month: number) => number
 }

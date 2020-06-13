@@ -26,6 +26,7 @@ const relatives: Array<[string, [number, number]]> = [
   ["resent 10 days", [20200221, 20200301]],
   ["past 10 days", [20200221, 20200301]],
   ["last 10 days", [20200221, 20200301]],
+  ["last seven days", [20200224, 20200301]]
 ]
 
 

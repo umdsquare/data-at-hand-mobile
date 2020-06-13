@@ -21,14 +21,6 @@ import { Platform, UIManager } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { theme } from '@style/Theme';
-import { preprocess } from '@core/speech/nlp/preprocessor';
-import { MeasureUnitType } from '@data-at-hand/core/measure/DataSourceSpec';
-
-preprocess("How many days did I meet my hour sleep goal", { getToday: () => new Date(), measureUnit: MeasureUnitType.Metric, getGoal: ()=>null}).then(
-  res => {
-    console.log(res)
-  }
-)
 
 if (
   Platform.OS === 'android' &&

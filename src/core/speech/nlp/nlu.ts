@@ -214,7 +214,11 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
                     if (cascadedRange || cascadedDate) {
                         if (rangePriority >= datePriority) {
-                            if (cascadedDataSource) {
+                            if(explorationInfo.type === ExplorationType.B_Overview && toldDataSources === false && (context.type === SpeechContextType.Global || context.type === SpeechContextType.Time)){
+                                return NLUCommandResolverImpl.convertActionToNLUResult(
+                                    createSetRangeAction(InteractionType.Speech, undefined, cascadedRange),
+                                    explorationInfo, preprocessed)
+                            } else if (cascadedDataSource) {
                                 return NLUCommandResolverImpl.convertActionToNLUResult(
                                     createGoToBrowseRangeAction(InteractionType.Speech, cascadedDataSource, cascadedRange),
                                     explorationInfo, preprocessed)

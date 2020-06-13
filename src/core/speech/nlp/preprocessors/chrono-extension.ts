@@ -104,10 +104,25 @@ yearParser.extract = (text, ref, match, opt) => {
 }
 
 const recentDurationParser = new Parser();
-recentDurationParser.pattern = () => new NamedRegExp("(?<prefix>recent|resent|resend|past|last)\\s+(?<n>[0-9]+)\\s+(?<durationUnit>days?|weeks?|months?|years?)", 'i')
+recentDurationParser.pattern = () => new NamedRegExp("(?<prefix>recent|resent|resend|past|last)\\s+(?<n>[0-9]+|one|two|three|four|five|six|seven|eight|nine|ten)\\s+(?<durationUnit>days?|weeks?|months?|years?)", 'i')
 recentDurationParser.extract = (text, ref, match, opt) => {
 
-    const n = Number.parseInt(match.groups.n)
+    let n: number = Number.parseInt(match.groups.n)
+    if(Number.isNaN(n) === true){
+        switch(match.groups.n.trim()){
+            case "one": n = 1; break;
+            case "two": n = 2; break;
+            case "three": n = 3; break;
+            case "four": n = 4; break;
+            case "five": n = 5; break;
+            case "six": n = 6; break;
+            case "seven": n = 7; break;
+            case "eight": n = 8; break;
+            case "nine": n = 9; break;
+            case "ten": n = 10; break;
+        }
+    }
+
     const durationUnit: string = match.groups.durationUnit
     if (n > 0) {
         let startDate
