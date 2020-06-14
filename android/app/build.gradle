@@ -253,7 +253,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
 
     // Speech SDK
-    implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.11.0'
+    implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.12.1'
 
     implementation 'com.bugsnag:bugsnag-android:4.22.3'
 

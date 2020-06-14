@@ -44,9 +44,11 @@ const SettingsNavigator = () => {
   </Stack.Navigator>
 }
 
+const screenOptions = Platform.OS === 'ios' ?  TransitionPresets.ModalPresentationIOS : TransitionPresets.ModalTransition
+
 export default () => {
   return <Stack.Navigator initialRouteName="Exploration" headerMode='none'
-    screenOptions={TransitionPresets.ModalPresentationIOS}>
+    screenOptions={screenOptions}>
     <Stack.Screen
       name="Exploration"
       options={{ headerShown: false }}
