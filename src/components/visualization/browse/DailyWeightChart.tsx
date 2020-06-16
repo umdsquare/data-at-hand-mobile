@@ -83,7 +83,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
             }
             {
                 prop.data.logs.map(d => {
-                    return <Circle key={d.numberedDate}
+                    return <Circle key={d.numberedDate + "" + d.secondsOfDay}
                         x={scaleX(d.numberedDate)! + scaleX.bandwidth() * 0.5}
                         y={scaleY(convert(d.value))}
                         r={Math.min(scaleX.bandwidth(), 8) / 2}
