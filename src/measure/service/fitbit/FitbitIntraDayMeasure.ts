@@ -45,18 +45,26 @@ export abstract class FitbitIntraDayMeasure<
       const recentPrefetched = await this.core.fitbitLocalDbManager.getLatestCachedIntraDayDate(this.key)
       const start = Math.max(await this.core.getMembershipStartDate(), recentPrefetched != null ? recentPrefetched.date : Number.MIN_SAFE_INTEGER)
       if (start <= until) {
-        const fetchedData = await this.prefetchFunc(start, until)
-        if (fetchedData != null) {
-          const cachedDates = await this.storeServerDataEntry(...fetchedData.result)
-          const queriedAt = new Date(fetchedData.queriedAt)
-          await this.core.fitbitLocalDbManager.upsertCachedIntraDayDate(...cachedDates.map(date => ({
-            id: this.key + "|" + date,
-            measureKey: this.key,
-            date,
-            queriedAt
-          })))
+        const chunks = DateTimeHelper.splitRange(start, until, 365);
+        if (chunks.length > 0) {
+          await Promise.all(chunks.map(async chunk => {
+            console.log(`fetch intraday ${this.key} from ${chunk[0]} to ${chunk[1]}...`)
+            const fetchedData = await this.prefetchFunc(chunk[0], chunk[1])
+            if (fetchedData != null) {
+              const cachedDates = await this.storeServerDataEntry(...fetchedData.result)
+              const queriedAt = new Date(fetchedData.queriedAt)
+              await this.core.fitbitLocalDbManager.upsertCachedIntraDayDate(...cachedDates.map(date => ({
+                id: this.key + "|" + date,
+                measureKey: this.key,
+                date,
+                queriedAt
+              })))
+            }
+          }))
           return { success: true, skipped: false }
-        }else return {success: false, skipped: true}
+        } else {
+          return { success: true, skipped: true }
+        }
       }
       else return { success: true, skipped: true }
     } else return {
