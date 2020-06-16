@@ -230,9 +230,10 @@ theDayBeforeRefiner.refine = function (text, results: Array<ParsedResult>, opt) 
 const sinceRefiner = new Refiner()
 sinceRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
 
+    console.log(results)
     results.forEach((result, index) => {
         const startStringPosition = index === 0 ? 0 : (results[index - 1].index + results[index - 1].text.length)
-        const match = text.substring(startStringPosition, result.index).match(/(?!^|\s)(since)\s+/i)
+        const match = text.substring(startStringPosition, result.index).match(/(?:^|\s)(since)\s+/i)
         if (match
             && result.start != null) {
 
