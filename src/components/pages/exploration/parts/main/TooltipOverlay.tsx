@@ -412,10 +412,10 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
                             case DataSourceType.Weight:
                                 switch (this.props.measureUnitType) {
                                     case MeasureUnitType.Metric:
-                                        valueText = `${touchingInfo.value} kg`
+                                        valueText = `${touchingInfo.value.toFixed(1)} kg (trend)`
                                         break;
                                     case MeasureUnitType.US:
-                                        valueText = `${unitConvert(touchingInfo.value).from('kg').to('lb')} lb`
+                                        valueText = `${unitConvert(touchingInfo.value).from('kg').to('lb').toFixed(1)} lb (trend)`
                                         break;
                                 }
                                 break;

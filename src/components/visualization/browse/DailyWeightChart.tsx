@@ -17,6 +17,7 @@ import { TodayContext } from '@components/pages/exploration/contexts';
 import { useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
 import { GoalValueIndicator } from './GoalValueIndicator';
+import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
 
 const weightTickFormat = (weight: number) => weight.toFixed(1)
 
@@ -72,7 +73,15 @@ export const DailyWeightChart = React.memo((prop: Props) => {
 
     const veryLastLog = prop.futureNearestLog == null ? (prop.data.logs.length > 0 ? prop.data.logs[prop.data.logs.length - 1] : prop.pastNearestLog) : null
 
-    return <Svg pointerEvents="none" width={CommonBrowsingChartStyles.CHART_WIDTH} height={CommonBrowsingChartStyles.CHART_HEIGHT}>
+    return <BandScaleChartTouchHandler
+    chartContainerWidth={CommonBrowsingChartStyles.CHART_WIDTH}
+    chartContainerHeight={CommonBrowsingChartStyles.CHART_HEIGHT}
+    chartArea={chartArea}
+    scaleX={scaleX}
+    dataSource={DataSourceType.Weight}
+    disableIntraDayLink={true}
+    getValueOfDate={(date) => prop.data.trend.find(d => d.numberedDate === date)?.value}
+    highlightedDays={prop.highlightFilter != null ? prop.highlightedDays : undefined}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={scaleY.ticks(5)} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
         <G key="chart" {...chartArea}>
@@ -118,6 +127,6 @@ export const DailyWeightChart = React.memo((prop: Props) => {
                 highlightReference != null ? <Line x1={0} x2={chartArea.width} y={scaleY(convert(highlightReference))} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
             }
         </G>
-    </Svg>
+    </BandScaleChartTouchHandler>
 
 })

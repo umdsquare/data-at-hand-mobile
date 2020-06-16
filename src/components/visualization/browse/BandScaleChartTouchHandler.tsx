@@ -22,6 +22,7 @@ export const BandScaleChartTouchHandler = (props: {
     scaleX: ScaleBand<number>,
     dataSource: DataSourceType,
     highlightedDays?: { [key: number]: boolean | undefined },
+    disableIntraDayLink?: boolean, 
     getValueOfDate: (date: number) => any,
 }) => {
 
@@ -77,10 +78,10 @@ export const BandScaleChartTouchHandler = (props: {
     const onTouchOut = useCallback(() => setTouchingInfo(null), [setTouchingInfo])
 
     const onClickDate = useCallback((date: number) => {
-        if (props.getValueOfDate(date)) {
+        if (props.getValueOfDate(date) && props.disableIntraDayLink !== true) {
             goToDayDetail(date)
         }
-    }, [props.getValueOfDate, goToDayDetail])
+    }, [props.getValueOfDate, props.disableIntraDayLink, goToDayDetail])
 
     return <CategoricalTouchableSvg
         chartContainerWidth={props.chartContainerWidth}
