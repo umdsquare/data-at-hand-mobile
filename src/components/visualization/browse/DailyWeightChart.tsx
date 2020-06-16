@@ -55,10 +55,10 @@ export const DailyWeightChart = React.memo((prop: Props) => {
     const preferredMin = prop.preferredValueRange[0] != null ? convert(prop.preferredValueRange[0]) : null
     const preferredMax = prop.preferredValueRange[1] != null ? convert(prop.preferredValueRange[1]) : null
 
-    const weightDomain = coverValueInRange([
+    const weightDomain = coverValueInRange(coverValueInRange([
         Math.floor(((trendMin === Number.MAX_SAFE_INTEGER && logMin === Number.MAX_SAFE_INTEGER && preferredMin == null) ? 0 : Math.min(trendMin, logMin, preferredMin || Number.MAX_SAFE_INTEGER)) - 1),
         Math.ceil(((trendMax === Number.MIN_SAFE_INTEGER && logMax === Number.MIN_SAFE_INTEGER && preferredMax == null) ? 0 : Math.max(trendMax, logMax, preferredMax || Number.MIN_SAFE_INTEGER)) + 1),
-    ], convert(highlightReference))
+    ], convert(highlightReference)), convert(prop.goalValue))
 
     const scaleY = scaleLinear()
         .domain(weightDomain)

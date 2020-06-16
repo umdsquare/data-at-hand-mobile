@@ -32,10 +32,10 @@ export const DailyBarChart = React.memo((prop: Props) => {
 
     const xTickFormat = useMemo(() => CommonBrowsingChartStyles.dateTickFormat(today), [today])
 
-    const valueRange = useMemo(() => coverValueInRange(
+    const valueRange = useMemo(() => coverValueInRange(coverValueInRange(
         [0, Math.max(d3Array.max(prop.data, d => d.value)!, prop.preferredValueRange[1] || Number.MIN_SAFE_INTEGER)],
         highlightReference
-    ), [prop.data, prop.preferredValueRange[1], highlightReference])
+    ), prop.goalValue), [prop.data, prop.preferredValueRange[1], highlightReference])
 
     const scaleY = useMemo(() => scaleLinear()
         .domain(valueRange)
