@@ -1,5 +1,5 @@
 import chrono, { ParsedResult, Refiner, ParsedComponents, ComponentParams, ComponentName, Parser } from 'chrono-node';
-import { getYear, isAfter, addYears, getDate, getMonth, addDays, subYears, subWeeks, subMonths, startOfMonth, endOfMonth, isBefore, startOfYear, endOfYear, addMonths, startOfWeek, endOfWeek, addWeeks, subDays } from 'date-fns';
+import { getYear, isAfter, addYears, getDate, getMonth, addDays, subYears, subWeeks, subMonths, startOfMonth, endOfMonth, isBefore, startOfYear, endOfYear, addMonths, startOfWeek, endOfWeek, addWeeks, subDays, getDay } from 'date-fns';
 
 import NamedRegExp from 'named-regexp-groups'
 import { getBetweenText, mergeResult } from './chrono-utils';
@@ -108,8 +108,8 @@ recentDurationParser.pattern = () => new NamedRegExp("(?<prefix>recent|resent|re
 recentDurationParser.extract = (text, ref, match, opt) => {
 
     let n: number = Number.parseInt(match.groups.n)
-    if(Number.isNaN(n) === true){
-        switch(match.groups.n.trim()){
+    if (Number.isNaN(n) === true) {
+        switch (match.groups.n.trim()) {
             case "one": n = 1; break;
             case "two": n = 2; break;
             case "three": n = 3; break;
@@ -229,8 +229,6 @@ theDayBeforeRefiner.refine = function (text, results: Array<ParsedResult>, opt) 
 
 const sinceRefiner = new Refiner()
 sinceRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
-
-    console.log(results)
     results.forEach((result, index) => {
         const startStringPosition = index === 0 ? 0 : (results[index - 1].index + results[index - 1].text.length)
         const match = text.substring(startStringPosition, result.index).match(/(?:^|\s)(since)\s+/i)
@@ -247,6 +245,48 @@ sinceRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
             return results
         }
     })
+    return results
+}
+
+const weekOfDateRefiner = new Refiner()
+weekOfDateRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
+    results.forEach((result, index) => {
+        if (result.end == null && result.start.isCertain('day') === true) {
+            const startStringPosition = index === 0 ? 0 : (results[index - 1].index + results[index - 1].text.length)
+            const match = text.substring(startStringPosition, result.index).match(/(^|\s)(((the|a)\s+)?week of)($|\s)/i)
+            if (match) {
+                result.index = match.index + match[1].length
+                result.text = match[2] + match[5] + result.text
+                const pivotDate = result.start.date()
+                const pivotDayOfWeek = getDay(pivotDate)
+                if (pivotDayOfWeek === 0) {
+                    //Sunday
+                    const endDate = addDays(pivotDate, 6)
+                    result.end = new ParsedComponents({
+                        year: getYear(endDate),
+                        month: getMonth(endDate) + 1,
+                        day: getDate(endDate)
+                    }, result.ref)
+                } else {
+                    //get Surrounding Monday through Saturday.
+                    const startDate = addDays(pivotDate, 1 - pivotDayOfWeek)
+                    const endDate = addDays(pivotDate, 7 - pivotDayOfWeek)
+                    result.start = new ParsedComponents({
+                        year: getYear(startDate),
+                        month: getMonth(startDate) + 1,
+                        day: getDate(startDate)
+                    }, result.ref)
+                    result.end = new ParsedComponents({
+                        year: getYear(endDate),
+                        month: getMonth(endDate) + 1,
+                        day: getDate(endDate)
+                    }, result.ref)
+                }
+                result.tags["WeekOfDateRefiner"] = true
+            }
+        }
+    })
+
     return results
 }
 
@@ -320,4 +360,4 @@ betweenConjunctionRefiner.refine = (text, results, opt) => {
 
 
 export const CHRONO_EXTENSION_PARSERS = [seasonParser, yearParser, recentDurationParser]
-export const CHRONO_EXTENSION_REFINERS: Array<Refiner> = [aroundRefiner, theDayBeforeRefiner, sinceRefiner, prepositionTagRefiner, betweenConjunctionRefiner, optimizedConjunctionRefiner]
+export const CHRONO_EXTENSION_REFINERS: Array<Refiner> = [aroundRefiner, theDayBeforeRefiner, weekOfDateRefiner, sinceRefiner, prepositionTagRefiner, betweenConjunctionRefiner, optimizedConjunctionRefiner]
