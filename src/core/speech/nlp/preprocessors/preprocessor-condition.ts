@@ -39,7 +39,7 @@ const lexicon: Array<TermInfo> = [
 
 ]
 
-const accomplishVerbs = ["meet", "met", "reach", "reached", "accomplish", "accomplished", "achieve", "achieved"]
+const accomplishVerbs = ["meet", "met", "reach", "reached", "accomplish", "accomplished", "achieve", "achieved", "make", "made", "get", "got"]
 
 function categorizeExtreme(extreme: string): NumericConditionType.Max | NumericConditionType.Min | null {
     if (/(max)|(maximum)|(latest)|(fastest)|(most)|(highest)/gi.test(extreme)) {
@@ -95,7 +95,7 @@ function isWaketimeReferred(speech: string): boolean {
 export async function inferHighlight(nlp: compromise.Document, original: string, guidedDataSource: DataSourceType | undefined, options: NLUOptions): Promise<{ conditionInfo: ConditionInfo, match: compromise.Document | string } | null> {
     //try to find the condition
     console.log("infer highlight")
-    const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective|below|above)] than? [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time|am|pm|hour|hours|minute|minutes)+?]`)
+    const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective|below|above|over)] than? [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time|am|pm|hour|hours|minute|minutes)+?]`)
 
     const durationComparisonInfo = normalizeCompromiseGroup(durationComparisonMatch.groups())
     if (durationComparisonInfo) {
@@ -132,7 +132,7 @@ export async function inferHighlight(nlp: compromise.Document, original: string,
         }
     }
     else {
-        const numericComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective|below|above)] than? [<number>(#Value+)] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
+        const numericComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective|below|above|over)] than? [<number>(#Value+)] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
         const numericComparisonInfo = normalizeCompromiseGroup(numericComparisonMatch.groups())
 
         if (numericComparisonInfo) {
@@ -222,7 +222,7 @@ export async function inferHighlight(nlp: compromise.Document, original: string,
             }
 
             //goal
-            const goalComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective|below|above)] than? (#Determiner|#Possessive|#Adjective)?+ (goal|gol|gold)`)
+            const goalComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective|below|above|over)] than? (#Determiner|#Possessive|#Adjective)?+ (goal|gol|gold)`)
             const goalComparisonInfo = normalizeCompromiseGroup(goalComparisonMatch.groups())
             if (goalComparisonInfo) {
                 const comparisonTermInfo = findComparisonTermInfo(goalComparisonInfo.comparison)
