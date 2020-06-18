@@ -4,7 +4,7 @@ import { ActionTypeBase } from "../../../state/types";
 import { NLUOptions, NLUCommandResolver } from "./types";
 import { setDateAction, createSetRangeAction, setDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, createGoToComparisonCyclicAction, setCycleTypeAction, setHighlightFilter } from "../../../state/exploration/interaction/actions";
 import { explorationInfoHelper } from "../../exploration/ExplorationInfoHelper";
-import { differenceInDays } from "date-fns";
+import { differenceInDays, addDays } from "date-fns";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import { DataSourceType, inferIntraDayDataSourceType, inferDataSource } from "@data-at-hand/core/measure/DataSourceSpec";
 import { ExplorationState, explorationStateReducer } from "@state/exploration/interaction/reducers";
@@ -214,7 +214,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
                     if (cascadedRange || cascadedDate) {
                         if (rangePriority >= datePriority) {
-                            if(explorationInfo.type === ExplorationType.B_Overview && toldDataSources === false && (context.type === SpeechContextType.Global || context.type === SpeechContextType.Time)){
+                            if (explorationInfo.type === ExplorationType.B_Overview && toldDataSources === false && (context.type === SpeechContextType.Global || context.type === SpeechContextType.Time)) {
                                 return NLUCommandResolverImpl.convertActionToNLUResult(
                                     createSetRangeAction(InteractionType.Speech, undefined, cascadedRange),
                                     explorationInfo, preprocessed)
@@ -232,6 +232,14 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                             if (inferredIntraDayDataSourceType) {
                                 return NLUCommandResolverImpl.convertActionToNLUResult(
                                     createGoToBrowseDayAction(InteractionType.Speech, inferredIntraDayDataSourceType, cascadedDate),
+                                    explorationInfo, preprocessed)
+                            } else {
+                                console.log(cascadedDataSource + " is not supported intraday. Show the around data instead")
+                                const startDate = DateTimeHelper.toNumberedDateFromDate(addDays(DateTimeHelper.toDate(cascadedDate), -3))
+                                const endDate = DateTimeHelper.toNumberedDateFromDate(addDays(DateTimeHelper.toDate(cascadedDate), 3))
+
+                                return NLUCommandResolverImpl.convertActionToNLUResult(
+                                    createGoToBrowseRangeAction(InteractionType.Speech, cascadedDataSource, [startDate, endDate]),
                                     explorationInfo, preprocessed)
                             }
                         }
