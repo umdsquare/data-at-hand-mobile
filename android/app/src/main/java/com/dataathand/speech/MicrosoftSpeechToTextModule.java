@@ -148,18 +148,17 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
 
             Log.d(TAG, "Recognized: " + s);
 
-            if(s.lastIndexOf('.') == s.length()-1){
-                s = s.substring(0, s.length()-1);
+            if (s.lastIndexOf('.') == s.length() - 1) {
+                s = s.substring(0, s.length() - 1);
             }
 
-            s = s.replaceAll("([a-zA-Z])([,.])(\\s+|$)", "$1$3");
-
-            if(s.length() > 1 && !s.matches("I\\s+")){
-                
-                s = s.substring(0,1).toLowerCase() + s.substring(1);
+            if (s.length() > 1 && !s.matches("I\\s+")) {
+                s = s.substring(0, 1).toLowerCase() + s.substring(1);
             }
 
-            accumulatedTextToPrevCycle = joinTexts(accumulatedTextToPrevCycle, s);
+            accumulatedTextToPrevCycle = joinTexts(accumulatedTextToPrevCycle, s)
+                    .replaceAll("([a-zA-Z])([,.])(\\s+|$)", "$1$3")
+                    .replaceAll("(\\s+)(2022)(\\s+)", "$12020 to$3");
             emitReceivedEvent(accumulatedTextToPrevCycle);
         });
 
