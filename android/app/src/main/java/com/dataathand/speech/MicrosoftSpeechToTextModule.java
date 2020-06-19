@@ -152,6 +152,8 @@ public class MicrosoftSpeechToTextModule extends ASpeechToTextModule {
                 s = s.substring(0, s.length()-1);
             }
 
+            s = s.replaceAll("([a-zA-Z])([,.])(\\s+|$)", "$1$3");
+
             if(s.length() > 1 && !s.matches("I\\s+")){
                 
                 s = s.substring(0,1).toLowerCase() + s.substring(1);
