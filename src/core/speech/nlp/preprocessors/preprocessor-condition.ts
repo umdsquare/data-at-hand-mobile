@@ -222,7 +222,7 @@ export async function inferHighlight(nlp: compromise.Document, original: string,
             }
 
             //goal
-            const goalComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective|below|above|over)] than? (#Determiner|#Possessive|#Adjective)?+ (goal|gol|gold)`)
+            const goalComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective|below|above|over)] than? (#Determiner|#Possessive|#Adjective)?+ (goal|gol|gold|call|girl)`)
             const goalComparisonInfo = normalizeCompromiseGroup(goalComparisonMatch.groups())
             if (goalComparisonInfo) {
                 const comparisonTermInfo = findComparisonTermInfo(goalComparisonInfo.comparison)
@@ -246,9 +246,10 @@ export async function inferHighlight(nlp: compromise.Document, original: string,
             }
 
             //goal accomplishment
-            const regex = new NamedRegExp(`(?<negation>(n\\'t|not|(fail(ed)? to))\\s+)?(?<verb>${accomplishVerbs.join("|")})\\s+((a|our|my|the)\\s+)?(current\\s+)?((?<source>${STEP_COUNT_REGEX_STRING}|${HOURS_SLEPT_REGEX_STRING}|${SLEEP_RANGE_REGEX_STRING}|${WEIGHT_REGEX_STRING})\\s+)?(goal|gold?|call)`, "i")
-            const regexMatch = original.match(regex)
-            console.log(regexMatch)
+            const goalPartRegex = `((a|our|my|the)\\s+)?(current\\s+)?((?<source>${STEP_COUNT_REGEX_STRING}|${HOURS_SLEPT_REGEX_STRING}|${SLEEP_RANGE_REGEX_STRING}|${WEIGHT_REGEX_STRING})\\s+)?(goal|gold?|call|girl)`
+            const regex = new NamedRegExp(`(?<negation>(n\\'t|not|(fail(ed)? to))\\s+)?(?<verb>${accomplishVerbs.join("|")})\\s+${goalPartRegex}`, "i")
+            const regexGoalOnly = new NamedRegExp(`(^|\\s+)${goalPartRegex}`, "i")
+            const regexMatch = original.match(regex) || original.match(regexGoalOnly)
             if (regexMatch != null) {
                 const groups: { negation?: string, verb?: string, source?: string } = regexMatch.groups
 
