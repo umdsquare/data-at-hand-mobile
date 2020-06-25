@@ -47,9 +47,9 @@ const compromiseAdjectivePartRule = "#Adverb|#Adjective|below|above|over|before|
 const accomplishVerbs = ["meet", "met", "reach", "reached", "accomplish", "accomplished", "achieve", "achieved", "make", "made", "get", "got"]
 
 function categorizeExtreme(extreme: string): NumericConditionType.Max | NumericConditionType.Min | null {
-    if (/(max)|(maximum)|(latest)|(fastest)|(most)|(highest)/gi.test(extreme)) {
+    if (/(max)|(maximum)|(latest)|(fastest)|(most)|(highest)|(longest)/gi.test(extreme)) {
         return NumericConditionType.Max
-    } else if (/(min)|(minimum)|(earliest)|(slowest)|(least)|(lowest)/gi.test(extreme)) {
+    } else if (/(min)|(minimum)|(earliest)|(slowest)|(least)|(lowest)|(shortest)/gi.test(extreme)) {
         return NumericConditionType.Min
     } else return null
 }
@@ -208,7 +208,7 @@ export async function inferHighlight(nlp: compromise.Document, original: string,
             }
         } else {
             //check extreme
-            const match = nlp.match("[<extreme>(max|maximum|min|minimum|earliest|latest|slowest|fastest|lowest|highest|most|least)]")
+            const match = nlp.match("[<extreme>(max|maximum|min|minimum|earliest|latest|slowest|fastest|lowest|highest|most|least|longest|shortest)]")
             const extremeInfo = normalizeCompromiseGroup(match.groups())
             if (extremeInfo) {
                 const category = categorizeExtreme(extremeInfo.extreme)

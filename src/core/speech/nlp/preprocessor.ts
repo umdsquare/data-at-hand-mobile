@@ -141,10 +141,19 @@ export async function preprocess(speech: string, options: NLUOptions, guidedData
                     const dataSourceVariableId = Object.keys(input.variables).find(id => input.variables[id].type === VariableType.DataSource)
                     if (dataSourceVariableId != null) {
                         const dataSource = input.variables[dataSourceVariableId]
-                        if (dataSource.value === DataSourceType.SleepRange && inferredConditionInfoResult.conditionInfo.propertyKey == null) {
-                            //if sleep range was specified but no clues for wake time / bed time
-                            dataSource.value = DataSourceType.HoursSlept
+                        if(dataSource.value === DataSourceType.SleepRange){
+                            if (inferredConditionInfoResult.conditionInfo.propertyKey == null) {
+                                //if sleep range was specified but no clues for wake time / bed time
+                                dataSource.value = DataSourceType.HoursSlept
+                            }
+                        }else{
+                            inferredConditionInfoResult.conditionInfo.propertyKey = undefined
                         }
+                    }else{
+                       //if data source is not set, try to find it.
+                       if(inferredConditionInfoResult.conditionInfo.propertyKey === 'bedtime' || inferredConditionInfoResult.conditionInfo.propertyKey === 'waketime'){
+                        inferredConditionInfoResult.conditionInfo.impliedDataSource = DataSourceType.SleepRange
+                       }
                     }
                 }
             }
