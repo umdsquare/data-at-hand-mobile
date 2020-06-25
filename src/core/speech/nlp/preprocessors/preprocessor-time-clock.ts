@@ -173,6 +173,7 @@ const templates: Array<{
 
 
 export function parseTimeOfTheDayTextToDiffSeconds(text: string, preferred: "day" | "night"): number {
+
     //Inspired by https://dlc.hypotheses.org/698
     //Test set
 

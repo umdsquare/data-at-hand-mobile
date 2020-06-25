@@ -94,7 +94,7 @@ function isBedtimeReferred(speech: string): boolean {
 }
 
 function isWaketimeReferred(speech: string): boolean {
-    return /(wake)|(woke)|(g(o|e)t(ting)?\s+up)/gi.test(speech)
+    return /(wake)|(walk)|(woke)|(g(o|e)t(ting)?\s+up)/gi.test(speech)
 }
 
 export async function inferHighlight(nlp: compromise.Document, original: string, guidedDataSource: DataSourceType | undefined, options: NLUOptions): Promise<{ conditionInfo: ConditionInfo, match: compromise.Document | string } | null> {
@@ -197,6 +197,7 @@ export async function inferHighlight(nlp: compromise.Document, original: string,
                     conditionInfo: {
                         type: comparisonTermInfo.conditionType,
                         impliedDataSource: comparisonTermInfo.impliedSource,
+                        propertyKey: comparisonTermInfo.impliedSource === DataSourceType.SleepRange ? 'waketime' : undefined,
                         ref: comparisonTermInfo.impliedSource ?
                             inferScalarValue(parseDecimalNumber(numericComparisonInfo.number),
                                 numericComparisonInfo.unit, comparisonTermInfo.impliedSource, options.measureUnit)

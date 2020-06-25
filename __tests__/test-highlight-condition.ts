@@ -57,6 +57,9 @@ const conditions: Array<[string, DataSourceType, ConditionInfo]> = [
     ["I went to bed earlier than 12:00 PM", DataSourceType.SleepRange, { ref: 3600 * 12, type: NumericConditionType.Less }],
     ["I went to bed earlier than 12", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
 
+
+    ["I woke up before 12 am", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
+
     ["I went to bed before 10 o'clock", DataSourceType.SleepRange, { ref: -7200, type: NumericConditionType.Less }],
     ["I went to bed earlier than 10 o'clock", DataSourceType.SleepRange, { ref: -7200, type: NumericConditionType.Less }],
     ["I woke up earlier than 10 o'clock", DataSourceType.SleepRange, { ref: 3600 * 10, type: NumericConditionType.Less }],
