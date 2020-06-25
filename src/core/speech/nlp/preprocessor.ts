@@ -75,6 +75,8 @@ export async function preprocess(speech: string, options: NLUOptions, guidedData
 
             nlp.match("compare").unTag("Date").unTag("Time").unTag("Duration").tag("Verb")
 
+            nlp.match("#Duration|#Date|#Time am|pm").tag("Time")
+
             //Tag all the inferred variables
             Object.keys(input.variables).forEach(id => {
                 tag(nlp.match(id), input.variables[id].type)

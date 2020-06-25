@@ -49,16 +49,21 @@ const conditions: Array<[string, DataSourceType, ConditionInfo]> = [
     ["I slept below five hours", DataSourceType.HoursSlept, { ref: 3600 * 5, type: NumericConditionType.Less }],
 
 
+    ["I went to bed before 12 am", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
     ["I went to bed earlier than 12 am", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
     ["I went to bed earlier than 12:00 AM", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
+    ["I went to bed before 12 pm", DataSourceType.SleepRange, { ref: 3600 * 12, type: NumericConditionType.Less }],
     ["I went to bed earlier than 12 pm", DataSourceType.SleepRange, { ref: 3600 * 12, type: NumericConditionType.Less }],
     ["I went to bed earlier than 12:00 PM", DataSourceType.SleepRange, { ref: 3600 * 12, type: NumericConditionType.Less }],
     ["I went to bed earlier than 12", DataSourceType.SleepRange, { ref: 0, type: NumericConditionType.Less }],
 
+    ["I went to bed before 10 o'clock", DataSourceType.SleepRange, { ref: -7200, type: NumericConditionType.Less }],
     ["I went to bed earlier than 10 o'clock", DataSourceType.SleepRange, { ref: -7200, type: NumericConditionType.Less }],
     ["I woke up earlier than 10 o'clock", DataSourceType.SleepRange, { ref: 3600 * 10, type: NumericConditionType.Less }],
     ["I woke up earlier than 7 o'clock", DataSourceType.SleepRange, { ref: 3600 * 7, type: NumericConditionType.Less }],
     ["I woke up earlier than seven o'clock", DataSourceType.SleepRange, { ref: 3600 * 7, type: NumericConditionType.Less }],
+
+    ["I woke up after seven o'clock", DataSourceType.SleepRange, { ref: 3600 * 7, type: NumericConditionType.More }],
 
 
     ["I went to bed earlier than 11", DataSourceType.SleepRange, { ref: -3600, type: NumericConditionType.Less }],
@@ -66,6 +71,7 @@ const conditions: Array<[string, DataSourceType, ConditionInfo]> = [
     ["I got up later than Noon", DataSourceType.SleepRange, { ref: 3600 * 12, type: NumericConditionType.More }],
     ["I got up earlier than Noon", DataSourceType.SleepRange, { ref: 3600 * 12, type: NumericConditionType.Less }],
     ["I woke up later than 12", DataSourceType.SleepRange, { ref: 3600 * 12, type: NumericConditionType.More }],
+    ["I woke up after 12", DataSourceType.SleepRange, { ref: 3600 * 12, type: NumericConditionType.More }],
 ]
 
 goalWordPrefixes.forEach(goalWordPrefix => {

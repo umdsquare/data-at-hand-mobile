@@ -16,6 +16,9 @@ const lexicon: Array<TermInfo> = [
     { term: 'earl', conditionType: NumericConditionType.Less, valueType: ["time"], impliedSource: DataSourceType.SleepRange },
     { term: 'late', conditionType: NumericConditionType.More, valueType: ["time"], impliedSource: DataSourceType.SleepRange },
 
+    { term: 'before', conditionType: NumericConditionType.Less, valueType: ["time"], impliedSource: DataSourceType.SleepRange },
+    { term: 'after', conditionType: NumericConditionType.More, valueType: ["time"], impliedSource: DataSourceType.SleepRange },
+
     { term: 'low', conditionType: NumericConditionType.Less, valueType: ["scalar"], impliedSource: null, },
     { term: 'high', conditionType: NumericConditionType.More, valueType: ["scalar"], impliedSource: null, },
 
@@ -38,6 +41,8 @@ const lexicon: Array<TermInfo> = [
     { term: 'heav', conditionType: NumericConditionType.More, valueType: ["scalar"], impliedSource: DataSourceType.Weight },
 
 ]
+
+const compromiseAdjectivePartRule = "#Adverb|#Adjective|below|above|over|before|after"
 
 const accomplishVerbs = ["meet", "met", "reach", "reached", "accomplish", "accomplished", "achieve", "achieved", "make", "made", "get", "got"]
 
@@ -95,7 +100,7 @@ function isWaketimeReferred(speech: string): boolean {
 export async function inferHighlight(nlp: compromise.Document, original: string, guidedDataSource: DataSourceType | undefined, options: NLUOptions): Promise<{ conditionInfo: ConditionInfo, match: compromise.Document | string } | null> {
     //try to find the condition
     console.log("infer highlight")
-    const durationComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective|below|above|over)] than? [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time|am|pm|hour|hours|minute|minutes)+?]`)
+    const durationComparisonMatch = nlp.match(`[<comparison>(${compromiseAdjectivePartRule})] than? [<duration>(#Duration|#Date|#Time)(#Cardinal|#Duration|#Date|#Time|am|pm|hour|hours|minute|minutes)+?]`)
 
     const durationComparisonInfo = normalizeCompromiseGroup(durationComparisonMatch.groups())
     if (durationComparisonInfo) {
@@ -132,7 +137,7 @@ export async function inferHighlight(nlp: compromise.Document, original: string,
         }
     }
     else {
-        const numericComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective|below|above|over)] than? [<number>(#Value+)] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
+        const numericComparisonMatch = nlp.match(`[<comparison>(${compromiseAdjectivePartRule})] than? [<number>(#Value+)] [<unit>(#Noun&&!#${PARSED_TAG})?]`)
         const numericComparisonInfo = normalizeCompromiseGroup(numericComparisonMatch.groups())
 
         if (numericComparisonInfo) {
