@@ -55,20 +55,20 @@ declare module "chrono-node" {
         constructor(options: ChronoOptions)
 
         parseDate(text: string, refDate?: Date, opts?: any): Date;
-        parse(text: string, refDate?: Date, opts?: ChronoParseOptions): ParsedResult[];
+        parse(text: string, refDate?: Date, opts?: ChronoParseOptions | any): ParsedResult[];
         parsers: Array<Parser>
         refiners: Array<Refiner>
     }
 
     export class Parser {
         pattern: () => RegExp
-        extract: (text: string, ref: Date, match: RegExpMatchArray, options?: ChronoParseOptions) => ParsedResult | null
+        extract: (text: string, ref: Date, match: RegExpMatchArray, options?: ChronoParseOptions | any) => ParsedResult | null
         findYearClosestToRef: (ref: Date, day: number, month: number) => number
     }
 
     export class Refiner {
         pattern: () => RegExp
-        refine: (text: string, results: Array<ParsedResult>, opt?: ChronoParseOptions) => Array<ParsedResult>
+        refine: (text: string, results: Array<ParsedResult>, opt?: ChronoParseOptions | any) => Array<ParsedResult>
     }
 
     export function parseDate(text: string, refDate?: Date, opts?: any): Date;

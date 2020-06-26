@@ -39,8 +39,9 @@ export async function preprocess(speech: string, options: NLUOptions, guidedData
     //Find time========================================================================================
 
     const pipeResult = await runPipe(speech,
-        definePipe("extract-time-expressions", (input) => {
-            const parsedTimeVariables = extractTimeExpressions(input.processedSpeech, options.getToday())
+        definePipe("extract-time-expressions", async (input) => {
+            const parsedTimeVariables = extractTimeExpressions(input.processedSpeech, options.getToday(), options)
+            let indexShift = 0
             parsedTimeVariables.forEach(variable => {
                 const id = makeVariableId()
                 input.variables[id] = {
@@ -50,13 +51,14 @@ export async function preprocess(speech: string, options: NLUOptions, guidedData
                     value: variable.value,
                     additionalInfo: variable.additionalInfo
                 }
-                input.processedSpeech = input.processedSpeech.substr(0, variable.index) + id + input.processedSpeech.substring(variable.index + variable.text.length, input.processedSpeech.length)
+                input.processedSpeech = input.processedSpeech.substr(0, variable.index + indexShift) + id + input.processedSpeech.substring(variable.index + indexShift + variable.text.length, input.processedSpeech.length)
+                indexShift += id.length - variable.text.length
             })
             return input
         }),
         definePipe("extract-data-sources", (input) => {
             DATASOURCE_VARIABLE_RULES.concat(CYCLIC_TIME_RULES).forEach(rule => {
-                input.processedSpeech = input.processedSpeech.replace((rule.regex as any).test != null? rule.regex : (rule.regex as any)(), (match) => {
+                input.processedSpeech = input.processedSpeech.replace((rule.regex as any).test != null ? rule.regex : (rule.regex as any)(), (match) => {
                     const id = makeVariableId()
                     input.variables[id] = {
                         id,
@@ -122,13 +124,13 @@ export async function preprocess(speech: string, options: NLUOptions, guidedData
                 const id = makeVariableId()
                 input.variables[id] = {
                     id,
-                    originalText: typeof inferredConditionInfoResult.match === 'string'? typeof inferredConditionInfoResult.match : inferredConditionInfoResult.match.text(),
+                    originalText: typeof inferredConditionInfoResult.match === 'string' ? typeof inferredConditionInfoResult.match : inferredConditionInfoResult.match.text(),
                     type: VariableType.Condition,
                     value: inferredConditionInfoResult.conditionInfo
                 }
-                if(typeof inferredConditionInfoResult.match !== 'string'){
+                if (typeof inferredConditionInfoResult.match !== 'string') {
                     tag(inferredConditionInfoResult.match.replaceWith(id), VariableType.Condition)
-                }else{
+                } else {
                     //TODO tag and replace the goal accomplishment part.
                 }
 
@@ -141,19 +143,19 @@ export async function preprocess(speech: string, options: NLUOptions, guidedData
                     const dataSourceVariableId = Object.keys(input.variables).find(id => input.variables[id].type === VariableType.DataSource)
                     if (dataSourceVariableId != null) {
                         const dataSource = input.variables[dataSourceVariableId]
-                        if(dataSource.value === DataSourceType.SleepRange){
+                        if (dataSource.value === DataSourceType.SleepRange) {
                             if (inferredConditionInfoResult.conditionInfo.propertyKey == null) {
                                 //if sleep range was specified but no clues for wake time / bed time
                                 dataSource.value = DataSourceType.HoursSlept
                             }
-                        }else{
+                        } else {
                             inferredConditionInfoResult.conditionInfo.propertyKey = undefined
                         }
-                    }else{
-                       //if data source is not set, try to find it.
-                       if(inferredConditionInfoResult.conditionInfo.propertyKey === 'bedtime' || inferredConditionInfoResult.conditionInfo.propertyKey === 'waketime'){
-                        inferredConditionInfoResult.conditionInfo.impliedDataSource = DataSourceType.SleepRange
-                       }
+                    } else {
+                        //if data source is not set, try to find it.
+                        if (inferredConditionInfoResult.conditionInfo.propertyKey === 'bedtime' || inferredConditionInfoResult.conditionInfo.propertyKey === 'waketime') {
+                            inferredConditionInfoResult.conditionInfo.impliedDataSource = DataSourceType.SleepRange
+                        }
                     }
                 }
             }

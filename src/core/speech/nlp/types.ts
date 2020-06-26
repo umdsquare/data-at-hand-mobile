@@ -8,6 +8,7 @@ import { DataSourceType } from "@data-at-hand/core"
 export interface NLUOptions {
     getToday: () => Date,
     getGoal: (dataSource: DataSourceType) => Promise<number | undefined>,
+    dataInitialDate?: number,
     measureUnit: MeasureUnitType
 }
 

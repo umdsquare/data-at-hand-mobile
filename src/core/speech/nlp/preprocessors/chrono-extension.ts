@@ -3,6 +3,63 @@ import { getYear, isAfter, addYears, getDate, getMonth, addDays, subYears, subWe
 
 import NamedRegExp from 'named-regexp-groups'
 import { getBetweenText, mergeResult } from './chrono-utils';
+import { DateTimeHelper } from '@data-at-hand/core';
+
+const dataInitialDateParser = new chrono.Parser();
+dataInitialDateParser.pattern = function () { return /(^|\s+)(the\s+)?(Fitbit\s+)?((initial|first)\s+(day|date))(\s+of\s+Fitbit)?($|\s+)/i }
+dataInitialDateParser.extract = function (text, ref, match, opt) {
+
+    const initialNumberedDate = opt?.dataInitialDate
+    if (initialNumberedDate != null) {
+
+        const initialDate = DateTimeHelper.toDate(initialNumberedDate)
+
+        const extractedText = match[2] + match[3] + match[4] + match[7]
+        const result = new ParsedResult({
+            ref,
+            text: extractedText,
+            index: match.index + match[1].length,
+            start: {
+                year: getYear(initialDate),
+                month: getMonth(initialDate) + 1,
+                day: getDate(initialDate)
+            }
+        })
+
+        return result
+    } else return null
+}
+
+const entirePeriodParser = new chrono.Parser();
+entirePeriodParser.pattern = function(){ return /(^|\s+)((the|a|an)\s+)?((entire|all|whole)\s+(period|range|data|dataset))($|\s+)/i }
+entirePeriodParser.extract = function (text, ref, match, opt) {
+
+    const initialNumberedDate = opt?.dataInitialDate
+    if (initialNumberedDate != null) {
+
+        const initialDate = DateTimeHelper.toDate(initialNumberedDate)
+
+        const extractedText = match[2] + match[4]
+        const result = new ParsedResult({
+            ref,
+            text: extractedText,
+            index: match.index + match[1].length,
+            start: {
+                year: getYear(initialDate),
+                month: getMonth(initialDate) + 1,
+                day: getDate(initialDate)
+            },
+            end: {
+                year: getYear(ref),
+                month: getMonth(ref) + 1,
+                day: getDate(ref)
+            }
+        })
+
+        return result
+    } else return null
+}
+
 
 function getSeasonOfYear(season: string, year: number): [Date, Date] {
     switch (season) {
@@ -359,5 +416,5 @@ betweenConjunctionRefiner.refine = (text, results, opt) => {
 }
 
 
-export const CHRONO_EXTENSION_PARSERS = [seasonParser, yearParser, recentDurationParser]
+export const CHRONO_EXTENSION_PARSERS = [dataInitialDateParser, entirePeriodParser, seasonParser, yearParser, recentDurationParser]
 export const CHRONO_EXTENSION_REFINERS: Array<Refiner> = [aroundRefiner, theDayBeforeRefiner, weekOfDateRefiner, sinceRefiner, prepositionTagRefiner, betweenConjunctionRefiner, optimizedConjunctionRefiner]

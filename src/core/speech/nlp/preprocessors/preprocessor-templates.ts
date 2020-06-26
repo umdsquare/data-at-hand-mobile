@@ -1,11 +1,9 @@
 import { NLUOptions, makeVariableId } from "../types";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import NamedRegExp from 'named-regexp-groups'
-import { parseTimeText, extractTimeExpressions } from "./preprocessor-time";
 import { DataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { CyclicTimeFrame } from "@data-at-hand/core/exploration/CyclicTimeFrame";
 import { VariableType, Intent, PreProcessedInputText } from '@data-at-hand/core/speech/types';
-import { fastConcatTo } from "@data-at-hand/core/utils";
 
 const REGEX_RANDOM_ELEMENT = "[a-zA-Z0-9\\s]+"
 
@@ -115,7 +113,7 @@ const templates: Array<Template> = [
                 }]
             }
         }
-    },
+    },/*
     {
         regex: new NamedRegExp(`(compare|compared|compel|compelled|(difference between))\\s+((?<dataSource>[a-zA-Z0-9\\s]+)\\s+(?<dataSourcePreposition>of|in|on|at)\\s+)?(?<compareA>${REGEX_RANDOM_ELEMENT})\\s+(?<conjunction>with|to|and)\\s+(?<compareB>${REGEX_RANDOM_ELEMENT})`, 'i'),
         parse: (groups: { compareA: string, compareB: string, conjunction: string, dataSource?: string, dataSourcePreposition?: string }, options) => {
@@ -132,6 +130,10 @@ const templates: Array<Template> = [
                 const parsedDataSourceInfo = parseVariable(groups.dataSource, DATASOURCE_VARIABLE_RULES)
                 if (parsedDataSourceInfo) {
                     variables.push(parsedDataSourceInfo.info)
+                    const afterPart = groups.dataSource.substring(parsedDataSourceInfo.index + parsedDataSourceInfo.length)
+                    if(afterPart.length > 0){
+                        compareAOverride = `${afterPart} ${groups.dataSourcePreposition} ${groups.compareA}`
+                    }
                 } else {
                     //maybe it could be merged into the time expression.
                     compareAOverride = `${groups.dataSource} ${groups.dataSourcePreposition} ${groups.compareA}`
@@ -166,7 +168,7 @@ const templates: Array<Template> = [
             let timeVariables = []
 
             for (const elementText of [compareAOverride, compareBOverride]) {
-                const timeParsingResult = parseTimeText(elementText, today)
+                const timeParsingResult = parseTimeText(elementText, today, options)
                 if (timeParsingResult) {
                     timeVariables.push(timeParsingResult)
                     continue;
@@ -183,7 +185,7 @@ const templates: Array<Template> = [
 
             if (timeVariables.length >= 2 && timeVariables[0].type != timeVariables[1].type) {
                 //two time variables should be parsed in the same way.
-                timeVariables = extractTimeExpressions(`${compareAOverride} and ${compareBOverride}`, today)
+                timeVariables = extractTimeExpressions(`${compareAOverride} and ${compareBOverride}`, today, options)
             }
 
             fastConcatTo(variables, timeVariables)
@@ -196,7 +198,7 @@ const templates: Array<Template> = [
             } else return null
 
         }
-    }
+    }*/
 ]
 
 export function tryPreprocessingByTemplates(speech: string, options: NLUOptions): PreProcessedInputText | null {

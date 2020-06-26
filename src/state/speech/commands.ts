@@ -103,6 +103,7 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                                 {
                                     getToday: service.getToday,
                                     getGoal: (dataSource) => service.getGoalValue(dataSource),
+                                    dataInitialDate: await service.getDataInitialDate(),
                                     measureUnit: currentState.settingsState.unit
                                 }
                             )
