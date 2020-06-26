@@ -74,20 +74,22 @@ export const DailyWeightChart = React.memo((prop: Props) => {
     const veryLastLog = prop.futureNearestLog == null ? (prop.data.logs.length > 0 ? prop.data.logs[prop.data.logs.length - 1] : prop.pastNearestLog) : null
 
     return <BandScaleChartTouchHandler
-    chartContainerWidth={CommonBrowsingChartStyles.CHART_WIDTH}
-    chartContainerHeight={CommonBrowsingChartStyles.CHART_HEIGHT}
-    chartArea={chartArea}
-    scaleX={scaleX}
-    dataSource={DataSourceType.Weight}
-    disableIntraDayLink={true}
-    getValueOfDate={(date) => prop.data.trend.find(d => d.numberedDate === date)?.value}
-    highlightedDays={prop.highlightFilter != null ? prop.highlightedDays : undefined}>
+        chartContainerWidth={CommonBrowsingChartStyles.CHART_WIDTH}
+        chartContainerHeight={CommonBrowsingChartStyles.CHART_HEIGHT}
+        chartArea={chartArea}
+        scaleX={scaleX}
+        dataSource={DataSourceType.Weight}
+        disableIntraDayLink={true}
+        getValueOfDate={(date) => prop.data.trend.find(d => d.numberedDate === date)?.value}
+        highlightedDays={prop.highlightFilter != null ? prop.highlightedDays : undefined}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={scaleY.ticks(5)} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
         <G key="chart" {...chartArea}>
             {
                 prop.highlightFilter && prop.highlightedDays && Object.keys(prop.highlightedDays).map(date => {
-                    return <Rect key={date} fill={Colors.highlightElementBackground} opacity={0.2} x={getScaleStepLeft(scaleX, Number.parseInt(date))} width={scaleX.step()} height={chartArea.height} />
+                    if (date != null && date != "null") {
+                        return <Rect key={date} fill={Colors.highlightElementBackground} opacity={0.2} x={getScaleStepLeft(scaleX, Number.parseInt(date))} width={scaleX.step()} height={chartArea.height} />
+                    } else return null
                 })
             }
             {
@@ -121,8 +123,8 @@ export const DailyWeightChart = React.memo((prop: Props) => {
                 />
             }
 
-            <GoalValueIndicator yScale={scaleY} goal={prop.goalValue} lineLength={chartArea.width} 
-                labelAreaWidth={CommonBrowsingChartStyles.yAxisWidth} valueConverter={convert} valueFormatter={weightTickFormat}/>
+            <GoalValueIndicator yScale={scaleY} goal={prop.goalValue} lineLength={chartArea.width}
+                labelAreaWidth={CommonBrowsingChartStyles.yAxisWidth} valueConverter={convert} valueFormatter={weightTickFormat} />
             {
                 highlightReference != null ? <Line x1={0} x2={chartArea.width} y={scaleY(convert(highlightReference))} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
             }

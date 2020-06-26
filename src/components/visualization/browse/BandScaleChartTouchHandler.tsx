@@ -22,7 +22,7 @@ export const BandScaleChartTouchHandler = (props: {
     scaleX: ScaleBand<number>,
     dataSource: DataSourceType,
     highlightedDays?: { [key: number]: boolean | undefined },
-    disableIntraDayLink?: boolean, 
+    disableIntraDayLink?: boolean,
     getValueOfDate: (date: number) => any,
 }) => {
 
@@ -100,7 +100,9 @@ export const BandScaleChartTouchHandler = (props: {
             }
             {
                 props.highlightedDays != null ? Object.keys(props.highlightedDays).map(date => {
-                    return <Rect key={date} fill={Colors.highlightElementBackground} opacity={0.2} x={getScaleStepLeft(props.scaleX, Number.parseInt(date))} width={props.scaleX.step()} height={props.chartArea.height} />
+                    if (date != null && date != "null") {
+                        return <Rect key={date} fill={Colors.highlightElementBackground} opacity={0.2} x={getScaleStepLeft(props.scaleX, Number.parseInt(date))} width={props.scaleX.step()} height={props.chartArea.height} />
+                    } else return null
                 }) : null
             }
         </G>

@@ -17,6 +17,8 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
 
     const { shouldHighlightElements, highlightReference } = CommonBrowsingChartStyles.makeHighlightInformation(prop, prop.dataSource)
 
+    console.log("highlightReference:", highlightReference)
+
     const today = useContext(TodayContext)
 
     const chartArea = CommonBrowsingChartStyles.CHART_AREA
@@ -95,9 +97,6 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
             }
             {
                 Number.isNaN(avg) === false && <Line x1={0} x2={chartArea.width} y={scaleY(avg)} stroke={Colors.chartAvgLineColor} strokeWidth={CommonBrowsingChartStyles.AVERAGE_LINE_WIDTH} strokeDasharray={"2"} />
-            }
-            {
-                highlightReference != null ? <Line x1={0} x2={chartArea.width} y={scaleY(highlightReference)} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
             }
         </G>
     </BandScaleChartTouchHandler>
