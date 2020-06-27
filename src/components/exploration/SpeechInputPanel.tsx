@@ -113,18 +113,18 @@ export const SpeechInputPanel = React.memo(() => {
                             alignItems: 'center'
                         }}>
                             {
-                                examples != null ? <>
-                                    <Text style={styles.exampleTextTitleStyle}>Say something like:</Text>
+                                examples != null && examples.phrases != null && examples.phrases.length > 0 ? <>
+                                    <Text style={styles.exampleTextTitleStyle}>{examples.messageOverride != null ? examples.messageOverride : "Say something like:"}</Text>
                                     <View style={{
                                         flexDirection: 'row',
                                         flexWrap: 'wrap',
                                         justifyContent: 'space-around',
                                     }}>
                                         {
-                                            examples.map((example: string, i: number) => <Text key={i.toString()} style={styles.exampleTextSentenceStyle}>"{example}"</Text>)
+                                            examples.phrases.map((example: string, i: number) => <Text key={i.toString()} style={styles.exampleTextSentenceStyle}>"{example}"</Text>)
                                         }
                                     </View>
-                                </> : <Text style={styles.exampleTextTitleStyle}>What can I do for you?</Text>
+                                </> : <Text style={styles.exampleTextTitleStyle}>{examples?.messageOverride != null ? examples.messageOverride : "What can I do for you?"}</Text>
                             }
                         </View>
                 }
