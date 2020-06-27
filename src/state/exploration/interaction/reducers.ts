@@ -238,6 +238,12 @@ export const explorationStateReducer = (
               ParameterType.DataSource,
             );
           }
+
+          if (goToBrowseRangeAction.highlightFilter != null) {
+            newState.info.highlightFilter = goToBrowseRangeAction.highlightFilter
+          } else if (goToBrowseRangeAction.highlightFilter === null) {
+            newState.info.highlightFilter = undefined
+          }
         }
         break;
       case ExplorationActionType.GoToBrowseDay:

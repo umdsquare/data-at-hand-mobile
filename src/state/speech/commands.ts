@@ -133,6 +133,9 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                                     const inferredActionWithMetadata = setMetadataToAction(nluResult.action!, { speechLogId: speechCommandLogId })
                                     dispatch(inferredActionWithMetadata)
                                     break;
+                                case NLUResultType.NeedPromptingToGlobalCommand:
+                                    SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.RejectedMultimodal, { speechLogId: speechCommandLogId })
+                                    break;
                                 case NLUResultType.Void:
                                     SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.VoidSpeechAction, { action: inferredActionWithMetadata, speechLogId: speechCommandLogId })
                                     break;
@@ -144,6 +147,7 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                             requestAnimationFrame(() => {
                                 SpeechEventQueue.instance.push({
                                     type: nluResult.type,
+                                    nluResult,
                                     id: sessionId
                                 })
                             })

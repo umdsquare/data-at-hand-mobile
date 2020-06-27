@@ -1,8 +1,9 @@
 import { Subject, Observable } from "rxjs"
-import { NLUResultType } from "./nlp/types"
+import { NLUResultType, NLUResult } from "@data-at-hand/core/speech/types"
 
 export interface SpeechNotificationEvent{
     type: NLUResultType,
+    nluResult: NLUResult,
     id: string
 }
 

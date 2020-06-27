@@ -43,12 +43,14 @@ export function createGoToBrowseRangeAction(
   interactionType: InteractionType,
   dataSource?: DataSourceType,
   range?: [number, number],
+  highlightFilter?: HighlightFilter | null
 ): GoToBrowseRangeAction {
   return {
     type: ExplorationActionType.GoToBrowseRange,
     interactionType,
     range,
     dataSource,
+    highlightFilter
   };
 }
 

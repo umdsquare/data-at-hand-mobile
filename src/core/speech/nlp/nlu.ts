@@ -1,8 +1,8 @@
-import { SpeechContext, SpeechContextType, TimeSpeechContext, RangeElementSpeechContext } from "@data-at-hand/core/speech/SpeechContext"
+import { SpeechContext, SpeechContextType, TimeSpeechContext, RangeElementSpeechContext, GlobalSpeechContext, CategoricalRowElementSpeechContext, CycleDimensionElementSpeechContext, DateElementSpeechContext } from "@data-at-hand/core/speech/SpeechContext"
 import { preprocess } from "./preprocessor";
 import { ActionTypeBase } from "../../../state/types";
 import { NLUOptions, NLUCommandResolver } from "./types";
-import { setDateAction, createSetRangeAction, setDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, createGoToComparisonCyclicAction, setCycleTypeAction, setHighlightFilter } from "../../../state/exploration/interaction/actions";
+import { setDateAction, createSetRangeAction, setDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, createGoToComparisonCyclicAction, setCycleTypeAction, setHighlightFilter, setIntraDayDataSourceAction, setCycleDimensionAction, createGoToCyclicDetailDailyAction, createGoToCyclicDetailRangeAction } from "../../../state/exploration/interaction/actions";
 import { explorationInfoHelper } from "../../exploration/ExplorationInfoHelper";
 import { differenceInDays, addDays } from "date-fns";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
@@ -12,6 +12,8 @@ import { ExplorationInfo, ParameterType, HighlightFilter, ExplorationType } from
 import { InteractionType } from "@data-at-hand/core/exploration/actions";
 import { NLUResult, NLUResultType, VariableType, Intent, ConditionInfo, PreProcessedInputText, VariableInfo } from "@data-at-hand/core/speech/types";
 import { fastConcatTo } from "@data-at-hand/core/utils";
+import { CyclicTimeFrame } from "@data-at-hand/core";
+import { CycleDimension, getFilteredCycleDimensionList, getCycleDimensionSpec, CycleDimensionSpec, getCycleLevelOfDimension } from "@data-at-hand/core/exploration/CyclicTimeFrame";
 
 enum EntityPriority {
     None = 0,
@@ -79,9 +81,18 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
         }
     }
 
-    async resolveSpeechCommand(speech: string, context: SpeechContext, explorationInfo: ExplorationInfo, options: NLUOptions): Promise<NLUResult> {
-
-        const preprocessed = await preprocess(speech, options, this.getCascadedDataSource(null, context, explorationInfo))
+    private analyzeVariables(preprocessed: PreProcessedInputText): {
+        dataSources: Array<VariableInfo>,
+        dates: Array<VariableInfo>,
+        ranges: Array<VariableInfo>,
+        cyclicTimeFrames: Array<VariableInfo>,
+        conditions: Array<VariableInfo>,
+        toldDataSources: boolean,
+        toldDates: boolean,
+        toldRanges: boolean,
+        toldCyclicTimeFrames: boolean,
+        toldConditions: boolean
+    } {
 
         const dataSources = this.extractVariablesWithType(preprocessed, VariableType.DataSource)
         const dates = this.extractVariablesWithType(preprocessed, VariableType.Date)
@@ -89,17 +100,46 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
         const cyclicTimeFrames = this.extractVariablesWithType(preprocessed, VariableType.TimeCycle)
         const conditions = this.extractVariablesWithType(preprocessed, VariableType.Condition)
 
-        console.debug(preprocessed)
-
         const toldDataSources = dataSources.length > 0
         const toldDates = dates.length > 0
         const toldRanges = ranges.length > 0
         const toldCyclicTimeFrames = cyclicTimeFrames.length > 0
         const toldConditions = conditions.length > 0
 
-        const nonVerbVariableExists = Object.keys(preprocessed.variables).find(id => preprocessed.variables[id].type !== VariableType.Verb) != null
+        return {
+            dataSources,
+            dates,
+            ranges,
+            cyclicTimeFrames,
+            conditions,
+            toldDataSources,
+            toldDates,
+            toldRanges,
+            toldCyclicTimeFrames,
+            toldConditions
+        }
+    }
 
-        if (nonVerbVariableExists === false) {
+    async resolveSpeechCommand(speech: string, context: SpeechContext, explorationInfo: ExplorationInfo, options: NLUOptions): Promise<NLUResult> {
+
+        const preprocessed = await preprocess(speech, options, this.getCascadedDataSource(null, context, explorationInfo))
+
+        console.debug(preprocessed)
+
+        const {
+            dataSources,
+            dates,
+            ranges,
+            cyclicTimeFrames,
+            conditions,
+            toldDataSources,
+            toldDates,
+            toldRanges,
+            toldCyclicTimeFrames,
+            toldConditions
+        } = this.analyzeVariables(preprocessed)
+
+        if (Object.keys(preprocessed.variables).find(id => preprocessed.variables[id].type !== VariableType.Verb) == null) {
             //reject
             return {
                 type: NLUResultType.Fail,
@@ -107,11 +147,251 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
             }
         }
 
+        //check multimodal commands first
+        if (context.type !== SpeechContextType.Global) {
+            //In this status, first check the command is valid for multimodal and return the result in the switch block.
+            //Deal with the rejected commands after the switch block.
+
+            switch (context.type) {
+                case SpeechContextType.Time:
+                    {
+                        //In multimodal commands for time, only the period change is supported.
+                        if (preprocessed.intent === Intent.AssignTrivial && !toldDataSources && !toldCyclicTimeFrames && !toldConditions && (toldDates || toldRanges)) {
+                            //pure time assignment command
+                            return NLUCommandResolverImpl.convertActionToNLUResult(
+                                this.processTimeOnlyExpressions(dates, ranges, explorationInfo, context),
+                                explorationInfo, preprocessed)
+                        }
+                    }
+                    break;
+                case SpeechContextType.CategoricalRowElement:
+                    {
+                        if (preprocessed.intent === Intent.AssignTrivial || preprocessed.intent === Intent.Browse) {
+                            //modify the exact theme.
+                            const c = context as CategoricalRowElementSpeechContext
+
+                            switch (c.categoryType) {
+                                case ParameterType.DataSource:
+                                    if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
+                                        return NLUCommandResolverImpl.convertActionToNLUResult(
+                                            setDataSourceAction(InteractionType.Speech, undefined, dataSources[0].value), explorationInfo, preprocessed)
+                                    }
+                                    break;
+                                case ParameterType.CycleType:
+                                    if (toldCyclicTimeFrames && !toldDataSources && !toldConditions && !toldDates && !toldRanges) {
+                                        return NLUCommandResolverImpl.convertActionToNLUResult(
+                                            createGoToComparisonCyclicAction(InteractionType.Speech, undefined, undefined, cyclicTimeFrames[0].value),
+                                            explorationInfo, preprocessed)
+                                    }
+                                    break;
+                                case ParameterType.IntraDayDataSource:
+                                    if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
+                                        const inferredIntraDayDataSourceType = inferIntraDayDataSourceType(dataSources[0].value)
+                                        if (inferredIntraDayDataSourceType) {
+                                            return NLUCommandResolverImpl.convertActionToNLUResult(
+                                                createGoToBrowseDayAction(InteractionType.Speech, inferredIntraDayDataSourceType, undefined),
+                                                explorationInfo, preprocessed)
+                                        } else return {
+                                            type: NLUResultType.Fail,
+                                            preprocessed
+                                        } // TODO some message that the designated data source does not support a single-day view
+                                    }
+                                    break;
+                                case ParameterType.CycleDimension:
+                                    //parse the cycle dimension here. They might be interpreted as time expression.
+
+                                    if (!toldDataSources && !toldCyclicTimeFrames && !toldConditions && (toldDates || toldRanges)) {
+                                        const dimension: CycleDimensionSpec = getCycleDimensionSpec((explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.CycleDimension) as CycleDimension))
+                                        const dimensions = getFilteredCycleDimensionList(dimension.cycleType)
+                                        for (const dimensionSpec of dimensions) {
+                                            if (new RegExp(`(^|\\s)${dimensionSpec.name}($|\\s)`, 'i').test(preprocessed.original)) {
+                                                return NLUCommandResolverImpl.convertActionToNLUResult(
+                                                    setCycleDimensionAction(InteractionType.Speech, undefined, dimensionSpec.dimension),
+                                                    explorationInfo, preprocessed)
+                                            }
+                                        }
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+                    break;
+                case SpeechContextType.CycleDimensionElement:
+                    {
+                        if (preprocessed.intent !== Intent.Highlight && preprocessed.intent !== Intent.Compare) {
+                            if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
+                                const c = context as CycleDimensionElementSpeechContext
+                                const dimension = c.cycleDimension
+                                let action
+                                if (getCycleLevelOfDimension(dimension) === 'day') {
+                                    action = createGoToCyclicDetailDailyAction(InteractionType.Speech, dataSources[0].value, undefined, dimension)
+                                } else {
+                                    action = createGoToCyclicDetailRangeAction(InteractionType.Speech, dataSources[0].value, undefined, dimension)
+                                }
+
+                                return NLUCommandResolverImpl.convertActionToNLUResult(action, explorationInfo, preprocessed)
+                            }
+                        }
+                    }
+                    break;
+
+                case SpeechContextType.DateElement:
+                    {
+                        if (preprocessed.intent !== Intent.Highlight && preprocessed.intent !== Intent.Compare) {
+                            if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
+                                const c = context as DateElementSpeechContext
+                                const dataSource = dataSources[0].value
+
+                                const inferredIntraDayDataSourceType = inferIntraDayDataSourceType(dataSource)
+                                if (inferredIntraDayDataSourceType) {
+                                    return NLUCommandResolverImpl.convertActionToNLUResult(
+                                        createGoToBrowseDayAction(InteractionType.Speech, inferredIntraDayDataSourceType, c.date),
+                                        explorationInfo, preprocessed)
+                                } else {
+                                    console.log(dataSource + " is not supported intraday. Show the around data instead")
+                                    const startDate = DateTimeHelper.toNumberedDateFromDate(addDays(DateTimeHelper.toDate(c.date), -3))
+                                    const endDate = DateTimeHelper.toNumberedDateFromDate(addDays(DateTimeHelper.toDate(c.date), 3))
+
+                                    return NLUCommandResolverImpl.convertActionToNLUResult(
+                                        createGoToBrowseRangeAction(InteractionType.Speech, dataSource, [startDate, endDate]),
+                                        explorationInfo, preprocessed)
+                                }
+                            }
+                        }
+                    }
+                    break;
+                case SpeechContextType.RangeElement:
+                    {
+                        /*
+                        * Four possible commands:
+                        * 1. go to browse the range of new data source
+                        * 2. change this range
+                        * 3. change the other range
+                        * 4. go to cyclic view of the range
+                        * 5. go to browsing, highlighted with condition
+                        */
+
+                        const c = context as RangeElementSpeechContext
+
+                        //1.
+                        if (preprocessed.intent !== Intent.Highlight && preprocessed.intent !== Intent.Compare) {
+                            if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
+                                const dataSource = dataSources[0].value
+
+                                return NLUCommandResolverImpl.convertActionToNLUResult(
+                                    createGoToBrowseRangeAction(InteractionType.Speech, dataSource, undefined),
+                                    explorationInfo, preprocessed)
+                            }
+                        }
+
+                        //2.
+                        if (preprocessed.intent === Intent.AssignTrivial && toldRanges && ranges.length === 1) {
+
+                            const parameter = explorationInfo.values.find(parameter => parameter.parameter === ParameterType.Range && parameter.value[0] === c.range[0] && parameter.value[1] === c.range[1])
+
+                            if (parameter) {
+                                return NLUCommandResolverImpl.convertActionToNLUResult(
+                                    createSetRangeAction(InteractionType.Speech, undefined, ranges[0].value, parameter.key),
+                                    explorationInfo, preprocessed)
+                            }
+                        }
+
+                        //3.
+                        if (preprocessed.intent === Intent.Compare && toldRanges && ranges.length === 1) {
+                            const guaranteedDataSource = this.getCascadedDataSource(dataSources, context, explorationInfo)
+
+                            return NLUCommandResolverImpl.convertActionToNLUResult(
+                                createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, c.range, ranges[0].value),
+                                explorationInfo, preprocessed)
+
+                        }
+
+                        //4.
+                        if (toldCyclicTimeFrames && !toldRanges && !toldDates) {
+                            const guaranteedDataSource = this.getCascadedDataSource(dataSources, context, explorationInfo)
+                            if (guaranteedDataSource) {
+                                return NLUCommandResolverImpl.convertActionToNLUResult(
+                                    createGoToComparisonCyclicAction(InteractionType.Speech, guaranteedDataSource, c.range, cyclicTimeFrames[0].value),
+                                    explorationInfo, preprocessed)
+                            }
+                        }
+
+                        //5.
+                        if (toldConditions && !toldCyclicTimeFrames && !toldRanges && !toldDates) {
+                            const guaranteedDataSource = this.getCascadedDataSource(dataSources, context, explorationInfo)
+                            if (guaranteedDataSource) {
+
+                                const conditionInfo = conditions[0]?.value as ConditionInfo
+                                const cascadedDataSource: DataSourceType = toldDataSources ? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
+                                const dataSource = conditionInfo.impliedDataSource || cascadedDataSource
+                                if (dataSource) {
+                                    const highlightFilter: HighlightFilter = {
+                                        ...conditionInfo,
+                                        dataSource
+                                    }
+
+                                    return NLUCommandResolverImpl.convertActionToNLUResult(
+                                        createGoToBrowseRangeAction(InteractionType.Speech, dataSource, undefined, highlightFilter),
+                                        explorationInfo, preprocessed)
+                                }
+
+                            }
+                        }
+
+                    }
+                    break;
+            }
+
+            //If the code reaches here, the command is rejected as it is not related to the multimodal interaction.
+            console.log("Not a multimodal command")
+
+            //simulate the global speech result
+            const simulatedGlobalInterpretationResult = this.processGlobalSpeechCommand(preprocessed, { type: SpeechContextType.Global, uiStatus: context.uiStatus, explorationType: explorationInfo.type }, explorationInfo)
+
+            if (simulatedGlobalInterpretationResult.type === NLUResultType.Effective || simulatedGlobalInterpretationResult.type === NLUResultType.Void) {
+                console.log("prompt a global command")
+                return {
+                    type: NLUResultType.NeedPromptingToGlobalCommand,
+                    preprocessed: preprocessed,
+                    globalCommandSimulatedAction: simulatedGlobalInterpretationResult.action
+                }
+            } else {
+
+            }
+        } else {
+            //global speech
+            return this.processGlobalSpeechCommand(preprocessed, context as GlobalSpeechContext, explorationInfo)
+        }
+
+        //Cover cases with trivial intent
+        console.log("this is a corner case.")
+
+        return {
+            type: NLUResultType.Fail,
+            preprocessed
+        }
+    }
+
+    private processGlobalSpeechCommand(preprocessed: PreProcessedInputText, context: GlobalSpeechContext, explorationInfo: ExplorationInfo): NLUResult {
+
+        const {
+            dataSources,
+            dates,
+            ranges,
+            cyclicTimeFrames,
+            conditions,
+            toldDataSources,
+            toldDates,
+            toldRanges,
+            toldCyclicTimeFrames,
+            toldConditions
+        } = this.analyzeVariables(preprocessed)
+
         //Cover cyclic time frame first
         if (cyclicTimeFrames.length > 0) {
             const guaranteedDataSource = this.getCascadedDataSource(dataSources, context, explorationInfo)
             if (guaranteedDataSource) {
-                const guaranteedRange = ranges.length > 0 ? ranges[0].value : (context.type === SpeechContextType.RangeElement ? (context as RangeElementSpeechContext).range : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range))
+                const guaranteedRange = ranges.length > 0 ? ranges[0].value : (explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range))
                 return NLUCommandResolverImpl.convertActionToNLUResult(
                     createGoToComparisonCyclicAction(InteractionType.Speech, guaranteedDataSource, guaranteedRange, cyclicTimeFrames[0].value),
                     explorationInfo, preprocessed)

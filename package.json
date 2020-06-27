@@ -50,7 +50,7 @@
     "deep-equal": "^2.0.3",
     "diff": "^4.0.2",
     "eslint": "^7.2.0",
-    "jsrsasign": "^8.0.16",
+    "jsrsasign": "^8.0.20",
     "merge": "^1.2.1",
     "named-regexp-groups": "^1.0.5",
     "papaparse": "^5.2.0",
