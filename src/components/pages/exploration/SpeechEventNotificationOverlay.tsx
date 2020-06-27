@@ -1,6 +1,6 @@
 import React from 'react';
 import { SpeechNotificationEvent } from '@core/speech/SpeechEventQueue';
-import { View, Text, Animated, Easing, StyleSheet, ViewStyle } from 'react-native';
+import { View, Text, Animated, Easing, StyleSheet, ViewStyle, Platform } from 'react-native';
 import { ZIndices } from '@components/pages/exploration/parts/zIndices';
 import { StyleTemplates } from '@style/Styles';
 import { SvgIcon, SvgIconType } from '@components/common/svg/SvgIcon';
@@ -17,29 +17,24 @@ const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
 const start = { x: 0, y: 0 }
 const end = { x: 1, y: 1 }
 
-const containerStyleBase = {
-    position: 'absolute',
-    zIndex: ZIndices.TooltipOverlay,
-    elevation: 10,
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingBottom: 45,
-    alignItems: 'center',
-    justifyContent: 'center'
-} as ViewStyle
+//"#b5b5b590"
 
 const gradientProps = { colors: Colors.decisionButtonGradient, start: { x: 0, y: 0 }, end: { x: 1, y: 0 } }
 
 
 const styles = StyleSheet.create({
 
-    containerStyle: containerStyleBase,
-
-    opaqueContainerStyle: {
-        ...containerStyleBase,
-        backgroundColor: "#b5b5b590"
+    containerStyle: {
+        position: 'absolute',
+        zIndex: ZIndices.TooltipOverlay,
+        elevation: 10,
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        paddingBottom: 45,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
 
     popupDialogStyle: {
@@ -50,7 +45,7 @@ const styles = StyleSheet.create({
         padding: Sizes.horizontalPadding,
         paddingTop: Sizes.verticalPadding * 0.7,
         shadowColor: '#324749',
-        shadowOffset: {width: 0, height: 8},
+        shadowOffset: { width: 0, height: 8 },
         shadowRadius: 8,
         shadowOpacity: 0.3,
         elevation: 8,
@@ -158,7 +153,7 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
 
                 this.currentAnimation?.stop()
 
-                this.currentAnimation = Animated.timing(this.animProgress, {toValue: 1, duration: 400, useNativeDriver: true})
+                this.currentAnimation = Animated.timing(this.animProgress, { toValue: 1, duration: 400, useNativeDriver: true })
 
                 this.currentAnimation.start()
 
@@ -223,7 +218,7 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
     render() {
 
         return <View pointerEvents={this.state.currentEvent != null && this.state.currentEvent.type === NLUResultType.NeedPromptingToGlobalCommand ? "auto" : "none"}
-            style={this.state.currentEvent != null && this.state.currentEvent.type === NLUResultType.NeedPromptingToGlobalCommand ? styles.opaqueContainerStyle : styles.containerStyle}>
+            style={styles.containerStyle}>
             {this.state.currentEvent != null && this.state.currentEvent.type !== NLUResultType.NeedPromptingToGlobalCommand ? <AnimatedLinearGradient style={[
                 styles.gradientStyleBase,
                 {
@@ -266,49 +261,70 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
                 }</Text>
             </AnimatedLinearGradient> : null}
             {
-                this.state.currentEvent != null && this.state.currentEvent.type === NLUResultType.NeedPromptingToGlobalCommand ? <Animated.View style={
-                    {
-                        ...styles.popupDialogStyle,
-                        opacity: this.animProgress,
-                        transform: [{
-                            translateY: this.animProgress.interpolate({
+                this.state.currentEvent != null && this.state.currentEvent.type === NLUResultType.NeedPromptingToGlobalCommand ? <>
+                    {Platform.select({
+                        ios: <AnimatedLinearGradient style={{
+                            ...StyleTemplates.fitParent,
+                            opacity: this.animProgress.interpolate({
                                 inputRange: [0, 1],
-                                outputRange: [35, 0]
+                                outputRange: [0, 0.4]
                             })
-                        }],
+                        }} colors={["#00000000", "#000000FF"]} />,
+                        android: <Animated.View style={{
+                            ...StyleTemplates.fitParent,
+                            backgroundColor: 'black',
+                            opacity: this.animProgress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0, 0.25]
+                            })
+                        }} />
+                    })
                     }
-                    }>
-                    <Text style={styles.speechMessageStyle}>"{this.state.currentEvent?.nluResult?.preprocessed?.original}"</Text>
-                    <Text style={styles.popupMessageStyle}>Your speech command is not related to the pressed element. Do you want to execute it as if through the mic button?</Text>
-                    <View style={styles.buttonsContainerStyle}>
-                        <Button
-                            containerStyle={styles.cancelButtonContainerStyle}
-                            buttonStyle={styles.cancelButtonStyle}
-                            iconRight={false}
-                            titleStyle={styles.cancelButtonTitleStyle}
-                            title="Cancel"
-                            onPress={this.showNext}
-                        />
-                        <Button
-                            containerStyle={styles.buttonContainerStyle}
-                            ViewComponent={LinearGradient}
-                            linearGradientProps={gradientProps}
-                            buttonStyle={styles.buttonStyle}
-                            titleStyle={styles.buttonTitleStyle}
-                            title="Execute"
-                            onPress={() => {
-                                const globalResult = this.state.currentEvent.nluResult.globalCommandSimulatedResult
-                                this.props.dispatch(globalResult.action)
-                                this.notify({
-                                    type: globalResult.type,
-                                    nluResult: globalResult,
-                                    id: this.state.currentEvent?.id
+
+                    <Animated.View style={
+                        {
+                            ...styles.popupDialogStyle,
+                            opacity: this.animProgress,
+                            transform: [{
+                                translateY: this.animProgress.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [30, 0]
                                 })
-                                this.showNext()
-                            }}
-                        />
-                    </View>
-                </Animated.View> : null
+                            }],
+                        }
+                    }>
+                        <Text style={styles.speechMessageStyle}>"{this.state.currentEvent?.nluResult?.preprocessed?.original}"</Text>
+                        <Text style={styles.popupMessageStyle}>Your speech command is not related to the pressed element. Do you want to execute it as if through the mic button?</Text>
+                        <View style={styles.buttonsContainerStyle}>
+                            <Button
+                                containerStyle={styles.cancelButtonContainerStyle}
+                                buttonStyle={styles.cancelButtonStyle}
+                                iconRight={false}
+                                titleStyle={styles.cancelButtonTitleStyle}
+                                title="Cancel"
+                                onPress={this.showNext}
+                            />
+                            <Button
+                                containerStyle={styles.buttonContainerStyle}
+                                ViewComponent={LinearGradient}
+                                linearGradientProps={gradientProps}
+                                buttonStyle={styles.buttonStyle}
+                                titleStyle={styles.buttonTitleStyle}
+                                title="Execute"
+                                onPress={() => {
+                                    const globalResult = this.state.currentEvent.nluResult.globalCommandSimulatedResult
+                                    this.props.dispatch(globalResult.action)
+                                    this.notify({
+                                        type: globalResult.type,
+                                        nluResult: globalResult,
+                                        id: this.state.currentEvent?.id
+                                    })
+                                    this.showNext()
+                                }}
+                            />
+                        </View>
+                    </Animated.View>
+                </> : null
             }
         </View>
     }
