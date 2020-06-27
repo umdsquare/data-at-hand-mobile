@@ -1,11 +1,13 @@
-import { SpeechContext, SpeechContextType, DateElementSpeechContext, RangeElementSpeechContext } from "@data-at-hand/core/speech/SpeechContext";
+import { SpeechContext, SpeechContextType, DateElementSpeechContext, RangeElementSpeechContext, CategoricalRowElementSpeechContext } from "@data-at-hand/core/speech/SpeechContext";
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
 import { DataSourceType, getIntraDayDataSourceName, inferIntraDayDataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { DataSourceManager } from "@measure/DataSourceManager";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import holidays from '@date/holidays-us';
 import { isSameDay, getYear, isAfter } from "date-fns";
-import { ExplorationInfo, ParameterType, ExplorationType } from "@data-at-hand/core/exploration/ExplorationInfo";
+import { ExplorationInfo, ParameterType, ExplorationType, ParameterKey } from "@data-at-hand/core/exploration/ExplorationInfo";
+import { CyclicTimeFrame, cyclicTimeFrameSpecs, getFilteredCycleDimensionList, getCycleTypeOfDimension } from "@data-at-hand/core/exploration/CyclicTimeFrame";
+import { CycleDimension } from "@data-at-hand/core";
 
 const holidayRecommendationList: ReadonlyArray<{ func: string | ((year: number) => Date), casualName: string }> = [
     {
@@ -63,7 +65,19 @@ function getRecentHolidays(ref: Date): Array<{ casualName: string, date: Date }>
     return cachedRecentHolidays
 }
 
-export function generateExampleSentences(info: ExplorationInfo, context: SpeechContext, today: Date): string[] | null {
+export interface SpeechPanelExampleInfo{
+    messageOverride?: string,
+    phrases?: string[]
+}
+
+function makeExampleResult(phrases?: string[], messageOverride?: string): SpeechPanelExampleInfo{
+    return {
+        phrases,
+        messageOverride
+    }
+}
+
+export function generateExampleSentences(info: ExplorationInfo, context: SpeechContext, today: Date): SpeechPanelExampleInfo | null {
 
     if (context) {
         switch (context.type) {
@@ -83,21 +97,67 @@ export function generateExampleSentences(info: ExplorationInfo, context: SpeechC
                         }
                     }
 
-                    return dsToRecommend
+                    return makeExampleResult(dsToRecommend)
                 }
             case SpeechContextType.RangeElement:
                 {
                     const c = context as RangeElementSpeechContext
                     const currentDataSource = c.dataSource || explorationInfoHelper.getParameterValue<DataSourceType>(info, ParameterType.DataSource)
 
-                    const recommend: Array<string> = [`Go to ${getAnotherDataSource(currentDataSource)}`]
+                    const currentRange = c.range
 
-                    return recommend
+                    let rangesToExclude: Array<[number, number]>
+                    if (info.type === ExplorationType.C_TwoRanges) {
+                        rangesToExclude = [
+                            explorationInfoHelper.getParameterValue(info, ParameterType.Range, ParameterKey.RangeA), 
+                            explorationInfoHelper.getParameterValue(info, ParameterType.Range, ParameterKey.RangeB), 
+                        ]
+                    }
+
+
+                    const recommend: Array<string> = [
+                        `Show ${getAnotherDataSource(currentDataSource)}`,
+                        `Compare with ${getAnotherRangeText(currentRange, today, ...rangesToExclude)}`,
+                        `Show days-of-the-week pattern`
+                    ]
+
+                    return makeExampleResult(recommend)
                 }
+
+            case SpeechContextType.CategoricalRowElement:
+                {
+                    const c = context as CategoricalRowElementSpeechContext
+
+                    switch (c.categoryType) {
+                        case ParameterType.DataSource:
+                            return makeExampleResult([getAnotherDataSource(explorationInfoHelper.getParameterValue(info, ParameterType.DataSource))])
+                        case ParameterType.CycleType:
+                            return makeExampleResult([getAnotherCyclicTimeFrame(explorationInfoHelper.getParameterValue(info, ParameterType.CycleType))])
+                        case ParameterType.IntraDayDataSource:
+                            {
+                                const currentDatasource = explorationInfoHelper.getParameterValue(info, ParameterType.IntraDayDataSource)
+                                const sources = DataSourceManager.instance.supportedIntraDayDataSources
+                                const another = sources.find(source => source != currentDatasource)
+                                return makeExampleResult([getIntraDayDataSourceName(another)])
+                            }
+                        case ParameterType.CycleDimension:
+                            //parse the cycle dimension here. They might be interpreted as time expression.
+                            {
+                                const currentDimension = explorationInfoHelper.getParameterValue<CycleDimension>(info, ParameterType.CycleDimension)
+                                const cycleDimensions = getFilteredCycleDimensionList(getCycleTypeOfDimension(currentDimension))
+                                const others = cycleDimensions.filter(c => c.dimension != currentDimension)
+                                
+                                const another = others[Math.floor((Math.random() * others.length))]
+                                return makeExampleResult([another.name])
+                            }
+                    }
+                }
+                break;
             case SpeechContextType.Time:
                 {
-
+                    return makeExampleResult(undefined, "Say new date or period.")
                 }
+                break;
             case SpeechContextType.Global:
                 {
                     switch (info.type) {
@@ -112,7 +172,7 @@ export function generateExampleSentences(info: ExplorationInfo, context: SpeechC
                                     recommend.push("Show step count by days of the week")
                                 }
 
-                                return recommend
+                                return makeExampleResult(recommend)
                             }
                         case ExplorationType.B_Range:
                             {
@@ -125,11 +185,10 @@ export function generateExampleSentences(info: ExplorationInfo, context: SpeechC
                                 recommend.push("Compare with " + anotherRangeText)
                                 recommend.push(`${getAnotherDataSource(currentDataSource)} of ${anotherRangeText}`)
 
-                                return recommend
+                                return makeExampleResult(recommend)
                             }
                         case ExplorationType.B_Day:
                             {
-                                const currentDataSource = explorationInfoHelper.getParameterValue<DataSourceType>(info, ParameterType.DataSource)
                                 const currentDate = DateTimeHelper.toDate(explorationInfoHelper.getParameterValue<number>(info, ParameterType.Date))
 
                                 const recommend = ["last week"]
@@ -139,10 +198,10 @@ export function generateExampleSentences(info: ExplorationInfo, context: SpeechC
 
                                 recommend.push(holidayToRecommend.casualName)
 
-                                return recommend
+                                return makeExampleResult(recommend)
                             }
                         case ExplorationType.C_TwoRanges:
-                            
+
                             break;
                         case ExplorationType.C_Cyclic:
 
@@ -161,6 +220,13 @@ export function generateExampleSentences(info: ExplorationInfo, context: SpeechC
 
 function getAnotherDataSource(dataSource: DataSourceType): string {
     return DataSourceManager.instance.supportedDataSources.find(spec => spec.type !== dataSource).name
+}
+
+function getAnotherCyclicTimeFrame(cycleType: CyclicTimeFrame): string{
+    const newCycleType = Object.keys(cyclicTimeFrameSpecs).find(cycle => cycle != cycleType)
+    if(newCycleType){
+        return cyclicTimeFrameSpecs[newCycleType].name
+    }else return cyclicTimeFrameSpecs[cycleType].name
 }
 
 const humanOffsets = [-1, 0]
