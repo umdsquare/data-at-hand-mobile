@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
         padding: Sizes.horizontalPadding,
         paddingTop: Sizes.verticalPadding * 0.7,
         shadowColor: '#324749',
+        shadowOffset: {width: 0, height: 8},
         shadowRadius: 8,
         shadowOpacity: 0.3,
         elevation: 8,
@@ -152,8 +153,15 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
 
             if (currentEvent.type === NLUResultType.NeedPromptingToGlobalCommand) {
                 console.log("show prompt")
+
+                this.animProgress.setValue(0)
+
                 this.currentAnimation?.stop()
-                this.currentAnimation = undefined
+
+                this.currentAnimation = Animated.timing(this.animProgress, {toValue: 1, duration: 400, useNativeDriver: true})
+
+                this.currentAnimation.start()
+
             } else {
 
                 this.animProgress.setValue(0)
@@ -219,16 +227,10 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
             {this.state.currentEvent != null && this.state.currentEvent.type !== NLUResultType.NeedPromptingToGlobalCommand ? <AnimatedLinearGradient style={[
                 styles.gradientStyleBase,
                 {
-                    opacity: this.animProgress.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, 1]
-                    }),
+                    opacity: this.animProgress,
                     transform: [
                         {
-                            scale: this.animProgress.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [0, 1],
-                            })
+                            scale: this.animProgress
                         }
                     ]
                 }]}
@@ -264,12 +266,18 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
                 }</Text>
             </AnimatedLinearGradient> : null}
             {
-                this.state.currentEvent != null && this.state.currentEvent.type === NLUResultType.NeedPromptingToGlobalCommand ? <View style={{
-                    backgroundColor: Colors.WHITE,
-                    margin: Sizes.horizontalPadding,
-                    padding: Sizes.horizontalPadding,
-                    borderRadius: 12,
-                }}>
+                this.state.currentEvent != null && this.state.currentEvent.type === NLUResultType.NeedPromptingToGlobalCommand ? <Animated.View style={
+                    {
+                        ...styles.popupDialogStyle,
+                        opacity: this.animProgress,
+                        transform: [{
+                            translateY: this.animProgress.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [35, 0]
+                            })
+                        }],
+                    }
+                    }>
                     <Text style={styles.speechMessageStyle}>"{this.state.currentEvent?.nluResult?.preprocessed?.original}"</Text>
                     <Text style={styles.popupMessageStyle}>Your speech command is not related to the pressed element. Do you want to execute it as if through the mic button?</Text>
                     <View style={styles.buttonsContainerStyle}>
@@ -300,7 +308,7 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
                             }}
                         />
                     </View>
-                </View> : null
+                </Animated.View> : null
             }
         </View>
     }
