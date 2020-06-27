@@ -353,7 +353,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                 return {
                     type: NLUResultType.NeedPromptingToGlobalCommand,
                     preprocessed: preprocessed,
-                    globalCommandSimulatedAction: simulatedGlobalInterpretationResult.action
+                    globalCommandSimulatedResult: simulatedGlobalInterpretationResult
                 }
             } else {
 
