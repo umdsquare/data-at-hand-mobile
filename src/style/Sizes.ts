@@ -11,6 +11,9 @@ const GUIDELINE_WIDTH = 380; // ~5.5 inch screen width
 //iPhone Xr: 414
 //Pixel 3a: 392
 //Galaxy J7: 360
+//Galaxy Fold: 585, emaulator: 515
+
+console.log("screen width:", screenWidth)
 
 export function sizeByScreen(normal:number, small?: number): number{
     if(screenWidth >= GUIDELINE_WIDTH) return normal

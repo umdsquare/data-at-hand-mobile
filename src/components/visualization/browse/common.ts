@@ -51,7 +51,10 @@ export namespace CommonBrowsingChartStyles {
 
 
   export const CHART_WIDTH = Dimensions.get("window").width
-  export const CHART_HEIGHT = Math.round(CHART_WIDTH / 3)
+  const CHART_HEIGHT_BASE = Math.round(CHART_WIDTH / 3)
+  export const CHART_HEIGHT = CHART_WIDTH > 520? Math.min(CHART_HEIGHT_BASE, 120) : CHART_HEIGHT_BASE // for Foldable
+
+  console.log("chart height:", CHART_HEIGHT)
 
   export const CHART_AREA: LayoutRectangle = {
     x: yAxisWidth,
