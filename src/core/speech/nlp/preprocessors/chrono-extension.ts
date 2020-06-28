@@ -14,7 +14,7 @@ dataInitialDateParser.extract = function (text, ref, match, opt) {
 
         const initialDate = DateTimeHelper.toDate(initialNumberedDate)
 
-        const extractedText = match[2] + match[3] + match[4] + match[7]
+        const extractedText = (match[2] || "") + (match[3] || "") + (match[4] || "") + (match[7] || "")
         const result = new ParsedResult({
             ref,
             text: extractedText,
@@ -31,7 +31,7 @@ dataInitialDateParser.extract = function (text, ref, match, opt) {
 }
 
 const entirePeriodParser = new chrono.Parser();
-entirePeriodParser.pattern = function(){ return /(^|\s+)((the|a|an)\s+)?((entire|all|whole)\s+(period|range|data|dataset))($|\s+)/i }
+entirePeriodParser.pattern = function () { return /(^|\s+)((the|a|an)\s+)?((entire|all|whole)\s+(period|range|data|dataset))($|\s+)/i }
 entirePeriodParser.extract = function (text, ref, match, opt) {
 
     const initialNumberedDate = opt?.dataInitialDate
@@ -39,7 +39,7 @@ entirePeriodParser.extract = function (text, ref, match, opt) {
 
         const initialDate = DateTimeHelper.toDate(initialNumberedDate)
 
-        const extractedText = match[2] + match[4]
+        const extractedText = (match[2] || "") + (match[4] || "")
         const result = new ParsedResult({
             ref,
             text: extractedText,
