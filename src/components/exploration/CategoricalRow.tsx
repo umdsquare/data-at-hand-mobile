@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, FlatList, Animated } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, FlatList, Animated, SectionList, Dimensions } from 'react-native';
 import { Sizes } from '@style/Sizes';
 import { SpeechAffordanceIndicator } from './SpeechAffordanceIndicator';
 import { SwipedFeedback } from '@components/common/SwipedFeedback';
@@ -11,6 +11,13 @@ import Haptic from "react-native-haptic-feedback";
 
 import { FlingGestureHandler, Directions, FlingGestureHandlerStateChangeEvent, State, BorderlessButton, LongPressGestureHandler, LongPressGestureHandlerStateChangeEvent } from 'react-native-gesture-handler';
 import { denialAnimationSettings } from '@components/common/Animations';
+import { group } from 'd3-array';
+import { SvgIcon, SvgIconType } from '@components/common/svg/SvgIcon';
+
+const BOTTOMSHEET_ELEMENT_HEIGHT = Sizes.normalFontSize + 2 * Sizes.verticalPadding
+const BOTTOMSHEET_ELEMENT_SECTION_HEADER_HEIGHT = Sizes.smallFontSize + 1.5 * Sizes.horizontalPadding
+
+
 const height = 50
 const containerStyleBase = {
     flexDirection: 'row',
@@ -57,7 +64,7 @@ const styles = StyleSheet.create({
 
     valueStyle: valueStyleBase,
 
-    valueStyelLight: {
+    valueStyleLight: {
         ...valueStyleBase,
         color: Colors.textColorLight
     },
@@ -67,12 +74,46 @@ const styles = StyleSheet.create({
         marginLeft: 3
     },
 
+    bottomSheetHeaderStyle: { justifyContent: 'flex-end', flexDirection: 'row', paddingRight: Sizes.horizontalPadding, borderBottomColor: Colors.textGray, borderBottomWidth: 1 },
+
+    bottomSheetCloseButtonStyle: { padding: Sizes.horizontalPadding },
+
     bottomSheetElementStyle: {
         ...StyleTemplates.flexHorizontalCenteredListContainer,
+        height: BOTTOMSHEET_ELEMENT_HEIGHT,
         paddingLeft: Sizes.horizontalPadding, paddingRight: Sizes.horizontalPadding,
-        paddingTop: Sizes.verticalPadding, paddingBottom: Sizes.verticalPadding,
         borderBottomColor: '#00000015',
         borderBottomWidth: 1
+    },
+
+    bottomSheetElementTitleStyle: {
+        ...valueStyleBase,
+        color: Colors.textColorLight,
+        flex: 1
+    },
+
+    bottomSheetElementDescriptionStyle: {
+        color: Colors.textGray
+    },
+
+    bottomSheetSectionHeaderStyle: {
+        height: BOTTOMSHEET_ELEMENT_SECTION_HEADER_HEIGHT,
+        paddingLeft: Sizes.horizontalPadding, paddingRight: Sizes.horizontalPadding,
+        backgroundColor: Colors.backPanelColor,
+        borderBottomColor: Colors.lightBorderColor,
+        borderBottomWidth: 1,
+        justifyContent: 'center'
+    },
+
+    bottomSheetSectionHeaderTitleStyle: {
+        fontSize: Sizes.smallFontSize,
+        color: Colors.textGray,
+        fontWeight: 'bold',
+    },
+
+    bottomSheetListStyle: {
+        flexGrow: 0,
+        maxHeight: Dimensions.get('window').height * 0.6
     }
 })
 
@@ -85,7 +126,8 @@ export interface CategoricalRowProps {
     showBorder?: boolean,
     children?: any,
     isLightMode?: boolean,
-    values: string[],
+    values: Array<string>,
+    getCategory?: (index: number) => string,
     onPress?: () => void,
     onLongPressIn?: () => void,
     onLongPressOut?: () => void,
@@ -145,6 +187,45 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
         }
     }, [prop.onLongPressIn, prop.onLongPressOut])
 
+    const onCloseBottomSheetPress = useCallback(() => {
+        bottomSheetRef.current?.close()
+    }, [])
+
+    const dataBySection = useMemo(() => {
+        if (prop.getCategory != null) {
+            const list = prop.values.map((value, index) => ({ value, index, category: prop.getCategory(index) }))
+            const grouped = group(list, (v => v.category))
+            const result = []
+            for (const group of grouped.keys()) {
+                result.push({ title: group, data: grouped.get(group) })
+            }
+            return result
+        } else return null
+    }, [prop.values, prop.getCategory])
+
+    const renderItem = useCallback(entry => {
+        return <TouchableOpacity
+            onPress={
+                () => {
+                    if (prop.onValueChange) {
+                        prop.onValueChange(prop.values[entry.index], entry.index, 'picker')
+                    }
+                    bottomSheetRef.current?.close()
+                }
+            }
+            style={styles.bottomSheetElementStyle}>
+            {
+                prop.IconComponent != null ? <prop.IconComponent color={Colors.textGray} size={20} {...(prop.iconProps && prop.iconProps(entry.index))} /> : null
+            }
+            <Text style={styles.bottomSheetElementTitleStyle}>{entry.item}</Text>
+            {
+                entry.item === prop.value ? <SvgIcon type={SvgIconType.Check} color={Colors.accent} /> : null
+            }
+        </TouchableOpacity>
+    }, [prop.value, prop.onValueChange, prop.iconProps])
+
+    const renderSectionItem = useCallback(entry => renderItem({ item: entry.item.value, index: entry.item.index }), [renderItem])
+
     const [movement] = useState(new Animated.Value(0))
 
 
@@ -176,7 +257,7 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
                                     {...{ color: prop.isLightMode === true ? Colors.textGray : Colors.WHITE, size: 20 }}
                                     {...(prop.iconProps && prop.iconProps(prop.values.indexOf(prop.value)))} /> : null
                             }
-                            <Text style={prop.isLightMode === true ? styles.valueStyelLight : styles.valueStyle}>{prop.value}</Text>
+                            <Text style={prop.isLightMode === true ? styles.valueStyleLight : styles.valueStyle}>{prop.value}</Text>
                             {prop.onLongPressIn != null ?
                                 <SpeechAffordanceIndicator overrideStyle={styles.indicatorStyle} /> : null}
                         </Animated.View>
@@ -185,32 +266,33 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
 
                 {
                     <BottomSheet ref={bottomSheetRef}>
-                        <View style={{ justifyContent: 'flex-end', flexDirection: 'row', paddingRight: Sizes.horizontalPadding, borderBottomColor: Colors.textGray, borderBottomWidth: 1 }}>
-                            <Button type="clear" title="Close" buttonStyle={{ padding: Sizes.horizontalPadding }} onPress={() => { bottomSheetRef.current?.close() }} />
+                        <View style={styles.bottomSheetHeaderStyle}>
+                            <Button type="clear" title="Close" buttonStyle={styles.bottomSheetCloseButtonStyle} onPress={onCloseBottomSheetPress} />
                         </View>
-                        <FlatList
-                            style={{ flexGrow: 0 }}
-                            initialNumToRender={prop.values.length}
-                            data={prop.values}
-                            keyExtractor={(value, index) => index.toString()}
-                            renderItem={(entry => {
-                                return <TouchableOpacity
-                                    onPress={
-                                        () => {
-                                            if (prop.onValueChange) {
-                                                prop.onValueChange(prop.values[entry.index], entry.index, 'picker')
-                                            }
-                                            bottomSheetRef.current?.close()
-                                        }
-                                    }
-                                    style={styles.bottomSheetElementStyle}>
-                                    {
-                                        prop.IconComponent ? <prop.IconComponent {...{ color: Colors.textGray, size: 20 }} {...(prop.iconProps && prop.iconProps(entry.index))} /> : null
-                                    }
-                                    <Text style={styles.valueStyelLight}>{entry.item}</Text>
-                                </TouchableOpacity>
-                            })}
-                        />
+                        {
+                            dataBySection != null ?
+                                <SectionList
+                                    //initialNumToRender={prop.values.length}
+                                    //initialScrollIndex={prop.values.indexOf(prop.value)}
+                                    style={styles.bottomSheetListStyle}
+                                    sections={dataBySection}
+                                    keyExtractor={(item, index) => item.index.toString()}
+                                    renderItem={renderSectionItem}
+
+                                    renderSectionHeader={({ section }) => (
+                                        <View style={styles.bottomSheetSectionHeaderStyle}>
+                                            <Text style={styles.bottomSheetSectionHeaderTitleStyle}>{section.title}</Text>
+                                        </View>
+                                    )}
+                                />
+                                : <FlatList
+                                    style={styles.bottomSheetListStyle}
+                                    initialNumToRender={prop.values.length}
+                                    data={prop.values}
+                                    keyExtractor={(value, index) => index.toString()}
+                                    renderItem={renderItem}
+                                />
+                        }
                     </BottomSheet>
                 }
             </View>

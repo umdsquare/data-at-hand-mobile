@@ -13,7 +13,7 @@ import { createSetRangeAction, setDataSourceAction, goBackAction, setDateAction,
 import Colors from '@style/Colors';
 import { useDispatch, useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
-import { CyclicTimeFrame, cyclicTimeFrameSpecs, CycleDimension, getHomogeneousCycleDimensionList, getCycleDimensionSpec } from '@data-at-hand/core/exploration/CyclicTimeFrame';
+import { CyclicTimeFrame, cyclicTimeFrameSpecs, CycleDimension, getHomogeneousCycleDimensionList, getCycleDimensionSpec, getFilteredCycleDimensionList, allSupportedCycleDimensionSpecs } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { SvgIcon, SvgIconType } from '@components/common/svg/SvgIcon';
 import { makeNewSessionId, startSpeechSession, requestStopDictation } from '@state/speech/commands';
 import { createSetShowGlobalPopupAction } from '@state/speech/actions';
@@ -344,15 +344,18 @@ const CyclicComparisonTypeBar = (props: { showBorder: boolean }) => {
 const CycleDimensionBar = (props: { showBorder: boolean }) => {
     const dispatch = useDispatch()
     const explorationInfo = useSelector((appState: ReduxAppState) => appState.explorationState.info)
-    const cycleDimension = explorationInfoHelper.getParameterValue<CycleDimension>(explorationInfo, ParameterType.CycleDimension)!
-    const spec = useMemo(() => getCycleDimensionSpec(cycleDimension), [cycleDimension])
-    const selectableDimensions = useMemo(() => getHomogeneousCycleDimensionList(cycleDimension), [cycleDimension])
-    const dimensionNames = useMemo(() => selectableDimensions.map(spec => spec.name), [selectableDimensions])
+    const currentCycleDimension = explorationInfoHelper.getParameterValue<CycleDimension>(explorationInfo, ParameterType.CycleDimension)!
+    const spec = useMemo(() => getCycleDimensionSpec(currentCycleDimension), [currentCycleDimension])
+
+    const dimensionCategory = useCallback((index: number)  => cyclicTimeFrameSpecs[allSupportedCycleDimensionSpecs[index].cycleType].name, [])
+
+    const dimensionNames = useMemo(() => allSupportedCycleDimensionSpecs.map(spec => spec.name), [])
 
     return <HeaderCategoricalRow parameterType={ParameterType.CycleDimension} title="Cycle Filter" showBorder={props.showBorder} value={spec.name}
         values={dimensionNames}
+        getCategory = {dimensionCategory}
         onValueChange={(value, index, interactionContext) => {
-            dispatch(setCycleDimensionAction(InteractionType.TouchOnly, interactionContext, selectableDimensions[index].dimension))
+            dispatch(setCycleDimensionAction(InteractionType.TouchOnly, interactionContext, allSupportedCycleDimensionSpecs[index].dimension))
         }}
     />
 }
