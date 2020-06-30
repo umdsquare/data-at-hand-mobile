@@ -49,6 +49,7 @@ const styles = StyleSheet.create({
     buttonStyle: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'flex-end',
         height,
         paddingRight: Sizes.horizontalPadding,
         paddingLeft: Sizes.horizontalPadding,
@@ -163,7 +164,7 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
                     onHandlerStateChange={onLongPressStateChange}
                     shouldCancelWhenOutside={false}
                     maxDist={200}>
-                    <BorderlessButton onPress={onPress} rippleColor={"rgba(255,255,255,0.2)"}>
+                    <BorderlessButton onPress={onPress} rippleColor={"rgba(255,255,255,0.2)"} style={StyleTemplates.fillFlex}>
                         <Animated.View style={{
                             ...styles.buttonStyle,
                             transform: [{
