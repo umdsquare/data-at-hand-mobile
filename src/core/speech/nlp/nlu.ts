@@ -178,66 +178,6 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                         }
                     }
                     break;
-                case SpeechContextType.CategoricalRowElement:
-                    {
-                        if (preprocessed.intent === Intent.AssignTrivial || preprocessed.intent === Intent.Browse) {
-                            //modify the exact theme.
-                            const c = context as CategoricalRowElementSpeechContext
-
-                            switch (c.categoryType) {
-                                case ParameterType.DataSource:
-                                    if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
-                                        return NLUCommandResolverImpl.convertActionToNLUResult(
-                                            setDataSourceAction(InteractionType.Speech, undefined, dataSources[0].value), explorationInfo, preprocessed)
-                                    }else{
-                                        specifyMessageBlock = "a data source"
-                                    }
-                                    break;
-                                case ParameterType.CycleType:
-                                    if (toldCyclicTimeFrames && !toldDataSources && !toldConditions && !toldDates && !toldRanges) {
-                                        return NLUCommandResolverImpl.convertActionToNLUResult(
-                                            createGoToComparisonCyclicAction(InteractionType.Speech, undefined, undefined, cyclicTimeFrames[0].value),
-                                            explorationInfo, preprocessed)
-                                    }else{
-                                        specifyMessageBlock = "'day of the week' or 'months of the year'"
-                                    }
-                                    break;
-                                case ParameterType.IntraDayDataSource:
-                                    if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
-                                        const inferredIntraDayDataSourceType = inferIntraDayDataSourceType(dataSources[0].value)
-                                        if (inferredIntraDayDataSourceType) {
-                                            return NLUCommandResolverImpl.convertActionToNLUResult(
-                                                createGoToBrowseDayAction(InteractionType.Speech, inferredIntraDayDataSourceType, undefined),
-                                                explorationInfo, preprocessed)
-                                        } else return {
-                                            type: NLUResultType.Fail,
-                                            preprocessed
-                                        } // TODO some message that the designated data source does not support a single-day view
-                                    }else{
-                                        specifyMessageBlock = "a data source"
-                                    }
-                                    break;
-                                case ParameterType.CycleDimension:
-                                    //parse the cycle dimension here. They might be interpreted as time expression.
-
-                                    if (!toldDataSources && !toldCyclicTimeFrames && !toldConditions && (toldDates || toldRanges)) {
-                                        const dimension: CycleDimensionSpec = getCycleDimensionSpec((explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.CycleDimension) as CycleDimension))
-                                        const dimensions = getFilteredCycleDimensionList(dimension.cycleType)
-                                        for (const dimensionSpec of dimensions) {
-                                            if (new RegExp(`(^|\\s)${dimensionSpec.name}($|\\s)`, 'i').test(preprocessed.original)) {
-                                                return NLUCommandResolverImpl.convertActionToNLUResult(
-                                                    setCycleDimensionAction(InteractionType.Speech, undefined, dimensionSpec.dimension),
-                                                    explorationInfo, preprocessed)
-                                            }
-                                        }
-                                    }else{
-
-                                    }
-                                    break;
-                            }
-                        }
-                    }
-                    break;
                 case SpeechContextType.CycleDimensionElement:
                     {
                         if (preprocessed.intent !== Intent.Highlight && preprocessed.intent !== Intent.Compare) {

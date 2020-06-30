@@ -85,7 +85,6 @@ export interface CategoricalRowProps {
     children?: any,
     isLightMode?: boolean,
     values: string[],
-    useSpeechIndicator?: boolean,
     onPress?: () => void,
     onLongPressIn?: () => void,
     onLongPressOut?: () => void,
@@ -160,6 +159,7 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
                 <SwipedFeedback ref={swipedFeedbackRef} />
                 <Text style={prop.isLightMode === true ? styles.titleStyleLight : styles.titleStyle}>{prop.title}</Text>
                 <LongPressGestureHandler
+                    enabled={prop.onLongPressIn != null}
                     onHandlerStateChange={onLongPressStateChange}
                     shouldCancelWhenOutside={false}
                     maxDist={200}>
@@ -176,7 +176,7 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
                                     {...(prop.iconProps && prop.iconProps(prop.values.indexOf(prop.value)))} /> : null
                             }
                             <Text style={prop.isLightMode === true ? styles.valueStyelLight : styles.valueStyle}>{prop.value}</Text>
-                            {prop.useSpeechIndicator !== false ?
+                            {prop.onLongPressIn != null ?
                                 <SpeechAffordanceIndicator overrideStyle={styles.indicatorStyle} /> : null}
                         </Animated.View>
                     </BorderlessButton>

@@ -251,16 +251,17 @@ interface SpeechSupportedCategoricalRowProps extends CategoricalRowProps {
     parameterType: ParameterType
 }
 
-const SpeechSupportedCategoricalRow = (props: SpeechSupportedCategoricalRowProps) => {
+const HeaderCategoricalRow = (props: SpeechSupportedCategoricalRowProps) => {
     const dispatch = useDispatch()
 
     const [speechSessionId, setSpeechSessionId] = useState<string | null>(null)
+    /*
     const onLongPressIn = useCallback(() => {
         const newSessionId = makeNewSessionId()
         dispatch(createSetShowGlobalPopupAction(true, newSessionId))
         dispatch(startSpeechSession(newSessionId, SpeechContextHelper.makeCategoricalRowElementSpeechContext(props.parameterType as any)))
         setSpeechSessionId(newSessionId)
-    }, [dispatch, setSpeechSessionId])
+    }, [dispatch, setSpeechSessionId])*/
 
     const onLongPressOut = useCallback(() => {
         if (speechSessionId != null) {
@@ -270,7 +271,7 @@ const SpeechSupportedCategoricalRow = (props: SpeechSupportedCategoricalRowProps
         setSpeechSessionId(null)
     }, [speechSessionId, setSpeechSessionId, dispatch])
 
-    return <CategoricalRow {...props} onLongPressIn={onLongPressIn} onLongPressOut={onLongPressOut} />
+    return <CategoricalRow {...props} /*onLongPressIn={onLongPressIn}*/ onLongPressOut={onLongPressOut} />
 }
 
 const DataSourceBar = React.memo((props: { showBorder: boolean }) => {
@@ -287,7 +288,7 @@ const DataSourceBar = React.memo((props: { showBorder: boolean }) => {
 
     const values = useMemo(() => DataSourceManager.instance.supportedDataSources.map(spec => spec.name), [])
 
-    return <SpeechSupportedCategoricalRow parameterType={ParameterType.DataSource} title="Data Source" showBorder={props.showBorder} value={sourceSpec.name}
+    return <HeaderCategoricalRow parameterType={ParameterType.DataSource} title="Data Source" showBorder={props.showBorder} value={sourceSpec.name}
         IconComponent={DataSourceIcon}
         iconProps={iconProps}
         values={values}
@@ -312,7 +313,7 @@ const IntraDayDataSourceBar = React.memo((props: { showBorder: boolean }) => {
         [supportedIntraDayDataSourceTypes])
 
 
-    return <SpeechSupportedCategoricalRow parameterType={ParameterType.IntraDayDataSource} title="Data Source" showBorder={props.showBorder} value={sourceTypeName}
+    return <HeaderCategoricalRow parameterType={ParameterType.IntraDayDataSource} title="Data Source" showBorder={props.showBorder} value={sourceTypeName}
         IconComponent={DataSourceIcon}
         iconProps={(index) => {
             return {
@@ -332,7 +333,7 @@ const CyclicComparisonTypeBar = (props: { showBorder: boolean }) => {
     const cycleType = explorationInfoHelper.getParameterValue<CyclicTimeFrame>(explorationInfo, ParameterType.CycleType)!
     const cycles = useMemo(() => Object.keys(cyclicTimeFrameSpecs), [])
 
-    return <SpeechSupportedCategoricalRow parameterType={ParameterType.CycleType} title="Group By" showBorder={props.showBorder} value={cyclicTimeFrameSpecs[cycleType].name}
+    return <HeaderCategoricalRow parameterType={ParameterType.CycleType} title="Group By" showBorder={props.showBorder} value={cyclicTimeFrameSpecs[cycleType].name}
         values={cycles.map(key => cyclicTimeFrameSpecs[key].name)}
         onValueChange={(value, index, interactionContext) => {
             dispatch(setCycleTypeAction(InteractionType.TouchOnly, interactionContext, cycles[index] as any))
@@ -348,7 +349,7 @@ const CycleDimensionBar = (props: { showBorder: boolean }) => {
     const selectableDimensions = useMemo(() => getHomogeneousCycleDimensionList(cycleDimension), [cycleDimension])
     const dimensionNames = useMemo(() => selectableDimensions.map(spec => spec.name), [selectableDimensions])
 
-    return <SpeechSupportedCategoricalRow parameterType={ParameterType.CycleDimension} title="Cycle Filter" showBorder={props.showBorder} value={spec.name}
+    return <HeaderCategoricalRow parameterType={ParameterType.CycleDimension} title="Cycle Filter" showBorder={props.showBorder} value={spec.name}
         values={dimensionNames}
         onValueChange={(value, index, interactionContext) => {
             dispatch(setCycleDimensionAction(InteractionType.TouchOnly, interactionContext, selectableDimensions[index].dimension))

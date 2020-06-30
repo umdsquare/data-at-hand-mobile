@@ -72,7 +72,6 @@ export const ComparisonInitPanel = (props: { info: ExplorationInfo, onCompleted?
 
     return <View style={styles.containerStyle}>
         <CategoricalRow title="Data Source" isLightMode={true} value={DataSourceManager.instance.getSpec(dataSource).name}
-            useSpeechIndicator={false}
             values={DataSourceManager.instance.supportedDataSources.map(s => s.name)}
             onValueChange={(value, index) => { setDataSource(DataSourceManager.instance.supportedDataSources[index].type) }}
             IconComponent={DataSourceIcon}
@@ -81,7 +80,6 @@ export const ComparisonInitPanel = (props: { info: ExplorationInfo, onCompleted?
             })}
             showBorder={true} />
         <CategoricalRow title="Comparison Type"
-            useSpeechIndicator={false}
             isLightMode={true}
             value={cycleType === 'compareTwoRanges' ? CompareTwoRangesLabel : cyclicTimeFrameSpecs[cycleType].name}
             values={comparisonTypes}
