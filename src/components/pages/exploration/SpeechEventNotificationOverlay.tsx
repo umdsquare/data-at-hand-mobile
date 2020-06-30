@@ -294,7 +294,7 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
                         }
                     }>
                         <Text style={styles.speechMessageStyle}>"{this.state.currentEvent?.nluResult?.preprocessed?.original}"</Text>
-                        <Text style={styles.popupMessageStyle}>Your speech command is not related to the pressed element. Do you want to execute it as if through the mic button?</Text>
+                        <Text style={styles.popupMessageStyle}>{this.state.currentEvent?.nluResult?.message? this.state.currentEvent?.nluResult?.message : "Your speech command is not related to the pressed element."} Do you want to execute it as if through the mic button?</Text>
                         <View style={styles.buttonsContainerStyle}>
                             <Button
                                 containerStyle={styles.cancelButtonContainerStyle}

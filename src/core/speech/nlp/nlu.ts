@@ -152,15 +152,29 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
             //In this status, first check the command is valid for multimodal and return the result in the switch block.
             //Deal with the rejected commands after the switch block.
 
+            let specifyMessageBlock: string | undefined = undefined
+
             switch (context.type) {
                 case SpeechContextType.Time:
                     {
+                        const c = context as TimeSpeechContext
                         //In multimodal commands for time, only the period change is supported.
                         if (preprocessed.intent === Intent.AssignTrivial && !toldDataSources && !toldCyclicTimeFrames && !toldConditions && (toldDates || toldRanges)) {
                             //pure time assignment command
                             return NLUCommandResolverImpl.convertActionToNLUResult(
                                 this.processTimeOnlyExpressions(dates, ranges, explorationInfo, context),
                                 explorationInfo, preprocessed)
+                        } else {
+                            switch (c.timeElementType) {
+                                case "from":
+                                case "to":
+                                case "date":
+                                    specifyMessageBlock = "a date or period"
+                                    break;
+                                case "period":
+                                    specifyMessageBlock = "a period"
+                                    break;
+                            }
                         }
                     }
                     break;
@@ -175,6 +189,8 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                     if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
                                         return NLUCommandResolverImpl.convertActionToNLUResult(
                                             setDataSourceAction(InteractionType.Speech, undefined, dataSources[0].value), explorationInfo, preprocessed)
+                                    }else{
+                                        specifyMessageBlock = "a data source"
                                     }
                                     break;
                                 case ParameterType.CycleType:
@@ -182,6 +198,8 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                         return NLUCommandResolverImpl.convertActionToNLUResult(
                                             createGoToComparisonCyclicAction(InteractionType.Speech, undefined, undefined, cyclicTimeFrames[0].value),
                                             explorationInfo, preprocessed)
+                                    }else{
+                                        specifyMessageBlock = "'day of the week' or 'months of the year'"
                                     }
                                     break;
                                 case ParameterType.IntraDayDataSource:
@@ -195,6 +213,8 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                             type: NLUResultType.Fail,
                                             preprocessed
                                         } // TODO some message that the designated data source does not support a single-day view
+                                    }else{
+                                        specifyMessageBlock = "a data source"
                                     }
                                     break;
                                 case ParameterType.CycleDimension:
@@ -210,6 +230,8 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                                     explorationInfo, preprocessed)
                                             }
                                         }
+                                    }else{
+
                                     }
                                     break;
                             }
@@ -352,6 +374,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                 console.log("prompt a global command")
                 return {
                     type: NLUResultType.NeedPromptingToGlobalCommand,
+                    message: specifyMessageBlock != null? `You should specify ${specifyMessageBlock} for this element.` : undefined,
                     preprocessed: preprocessed,
                     globalCommandSimulatedResult: simulatedGlobalInterpretationResult
                 }
