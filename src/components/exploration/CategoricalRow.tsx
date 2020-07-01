@@ -35,6 +35,7 @@ const containerStyleBase = {
 const titleStyleBase = {
     fontSize: Sizes.normalFontSize,
     color: "#E0E0E0",
+    marginRight: Sizes.horizontalPadding
 } as TextStyle
 
 const valueStyleBase = {
@@ -269,7 +270,7 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
                     onHandlerStateChange={onLongPressStateChange}
                     shouldCancelWhenOutside={false}
                     maxDist={200}>
-                    <BorderlessButton onPress={onPress} rippleColor={"rgba(255,255,255,0.2)"} style={StyleTemplates.fillFlex}>
+                    <BorderlessButton onPress={onPress} rippleColor={"rgba(255,255,255,0.2)"} borderless={false} style={StyleTemplates.fillFlex}>
                         <Animated.View style={{
                             ...styles.buttonStyle,
                             transform: [{
