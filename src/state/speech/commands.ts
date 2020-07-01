@@ -134,6 +134,9 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                                     dispatch(inferredActionWithMetadata)
                                     break;
                                 case NLUResultType.NeedPromptingToGlobalCommand:
+                                    if(nluResult.globalCommandSimulatedResult?.action != null){
+                                        nluResult.globalCommandSimulatedResult.action = setMetadataToAction(nluResult.globalCommandSimulatedResult.action, {speechLogId: speechCommandLogId, promptedFromMultimodal: true})
+                                    }
                                     SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.RejectedMultimodal, { speechLogId: speechCommandLogId })
                                     break;
                                 case NLUResultType.Void:

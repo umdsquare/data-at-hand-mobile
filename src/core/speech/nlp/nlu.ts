@@ -12,8 +12,7 @@ import { ExplorationInfo, ParameterType, HighlightFilter, ExplorationType } from
 import { InteractionType } from "@data-at-hand/core/exploration/actions";
 import { NLUResult, NLUResultType, VariableType, Intent, ConditionInfo, PreProcessedInputText, VariableInfo } from "@data-at-hand/core/speech/types";
 import { fastConcatTo } from "@data-at-hand/core/utils";
-import { CyclicTimeFrame } from "@data-at-hand/core";
-import { CycleDimension, getFilteredCycleDimensionList, getCycleDimensionSpec, CycleDimensionSpec, getCycleLevelOfDimension } from "@data-at-hand/core/exploration/CyclicTimeFrame";
+import { getCycleLevelOfDimension } from "@data-at-hand/core/exploration/CyclicTimeFrame";
 
 import stringFormat from 'string-format';
 
@@ -390,9 +389,16 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                     }
 
                     if (extractedRanges.length < 2) {
-                        const cascadedRange = (context as any)["range"] || explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range)
-                        if (cascadedRange != null) {
-                            extractedRanges.unshift(cascadedRange)
+                        const rangesInInfo = explorationInfo.values.filter(v => v.parameter === ParameterType.Range)
+                        if(rangesInInfo.length > 1){
+                            //ambiguity.
+                            return {
+                                type: NLUResultType.Fail,
+                                preprocessed,
+                                message: "There are more than one range."
+                            }
+                        }else if(rangesInInfo.length === 1){
+                            extractedRanges.unshift(rangesInInfo[0].value)
                         }
                     }
 

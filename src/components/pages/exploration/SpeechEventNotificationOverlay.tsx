@@ -12,6 +12,8 @@ import { Button } from 'react-native-elements';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import StyledText from 'react-native-styled-text';
+import { VerboseEventTypes } from '@data-at-hand/core/logging/types';
+import { SystemLogger } from '@core/logging/SystemLogger';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
 
@@ -182,7 +184,7 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
                             toValue: 1,
                             useNativeDriver: true
                         }),
-                        Animated.delay(currentEvent.type !== NLUResultType.Fail ? 300 : 800),
+                        Animated.delay(currentEvent.type !== NLUResultType.Fail ? 300 : (this.state.currentEvent.nluResult.message != null ? 2000 : 800)),
                         Animated.timing(this.animProgress, {
                             toValue: 0,
                             easing: Easing.cubic,
@@ -223,6 +225,12 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
                 currentEvent: null
             })
         }
+    }
+
+    private onPromptCancel = () => {
+        const speechCommandLogId = this.state.currentEvent?.nluResult?.globalCommandSimulatedResult?.action?._metadata?.speechLogId
+        SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.CanceledSpeechPromptDialog, { speechLogId: speechCommandLogId })
+        this.showNext()
     }
 
     render() {
@@ -267,6 +275,7 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
 
 
                 <Text style={{ marginLeft: 8, color: Colors.WHITE, fontSize: Sizes.normalFontSize }}>{
+                    this.state.currentEvent.nluResult.message != null ? this.state.currentEvent.nluResult.message : 
                     branchByType(this.state.currentEvent!.type, "Got it.", "Got it, but no effect.", "Unapplicable command for now.", "Sorry, I couldn\'t understand.")
                 }</Text>
             </AnimatedLinearGradient> : null}
@@ -319,7 +328,7 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
                                 iconRight={false}
                                 titleStyle={styles.cancelButtonTitleStyle}
                                 title="Cancel"
-                                onPress={this.showNext}
+                                onPress={this.onPromptCancel}
                             />
                             <Button
                                 containerStyle={styles.buttonContainerStyle}
