@@ -9,7 +9,7 @@ import { BottomBar } from "@components/pages/exploration/parts/main/BottomBar";
 import { ExplorationViewHeader } from '@components/pages/exploration/parts/header';
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
 import { DataServiceManager } from "@measure/DataServiceManager";
-import { ExplorationInfo, ExplorationType, ExplorationMode } from "@data-at-hand/core/exploration/ExplorationInfo";
+import { ExplorationInfo, ExplorationType, ExplorationMode, ParameterType } from "@data-at-hand/core/exploration/ExplorationInfo";
 import { startLoadingForInfo } from "@state/exploration/data/reducers";
 import { ExplorationAction, createGoToBrowseOverviewAction, createRestorePreviousInfoAction, goBackAction } from "@state/exploration/interaction/actions";
 import { Button } from "react-native-elements";
@@ -43,6 +43,7 @@ import { sleep } from "@data-at-hand/core/utils";
 import { TodayContext } from "./contexts";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import { InteractionType } from "@data-at-hand/core/exploration/actions";
+import { getCycleDimensionSpec } from "@data-at-hand/core/exploration/CyclicTimeFrame";
 
 const styles = StyleSheet.create({
 
@@ -507,7 +508,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
             case ExplorationType.C_TwoRanges:
                 return <MultiRangeComparisonMainPanel />
             case ExplorationType.C_CyclicDetail_Range:
-                return <MultiRangeComparisonMainPanel />
+                return <MultiRangeComparisonMainPanel noDataMessageOverride={`No data exist. Please check whether the current range includes <b>${getCycleDimensionSpec(explorationInfoHelper.getParameterValue(this.props.loadedDataInfo, ParameterType.CycleDimension)).name}</b>.`}/>
             case ExplorationType.C_CyclicDetail_Daily:
                 return <FilteredDatesChartMainPanel />
         }

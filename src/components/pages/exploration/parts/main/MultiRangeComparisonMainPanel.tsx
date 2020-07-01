@@ -6,7 +6,7 @@ import { ReduxAppState, ActionTypeBase } from '@state/types'
 import { RangeAggregatedComparisonData, IAggregatedRangeValue, IAggregatedValue } from '@core/exploration/data/types'
 import { DataSourceType, MeasureUnitType, inferIntraDayDataSourceType } from '@data-at-hand/core/measure/DataSourceSpec'
 import { Dispatch } from 'redux'
-import { View, StyleSheet, LayoutRectangle } from 'react-native'
+import { View, StyleSheet, LayoutRectangle, Text } from 'react-native'
 import { StyleTemplates } from '@style/Styles'
 import SegmentedControl from '@react-native-community/segmented-control';
 import { Sizes, sizeByScreen } from '@style/Sizes'
@@ -30,6 +30,7 @@ import { HorizontalPullToActionContainer } from '@components/common/HorizontalPu
 import { getScaleStepLeft } from '@components/visualization/d3-utils'
 import { ParameterType } from '@data-at-hand/core/exploration/ExplorationInfo'
 import { InteractionType } from '@data-at-hand/core/exploration/actions'
+import StyledText from 'react-native-styled-text';
 
 const INDEX_AGGREGATED = 0
 const INDEX_SUM = 1
@@ -57,7 +58,14 @@ const styles = StyleSheet.create({
     rangeLegendContainerStyle: { alignItems: 'flex-end', padding: legendVerticalPadding, paddingTop: Sizes.verticalPadding, paddingLeft: Sizes.horizontalPadding * .5, paddingRight: Sizes.horizontalPadding * .5 },
     singleLegendContainerStyle: { alignItems: 'flex-end', padding: legendVerticalPadding, paddingTop: Sizes.verticalPadding, paddingLeft: Sizes.horizontalPadding, paddingRight: Sizes.horizontalPadding },
 
-    chartContainerStyleWithoutLegend: { ...StyleTemplates.fillFlex, marginTop: 20 }
+    chartContainerStyleWithoutLegend: { ...StyleTemplates.fillFlex, marginTop: 20 },
+
+    noItemIndicatorStyle: {
+        alignSelf: 'center', color: Colors.textColorLight,
+        fontSize: Sizes.normalFontSize,
+        margin: Sizes.verticalPadding,
+        lineHeight: Sizes.normalFontSize*1.5
+    }
 })
 
 interface Props {
@@ -67,6 +75,9 @@ interface Props {
     allRangesAreSingleDay?: boolean,
     measureUnitType?: MeasureUnitType,
     dispatchExplorationAction?: (explorationAction: ActionTypeBase) => void,
+
+
+    noDataMessageOverride?: string,
 }
 
 interface State {
@@ -96,9 +107,9 @@ class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
 
     private onElementClick = (timeKey: number) => {
         const range = this.props.data.data[timeKey].range
-        if(range[0] === range[1]){
+        if (range[0] === range[1]) {
             const intradayDataSource = inferIntraDayDataSourceType(this.props.source)
-            if(intradayDataSource != null){
+            if (intradayDataSource != null) {
                 this.props.dispatchExplorationAction(createGoToBrowseDayAction(InteractionType.TouchOnly, intradayDataSource, range[0]))
                 return
             }
@@ -143,7 +154,17 @@ class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
 
 
     render() {
-        const aggregationSettingIndex = this.props.sumSupported === true ? (this.props.allRangesAreSingleDay === true? INDEX_SUM : this.state.aggregationSettingIndex) : INDEX_AGGREGATED
+
+        if (this.props.data == null || this.props.data.data.length === 0) {
+            return <HorizontalPullToActionContainer
+                style={styles.containerStyle}
+                onPulled={this.onPulledFromSide}
+            ><View style={StyleTemplates.contentVerticalCenteredContainer}>
+                    <StyledText style={styles.noItemIndicatorStyle}>{this.props.noDataMessageOverride || "No data"}</StyledText>
+                </View></HorizontalPullToActionContainer>
+        }
+
+        const aggregationSettingIndex = this.props.sumSupported === true ? (this.props.allRangesAreSingleDay === true ? INDEX_SUM : this.state.aggregationSettingIndex) : INDEX_AGGREGATED
 
         let isRanged = false
         let startFromZero = true
