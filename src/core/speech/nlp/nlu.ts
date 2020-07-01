@@ -15,6 +15,10 @@ import { fastConcatTo } from "@data-at-hand/core/utils";
 import { CyclicTimeFrame } from "@data-at-hand/core";
 import { CycleDimension, getFilteredCycleDimensionList, getCycleDimensionSpec, CycleDimensionSpec, getCycleLevelOfDimension } from "@data-at-hand/core/exploration/CyclicTimeFrame";
 
+import stringFormat from 'string-format';
+
+const FORMAT_MULTIMODAL_MESSAGE = 'As you pressed <b>{element}</b>, Data@Hand expects to receive <b>{receive}</b>.'
+
 enum EntityPriority {
     None = 0,
     Implied = 1,
@@ -152,7 +156,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
             //In this status, first check the command is valid for multimodal and return the result in the switch block.
             //Deal with the rejected commands after the switch block.
 
-            let specifyMessageBlock: string | undefined = undefined
+            let messageBlock: string | undefined = undefined
 
             switch (context.type) {
                 case SpeechContextType.Time:
@@ -165,14 +169,19 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                 this.processTimeOnlyExpressions(dates, ranges, explorationInfo, context),
                                 explorationInfo, preprocessed)
                         } else {
+                            const receive = "a date or period"
                             switch (c.timeElementType) {
                                 case "from":
+                                    messageBlock = stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "the start date", receive })
+                                    break;
                                 case "to":
+                                    messageBlock = stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "the end date", receive })
+                                    break;
                                 case "date":
-                                    specifyMessageBlock = "a date or period"
+                                    messageBlock = stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "the date", receive })
                                     break;
                                 case "period":
-                                    specifyMessageBlock = "a period"
+                                    messageBlock = stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "the period", receive })
                                     break;
                             }
                         }
@@ -314,7 +323,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                 console.log("prompt a global command")
                 return {
                     type: NLUResultType.NeedPromptingToGlobalCommand,
-                    message: specifyMessageBlock != null? `You should specify ${specifyMessageBlock} for this element.` : undefined,
+                    message: messageBlock,
                     preprocessed: preprocessed,
                     globalCommandSimulatedResult: simulatedGlobalInterpretationResult
                 }

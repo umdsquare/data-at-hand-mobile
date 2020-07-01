@@ -11,6 +11,7 @@ import { NLUResultType } from '@data-at-hand/core/speech/types';
 import { Button } from 'react-native-elements';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
+import StyledText from 'react-native-styled-text';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
 
@@ -39,8 +40,8 @@ const styles = StyleSheet.create({
 
     popupDialogStyle: {
         backgroundColor: Colors.WHITE,
-        marginLeft: Sizes.horizontalPadding * 2,
-        marginRight: Sizes.horizontalPadding * 2,
+        marginLeft: Sizes.horizontalPadding * 1.5,
+        marginRight: Sizes.horizontalPadding * 1.5,
         borderRadius: 8,
         padding: Sizes.horizontalPadding,
         paddingTop: Sizes.verticalPadding * 0.7,
@@ -96,6 +97,15 @@ const styles = StyleSheet.create({
         padding: Sizes.verticalPadding * .5
     }
 })
+
+const popupMessageTextStyles = StyleSheet.create(
+    {
+        b:{
+            color: Colors.textColorLight,
+            fontWeight: 'bold'
+        }
+    }
+)
 
 function branchByType<T>(type: NLUResultType, effectiveValue: T, voidValue: T, unapplicableValue: T, failValue: T): T {
     switch (type) {
@@ -294,7 +304,14 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
                         }
                     }>
                         <Text style={styles.speechMessageStyle}>"{this.state.currentEvent?.nluResult?.preprocessed?.original}"</Text>
-                        <Text style={styles.popupMessageStyle}>{this.state.currentEvent?.nluResult?.message? this.state.currentEvent?.nluResult?.message : "Your speech command is not related to the pressed element."} Do you want to execute it as if through the mic button?</Text>
+                        <StyledText
+                            style={styles.popupMessageStyle}
+                            textStyles={popupMessageTextStyles}
+                        >
+                            {(this.state.currentEvent?.nluResult?.message ? this.state.currentEvent?.nluResult?.message :
+                                "Your speech command is not related to the pressed element.") +
+                                " Instead, your command seems to work with the mic button. Do you want to execute it <u>as if through the mic button?</u>"}
+                        </StyledText>
                         <View style={styles.buttonsContainerStyle}>
                             <Button
                                 containerStyle={styles.cancelButtonContainerStyle}
