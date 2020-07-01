@@ -8,6 +8,7 @@ import { isSameDay, getYear, isAfter } from "date-fns";
 import { ExplorationInfo, ParameterType, ExplorationType, ParameterKey } from "@data-at-hand/core/exploration/ExplorationInfo";
 import { CyclicTimeFrame, cyclicTimeFrameSpecs, getFilteredCycleDimensionList, getCycleTypeOfDimension } from "@data-at-hand/core/exploration/CyclicTimeFrame";
 import { CycleDimension } from "@data-at-hand/core";
+import { fastConcatTo } from "@data-at-hand/core/utils";
 
 const holidayRecommendationList: ReadonlyArray<{ func: string | ((year: number) => Date), casualName: string }> = [
     {
@@ -65,12 +66,12 @@ function getRecentHolidays(ref: Date): Array<{ casualName: string, date: Date }>
     return cachedRecentHolidays
 }
 
-export interface SpeechPanelExampleInfo{
+export interface SpeechPanelExampleInfo {
     messageOverride?: string,
     phrases?: string[]
 }
 
-function makeExampleResult(phrases?: string[], messageOverride?: string): SpeechPanelExampleInfo{
+function makeExampleResult(phrases?: string[], messageOverride?: string): SpeechPanelExampleInfo {
     return {
         phrases,
         messageOverride
@@ -106,14 +107,19 @@ export function generateExampleSentences(info: ExplorationInfo, context: SpeechC
 
                     const currentRange = c.range
 
-                    let rangesToExclude: Array<[number, number]>
-                    if (info.type === ExplorationType.C_TwoRanges) {
-                        rangesToExclude = [
-                            explorationInfoHelper.getParameterValue(info, ParameterType.Range, ParameterKey.RangeA), 
-                            explorationInfoHelper.getParameterValue(info, ParameterType.Range, ParameterKey.RangeB), 
-                        ]
-                    }
+                    let rangesToExclude: Array<[number, number]> = []
+                    switch (info.type) {
+                        case ExplorationType.C_TwoRanges:
 
+                            fastConcatTo(rangesToExclude, [
+                                explorationInfoHelper.getParameterValue(info, ParameterType.Range, ParameterKey.RangeA),
+                                explorationInfoHelper.getParameterValue(info, ParameterType.Range, ParameterKey.RangeB),
+                            ])
+                            break;
+                        case ExplorationType.C_CyclicDetail_Range:
+                            break;
+
+                    }
 
                     const recommend: Array<string> = [
                         `Show ${getAnotherDataSource(currentDataSource)}`,
@@ -146,7 +152,7 @@ export function generateExampleSentences(info: ExplorationInfo, context: SpeechC
                                 const currentDimension = explorationInfoHelper.getParameterValue<CycleDimension>(info, ParameterType.CycleDimension)
                                 const cycleDimensions = getFilteredCycleDimensionList(getCycleTypeOfDimension(currentDimension))
                                 const others = cycleDimensions.filter(c => c.dimension != currentDimension)
-                                
+
                                 const another = others[Math.floor((Math.random() * others.length))]
                                 return makeExampleResult([another.name])
                             }
@@ -222,11 +228,11 @@ function getAnotherDataSource(dataSource: DataSourceType): string {
     return DataSourceManager.instance.supportedDataSources.find(spec => spec.type !== dataSource).name
 }
 
-function getAnotherCyclicTimeFrame(cycleType: CyclicTimeFrame): string{
+function getAnotherCyclicTimeFrame(cycleType: CyclicTimeFrame): string {
     const newCycleType = Object.keys(cyclicTimeFrameSpecs).find(cycle => cycle != cycleType)
-    if(newCycleType){
+    if (newCycleType) {
         return cyclicTimeFrameSpecs[newCycleType].name
-    }else return cyclicTimeFrameSpecs[cycleType].name
+    } else return cyclicTimeFrameSpecs[cycleType].name
 }
 
 const humanOffsets = [-1, 0]

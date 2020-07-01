@@ -355,8 +355,7 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
                     })
                 }}
             />
-            {this.state.touchingInfo &&
-                <Animated.View style={{
+            {this.state.touchingInfo != null? <Animated.View style={{
                     ...styles.tooltipStyle,
                     transform: [{ translateX: this.state.tooltipInterpPosition.x }, { translateY: this.state.tooltipInterpPosition.y }],
                     opacity: this.state.emergingProgress.interpolate({
@@ -378,7 +377,7 @@ class TooltipOverlay extends React.PureComponent<Props, State>{
                     <View style={{ backgroundColor: Colors.WHITE, borderBottomLeftRadius: borderRadius, borderBottomRightRadius: borderRadius }}>
                         <SpeechInputPanel />
                     </View>
-                </Animated.View>}
+                </Animated.View> : null}
         </View>
     }
 

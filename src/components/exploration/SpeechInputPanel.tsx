@@ -77,7 +77,12 @@ export const SpeechInputPanel = React.memo(() => {
     }, [dictationResult])
 
     const examples = useMemo(() => {
-        return require('@core/speech/ExampleSentenceRecommender').generateExampleSentences(explorationInfo, speechContext, selectedService.getToday())
+        try {
+            return require('@core/speech/ExampleSentenceRecommender').generateExampleSentences(explorationInfo, speechContext, selectedService.getToday())
+        } catch (ex) {
+            console.log(ex)
+            return []
+        }
     }, [explorationInfo, speechContext])
 
     switch (speechStatus) {
