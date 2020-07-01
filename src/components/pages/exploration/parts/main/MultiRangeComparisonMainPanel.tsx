@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     noItemIndicatorStyle: {
         alignSelf: 'center', color: Colors.textColorLight,
         fontSize: Sizes.normalFontSize,
-        margin: Sizes.verticalPadding,
+        margin: Sizes.verticalPadding*2.5,
         lineHeight: Sizes.normalFontSize*1.5
     }
 })
