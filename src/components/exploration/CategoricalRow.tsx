@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, FlatList, Animated, SectionList, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ViewStyle, TextStyle, TouchableOpacity, FlatList, Animated, SectionList, Dimensions, ViewabilityConfig, ViewToken } from 'react-native';
 import { Sizes } from '@style/Sizes';
 import { SpeechAffordanceIndicator } from './SpeechAffordanceIndicator';
 import { SwipedFeedback } from '@components/common/SwipedFeedback';
@@ -17,6 +17,11 @@ import { SvgIcon, SvgIconType } from '@components/common/svg/SvgIcon';
 const BOTTOMSHEET_ELEMENT_HEIGHT = Sizes.normalFontSize + 2 * Sizes.verticalPadding
 const BOTTOMSHEET_ELEMENT_SECTION_HEADER_HEIGHT = Sizes.smallFontSize + 1.5 * Sizes.horizontalPadding
 
+const LIST_VIEWABILITY_CONFIG = {
+    itemVisiblePercentThreshold: 100,
+    minimumViewTime: 0,
+    waitForInteraction: true
+} as ViewabilityConfig
 
 const height = 50
 const containerStyleBase = {
@@ -226,6 +231,25 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
 
     const renderSectionItem = useCallback(entry => renderItem({ item: entry.item.value, index: entry.item.index }), [renderItem])
 
+    const flatListGetItemLayoutFunc = useCallback((_: any, index: number) => {
+        return { length: BOTTOMSHEET_ELEMENT_HEIGHT, offset: BOTTOMSHEET_ELEMENT_HEIGHT * index, index }
+    }, [])
+
+    /*
+
+    const [viewableItems, setViewableItems] = useState<Array<ViewToken> | null>(null)
+
+    const onViewableItemsChanged = useCallback((args: { viewableItems: Array<ViewToken>, changed: Array<ViewToken> }) => {
+        setViewableItems(args.viewableItems)
+    }, [])
+
+    const isCurrentValueViewable = useMemo(() => viewableItems?.find(v => v.item.value != null ? (v.item.value === prop.value) : (v.item === prop.value)) != null,
+        [prop.value, viewableItems, onViewableItemsChanged])
+
+        console.log("viewable items:", viewableItems, " currentValueViewable: ", isCurrentValueViewable)
+
+        */
+
     const [movement] = useState(new Animated.Value(0))
 
 
@@ -272,13 +296,15 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
                         {
                             dataBySection != null ?
                                 <SectionList
-                                    //initialNumToRender={prop.values.length}
-                                    //initialScrollIndex={prop.values.indexOf(prop.value)}
+                                    initialNumToRender={prop.values.length}
                                     style={styles.bottomSheetListStyle}
                                     sections={dataBySection}
-                                    keyExtractor={(item, index) => item.index.toString()}
+                                    keyExtractor={(item, index) => {
+                                        return item?.index?.toString()
+                                    
+                                    }}
                                     renderItem={renderSectionItem}
-
+                                    getItemLayout={flatListGetItemLayoutFunc}
                                     renderSectionHeader={({ section }) => (
                                         <View style={styles.bottomSheetSectionHeaderStyle}>
                                             <Text style={styles.bottomSheetSectionHeaderTitleStyle}>{section.title}</Text>
@@ -288,6 +314,7 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
                                 : <FlatList
                                     style={styles.bottomSheetListStyle}
                                     initialNumToRender={prop.values.length}
+                                    getItemLayout={flatListGetItemLayoutFunc}
                                     data={prop.values}
                                     keyExtractor={(value, index) => index.toString()}
                                     renderItem={renderItem}

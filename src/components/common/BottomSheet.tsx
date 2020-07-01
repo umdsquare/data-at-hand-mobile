@@ -6,6 +6,7 @@ import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
 interface Props {
     closeOnBackdropPress?: boolean
+    onBottomSheetShown?: () => void,
     children?: any
 }
 
@@ -47,9 +48,10 @@ export class BottomSheet extends React.Component<Props, State>{
         return <Modal isVisible={this.state.isVisible}
             propagateSwipe={true}
             onBackdropPress={this.onBackdropPress}
+            onModalShow={this.props.onBottomSheetShown}
             style={StyleTemplates.bottomSheetModalContainerStyle}
             backdropOpacity={0.3}
-            >
+        >
             <SafeAreaInsetsContext.Consumer>
                 {
                     insets => <View style={{

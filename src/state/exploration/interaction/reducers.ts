@@ -6,6 +6,7 @@ import { ExplorationInfo, ParameterType, ExplorationType, ParameterKey } from '@
 import { TouchingElementInfo } from '@data-at-hand/core/exploration/TouchingElementInfo';
 import { ExplorationActionType, SetTouchingElementInfoAction, MemoUIStatusAction, ResetAction, InteractionType, SetRangeAction, SetDateAction, SetDataSourceAction, SetIntraDayDataSourceAction, SetCycleTypeAction, SetCycleDimensionAction, SetHighlightFilterAction, ShiftAllRangesAction, GoToBrowseRangeAction, GoToBrowseDayAction, GoToComparisonCyclicAction, GoToComparisonTwoRangesAction, GoToCyclicDetailAction } from '@data-at-hand/core/exploration/actions';
 import { ExplorationAction } from './actions';
+import { getCycleDimensionSpec } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 
 export interface ExplorationState {
   info: ExplorationInfo;
@@ -148,12 +149,24 @@ export const explorationStateReducer = (
         break;
 
       case ExplorationActionType.SetCycleDimension:
+        {
         const setCycleDimensionAction = action as SetCycleDimensionAction;
         explorationInfoHelper.setParameterValue(
           newState.info,
           setCycleDimensionAction.cycleDimension,
           ParameterType.CycleDimension
         )
+
+          const spec = getCycleDimensionSpec(setCycleDimensionAction.cycleDimension)
+          switch(spec.level){
+            case "year":
+              newState.info.type = ExplorationType.C_CyclicDetail_Range
+              break;
+            case "day":
+              newState.info.type = ExplorationType.C_CyclicDetail_Daily
+              break;
+          }
+        }
         break;
 
       case ExplorationActionType.SetHighlightFilter:
