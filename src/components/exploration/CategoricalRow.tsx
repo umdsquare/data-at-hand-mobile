@@ -144,21 +144,58 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
     const swipedFeedbackRef = useRef<SwipedFeedback>(null)
     const bottomSheetRef = useRef<BottomSheet>(null)
 
+    const dataBySection = useMemo(() => {
+        if (prop.getCategory != null) {
+            const list = prop.values.map((value, index) => ({ value, index, category: prop.getCategory(index) }))
+            const grouped = group(list, (v => v.category))
+            const result = []
+            for (const group of grouped.keys()) {
+                result.push({ title: group, data: grouped.get(group) })
+            }
+            return result
+        } else return null
+    }, [prop.values, prop.getCategory])
+
+
     const makeFlingGestureStateChangeHandler = useMemo(() => (direction: "left" | "right") => {
         return (ev: FlingGestureHandlerStateChangeEvent) => {
             if (ev.nativeEvent.state === State.ACTIVE) {
-                let currentIndex = prop.values.indexOf(prop.value)
-                if (direction === 'left') {
-                    if (currentIndex === 0) {
-                        currentIndex = prop.values.length - 1
-                    } else currentIndex--
+
+                if (dataBySection != null) {
+                    //if sectioned, circulate within the same section
+                    const currentSection = dataBySection.find(s => s.title === prop.getCategory(prop.values.indexOf(prop.value)))
+                    if(currentSection){
+                        let currentIndex = currentSection.data.findIndex(d => d.value === prop.value)
+                        if (direction === 'left') {
+                            if (currentIndex === 0) {
+                                currentIndex = currentSection.data.length - 1
+                            } else currentIndex--
+                        } else {
+                            currentIndex = (currentIndex + 1) % currentSection.data.length
+                        }
+
+                        const newItem = currentSection.data[currentIndex]
+
+                        if(prop.onValueChange){
+                            prop.onValueChange(prop.values[newItem.index], newItem.index, 'swipe')
+                        }
+                    }
                 } else {
-                    currentIndex = (currentIndex + 1) % prop.values.length
+
+                    let currentIndex = prop.values.indexOf(prop.value)
+                    if (direction === 'left') {
+                        if (currentIndex === 0) {
+                            currentIndex = prop.values.length - 1
+                        } else currentIndex--
+                    } else {
+                        currentIndex = (currentIndex + 1) % prop.values.length
+                    }
+
+                    if (prop.onValueChange) {
+                        prop.onValueChange(prop.values[currentIndex], currentIndex, 'swipe')
+                    }
                 }
 
-                if (prop.onValueChange) {
-                    prop.onValueChange(prop.values[currentIndex], currentIndex, 'swipe')
-                }
                 swipedFeedbackRef.current?.startFeedback(direction)
             }
         }
@@ -196,18 +233,6 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
     const onCloseBottomSheetPress = useCallback(() => {
         bottomSheetRef.current?.close()
     }, [])
-
-    const dataBySection = useMemo(() => {
-        if (prop.getCategory != null) {
-            const list = prop.values.map((value, index) => ({ value, index, category: prop.getCategory(index) }))
-            const grouped = group(list, (v => v.category))
-            const result = []
-            for (const group of grouped.keys()) {
-                result.push({ title: group, data: grouped.get(group) })
-            }
-            return result
-        } else return null
-    }, [prop.values, prop.getCategory])
 
     const renderItem = useCallback(entry => {
         return <TouchableOpacity
@@ -302,7 +327,7 @@ export const CategoricalRow = React.memo((prop: CategoricalRowProps) => {
                                     sections={dataBySection}
                                     keyExtractor={(item, index) => {
                                         return item?.index?.toString()
-                                    
+
                                     }}
                                     renderItem={renderSectionItem}
                                     getItemLayout={flatListGetItemLayoutFunc}
