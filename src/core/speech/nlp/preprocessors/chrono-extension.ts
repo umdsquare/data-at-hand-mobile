@@ -4,6 +4,7 @@ import { getYear, isAfter, addYears, getDate, getMonth, addDays, subYears, subWe
 import NamedRegExp from 'named-regexp-groups'
 import { getBetweenText, mergeResult } from './chrono-utils';
 import { DateTimeHelper } from '@data-at-hand/core';
+import { CHRONO_TAG_RANGE_CERTAIN } from '@core/speech/types';
 
 const dataInitialDateParser = new chrono.Parser();
 dataInitialDateParser.pattern = function () { return /(^|\s+)(the\s+)?(Fitbit\s+)?((initial|first)\s+(day|date))(\s+of\s+Fitbit)?($|\s+)/i }
@@ -55,6 +56,8 @@ entirePeriodParser.extract = function (text, ref, match, opt) {
                 day: getDate(ref)
             }
         })
+
+        result.tags[CHRONO_TAG_RANGE_CERTAIN] = true
 
         return result
     } else return null
@@ -208,7 +211,8 @@ recentDurationParser.extract = (text, ref, match, opt) => {
                 day: getDate(ref)
             },
             tags: {
-                "ENRecentDurationParser": true
+                "ENRecentDurationParser": true,
+                [CHRONO_TAG_RANGE_CERTAIN]: true
             }
         })
     } else return null
@@ -245,7 +249,7 @@ aroundRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
                     month: getMonth(end) + 1,
                     year: getYear(end)
                 },
-                tags: results[0].tags
+                tags: { ...results[0].tags, CHRONO_TAG_RANGE_CERTAIN: true }
             })
         ]
     }
@@ -299,6 +303,9 @@ sinceRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
                 month: getMonth(result.ref) + 1,
                 day: getDate(result.ref)
             }, result.ref)
+
+            result.tags[CHRONO_TAG_RANGE_CERTAIN] = true
+
             return results
         }
     })
@@ -340,6 +347,7 @@ weekOfDateRefiner.refine = function (text, results: Array<ParsedResult>, opt) {
                     }, result.ref)
                 }
                 result.tags["WeekOfDateRefiner"] = true
+                result.tags[CHRONO_TAG_RANGE_CERTAIN] = true
             }
         }
     })
@@ -407,6 +415,7 @@ betweenConjunctionRefiner.refine = (text, results, opt) => {
                 merged.index = prefixMatch.index + prefixMatch[1].length
                 merged.text = text.substring(merged.index, results[1].index + results[1].text.length)
                 merged.tags["BetweenConjunctionRefiner"] = true;
+                merged.tags[CHRONO_TAG_RANGE_CERTAIN] = true
                 return [merged]
             }
         }

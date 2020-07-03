@@ -1,6 +1,7 @@
 import { Refiner, ParsedResult, ComponentName } from "chrono-node";
 import { isAfter, addYears, getDate, getMonth, getYear } from "date-fns";
 import { getBetweenText, mergeResult } from "../chrono-utils";
+import { CHRONO_TAG_RANGE_CERTAIN } from "@core/speech/types";
 
 export const makeENMergeDateRangeRefiner = () => {
 
@@ -53,6 +54,7 @@ export const makeENMergeDateRangeRefiner = () => {
                 if (merge === true) {
                     prevResult = mergeResult(text, prevResult, currResult);
                     prevResult.tags["ENMergeDateRangeRefiner"] = true;
+                    prevResult.tags[CHRONO_TAG_RANGE_CERTAIN] = true;
                     currResult = null;
                     i += 1;
                 }

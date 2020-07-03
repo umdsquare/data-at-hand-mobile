@@ -16,6 +16,7 @@ import { makeNoopParser } from "./chrono-replacers/chrono-noop";
 import { VariableType } from "@data-at-hand/core/speech/types";
 import { makeENMergeDateRangeRefiner } from "./chrono-replacers/chrono-mergedates";
 import { NLUOptions } from "../types";
+import { CHRONO_TAG_RANGE_CERTAIN } from "@core/speech/types";
 
 
 let _chrono: Chrono | undefined = undefined
@@ -103,7 +104,8 @@ function processChronoResult(chronoResult: ParsedResult): TimeVariable {
                 type: VariableType.Period,
                 value: [Math.min(start, end), Math.max(start, end)],
                 text: chronoResult.text,
-                index: chronoResult.index
+                index: chronoResult.index,
+                additionalInfo: {"isPeriodCertain": chronoResult.tags[CHRONO_TAG_RANGE_CERTAIN]}
             }
         } else return null
 

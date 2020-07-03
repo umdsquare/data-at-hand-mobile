@@ -45,7 +45,6 @@ const styles = StyleSheet.create({
         marginLeft: Sizes.horizontalPadding * 1.5,
         marginRight: Sizes.horizontalPadding * 1.5,
         borderRadius: 8,
-        padding: Sizes.horizontalPadding,
         paddingTop: Sizes.verticalPadding * 0.7,
         shadowColor: '#324749',
         shadowOffset: { width: 0, height: 8 },
@@ -72,7 +71,7 @@ const styles = StyleSheet.create({
 
     cancelButtonContainerStyle: {
         marginTop: Sizes.verticalPadding,
-        marginRight: Sizes.horizontalPadding * .5
+        //marginRight: Sizes.horizontalPadding * .5
     },
 
     speechMessageStyle: {
@@ -81,28 +80,33 @@ const styles = StyleSheet.create({
         color: Colors.link,
         fontSize: Sizes.normalFontSize,
 
+        margin: Sizes.horizontalPadding,
         marginTop: Sizes.verticalPadding * .5,
         marginBottom: Sizes.verticalPadding * .5
     },
 
     buttonStyle: { backgroundColor: Colors.TRANSPARENT, borderRadius: 50, paddingTop: Sizes.verticalPadding * .5, paddingBottom: Sizes.verticalPadding * .5, paddingLeft: Sizes.horizontalPadding, paddingRight: Sizes.horizontalPadding },
-    cancelButtonStyle: { backgroundColor: Colors.TRANSPARENT, paddingTop: Sizes.verticalPadding * .5, paddingBottom: Sizes.verticalPadding * .5 },
+    
+    cancelButtonStyle:{ backgroundColor: Colors.TRANSPARENT, paddingTop: Sizes.verticalPadding * .75, paddingBottom: Sizes.verticalPadding * .75, borderTopColor: Colors.lightBorderColor, borderTopWidth: 2 },
 
     buttonTitleStyle: { fontSize: Sizes.smallFontSize, fontWeight: 'bold' },
-    cancelButtonTitleStyle: { fontSize: Sizes.smallFontSize, color: Colors.red, fontWeight: 'bold' },
+    
+    cancelButtonTitleStyle: { fontSize: Sizes.normalFontSize, color: Colors.primary, fontWeight: 'bold' },
 
-    buttonsContainerStyle: { flexDirection: 'row', paddingTop: 0.5 * Sizes.verticalPadding, justifyContent: 'flex-end' },
+    buttonsContainerStyle: { flexDirection: 'row', justifyContent: 'flex-end' },
 
     popupMessageStyle: {
         fontSize: Sizes.normalFontSize, fontWeight: "400",
         lineHeight: Sizes.normalFontSize * 1.4,
-        padding: Sizes.verticalPadding * .5
+        padding: Sizes.verticalPadding * .5,
+        marginLeft: Sizes.horizontalPadding,
+        marginRight: Sizes.horizontalPadding
     }
 })
 
 const popupMessageTextStyles = StyleSheet.create(
     {
-        b:{
+        b: {
             color: Colors.textColorLight,
             fontWeight: 'bold'
         }
@@ -158,7 +162,7 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
                 currentEvent: currentEvent
             })
 
-            if (currentEvent.type === NLUResultType.NeedPromptingToGlobalCommand) {
+            if (currentEvent.type === NLUResultType.PromptingInformDialog) {
                 console.log("show prompt")
 
                 this.animProgress.setValue(0)
@@ -226,18 +230,18 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
             })
         }
     }
-
+/*
     private onPromptCancel = () => {
         const speechCommandLogId = this.state.currentEvent?.nluResult?.globalCommandSimulatedResult?.action?._metadata?.speechLogId
         SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.CanceledSpeechPromptDialog, { speechLogId: speechCommandLogId })
         this.showNext()
-    }
+    }*/
 
     render() {
 
-        return <View pointerEvents={this.state.currentEvent != null && this.state.currentEvent.type === NLUResultType.NeedPromptingToGlobalCommand ? "auto" : "none"}
+        return <View pointerEvents={this.state.currentEvent != null && this.state.currentEvent.type === NLUResultType.PromptingInformDialog ? "auto" : "none"}
             style={styles.containerStyle}>
-            {this.state.currentEvent != null && this.state.currentEvent.type !== NLUResultType.NeedPromptingToGlobalCommand ? <AnimatedLinearGradient style={[
+            {this.state.currentEvent != null && this.state.currentEvent.type !== NLUResultType.PromptingInformDialog ? <AnimatedLinearGradient style={[
                 styles.gradientStyleBase,
                 {
                     opacity: this.animProgress,
@@ -275,12 +279,12 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
 
 
                 <Text style={{ marginLeft: 8, color: Colors.WHITE, fontSize: Sizes.normalFontSize }}>{
-                    this.state.currentEvent.nluResult.message != null ? this.state.currentEvent.nluResult.message : 
-                    branchByType(this.state.currentEvent!.type, "Got it.", "Got it, but no effect.", "Unapplicable command for now.", "Sorry, I couldn\'t understand.")
+                    this.state.currentEvent.nluResult.message != null ? this.state.currentEvent.nluResult.message :
+                        branchByType(this.state.currentEvent!.type, "Got it.", "Got it, but no effect.", "Unapplicable command for now.", "Sorry, I couldn\'t understand.")
                 }</Text>
             </AnimatedLinearGradient> : null}
             {
-                this.state.currentEvent != null && this.state.currentEvent.type === NLUResultType.NeedPromptingToGlobalCommand ? <>
+                this.state.currentEvent != null && this.state.currentEvent.type === NLUResultType.PromptingInformDialog ? <>
                     {Platform.select({
                         ios: <AnimatedLinearGradient style={{
                             ...StyleTemplates.fitParent,
@@ -318,9 +322,17 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
                             textStyles={popupMessageTextStyles}
                         >
                             {(this.state.currentEvent?.nluResult?.message ? this.state.currentEvent?.nluResult?.message :
-                                "Your speech command is not related to the pressed element.") +
-                                " Instead, your command seems to work with the mic button. Do you want to execute it <u>as if through the mic button?</u>"}
+                                "Your speech command is not related to the pressed element.")}
                         </StyledText>
+                        <Button
+                                containerStyle={styles.cancelButtonContainerStyle}
+                                buttonStyle={styles.cancelButtonStyle}
+                                iconRight={false}
+                                titleStyle={styles.cancelButtonTitleStyle}
+                                title="OK"
+                                onPress={this.showNext}
+                            />
+                            {/*
                         <View style={styles.buttonsContainerStyle}>
                             <Button
                                 containerStyle={styles.cancelButtonContainerStyle}
@@ -349,6 +361,7 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
                                 }}
                             />
                         </View>
+                            */}
                     </Animated.View>
                 </> : null
             }

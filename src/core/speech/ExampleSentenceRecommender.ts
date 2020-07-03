@@ -1,4 +1,4 @@
-import { SpeechContext, SpeechContextType, DateElementSpeechContext, RangeElementSpeechContext, CategoricalRowElementSpeechContext } from "@data-at-hand/core/speech/SpeechContext";
+import { SpeechContext, SpeechContextType, DateElementSpeechContext, RangeElementSpeechContext, CategoricalRowElementSpeechContext, TimeSpeechContext } from "@data-at-hand/core/speech/SpeechContext";
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
 import { DataSourceType, getIntraDayDataSourceName, inferIntraDayDataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { DataSourceManager } from "@measure/DataSourceManager";
@@ -161,7 +161,17 @@ export function generateExampleSentences(info: ExplorationInfo, context: SpeechC
                 break;
             case SpeechContextType.Time:
                 {
-                    return makeExampleResult(undefined, "Say a new date or period.")
+
+                    const c = context as TimeSpeechContext
+                    switch (c.timeElementType) {
+                        case "from":
+                        case "to":
+                            return makeExampleResult(undefined, "Say a new date.")
+                        case "date":
+                            return makeExampleResult(undefined, "Say a new date or period.")
+                        case "period":
+                            return makeExampleResult(undefined, "Say a new period.")
+                    }
                 }
                 break;
             case SpeechContextType.Global:

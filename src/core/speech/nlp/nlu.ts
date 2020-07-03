@@ -164,23 +164,118 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                         //In multimodal commands for time, only the period change is supported.
                         if (preprocessed.intent === Intent.AssignTrivial && !toldDataSources && !toldCyclicTimeFrames && !toldConditions && (toldDates || toldRanges)) {
                             //pure time assignment command
+                            /*
                             return NLUCommandResolverImpl.convertActionToNLUResult(
                                 this.processTimeOnlyExpressions(dates, ranges, explorationInfo, context),
-                                explorationInfo, preprocessed)
-                        } else {
-                            const receive = "a date or period"
+                                explorationInfo, preprocessed)*/
+
                             switch (c.timeElementType) {
                                 case "from":
-                                    messageBlock = stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "the start date", receive })
-                                    break;
                                 case "to":
-                                    messageBlock = stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "the end date", receive })
+                                    {
+                                        let start: number
+                                        let end: number
+                                        let specified: string
+
+                                        if (dates.length === 1 && ranges.length === 0) {
+                                            //told only a date
+                                            specified = 'date'
+
+                                            const date = dates[0].value
+                                            const currentRange = explorationInfoHelper.getParameterValue<[number, number]>(explorationInfo, ParameterType.Range)
+
+                                            if (c.timeElementType === 'from') {
+                                                start = date
+                                                end = currentRange[1]
+                                            } else if (c.timeElementType === 'to') {
+                                                start = currentRange[0]
+                                                end = date
+                                            }
+                                        } else if (ranges.length === 1 && dates.length === 0) {
+                                            //told only a range
+                                            if (ranges[0].additionalInfo?.isPeriodCertain !== true) {
+                                                const range = ranges[0].value
+                                                const currentRange = explorationInfoHelper.getParameterValue<[number, number]>(explorationInfo, ParameterType.Range)
+                                                specified = 'period'
+
+                                                if (c.timeElementType === 'from') {
+                                                    start = range[0]
+                                                    end = currentRange[1]
+                                                } else if (c.timeElementType === 'to') {
+                                                    start = currentRange[0]
+                                                    end = range[1]
+                                                }
+                                            } else {
+                                                //it is obviously a period.
+                                            }
+                                        }
+
+                                        if (start != null && end != null) {
+                                            if (start <= end) {
+                                                return NLUCommandResolverImpl.convertActionToNLUResult(
+                                                    createSetRangeAction(InteractionType.Speech, undefined, [start, end], c.parameterKey),
+                                                    explorationInfo, preprocessed
+                                                )
+                                            } else {
+                                                //error
+                                                return {
+                                                    type: NLUResultType.PromptingInformDialog,
+                                                    message: c.timeElementType === 'from' ? `The specified ${specified} seems to be later than the <b>end date</b>.` : `The specified ${specified} seems to be earlier than the <b>start date</b>.`,
+                                                    preprocessed
+                                                }
+                                            }
+                                        }
+
+                                    }
                                     break;
                                 case "date":
-                                    messageBlock = stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "the date", receive })
+                                    {
+                                        if (dates.length > 0) {
+                                            return NLUCommandResolverImpl.convertActionToNLUResult(
+                                                setDateAction(InteractionType.Speech, undefined, dates[0].value as number),
+                                                explorationInfo, preprocessed
+                                            )
+                                        } else if (ranges.length === 1) {
+                                            return NLUCommandResolverImpl.convertActionToNLUResult(
+                                                createGoToBrowseRangeAction(InteractionType.Speech, inferDataSource(explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.IntraDayDataSource))
+                                                    , ranges[0].value),
+                                                explorationInfo, preprocessed
+                                            )
+                                        }
+                                    }
                                     break;
                                 case "period":
-                                    messageBlock = stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "the period", receive })
+                                    if (ranges.length === 1 && dates.length === 0) {
+                                        //told only a range
+                                        return NLUCommandResolverImpl.convertActionToNLUResult(
+                                            createSetRangeAction(InteractionType.Speech, undefined, ranges[0].value, c.parameterKey),
+                                            explorationInfo, preprocessed
+                                        )
+                                    }else if(dates.length === 1 && ranges.length === 0){
+                                        //told only dates
+                                        return {
+                                            type: NLUResultType.PromptingInformDialog,
+                                            message: stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "the period", receive: "a period" })
+                                             + " If you intended to modify either start or end date, please try again by long-pressing on the corresponding date.",
+                                            preprocessed
+                                        }
+                                    }
+                                    break;
+                            }
+
+                        } else {
+                            switch (c.timeElementType) {
+                                case "from":
+                                    messageBlock = stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "the start date", receive: "a date" })
+                                    break;
+                                case "to":
+                                    messageBlock = stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "the end date", receive: "a date" })
+                                    break;
+                                case "date":
+                                    messageBlock = stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "the date", receive: "a date" })
+                                    break;
+                                case "period":
+                                    messageBlock = stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "the period", receive: "a period" })
                                     break;
                             }
                         }
@@ -321,9 +416,9 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
             if (simulatedGlobalInterpretationResult.type === NLUResultType.Effective || simulatedGlobalInterpretationResult.type === NLUResultType.Void) {
                 console.log("prompt a global command")
                 return {
-                    type: NLUResultType.NeedPromptingToGlobalCommand,
-                    message: messageBlock,
-                    preprocessed: preprocessed,
+                    type: NLUResultType.PromptingInformDialog,
+                    message: messageBlock + " Instead, please consider trying with <u>the mic button</u> again.",
+                    preprocessed,
                     globalCommandSimulatedResult: simulatedGlobalInterpretationResult
                 }
             } else {
@@ -390,14 +485,14 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
                     if (extractedRanges.length < 2) {
                         const rangesInInfo = explorationInfo.values.filter(v => v.parameter === ParameterType.Range)
-                        if(rangesInInfo.length > 1){
+                        if (rangesInInfo.length > 1) {
                             //ambiguity.
                             return {
                                 type: NLUResultType.Fail,
                                 preprocessed,
                                 message: "There are more than one range."
                             }
-                        }else if(rangesInInfo.length === 1){
+                        } else if (rangesInInfo.length === 1) {
                             extractedRanges.unshift(rangesInInfo[0].value)
                         }
                     }
@@ -541,6 +636,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
     private processTimeOnlyExpressions(dates: VariableInfo[], ranges: VariableInfo[], explorationInfo: ExplorationInfo, context: SpeechContext): ActionTypeBase | null {
         switch (explorationInfo.type) {
             case ExplorationType.B_Day:
+                //pages with no ranges
                 if (dates.length > 0) {
                     return setDateAction(InteractionType.Speech, undefined, dates[0].value as number)
                 } else if (ranges.length > 0) {
@@ -552,6 +648,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
             case ExplorationType.C_Cyclic:
             case ExplorationType.C_CyclicDetail_Daily:
             case ExplorationType.C_CyclicDetail_Range:
+                //pages with a single range
                 if (ranges.length > 0) {
                     return createSetRangeAction(InteractionType.Speech, undefined, ranges[0].value as [number, number])
                 }
@@ -590,38 +687,12 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                 }
                 break;
             case ExplorationType.C_TwoRanges:
-                switch (context.type) {
-                    case SpeechContextType.RangeElement:
-                        {
-                            const c = context as RangeElementSpeechContext
-                            if (ranges.length > 0) {
-                                const parameter = explorationInfo.values.find(parameter => parameter.parameter === ParameterType.Range && parameter.value[0] === c.range[0] && parameter.value[1] === c.range[1])
-
-                                if (parameter) {
-                                    return createSetRangeAction(InteractionType.Speech, undefined, ranges[0].value, parameter.key)
-                                }
-                            }
-                        }
-                        break;
-                    case SpeechContextType.Time:
-                        {
-                            const timeContext = context as TimeSpeechContext
-                            const currentRange = explorationInfoHelper.getParameterValue<[number, number]>(explorationInfo, ParameterType.Range, timeContext.parameterKey)
-                            if (dates.length > 0) {
-                                const date = dates[0].value
-                                if (timeContext.timeElementType === 'from') {
-                                    return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])], timeContext.parameterKey)
-                                } else if (timeContext.timeElementType === 'to') {
-                                    return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])], timeContext.parameterKey)
-                                }
-                            }
-                            if (ranges.length > 0) {
-                                return createSetRangeAction(InteractionType.Speech, undefined, ranges[0].value, timeContext.parameterKey)
-                            }
-                        }
-                        break;
+                //pages with two ranges
+                {
+                    if (ranges.length >= 2) {
+                        return createGoToComparisonTwoRangesAction(InteractionType.Speech, undefined, ranges[0].value, ranges[1].value)
+                    }
                 }
-                break;
         }
     }
 }

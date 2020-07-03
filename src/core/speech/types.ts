@@ -26,3 +26,5 @@ export enum SpeechRecognitionEventType {
     EVENT_STOPPED = "speech.stopped",
     EVENT_RECEIVED = "speech.received",
 }
+
+export const CHRONO_TAG_RANGE_CERTAIN = "RangeCertain"

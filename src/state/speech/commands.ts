@@ -133,7 +133,7 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                                     const inferredActionWithMetadata = setMetadataToAction(nluResult.action!, { speechLogId: speechCommandLogId })
                                     dispatch(inferredActionWithMetadata)
                                     break;
-                                case NLUResultType.NeedPromptingToGlobalCommand:
+                                case NLUResultType.PromptingInformDialog:
                                     if(nluResult.globalCommandSimulatedResult?.action != null){
                                         nluResult.globalCommandSimulatedResult.action = setMetadataToAction(nluResult.globalCommandSimulatedResult.action, {speechLogId: speechCommandLogId, promptedFromMultimodal: true})
                                     }
