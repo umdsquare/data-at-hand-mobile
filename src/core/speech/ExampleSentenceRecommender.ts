@@ -121,11 +121,17 @@ export function generateExampleSentences(info: ExplorationInfo, context: SpeechC
 
                     }
 
+                    const anotherRangeText = getAnotherRangeText(currentRange, today, ...rangesToExclude)
+
                     const recommend: Array<string> = [
-                        `Show ${getAnotherDataSource(currentDataSource)}`,
-                        `Compare with ${getAnotherRangeText(currentRange, today, ...rangesToExclude)}`,
+                        `Show ${getAnotherDataSource(currentDataSource)} (of this period)`,
+                        `Compare with ${anotherRangeText}`,
                         `Show days-of-the-week pattern`
                     ]
+
+                    if(info.type === ExplorationType.C_TwoRanges){
+                        recommend.unshift(`(Set to) ${anotherRangeText}`)
+                    }
 
                     return makeExampleResult(recommend)
                 }
@@ -176,6 +182,7 @@ export function generateExampleSentences(info: ExplorationInfo, context: SpeechC
                 break;
             case SpeechContextType.Global:
                 {
+                    /*
                     switch (info.type) {
                         case ExplorationType.B_Overview:
                             {
@@ -189,8 +196,12 @@ export function generateExampleSentences(info: ExplorationInfo, context: SpeechC
                                 }
 
                                 return makeExampleResult(recommend)
-                            }
-                        case ExplorationType.B_Range:
+                            } 
+
+                            case ExplorationType.B_Range:
+                            case ExplorationType.C_Cyclic:
+                            case ExplorationType.C_CyclicDetail_Daily:
+                            case ExplorationType.C_CyclicDetail_Range:
                             {
                                 const recommend = []
 
@@ -217,16 +228,10 @@ export function generateExampleSentences(info: ExplorationInfo, context: SpeechC
                                 return makeExampleResult(recommend)
                             }
                         case ExplorationType.C_TwoRanges:
+                            {
 
-                            break;
-                        case ExplorationType.C_Cyclic:
-
-                            break;
-                        case ExplorationType.C_CyclicDetail_Daily:
-                            break;
-                        case ExplorationType.C_CyclicDetail_Range:
-                            break;
-                    }
+                            }
+                    }*/
                 }
         }
     }
