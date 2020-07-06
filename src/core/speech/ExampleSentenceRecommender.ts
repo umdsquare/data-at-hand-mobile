@@ -1,4 +1,4 @@
-import { SpeechContext, SpeechContextType, DateElementSpeechContext, RangeElementSpeechContext, CategoricalRowElementSpeechContext, TimeSpeechContext } from "@data-at-hand/core/speech/SpeechContext";
+import { SpeechContext, SpeechContextType, DateElementSpeechContext, RangeElementSpeechContext, CategoricalRowElementSpeechContext, TimeSpeechContext, CycleDimensionElementSpeechContext } from "@data-at-hand/core/speech/SpeechContext";
 import { explorationInfoHelper } from "@core/exploration/ExplorationInfoHelper";
 import { DataSourceType, getIntraDayDataSourceName, inferIntraDayDataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { DataSourceManager } from "@measure/DataSourceManager";
@@ -82,6 +82,12 @@ export function generateExampleSentences(info: ExplorationInfo, context: SpeechC
 
     if (context) {
         switch (context.type) {
+            case SpeechContextType.CycleDimensionElement:
+                {
+                    const c = context as CycleDimensionElementSpeechContext
+                    const currentDataSource = c.dataSource || explorationInfoHelper.getParameterValue<DataSourceType>(info, ParameterType.DataSource)
+                    return makeExampleResult([`Show ${getAnotherDataSource(currentDataSource)}`])
+                }
             case SpeechContextType.DateElement:
                 {
                     const c = context as DateElementSpeechContext

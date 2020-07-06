@@ -12,7 +12,7 @@ import { ExplorationInfo, ParameterType, HighlightFilter, ExplorationType } from
 import { InteractionType } from "@data-at-hand/core/exploration/actions";
 import { NLUResult, NLUResultType, VariableType, Intent, ConditionInfo, PreProcessedInputText, VariableInfo } from "@data-at-hand/core/speech/types";
 import { fastConcatTo } from "@data-at-hand/core/utils";
-import { getCycleLevelOfDimension } from "@data-at-hand/core/exploration/CyclicTimeFrame";
+import { getCycleLevelOfDimension, getCycleDimensionSpec } from "@data-at-hand/core/exploration/CyclicTimeFrame";
 
 import stringFormat from 'string-format';
 
@@ -251,12 +251,12 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                             createSetRangeAction(InteractionType.Speech, undefined, ranges[0].value, c.parameterKey),
                                             explorationInfo, preprocessed
                                         )
-                                    }else if(dates.length === 1 && ranges.length === 0){
+                                    } else if (dates.length === 1 && ranges.length === 0) {
                                         //told only dates
                                         return {
                                             type: NLUResultType.PromptingInformDialog,
                                             message: stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "the period", receive: "a period" })
-                                             + " If you intended to modify either start or end date, please try again by long-pressing on the corresponding date.",
+                                                + " If you intended to modify either start or end date, please try again by long-pressing on the corresponding date.",
                                             preprocessed
                                         }
                                     }
@@ -283,10 +283,11 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                     break;
                 case SpeechContextType.CycleDimensionElement:
                     {
+                        const c = context as CycleDimensionElementSpeechContext
+                        const dimension = c.cycleDimension
+
                         if (preprocessed.intent !== Intent.Highlight && preprocessed.intent !== Intent.Compare) {
                             if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
-                                const c = context as CycleDimensionElementSpeechContext
-                                const dimension = c.cycleDimension
                                 let action
                                 if (getCycleLevelOfDimension(dimension) === 'day') {
                                     action = createGoToCyclicDetailDailyAction(InteractionType.Speech, dataSources[0].value, undefined, dimension)
@@ -297,6 +298,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                 return NLUCommandResolverImpl.convertActionToNLUResult(action, explorationInfo, preprocessed)
                             }
                         }
+                        messageBlock = stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "a chart plot", receive: `commands related to the ${getCycleDimensionSpec(dimension).name} filter` })
                     }
                     break;
 
@@ -323,6 +325,8 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                 }
                             }
                         }
+
+                        messageBlock = stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "a chart plot", receive: "commands related to the corresponding date" })
                     }
                     break;
                 case SpeechContextType.RangeElement:
@@ -403,6 +407,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                             }
                         }
 
+                        messageBlock = stringFormat(FORMAT_MULTIMODAL_MESSAGE, { element: "a chart plot", receive: "commands related to the corresponding period" })
                     }
                     break;
             }
@@ -457,10 +462,27 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
         if (cyclicTimeFrames.length > 0) {
             const guaranteedDataSource = this.getCascadedDataSource(dataSources, context, explorationInfo)
             if (guaranteedDataSource) {
-                const guaranteedRange = ranges.length > 0 ? ranges[0].value : (explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range))
-                return NLUCommandResolverImpl.convertActionToNLUResult(
-                    createGoToComparisonCyclicAction(InteractionType.Speech, guaranteedDataSource, guaranteedRange, cyclicTimeFrames[0].value),
-                    explorationInfo, preprocessed)
+                let guaranteedRange: [number, number]
+                if (ranges.length > 0) {
+                    guaranteedRange = ranges[0].value
+                } else {
+                    const rangesInInfo = explorationInfo.values.filter(v => v.parameter === ParameterType.Range)
+                    if (rangesInInfo.length > 1) {
+                        //ambiguity.
+                        return {
+                            type: NLUResultType.PromptingInformDialog,
+                            preprocessed,
+                            message: "There are two periods on this screen. Please say the command through <b>the chart plot</b> of the period you are interested in."
+                        }
+                    } else if (rangesInInfo.length === 1) {
+                        guaranteedRange = rangesInInfo[0].value
+                    }
+                }
+                if (guaranteedRange != null) {
+                    return NLUCommandResolverImpl.convertActionToNLUResult(
+                        createGoToComparisonCyclicAction(InteractionType.Speech, guaranteedDataSource, guaranteedRange, cyclicTimeFrames[0].value),
+                        explorationInfo, preprocessed)
+                }
             }
         }
 
@@ -488,9 +510,9 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                         if (rangesInInfo.length > 1) {
                             //ambiguity.
                             return {
-                                type: NLUResultType.Fail,
+                                type: NLUResultType.PromptingInformDialog,
                                 preprocessed,
-                                message: "There are more than one range."
+                                message: "There are two periods on this screen. Please say the command through <b>the chart plot</b> of the period you are interested in."
                             }
                         } else if (rangesInInfo.length === 1) {
                             extractedRanges.unshift(rangesInInfo[0].value)
@@ -509,8 +531,15 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                 console.log("Assign intent")
                 if (!toldDataSources && !toldCyclicTimeFrames && !toldConditions && (toldDates || toldRanges)) {
                     //only time expression
-                    return NLUCommandResolverImpl.convertActionToNLUResult(
-                        this.processTimeOnlyExpressions(dates, ranges, explorationInfo, context),
+                    const parseResult = this.processTimeOnlyExpressionsGlobal(dates, ranges, explorationInfo)
+                    if (typeof parseResult === 'string') {
+                        return {
+                            type: NLUResultType.PromptingInformDialog,
+                            preprocessed,
+                            message: parseResult
+                        }
+                    } else return NLUCommandResolverImpl.convertActionToNLUResult(
+                        parseResult,
                         explorationInfo, preprocessed)
                 } else if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
                     //only data source
@@ -633,7 +662,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
     }
 
     //============
-    private processTimeOnlyExpressions(dates: VariableInfo[], ranges: VariableInfo[], explorationInfo: ExplorationInfo, context: SpeechContext): ActionTypeBase | null {
+    private processTimeOnlyExpressionsGlobal(dates: VariableInfo[], ranges: VariableInfo[], explorationInfo: ExplorationInfo): ActionTypeBase | string | null {
         switch (explorationInfo.type) {
             case ExplorationType.B_Day:
                 //pages with no ranges
@@ -656,33 +685,27 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                     const date = dates[0].value
                     const currentRange = explorationInfoHelper.getParameterValue<[number, number]>(explorationInfo, ParameterType.Range)
 
-                    if (context.type === SpeechContextType.Time) {
-                        const timeContext = context as TimeSpeechContext
-
-                        if (timeContext.timeElementType === 'from') {
-                            return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])])
-                        } else if (timeContext.timeElementType === 'to') {
-                            return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])])
-                        }
-                    }
-
                     if (dates[0].additionalInfo === 'from') {
                         return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])])
                     } else if (dates[0].additionalInfo === 'to') {
                         return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])])
                     }
 
-                    if (date < currentRange[0]) {
+                    if (date <= currentRange[0]) {
                         return createSetRangeAction(InteractionType.Speech, undefined, [date, currentRange[1]])
-                    } else if (date > currentRange[1]) {
+                    } else if (date >= currentRange[1]) {
                         return createSetRangeAction(InteractionType.Speech, undefined, [currentRange[0], date])
                     } else {
                         //middle. change more near one
+                        /*
                         const differLeft = differenceInDays(DateTimeHelper.toDate(date), DateTimeHelper.toDate(currentRange[0]))
                         const differRight = differenceInDays(DateTimeHelper.toDate(currentRange[1]), DateTimeHelper.toDate(date))
                         if (differLeft <= differRight) {
                             return createSetRangeAction(InteractionType.Speech, undefined, [date, currentRange[1]])
                         } else return createSetRangeAction(InteractionType.Speech, undefined, [currentRange[0], date])
+                        */
+                        //middle. Show an ambiguity dialog.
+                        return "Data@Hand is confused about which date to modify. Please say the command through <b>the date</b> you want to modify."
                     }
                 }
                 break;
@@ -691,6 +714,10 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                 {
                     if (ranges.length >= 2) {
                         return createGoToComparisonTwoRangesAction(InteractionType.Speech, undefined, ranges[0].value, ranges[1].value)
+                    } else if (ranges.length === 1) {
+                        return "Data@Hand is confused about which period to modify. Please say the command through <b>the chart plot</b> of the period you want to modify."
+                    } else if (dates.length > 0) {
+                        return "Data@Hand is confused about which date to modify. Please say the command through <b>the date</b> you want to modify."
                     }
                 }
         }
