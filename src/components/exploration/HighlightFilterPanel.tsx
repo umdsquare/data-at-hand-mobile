@@ -286,6 +286,11 @@ export const HighlightFilterPanel = React.memo((props: {
             ...props.filter,
             type: key
         }
+        if(newFilter.ref == null && newFilter.type !== NumericConditionType.Max && newFilter.type !== NumericConditionType.Min){
+            //if the condition type requires a reference value but not, use the default reference value.
+            newFilter.ref = getDefaultReference(newFilter.dataSource, newFilter.propertyKey)
+        }
+
         props.onFilterModified(newFilter)
     }, [props.filter, props.onFilterModified])
 
