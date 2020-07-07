@@ -345,7 +345,6 @@ export class DateRangeBar extends React.PureComponent<Props, State> {
     }
 
     private readonly onPeriodButtonLongPress = (ev: LongPressGestureHandlerStateChangeEvent) => {
-
         if (ev.nativeEvent.state === GestureState.ACTIVE) {
             Haptic.trigger("impactHeavy", {
                 enableVibrateFallback: true,
@@ -550,7 +549,7 @@ const DateButton = React.forwardRef((props: DateButtonProps, ref: any) => {
 
     return <LongPressGestureHandler onHandlerStateChange={onLongPressStateChange}
         shouldCancelWhenOutside={false}
-        maxDist={150}>
+        maxDist={Number.MAX_VALUE}>
         <BorderlessButton onPress={props.onPress} shouldCancelWhenOutside={false} rippleColor={"rgba(255,255,255,0.2)"}>
             <Animated.View style={{
                 ...(props.freeWidth === true ? styles.dateButtonContainerStyleFreeWidth : styles.dateButtonContainerStyle),

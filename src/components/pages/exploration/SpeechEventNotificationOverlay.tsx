@@ -14,6 +14,7 @@ import { connect } from 'react-redux';
 import StyledText from 'react-native-styled-text';
 import { VerboseEventTypes } from '@data-at-hand/core/logging/types';
 import { SystemLogger } from '@core/logging/SystemLogger';
+import { TapGestureHandler, State as GestureState, TapGestureHandlerStateChangeEvent } from 'react-native-gesture-handler';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
 
@@ -86,11 +87,11 @@ const styles = StyleSheet.create({
     },
 
     buttonStyle: { backgroundColor: Colors.TRANSPARENT, borderRadius: 50, paddingTop: Sizes.verticalPadding * .5, paddingBottom: Sizes.verticalPadding * .5, paddingLeft: Sizes.horizontalPadding, paddingRight: Sizes.horizontalPadding },
-    
-    cancelButtonStyle:{ backgroundColor: Colors.TRANSPARENT, paddingTop: Sizes.verticalPadding * .75, paddingBottom: Sizes.verticalPadding * .75, borderTopColor: Colors.lightBorderColor, borderTopWidth: 2 },
+
+    cancelButtonStyle: { backgroundColor: Colors.TRANSPARENT, paddingTop: Sizes.verticalPadding * .75, paddingBottom: Sizes.verticalPadding * .75, borderTopColor: Colors.lightBorderColor, borderTopWidth: 2 },
 
     buttonTitleStyle: { fontSize: Sizes.smallFontSize, fontWeight: 'bold' },
-    
+
     cancelButtonTitleStyle: { fontSize: Sizes.normalFontSize, color: Colors.primary, fontWeight: 'bold' },
 
     buttonsContainerStyle: { flexDirection: 'row', justifyContent: 'flex-end' },
@@ -230,12 +231,18 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
             })
         }
     }
-/*
-    private onPromptCancel = () => {
-        const speechCommandLogId = this.state.currentEvent?.nluResult?.globalCommandSimulatedResult?.action?._metadata?.speechLogId
-        SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.CanceledSpeechPromptDialog, { speechLogId: speechCommandLogId })
-        this.showNext()
-    }*/
+    /*
+        private onPromptCancel = () => {
+            const speechCommandLogId = this.state.currentEvent?.nluResult?.globalCommandSimulatedResult?.action?._metadata?.speechLogId
+            SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.CanceledSpeechPromptDialog, { speechLogId: speechCommandLogId })
+            this.showNext()
+        }*/
+
+    private onBackdropClick = (ev: TapGestureHandlerStateChangeEvent) => {
+        if (ev.nativeEvent.state === GestureState.ACTIVE) {
+            this.showNext()
+        }
+    }
 
     render() {
 
@@ -285,24 +292,26 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
             </AnimatedLinearGradient> : null}
             {
                 this.state.currentEvent != null && this.state.currentEvent.type === NLUResultType.PromptingInformDialog ? <>
-                    {Platform.select({
-                        ios: <AnimatedLinearGradient style={{
-                            ...StyleTemplates.fitParent,
-                            opacity: this.animProgress.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [0, 0.4]
-                            })
-                        }} colors={["#00000000", "#000000FF"]} />,
-                        android: <Animated.View style={{
-                            ...StyleTemplates.fitParent,
-                            backgroundColor: 'black',
-                            opacity: this.animProgress.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [0, 0.25]
-                            })
-                        }} />
-                    })
-                    }
+
+                    <TapGestureHandler onHandlerStateChange={this.onBackdropClick} maxDurationMs={Number.MAX_VALUE}>
+                        {Platform.select({
+                            ios: <AnimatedLinearGradient style={{
+                                ...StyleTemplates.fitParent,
+                                opacity: this.animProgress.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [0, 0.4]
+                                })
+                            }} colors={["#00000000", "#000000FF"]} />,
+                            android: <Animated.View style={{
+                                ...StyleTemplates.fitParent,
+                                backgroundColor: 'black',
+                                opacity: this.animProgress.interpolate({
+                                    inputRange: [0, 1],
+                                    outputRange: [0, 0.25]
+                                })
+                            }} />
+                        })
+                        }</TapGestureHandler>
 
                     <Animated.View style={
                         {
@@ -325,14 +334,14 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
                                 "Your speech command is not related to the pressed element.")}
                         </StyledText>
                         <Button
-                                containerStyle={styles.cancelButtonContainerStyle}
-                                buttonStyle={styles.cancelButtonStyle}
-                                iconRight={false}
-                                titleStyle={styles.cancelButtonTitleStyle}
-                                title="OK"
-                                onPress={this.showNext}
-                            />
-                            {/*
+                            containerStyle={styles.cancelButtonContainerStyle}
+                            buttonStyle={styles.cancelButtonStyle}
+                            iconRight={false}
+                            titleStyle={styles.cancelButtonTitleStyle}
+                            title="OK"
+                            onPress={this.showNext}
+                        />
+                        {/*
                         <View style={styles.buttonsContainerStyle}>
                             <Button
                                 containerStyle={styles.cancelButtonContainerStyle}
