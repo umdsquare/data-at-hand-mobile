@@ -130,9 +130,9 @@ export function generateExampleSentences(info: ExplorationInfo, context: SpeechC
                     const anotherRangeText = getAnotherRangeText(currentRange, today, ...rangesToExclude)
 
                     const recommend: Array<string> = [
-                        `Show ${getAnotherDataSource(currentDataSource)} (of this period)`,
                         `Compare with ${anotherRangeText}`,
-                        `Show days-of-the-week pattern`
+                        `Show ${getAnotherDataSource(currentDataSource)} (of this period)`,
+                        `Maximum step count (of this period)`
                     ]
 
                     if(info.type === ExplorationType.C_TwoRanges){

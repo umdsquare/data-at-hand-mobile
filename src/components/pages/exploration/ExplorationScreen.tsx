@@ -262,6 +262,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
 
         this.subscriptions.add(SpeechEventQueue.instance.onNewEventPushed.subscribe(
             (event) => {
+                console.log("notify speech event")
                 this.speechFeedbackRef.current?.notify(event)
             },
             () => {

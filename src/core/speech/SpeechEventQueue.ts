@@ -29,6 +29,7 @@ export class SpeechEventQueue{
     }
 
     public push(event: SpeechNotificationEvent){
+        console.log("Push new speech notification event")
         this._onNewEventPushed.next(event)
     }
 }

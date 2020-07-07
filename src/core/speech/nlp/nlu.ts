@@ -8,7 +8,7 @@ import { differenceInDays, addDays } from "date-fns";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import { DataSourceType, inferIntraDayDataSourceType, inferDataSource } from "@data-at-hand/core/measure/DataSourceSpec";
 import { ExplorationState, explorationStateReducer } from "@state/exploration/interaction/reducers";
-import { ExplorationInfo, ParameterType, HighlightFilter, ExplorationType } from "@data-at-hand/core/exploration/ExplorationInfo";
+import { ExplorationInfo, ParameterType, HighlightFilter, ExplorationType, ParameterKey } from "@data-at-hand/core/exploration/ExplorationInfo";
 import { InteractionType } from "@data-at-hand/core/exploration/actions";
 import { NLUResult, NLUResultType, VariableType, Intent, ConditionInfo, PreProcessedInputText, VariableInfo } from "@data-at-hand/core/speech/types";
 import { fastConcatTo } from "@data-at-hand/core/utils";
@@ -369,9 +369,19 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                         if (preprocessed.intent === Intent.Compare && toldRanges && ranges.length === 1) {
                             const guaranteedDataSource = this.getCascadedDataSource(dataSources, context, explorationInfo)
 
-                            return NLUCommandResolverImpl.convertActionToNLUResult(
-                                createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, c.range, ranges[0].value),
-                                explorationInfo, preprocessed)
+                            const parameter = explorationInfo.values.find(parameter => parameter.parameter === ParameterType.Range && parameter.value[0] === c.range[0] && parameter.value[1] === c.range[1])
+
+                            if(parameter.key == ParameterKey.RangeB){
+                                return NLUCommandResolverImpl.convertActionToNLUResult(
+                                    createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, ranges[0].value, c.range),
+                                    explorationInfo, preprocessed)
+                            }else{
+                                return NLUCommandResolverImpl.convertActionToNLUResult(
+                                        createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, c.range, ranges[0].value),
+                                        explorationInfo, preprocessed)
+                            }
+
+                            
 
                         }
 
@@ -400,7 +410,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                     }
 
                                     return NLUCommandResolverImpl.convertActionToNLUResult(
-                                        createGoToBrowseRangeAction(InteractionType.Speech, dataSource, undefined, highlightFilter),
+                                        createGoToBrowseRangeAction(InteractionType.Speech, dataSource, c.range, highlightFilter),
                                         explorationInfo, preprocessed)
                                 }
 

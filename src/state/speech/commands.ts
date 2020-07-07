@@ -54,6 +54,8 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
 
             let previousDictationResult: DictationResult | null = null
 
+            let hasDictatorStoppEventCalled: boolean = false
+
             VoiceDictator.instance.registerStartEventListener(() => {
                 console.log(sessionId, "dictator start event")
                 dispatch(createStartDictationAction(sessionId))
@@ -78,6 +80,12 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
 
             VoiceDictator.instance.registerStopEventListener(async error => {
                 console.log(sessionId, "dictator stop event")
+                if(hasDictatorStoppEventCalled === false){
+                    hasDictatorStoppEventCalled = true
+                }else{
+                    console.log("this session already stopped. skip this handler.")
+                    return
+                }
 
                 if (error) {
                     console.log(sessionId, "Finish without dictation")
