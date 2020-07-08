@@ -69,7 +69,7 @@ export const BottomBar = (props: Props) => {
 
     return <View style={Styles.bottomBarContainerStyle} removeClippedSubviews={false}>
         <SafeAreaView style={Styles.bottomBarInnerListStyle}>
-            <BottomBarButton isOn={props.mode === 'browse'} title="Browse" mode={ExplorationMode.Browse} onPress={() => { props.onModePress(ExplorationMode.Browse) }} />
+            <BottomBarButton isOn={props.mode === 'browse'} title="Home" mode={ExplorationMode.Browse} onPress={() => { props.onModePress(ExplorationMode.Browse) }} />
             <BottomBarButton isOn={props.mode === 'compare'} title="Compare" mode={ExplorationMode.Compare} onPress={() => { props.onModePress(ExplorationMode.Compare) }} />
             <View style={Styles.bottomBarVoiceButtonContainerStyle}>
                 <VoiceInputButton isBusy={speechSessionStatus === SpeechRecognizerSessionStatus.Analyzing} onTouchDown={props.onVoiceButtonPressIn} onTouchUp={props.onVoiceButtonPressOut} />

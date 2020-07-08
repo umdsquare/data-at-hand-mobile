@@ -348,7 +348,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                 const dataSource = dataSources[0].value
 
                                 return NLUCommandResolverImpl.convertActionToNLUResult(
-                                    createGoToBrowseRangeAction(InteractionType.Speech, dataSource, undefined),
+                                    createGoToBrowseRangeAction(InteractionType.Speech, dataSource, c.range),
                                     explorationInfo, preprocessed)
                             }
                         }
