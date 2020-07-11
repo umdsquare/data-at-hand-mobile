@@ -502,13 +502,15 @@ function CategoryFormButton<T, KeyType>(props: CategoryFormButtonProps<T, KeyTyp
                     options: selections,
                     cancelButtonIndex: selections.length - 1,
                 }, buttonIndex => {
+
                     if (buttonIndex != selections.length - 1 && props.getKey(props.values[buttonIndex]) !== props.currentKey) {
                         props.onChanged(props.getKey(props.values[buttonIndex]))
                     }
                 })
         } else if (Platform.OS === 'android') {
             UIManager.showPopupMenu(findNodeHandle(buttonRef.current), selections, () => { }, (item, buttonIndex) => {
-                if (props.getKey(props.values[buttonIndex]) !== props.currentKey) {
+
+                if (buttonIndex != null && props.getKey(props.values[buttonIndex]) !== props.currentKey) {
                     props.onChanged(props.getKey(props.values[buttonIndex]))
                 }
             })
