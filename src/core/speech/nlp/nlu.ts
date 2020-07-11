@@ -182,7 +182,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                             specified = 'date'
 
                                             const date = dates[0].value
-                                            const currentRange = explorationInfoHelper.getParameterValue<[number, number]>(explorationInfo, ParameterType.Range)
+                                            const currentRange = explorationInfoHelper.getParameterValue<[number, number]>(explorationInfo, ParameterType.Range, c.parameterKey)
 
                                             if (c.timeElementType === 'from') {
                                                 start = date
@@ -195,7 +195,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                             //told only a range
                                             if (ranges[0].additionalInfo?.isPeriodCertain !== true) {
                                                 const range = ranges[0].value
-                                                const currentRange = explorationInfoHelper.getParameterValue<[number, number]>(explorationInfo, ParameterType.Range)
+                                                const currentRange = explorationInfoHelper.getParameterValue<[number, number]>(explorationInfo, ParameterType.Range, c.parameterKey)
                                                 specified = 'period'
 
                                                 if (c.timeElementType === 'from') {
