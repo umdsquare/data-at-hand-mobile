@@ -5,6 +5,7 @@ import { Mutex } from 'async-mutex';
 import { getVersion, getUniqueId } from 'react-native-device-info';
 import { Platform } from 'react-native';
 import { getUploadServerHostUrl } from './common';
+import { notifyError } from "./ErrorReportingService"
 
 export class DirectoryLogger {
 
@@ -92,13 +93,22 @@ class DebouncedFileLogger {
         this.nextTimeoutAt = Date.now() + 700
         this.timeout = setTimeout(async () => {
             const release = await this.writeTaskMutex.acquire()
-            const backendUrl = getUploadServerHostUrl()
-            if (backendUrl != null) {
-                console.log("push log queue to backend server - ", this.queue.length, backendUrl)
-                await this.writeQueueToBackend(backendUrl)
-            } else{
-                console.log("push log queue to file")
-                await this.writeQueueToFile()
+            try {
+                const backendUrl = getUploadServerHostUrl()
+                if (backendUrl != null) {
+                    console.log("push log queue to backend server - ", this.queue.length, backendUrl)
+                    await this.writeQueueToBackend(backendUrl)
+                } else {
+                    console.log("push log queue to file")
+                    await this.writeQueueToFile()
+                }
+            } catch (e) {
+                notifyError(e, (report) => {
+                    report.errorMessage = `Error while logging`
+                    report.metadata = {
+                        lineToPush: line
+                    }
+                })
             }
 
             this.nextTimeoutAt = null
@@ -157,7 +167,7 @@ class DebouncedFileLogger {
             if (result.status === 200) {
                 console.log(`successfully uploaded ${this.queue.length} logs.`)
                 this.queue.splice(0)
-            }else{
+            } else {
                 console.log(`uploading logs was unsuccessful: ${result.status}`)
             }
         }
