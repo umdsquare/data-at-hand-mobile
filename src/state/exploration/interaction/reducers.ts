@@ -176,6 +176,10 @@ export const explorationStateReducer = (
           const prevFilter = newState.info.highlightFilter
           newState.info.highlightFilter = a.highlightFilter
 
+          if(a.range != null){
+            explorationInfoHelper.setParameterValue(newState.info, a.range, ParameterType.Range)
+          }
+
           if (newState.info.type === ExplorationType.B_Range && a.highlightFilter != null) {
             if (prevFilter == null || prevFilter.dataSource !== a.highlightFilter.dataSource) {
               //highlight filter's data source was changed

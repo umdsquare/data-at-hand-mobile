@@ -226,11 +226,12 @@ export function shiftAllRanges(interactionType: InteractionType, direction: 'pas
   }
 }
 
-export function setHighlightFilter(interactionType: InteractionType, highlightFilter?: HighlightFilter | null): SetHighlightFilterAction {
+export function setHighlightFilter(interactionType: InteractionType, highlightFilter?: HighlightFilter | null, range?: [number, number]): SetHighlightFilterAction {
   return {
     interactionType,
     type: ExplorationActionType.SetHighlightFilter,
-    highlightFilter: highlightFilter
+    highlightFilter: highlightFilter,
+    range
   }
 }
 

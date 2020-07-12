@@ -371,17 +371,17 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
                             const parameter = explorationInfo.values.find(parameter => parameter.parameter === ParameterType.Range && parameter.value[0] === c.range[0] && parameter.value[1] === c.range[1])
 
-                            if(parameter.key == ParameterKey.RangeB){
+                            if (parameter.key == ParameterKey.RangeB) {
                                 return NLUCommandResolverImpl.convertActionToNLUResult(
                                     createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, ranges[0].value, c.range),
                                     explorationInfo, preprocessed)
-                            }else{
+                            } else {
                                 return NLUCommandResolverImpl.convertActionToNLUResult(
-                                        createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, c.range, ranges[0].value),
-                                        explorationInfo, preprocessed)
+                                    createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, c.range, ranges[0].value),
+                                    explorationInfo, preprocessed)
                             }
 
-                            
+
 
                         }
 
@@ -640,18 +640,26 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                 break;
             case Intent.Highlight:
                 console.log("Highlight intent")
-                const conditionInfo = conditions[0].value as ConditionInfo
-                const cascadedDataSource: DataSourceType = toldDataSources ? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
+                if (conditions.length > 0) {
+                    const conditionInfo = conditions[0].value as ConditionInfo
+                    const cascadedDataSource: DataSourceType = toldDataSources ? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
 
-                const dataSource: DataSourceType = conditionInfo.impliedDataSource || cascadedDataSource
+                    const dataSource: DataSourceType = conditionInfo.impliedDataSource || cascadedDataSource
 
-                if (dataSource) {
-                    const highlightFilter: HighlightFilter = {
-                        ...conditionInfo,
-                        dataSource
+                    if (dataSource) {
+                        const highlightFilter: HighlightFilter = {
+                            ...conditionInfo,
+                            dataSource
+                        }
+
+                        let range: [number, number] | undefined = undefined
+                        if(ranges.length > 0){
+                            range = ranges[0].value
+                        }
+
+                        return NLUCommandResolverImpl.convertActionToNLUResult(setHighlightFilter(InteractionType.Speech, highlightFilter, range),
+                            explorationInfo, preprocessed)
                     }
-                    return NLUCommandResolverImpl.convertActionToNLUResult(setHighlightFilter(InteractionType.Speech, highlightFilter),
-                        explorationInfo, preprocessed)
                 }
                 break;
         }

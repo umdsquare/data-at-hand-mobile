@@ -33,6 +33,8 @@ const lexicon: Array<TermInfo> = [
 
     { term: 'less', conditionType: NumericConditionType.Less, valueType: ["scalar", "duration"], impliedSource: null },
     { term: 'more', conditionType: NumericConditionType.More, valueType: ["scalar", 'duration'], impliedSource: null },
+    { term: 'great', conditionType: NumericConditionType.More, valueType: ["scalar", 'duration'], impliedSource: null },
+    
 
     { term: 'slow', conditionType: NumericConditionType.Less, valueType: ["scalar"], impliedSource: DataSourceType.HeartRate },
     { term: 'fast', conditionType: NumericConditionType.More, valueType: ["scalar"], impliedSource: DataSourceType.HeartRate },
@@ -42,7 +44,7 @@ const lexicon: Array<TermInfo> = [
 
 ]
 
-const compromiseAdjectivePartRule = "#Adverb|#Adjective|below|above|over|before|after"
+const compromiseAdjectivePartRule = "#Adverb|#Adjective|below|above|over|before|after|greater"
 
 const accomplishVerbs = ["meet", "met", "reach", "reached", "accomplish", "accomplished", "achieve", "achieved", "make", "made", "get", "got"]
 
