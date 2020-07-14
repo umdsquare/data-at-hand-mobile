@@ -369,17 +369,30 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                         if (preprocessed.intent === Intent.Compare && toldRanges && ranges.length === 1) {
                             const guaranteedDataSource = this.getCascadedDataSource(dataSources, context, explorationInfo)
 
-                            const parameter = explorationInfo.values.find(parameter => parameter.parameter === ParameterType.Range && parameter.value[0] === c.range[0] && parameter.value[1] === c.range[1])
+                            switch (explorationInfo.type) {
+                                case ExplorationType.C_TwoRanges:
+                                    {
+                                        const parameter = explorationInfo.values.find(parameter => parameter.parameter === ParameterType.Range && parameter.value[0] === c.range[0] && parameter.value[1] === c.range[1])
 
-                            if (parameter.key == ParameterKey.RangeB) {
-                                return NLUCommandResolverImpl.convertActionToNLUResult(
-                                    createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, ranges[0].value, c.range),
-                                    explorationInfo, preprocessed)
-                            } else {
-                                return NLUCommandResolverImpl.convertActionToNLUResult(
-                                    createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, c.range, ranges[0].value),
-                                    explorationInfo, preprocessed)
+                                        if (parameter.key == ParameterKey.RangeB) {
+                                            return NLUCommandResolverImpl.convertActionToNLUResult(
+                                                createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, ranges[0].value, c.range),
+                                                explorationInfo, preprocessed)
+                                        } else {
+                                            return NLUCommandResolverImpl.convertActionToNLUResult(
+                                                createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, c.range, ranges[0].value),
+                                                explorationInfo, preprocessed)
+                                        }
+                                    }
+                                case ExplorationType.C_CyclicDetail_Range:
+                                    {
+                                        return NLUCommandResolverImpl.convertActionToNLUResult(
+                                            createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, c.range, ranges[0].value),
+                                            explorationInfo, preprocessed)
+                                    }
                             }
+
+
 
 
 
@@ -653,7 +666,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                         }
 
                         let range: [number, number] | undefined = undefined
-                        if(ranges.length > 0){
+                        if (ranges.length > 0) {
                             range = ranges[0].value
                         }
 
