@@ -21,7 +21,8 @@ class SpeechRecognitionManager: RCTEventEmitter{
                             "Spring", "Winter", "Fall", "Autumn", "Summer", "sleep goal"]
   
   let REPLACE_REGEX = [
-    ["regex": try? NSRegularExpression(pattern: "(^|\\s)(h?ours? (s|f)l(u|o|a)t(h|s)?)($|\\s)", options: [.caseInsensitive]) as Any , "replaceWith": "$1hours slept$6"]
+    ["regex": try? NSRegularExpression(pattern: "(^|\\s)(h?ours? (s|f)l(u|o|a)t(h|s)?)($|\\s)", options: [.caseInsensitive]) as Any , "replaceWith": "$1hours slept$6"],
+    ["regex": try? NSRegularExpression(pattern: "(^|\\s+)#DATA($|\\s+)", options: [.caseInsensitive]) as Any , "replaceWith": "$1data$2"]
     ]
   
   @objc
