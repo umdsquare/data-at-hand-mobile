@@ -7,7 +7,7 @@ export const makeENMergeDateRangeRefiner = () => {
 
     const refiner = new Refiner()
 
-    refiner.pattern = function () { return /^[,.]?\s*(to|through|two|\-|2)\s*$/i };
+    refiner.pattern = function () { return /^[,.]?\s*(until|to|through|two|\-|2)\s*$/i };
 
     refiner.refine = function (text, results, opt) {
 
