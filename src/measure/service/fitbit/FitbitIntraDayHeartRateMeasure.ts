@@ -20,7 +20,9 @@ export class FitbitIntraDayHeartRateMeasure extends FitbitIntraDayMeasure<HeartR
 
   protected async fetchAndCacheFitbitData(date: number): Promise<void> {
     const result: FitbitHeartRateIntraDayQueryResult = await this.core.fetchIntradayHeartRate(date);
-    await this.storeServerDataEntry(result)
+    if(result != null){
+      await this.storeServerDataEntry(result)
+    }
   }
 
   protected async storeServerDataEntry(...dataset: FitbitHeartRateIntraDayQueryResult[]): Promise<number[]> {

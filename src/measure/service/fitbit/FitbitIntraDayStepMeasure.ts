@@ -19,7 +19,9 @@ export class FitbitIntraDayStepMeasure extends FitbitIntraDayMeasure<StepCountIn
         const total = await this.core.fitbitLocalDbManager.selectQuery<{ value: number }>(`SELECT value FROM ${FitbitLocalTableName.StepCount} WHERE numberedDate = ${date}`)
         if (total != null && total.length > 0 && total[0].value > 0) {
             const data: FitbitIntradayStepDayQueryResult = await this.core.fetchIntradayStepCount(date)
-            await this.storeServerDataEntry(data)
+            if (data != null) {
+                await this.storeServerDataEntry(data)
+            }
         } else return
     }
 
