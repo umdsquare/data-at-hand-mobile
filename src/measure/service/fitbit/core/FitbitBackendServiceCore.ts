@@ -54,7 +54,7 @@ export default class FitbitOfficialServiceCore implements FitbitServiceCore {
     get fitbitLocalDbManager(): FitbitLocalDbManager {
         if (this._fitbitLocalDbManager == null) {
             this._fitbitLocalDbManager = new FitbitLocalDbManager({
-                name: 'fitbit-local-cache.sqlite',
+                name: 'fitbit-backend-local-cache.sqlite',
                 location: 'default',
             } as DatabaseParams);
         }
