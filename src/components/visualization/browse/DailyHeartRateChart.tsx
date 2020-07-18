@@ -11,6 +11,7 @@ import Colors from '@style/Colors';
 import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
 import { coverValueInRange, clusterSortedNumbers } from '@data-at-hand/core/utils';
 import { TodayContext } from '@components/pages/exploration/contexts';
+import { PointFallbackCircle } from './PointFallbackCircle';
 
 
 export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
@@ -84,7 +85,8 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
             }
             {
                 prop.data.map(d => {
-                    return <Circle key={d.numberedDate}
+
+                    return <PointFallbackCircle
                         x={scaleX(d.numberedDate)! + scaleX.bandwidth() * 0.5}
                         y={scaleY(d.value)}
                         r={Math.min(scaleX.bandwidth(), 8) / 2}
@@ -92,6 +94,7 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
                         fill={Colors.WHITE}
                         stroke={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
                         opacity={getChartElementOpacity(today === d.numberedDate)}
+                        thresholdRadius={1}
                     />
                 })
             }

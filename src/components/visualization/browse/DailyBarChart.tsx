@@ -53,6 +53,8 @@ export const DailyBarChart = React.memo((prop: Props) => {
         else return scaleY.ticks(5)
     }, [prop.valueTicksOverride, scaleY])
 
+    const barWidth = Math.min(scaleX.bandwidth(), 25)
+
     return <BandScaleChartTouchHandler
         chartContainerWidth={CommonBrowsingChartStyles.CHART_WIDTH}
         chartContainerHeight={CommonBrowsingChartStyles.CHART_HEIGHT}
@@ -66,14 +68,14 @@ export const DailyBarChart = React.memo((prop: Props) => {
         <G pointerEvents="none" {...chartArea}>
             {
                 prop.data.map(d => {
-                    const barHeight = scaleY(0) - scaleY(d.value)
-                    const barWidth = Math.min(scaleX.bandwidth(), 25)
-                    return <Rect key={d.numberedDate}
-                        width={barWidth} height={barHeight}
-                        x={scaleX(d.numberedDate)! + (scaleX.bandwidth() - barWidth) * 0.5}
-                        y={scaleY(d.value)}
-
-                        fill={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
+                    const y = scaleY(d.value)
+                    return <Line key={d.numberedDate}
+                        strokeWidth={barWidth}
+                        
+                        x={scaleX(d.numberedDate)! + scaleX.bandwidth() * 0.5}
+                        y1={y}
+                        y2={scaleY(0)}
+                        stroke={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
                         opacity={getChartElementOpacity(today === d.numberedDate)}
                     />
                 })

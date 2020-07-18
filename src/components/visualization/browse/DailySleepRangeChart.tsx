@@ -23,7 +23,7 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
 
 
     const today = useContext(TodayContext)
-    
+
     const { shouldHighlightElements, highlightReference } = CommonBrowsingChartStyles.makeHighlightInformation(prop, prop.dataSource)
 
 
@@ -37,7 +37,7 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
     const earliestTimeDiff = Math.min(d3Array.min(prop.data, d => d.wakeTimeDiffSeconds)!, d3Array.min(prop.data, d => d.bedTimeDiffSeconds)!, prop.preferredValueRange[0] || Number.MAX_SAFE_INTEGER)
 
     const scaleForNice = scaleLinear()
-        .domain(coverValueInRange([Math.floor(earliestTimeDiff / 3600), Math.ceil(latestTimeDiff / 3600)], highlightReference/3600))
+        .domain(coverValueInRange([Math.floor(earliestTimeDiff / 3600), Math.ceil(latestTimeDiff / 3600)], highlightReference / 3600))
         .nice()
 
     const ticks = scaleForNice.ticks(5).map(t => t * 3600)
@@ -50,6 +50,8 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
 
     const bedTimeAvg = d3Array.mean(prop.data, d => d.bedTimeDiffSeconds)!
     const wakeTimeAvg = d3Array.mean(prop.data, d => d.wakeTimeDiffSeconds)!
+
+    const barWidth = Math.min(scaleX.bandwidth(), 20)
 
     return <BandScaleChartTouchHandler
         chartContainerWidth={CommonBrowsingChartStyles.CHART_WIDTH}
@@ -69,16 +71,27 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
         <G pointerEvents="none" {...chartArea}>
             {
                 prop.data.map(d => {
-                    const barHeight = scaleY(d.wakeTimeDiffSeconds) - scaleY(d.bedTimeDiffSeconds)
-                    const barWidth = Math.min(scaleX.bandwidth(), 20)
-                    return <Rect key={d.numberedDate}
-                        width={barWidth} height={barHeight}
-                        x={scaleX(d.numberedDate)! + (scaleX.bandwidth() - barWidth) * 0.5}
-                        y={scaleY(d.bedTimeDiffSeconds)}
-                        rx={2}
-                        fill={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
-                        opacity={getChartElementOpacity(today === d.numberedDate)}
-                    />
+                    if (barWidth < 4) {
+                        return <Line key={d.numberedDate}
+                            strokeWidth={barWidth}
+                            x={scaleX(d.numberedDate)! + scaleX.bandwidth() * 0.5}
+                            y1={scaleY(d.bedTimeDiffSeconds)}
+                            y2={scaleY(d.wakeTimeDiffSeconds)}
+                            stroke={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
+                            opacity={getChartElementOpacity(today === d.numberedDate)}
+                        />
+                    } else {
+                        const barHeight = scaleY(d.wakeTimeDiffSeconds) - scaleY(d.bedTimeDiffSeconds)
+                        return <Rect key={d.numberedDate}
+                            width={barWidth} height={barHeight}
+                            x={scaleX(d.numberedDate)! + (scaleX.bandwidth() - barWidth) * 0.5}
+                            y={scaleY(d.bedTimeDiffSeconds)}
+                            rx={2}
+                            fill={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
+                            opacity={getChartElementOpacity(today === d.numberedDate)}
+                        />
+                    }
+
                 })
             }
             {
