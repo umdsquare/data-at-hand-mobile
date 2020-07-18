@@ -18,6 +18,7 @@ import { useSelector } from 'react-redux';
 import { ReduxAppState } from '@state/types';
 import { GoalValueIndicator } from './GoalValueIndicator';
 import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
+import { PointFallbackCircle } from './PointFallbackCircle';
 
 const weightTickFormat = (weight: number) => weight.toFixed(1)
 
@@ -94,7 +95,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
             }
             {
                 prop.data.logs.map(d => {
-                    return <Circle key={d.numberedDate + "" + d.secondsOfDay}
+                    return <PointFallbackCircle key={d.numberedDate + "" + d.secondsOfDay}
                         x={scaleX(d.numberedDate)! + scaleX.bandwidth() * 0.5}
                         y={scaleY(convert(d.value))}
                         r={Math.min(scaleX.bandwidth(), 8) / 2}
@@ -102,6 +103,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
                         fill={Colors.WHITE}
                         stroke={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
                         opacity={0.62}
+                        thresholdRadius={1}
                     />
                 })
             }
@@ -110,7 +112,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
                     strokeWidth={2.5}
                     fill="transparent"
                     stroke={Colors.chartElementDefault}
-                    opacity={1}
+                    opacity={0.8}
                 />
             }
             {

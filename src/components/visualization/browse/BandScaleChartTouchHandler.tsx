@@ -101,7 +101,7 @@ export const BandScaleChartTouchHandler = (props: {
             {
                 props.highlightedDays != null ? Object.keys(props.highlightedDays).map(date => {
                     if (date != null && date != "null") {
-                        return <Rect key={date} fill={Colors.highlightElementBackground} opacity={0.2} x={getScaleStepLeft(props.scaleX, Number.parseInt(date))} width={props.scaleX.step()} height={props.chartArea.height} />
+                        return <Rect key={date} fill={Colors.highlightElementBackground} opacity={0.2} x={getScaleStepLeft(props.scaleX, Number.parseInt(date))} width={Math.max(3, props.scaleX.step())} height={props.chartArea.height} />
                     } else return null
                 }) : null
             }

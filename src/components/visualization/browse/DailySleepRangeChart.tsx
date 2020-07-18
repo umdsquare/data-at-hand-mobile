@@ -12,6 +12,7 @@ import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
 import { coverValueInRange } from '@data-at-hand/core/utils';
 import { TodayContext } from '@components/pages/exploration/contexts';
 import { timeTickFormat } from '../compare/common';
+import { Platform } from 'react-native';
 
 interface Props extends ChartProps {
     data: Array<{ numberedDate: number, value: number, bedTimeDiffSeconds: number, wakeTimeDiffSeconds: number }>
@@ -71,7 +72,7 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
         <G pointerEvents="none" {...chartArea}>
             {
                 prop.data.map(d => {
-                    if (barWidth < 4) {
+                    if (barWidth < 4 && Platform.OS === 'android') {
                         return <Line key={d.numberedDate}
                             strokeWidth={barWidth}
                             x={scaleX(d.numberedDate)! + scaleX.bandwidth() * 0.5}

@@ -11,6 +11,7 @@ import { BandScaleChartTouchHandler } from './BandScaleChartTouchHandler';
 import { coverValueInRange } from '@data-at-hand/core/utils';
 import { TodayContext } from '@components/pages/exploration/contexts';
 import { GoalValueIndicator } from './GoalValueIndicator';
+import { Platform } from 'react-native';
 
 interface Props extends ChartProps {
     valueTickFormat?: (num: number) => string,
@@ -28,7 +29,7 @@ export const DailyBarChart = React.memo((prop: Props) => {
 
     const chartArea = CommonBrowsingChartStyles.CHART_AREA
     const scaleX = useContext(DateRangeScaleContext) || CommonBrowsingChartStyles
-    .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
+        .makeDateScale(undefined, prop.dateRange[0], prop.dateRange[1])
 
     const xTickFormat = useMemo(() => CommonBrowsingChartStyles.dateTickFormat(today), [today])
 
@@ -67,23 +68,34 @@ export const DailyBarChart = React.memo((prop: Props) => {
         <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={prop.valueTickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
         <G pointerEvents="none" {...chartArea}>
             {
-                prop.data.map(d => {
-                    const y = scaleY(d.value)
-                    return <Line key={d.numberedDate}
-                        strokeWidth={barWidth}
-                        
-                        x={scaleX(d.numberedDate)! + scaleX.bandwidth() * 0.5}
-                        y1={y}
-                        y2={scaleY(0)}
-                        stroke={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
-                        opacity={getChartElementOpacity(today === d.numberedDate)}
-                    />
-                })
+                Platform.OS === 'android' ?
+                    prop.data.map(d => {
+                        const y = scaleY(d.value)
+                        return <Line key={d.numberedDate}
+                            strokeWidth={barWidth}
+
+                            x={scaleX(d.numberedDate)! + scaleX.bandwidth() * 0.5}
+                            y1={y}
+                            y2={scaleY(0)}
+                            stroke={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
+                            opacity={getChartElementOpacity(today === d.numberedDate)}
+                        />
+                    }) : prop.data.map(d => {
+                        const barHeight = scaleY(0) - scaleY(d.value)
+                        return <Rect key={d.numberedDate}
+                            width={barWidth} height={barHeight}
+                            x={scaleX(d.numberedDate)! + (scaleX.bandwidth() - barWidth) * 0.5}
+                            y={scaleY(d.value)}
+
+                            fill={getChartElementColor(shouldHighlightElements, prop.highlightedDays ? prop.highlightedDays[d.numberedDate] == true : false, today === d.numberedDate)}
+                            opacity={getChartElementOpacity(today === d.numberedDate)}
+                        />
+                    })
             }
             {
                 mean != null && <Line x1={0} x2={chartArea.width} y={scaleY(mean)} stroke={Colors.chartAvgLineColor} strokeWidth={CommonBrowsingChartStyles.AVERAGE_LINE_WIDTH} strokeDasharray={"2"} />
             }
-            <GoalValueIndicator yScale={scaleY} goal={prop.goalValue} lineLength={chartArea.width} labelAreaWidth={CommonBrowsingChartStyles.yAxisWidth} valueFormatter={prop.valueTickFormat}/>
+            <GoalValueIndicator yScale={scaleY} goal={prop.goalValue} lineLength={chartArea.width} labelAreaWidth={CommonBrowsingChartStyles.yAxisWidth} valueFormatter={prop.valueTickFormat} />
             {
                 highlightReference != null ? <Line x1={0} x2={chartArea.width} y={scaleY(highlightReference)} stroke={Colors.highlightElementColor} strokeWidth={2} /> : null
             }
