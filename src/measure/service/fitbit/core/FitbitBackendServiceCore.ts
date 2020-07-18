@@ -11,6 +11,7 @@ import { SystemError } from '@utils/errors';
 import { notifyError } from '@core/logging/ErrorReportingService';
 import path from 'react-native-path';
 import prompt from 'react-native-prompt-android';
+import { Platform } from 'react-native';
 
 interface FitbitCredential {
     readonly client_secret: string;
@@ -75,16 +76,18 @@ export default class FitbitOfficialServiceCore implements FitbitServiceCore {
         if (code != null) {
             return code
         } else return new Promise<string | undefined>((resolve, reject) => {
-            prompt("Insert User Code", "Please insert the user code you received from the experimenter.", [
-                { text: 'Cancel', onPress: () => resolve(null), style: 'cancel' },
-                { text: 'OK', onPress: code => resolve(code) },
-            ],
-                {
-                    type: 'default',
-                    cancelable: false,
-                    defaultValue: null,
-                    placeholder: 'User Code'
-                })
+            if (Platform.OS === 'android') {
+                prompt("Insert User Code", "Please insert the user code you received from the experimenter.", [
+                    { text: 'Cancel', onPress: () => resolve(null), style: 'cancel' },
+                    { text: 'OK', onPress: code => resolve(code) },
+                ],
+                    {
+                        type: 'default',
+                        cancelable: false,
+                        defaultValue: null,
+                        placeholder: 'User Code'
+                    })
+            }
         }).then(async code => {
             if (code != null) {
                 //get 
@@ -121,16 +124,19 @@ export default class FitbitOfficialServiceCore implements FitbitServiceCore {
         })
     }
 
-    onCheckSupportedInSystem(): Promise<{ supported: boolean, reason?: UnSupportedReason }> {
+    async onCheckSupportedInSystem(): Promise<{ supported: boolean, reason?: UnSupportedReason }> {
+        if (Platform.OS !== 'android') {
+            return { supported: false, reason: UnSupportedReason.OS }
+        }
         try {
             this._credential = require('@credentials/fitbit.json');
-            return Promise.resolve({ supported: true });
+            return { supported: true };
         } catch (e) {
             console.log(e);
-            return Promise.resolve({
+            return {
                 supported: false,
                 reason: UnSupportedReason.Credential,
-            });
+            };
         }
     }
 
