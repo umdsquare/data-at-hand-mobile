@@ -58,7 +58,7 @@
     "parse-duration": "^0.4.4",
     "pluralize": "^8.0.0",
     "react": "16.13.1",
-    "react-native": "0.62.2",
+    "react-native": "0.63.2",
     "react-native-app-auth": "^5.1.2",
     "react-native-calendars": "^1.294.0",
     "react-native-dash": "0.0.11",
