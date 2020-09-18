@@ -1,4 +1,4 @@
-import { createGoToBrowseRangeAction, memoUIStatus, ExplorationAction, createGoToBrowseDayAction, setHighlightFilter } from "@state/exploration/interaction/actions";
+import { createGoToBrowseRangeAction, memoUIStatus, ExplorationAction, createGoToBrowseDayAction, setDataDrivenQuery } from "@state/exploration/interaction/actions";
 import React from "react";
 import { connect } from "react-redux";
 import { ReduxAppState } from "@state/types";
@@ -9,14 +9,14 @@ import { DataSourceType, inferIntraDayDataSourceType } from "@data-at-hand/core/
 import { Sizes } from "@style/Sizes";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import { DataServiceManager } from "@measure/DataServiceManager";
-import { HighlightFilterPanel } from "@components/exploration/HighlightFilterPanel";
+import { DataDrivenQueryBar } from "@components/exploration/DataDrivenQueryBar";
 import { DataSourceManager } from "@measure/DataSourceManager";
 import { startLoadingForInfo } from "@state/exploration/data/reducers";
 import { ThunkDispatch } from "redux-thunk";
 import { DataService } from "@measure/service/DataService";
 import { CommonBrowsingChartStyles, DateRangeScaleContext } from "@components/visualization/browse/common";
 import { ScaleBand } from "d3-scale";
-import { HighlightFilter } from "@data-at-hand/core/exploration/ExplorationInfo";
+import { DataDrivenQuery } from "@data-at-hand/core/exploration/ExplorationInfo";
 import { InteractionType } from "@data-at-hand/core/exploration/actions";
 
 const MIN_REFRESH_TIME_FOR_PERCEPTION = 1000
@@ -27,7 +27,7 @@ interface Props {
     data?: OverviewData,
     isLoading?: boolean,
     overviewScrollY?: any,
-    highlightFilter?: HighlightFilter,
+    dataDrivenQuery?: DataDrivenQuery,
     selectedService?: DataService,
     dispatchAction?: (action: ExplorationAction) => void,
     dispatchDataReload?: () => void,
@@ -84,16 +84,16 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
     }
 
     componentDidUpdate(prevProps: Props) {
-        if (prevProps.highlightFilter !== this.props.highlightFilter) {
+        if (prevProps.dataDrivenQuery !== this.props.dataDrivenQuery) {
             LayoutAnimation.configureNext(
                 LayoutAnimation.create(
                     500, LayoutAnimation.Types.easeInEaseOut, "opacity")
             )
 
-            if (this.props.highlightFilter != null && (prevProps.highlightFilter == null || prevProps.highlightFilter.dataSource !== this.props.highlightFilter.dataSource)) {
+            if (this.props.dataDrivenQuery != null && (prevProps.dataDrivenQuery == null || prevProps.dataDrivenQuery.dataSource !== this.props.dataDrivenQuery.dataSource)) {
                 this._listRef.current?.scrollToIndex({
                     animated: true,
-                    index: this.props.data.sourceDataList.findIndex(d => d.source === this.props.highlightFilter.dataSource)
+                    index: this.props.data.sourceDataList.findIndex(d => d.source === this.props.dataDrivenQuery.dataSource)
                 })
             }
         }
@@ -131,11 +131,11 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
     }
 
     private readonly onDiscardFilter = () => {
-        this.props.dispatchAction(setHighlightFilter(InteractionType.TouchOnly, null))
+        this.props.dispatchAction(setDataDrivenQuery(InteractionType.TouchOnly, null))
     }
 
-    private readonly onFilterModified = (newFilter: HighlightFilter) => {
-        this.props.dispatchAction(setHighlightFilter(InteractionType.TouchOnly, newFilter))
+    private readonly onFilterModified = (newFilter: DataDrivenQuery) => {
+        this.props.dispatchAction(setDataDrivenQuery(InteractionType.TouchOnly, newFilter))
     }
 
 
@@ -169,7 +169,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
 
     private readonly renderItem = ({ item }: { item: OverviewSourceRow }) => <DataSourceChartFrame key={item.source.toString()}
         data={item}
-        filter={this.props.highlightFilter}
+        filter={this.props.dataDrivenQuery}
         highlightedDays={this.props.data.highlightedDays}
         onHeaderPressed={this.onHeaderPressed}
         onTodayPressed={inferIntraDayDataSourceType(item.source) != null ? this.onTodayPressed : null}
@@ -206,8 +206,8 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
         if (this.props.data != null) {
             return <DateRangeScaleContext.Provider value={this.state.scaleX}>
                 {
-                    this.props.highlightFilter != null ? <HighlightFilterPanel
-                        filter={this.props.highlightFilter}
+                    this.props.dataDrivenQuery != null ? <DataDrivenQueryBar
+                        filter={this.props.dataDrivenQuery}
                         highlightedDays={this.props.data.highlightedDays}
                         onDiscardFilterPressed={this.onDiscardFilter}
                         onFilterModified={this.onFilterModified}
@@ -217,7 +217,7 @@ class OverviewMainPanel extends React.PureComponent<Props, State> {
                     ref={this._listRef}
                     windowSize={DataSourceManager.instance.supportedDataSources.length}
 
-                    extraData={this.props.highlightFilter}
+                    extraData={this.props.dataDrivenQuery}
 
                     viewabilityConfig = {this.viewabilityConfig}
                     onViewableItemsChanged = {this.onViewableItemsChanged}
@@ -246,7 +246,7 @@ function mapStateToProps(state: ReduxAppState, ownProps: Props): Props {
         isLoading: state.explorationDataState.isBusy,
         data: state.explorationDataState.data,
         overviewScrollY: state.explorationState.uiStatus.overviewScrollY,
-        highlightFilter: state.explorationState.info.highlightFilter,
+        dataDrivenQuery: state.explorationState.info.dataDrivenQuery,
         selectedService,
     }
 }

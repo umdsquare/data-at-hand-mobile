@@ -9,7 +9,7 @@ import commaNumber from 'comma-number';
 import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { startOfDay, addSeconds, format } from 'date-fns';
 import { scaleLinear } from 'd3-scale';
-import { HighlightFilter } from '@data-at-hand/core/exploration/ExplorationInfo';
+import { DataDrivenQuery } from '@data-at-hand/core/exploration/ExplorationInfo';
 import { DataSourceIcon } from '@components/common/DataSourceIcon';
 import { DailyBarChart } from '@components/visualization/browse/DailyBarChart';
 import { DailyHeartRateChart } from '@components/visualization/browse/DailyHeartRateChart';
@@ -276,11 +276,11 @@ function formatStatistics(sourceType: DataSourceType, statisticsType: Statistics
     }
 }
 
-function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filter: HighlightFilter | undefined, highlightedDays: { [key: number]: boolean | undefined } | undefined): any {
+function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, query: DataDrivenQuery | undefined, highlightedDays: { [key: number]: boolean | undefined } | undefined): any {
 
     const commonProps = {
         preferredValueRange: data.preferredValueRange,
-        highlightFilter: filter,
+        dataDrivenQuery: query,
         highlightedDays: highlightedDays,
         dateRange: data.range,
         data: data.data,
@@ -329,7 +329,7 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, filte
 
 export const DataSourceChartFrame = React.memo((props: {
     data: OverviewSourceRow,
-    filter: HighlightFilter,
+    filter: DataDrivenQuery,
     highlightedDays?: { [key: number]: boolean | undefined }
     showToday?: boolean
     flat?: boolean

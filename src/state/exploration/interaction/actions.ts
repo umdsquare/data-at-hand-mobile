@@ -4,8 +4,8 @@ import { TouchingElementInfo } from '@data-at-hand/core/exploration/TouchingElem
 import { CyclicTimeFrame, CycleDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { startOfDay, subDays, endOfDay } from 'date-fns';
 import { DateTimeHelper } from '@data-at-hand/core/utils/time';
-import { HighlightFilter } from '@data-at-hand/core/exploration/ExplorationInfo';
-import { InteractionType, SetRangeAction, SetDateAction, SetIntraDayDataSourceAction, GoToBrowseRangeAction, GoToBrowseDayAction, GoToComparisonCyclicAction, GoToComparisonTwoRangesAction, GoToCyclicDetailAction, MemoUIStatusAction, SetDataSourceAction, SetTouchingElementInfoAction, SetCycleDimensionAction, ShiftAllRangesAction, SetHighlightFilterAction, ExplorationActionType, SetCycleTypeAction, ResetAction } from '@data-at-hand/core/exploration/actions';
+import { DataDrivenQuery } from '@data-at-hand/core/exploration/ExplorationInfo';
+import { InteractionType, SetRangeAction, SetDateAction, SetIntraDayDataSourceAction, GoToBrowseRangeAction, GoToBrowseDayAction, GoToComparisonCyclicAction, GoToComparisonTwoRangesAction, GoToCyclicDetailAction, MemoUIStatusAction, SetDataSourceAction, SetTouchingElementInfoAction, SetCycleDimensionAction, ShiftAllRangesAction, ExplorationActionType, SetCycleTypeAction, ResetAction, SetDataDrivenQueryAction } from '@data-at-hand/core/exploration/actions';
 
 export type ExplorationAction =
   | ActionTypeBase
@@ -22,7 +22,7 @@ export type ExplorationAction =
   | SetTouchingElementInfoAction
   | SetCycleDimensionAction
   | ShiftAllRangesAction
-  | SetHighlightFilterAction
+  | SetDataDrivenQueryAction
 
 export function createSetRangeAction(
   interactionType: InteractionType,
@@ -43,14 +43,14 @@ export function createGoToBrowseRangeAction(
   interactionType: InteractionType,
   dataSource?: DataSourceType,
   range?: [number, number],
-  highlightFilter?: HighlightFilter | null
+  dataDrivenQuery?: DataDrivenQuery | null
 ): GoToBrowseRangeAction {
   return {
     type: ExplorationActionType.GoToBrowseRange,
     interactionType,
     range,
     dataSource,
-    highlightFilter
+    dataDrivenQuery
   };
 }
 
@@ -226,11 +226,11 @@ export function shiftAllRanges(interactionType: InteractionType, direction: 'pas
   }
 }
 
-export function setHighlightFilter(interactionType: InteractionType, highlightFilter?: HighlightFilter | null, range?: [number, number]): SetHighlightFilterAction {
+export function setDataDrivenQuery(interactionType: InteractionType, dataDrivenQuery?: DataDrivenQuery | null, range?: [number, number]): SetDataDrivenQueryAction {
   return {
     interactionType,
-    type: ExplorationActionType.SetHighlightFilter,
-    highlightFilter: highlightFilter,
+    type: ExplorationActionType.SetDataDrivenQuery,
+    dataDrivenQuery,
     range
   }
 }

@@ -135,7 +135,7 @@ export async function preprocess(speech: string, options: NLUOptions, guidedData
                 }
 
                 input.processedSpeech = input.payload.nlp.text()
-                input.intent = Intent.Highlight
+                input.intent = Intent.Query
 
                 //check some nonsense cases
                 if (inferredConditionInfoResult.conditionInfo.type === NumericConditionType.Max || inferredConditionInfoResult.conditionInfo.type === NumericConditionType.Min) {

@@ -2,7 +2,7 @@ import { ScaleBand, scaleBand } from 'd3-scale';
 import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { LayoutRectangle, Dimensions } from 'react-native';
 import { DataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
-import { HighlightFilter, NumericConditionType } from '@data-at-hand/core/exploration/ExplorationInfo';
+import { DataDrivenQuery, NumericConditionType } from '@data-at-hand/core/exploration/ExplorationInfo';
 import { useMemo } from 'react';
 import Colors from '@style/Colors';
 import React from 'react';
@@ -15,7 +15,7 @@ export interface ChartPropsBase<T> {
   preferredValueRange: number[],
   data: T,
   goalValue?: number,
-  highlightFilter?: HighlightFilter,
+  dataDrivenQuery?: DataDrivenQuery,
   highlightedDays?: { [key: number]: boolean | undefined }
 }
 
@@ -102,19 +102,19 @@ export namespace CommonBrowsingChartStyles {
     dataSource: DataSourceType,
     getDataArray?: (data: T) => Array<{ numberedDate: number, value: number }>) {
 
-    const shouldHighlightElements = useMemo(() => prop.highlightFilter != null && prop.highlightFilter.dataSource === dataSource && prop.highlightedDays != null, [
-      prop.highlightFilter,
+    const shouldHighlightElements = useMemo(() => prop.dataDrivenQuery != null && prop.dataDrivenQuery.dataSource === dataSource && prop.highlightedDays != null, [
+      prop.dataDrivenQuery,
       (prop as any)["dataSource"],
       prop.highlightedDays
     ])
 
     const highlightReference = useMemo(() => {
-      if (prop.highlightFilter != null && prop.highlightFilter.dataSource === dataSource) {
+      if (prop.dataDrivenQuery != null && prop.dataDrivenQuery.dataSource === dataSource) {
 
-        switch (prop.highlightFilter.type) {
+        switch (prop.dataDrivenQuery.type) {
           case NumericConditionType.Less:
           case NumericConditionType.More:
-            return prop.highlightFilter.ref!
+            return prop.dataDrivenQuery.ref!
           case NumericConditionType.Max:
           case NumericConditionType.Min:
             const array = getDataArray ? getDataArray(prop.data) : prop.data as any
@@ -124,7 +124,7 @@ export namespace CommonBrowsingChartStyles {
                 const extremeDatum = array.find((d: { numberedDate: number }) => d.numberedDate === Number.parseInt(extremeDays[0]))
                 if (extremeDatum) {
                   if (dataSource === DataSourceType.SleepRange) {
-                    if (prop.highlightFilter!.propertyKey === 'waketime') {
+                    if (prop.dataDrivenQuery!.propertyKey === 'waketime') {
                       return extremeDatum["wakeTimeDiffSeconds"]
                     } else return extremeDatum["bedTimeDiffSeconds"]
                   } else return extremeDatum.value
@@ -134,7 +134,7 @@ export namespace CommonBrowsingChartStyles {
         }
         return null
       } else return null
-    }, [shouldHighlightElements, prop.highlightFilter, prop.data])
+    }, [shouldHighlightElements, prop.dataDrivenQuery, prop.data])
 
     return {
       shouldHighlightElements,

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback, useMemo } from "react";
 import { View, FlatList, Text, StyleSheet, ActivityIndicator, LayoutAnimation, UIManager, findNodeHandle, ViewStyle } from 'react-native';
 import { MeasureUnitType, DataSourceType, inferIntraDayDataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
-import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, setHighlightFilter } from "@state/exploration/interaction/actions";
+import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, setDataDrivenQuery } from "@state/exploration/interaction/actions";
 import { connect } from "react-redux";
 import { ReduxAppState } from "@state/types";
 import { Dispatch } from "redux";
@@ -19,8 +19,8 @@ import unitConvert from 'convert-units';
 import { TouchableHighlight } from "react-native-gesture-handler";
 import { SvgIcon, SvgIconType } from "@components/common/svg/SvgIcon";
 import { DataServiceManager } from "@measure/DataServiceManager";
-import { HighlightFilterPanel } from "@components/exploration/HighlightFilterPanel";
-import { HighlightFilter, ParameterType } from "@data-at-hand/core/exploration/ExplorationInfo";
+import { DataDrivenQueryBar } from "@components/exploration/DataDrivenQueryBar";
+import { DataDrivenQuery, ParameterType } from "@data-at-hand/core/exploration/ExplorationInfo";
 import { InteractionType } from "@data-at-hand/core/exploration/actions";
 
 const listItemHeightNormal = 52
@@ -81,7 +81,7 @@ interface Props {
     source?: DataSourceType,
     data?: any,
     measureUnitType?: MeasureUnitType,
-    highlightFilter?: HighlightFilter,
+    dataDrivenQuery?: DataDrivenQuery,
     pressedDate?: number,
     getToday?: () => Date,
     dispatchExplorationAction?: (action: ExplorationAction) => void
@@ -120,9 +120,9 @@ class DataSourceDetailNavigationPanel extends React.PureComponent<Props, State>{
             this.setState({ ...this.state, sortedData: dataList })
 
             /*
-            if (this.props.highlightFilter != null) {
+            if (this.props.dataDrivenQuery != null) {
 
-                if (this.props.highlightFilter != null) {
+                if (this.props.dataDrivenQuery != null) {
                     const sourceRangedData = this.props.data as DataSourceBrowseData
                     const highlightedDates = Object.keys(sourceRangedData.highlightedDays).filter(date => sourceRangedData.highlightedDays[Number.parseInt(date)] === true).map(d => Number.parseInt(d))
                     if (highlightedDates.length === 1) {
@@ -141,7 +141,7 @@ class DataSourceDetailNavigationPanel extends React.PureComponent<Props, State>{
             }*/
         }
 
-        if (prevProps.highlightFilter !== this.props.highlightFilter) {
+        if (prevProps.dataDrivenQuery !== this.props.dataDrivenQuery) {
 
             LayoutAnimation.configureNext(
                 LayoutAnimation.create(
@@ -163,11 +163,11 @@ class DataSourceDetailNavigationPanel extends React.PureComponent<Props, State>{
     }
 
     private readonly onDiscardFilter = () => {
-        this.props.dispatchExplorationAction(setHighlightFilter(InteractionType.TouchOnly, null))
+        this.props.dispatchExplorationAction(setDataDrivenQuery(InteractionType.TouchOnly, null))
     }
 
-    private readonly onFilterModified = (newFilter: HighlightFilter) => {
-        this.props.dispatchExplorationAction(setHighlightFilter(InteractionType.TouchOnly, newFilter))
+    private readonly onFilterModified = (newFilter: DataDrivenQuery) => {
+        this.props.dispatchExplorationAction(setDataDrivenQuery(InteractionType.TouchOnly, newFilter))
     }
 
     private getItemLayout = (_: any, index: number) => {
@@ -191,15 +191,15 @@ class DataSourceDetailNavigationPanel extends React.PureComponent<Props, State>{
 
             return <>
                 {
-                    this.props.highlightFilter != null ? <HighlightFilterPanel
-                        filter={this.props.highlightFilter}
+                    this.props.dataDrivenQuery != null ? <DataDrivenQueryBar
+                        filter={this.props.dataDrivenQuery}
                         highlightedDays={this.props.data.highlightedDays}
                         onDiscardFilterPressed={this.onDiscardFilter}
                         onFilterModified={this.onFilterModified}
                     /> : null
                 }
                 <DataSourceChartFrame data={sourceRangedData}
-                    filter={this.props.highlightFilter}
+                    filter={this.props.dataDrivenQuery}
                     highlightedDays={sourceRangedData.highlightedDays}
                     showToday={false}
                     flat={true}
@@ -248,7 +248,7 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
         measureUnitType: appState.settingsState.unit,
         isLoadingData: appState.explorationDataState.isBusy,
         pressedDate,
-        highlightFilter: appState.explorationState.info.highlightFilter,
+        dataDrivenQuery: appState.explorationState.info.dataDrivenQuery,
         getToday: DataServiceManager.instance.getServiceByKey(appState.settingsState.serviceKey).getToday
     }
 }

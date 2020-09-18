@@ -69,7 +69,7 @@ export const DailyHeartRateChart = React.memo((prop: ChartProps) => {
         chartContainerHeight={CommonBrowsingChartStyles.CHART_HEIGHT}
         chartArea={chartArea} scaleX={scaleX} dataSource={prop.dataSource}
         getValueOfDate={(date) => prop.data.find(d => d.numberedDate === date)?.value}
-        highlightedDays={prop.highlightFilter != null ? prop.highlightedDays : undefined}>
+        highlightedDays={prop.dataDrivenQuery != null ? prop.highlightedDays : undefined}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={scaleY.ticks(5)} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
         <G pointerEvents="none" {...chartArea}>

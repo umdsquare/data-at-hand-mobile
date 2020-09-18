@@ -82,12 +82,12 @@ export const DailyWeightChart = React.memo((prop: Props) => {
         dataSource={DataSourceType.Weight}
         disableIntraDayLink={true}
         getValueOfDate={(date) => prop.data.trend.find(d => d.numberedDate === date)?.value}
-        highlightedDays={prop.highlightFilter != null ? prop.highlightedDays : undefined}>
+        highlightedDays={prop.dataDrivenQuery != null ? prop.highlightedDays : undefined}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={scaleY.ticks(5)} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
         <G key="chart" {...chartArea}>
             {
-                prop.highlightFilter && prop.highlightedDays && Object.keys(prop.highlightedDays).map(date => {
+                prop.dataDrivenQuery && prop.highlightedDays && Object.keys(prop.highlightedDays).map(date => {
                     if (date != null && date != "null") {
                         return <Rect key={date} fill={Colors.highlightElementBackground} opacity={0.2} x={getScaleStepLeft(scaleX, Number.parseInt(date))} width={scaleX.step()} height={chartArea.height} />
                     } else return null

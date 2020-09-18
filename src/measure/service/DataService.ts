@@ -7,7 +7,7 @@ import { getNumberSequence } from '@data-at-hand/core/utils';
 import { writeFile, TemporaryDirectoryPath, exists, mkdir } from 'react-native-fs';
 import { zip } from 'react-native-zip-archive'
 import Share from 'react-native-share'
-import { HighlightFilter } from '@data-at-hand/core/exploration/ExplorationInfo';
+import { DataDrivenQuery } from '@data-at-hand/core/exploration/ExplorationInfo';
 
 export interface ServiceActivationResult {
   success: boolean,
@@ -70,7 +70,7 @@ export abstract class DataService {
 
   abstract getPreferredValueRange(dataSource: DataSourceType): Promise<[number, number]>
 
-  abstract fetchFilteredDates(filter: HighlightFilter, start: number, end: number): Promise<{ [key: number]: boolean | undefined }>
+  abstract fetchFilteredDates(filter: DataDrivenQuery, start: number, end: number): Promise<{ [key: number]: boolean | undefined }>
 
   abstract fetchIntraDayData(intraDayDataSource: IntraDayDataSourceType, date: number): Promise<any>
 
@@ -137,8 +137,14 @@ export abstract class DataService {
   abstract async activateInSystem(progressHandler: (progressInfo: { progress: number /*0 - 1*/, message: string }) => void): Promise<ServiceActivationResult>
   abstract async deactivatedInSystem(): Promise<boolean>
 
-  getToday = (): Date => {
-    return new Date()
+  private _getToday = (): Date => {
+    return new Date();
+  };
+  public get getToday() {
+    return this._getToday;
+  }
+  public set getToday(value) {
+    this._getToday = value;
   }
 
   abstract getDataInitialDate(): Promise<number>

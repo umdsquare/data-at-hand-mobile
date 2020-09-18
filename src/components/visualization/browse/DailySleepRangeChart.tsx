@@ -66,7 +66,7 @@ export const DailySleepRangeChart = React.memo((prop: Props) => {
                 return { value: datum.bedTimeDiffSeconds, value2: datum.wakeTimeDiffSeconds }
             } else return null
         }}
-        highlightedDays={prop.highlightFilter != null ? prop.highlightedDays : undefined}>
+        highlightedDays={prop.dataDrivenQuery != null ? prop.highlightedDays : undefined}>
         <DateBandAxis key="xAxis" scale={scaleX} dateSequence={scaleX.domain()} today={today} tickFormat={xTickFormat} chartArea={chartArea} />
         <AxisSvg key="yAxis" tickMargin={0} ticks={ticks} tickFormat={timeTickFormat} chartArea={chartArea} scale={scaleY} position={Padding.Left} />
         <G pointerEvents="none" {...chartArea}>

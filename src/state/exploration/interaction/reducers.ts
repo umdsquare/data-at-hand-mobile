@@ -4,7 +4,7 @@ import { DateTimeHelper } from '@data-at-hand/core/utils/time';
 import { DataSourceType, inferIntraDayDataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { ExplorationInfo, ParameterType, ExplorationType, ParameterKey } from '@data-at-hand/core/exploration/ExplorationInfo';
 import { TouchingElementInfo } from '@data-at-hand/core/exploration/TouchingElementInfo';
-import { ExplorationActionType, SetTouchingElementInfoAction, MemoUIStatusAction, ResetAction, InteractionType, SetRangeAction, SetDateAction, SetDataSourceAction, SetIntraDayDataSourceAction, SetCycleTypeAction, SetCycleDimensionAction, SetHighlightFilterAction, ShiftAllRangesAction, GoToBrowseRangeAction, GoToBrowseDayAction, GoToComparisonCyclicAction, GoToComparisonTwoRangesAction, GoToCyclicDetailAction } from '@data-at-hand/core/exploration/actions';
+import { ExplorationActionType, SetTouchingElementInfoAction, MemoUIStatusAction, ResetAction, InteractionType, SetRangeAction, SetDateAction, SetDataSourceAction, SetIntraDayDataSourceAction, SetCycleTypeAction, SetCycleDimensionAction, SetDataDrivenQueryAction, ShiftAllRangesAction, GoToBrowseRangeAction, GoToBrowseDayAction, GoToComparisonCyclicAction, GoToComparisonTwoRangesAction, GoToCyclicDetailAction } from '@data-at-hand/core/exploration/actions';
 import { ExplorationAction } from './actions';
 import { getCycleDimensionSpec } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 
@@ -169,22 +169,22 @@ export const explorationStateReducer = (
         }
         break;
 
-      case ExplorationActionType.SetHighlightFilter:
+      case ExplorationActionType.SetDataDrivenQuery:
         {
-          const a = action as SetHighlightFilterAction
-          console.log("update filter:", a.highlightFilter)
-          const prevFilter = newState.info.highlightFilter
-          newState.info.highlightFilter = a.highlightFilter
+          const a = action as SetDataDrivenQueryAction
+          console.log("update filter:", a.dataDrivenQuery)
+          const prevFilter = newState.info.dataDrivenQuery
+          newState.info.dataDrivenQuery = a.dataDrivenQuery
 
           if(a.range != null){
             explorationInfoHelper.setParameterValue(newState.info, a.range, ParameterType.Range)
           }
 
-          if (newState.info.type === ExplorationType.B_Range && a.highlightFilter != null) {
-            if (prevFilter == null || prevFilter.dataSource !== a.highlightFilter.dataSource) {
+          if (newState.info.type === ExplorationType.B_Range && a.dataDrivenQuery != null) {
+            if (prevFilter == null || prevFilter.dataSource !== a.dataDrivenQuery.dataSource) {
               //highlight filter's data source was changed
-              if (explorationInfoHelper.getParameterValue(newState.info, ParameterType.DataSource) !== a.highlightFilter.dataSource) {
-                explorationInfoHelper.setParameterValue(newState.info, a.highlightFilter.dataSource, ParameterType.DataSource)
+              if (explorationInfoHelper.getParameterValue(newState.info, ParameterType.DataSource) !== a.dataDrivenQuery.dataSource) {
+                explorationInfoHelper.setParameterValue(newState.info, a.dataDrivenQuery.dataSource, ParameterType.DataSource)
               }
             }
           }
@@ -256,10 +256,10 @@ export const explorationStateReducer = (
             );
           }
 
-          if (goToBrowseRangeAction.highlightFilter != null) {
-            newState.info.highlightFilter = goToBrowseRangeAction.highlightFilter
-          } else if (goToBrowseRangeAction.highlightFilter === null) {
-            newState.info.highlightFilter = undefined
+          if (goToBrowseRangeAction.dataDrivenQuery != null) {
+            newState.info.dataDrivenQuery = goToBrowseRangeAction.dataDrivenQuery
+          } else if (goToBrowseRangeAction.dataDrivenQuery === null) {
+            newState.info.dataDrivenQuery = undefined
           }
         }
         break;
@@ -506,7 +506,7 @@ function shallowCopyExplorationInfo(original: ExplorationInfo): ExplorationInfo 
   return {
     ...original,
     values: original.values.map(v => ({ ...v })),
-    highlightFilter: original.highlightFilter
+    dataDrivenQuery: original.dataDrivenQuery
   }
 }
 

@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react'
-import { HighlightFilter, NumericConditionType } from '@data-at-hand/core/exploration/ExplorationInfo'
+import { DataDrivenQuery, NumericConditionType } from '@data-at-hand/core/exploration/ExplorationInfo'
 import { View, StyleSheet, Text, Animated, Platform, ActionSheetIOS, UIManager, findNodeHandle } from 'react-native'
 import Colors from '@style/Colors'
 import { DataSourceManager } from '@measure/DataSourceManager'
@@ -180,11 +180,11 @@ const styles = StyleSheet.create({
 
 const pivot = startOfDay(new Date())
 
-export const HighlightFilterPanel = React.memo((props: {
-    filter: HighlightFilter,
+export const DataDrivenQueryBar = React.memo((props: {
+    filter: DataDrivenQuery,
     highlightedDays: { [key: number]: boolean | undefined },
     onDiscardFilterPressed: () => void,
-    onFilterModified: (newFilter: HighlightFilter) => void
+    onFilterModified: (newFilter: DataDrivenQuery) => void
 }) => {
 
     const measureUnitType: MeasureUnitType = useSelector((appState: ReduxAppState) => appState.settingsState.unit)
@@ -313,7 +313,7 @@ export const HighlightFilterPanel = React.memo((props: {
         const newFilter = {
             ...props.filter,
             ref: inputReferenceValue
-        } as HighlightFilter
+        } as DataDrivenQuery
         props.onFilterModified(newFilter)
     }, [inputReferenceValue, props.onFilterModified])
 

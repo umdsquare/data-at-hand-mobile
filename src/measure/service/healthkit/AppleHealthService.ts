@@ -3,7 +3,7 @@ import * as HK from './HealthKitManager';
 import { DataSourceType, IntraDayDataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { Platform } from 'react-native';
 import { FilteredDailyValues, GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue } from '@core/exploration/data/types';
-import { HighlightFilter } from '@data-at-hand/core/exploration/ExplorationInfo';
+import { DataDrivenQuery } from '@data-at-hand/core/exploration/ExplorationInfo';
 import { CyclicTimeFrame, CycleDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 
 export default class AppleHealthService extends DataService {
@@ -77,7 +77,7 @@ export default class AppleHealthService extends DataService {
   getPreferredValueRange(dataSource: DataSourceType): Promise<[number, number]> {
     throw new Error("Method not implemented.");
   }
-  fetchFilteredDates(filter: HighlightFilter, start: number, end: number): Promise<{ [key: number]: boolean; }> {
+  fetchFilteredDates(filter: DataDrivenQuery, start: number, end: number): Promise<{ [key: number]: boolean; }> {
     throw new Error("Method not implemented.");
   }
   fetchIntraDayData(intraDayDataSource: IntraDayDataSourceType, date: number): Promise<any> {

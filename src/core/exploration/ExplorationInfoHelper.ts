@@ -80,7 +80,7 @@ class ExplorationInfoHelper {
     if (a === b) {
       return true
     } else {
-      if (a.type === b.type && a.values.length === b.values.length && a.highlightFilter === b.highlightFilter) {
+      if (a.type === b.type && a.values.length === b.values.length && a.dataDrivenQuery === b.dataDrivenQuery) {
         var deepEqual = require('deep-equal');
         for (const aParameter of a.values) {
           const bParameter = b.values.find(bParameter =>

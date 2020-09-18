@@ -2,13 +2,13 @@ import { SpeechContext, SpeechContextType, TimeSpeechContext, RangeElementSpeech
 import { preprocess } from "./preprocessor";
 import { ActionTypeBase } from "../../../state/types";
 import { NLUOptions, NLUCommandResolver } from "./types";
-import { setDateAction, createSetRangeAction, setDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, createGoToComparisonCyclicAction, setCycleTypeAction, setHighlightFilter, setIntraDayDataSourceAction, setCycleDimensionAction, createGoToCyclicDetailDailyAction, createGoToCyclicDetailRangeAction } from "../../../state/exploration/interaction/actions";
+import { setDateAction, createSetRangeAction, setDataSourceAction, createGoToBrowseRangeAction, createGoToComparisonTwoRangesAction, createGoToBrowseDayAction, createGoToComparisonCyclicAction, setCycleTypeAction, setDataDrivenQuery, setIntraDayDataSourceAction, setCycleDimensionAction, createGoToCyclicDetailDailyAction, createGoToCyclicDetailRangeAction } from "../../../state/exploration/interaction/actions";
 import { explorationInfoHelper } from "../../exploration/ExplorationInfoHelper";
 import { differenceInDays, addDays } from "date-fns";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import { DataSourceType, inferIntraDayDataSourceType, inferDataSource } from "@data-at-hand/core/measure/DataSourceSpec";
 import { ExplorationState, explorationStateReducer } from "@state/exploration/interaction/reducers";
-import { ExplorationInfo, ParameterType, HighlightFilter, ExplorationType, ParameterKey } from "@data-at-hand/core/exploration/ExplorationInfo";
+import { ExplorationInfo, ParameterType, DataDrivenQuery, ExplorationType, ParameterKey } from "@data-at-hand/core/exploration/ExplorationInfo";
 import { InteractionType } from "@data-at-hand/core/exploration/actions";
 import { NLUResult, NLUResultType, VariableType, Intent, ConditionInfo, PreProcessedInputText, VariableInfo } from "@data-at-hand/core/speech/types";
 import { fastConcatTo } from "@data-at-hand/core/utils";
@@ -286,7 +286,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                         const c = context as CycleDimensionElementSpeechContext
                         const dimension = c.cycleDimension
 
-                        if (preprocessed.intent !== Intent.Highlight && preprocessed.intent !== Intent.Compare) {
+                        if (preprocessed.intent !== Intent.Query && preprocessed.intent !== Intent.Compare) {
                             if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
                                 let action
                                 if (getCycleLevelOfDimension(dimension) === 'day') {
@@ -304,7 +304,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
                 case SpeechContextType.DateElement:
                     {
-                        if (preprocessed.intent !== Intent.Highlight && preprocessed.intent !== Intent.Compare) {
+                        if (preprocessed.intent !== Intent.Query && preprocessed.intent !== Intent.Compare) {
                             if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
                                 const c = context as DateElementSpeechContext
                                 const dataSource = dataSources[0].value
@@ -343,7 +343,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                         const c = context as RangeElementSpeechContext
 
                         //1.
-                        if (preprocessed.intent !== Intent.Highlight && preprocessed.intent !== Intent.Compare) {
+                        if (preprocessed.intent !== Intent.Query && preprocessed.intent !== Intent.Compare) {
                             if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
                                 const dataSource = dataSources[0].value
 
@@ -417,13 +417,13 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                 const cascadedDataSource: DataSourceType = toldDataSources ? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
                                 const dataSource = conditionInfo.impliedDataSource || cascadedDataSource
                                 if (dataSource) {
-                                    const highlightFilter: HighlightFilter = {
+                                    const dataDrivenQuery: DataDrivenQuery = {
                                         ...conditionInfo,
                                         dataSource
                                     }
 
                                     return NLUCommandResolverImpl.convertActionToNLUResult(
-                                        createGoToBrowseRangeAction(InteractionType.Speech, dataSource, c.range, highlightFilter),
+                                        createGoToBrowseRangeAction(InteractionType.Speech, dataSource, c.range, dataDrivenQuery),
                                         explorationInfo, preprocessed)
                                 }
 
@@ -659,7 +659,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                     }
                 }
                 break;
-            case Intent.Highlight:
+            case Intent.Query:
                 console.log("Highlight intent")
                 if (conditions.length > 0 && (explorationInfo.type === ExplorationType.B_Overview || explorationInfo.type === ExplorationType.B_Range)) {
                     const conditionInfo = conditions[0].value as ConditionInfo
@@ -668,7 +668,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                     const dataSource: DataSourceType = conditionInfo.impliedDataSource || cascadedDataSource
 
                     if (dataSource) {
-                        const highlightFilter: HighlightFilter = {
+                        const dataDrivenQuery: DataDrivenQuery = {
                             ...conditionInfo,
                             dataSource
                         }
@@ -678,7 +678,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                             range = ranges[0].value
                         }
 
-                        return NLUCommandResolverImpl.convertActionToNLUResult(setHighlightFilter(InteractionType.Speech, highlightFilter, range),
+                        return NLUCommandResolverImpl.convertActionToNLUResult(setDataDrivenQuery(InteractionType.Speech, dataDrivenQuery, range),
                             explorationInfo, preprocessed)
                     }
                 }

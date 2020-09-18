@@ -127,7 +127,7 @@ describe("Inequation condition", () => {
                         dataSource = condition.impliedDataSource
                     }
 
-                    expect(result.intent).toBe(Intent.Highlight)
+                    expect(result.intent).toBe(Intent.Query)
                     expect(dataSource).toEqual(testcase[1])
                     expect(condition.type).toEqual(testcase[2].type)
                     expect(condition.ref).toEqual(testcase[2].ref)
@@ -225,7 +225,7 @@ describe("Goal achievement condition", () => {
 
             expect(condition).toBeDefined()
 
-            expect(result.intent).toBe(Intent.Highlight)
+            expect(result.intent).toBe(Intent.Query)
             expect(condition.impliedDataSource).toEqual(testcase[1])
             expect(condition.type).toEqual(testcase[2].type)
             expect(condition.ref).toEqual(testcase[2].ref)
@@ -274,7 +274,7 @@ describe("Extreme condition", () => {
                 dataSource = condition.impliedDataSource
             }
 
-            expect(result.intent).toBe(Intent.Highlight)
+            expect(result.intent).toBe(Intent.Query)
             expect(dataSource).toEqual(testcase[1])
             expect(condition.type).toEqual(testcase[2].type)
             expect(condition.ref).toEqual(testcase[2].ref)

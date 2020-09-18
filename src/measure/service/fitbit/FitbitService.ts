@@ -8,7 +8,6 @@ import { DataSourceType, IntraDayDataSourceType } from '@data-at-hand/core/measu
 import { FitbitDailyStepMeasure } from './FitbitDailyStepMeasure';
 import { FitbitDailyHeartRateMeasure } from './FitbitDailyHeartRateMeasure';
 import { DateTimeHelper } from '@data-at-hand/core/utils/time';
-import { FitbitServiceMeasure } from './FitbitServiceMeasure';
 import { FitbitWeightMeasure } from './FitbitWeightMeasure';
 import { FitbitSleepMeasure } from './FitbitSleepMeasure';
 import { FitbitIntraDayStepMeasure } from './FitbitIntraDayStepMeasure';
@@ -16,7 +15,7 @@ import { FitbitIntraDayHeartRateMeasure } from './FitbitIntraDayHeartRateMeasure
 import { GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, FilteredDailyValues, BoxPlotInfo } from '@core/exploration/data/types';
 import { CyclicTimeFrame, CycleDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 import { FitbitLocalTableName } from './sqlite/database';
-import { HighlightFilter, NumericConditionType } from '@data-at-hand/core/exploration/ExplorationInfo';
+import { DataDrivenQuery, NumericConditionType } from '@data-at-hand/core/exploration/ExplorationInfo';
 import { FitbitServiceMeasureBase } from './FitbitServiceMeasureBase';
 
 
@@ -97,7 +96,7 @@ export default class FitbitService extends DataService {
   }
 
 
-  async fetchFilteredDates(filter: HighlightFilter, start: number, end: number): Promise<{ [key: number]: boolean | undefined }> {
+  async fetchFilteredDates(filter: DataDrivenQuery, start: number, end: number): Promise<{ [key: number]: boolean | undefined }> {
     let tableName
     let valueColumnName = 'value'
     let selectClause = 'SELECT numberedDate'
