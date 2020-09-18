@@ -12,7 +12,7 @@ import pluralize from 'pluralize';
 import deepEqual from 'deep-equal';
 import Dialog from 'react-native-dialog'
 import { DateTimeHelper } from '@data-at-hand/core/utils/time'
-import { startOfDay, addSeconds, format, getHours, getMinutes } from 'date-fns'
+import { startOfDay, addSeconds, format, getHours, getMinutes, isToday } from 'date-fns'
 import commaNumber from 'comma-number'
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { TimePicker, WheelPicker } from "react-native-wheel-picker-android";
@@ -286,7 +286,7 @@ export const DataDrivenQueryBar = React.memo((props: {
             ...props.filter,
             type: key
         }
-        if(newFilter.ref == null && newFilter.type !== NumericConditionType.Max && newFilter.type !== NumericConditionType.Min){
+        if (newFilter.ref == null && newFilter.type !== NumericConditionType.Max && newFilter.type !== NumericConditionType.Min) {
             //if the condition type requires a reference value but not, use the default reference value.
             newFilter.ref = getDefaultReference(newFilter.dataSource, newFilter.propertyKey)
         }
@@ -419,6 +419,23 @@ export const DataDrivenQueryBar = React.memo((props: {
         }
     }, [props.filter.dataSource, measureUnitType, onInputTextChange, inputReferenceValue, onTimePickerValueChange])
 
+    const resultInfoText = useMemo(() => {
+        if (props.filter.type === NumericConditionType.Max || props.filter.type === NumericConditionType.Min) {
+            if (props.highlightedDays != null) {
+                const dateStrings = Object.keys(props.highlightedDays)
+                if (dateStrings.length > 0) {
+                    const numberedDate = Number.parseInt(Object.keys(props.highlightedDays)[0])
+                    if (Number.isNaN(numberedDate) === false) {
+                        const date = DateTimeHelper.toDate(numberedDate)
+                        return format(date, "MMM dd, yyyy")
+                    }
+                }
+            }
+
+            return "No data"
+        } else return pluralize('day', props.highlightedDays != null ? Object.keys(props.highlightedDays).length : 0, true)
+    }, [props.filter.type, props.highlightedDays])
+
     return <Swipeable
         renderRightActions={renderRightActions}
         containerStyle={styles.containerStyle}
@@ -441,7 +458,7 @@ export const DataDrivenQueryBar = React.memo((props: {
             {(props.filter.type !== NumericConditionType.Max && props.filter.type !== NumericConditionType.Min)
                 ? <FormButton onPress={onPressReferenceValue} value={valueFormatter(props.filter.ref!)} /> : null}
 
-            <Text style={styles.numDaysLabelStyle}>{pluralize('day', props.highlightedDays != null ? Object.keys(props.highlightedDays).length : 0, true)}</Text>
+            <Text style={styles.numDaysLabelStyle}>{resultInfoText}</Text>
 
             <Dialog.Container contentStyle={styles.dialogContainerStyle} visible={showReferenceEditView} onBackdropPress={handleCancelReferenceEdit}>
                 <Dialog.Title>Change Reference Value</Dialog.Title>
@@ -451,16 +468,16 @@ export const DataDrivenQueryBar = React.memo((props: {
                     dataSourcePresets != null ? <View style={styles.dialogPresetViewStyle}>
                         {
                             dataSourcePresets.map((preset, i) =>
-                                <Button key={i.toString()} 
-                                containerStyle={styles.dialogPresetButtonStyle} 
-                                buttonStyle={styles.dialogPresetButtonContentStyle}
-                                titleStyle={styles.dialogPresetButtonTextStyle}
-                                title={valueFormatter(preset)}
-                                
-                                onPress={() => { 
-                                    console.log("set input reference:", preset)
-                                    setInputReferenceValue(preset) 
-                                    }}/>)
+                                <Button key={i.toString()}
+                                    containerStyle={styles.dialogPresetButtonStyle}
+                                    buttonStyle={styles.dialogPresetButtonContentStyle}
+                                    titleStyle={styles.dialogPresetButtonTextStyle}
+                                    title={valueFormatter(preset)}
+
+                                    onPress={() => {
+                                        console.log("set input reference:", preset)
+                                        setInputReferenceValue(preset)
+                                    }} />)
                         }
                     </View> : null
                 }

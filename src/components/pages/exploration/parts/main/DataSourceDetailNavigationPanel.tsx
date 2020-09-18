@@ -20,7 +20,7 @@ import { TouchableHighlight } from "react-native-gesture-handler";
 import { SvgIcon, SvgIconType } from "@components/common/svg/SvgIcon";
 import { DataServiceManager } from "@measure/DataServiceManager";
 import { DataDrivenQueryBar } from "@components/exploration/DataDrivenQueryBar";
-import { DataDrivenQuery, ParameterType } from "@data-at-hand/core/exploration/ExplorationInfo";
+import { DataDrivenQuery, NumericConditionType, ParameterType } from "@data-at-hand/core/exploration/ExplorationInfo";
 import { InteractionType } from "@data-at-hand/core/exploration/actions";
 
 const listItemHeightNormal = 52
@@ -89,6 +89,7 @@ interface Props {
 
 interface State {
     today: number,
+    isLoadingAfterQueryUpdate: boolean,
     sortedData: Array<any>
 }
 
@@ -106,6 +107,7 @@ class DataSourceDetailNavigationPanel extends React.PureComponent<Props, State>{
 
         this.state = {
             today: DateTimeHelper.toNumberedDateFromDate(props.getToday()),
+            isLoadingAfterQueryUpdate: false,
             sortedData: dataList
         }
     }
@@ -118,11 +120,15 @@ class DataSourceDetailNavigationPanel extends React.PureComponent<Props, State>{
             const dataList: Array<any> = (this.props.source === DataSourceType.Weight ? sourceRangedData.data.logs : sourceRangedData.data).slice(0)
             dataList.sort((a: any, b: any) => b["numberedDate"] - a["numberedDate"])
             this.setState({ ...this.state, sortedData: dataList })
+        }
 
-            /*
-            if (this.props.dataDrivenQuery != null) {
+        if (prevProps.isLoadingData !== this.props.isLoadingData && this.props.isLoadingData === false) {
+            console.log("loading finished after data driven query update")
 
-                if (this.props.dataDrivenQuery != null) {
+            if (this.state.isLoadingAfterQueryUpdate === true) {
+
+
+                if (this.props.dataDrivenQuery != null && (this.props.dataDrivenQuery?.type === NumericConditionType.Max || this.props.dataDrivenQuery?.type === NumericConditionType.Min)) {
                     const sourceRangedData = this.props.data as DataSourceBrowseData
                     const highlightedDates = Object.keys(sourceRangedData.highlightedDays).filter(date => sourceRangedData.highlightedDays[Number.parseInt(date)] === true).map(d => Number.parseInt(d))
                     if (highlightedDates.length === 1) {
@@ -130,7 +136,7 @@ class DataSourceDetailNavigationPanel extends React.PureComponent<Props, State>{
                         //only one highlighted day, navigate to it
                         const index = this.state.sortedData.findIndex(d => d["numberedDate"] === highlightedDates[0])
                         console.log("scroll to ", index)
-                        if(index != -1){
+                        if (index != -1) {
                             this._listRef.current?.scrollToIndex({
                                 animated: true,
                                 index,
@@ -138,10 +144,16 @@ class DataSourceDetailNavigationPanel extends React.PureComponent<Props, State>{
                         }
                     }
                 }
-            }*/
+
+                this.setState({ ...this.state, isLoadingAfterQueryUpdate: false })
+            }
         }
 
         if (prevProps.dataDrivenQuery !== this.props.dataDrivenQuery) {
+
+            if (this.props.isLoadingData === true) {
+                this.setState({ ...this.state, isLoadingAfterQueryUpdate: true })
+            }
 
             LayoutAnimation.configureNext(
                 LayoutAnimation.create(
