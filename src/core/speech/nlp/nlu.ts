@@ -735,14 +735,6 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                     } else if (date >= currentRange[1]) {
                         return createSetRangeAction(InteractionType.Speech, undefined, [currentRange[0], date])
                     } else {
-                        //middle. change more near one
-                        /*
-                        const differLeft = differenceInDays(DateTimeHelper.toDate(date), DateTimeHelper.toDate(currentRange[0]))
-                        const differRight = differenceInDays(DateTimeHelper.toDate(currentRange[1]), DateTimeHelper.toDate(date))
-                        if (differLeft <= differRight) {
-                            return createSetRangeAction(InteractionType.Speech, undefined, [date, currentRange[1]])
-                        } else return createSetRangeAction(InteractionType.Speech, undefined, [currentRange[0], date])
-                        */
                         //middle. Show an ambiguity dialog.
                         return "Data@Hand is confused about which date to modify. Please say the command through <b>the date</b> you want to modify."
                     }

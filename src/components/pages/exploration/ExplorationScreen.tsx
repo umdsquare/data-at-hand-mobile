@@ -15,7 +15,6 @@ import { ExplorationAction, createGoToBrowseOverviewAction, createRestorePreviou
 import { Button } from "react-native-elements";
 import { Sizes } from "@style/Sizes";
 import { OverviewMainPanel } from "@components/pages/exploration/parts/main/OverviewMainPanel";
-import { BrowseRangeMainPanel } from "@components/pages/exploration/parts/main/BrowseRangeMainPanel";
 import { BusyHorizontalIndicator } from "@components/exploration/BusyHorizontalIndicator";
 import { getIntraDayMainPanel } from "@components/pages/exploration/parts/main/IntraDayMainPanel";
 import { CyclicComparisonMainPanel } from "@components/pages/exploration/parts/main/CyclicComparisonMainPanel";
@@ -44,6 +43,7 @@ import { TodayContext } from "./contexts";
 import { DateTimeHelper } from "@data-at-hand/core/utils/time";
 import { InteractionType } from "@data-at-hand/core/exploration/actions";
 import { getCycleDimensionSpec } from "@data-at-hand/core/exploration/CyclicTimeFrame";
+import { DataSourceDetailNavigationPanel } from "./parts/main/DataSourceDetailNavigationPanel";
 
 const styles = StyleSheet.create({
 
@@ -501,7 +501,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
             case ExplorationType.B_Overview:
                 return <OverviewMainPanel />
             case ExplorationType.B_Range:
-                return <BrowseRangeMainPanel />
+                return <DataSourceDetailNavigationPanel />
             case ExplorationType.B_Day:
                 return getIntraDayMainPanel(this.props.loadedDataInfo)
             case ExplorationType.C_Cyclic:

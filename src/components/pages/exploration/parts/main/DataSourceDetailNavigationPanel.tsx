@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useMemo } from "react";
-import { View, FlatList, Text, StyleSheet, ActivityIndicator, LayoutAnimation, UIManager, findNodeHandle } from 'react-native';
+import { View, FlatList, Text, StyleSheet, ActivityIndicator, LayoutAnimation, UIManager, findNodeHandle, ViewStyle } from 'react-native';
 import { MeasureUnitType, DataSourceType, inferIntraDayDataSourceType } from "@data-at-hand/core/measure/DataSourceSpec";
 import { ExplorationAction, setTouchElementInfo, createGoToBrowseDayAction, setHighlightFilter } from "@state/exploration/interaction/actions";
 import { connect } from "react-redux";
@@ -82,28 +82,67 @@ interface Props {
     data?: any,
     measureUnitType?: MeasureUnitType,
     highlightFilter?: HighlightFilter,
-    highlightedDate?: number,
+    pressedDate?: number,
     getToday?: () => Date,
     dispatchExplorationAction?: (action: ExplorationAction) => void
 }
 
 interface State {
     today: number,
+    sortedData: Array<any>
 }
 
-class BrowseRangeMainPanel extends React.PureComponent<Props, State>{
+class DataSourceDetailNavigationPanel extends React.PureComponent<Props, State>{
+
+    private _listRef = React.createRef<FlatList<any>>()
 
     constructor(props: Props) {
         super(props)
 
+        const sourceRangedData = this.props.data as DataSourceBrowseData
+        const dataList: Array<any> = (this.props.source === DataSourceType.Weight ? sourceRangedData.data.logs : sourceRangedData.data).slice(0)
+        dataList.sort((a: any, b: any) => b["numberedDate"] - a["numberedDate"])
+
+
         this.state = {
-            today: DateTimeHelper.toNumberedDateFromDate(props.getToday())
+            today: DateTimeHelper.toNumberedDateFromDate(props.getToday()),
+            sortedData: dataList
         }
     }
 
 
     componentDidUpdate(prevProps: Props) {
+
+        if (prevProps.data !== this.props.data) {
+            const sourceRangedData = this.props.data as DataSourceBrowseData
+            const dataList: Array<any> = (this.props.source === DataSourceType.Weight ? sourceRangedData.data.logs : sourceRangedData.data).slice(0)
+            dataList.sort((a: any, b: any) => b["numberedDate"] - a["numberedDate"])
+            this.setState({ ...this.state, sortedData: dataList })
+
+            /*
+            if (this.props.highlightFilter != null) {
+
+                if (this.props.highlightFilter != null) {
+                    const sourceRangedData = this.props.data as DataSourceBrowseData
+                    const highlightedDates = Object.keys(sourceRangedData.highlightedDays).filter(date => sourceRangedData.highlightedDays[Number.parseInt(date)] === true).map(d => Number.parseInt(d))
+                    if (highlightedDates.length === 1) {
+                        console.log("let's scroll to", highlightedDates[0])
+                        //only one highlighted day, navigate to it
+                        const index = this.state.sortedData.findIndex(d => d["numberedDate"] === highlightedDates[0])
+                        console.log("scroll to ", index)
+                        if(index != -1){
+                            this._listRef.current?.scrollToIndex({
+                                animated: true,
+                                index,
+                            })
+                        }
+                    }
+                }
+            }*/
+        }
+
         if (prevProps.highlightFilter !== this.props.highlightFilter) {
+
             LayoutAnimation.configureNext(
                 LayoutAnimation.create(
                     500, LayoutAnimation.Types.easeInEaseOut, "opacity")
@@ -139,7 +178,8 @@ class BrowseRangeMainPanel extends React.PureComponent<Props, State>{
     private renderItem = ({ item }: { item: any }) => <Item date={item["numberedDate"]}
         today={this.state.today} item={item} type={this.props.source}
         unitType={this.props.measureUnitType}
-        isHighlighted={item["numberedDate"] === this.props.highlightedDate}
+        isHovering={item["numberedDate"] === this.props.pressedDate}
+        isInQueryResult={(this.props.data as DataSourceBrowseData)?.highlightedDays?.[item["numberedDate"]] === true}
         onClick={this.onListElementClick}
         onLongPressIn={this.onListElementLongPressIn}
         onLongPressOut={this.onListElementLongPressOut}
@@ -148,8 +188,6 @@ class BrowseRangeMainPanel extends React.PureComponent<Props, State>{
     render() {
         if (this.props.data != null) {
             const sourceRangedData = this.props.data as DataSourceBrowseData
-            const dataList: Array<any> = (this.props.source === DataSourceType.Weight ? sourceRangedData.data.logs : sourceRangedData.data).slice(0)
-            dataList.sort((a: any, b: any) => b["numberedDate"] - a["numberedDate"])
 
             return <>
                 {
@@ -168,15 +206,15 @@ class BrowseRangeMainPanel extends React.PureComponent<Props, State>{
                     showHeader={false}
                 />
                 {
-                    dataList.length > 0 && <FlatList style={StyleTemplates.fillFlex}
-                        data={dataList}
+                    this.state.sortedData.length > 0 && <FlatList ref={this._listRef} style={StyleTemplates.fillFlex}
+                        data={this.state.sortedData}
                         renderItem={this.renderItem}
                         getItemLayout={this.getItemLayout}
                         keyExtractor={item => item["id"] || item["numberedDate"].toString()}
                     />
                 }
                 {
-                    dataList.length === 0 && <View style={StyleTemplates.contentVerticalCenteredContainer}>
+                    this.state.sortedData.length === 0 && <View style={StyleTemplates.contentVerticalCenteredContainer}>
                         <Text style={styles.noItemIndicatorStyle}>No data during this range.</Text>
                     </View>
                 }
@@ -195,11 +233,11 @@ function mapDispatchToProps(dispatch: Dispatch, ownProps: Props): Props {
 
 function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
 
-    let highlightedDate: number = null
+    let pressedDate: number = null
     if (appState.explorationState.touchingElement) {
         const date = explorationInfoHelper.getParameterValueOfParams<number>(appState.explorationState.touchingElement.params, ParameterType.Date)
         if (date != null) {
-            highlightedDate = date
+            pressedDate = date
         }
     }
 
@@ -209,16 +247,16 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
         data: appState.explorationDataState.data,
         measureUnitType: appState.settingsState.unit,
         isLoadingData: appState.explorationDataState.isBusy,
-        highlightedDate,
+        pressedDate,
         highlightFilter: appState.explorationState.info.highlightFilter,
         getToday: DataServiceManager.instance.getServiceByKey(appState.settingsState.serviceKey).getToday
     }
 }
 
 
-const connected = connect(mapStateToProps, mapDispatchToProps)(BrowseRangeMainPanel)
+const connected = connect(mapStateToProps, mapDispatchToProps)(DataSourceDetailNavigationPanel)
 
-export { connected as BrowseRangeMainPanel }
+export { connected as DataSourceDetailNavigationPanel }
 
 
 const Item = React.memo((prop: {
@@ -227,7 +265,8 @@ const Item = React.memo((prop: {
     today: number,
     type: DataSourceType,
     unitType: MeasureUnitType,
-    isHighlighted: boolean,
+    isInQueryResult: boolean,
+    isHovering: boolean,
     onClick: (date: number) => void,
     onLongPressIn: (date: number, touchingElement: TouchingElementInfo) => void,
     onLongPressOut: (date: number) => void
@@ -243,9 +282,16 @@ const Item = React.memo((prop: {
     }, [prop.date, prop.today])
 
     const listItemStyle = useMemo(() => {
-        if (prop.type === DataSourceType.SleepRange || prop.type === DataSourceType.HoursSlept) return { ...styles.listItemStyle, height: listItemHeightTall }
-        else return { ...styles.listItemStyle, height: listItemHeightNormal }
-    }, [prop.type])
+        let style: ViewStyle
+
+        if (prop.type === DataSourceType.SleepRange || prop.type === DataSourceType.HoursSlept) style = { ...styles.listItemStyle, height: listItemHeightTall }
+        else style = { ...styles.listItemStyle, height: listItemHeightNormal }
+
+        if (prop.isInQueryResult === true) {
+            style.backgroundColor = Colors.highlightElementBackgroundOpaque
+        }
+        return style
+    }, [prop.type, prop.isInQueryResult])
 
     const valueView = useMemo(() => {
         let valueElement: any
@@ -291,7 +337,12 @@ const Item = React.memo((prop: {
                 const actualBedTime = addSeconds(pivot, Math.round(prop.item.bedTimeDiffSeconds))
                 const actualWakeTime = addSeconds(pivot, Math.round(prop.item.wakeTimeDiffSeconds))
 
-                const rangeText = format(actualBedTime, 'hh:mm a').toLowerCase() + " - " + format(actualWakeTime, 'hh:mm a').toLowerCase()
+                let rangeText: string
+                if (prop.item.bedTimeDiffSeconds != null && prop.item.wakeTimeDiffSeconds != null) {
+                    rangeText = format(actualBedTime, 'hh:mm a').toLowerCase() + " - " + format(actualWakeTime, 'hh:mm a').toLowerCase()
+                } else {
+                    rangeText = ""
+                }
 
                 const lengthHr = Math.floor(prop.item.lengthInSeconds / 3600)
                 let lengthMin = Math.floor((prop.item.lengthInSeconds % 3600) / 60)
@@ -330,6 +381,7 @@ const Item = React.memo((prop: {
 
     const elmRef = useRef(null)
 
+    /*
     const onLongPress = useCallback((event) => {
         if (prop.onLongPressIn) {
             UIManager.measureInWindow(findNodeHandle(elmRef.current), (x, y, width, height) => {
@@ -349,7 +401,7 @@ const Item = React.memo((prop: {
         } else {
             setInLongPress(true);
         }
-    }, [elmRef.current, prop.onLongPressIn, setInLongPress, prop.type, prop.date, prop.item])
+    }, [elmRef.current, prop.onLongPressIn, setInLongPress, prop.type, prop.date, prop.item])*/
 
     const onPress = useCallback(() => {
         prop.onClick(prop.date)
@@ -367,9 +419,10 @@ const Item = React.memo((prop: {
 
     return <TouchableHighlight activeOpacity={0.95}
         ref={elmRef}
-        onLongPress={onLongPress}
+        //onLongPress={onLongPress}
         onPress={onPress}
-        onPressOut={onPressOut}>
+        onPressOut={onPressOut}
+    >
 
         <View style={listItemStyle}>
             <Text style={prop.today === prop.date ? styles.listItemDateTodayStyle : styles.listItemDateStyle}>{dateString}</Text>
@@ -378,7 +431,7 @@ const Item = React.memo((prop: {
             }
             <SvgIcon type={SvgIconType.ArrowRight} color={Colors.textGray} />
             {
-                prop.isHighlighted === true && <View style={styles.listItemHighlightStyle} />
+                prop.isHovering === true && <View style={styles.listItemHighlightStyle} />
             }
         </View></TouchableHighlight>
 })
