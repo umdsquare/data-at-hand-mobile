@@ -12,8 +12,6 @@ import { Button } from 'react-native-elements';
 import { Dispatch } from 'redux';
 import { connect } from 'react-redux';
 import StyledText from 'react-native-styled-text';
-import { VerboseEventTypes } from '@data-at-hand/core/logging/types';
-import { SystemLogger } from '@core/logging/SystemLogger';
 import { TapGestureHandler, State as GestureState, TapGestureHandlerStateChangeEvent } from 'react-native-gesture-handler';
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient)
@@ -56,9 +54,9 @@ const styles = StyleSheet.create({
 
     gradientStyleBase: {
         ...StyleTemplates.flexHorizontalCenteredListContainer,
-        borderRadius: 50,
-        paddingLeft: 12,
-        paddingRight: 25,
+        borderRadius: 12,
+        paddingLeft: 10,
+        paddingRight: 23,
         height: 50,
         justifyContent: 'center',
         alignItems: 'center',
@@ -287,7 +285,7 @@ class SpeechEventNotificationOverlay extends React.PureComponent<{ dispatch: Dis
 
                 <Text style={{ marginLeft: 8, color: Colors.WHITE, fontSize: Sizes.normalFontSize }}>{
                     this.state.currentEvent.nluResult.message != null ? this.state.currentEvent.nluResult.message :
-                        branchByType(this.state.currentEvent!.type, "Got it.", "Got it, but no effect.", "Unapplicable command for now.", "Sorry, I couldn\'t understand.")
+                        branchByType(this.state.currentEvent!.type, "Got it.", "You're already there.", "Unapplicable command for now.", "Sorry, I couldn\'t understand.")
                 }</Text>
             </AnimatedLinearGradient> : null}
             {

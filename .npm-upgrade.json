@@ -7,6 +7,18 @@
     "@types/uuid": {
       "versions": ">6",
       "reason": "requires crypto."
+    },
+    "jest": {
+      "versions": ">=26",
+      "reason": "Breaking changes"
+    },
+    "@types/jest": {
+      "versions": ">=26",
+      "reason": "Breaking changes"
+    },
+    "chrono-node": {
+      "versions": ">=2",
+      "reason": "Chrono v2 contains breaking changes. We don't migrate at this time."
     }
   }
 }

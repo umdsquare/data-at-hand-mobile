@@ -539,10 +539,18 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                             }
                         } else if (rangesInInfo.length === 1) {
                             extractedRanges.unshift(rangesInInfo[0].value)
+
+                            //resort ranges
+                            if (extractedRanges[0][0] > extractedRanges[1][0]) {
+                                const temp = extractedRanges[1]
+                                extractedRanges[1] = extractedRanges[0]
+                                extractedRanges[0] = temp
+                            }
                         }
                     }
 
                     if (cascadedDataSource && extractedRanges.length >= 2) {
+
                         return NLUCommandResolverImpl.convertActionToNLUResult(
                             createGoToComparisonTwoRangesAction(InteractionType.Speech, cascadedDataSource, extractedRanges[0], extractedRanges[1]),
                             explorationInfo, preprocessed)
@@ -653,7 +661,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                 break;
             case Intent.Highlight:
                 console.log("Highlight intent")
-                if (conditions.length > 0) {
+                if (conditions.length > 0 && (explorationInfo.type === ExplorationType.B_Overview || explorationInfo.type === ExplorationType.B_Range)) {
                     const conditionInfo = conditions[0].value as ConditionInfo
                     const cascadedDataSource: DataSourceType = toldDataSources ? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
 
