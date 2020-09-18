@@ -18,7 +18,7 @@ export interface SettingsState {
 }
 
 const INITIAL_STATE = {
-  serviceKey: 'fitbit_example', //"fitbit"
+  serviceKey: 'fitbit', //"fitbit"
   unit: MeasureUnitType.US,
   recordLogs: true, // opt out
   recordScreens: false, // opt out
@@ -46,11 +46,11 @@ export const settingsStateReducer = (
     case SettingsActionTypes.SetRecordLogs:
       {
         const a = action as SetRecordLogsAction
-        if(newState.recordLogs !== a.recordLogs || newState.loggingSessionId !== a.sessionId){
+        if (newState.recordLogs !== a.recordLogs || newState.loggingSessionId !== a.sessionId) {
           newState.recordLogs = a.recordLogs
           newState.loggingSessionId = a.sessionId
 
-          if(state.recordLogs=== false && a.recordLogs === true && newState.loggingSessionId == null){
+          if (state.recordLogs === false && a.recordLogs === true && newState.loggingSessionId == null) {
             //cold start of the logging
             const id = shortid.generate()
             console.log("Start recording logs in session id", id)
@@ -58,14 +58,14 @@ export const settingsStateReducer = (
             newState.recordScreens = true
           }
           return newState;
-        }else return state
+        } else return state
       }
-      case SettingsActionTypes.SetRecordScreens:
-        {
-          const a = action as SetRecordScreensAction
-          newState.recordScreens = a.recordScreens
-          return newState
-        }
+    case SettingsActionTypes.SetRecordScreens:
+      {
+        const a = action as SetRecordScreensAction
+        newState.recordScreens = a.recordScreens
+        return newState
+      }
     default:
       return state;
   }

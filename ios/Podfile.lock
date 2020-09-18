@@ -1,9 +1,9 @@
 PODS:
-  - AppAuth (1.2.0):
-    - AppAuth/Core (= 1.2.0)
-    - AppAuth/ExternalUserAgent (= 1.2.0)
-  - AppAuth/Core (1.2.0)
-  - AppAuth/ExternalUserAgent (1.2.0)
+  - AppAuth (1.4.0):
+    - AppAuth/Core (= 1.4.0)
+    - AppAuth/ExternalUserAgent (= 1.4.0)
+  - AppAuth/Core (1.4.0)
+  - AppAuth/ExternalUserAgent (1.4.0)
   - boost-for-react-native (1.63.0)
   - BugsnagReactNative (2.23.10):
     - BugsnagReactNative/Core (= 2.23.10)
@@ -82,9 +82,9 @@ PODS:
   - OpenSSL-Universal (1.0.2.19):
     - OpenSSL-Universal/Static (= 1.0.2.19)
   - OpenSSL-Universal/Static (1.0.2.19)
-  - Permission-Microphone (2.1.5):
+  - Permission-Microphone (2.2.0):
     - RNPermissions
-  - Permission-SpeechRecognition (2.1.5):
+  - Permission-SpeechRecognition (2.2.0):
     - RNPermissions
   - RCTRequired (0.63.2)
   - RCTTypeSafety (0.63.2):
@@ -252,12 +252,12 @@ PODS:
     - React-cxxreact (= 0.63.2)
     - React-jsi (= 0.63.2)
   - React-jsinspector (0.63.2)
-  - react-native-app-auth (5.1.2):
-    - AppAuth (= 1.2.0)
+  - react-native-app-auth (6.0.0):
+    - AppAuth (= 1.4.0)
     - React
-  - react-native-safe-area-context (3.1.1):
-    - React
-  - react-native-segmented-control (2.1.0):
+  - react-native-safe-area-context (3.1.8):
+    - React-Core
+  - react-native-segmented-control (2.1.2):
     - React
   - react-native-spinkit (1.4.1):
     - React
@@ -325,39 +325,39 @@ PODS:
     - React-Core (= 0.63.2)
     - React-cxxreact (= 0.63.2)
     - React-jsi (= 0.63.2)
-  - RNCAsyncStorage (1.11.0):
+  - RNCAsyncStorage (1.12.0):
     - React
   - RNCMaskedView (0.1.10):
     - React
-  - RNDateTimePicker (2.6.1):
+  - RNDateTimePicker (3.0.2):
     - React
-  - RNDeviceInfo (5.6.3):
-    - React
+  - RNDeviceInfo (6.0.3):
+    - React-Core
   - RNFS (2.16.6):
     - React
-  - RNGestureHandler (1.7.0):
+  - RNGestureHandler (1.8.0):
     - React
-  - RNPermissions (2.1.5):
+  - RNPermissions (2.2.0):
     - React
   - RNReactNativeHapticFeedback (1.10.0):
     - React
-  - RNReanimated (1.10.1):
+  - RNReanimated (1.13.0):
     - React
-  - RNScreens (2.9.0):
+  - RNScreens (2.11.0):
     - React
-  - RNShare (3.7.0):
-    - React
+  - RNShare (3.8.3):
+    - React-Core
   - RNStaticSafeAreaInsets (2.1.1):
     - React
   - RNSVG (12.1.0):
     - React
-  - RNVectorIcons (7.0.0):
+  - RNVectorIcons (7.1.0):
     - React
-  - RNZipArchive (5.0.4):
+  - RNZipArchive (5.0.6):
     - React
-    - RNZipArchive/Core (= 5.0.4)
+    - RNZipArchive/Core (= 5.0.6)
     - SSZipArchive (= 2.2.2)
-  - RNZipArchive/Core (5.0.4):
+  - RNZipArchive/Core (5.0.6):
     - React
     - SSZipArchive (= 2.2.2)
   - SSZipArchive (2.2.2)
@@ -561,7 +561,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  AppAuth: bce82c76043657c99d91e7882e8a9e1a93650cd4
+  AppAuth: 31bcec809a638d7bd2f86ea8a52bd45f6e81e7c7
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   BugsnagReactNative: 98fb350df4bb0c94cce903023531a1a5cc11fa51
   BVLinearGradient: e3aad03778a456d77928f594a649e96995f1c872
@@ -580,8 +580,8 @@ SPEC CHECKSUMS:
   Folly: b73c3869541e86821df3c387eb0af5f65addfab4
   glog: 40a13f7840415b9a77023fbcae0f1e6f43192af3
   OpenSSL-Universal: 8b48cc0d10c1b2923617dfe5c178aa9ed2689355
-  Permission-Microphone: af45e35013788b52eecf3cd8f13185c4b6f7bff7
-  Permission-SpeechRecognition: 844dc75f7165ff00bc0714bedd1c2bd42d6fa076
+  Permission-Microphone: 2fb25d7e1efe36e82bcff52ce72d03ced7b6d474
+  Permission-SpeechRecognition: d5f1140d2e37d3041dc54b3c9a730d671541285f
   RCTRequired: f13f25e7b12f925f1f6a6a8c69d929a03c0129fe
   RCTTypeSafety: 44982c5c8e43ff4141eb519a8ddc88059acd1f3a
   React: e1c65dd41cb9db13b99f24608e47dd595f28ca9a
@@ -592,9 +592,9 @@ SPEC CHECKSUMS:
   React-jsi: 54245e1d5f4b690dec614a73a3795964eeef13a8
   React-jsiexecutor: 8ca588cc921e70590820ce72b8789b02c67cce38
   React-jsinspector: b14e62ebe7a66e9231e9581279909f2fc3db6606
-  react-native-app-auth: d7a1884e56c208d50c3fec8cb5a5b860a6ea1378
-  react-native-safe-area-context: 4c3249e4840225c61fcd215b136af0a737bccb79
-  react-native-segmented-control: b40d30a4fbef68b205854406fd563b9363835067
+  react-native-app-auth: 19db7cfbc10e256b26ff733daf16fe12daabd3bf
+  react-native-safe-area-context: 01158a92c300895d79dee447e980672dc3fb85a6
+  react-native-segmented-control: a32c2b1972c313e207411920bb5ecd17bfc48e24
   react-native-spinkit: da294fd828216ad211fe36a5c14c1e09f09e62db
   react-native-sqlite-storage: ce71689c5a73b79390a1ab213555ae80979a5dc7
   react-native-view-shot: 08c46c9e8e92f6681e8f2ffa55ac3d06e7e99070
@@ -608,21 +608,21 @@ SPEC CHECKSUMS:
   React-RCTText: 1b6773e776e4b33f90468c20fe3b16ca3e224bb8
   React-RCTVibration: 4d2e726957f4087449739b595f107c0d4b6c2d2d
   ReactCommon: a0a1edbebcac5e91338371b72ffc66aa822792ce
-  RNCAsyncStorage: db711e29e5e0500d9bd21aa0c2e397efa45302b1
+  RNCAsyncStorage: 3eea36d9460c5159b592f9ecbe5a77f8aca98006
   RNCMaskedView: f5c7d14d6847b7b44853f7acb6284c1da30a3459
-  RNDateTimePicker: f13c2d8c4cd1ea6d1a1f9ea7ddcdd24e82060770
-  RNDeviceInfo: c5fa705c8914c42800ff36e86d25d277e8eb16ff
+  RNDateTimePicker: 3a1783e63fcb6e2b162b08a4321db030d23accff
+  RNDeviceInfo: 910ef2129aff229d8ebd1214bc5f0148017b51d1
   RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
-  RNGestureHandler: b6b359bb800ae399a9c8b27032bdbf7c18f08a08
-  RNPermissions: 1888705aebcc81714efa5dbff94351e4388ae012
+  RNGestureHandler: 7a5833d0f788dbd107fbb913e09aa0c1ff333c39
+  RNPermissions: e29e449d948ba1c04f3bb3bede5c662667543c49
   RNReactNativeHapticFeedback: 22c5ecf474428766c6b148f96f2ff6155cd7225e
-  RNReanimated: c2bb7438b57a3d987bb2e4e6e4bca94787e30b02
-  RNScreens: c526239bbe0e957b988dacc8d75ac94ec9cb19da
-  RNShare: a1d5064df7a0ebe778d001869b3f0a124bf0a491
+  RNReanimated: 89f5e0a04d1dd52fbf27e7e7030d8f80a646a3fc
+  RNScreens: 0e91da98ab26d5d04c7b59a9b6bd694124caf88c
+  RNShare: ec48772563576a8ff19022c3d1db410429fb3e2e
   RNStaticSafeAreaInsets: 6103cf09647fa427186d30f67b0f5163c1ae8252
   RNSVG: ce9d996113475209013317e48b05c21ee988d42e
-  RNVectorIcons: da6fe858f5a65d7bbc3379540a889b0b12aa5976
-  RNZipArchive: be3009f34009076062b34f1d0f000391ad3ea86a
+  RNVectorIcons: bc69e6a278b14842063605de32bec61f0b251a59
+  RNZipArchive: 0c9463e46a56d93b29cd8a306e051f24397f5dfa
   SSZipArchive: fa16b8cc4cdeceb698e5e5d9f67e9558532fbf23
   Yoga: 7740b94929bbacbddda59bf115b5317e9a161598
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
