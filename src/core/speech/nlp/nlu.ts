@@ -392,10 +392,6 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                     }
                             }
 
-
-
-
-
                         }
 
                         //4.
@@ -661,7 +657,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                 break;
             case Intent.Query:
                 console.log("Highlight intent")
-                if (conditions.length > 0 && (explorationInfo.type === ExplorationType.B_Overview || explorationInfo.type === ExplorationType.B_Range)) {
+                if (conditions.length > 0) {
                     const conditionInfo = conditions[0].value as ConditionInfo
                     const cascadedDataSource: DataSourceType = toldDataSources ? dataSources[0].value : explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource)
 
@@ -678,8 +674,27 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                             range = ranges[0].value
                         }
 
-                        return NLUCommandResolverImpl.convertActionToNLUResult(setDataDrivenQuery(InteractionType.Speech, dataDrivenQuery, range),
-                            explorationInfo, preprocessed)
+
+                        if (explorationInfo.type === ExplorationType.B_Overview || explorationInfo.type === ExplorationType.B_Range) {
+                            return NLUCommandResolverImpl.convertActionToNLUResult(setDataDrivenQuery(InteractionType.Speech, dataDrivenQuery, range),
+                                explorationInfo, preprocessed)
+                        } else {
+                            if (range == null && explorationInfo.type !== ExplorationType.C_TwoRanges) {
+                                range = explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.Range) as [number, number]
+                            }
+
+
+                            if (range != null) {
+                                return NLUCommandResolverImpl.convertActionToNLUResult(createGoToBrowseRangeAction(InteractionType.Speech, dataSource, range, dataDrivenQuery),
+                                    explorationInfo, preprocessed)
+                            } else return {
+                                type: NLUResultType.PromptingInformDialog,
+                                preprocessed,
+                                message: explorationInfo.type === ExplorationType.C_TwoRanges ?
+                                    "There are two periods on this screen. Please say the command through <b>the chart plot</b> of the period you are interested in."
+                                    : "Currently, Data@Hand answers with the data-driven query within a specific range of data. Please say the query along with a period you are curious."
+                            }
+                        }
                     }
                 }
                 break;
