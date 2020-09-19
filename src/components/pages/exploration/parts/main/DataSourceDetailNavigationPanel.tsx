@@ -79,7 +79,8 @@ const styles = StyleSheet.create({
 interface Props {
     isLoadingData?: boolean,
     source?: DataSourceType,
-    data?: any,
+    dataset?: DataSourceBrowseData,
+    sortedDailyItems?: Array<any>,
     measureUnitType?: MeasureUnitType,
     dataDrivenQuery?: DataDrivenQuery,
     pressedDate?: number,
@@ -90,7 +91,6 @@ interface Props {
 interface State {
     today: number,
     isLoadingAfterQueryUpdate: boolean,
-    sortedData: Array<any>
 }
 
 class DataSourceDetailNavigationPanel extends React.PureComponent<Props, State>{
@@ -100,42 +100,29 @@ class DataSourceDetailNavigationPanel extends React.PureComponent<Props, State>{
     constructor(props: Props) {
         super(props)
 
-        const sourceRangedData = this.props.data as DataSourceBrowseData
-        const dataList: Array<any> = (this.props.source === DataSourceType.Weight ? sourceRangedData.data.logs : sourceRangedData.data).slice(0)
+        const dataList: Array<any> = (this.props.source === DataSourceType.Weight ? props.dataset.data.logs : props.dataset.data).slice(0)
         dataList.sort((a: any, b: any) => b["numberedDate"] - a["numberedDate"])
 
 
         this.state = {
             today: DateTimeHelper.toNumberedDateFromDate(props.getToday()),
             isLoadingAfterQueryUpdate: false,
-            sortedData: dataList
         }
     }
 
 
     componentDidUpdate(prevProps: Props) {
-
-        if (prevProps.data !== this.props.data) {
-            const sourceRangedData = this.props.data as DataSourceBrowseData
-            const dataList: Array<any> = (this.props.source === DataSourceType.Weight ? sourceRangedData.data.logs : sourceRangedData.data).slice(0)
-            dataList.sort((a: any, b: any) => b["numberedDate"] - a["numberedDate"])
-            this.setState({ ...this.state, sortedData: dataList })
-        }
-
         if (prevProps.isLoadingData !== this.props.isLoadingData && this.props.isLoadingData === false) {
-            console.log("loading finished after data driven query update")
 
             if (this.state.isLoadingAfterQueryUpdate === true) {
 
 
                 if (this.props.dataDrivenQuery != null && (this.props.dataDrivenQuery?.type === NumericConditionType.Max || this.props.dataDrivenQuery?.type === NumericConditionType.Min)) {
-                    const sourceRangedData = this.props.data as DataSourceBrowseData
+                    const sourceRangedData = this.props.dataset as DataSourceBrowseData
                     const highlightedDates = Object.keys(sourceRangedData.highlightedDays).filter(date => sourceRangedData.highlightedDays[Number.parseInt(date)] === true).map(d => Number.parseInt(d))
                     if (highlightedDates.length === 1) {
-                        console.log("let's scroll to", highlightedDates[0])
                         //only one highlighted day, navigate to it
-                        const index = this.state.sortedData.findIndex(d => d["numberedDate"] === highlightedDates[0])
-                        console.log("scroll to ", index)
+                        const index = this.props.sortedDailyItems.findIndex(d => d["numberedDate"] === highlightedDates[0])
                         if (index != -1) {
                             this._listRef.current?.scrollToIndex({
                                 animated: true,
@@ -191,42 +178,40 @@ class DataSourceDetailNavigationPanel extends React.PureComponent<Props, State>{
         today={this.state.today} item={item} type={this.props.source}
         unitType={this.props.measureUnitType}
         isHovering={item["numberedDate"] === this.props.pressedDate}
-        isInQueryResult={(this.props.data as DataSourceBrowseData)?.highlightedDays?.[item["numberedDate"]] === true}
+        isInQueryResult={this.props.dataset?.highlightedDays?.[item["numberedDate"]] === true}
         onClick={this.onListElementClick}
         onLongPressIn={this.onListElementLongPressIn}
         onLongPressOut={this.onListElementLongPressOut}
     />
 
     render() {
-        if (this.props.data != null) {
-            const sourceRangedData = this.props.data as DataSourceBrowseData
-
+        if (this.props.dataset != null) {
             return <>
                 {
                     this.props.dataDrivenQuery != null ? <DataDrivenQueryBar
                         filter={this.props.dataDrivenQuery}
-                        highlightedDays={this.props.data.highlightedDays}
+                        highlightedDays={this.props.dataset.highlightedDays}
                         onDiscardFilterPressed={this.onDiscardFilter}
                         onFilterModified={this.onFilterModified}
                     /> : null
                 }
-                <DataSourceChartFrame data={sourceRangedData}
+                <DataSourceChartFrame data={this.props.dataset}
                     filter={this.props.dataDrivenQuery}
-                    highlightedDays={sourceRangedData.highlightedDays}
+                    highlightedDays={this.props.dataset.highlightedDays}
                     showToday={false}
                     flat={true}
                     showHeader={false}
                 />
                 {
-                    this.state.sortedData.length > 0 && <FlatList ref={this._listRef} style={StyleTemplates.fillFlex}
-                        data={this.state.sortedData}
+                    this.props.sortedDailyItems.length > 0 && <FlatList ref={this._listRef} style={StyleTemplates.fillFlex}
+                        data={this.props.sortedDailyItems}
                         renderItem={this.renderItem}
                         getItemLayout={this.getItemLayout}
                         keyExtractor={item => item["id"] || item["numberedDate"].toString()}
                     />
                 }
                 {
-                    this.state.sortedData.length === 0 && <View style={StyleTemplates.contentVerticalCenteredContainer}>
+                    this.props.sortedDailyItems.length === 0 && <View style={StyleTemplates.contentVerticalCenteredContainer}>
                         <Text style={styles.noItemIndicatorStyle}>No data during this range.</Text>
                     </View>
                 }
@@ -253,10 +238,18 @@ function mapStateToProps(appState: ReduxAppState, ownProps: Props): Props {
         }
     }
 
+    const source = explorationInfoHelper.getParameterValue<DataSourceType>(appState.explorationDataState.info, ParameterType.DataSource)
+
+    const sourceRangedData = appState.explorationDataState.data as DataSourceBrowseData
+
+    const dataList: Array<any> = (source === DataSourceType.Weight ? sourceRangedData.data.logs : sourceRangedData.data).slice(0)
+    dataList.sort((a: any, b: any) => b["numberedDate"] - a["numberedDate"])
+
     return {
         ...ownProps,
-        source: explorationInfoHelper.getParameterValue(appState.explorationDataState.info, ParameterType.DataSource),
-        data: appState.explorationDataState.data,
+        source,
+        dataset: sourceRangedData,
+        sortedDailyItems: dataList,
         measureUnitType: appState.settingsState.unit,
         isLoadingData: appState.explorationDataState.isBusy,
         pressedDate,
@@ -388,52 +381,13 @@ const Item = React.memo((prop: {
         return valueElement
     }, [prop.type, prop.item.bedTimeDiffSeconds, prop.item.wakeTimeDiffSeconds, prop.item.value])
 
-
-    const [isInLongPress, setInLongPress] = useState(false)
-
-    const elmRef = useRef(null)
-
-    /*
-    const onLongPress = useCallback((event) => {
-        if (prop.onLongPressIn) {
-            UIManager.measureInWindow(findNodeHandle(elmRef.current), (x, y, width, height) => {
-                setInLongPress(true);
-                prop.onLongPressIn(prop.date, {
-                    touchId: Date.now().toString(),
-                    elementBoundInScreen: { x, y, width, height },
-                    params: [
-                        { parameter: ParameterType.DataSource, value: prop.type },
-                        { parameter: ParameterType.Date, value: prop.date }
-                    ],
-                    valueType: TouchingElementValueType.DayValue,
-                    value: prop.type === DataSourceType.SleepRange ? { value: prop.item.bedTimeDiffSeconds, value2: prop.item.wakeTimeDiffSeconds }
-                        : (prop.type === DataSourceType.HoursSlept ? prop.item.lengthInSeconds : prop.item.value)
-                })
-            })
-        } else {
-            setInLongPress(true);
-        }
-    }, [elmRef.current, prop.onLongPressIn, setInLongPress, prop.type, prop.date, prop.item])*/
-
     const onPress = useCallback(() => {
         prop.onClick(prop.date)
     }, [prop.onClick, prop.date])
 
-    const onPressOut = useCallback(() => {
-        if (isInLongPress === true) {
-            console.log("long press out")
-            setInLongPress(false)
-            prop.onLongPressOut && prop.onLongPressOut(prop.date)
-        } else {
-            console.log("click press out")
-        }
-    }, [isInLongPress, setInLongPress, prop.onLongPressOut, prop.date])
-
     return <TouchableHighlight activeOpacity={0.95}
-        ref={elmRef}
         //onLongPress={onLongPress}
         onPress={onPress}
-        onPressOut={onPressOut}
     >
 
         <View style={listItemStyle}>
