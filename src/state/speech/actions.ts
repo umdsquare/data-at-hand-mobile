@@ -10,7 +10,8 @@ export enum SpeechRecognizerActionType {
     FinishDictation = "speech:recognition:finish_dictation",
     TerminateSession = "speech:recognition:terminate",
     SetShowGlobalPopupAction = "speech:recognition:set_show_global_popup",
-    SetSpeechContextAction = "speech:recognition:set_speech_context"
+    SetSpeechContextAction = "speech:recognition:set_speech_context",
+    AbortAllAction = "speech:recognition:abort_all"
 }
 
 
@@ -18,6 +19,7 @@ export enum TerminationReason {
     Success,
     Fail,
     Cancel,
+    AppBackground
 }
 
 export interface TerminationPayload {
@@ -44,6 +46,10 @@ export interface SetShowGlobalPopupAction extends SpeechSessionAction {
 
 export interface SetSpeechContextAction extends SpeechSessionAction {
     speechContext: SpeechContext | null
+}
+
+export interface SpeechAbortAction extends ActionTypeBase{
+    reason: TerminationReason
 }
 
 export function createUpdateDictationResultAction(dictationResult: DictationResult, sessionId: string): UpdateDictationResultAction {
@@ -83,12 +89,19 @@ export function craeteFinishDictationAction(sessionId: string): SpeechSessionAct
     }
 }
 
-export function createTerminateSessionAction(reason: TerminationReason, sessionId: string, data?: any): TerminateAction {
+export function createTerminateSessionAction(reason: TerminationReason, sessionId: string, data?: any, ): TerminateAction {
     return {
         type: SpeechRecognizerActionType.TerminateSession,
         reason,
         data,
         sessionId
+    }
+}
+
+export function createSpeechAbortAction(reason: TerminationReason): SpeechAbortAction{
+    return {
+        type: SpeechRecognizerActionType.AbortAllAction,
+        reason
     }
 }
 

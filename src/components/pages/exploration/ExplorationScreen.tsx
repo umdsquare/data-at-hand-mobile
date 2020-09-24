@@ -25,7 +25,7 @@ import { TooltipOverlay } from "@components/pages/exploration/parts/main/Tooltip
 import { check, PERMISSIONS, RESULTS, request, openSettings } from 'react-native-permissions';
 import { GlobalSpeechOverlay } from "@components/pages/exploration/parts/main/GlobalSpeechOverlay";
 import Haptic from "react-native-haptic-feedback";
-import { startSpeechSession, requestStopDictation, makeNewSessionId } from "@state/speech/commands";
+import { startSpeechSession, requestStopDictation, makeNewSessionId, abortAll } from "@state/speech/commands";
 import { SvgIcon, SvgIconType } from "@components/common/svg/SvgIcon";
 import { ZIndices } from "@components/pages/exploration/parts/zIndices";
 import { DataBusyOverlay } from "@components/pages/exploration/parts/main/DataBusyOverlay";
@@ -118,7 +118,8 @@ export interface ExplorationProps {
     dispatchDataReload: (info: ExplorationInfo) => void,
     dispatchStartSpeechSession: (sessionId: string, currentExplorationType: ExplorationType) => void,
     dispatchFinishDictation: (sessionId: string) => void,
-    dispatchSetShowGlobalPopup: (value: boolean, sessionId: string) => void
+    dispatchSetShowGlobalPopup: (value: boolean, sessionId: string) => void,
+    dispatchAbortSpeech: () => void
 }
 
 enum PrepareStatus {
@@ -158,6 +159,11 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
             if (this.state.prepareStatus === PrepareStatus.ACQUIRING_PERMISSION) {
                 await this.prepare()
             }
+        } else if (
+            this.state.appState === 'active' &&
+            nextAppState.match(/inactive|background/)) {
+            console.log("app came to the background!")
+            this.props.dispatchAbortSpeech()
         }
         this.setState({ appState: nextAppState });
     }
@@ -341,7 +347,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
 
         if (this.props.selectedServiceKey !== prevProps.selectedServiceKey) {
             dataReloadNeeded = true
-            if(this.state.prepareStatus === PrepareStatus.FAILED){
+            if (this.state.prepareStatus === PrepareStatus.FAILED) {
                 this.setState({
                     ...this.state,
                     prepareStatus: PrepareStatus.PREPARED
@@ -509,7 +515,7 @@ class ExplorationScreen extends React.PureComponent<ExplorationProps, State> {
             case ExplorationType.C_TwoRanges:
                 return <MultiRangeComparisonMainPanel />
             case ExplorationType.C_CyclicDetail_Range:
-                return <MultiRangeComparisonMainPanel noDataMessageOverride={`No data exist. Please check whether the current range includes <b>${getCycleDimensionSpec(explorationInfoHelper.getParameterValue(this.props.loadedDataInfo, ParameterType.CycleDimension)).name}</b>.`}/>
+                return <MultiRangeComparisonMainPanel noDataMessageOverride={`No data exist. Please check whether the current range includes <b>${getCycleDimensionSpec(explorationInfoHelper.getParameterValue(this.props.loadedDataInfo, ParameterType.CycleDimension)).name}</b>.`} />
             case ExplorationType.C_CyclicDetail_Daily:
                 return <FilteredDatesChartMainPanel />
         }
@@ -525,7 +531,8 @@ function mapDispatchToProps(dispatch: ThunkDispatch<{}, {}, any>, ownProps: Expl
         dispatchDataReload: (info: ExplorationInfo) => dispatch(startLoadingForInfo(info)),
         dispatchStartSpeechSession: (sessionId, currentExplorationType) => dispatch(startSpeechSession(sessionId, SpeechContextHelper.makeGlobalContext(currentExplorationType))),
         dispatchFinishDictation: (sessionId) => dispatch(requestStopDictation(sessionId)),
-        dispatchSetShowGlobalPopup: (value, sessionId) => dispatch(createSetShowGlobalPopupAction(value, sessionId))
+        dispatchSetShowGlobalPopup: (value, sessionId) => dispatch(createSetShowGlobalPopupAction(value, sessionId)),
+        dispatchAbortSpeech: () => dispatch(abortAll())
     }
 }
 

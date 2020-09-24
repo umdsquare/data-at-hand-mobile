@@ -172,6 +172,7 @@ class SpeechRecognitionManager: RCTEventEmitter{
       currentRecognitionRequest?.endAudio()
       audioEngine.stop()
     }
+    callback(nil)
   }
   
   

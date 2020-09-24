@@ -1,6 +1,6 @@
 import { Dispatch } from "redux";
 import { ReduxAppState, setMetadataToAction } from "../types";
-import { createBootstrapAction, createTerminateSessionAction, createUpdateDictationResultAction, createStartDictationAction, TerminationReason, createWaitAction } from "./actions";
+import { createBootstrapAction, createTerminateSessionAction, createUpdateDictationResultAction, createStartDictationAction, TerminationReason, createWaitAction, createSpeechAbortAction } from "./actions";
 import { VoiceDictator } from "../../core/speech/VoiceDictator";
 import { DictationResult } from "../../core/speech/types";
 import { SpeechRecognizerSessionStatus } from "./types";
@@ -14,6 +14,7 @@ import { NLUCommandResolver } from "@core/speech/nlp/types";
 import { Lazy } from "@data-at-hand/core/utils";
 import { notifyError } from "@core/logging/ErrorReportingService";
 import { NLUResultType, NLUResult } from "@data-at-hand/core/speech/types";
+import { dispatch } from "rxjs/internal/observable/pairs";
 
 const sessionMutex = new Mutex()
 
@@ -80,9 +81,9 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
 
             VoiceDictator.instance.registerStopEventListener(async error => {
                 console.log(sessionId, "dictator stop event")
-                if(hasDictatorStoppEventCalled === false){
+                if (hasDictatorStoppEventCalled === false) {
                     hasDictatorStoppEventCalled = true
-                }else{
+                } else {
                     console.log("this session already stopped. skip this handler.")
                     return
                 }
@@ -142,8 +143,8 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
                                     dispatch(inferredActionWithMetadata)
                                     break;
                                 case NLUResultType.PromptingInformDialog:
-                                    if(nluResult.globalCommandSimulatedResult?.action != null){
-                                        nluResult.globalCommandSimulatedResult.action = setMetadataToAction(nluResult.globalCommandSimulatedResult.action, {speechLogId: speechCommandLogId, promptedFromMultimodal: true})
+                                    if (nluResult.globalCommandSimulatedResult?.action != null) {
+                                        nluResult.globalCommandSimulatedResult.action = setMetadataToAction(nluResult.globalCommandSimulatedResult.action, { speechLogId: speechCommandLogId, promptedFromMultimodal: true })
                                     }
                                     SystemLogger.instance.logVerboseToInteractionStateTransition(VerboseEventTypes.RejectedMultimodal, { speechLogId: speechCommandLogId })
                                     break;
@@ -183,7 +184,7 @@ export function startSpeechSession(sessionId: string, speechContext: SpeechConte
         } catch (startError) {
             console.log(startError)
             console.log("speech start error")
-            
+
             notifyError(startError, report => {
                 report.context = "Speech start error"
             })
@@ -198,6 +199,17 @@ function terminate(releaseMutex: Function, dispatch: Dispatch, reason: Terminati
     dispatch(createTerminateSessionAction(reason, sessionId, data))
     VoiceDictator.instance.clearAllListeners()
     releaseMutex()
+}
+
+export function abortAll(): (dispatch: Dispatch, getState: () => ReduxAppState) => void {
+    return async (dispatch: Dispatch, getState: () => ReduxAppState) => {
+        {
+            VoiceDictator.instance.clearAllListeners()
+            await VoiceDictator.instance.stop();
+            dispatch(createSpeechAbortAction(TerminationReason.AppBackground))
+            sessionMutex.release()
+        }
+    }
 }
 
 export function requestStopDictation(sessionId: string): (dispatch: Dispatch, getState: () => ReduxAppState) => void {

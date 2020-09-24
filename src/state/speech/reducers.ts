@@ -1,6 +1,6 @@
 import { SpeechRecognizerState, INITIAL_STATE, SpeechRecognizerSessionStatus } from "@state/speech/types";
 import { ActionTypeBase } from "@state/types";
-import { SpeechRecognizerActionType, UpdateDictationResultAction, SpeechSessionAction, SetShowGlobalPopupAction, SetSpeechContextAction } from "@state/speech/actions";
+import { SpeechRecognizerActionType, UpdateDictationResultAction, SpeechSessionAction, SetShowGlobalPopupAction, SetSpeechContextAction, SpeechAbortAction } from "@state/speech/actions";
 
 
 export const speechRecognizerStateReducer = (state: SpeechRecognizerState = INITIAL_STATE, action: ActionTypeBase): SpeechRecognizerState => {
@@ -69,6 +69,17 @@ export const speechRecognizerStateReducer = (state: SpeechRecognizerState = INIT
                 return newState
             }
 
+        case SpeechRecognizerActionType.AbortAllAction:
+            {
+                console.log("abort state speech")
+                const a = action as SpeechAbortAction
+                newState.currentSessionId = null
+                newState.currentSpeechContext = null
+                newState.dictationResult = null
+                newState.showGlobalPopup = false
+                newState.status = SpeechRecognizerSessionStatus.Idle
+                return newState
+            }
 
 
         default:
