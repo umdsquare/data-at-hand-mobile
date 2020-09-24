@@ -72,9 +72,9 @@ export class FitbitWeightMeasure extends FitbitServiceMeasure {
       data: {
         trend: trendData.list,
         logs: logData,
+        pastNearestLog: latestLog,
+        futureNearestLog: futureNearestLog,
       },
-      pastNearestLog: latestLog,
-      futureNearestLog: futureNearestLog,
       today: includeToday === true ? await this.fetchTodayValue() : null,
       statistics: [
         { type: 'avg', value: trendData.avg },

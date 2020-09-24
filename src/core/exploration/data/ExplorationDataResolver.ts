@@ -117,16 +117,36 @@ class ExplorationDataResolver {
               const casted = prevData as WeightRangedData
               newData.data = {
                 trend: casted.data.trend.filter(datum => datum.numberedDate <= range[1] && datum.numberedDate >= range[0]),
-                logs: casted.data.logs.filter(datum => datum.numberedDate <= range[1] && datum.numberedDate >= range[0])
+                logs: casted.data.logs.filter(datum => datum.numberedDate <= range[1] && datum.numberedDate >= range[0]),
+                futureNearestLog: casted.data.futureNearestLog,
+                pastNearestLog: casted.data.pastNearestLog
               }
 
               if (newPart) {
                 fastConcatTo(newData.data.trend, newPart.data.trend)
                 fastConcatTo(newData.data.logs, newPart.data.logs)
+
+                if(casted.range[0] > range[0]){
+                  newData.data.pastNearestLog = newPart.data.pastNearestLog
+                }
+
+                if(casted.range[1] < range[1]){
+                  newData.data.futureNearestLog = newPart.data.futureNearestLog
+                }
               }
 
               newData.data.logs.sort(dateSortFunc)
               newData.data.trend.sort(dateSortFunc)
+
+              if(newData.data.pastNearestLog == null && newPart == null && range[0] > casted.range[0] && casted.data.logs.length > 0){
+                //find nearestLog from prevData.
+                const excludeIndex = casted.data.logs.findIndex(l => l.numberedDate >= range[0])
+                if(excludeIndex > 0){
+                  newData.data.pastNearestLog = casted.data.logs[excludeIndex - 1]
+                }else if(excludeIndex === -1){
+                  newData.data.pastNearestLog = casted.data.logs[casted.data.logs.length - 1]
+                }
+              }
             }
             break;
         }

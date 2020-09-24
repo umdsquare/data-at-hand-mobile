@@ -72,15 +72,51 @@ class HealthKitManager: NSObject{
     return components.year! * 10000 + components.month! * 100 + components.day!
   }
   
+  static func querySamples(_ store: HKHealthStore, start: Int, end: Int, type: HKSampleType,
+                            convert: @escaping (HKSample)->Any,
+                            postprocess: (([Any])->[NSDictionary])?,
+                            completion callback: @escaping ([Any]?)->Void){
+    let fromDate = HealthKitManager.convertNumberedDateToDate(start)
+    let toDate = Calendar.current.startOfDay(for: HealthKitManager.convertNumberedDateToDate(end)).addingTimeInterval(TimeInterval(24*60*60))
+    
+    let predicate = HKQuery.predicateForSamples(withStart: fromDate, end: toDate, options: [.strictStartDate, .strictEndDate])
+    
+    
+    let query = HKSampleQuery(sampleType: type, predicate: predicate,
+                              limit: Int(HKObjectQueryNoLimit),
+                              sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)],
+                              resultsHandler: {query, results, error in
+                                if error == nil {
+                                  let convertedResult = results!.map({ (sample) in
+                                    return convert(sample)
+                                  })
+                                  
+                                  if postprocess != nil {
+                                    let dispatchQueue = DispatchQueue(label: "PostProcess", qos: .background)
+                                    dispatchQueue.async {
+                                      let processed = postprocess!(convertedResult)
+                                      callback(processed)
+                                    }
+                                  }else { callback(convertedResult) }
+                                } else{
+                                    print(error.debugDescription)
+                                    callback(nil)
+                                }
+    })
+    
+    store.execute(query)
+  }
+  
+  
   static var permissionSet = Set([
     HKObjectType.quantityType(forIdentifier: .heartRate)!,
     HKObjectType.quantityType(forIdentifier: .stepCount)!,
     HKObjectType.quantityType(forIdentifier: .bodyMass)!,
-    HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!
+    HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!,
+    HKObjectType.quantityType(forIdentifier: .restingHeartRate)!
   ])
   
   private let dateFormatter = DateFormatter()
-  private let bpmUnit: HKUnit = HKUnit.count().unitDivided(by: HKUnit.minute())
   
   private var _healthStore: HKHealthStore? = nil
   func getHealthStore() -> HKHealthStore{
@@ -92,12 +128,18 @@ class HealthKitManager: NSObject{
     }
   }
   
+  private var dayLevelMeasures: [NSString: DataSourceRangeMeasureBase]
+  
   override init(){
     dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZZZ"
-    
-    if #available(iOS 11.0, *) {
-      HealthKitManager.permissionSet.insert(HKObjectType.quantityType(forIdentifier: .restingHeartRate)!)
-    }
+        
+    dayLevelMeasures = [
+      "step_count": StepRangeMeasure(),
+      "weight": WeightRangeMeasure(),
+      "heart_rate": RestingHeartRateRangeMeasure(),
+      "sleep_duration": HoursSleptRangeMeasure(),
+      "sleep_range": SleepRangeRangeMeasure()
+    ]
   }
   
   deinit {
@@ -148,8 +190,11 @@ class HealthKitManager: NSObject{
     getHealthStore().execute(query)
   }
   
+  
   @objc
   func getInitialTrackingDate(_ callback: @escaping RCTResponseSenderBlock) -> Void{
+    
+    print("get initial tracking date ")
     
     let types = [
       HKObjectType.quantityType(forIdentifier: .heartRate)!,
@@ -179,30 +224,75 @@ class HealthKitManager: NSObject{
     }
     
     group.notify(queue: queue){
-      callback([["initialDate": minimumInitialDate], NSNull()])
+      callback([NSNull(), ["initialDate": minimumInitialDate]])
     }
   }
   
   @objc
-  func queryDailySummaryData(_ start: Int, end: Int, source: String, completion callback: @escaping RCTResponseSenderBlock) -> Void{
-    switch source {
-    case "stepcount":
-      
-      break;
-    case "heart_rate":
-      break;
-      
-    case "sleep_duration":
-      break;
-    case "sleep_range":
-      break;
-    case "weight":
-      break;
-    default:
-      break;
-    }
+  func getPreferredValueRange(_ source: NSString, completion callback: @escaping RCTResponseSenderBlock) -> Void{
+    self.dayLevelMeasures[source]?.getPreferredValueRange(getHealthStore(), completion: { (error: Error?, range) in
+      callback([error?.localizedDescription, range])
+    }) ?? callback([NSNull(), [nil, nil]])
   }
   
+  @objc
+  func queryDailySummaryData(_ start: NSInteger, end: NSInteger, source: NSString, includeStatistics: Bool, includeToday: Bool, completion callback: @escaping RCTResponseSenderBlock) -> Void{
+        
+    let queryDispatchGroup = DispatchGroup.init()
+        
+    var data: Any?
+    var todayValue: Any? = nil
+    var statistics: Any? = nil
+        
+    let measure = self.dayLevelMeasures[source]
+    
+    if(measure != nil){
+      queryDispatchGroup.enter()
+      measure!.queryDayLevelMetricData(getHealthStore(), start: start, end: end, completion: { (result) in
+      data = result
+      queryDispatchGroup.leave()
+      })
+      
+      if includeToday == true {
+        queryDispatchGroup.enter()
+        measure!.getTodayValue(getHealthStore()) { (result) in
+          todayValue = result
+          queryDispatchGroup.leave()
+        }
+      }
+      
+      if includeStatistics == true {
+        queryDispatchGroup.enter()
+        measure!.getStatistics(getHealthStore(), start: start, end: end) { (error: Error?, result: Any?) in
+          if(error == nil){
+            statistics = result
+          }else{
+            print(error?.localizedDescription)
+          }
+          queryDispatchGroup.leave()
+        }
+      }
+    }else {
+      data = []
+    }
+    
+    
+        
+    queryDispatchGroup.notify(queue: DispatchQueue.main) {
+            
+      callback([NSNull(), [
+        "source": source,
+        "range": [start, end],
+        "data": data,
+        "today": todayValue,
+        "statistics": statistics
+        ]])
+    }
+        
+  }
+  
+  
+  /*
   @objc
   func queryIntradayData(_ date: Int, type: String, completion callback: @escaping RCTResponseSenderBlock) -> Void{
     let dateDate = HealthKitManager.convertNumberedDateToDate(date)
@@ -264,63 +354,13 @@ class HealthKitManager: NSObject{
     
     getHealthStore().execute(query)
   }
-  
-  
-  private func queryDailyAggregatedValues(start: Int, end: Int, type: HKQuantityType, aggregation: DailyAggregationType = .average, completion callback: @escaping ([[String:Any]]?)->Void){
-    var interval = DateComponents()
-    interval.day = 1
-    
-    let startDate = HealthKitManager.convertNumberedDateToDate(start)
-    let endDate = HealthKitManager.convertNumberedDateToDate(end).addingTimeInterval(TimeInterval(24*60*60))
-    
-    let query = HKStatisticsCollectionQuery(
-      quantityType: HKObjectType.quantityType(forIdentifier: .stepCount)!,
-      quantitySamplePredicate: nil,
-      options: HKStatisticsOptions.cumulativeSum,
-      anchorDate: startDate, intervalComponents: interval)
-    
-    query.initialResultsHandler = {
-      query, results, error in
-      
-      if error == nil {
-        var dataList: [[String:Any]] = []
-        results?.enumerateStatistics(from: startDate, to: endDate, with: {(datum, stop) in
-          
-          let components = Calendar.current.dateComponents([.year, .month, .weekday], from: datum.startDate)
-          var value: Double? = nil
-          if type.identifier == HKQuantityTypeIdentifier.stepCount.rawValue {
-            value = datum.sumQuantity()?.doubleValue(for: .count())
-          }else if #available(iOS 11.0, *), type.identifier == HKQuantityTypeIdentifier.restingHeartRate.rawValue {
-            value = datum.averageQuantity()?.doubleValue(for: self.bpmUnit)
-          }
-          
-          if value != nil {
-            dataList.append(
-              [
-                "numberedDate": HealthKitManager.convertDateToNumberedDate(datum.startDate),
-                "year": components.year!,
-                "month": components.month!,
-                "dayOfWeek": components.weekday! - 1,
-                "value": round(value!)
-              ]
-            )
-          }
-          
-        })
-        callback(dataList)
-      } else {
-        callback(nil)
-      }
-    }
-    
-    getHealthStore().execute(query)
-  }
+
   
   
   private func querySamples(start: Int, end: Int, type: HKSampleType,
                             convert: @escaping (HKSample)->Any,
                             postprocess: (([Any])->[NSDictionary])?,
-                            completion callback: @escaping RCTResponseSenderBlock){
+                            completion callback: @escaping ([Any]?)->Void){
     let fromDate = HealthKitManager.convertNumberedDateToDate(start)
     let toDate = Calendar.current.startOfDay(for: HealthKitManager.convertNumberedDateToDate(end)).addingTimeInterval(TimeInterval(24*60*60))
     
@@ -340,20 +380,21 @@ class HealthKitManager: NSObject{
                                     let dispatchQueue = DispatchQueue(label: "PostProcess", qos: .background)
                                     dispatchQueue.async {
                                       let processed = postprocess!(convertedResult)
-                                      callback([NSNull(), processed])
+                                      callback(processed)
                                     }
-                                  }else { callback([NSNull(), convertedResult]) }
+                                  }else { callback(convertedResult) }
                                 } else{
-                                  callback([["error": error?.localizedDescription], NSNull()])
+                                    print(error.debugDescription)
+                                    callback(nil)
                                 }
     })
     
     getHealthStore().execute(query)
   }
-  
-  
-  
-  /*
+   
+   
+   
+   
    @objc
    func queryHealthData(_ params: NSDictionary, completion callback: @escaping RCTResponseSenderBlock) -> Void{
    if(params.value(forKey: "to") != nil && params.value(forKey: "from") != nil && params.value(forKey: "dataType") != nil){

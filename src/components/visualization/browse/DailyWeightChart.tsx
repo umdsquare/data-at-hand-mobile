@@ -24,12 +24,10 @@ const weightTickFormat = (weight: number) => weight.toFixed(1)
 
 interface Props extends ChartPropsBase<{
     trend: Array<{ numberedDate: number, value: number }>,
-    logs: Array<IWeightIntraDayLogEntry>
-}> {
+    logs: Array<IWeightIntraDayLogEntry>,
     futureNearestLog: IWeightIntraDayLogEntry,
     pastNearestLog: IWeightIntraDayLogEntry,
-
-}
+}> {}
 
 export const DailyWeightChart = React.memo((prop: Props) => {
 
@@ -72,7 +70,7 @@ export const DailyWeightChart = React.memo((prop: Props) => {
         .y((d) => scaleY(convert(d.value)))
 
 
-    const veryLastLog = prop.futureNearestLog == null ? (prop.data.logs.length > 0 ? prop.data.logs[prop.data.logs.length - 1] : prop.pastNearestLog) : null
+    const veryLastLog = prop.data.futureNearestLog == null ? (prop.data.logs.length > 0 ? prop.data.logs[prop.data.logs.length - 1] : prop.data.pastNearestLog) : null
 
     return <BandScaleChartTouchHandler
         chartContainerWidth={CommonBrowsingChartStyles.CHART_WIDTH}

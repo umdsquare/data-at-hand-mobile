@@ -2,7 +2,7 @@ import { DataService, UnSupportedReason, ServiceActivationResult } from '../Data
 import * as HK from './HealthKitManager';
 import { DataSourceType, IntraDayDataSourceType } from '@data-at-hand/core/measure/DataSourceSpec';
 import { Platform } from 'react-native';
-import { FilteredDailyValues, GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue } from '@core/exploration/data/types';
+import { FilteredDailyValues, GroupedData, GroupedRangeData, IAggregatedValue, IAggregatedRangeValue, OverviewSourceRow } from '@core/exploration/data/types';
 import { DataDrivenQuery } from '@data-at-hand/core/exploration/ExplorationInfo';
 import { CyclicTimeFrame, CycleDimension } from '@data-at-hand/core/exploration/CyclicTimeFrame';
 
@@ -17,7 +17,7 @@ export default class AppleHealthService extends DataService {
   isQuotaLimited: boolean = false
 
   protected async onCheckSupportedInSystem(): Promise<{ supported: boolean; reason?: UnSupportedReason; }> {
-    if (Platform.OS === 'ios') {
+    if (Platform.OS === 'ios' && __DEV__ === true) {
       const healthKitSupported = await HK.isHealthDataAvailable();
       if (healthKitSupported === true) {
         return { supported: true };
@@ -75,7 +75,7 @@ export default class AppleHealthService extends DataService {
     return undefined
   }
   getPreferredValueRange(dataSource: DataSourceType): Promise<[number, number]> {
-    throw new Error("Method not implemented.");
+    return HK.getPreferredValueRange(dataSource)
   }
   fetchFilteredDates(filter: DataDrivenQuery, start: number, end: number): Promise<{ [key: number]: boolean; }> {
     throw new Error("Method not implemented.");
@@ -83,8 +83,8 @@ export default class AppleHealthService extends DataService {
   fetchIntraDayData(intraDayDataSource: IntraDayDataSourceType, date: number): Promise<any> {
     throw new Error("Method not implemented.");
   }
-  protected fetchDataImpl(dataSource: DataSourceType, start: number, end: number, includeStatistics: boolean, includeToday: boolean): Promise<any> {
-    throw new Error("Method not implemented.");
+  protected fetchDataImpl(dataSource: DataSourceType, start: number, end: number, includeStatistics: boolean, includeToday: boolean): Promise<OverviewSourceRow> {
+    return HK.queryDailySummaryData(start, end, dataSource, includeStatistics, includeToday)
   }
   fetchCyclicAggregatedData(dataSource: DataSourceType, start: number, end: number, cycle: CyclicTimeFrame): Promise<GroupedData | GroupedRangeData> {
     throw new Error("Method not implemented.");

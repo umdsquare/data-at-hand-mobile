@@ -145,9 +145,9 @@ export interface WeightRangedData extends OverviewSourceRow {
   data: {
     trend: Array<IDailySummaryEntry>;
     logs: Array<IWeightIntraDayLogEntry>;
+    pastNearestLog: IWeightIntraDayLogEntry;
+    futureNearestLog: IWeightIntraDayLogEntry;
   };
-  pastNearestLog: IWeightIntraDayLogEntry;
-  futureNearestLog: IWeightIntraDayLogEntry;
 }
 
 export interface SleepRangedData extends OverviewSourceRow {

@@ -17,7 +17,10 @@
   RCT_EXTERN_METHOD(requestPermissions:(RCTResponseSenderBlock*)callback)
   
   RCT_EXTERN_METHOD(getInitialTrackingDate: (RCTResponseSenderBlock*)callback)
-  RCT_EXTERN_METHOD(queryDailySummaryData: (NSInteger *)start (NSInteger *)end (NSString *)source completion:(RCTResponseSenderBlock*)callback)
+  RCT_EXTERN_METHOD(queryDailySummaryData: (NSInteger *)start end:(NSInteger *)end source:(NSString *)source includeStatistics:(BOOL)includeStatistics includeToday:(BOOL)includeToday completion:(RCTResponseSenderBlock*)callback)
+  
+  RCT_EXTERN_METHOD(getPreferredValueRange: (NSString *)source completion:(RCTResponseSenderBlock*)callback)
+
   RCT_EXTERN_METHOD(queryIntradayData: (NSInteger *)date (NSString *)source completion:(RCTResponseSenderBlock*)callback)
 
 

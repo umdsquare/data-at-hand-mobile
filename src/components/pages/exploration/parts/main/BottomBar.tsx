@@ -3,7 +3,7 @@ import { View, SafeAreaView, StyleSheet, Dimensions, TouchableOpacity, Text, Pla
 import Colors from '@style/Colors';
 import { Sizes, sizeByScreen } from '@style/Sizes';
 import { StyleTemplates } from '@style/Styles';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Path, Polygon } from 'react-native-svg';
 import { VoiceInputButton } from '@components/exploration/VoiceInputButton';
 import { ExplorationMode } from '@data-at-hand/core/exploration/ExplorationInfo';
 import { useSelector } from 'react-redux';
@@ -105,8 +105,10 @@ const BottomBarButton = (prop: { isOn: boolean, mode: ExplorationMode, title: st
                 </Svg>
             }
             {
-                prop.mode == 'browse' && <Svg width={bottomBarIconSize} height={bottomBarIconSize} viewBox="0 0 215.64 215.63">
-                    <Path id="Icon_material-pie-chart" data-name="Icon material-pie-chart" d="M108.38,12.21V227.82a108.4,108.4,0,0,1,0-215.61Zm21.88,0v96.92H227A108.28,108.28,0,0,0,130.26,12.21Zm0,118.7v96.92A108.15,108.15,0,0,0,227,130.91Z" transform="translate(-11.33 -12.21)" fill={color} />
+                prop.mode == 'browse' && <Svg width={bottomBarIconSize} height={bottomBarIconSize} viewBox="0 0 24 24">
+                    <Path d="M22.5,13.7c-0.3,0-0.6-0.1-0.9-0.4L12,4.1l-9.6,9.2c-0.5,0.5-1.3,0.5-1.8,0c-0.5-0.5-0.5-1.3,0-1.8L11.1,1.3
+	c0.5-0.5,1.3-0.5,1.8,0l10.5,10.1c0.5,0.5,0.5,1.3,0,1.8C23.2,13.5,22.9,13.7,22.5,13.7z" fill={color} />
+                    <Polygon points="4.4,12.9 12,5.6 19.6,12.9 19.6,23 4.4,23 " fill={color} />
                 </Svg>
             }
             <Text style={{

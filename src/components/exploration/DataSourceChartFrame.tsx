@@ -321,8 +321,6 @@ function getChartView(sourceType: DataSourceType, data: OverviewSourceRow, query
             const weightData = data as WeightRangedData
             return <DailyWeightChart
                 {...commonProps}
-                pastNearestLog={weightData.pastNearestLog}
-                futureNearestLog={weightData.futureNearestLog}
             />
     }
 }

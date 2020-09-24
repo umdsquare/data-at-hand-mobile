@@ -74,7 +74,7 @@ export abstract class DataService {
 
   abstract fetchIntraDayData(intraDayDataSource: IntraDayDataSourceType, date: number): Promise<any>
 
-  protected abstract fetchDataImpl(dataSource: DataSourceType, start: number, end: number, includeStatistics: boolean, includeToday: boolean): Promise<any>
+  protected abstract fetchDataImpl(dataSource: DataSourceType, start: number, end: number, includeStatistics: boolean, includeToday: boolean): Promise<OverviewSourceRow>
 
   abstract fetchCyclicAggregatedData(dataSource: DataSourceType, start: number, end: number, cycle: CyclicTimeFrame): Promise<GroupedData | GroupedRangeData>
 
