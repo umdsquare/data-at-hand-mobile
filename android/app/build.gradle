@@ -83,6 +83,7 @@ project.ext.react = [
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"
+apply from: "../../node_modules/@bugsnag/react-native/bugsnag-react-native.gradle"
 
 /**
  * Set this to true to create two separate APKs instead of one:
@@ -253,9 +254,9 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0'
 
     // Speech SDK
-    implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.12.1'
+    implementation 'com.microsoft.cognitiveservices.speech:client-sdk:1.13.0'
 
-    implementation 'com.bugsnag:bugsnag-android:4.22.3'
+    implementation 'com.bugsnag:bugsnag-android:5.2.0'
 
 
     if (enableHermes) {

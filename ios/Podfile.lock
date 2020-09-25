@@ -5,10 +5,7 @@ PODS:
   - AppAuth/Core (1.4.0)
   - AppAuth/ExternalUserAgent (1.4.0)
   - boost-for-react-native (1.63.0)
-  - BugsnagReactNative (2.23.10):
-    - BugsnagReactNative/Core (= 2.23.10)
-    - React
-  - BugsnagReactNative/Core (2.23.10):
+  - BugsnagReactNative (7.3.5):
     - React
   - BVLinearGradient (2.5.6):
     - React
@@ -82,9 +79,9 @@ PODS:
   - OpenSSL-Universal (1.0.2.19):
     - OpenSSL-Universal/Static (= 1.0.2.19)
   - OpenSSL-Universal/Static (1.0.2.19)
-  - Permission-Microphone (2.2.0):
+  - Permission-Microphone (2.2.1):
     - RNPermissions
-  - Permission-SpeechRecognition (2.2.0):
+  - Permission-SpeechRecognition (2.2.1):
     - RNPermissions
   - RCTRequired (0.63.2)
   - RCTTypeSafety (0.63.2):
@@ -331,17 +328,17 @@ PODS:
     - React
   - RNDateTimePicker (3.0.2):
     - React
-  - RNDeviceInfo (6.0.3):
+  - RNDeviceInfo (6.0.4):
     - React-Core
   - RNFS (2.16.6):
     - React
   - RNGestureHandler (1.8.0):
     - React
-  - RNPermissions (2.2.0):
-    - React
+  - RNPermissions (2.2.1):
+    - React-Core
   - RNReactNativeHapticFeedback (1.10.0):
     - React
-  - RNReanimated (1.13.0):
+  - RNReanimated (1.13.1):
     - React
   - RNScreens (2.11.0):
     - React
@@ -366,7 +363,7 @@ PODS:
     - Yoga (~> 1.14)
 
 DEPENDENCIES:
-  - BugsnagReactNative (from `../node_modules/bugsnag-react-native`)
+  - "BugsnagReactNative (from `../node_modules/@bugsnag/react-native`)"
   - BVLinearGradient (from `../node_modules/react-native-linear-gradient`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
@@ -458,7 +455,7 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   BugsnagReactNative:
-    :path: "../node_modules/bugsnag-react-native"
+    :path: "../node_modules/@bugsnag/react-native"
   BVLinearGradient:
     :path: "../node_modules/react-native-linear-gradient"
   DoubleConversion:
@@ -563,7 +560,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AppAuth: 31bcec809a638d7bd2f86ea8a52bd45f6e81e7c7
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
-  BugsnagReactNative: 98fb350df4bb0c94cce903023531a1a5cc11fa51
+  BugsnagReactNative: fc7d6fb2127e53a8bfc79130b58263da363bb94b
   BVLinearGradient: e3aad03778a456d77928f594a649e96995f1c872
   CocoaAsyncSocket: 694058e7c0ed05a9e217d1b3c7ded962f4180845
   CocoaLibEvent: 2fab71b8bd46dd33ddb959f7928ec5909f838e3f
@@ -580,8 +577,8 @@ SPEC CHECKSUMS:
   Folly: b73c3869541e86821df3c387eb0af5f65addfab4
   glog: 40a13f7840415b9a77023fbcae0f1e6f43192af3
   OpenSSL-Universal: 8b48cc0d10c1b2923617dfe5c178aa9ed2689355
-  Permission-Microphone: 2fb25d7e1efe36e82bcff52ce72d03ced7b6d474
-  Permission-SpeechRecognition: d5f1140d2e37d3041dc54b3c9a730d671541285f
+  Permission-Microphone: b7d3473413954a6f4a86dfc86d491350ecea8dd5
+  Permission-SpeechRecognition: bbae4061026f97d4d3dce0f6c390b9860f768a39
   RCTRequired: f13f25e7b12f925f1f6a6a8c69d929a03c0129fe
   RCTTypeSafety: 44982c5c8e43ff4141eb519a8ddc88059acd1f3a
   React: e1c65dd41cb9db13b99f24608e47dd595f28ca9a
@@ -611,12 +608,12 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: 3eea36d9460c5159b592f9ecbe5a77f8aca98006
   RNCMaskedView: f5c7d14d6847b7b44853f7acb6284c1da30a3459
   RNDateTimePicker: 3a1783e63fcb6e2b162b08a4321db030d23accff
-  RNDeviceInfo: 910ef2129aff229d8ebd1214bc5f0148017b51d1
+  RNDeviceInfo: 6d3fae29bb57a18fabac7d09d49aca0be0d78977
   RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
   RNGestureHandler: 7a5833d0f788dbd107fbb913e09aa0c1ff333c39
-  RNPermissions: e29e449d948ba1c04f3bb3bede5c662667543c49
+  RNPermissions: 0819badb1d289f9497e7c5535c2e050d9f62a89d
   RNReactNativeHapticFeedback: 22c5ecf474428766c6b148f96f2ff6155cd7225e
-  RNReanimated: 89f5e0a04d1dd52fbf27e7e7030d8f80a646a3fc
+  RNReanimated: dd8c286ab5dd4ba36d3a7fef8bff7e08711b5476
   RNScreens: 0e91da98ab26d5d04c7b59a9b6bd694124caf88c
   RNShare: ec48772563576a8ff19022c3d1db410429fb3e2e
   RNStaticSafeAreaInsets: 6103cf09647fa427186d30f67b0f5163c1ae8252
