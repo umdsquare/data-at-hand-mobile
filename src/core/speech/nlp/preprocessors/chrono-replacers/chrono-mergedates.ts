@@ -24,7 +24,8 @@ export const makeENMergeDateRangeRefiner = () => {
 
             if (!prevResult.end && !currResult.end) {
                 let merge: boolean = false
-                if (refiner.pattern().test(getBetweenText(text, prevResult, currResult)) === true) {
+                const conjunction = getBetweenText(text, prevResult, currResult)
+                if (refiner.pattern().test(conjunction) === true) {
                     merge = true
                 } else if (isTwoSuspiciousTobeTo(text, prevResult, currResult) === true) {
                     //infer what finishes with two
@@ -52,9 +53,17 @@ export const makeENMergeDateRangeRefiner = () => {
                 }
 
                 if (merge === true) {
+                    const prevResultText = prevResult.text
                     prevResult = mergeResult(text, prevResult, currResult);
                     prevResult.tags["ENMergeDateRangeRefiner"] = true;
                     prevResult.tags[CHRONO_TAG_RANGE_CERTAIN] = true;
+                    
+                    if(/to|two|2/i.test(conjunction) === true){
+                        prevResult.tags["ConjunctionTo"] = true
+                        prevResult.tags["BeforeConjunction"] = prevResultText
+                        prevResult.tags["AfterConjunction"] = currResult.text
+                    }
+
                     currResult = null;
                     i += 1;
                 }

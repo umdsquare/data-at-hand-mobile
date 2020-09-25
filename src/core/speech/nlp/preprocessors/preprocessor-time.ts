@@ -105,7 +105,12 @@ function processChronoResult(chronoResult: ParsedResult): TimeVariable {
                 value: [Math.min(start, end), Math.max(start, end)],
                 text: chronoResult.text,
                 index: chronoResult.index,
-                additionalInfo: {"isPeriodCertain": chronoResult.tags[CHRONO_TAG_RANGE_CERTAIN]}
+                additionalInfo: {
+                    "isPeriodCertain": chronoResult.tags[CHRONO_TAG_RANGE_CERTAIN],
+                    "conjunctionTo": chronoResult.tags["ConjunctionTo"],
+                    "beforeConjunction": chronoResult.tags["BeforeConjunction"],
+                    "afterConjunction": chronoResult.tags["AfterConjunction"]
+                }
             }
         } else return null
 

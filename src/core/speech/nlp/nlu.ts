@@ -15,6 +15,7 @@ import { fastConcatTo } from "@data-at-hand/core/utils";
 import { getCycleLevelOfDimension, getCycleDimensionSpec } from "@data-at-hand/core/exploration/CyclicTimeFrame";
 
 import stringFormat from 'string-format';
+import { extractTimeExpressions } from "./preprocessors/preprocessor-time";
 
 const FORMAT_MULTIMODAL_MESSAGE = 'As you pressed <b>{element}</b>, Data@Hand expects to receive <b>{receive}</b>.'
 
@@ -435,7 +436,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
             console.log("Not a multimodal command")
 
             //simulate the global speech result
-            const simulatedGlobalInterpretationResult = this.processGlobalSpeechCommand(preprocessed, { type: SpeechContextType.Global, uiStatus: context.uiStatus, explorationType: explorationInfo.type }, explorationInfo)
+            const simulatedGlobalInterpretationResult = this.processGlobalSpeechCommand(preprocessed, { type: SpeechContextType.Global, uiStatus: context.uiStatus, explorationType: explorationInfo.type }, explorationInfo, options)
 
             if (simulatedGlobalInterpretationResult.type === NLUResultType.Effective || simulatedGlobalInterpretationResult.type === NLUResultType.Void) {
                 console.log("prompt a global command")
@@ -450,7 +451,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
             }
         } else {
             //global speech
-            return this.processGlobalSpeechCommand(preprocessed, context as GlobalSpeechContext, explorationInfo)
+            return this.processGlobalSpeechCommand(preprocessed, context as GlobalSpeechContext, explorationInfo, options)
         }
 
         //Cover cases with trivial intent
@@ -462,7 +463,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
         }
     }
 
-    private processGlobalSpeechCommand(preprocessed: PreProcessedInputText, context: GlobalSpeechContext, explorationInfo: ExplorationInfo): NLUResult {
+    private processGlobalSpeechCommand(preprocessed: PreProcessedInputText, context: GlobalSpeechContext, explorationInfo: ExplorationInfo, options: NLUOptions): NLUResult {
 
         const {
             dataSources,
@@ -517,7 +518,32 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                     let extractedRanges: Array<[number, number]> = []
 
                     if (toldRanges) {
-                        fastConcatTo(extractedRanges, ranges.map(r => r.value))
+                        if (/compare(\s+this(\s+(period|.))?)?\swith/i.test(preprocessed.original) === false && ranges.length === 1 && ranges[0].additionalInfo?.conjunctionTo === true) {
+
+                            //try parsing periods before and after the conjunction
+                            const beforePeriod = extractTimeExpressions(ranges[0].additionalInfo?.beforeConjunction, options.getToday(), options)
+                            const afterPeriod = extractTimeExpressions(ranges[0].additionalInfo?.afterConjunction, options.getToday(), options)
+
+                            if (beforePeriod.length >= 0 && afterPeriod.length >= 0) {
+                                //split periods
+                                if (beforePeriod[0].type == VariableType.Date) {
+                                    extractedRanges.push([beforePeriod[0].value as number, beforePeriod[0].value as number])
+                                } else {
+                                    extractedRanges.push(beforePeriod[0].value as [number, number])
+                                }
+
+                                if (afterPeriod[0].type == VariableType.Date) {
+                                    extractedRanges.push([afterPeriod[0].value as number, afterPeriod[0].value as number])
+                                } else {
+                                    extractedRanges.push(afterPeriod[0].value as [number, number])
+                                }
+                            }
+
+                        } else {
+
+                            fastConcatTo(extractedRanges, ranges.map(r => r.value))
+                        }
+
                     }
 
                     if (toldDates) {
