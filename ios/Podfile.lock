@@ -358,6 +358,7 @@ PODS:
     - React
     - SSZipArchive (= 2.2.2)
   - SSZipArchive (2.2.2)
+  - SwiftGen (6.3.0)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -434,6 +435,7 @@ DEPENDENCIES:
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - RNZipArchive (from `../node_modules/react-native-zip-archive`)
+  - SwiftGen (~> 6.0)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -451,6 +453,7 @@ SPEC REPOS:
     - FlipperKit
     - OpenSSL-Universal
     - SSZipArchive
+    - SwiftGen
     - YogaKit
 
 EXTERNAL SOURCES:
@@ -621,9 +624,10 @@ SPEC CHECKSUMS:
   RNVectorIcons: bc69e6a278b14842063605de32bec61f0b251a59
   RNZipArchive: 0c9463e46a56d93b29cd8a306e051f24397f5dfa
   SSZipArchive: fa16b8cc4cdeceb698e5e5d9f67e9558532fbf23
+  SwiftGen: 3d5024a47ea79e408cded20763d7a17d18a4548c
   Yoga: 7740b94929bbacbddda59bf115b5317e9a161598
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 76513fd7f4f3bfe5d29c0b0afb178cb8568c3579
+PODFILE CHECKSUM: 1485218a76a033b859b592c576be09465aa17c3c
 
 COCOAPODS: 1.8.3

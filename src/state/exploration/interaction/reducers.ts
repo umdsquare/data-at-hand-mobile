@@ -28,6 +28,7 @@ export const explorationStateReducer = (
   state: ExplorationState = INITIAL_STATE,
   action: ExplorationAction,
 ): ExplorationState => {
+
   const newState: ExplorationState = {
     info: state.info != null ? shallowCopyExplorationInfo(state.info) : null,
     prevInfo: null,
@@ -92,7 +93,7 @@ export const explorationStateReducer = (
         }
     }
   } else {
-    if ((action as any)['interactionType'] === InteractionType.Speech) {
+    if ((action as any)['interactionType'] !== InteractionType.TouchOnly && (action as any)['interactionType'] != null) {
       newState.prevInfo = shallowCopyExplorationInfo(newState.info);
     }
 
@@ -150,15 +151,15 @@ export const explorationStateReducer = (
 
       case ExplorationActionType.SetCycleDimension:
         {
-        const setCycleDimensionAction = action as SetCycleDimensionAction;
-        explorationInfoHelper.setParameterValue(
-          newState.info,
-          setCycleDimensionAction.cycleDimension,
-          ParameterType.CycleDimension
-        )
+          const setCycleDimensionAction = action as SetCycleDimensionAction;
+          explorationInfoHelper.setParameterValue(
+            newState.info,
+            setCycleDimensionAction.cycleDimension,
+            ParameterType.CycleDimension
+          )
 
           const spec = getCycleDimensionSpec(setCycleDimensionAction.cycleDimension)
-          switch(spec.level){
+          switch (spec.level) {
             case "year":
               newState.info.type = ExplorationType.C_CyclicDetail_Range
               break;
@@ -172,19 +173,29 @@ export const explorationStateReducer = (
       case ExplorationActionType.SetDataDrivenQuery:
         {
           const a = action as SetDataDrivenQueryAction
-          console.log("update filter:", a.dataDrivenQuery)
           const prevFilter = newState.info.dataDrivenQuery
           newState.info.dataDrivenQuery = a.dataDrivenQuery
 
-          if(a.range != null){
-            explorationInfoHelper.setParameterValue(newState.info, a.range, ParameterType.Range)
-          }
+          if (newState.info.type !== ExplorationType.B_Range && newState.info.type !== ExplorationType.B_Overview) {
+            const dataSource = a.dataDrivenQuery.dataSource
+            const range = a.range || explorationInfoHelper.getParameterValue(newState.info, ParameterType.Range)
+            newState.info.type = ExplorationType.B_Range
+            newState.info.values = []
+            newState.info.dataDrivenQuery = a.dataDrivenQuery
+            explorationInfoHelper.setParameterValue(newState.info, dataSource, ParameterType.DataSource)
+            explorationInfoHelper.setParameterValue(newState.info, range, ParameterType.Range)
+          } else {
 
-          if (newState.info.type === ExplorationType.B_Range && a.dataDrivenQuery != null) {
-            if (prevFilter == null || prevFilter.dataSource !== a.dataDrivenQuery.dataSource) {
-              //highlight filter's data source was changed
-              if (explorationInfoHelper.getParameterValue(newState.info, ParameterType.DataSource) !== a.dataDrivenQuery.dataSource) {
-                explorationInfoHelper.setParameterValue(newState.info, a.dataDrivenQuery.dataSource, ParameterType.DataSource)
+            if (a.range != null) {
+              explorationInfoHelper.setParameterValue(newState.info, a.range, ParameterType.Range)
+            }
+
+            if (newState.info.type === ExplorationType.B_Range && a.dataDrivenQuery != null) {
+              if (prevFilter == null || prevFilter.dataSource !== a.dataDrivenQuery.dataSource) {
+                //highlight filter's data source was changed
+                if (explorationInfoHelper.getParameterValue(newState.info, ParameterType.DataSource) !== a.dataDrivenQuery.dataSource) {
+                  explorationInfoHelper.setParameterValue(newState.info, a.dataDrivenQuery.dataSource, ParameterType.DataSource)
+                }
               }
             }
           }
@@ -254,12 +265,6 @@ export const explorationStateReducer = (
               dataSource,
               ParameterType.DataSource,
             );
-          }
-
-          if (goToBrowseRangeAction.dataDrivenQuery != null) {
-            newState.info.dataDrivenQuery = goToBrowseRangeAction.dataDrivenQuery
-          } else if (goToBrowseRangeAction.dataDrivenQuery === null) {
-            newState.info.dataDrivenQuery = undefined
           }
         }
         break;
@@ -505,7 +510,7 @@ export const explorationStateReducer = (
 function shallowCopyExplorationInfo(original: ExplorationInfo): ExplorationInfo {
   return {
     ...original,
-    values: original.values.map(v => ({ ...v })),
+    values: original.values?.map(v => ({ ...v })),
     dataDrivenQuery: original.dataDrivenQuery
   }
 }

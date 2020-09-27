@@ -25,6 +25,8 @@
 		3B8582BB2356BA9C0028E901 /* SpeechRecognitionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B8582BA2356BA9C0028E901 /* SpeechRecognitionManager.swift */; };
 		3BDC5715251C5A81003DD9AD /* HoursSleptRangeMeasure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BDC5714251C5A81003DD9AD /* HoursSleptRangeMeasure.swift */; };
 		3BDC571B251C604F003DD9AD /* SleepRangeRangeMeasure.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BDC571A251C604F003DD9AD /* SleepRangeRangeMeasure.swift */; };
+		3BDC5841251FFFDD003DD9AD /* BugsnagCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BDC5840251FFFDD003DD9AD /* BugsnagCredentials.swift */; };
+		3BDC5845252003A3003DD9AD /* CredentialsBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BDC5844252003A3003DD9AD /* CredentialsBridge.swift */; };
 		3BDD1F2C2350DA7200528D3C /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BDD1F2B2350DA7200528D3C /* HealthKitManager.swift */; };
 		3BDD1F2E2350DAE700528D3C /* Bridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 3BDD1F2D2350DAE700528D3C /* Bridge.m */; };
 		3BDD1F312350DE7800528D3C /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BDD1F302350DE7800528D3C /* HealthKit.framework */; };
@@ -69,6 +71,8 @@
 		3B8582BA2356BA9C0028E901 /* SpeechRecognitionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SpeechRecognitionManager.swift; path = DataAtHand/SpeechRecognitionManager.swift; sourceTree = "<group>"; };
 		3BDC5714251C5A81003DD9AD /* HoursSleptRangeMeasure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HoursSleptRangeMeasure.swift; path = DataAtHand/health/HoursSleptRangeMeasure.swift; sourceTree = "<group>"; };
 		3BDC571A251C604F003DD9AD /* SleepRangeRangeMeasure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SleepRangeRangeMeasure.swift; path = DataAtHand/health/SleepRangeRangeMeasure.swift; sourceTree = "<group>"; };
+		3BDC5840251FFFDD003DD9AD /* BugsnagCredentials.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = BugsnagCredentials.swift; path = DataAtHand/BugsnagCredentials.swift; sourceTree = "<group>"; };
+		3BDC5844252003A3003DD9AD /* CredentialsBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = CredentialsBridge.swift; path = DataAtHand/CredentialsBridge.swift; sourceTree = "<group>"; };
 		3BDD1F2A2350DA7100528D3C /* DataAtHand-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DataAtHand-Bridging-Header.h"; sourceTree = "<group>"; };
 		3BDD1F2B2350DA7200528D3C /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = HealthKitManager.swift; path = DataAtHand/HealthKitManager.swift; sourceTree = "<group>"; };
 		3BDD1F2D2350DAE700528D3C /* Bridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = Bridge.m; path = DataAtHand/Bridge.m; sourceTree = "<group>"; };
@@ -129,6 +133,7 @@
 		13B07FAE1A68108700A75B9A /* DataAtHand */ = {
 			isa = PBXGroup;
 			children = (
+				3BDC5840251FFFDD003DD9AD /* BugsnagCredentials.swift */,
 				3B3CEBD7251690FB00FEB10D /* health */,
 				3BDD1F2F2350DE7800528D3C /* DataAtHand.entitlements */,
 				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
@@ -142,6 +147,7 @@
 				3BDD1F2D2350DAE700528D3C /* Bridge.m */,
 				3BDD1F2B2350DA7200528D3C /* HealthKitManager.swift */,
 				3B8582BA2356BA9C0028E901 /* SpeechRecognitionManager.swift */,
+				3BDC5844252003A3003DD9AD /* CredentialsBridge.swift */,
 			);
 			name = DataAtHand;
 			sourceTree = "<group>";
@@ -266,6 +272,7 @@
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				27BEC53BADD10B0539644665 /* [CP] Copy Pods Resources */,
+				3BDC57F6251FF687003DD9AD /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -397,6 +404,23 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-DataAtHand/Pods-DataAtHand-resources.sh\"\n";
 			showEnvVarsInLog = 0;
+		};
+		3BDC57F6251FF687003DD9AD /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [[ -f \"${PODS_ROOT}/SwiftGen/bin/swiftgen\" ]]; then\n  \"${PODS_ROOT}/SwiftGen/bin/swiftgen\"\nelse\n  echo \"warning: SwiftGen is not installed. Run 'pod install --repo-update' to install it.\"\nfi\n";
 		};
 		595DF67F77985809A187479A /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -532,12 +556,14 @@
 				3B3CEBD92516913400FEB10D /* DataSourceRangeMeasureBase.swift in Sources */,
 				3BDC571B251C604F003DD9AD /* SleepRangeRangeMeasure.swift in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
+				3BDC5841251FFFDD003DD9AD /* BugsnagCredentials.swift in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				3BDD1F2E2350DAE700528D3C /* Bridge.m in Sources */,
 				3B3CEBDF2516E57800FEB10D /* StepRangeMeasure.swift in Sources */,
 				3B3CEBDB2516DE2D00FEB10D /* DataSourceDailySummaryMeasureBase.swift in Sources */,
 				3BDD1F2C2350DA7200528D3C /* HealthKitManager.swift in Sources */,
 				3B8582BB2356BA9C0028E901 /* SpeechRecognitionManager.swift in Sources */,
+				3BDC5845252003A3003DD9AD /* CredentialsBridge.swift in Sources */,
 				3B4B41DE251C0E7E0067FE59 /* SleepRangeMeasureBase.swift in Sources */,
 				3BDC5715251C5A81003DD9AD /* HoursSleptRangeMeasure.swift in Sources */,
 			);

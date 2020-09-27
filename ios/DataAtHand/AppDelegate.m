@@ -3,6 +3,8 @@
 #import <React/RCTBridge.h>
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTRootView.h>
+#import <Bugsnag/Bugsnag.h>
+#import <DataAtHand-Swift.h>
 
 #ifdef FB_SONARKIT_ENABLED
 #import <FlipperKit/FlipperClient.h>
@@ -48,6 +50,13 @@ static void InitializeFlipper(UIApplication *application) {
   UIView* launchScreenView = [[[NSBundle mainBundle] loadNibNamed:@"LaunchScreen" owner:self options:nil] objectAtIndex:0];
   launchScreenView.frame = self.window.bounds;
   rootView.loadingView = launchScreenView;
+  
+  
+  //BugSnag
+  NSString * _Nullable bugsnagApiKey = [Credentials getBugsnagApiKey];
+  if (bugsnagApiKey && [bugsnagApiKey length] > 0){
+    [Bugsnag startWithApiKey:bugsnagApiKey];
+  }
   
   return YES;
 }

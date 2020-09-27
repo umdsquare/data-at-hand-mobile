@@ -42,15 +42,13 @@ export function createSetRangeAction(
 export function createGoToBrowseRangeAction(
   interactionType: InteractionType,
   dataSource?: DataSourceType,
-  range?: [number, number],
-  dataDrivenQuery?: DataDrivenQuery | null
+  range?: [number, number]
 ): GoToBrowseRangeAction {
   return {
     type: ExplorationActionType.GoToBrowseRange,
     interactionType,
     range,
-    dataSource,
-    dataDrivenQuery
+    dataSource
   };
 }
 

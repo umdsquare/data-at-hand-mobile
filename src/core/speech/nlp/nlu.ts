@@ -214,7 +214,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                         if (start != null && end != null) {
                                             if (start <= end) {
                                                 return NLUCommandResolverImpl.convertActionToNLUResult(
-                                                    createSetRangeAction(InteractionType.Speech, undefined, [start, end], c.parameterKey),
+                                                    createSetRangeAction(InteractionType.TouchAndSpeech, undefined, [start, end], c.parameterKey),
                                                     explorationInfo, preprocessed
                                                 )
                                             } else {
@@ -233,12 +233,12 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                     {
                                         if (dates.length > 0) {
                                             return NLUCommandResolverImpl.convertActionToNLUResult(
-                                                setDateAction(InteractionType.Speech, undefined, dates[0].value as number),
+                                                setDateAction(InteractionType.TouchAndSpeech, undefined, dates[0].value as number),
                                                 explorationInfo, preprocessed
                                             )
                                         } else if (ranges.length === 1) {
                                             return NLUCommandResolverImpl.convertActionToNLUResult(
-                                                createGoToBrowseRangeAction(InteractionType.Speech, inferDataSource(explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.IntraDayDataSource))
+                                                createGoToBrowseRangeAction(InteractionType.TouchAndSpeech, inferDataSource(explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.IntraDayDataSource))
                                                     , ranges[0].value),
                                                 explorationInfo, preprocessed
                                             )
@@ -249,7 +249,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                     if (ranges.length === 1 && dates.length === 0) {
                                         //told only a range
                                         return NLUCommandResolverImpl.convertActionToNLUResult(
-                                            createSetRangeAction(InteractionType.Speech, undefined, ranges[0].value, c.parameterKey),
+                                            createSetRangeAction(InteractionType.TouchAndSpeech, undefined, ranges[0].value, c.parameterKey),
                                             explorationInfo, preprocessed
                                         )
                                     } else if (dates.length === 1 && ranges.length === 0) {
@@ -291,9 +291,9 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                             if (toldDataSources && !toldConditions && !toldCyclicTimeFrames && !toldDates && !toldRanges) {
                                 let action
                                 if (getCycleLevelOfDimension(dimension) === 'day') {
-                                    action = createGoToCyclicDetailDailyAction(InteractionType.Speech, dataSources[0].value, undefined, dimension)
+                                    action = createGoToCyclicDetailDailyAction(InteractionType.TouchAndSpeech, dataSources[0].value, undefined, dimension)
                                 } else {
-                                    action = createGoToCyclicDetailRangeAction(InteractionType.Speech, dataSources[0].value, undefined, dimension)
+                                    action = createGoToCyclicDetailRangeAction(InteractionType.TouchAndSpeech, dataSources[0].value, undefined, dimension)
                                 }
 
                                 return NLUCommandResolverImpl.convertActionToNLUResult(action, explorationInfo, preprocessed)
@@ -313,7 +313,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                 const inferredIntraDayDataSourceType = inferIntraDayDataSourceType(dataSource)
                                 if (inferredIntraDayDataSourceType) {
                                     return NLUCommandResolverImpl.convertActionToNLUResult(
-                                        createGoToBrowseDayAction(InteractionType.Speech, inferredIntraDayDataSourceType, c.date),
+                                        createGoToBrowseDayAction(InteractionType.TouchAndSpeech, inferredIntraDayDataSourceType, c.date),
                                         explorationInfo, preprocessed)
                                 } else {
                                     console.log(dataSource + " is not supported intraday. Show the around data instead")
@@ -321,7 +321,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                     const endDate = DateTimeHelper.toNumberedDateFromDate(addDays(DateTimeHelper.toDate(c.date), 3))
 
                                     return NLUCommandResolverImpl.convertActionToNLUResult(
-                                        createGoToBrowseRangeAction(InteractionType.Speech, dataSource, [startDate, endDate]),
+                                        createGoToBrowseRangeAction(InteractionType.TouchAndSpeech, dataSource, [startDate, endDate]),
                                         explorationInfo, preprocessed)
                                 }
                             }
@@ -349,7 +349,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                 const dataSource = dataSources[0].value
 
                                 return NLUCommandResolverImpl.convertActionToNLUResult(
-                                    createGoToBrowseRangeAction(InteractionType.Speech, dataSource, c.range),
+                                    createGoToBrowseRangeAction(InteractionType.TouchAndSpeech, dataSource, c.range),
                                     explorationInfo, preprocessed)
                             }
                         }
@@ -361,7 +361,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
                             if (parameter) {
                                 return NLUCommandResolverImpl.convertActionToNLUResult(
-                                    createSetRangeAction(InteractionType.Speech, undefined, ranges[0].value, parameter.key),
+                                    createSetRangeAction(InteractionType.TouchAndSpeech, undefined, ranges[0].value, parameter.key),
                                     explorationInfo, preprocessed)
                             }
                         }
@@ -377,18 +377,18 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
                                         if (parameter.key == ParameterKey.RangeB) {
                                             return NLUCommandResolverImpl.convertActionToNLUResult(
-                                                createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, ranges[0].value, c.range),
+                                                createGoToComparisonTwoRangesAction(InteractionType.TouchAndSpeech, guaranteedDataSource, ranges[0].value, c.range),
                                                 explorationInfo, preprocessed)
                                         } else {
                                             return NLUCommandResolverImpl.convertActionToNLUResult(
-                                                createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, c.range, ranges[0].value),
+                                                createGoToComparisonTwoRangesAction(InteractionType.TouchAndSpeech, guaranteedDataSource, c.range, ranges[0].value),
                                                 explorationInfo, preprocessed)
                                         }
                                     }
                                 case ExplorationType.C_CyclicDetail_Range:
                                     {
                                         return NLUCommandResolverImpl.convertActionToNLUResult(
-                                            createGoToComparisonTwoRangesAction(InteractionType.Speech, guaranteedDataSource, c.range, ranges[0].value),
+                                            createGoToComparisonTwoRangesAction(InteractionType.TouchAndSpeech, guaranteedDataSource, c.range, ranges[0].value),
                                             explorationInfo, preprocessed)
                                     }
                             }
@@ -400,7 +400,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                             const guaranteedDataSource = this.getCascadedDataSource(dataSources, context, explorationInfo)
                             if (guaranteedDataSource) {
                                 return NLUCommandResolverImpl.convertActionToNLUResult(
-                                    createGoToComparisonCyclicAction(InteractionType.Speech, guaranteedDataSource, c.range, cyclicTimeFrames[0].value),
+                                    createGoToComparisonCyclicAction(InteractionType.TouchAndSpeech, guaranteedDataSource, c.range, cyclicTimeFrames[0].value),
                                     explorationInfo, preprocessed)
                             }
                         }
@@ -420,7 +420,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                     }
 
                                     return NLUCommandResolverImpl.convertActionToNLUResult(
-                                        createGoToBrowseRangeAction(InteractionType.Speech, dataSource, c.range, dataDrivenQuery),
+                                        setDataDrivenQuery(InteractionType.TouchAndSpeech, dataDrivenQuery, c.range),
                                         explorationInfo, preprocessed)
                                 }
 
@@ -500,7 +500,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                 }
                 if (guaranteedRange != null) {
                     return NLUCommandResolverImpl.convertActionToNLUResult(
-                        createGoToComparisonCyclicAction(InteractionType.Speech, guaranteedDataSource, guaranteedRange, cyclicTimeFrames[0].value),
+                        createGoToComparisonCyclicAction(InteractionType.SpeechOnly, guaranteedDataSource, guaranteedRange, cyclicTimeFrames[0].value),
                         explorationInfo, preprocessed)
                 }
             }
@@ -574,7 +574,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                     if (cascadedDataSource && extractedRanges.length >= 2) {
 
                         return NLUCommandResolverImpl.convertActionToNLUResult(
-                            createGoToComparisonTwoRangesAction(InteractionType.Speech, cascadedDataSource, extractedRanges[0], extractedRanges[1]),
+                            createGoToComparisonTwoRangesAction(InteractionType.SpeechOnly, cascadedDataSource, extractedRanges[0], extractedRanges[1]),
                             explorationInfo, preprocessed)
                     }
                 }
@@ -599,14 +599,14 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                     //only if the exploration info supports the data source
                     if (explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.DataSource) != null) {
                         return NLUCommandResolverImpl.convertActionToNLUResult(
-                            setDataSourceAction(InteractionType.Speech, undefined, dataSources[0].value),
+                            setDataSourceAction(InteractionType.SpeechOnly, undefined, dataSources[0].value),
                             explorationInfo, preprocessed)
                     }
                 } else if (!toldDataSources && toldCyclicTimeFrames && toldDates === false && toldRanges === false) {
                     //only time cycle
                     if (explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.CycleType) === cyclicTimeFrames[0].value) {
                         return NLUCommandResolverImpl.convertActionToNLUResult(
-                            setCycleTypeAction(InteractionType.Speech, null, cyclicTimeFrames[0].value),
+                            setCycleTypeAction(InteractionType.SpeechOnly, null, cyclicTimeFrames[0].value),
                             explorationInfo, preprocessed)
                     }
                 }
@@ -651,22 +651,22 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                         if (rangePriority >= datePriority) {
                             if (explorationInfo.type === ExplorationType.B_Overview && toldDataSources === false && (context.type === SpeechContextType.Global || context.type === SpeechContextType.Time)) {
                                 return NLUCommandResolverImpl.convertActionToNLUResult(
-                                    createSetRangeAction(InteractionType.Speech, undefined, cascadedRange),
+                                    createSetRangeAction(InteractionType.SpeechOnly, undefined, cascadedRange),
                                     explorationInfo, preprocessed)
                             } else if (cascadedDataSource) {
                                 return NLUCommandResolverImpl.convertActionToNLUResult(
-                                    createGoToBrowseRangeAction(InteractionType.Speech, cascadedDataSource, cascadedRange),
+                                    createGoToBrowseRangeAction(InteractionType.SpeechOnly, cascadedDataSource, cascadedRange),
                                     explorationInfo, preprocessed)
                             } else {
                                 return NLUCommandResolverImpl.convertActionToNLUResult(
-                                    createSetRangeAction(InteractionType.Speech, undefined, cascadedRange),
+                                    createSetRangeAction(InteractionType.SpeechOnly, undefined, cascadedRange),
                                     explorationInfo, preprocessed)
                             }
                         } else {
                             const inferredIntraDayDataSourceType = inferIntraDayDataSourceType(cascadedDataSource)
                             if (inferredIntraDayDataSourceType) {
                                 return NLUCommandResolverImpl.convertActionToNLUResult(
-                                    createGoToBrowseDayAction(InteractionType.Speech, inferredIntraDayDataSourceType, cascadedDate),
+                                    createGoToBrowseDayAction(InteractionType.SpeechOnly, inferredIntraDayDataSourceType, cascadedDate),
                                     explorationInfo, preprocessed)
                             } else {
                                 console.log(cascadedDataSource + " is not supported intraday. Show the around data instead")
@@ -674,7 +674,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                                 const endDate = DateTimeHelper.toNumberedDateFromDate(addDays(DateTimeHelper.toDate(cascadedDate), 3))
 
                                 return NLUCommandResolverImpl.convertActionToNLUResult(
-                                    createGoToBrowseRangeAction(InteractionType.Speech, cascadedDataSource, [startDate, endDate]),
+                                    createGoToBrowseRangeAction(InteractionType.SpeechOnly, cascadedDataSource, [startDate, endDate]),
                                     explorationInfo, preprocessed)
                             }
                         }
@@ -702,7 +702,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
 
                         if (explorationInfo.type === ExplorationType.B_Overview || explorationInfo.type === ExplorationType.B_Range) {
-                            return NLUCommandResolverImpl.convertActionToNLUResult(setDataDrivenQuery(InteractionType.Speech, dataDrivenQuery, range),
+                            return NLUCommandResolverImpl.convertActionToNLUResult(setDataDrivenQuery(InteractionType.SpeechOnly, dataDrivenQuery, range),
                                 explorationInfo, preprocessed)
                         } else {
                             if (range == null && explorationInfo.type !== ExplorationType.C_TwoRanges) {
@@ -711,7 +711,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
 
 
                             if (range != null) {
-                                return NLUCommandResolverImpl.convertActionToNLUResult(createGoToBrowseRangeAction(InteractionType.Speech, dataSource, range, dataDrivenQuery),
+                                return NLUCommandResolverImpl.convertActionToNLUResult(setDataDrivenQuery(InteractionType.SpeechOnly, dataDrivenQuery, range),
                                     explorationInfo, preprocessed)
                             } else return {
                                 type: NLUResultType.PromptingInformDialog,
@@ -747,9 +747,9 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
             case ExplorationType.B_Day:
                 //pages with no ranges
                 if (dates.length > 0) {
-                    return setDateAction(InteractionType.Speech, undefined, dates[0].value as number)
+                    return setDateAction(InteractionType.SpeechOnly, undefined, dates[0].value as number)
                 } else if (ranges.length > 0) {
-                    return createGoToBrowseRangeAction(InteractionType.Speech, inferDataSource(explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.IntraDayDataSource))
+                    return createGoToBrowseRangeAction(InteractionType.SpeechOnly, inferDataSource(explorationInfoHelper.getParameterValue(explorationInfo, ParameterType.IntraDayDataSource))
                         , ranges[0].value)
                 }
             case ExplorationType.B_Overview:
@@ -759,22 +759,22 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
             case ExplorationType.C_CyclicDetail_Range:
                 //pages with a single range
                 if (ranges.length > 0) {
-                    return createSetRangeAction(InteractionType.Speech, undefined, ranges[0].value as [number, number])
+                    return createSetRangeAction(InteractionType.SpeechOnly, undefined, ranges[0].value as [number, number])
                 }
                 if (dates.length > 0) {
                     const date = dates[0].value
                     const currentRange = explorationInfoHelper.getParameterValue<[number, number]>(explorationInfo, ParameterType.Range)
 
                     if (dates[0].additionalInfo === 'from') {
-                        return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])])
+                        return createSetRangeAction(InteractionType.SpeechOnly, undefined, [Math.min(date, currentRange[1]), Math.max(date, currentRange[1])])
                     } else if (dates[0].additionalInfo === 'to') {
-                        return createSetRangeAction(InteractionType.Speech, undefined, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])])
+                        return createSetRangeAction(InteractionType.SpeechOnly, undefined, [Math.min(date, currentRange[0]), Math.max(date, currentRange[0])])
                     }
 
                     if (date <= currentRange[0]) {
-                        return createSetRangeAction(InteractionType.Speech, undefined, [date, currentRange[1]])
+                        return createSetRangeAction(InteractionType.SpeechOnly, undefined, [date, currentRange[1]])
                     } else if (date >= currentRange[1]) {
-                        return createSetRangeAction(InteractionType.Speech, undefined, [currentRange[0], date])
+                        return createSetRangeAction(InteractionType.SpeechOnly, undefined, [currentRange[0], date])
                     } else {
                         //middle. Show an ambiguity dialog.
                         return "Data@Hand is confused about which date to modify. Please say the command through <b>the date</b> you want to modify."
@@ -785,7 +785,7 @@ export default class NLUCommandResolverImpl implements NLUCommandResolver {
                 //pages with two ranges
                 {
                     if (ranges.length >= 2) {
-                        return createGoToComparisonTwoRangesAction(InteractionType.Speech, undefined, ranges[0].value, ranges[1].value)
+                        return createGoToComparisonTwoRangesAction(InteractionType.SpeechOnly, undefined, ranges[0].value, ranges[1].value)
                     } else if (ranges.length === 1) {
                         return "Data@Hand is confused about which period to modify. Please say the command through <b>the chart plot</b> of the period you want to modify."
                     } else if (dates.length > 0) {

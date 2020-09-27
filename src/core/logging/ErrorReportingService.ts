@@ -16,9 +16,7 @@ export function initErrorReportingService() {
             const bugsnagInfo = require("@credentials/bugsnag.json")
             if (bugsnagInfo != null && bugsnagInfo.api_key != null && bugsnagInfo.api_key.length > 0) {
                 bugsnagClient = require('@bugsnag/react-native')
-                bugsnagClient.start({
-                    apiKey: bugsnagInfo.api_key
-                })
+                bugsnagClient.start()
             }
         } catch (ex) {
             console.log(ex)

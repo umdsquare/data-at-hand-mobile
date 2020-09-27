@@ -1,0 +1,5 @@
+json:
+  inputs: ../credentials/bugsnag.json
+  outputs:
+    templateName: inline-swift4
+    output: DataAtHand/BugsnagCredentials.swift
