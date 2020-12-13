@@ -2,9 +2,11 @@
 
 <img src="https://img.shields.io/badge/platform-ios%7Candroid-green"/> <img src="https://img.shields.io/badge/framework-react%20native-blue"/> <img src="https://img.shields.io/badge/language-typescript%20%7C%20swift%20%7C%20java-lightblue"/> 
 
-A multimodal fitness application supporting both touch and speech input for data exploration.
+<img src="https://github.com/muclipse/data-at-hand-mobile/blob/master/teaser_revised.jpg"/>
 
-**This project is currently under heavy development.**
+**Data@Hand** is a cross-platform smartphone app that facilitates visual data exploration leveraging both speech and touch interactions. Data visualization is a common way that mobile health apps enable people to explore their data on smartphones. However, due to smartphones’ limitations such as small screen size and lack of precise pointing input, they provide limited support for visual data exploration with over-simplified time navigation, even though *time* is a primary dimension of self-tracking data. Data@Hand leverages the synergy of speech and touch; speech-based interaction takes little screen space and natural language is flexible to cover different ways of specifying dates and their ranges (e.g., “October 7th”, “Last Sunday”, “This month”). Currently, Data@Hand supports displaying the **Fitbit** data (e.g., step count, heart rate, sleep, and weight) for navigation and temporal comparisons tasks.
+
+
 
 ### Related Research Paper (Describes the design and a user study)
 **Data@Hand: Fostering Visual Exploration of Personal Data on Smartphones Leveraging Speech and Touch Interaction**<br>
