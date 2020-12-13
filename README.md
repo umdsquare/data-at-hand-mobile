@@ -6,6 +6,13 @@ A multimodal fitness application supporting both touch and speech input for data
 
 **This project is currently under heavy development.**
 
+### Related Research Paper (Contains design and user study)
+**Data@Hand: Fostering Visual Exploration of Personal Data on Smartphones Leveraging Speech and Touch Interaction**<br>
+Young-Ho Kim, Bongshin Lee, Arjun Srinivasan, and Eun Kyoung Choe<br>
+ACM CHI 2021 (conditionally accepted)
+
+
+
 
 ### How to build & run
 
@@ -56,13 +63,6 @@ Install dependencies
 - [Bugsnag](https://www.bugsnag.com/) (Optional. Error reporting)
 
 
----
-  
-## Author
-
-#### Young-Ho Kim (yghokim@umd.edu)
-http://younghokim.net
-University of Maryland, College Park, MD, USA
 
 ----
 
