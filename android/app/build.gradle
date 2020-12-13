@@ -145,7 +145,7 @@ android {
                 appName              : 'Data@Hand'
         ]
 
-        buildConfigField 'String', 'BUGSNAG_API_KEY', rootProject.ext.bugsnagApiKey != null ? "\"rootProject.ext.bugsnagApiKey\"" : "null"
+        buildConfigField 'String', 'BUGSNAG_API_KEY', rootProject.ext.bugsnagApiKey != null ? "\"${rootProject.ext.bugsnagApiKey}\"" : "null"
     }
     splits {
         abi {
@@ -167,8 +167,8 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
-            applicationIdSuffix ".debug"
-            manifestPlaceholders.appNamePrefix = "(Dbg) "
+            //applicationIdSuffix ".debug"
+            manifestPlaceholders.appNamePrefix = ""
 
         }
         release {
@@ -205,13 +205,6 @@ android {
         }
     }
 
-    packagingOptions {
-        pickFirst "lib/armeabi-v7a/libc++_shared.so"
-        pickFirst "lib/arm64-v8a/libc++_shared.so"
-        pickFirst "lib/x86/libc++_shared.so"
-        pickFirst "lib/x86_64/libc++_shared.so"
-    }
-
     // applicationVariants are e.g. debug, release
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
@@ -238,7 +231,7 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
-    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0-beta01'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 
     //Flipper debugger support
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
@@ -246,6 +239,7 @@ dependencies {
     }
     debugImplementation("com.facebook.flipper:flipper-network-plugin:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.flipper'
+        exclude group:'com.squareup.okhttp3', module:'okhttp'
     }
     debugImplementation("com.facebook.flipper:flipper-fresco-plugin:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.flipper'

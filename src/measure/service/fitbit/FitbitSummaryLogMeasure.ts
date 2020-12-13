@@ -9,7 +9,7 @@ import { CyclicTimeFrame, CycleDimension, getCycleTypeOfDimension, getTimeKeyOfD
 
 export abstract class FitbitSummaryLogMeasure<
   QueryResultType> extends FitbitRangeMeasure<QueryResultType> {
-  protected maxQueryRangeLength: number = 1095;
+  protected maxQueryRangeLength: number = 365;
 
   protected abstract dbTableName: FitbitLocalTableName;
 

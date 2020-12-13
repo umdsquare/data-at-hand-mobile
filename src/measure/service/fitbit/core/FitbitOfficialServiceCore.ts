@@ -261,7 +261,7 @@ export default class FitbitOfficialServiceCore implements FitbitServiceCore {
                     case 429:
                         throw new SystemError(ServiceApiErrorType.QuotaLimitReached, "Quota limit reached.")
                     default:
-                        throw { error: result.status };
+                        throw { error: result.status, message: result.statusText};
                 }
             } else {
                 console.log(

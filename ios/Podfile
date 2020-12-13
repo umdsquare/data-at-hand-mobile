@@ -10,8 +10,8 @@ target 'DataAtHand' do
   use_react_native!(:path => config["reactNativePath"])
 
   permissions_path = '../node_modules/react-native-permissions/ios'
-  pod 'Permission-Microphone', :path => "#{permissions_path}/Microphone.podspec"
-  pod 'Permission-SpeechRecognition', :path => "#{permissions_path}/SpeechRecognition.podspec"
+  pod 'Permission-Microphone', :path => "#{permissions_path}/Microphone"
+  pod 'Permission-SpeechRecognition', :path => "#{permissions_path}/SpeechRecognition"
 
   pod 'SwiftGen', '~> 6.0'
 

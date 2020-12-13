@@ -17,7 +17,7 @@ export default class AppleHealthService extends DataService {
   isQuotaLimited: boolean = false
 
   protected async onCheckSupportedInSystem(): Promise<{ supported: boolean; reason?: UnSupportedReason; }> {
-    if (Platform.OS === 'ios' && __DEV__ === true) {
+    if (Platform.OS === 'ios' && __DEV__ === true) { //TODO remove the dev tag after the development of Apple Health is complete.
       const healthKitSupported = await HK.isHealthDataAvailable();
       if (healthKitSupported === true) {
         return { supported: true };
