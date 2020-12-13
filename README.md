@@ -6,7 +6,7 @@ A multimodal fitness application supporting both touch and speech input for data
 
 **This project is currently under heavy development.**
 
-### Related Research Paper (Contains design and user study)
+### Related Research Paper (Describes the design and a user study)
 **Data@Hand: Fostering Visual Exploration of Personal Data on Smartphones Leveraging Speech and Touch Interaction**<br>
 Young-Ho Kim, Bongshin Lee, Arjun Srinivasan, and Eun Kyoung Choe<br>
 ACM CHI 2021 (conditionally accepted)
