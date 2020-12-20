@@ -6,9 +6,10 @@
 
 **Data@Hand** is a cross-platform smartphone app that facilitates visual data exploration leveraging both speech and touch interactions. Data visualization is a common way that mobile health apps enable people to explore their data on smartphones. However, due to smartphones’ limitations such as small screen size and lack of precise pointing input, they provide limited support for visual data exploration with over-simplified time navigation, even though *time* is a primary dimension of self-tracking data. Data@Hand leverages the synergy of speech and touch; speech-based interaction takes little screen space and natural language is flexible to cover different ways of specifying dates and their ranges (e.g., “October 7th”, “Last Sunday”, “This month”). Currently, Data@Hand supports displaying the **Fitbit** data (e.g., step count, heart rate, sleep, and weight) for navigation and temporal comparisons tasks.
 
+For more information about this project, please visit [https://data-at-hand.github.io](https://data-at-hand.github.io).
 
 
-### Related Research Paper (Describes the design and a user study)
+## Related Research Paper (Describes the design and a user study)
 **Data@Hand: Fostering Visual Exploration of Personal Data on Smartphones Leveraging Speech and Touch Interaction**<br>
 Young-Ho Kim, Bongshin Lee, Arjun Srinivasan, and Eun Kyoung Choe<br>
 ACM CHI 2021 (conditionally accepted)
@@ -16,7 +17,7 @@ ACM CHI 2021 (conditionally accepted)
 
 
 
-### How to build & run
+## How to build & run
 
 Install Node.js on your system.
 
