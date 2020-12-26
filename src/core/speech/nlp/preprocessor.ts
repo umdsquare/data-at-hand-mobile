@@ -19,6 +19,7 @@ const lexicon = {
     'highlight': 'Verb',
     'compare': 'Verb',
     'compared': 'Verb',
+    'below': 'Adjective',
     'less': 'Adjective',
     'noon': 'Time',
     'midnight': 'Time'
@@ -77,6 +78,8 @@ export async function preprocess(speech: string, options: NLUOptions, guidedData
 
             nlp.match("compare").unTag("Date").unTag("Time").unTag("Duration").tag("Verb")
 
+            nlp.match("below").unTag("Verb")
+
             nlp.match("(#Duration|#Date|#Time|#Cardinal|#NumericValue) (am|pm)").tag("Time")
 
             //Tag all the inferred variables
@@ -124,7 +127,7 @@ export async function preprocess(speech: string, options: NLUOptions, guidedData
                 const id = makeVariableId()
                 input.variables[id] = {
                     id,
-                    originalText: typeof inferredConditionInfoResult.match === 'string' ? typeof inferredConditionInfoResult.match : inferredConditionInfoResult.match.text(),
+                    originalText: typeof inferredConditionInfoResult.match === 'string' ? inferredConditionInfoResult.match : inferredConditionInfoResult.match.text(),
                     type: VariableType.Condition,
                     value: inferredConditionInfoResult.conditionInfo
                 }

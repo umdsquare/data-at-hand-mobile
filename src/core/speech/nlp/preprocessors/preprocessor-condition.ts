@@ -230,9 +230,11 @@ export async function inferHighlight(nlp: compromise.Document, original: string,
             }
 
             //goal
+            console.log("parse goal phrases.")
             const goalComparisonMatch = nlp.match(`[<comparison>(#Adverb|#Adjective|below|above|over)] than? (#Determiner|#Possessive|#Adjective)?+ (goal|gol|gold|call|girl)`)
             const goalComparisonInfo = normalizeCompromiseGroup(goalComparisonMatch.groups())
             if (goalComparisonInfo) {
+                console.log("found goal comparison info.")
                 const comparisonTermInfo = findComparisonTermInfo(goalComparisonInfo.comparison)
 
                 if (comparisonTermInfo != null) {
