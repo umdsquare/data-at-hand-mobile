@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@bugsnag/react-native": "^7.5.5",
-    "@data-at-hand/core": "github:data-at-hand/data-at-hand-core",
+    "@data-at-hand/core": "github:umdsquare/data-at-hand-core",
     "@date/holidays-us": "^0.4.0",
     "@react-native-community/async-storage": "^1.12.1",
     "@react-native-community/datetimepicker": "^3.0.8",
