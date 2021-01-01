@@ -91,6 +91,10 @@ export const HeartRateIntraDayPanel = React.memo(() => {
             .x((d) => scaleX(d.secondOfDay / 3600))
             .y((d) => scaleY(d.value))
 
+        const clustering = require('density-clustering');
+        const dbscan = new clustering.DBSCAN();
+        const clusters = dbscan.run(data.points, 900, 2, (a: any, b: any) => b.secondOfDay - a.secondOfDay).map((cluster: Array<number>) => cluster.map(index => data.points[index]))
+
         const exerciseZones = data.zones.filter(zone => zone.name != HeartRateZone.OutOfRange)
         const exerciseZoneMinutes = sum(exerciseZones, zone => zone.minutes)
         const exerciseHrs = Math.floor(exerciseZoneMinutes / 60)
@@ -107,7 +111,10 @@ export const HeartRateIntraDayPanel = React.memo(() => {
             <SizeWatcher containerStyle={styles.chartContainerStyle} onSizeChange={(width, height) => { setChartContainerWidth(width); setChartContainerHeight(height) }}>
                 <Svg width={chartContainerWidth} height={chartContainerHeight}>
                     <G {...chartArea}>
-                        <Path d={line(data.points)} fill="transparent" stroke={Colors.accent} strokeWidth={1} />
+                        {
+                            clusters.map((cluster: any, index: number) => 
+                                <Path key={index.toString()} d={line(cluster)} fill="transparent" stroke={Colors.accent} strokeWidth={1} />)
+                        }
                         <Line x1={0} x2={chartArea.width} y={scaleY(data.restingHeartRate)} stroke={Colors.chartAvgLineColor} strokeWidth={2} strokeDasharray={"4"} />
                         <SvgText y={scaleY(data.restingHeartRate) - 8} fontSize={Sizes.tinyFontSize} fontWeight={"bold"}>Resting HR</SvgText>
                     </G>
@@ -153,7 +160,7 @@ export const HeartRateIntraDayPanel = React.memo(() => {
                                 }} />
                             <Text style={styles.zoneChartValueStyle}>{zoneInfo ? DateTimeHelper.formatDuration(zoneInfo.minutes * 60, true) : 0}</Text>
                         </View>
-                    }else return null
+                    } else return null
                 })
             }
 
