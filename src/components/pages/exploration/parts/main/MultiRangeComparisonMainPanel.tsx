@@ -63,8 +63,8 @@ const styles = StyleSheet.create({
     noItemIndicatorStyle: {
         alignSelf: 'center', color: Colors.textColorLight,
         fontSize: Sizes.normalFontSize,
-        margin: Sizes.verticalPadding*2.5,
-        lineHeight: Sizes.normalFontSize*1.5
+        margin: Sizes.verticalPadding * 2.5,
+        lineHeight: Sizes.normalFontSize * 1.5
     }
 })
 
@@ -255,6 +255,7 @@ class MultiRangeComparisonMainPanel extends React.PureComponent<Props, State>{
             onPulled={this.onPulledFromSide}
         >{
                 this.props.sumSupported === true ? <SegmentedControl values={SEGEMENTED_VALUES}
+                    appearance={"light"}
                     selectedIndex={aggregationSettingIndex}
                     style={styles.segmentedControlContainer}
                     enabled={this.props.allRangesAreSingleDay !== true}
