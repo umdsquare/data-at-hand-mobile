@@ -1,6 +1,6 @@
 # Data@Hand
 
-<img src="https://img.shields.io/badge/platform-ios%7Candroid-green"/> <img src="https://img.shields.io/badge/framework-react%20native-blue"/> <img src="https://img.shields.io/github/package-json/dependency-version/umdsquare/data-at-hand-mobile/react-native?label=React%20Native"/> <img src="https://img.shields.io/badge/language-typescript%20%7C%20swift%20%7C%20java-lightblue"/> <img src="https://img.shields.io/github/package-json/v/umdsquare/data-at-hand-mobile"/>
+<img src="https://img.shields.io/badge/platform-ios%7Candroid-green"/> <img src="https://img.shields.io/badge/framework-react%20native-blue"/> <img src="https://img.shields.io/github/package-json/dependency-version/umdsquare/data-at-hand-mobile/react-native?label=React%20Native"/> <img src="https://img.shields.io/github/package-json/v/umdsquare/data-at-hand-mobile"/> <img src="https://img.shields.io/badge/language-typescript%20%7C%20swift%20%7C%20java-lightblue"/>
 
 <img src="https://github.com/muclipse/data-at-hand-mobile/blob/master/teaser_revised.jpg"/>
 
