@@ -5,11 +5,11 @@ PODS:
   - AppAuth/Core (1.4.0)
   - AppAuth/ExternalUserAgent (1.4.0)
   - boost-for-react-native (1.63.0)
-  - BugsnagReactNative (7.5.5):
+  - BugsnagReactNative (7.8.0):
     - React
   - BVLinearGradient (2.5.6):
     - React
-  - CocoaAsyncSocket (7.6.4)
+  - CocoaAsyncSocket (7.6.5)
   - CocoaLibEvent (1.0.0)
   - DoubleConversion (1.1.6)
   - FBLazyVector (0.63.4)
@@ -24,16 +24,16 @@ PODS:
     - Flipper-Folly (~> 2.2)
     - Flipper-RSocket (~> 1.1)
   - Flipper-DoubleConversion (1.1.7)
-  - Flipper-Folly (2.2.0):
+  - Flipper-Folly (2.3.0):
     - boost-for-react-native
     - CocoaLibEvent (~> 1.0)
     - Flipper-DoubleConversion
     - Flipper-Glog
-    - OpenSSL-Universal (= 1.0.2.19)
+    - OpenSSL-Universal (= 1.0.2.20)
   - Flipper-Glog (0.3.6)
   - Flipper-PeerTalk (0.0.4)
-  - Flipper-RSocket (1.1.0):
-    - Flipper-Folly (~> 2.2)
+  - Flipper-RSocket (1.1.1):
+    - Flipper-Folly (~> 2.3)
   - FlipperKit (0.54.0):
     - FlipperKit/Core (= 0.54.0)
   - FlipperKit/Core (0.54.0):
@@ -76,9 +76,9 @@ PODS:
     - DoubleConversion
     - glog
   - glog (0.3.5)
-  - OpenSSL-Universal (1.0.2.19):
-    - OpenSSL-Universal/Static (= 1.0.2.19)
-  - OpenSSL-Universal/Static (1.0.2.19)
+  - OpenSSL-Universal (1.0.2.20):
+    - OpenSSL-Universal/Static (= 1.0.2.20)
+  - OpenSSL-Universal/Static (1.0.2.20)
   - Permission-Microphone (3.0.0):
     - RNPermissions
   - Permission-SpeechRecognition (3.0.0):
@@ -249,7 +249,7 @@ PODS:
     - React-cxxreact (= 0.63.4)
     - React-jsi (= 0.63.4)
   - React-jsinspector (0.63.4)
-  - react-native-app-auth (6.0.1):
+  - react-native-app-auth (6.1.0):
     - AppAuth (= 1.4.0)
     - React-Core
   - react-native-safe-area-context (3.1.9):
@@ -326,13 +326,13 @@ PODS:
     - React-Core
   - RNCMaskedView (0.1.10):
     - React
-  - RNDateTimePicker (3.0.8):
+  - RNDateTimePicker (3.0.9):
     - React-Core
-  - RNDeviceInfo (7.3.1):
+  - RNDeviceInfo (8.0.1):
     - React-Core
   - RNFS (2.16.6):
     - React
-  - RNGestureHandler (1.9.0):
+  - RNGestureHandler (1.10.2):
     - React-Core
   - RNPermissions (3.0.0):
     - React-Core
@@ -340,25 +340,25 @@ PODS:
     - React-Core
   - RNReanimated (1.13.2):
     - React-Core
-  - RNScreens (2.16.1):
+  - RNScreens (2.17.1):
     - React-Core
-  - RNShare (5.1.0):
+  - RNShare (5.1.3):
     - React-Core
   - RNStaticSafeAreaInsets (2.1.1):
     - React
   - RNSVG (12.1.0):
     - React
-  - RNVectorIcons (7.1.0):
-    - React
-  - RNZipArchive (5.0.6):
-    - React
-    - RNZipArchive/Core (= 5.0.6)
-    - SSZipArchive (= 2.2.2)
-  - RNZipArchive/Core (5.0.6):
-    - React
-    - SSZipArchive (= 2.2.2)
-  - SSZipArchive (2.2.2)
-  - SwiftGen (6.3.0)
+  - RNVectorIcons (8.1.0):
+    - React-Core
+  - RNZipArchive (6.0.2):
+    - React-Core
+    - RNZipArchive/Core (= 6.0.2)
+    - SSZipArchive (= 2.2.3)
+  - RNZipArchive/Core (6.0.2):
+    - React-Core
+    - SSZipArchive (= 2.2.3)
+  - SSZipArchive (2.2.3)
+  - SwiftGen (6.4.0)
   - Yoga (1.14.0)
   - YogaKit (1.18.1):
     - Yoga (~> 1.14)
@@ -371,7 +371,7 @@ DEPENDENCIES:
   - FBReactNativeSpec (from `../node_modules/react-native/Libraries/FBReactNativeSpec`)
   - Flipper (~> 0.54.0)
   - Flipper-DoubleConversion (= 1.1.7)
-  - Flipper-Folly (~> 2.2)
+  - Flipper-Folly (= 2.3.0)
   - Flipper-Glog (= 0.3.6)
   - Flipper-PeerTalk (~> 0.0.4)
   - Flipper-RSocket (~> 1.1)
@@ -563,23 +563,23 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AppAuth: 31bcec809a638d7bd2f86ea8a52bd45f6e81e7c7
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
-  BugsnagReactNative: 722e3508bb4aadf5e9a5ef11f2195983ace1108a
+  BugsnagReactNative: f2b534d19f2b82b84bb26d5cc7ae10b65273bfee
   BVLinearGradient: e3aad03778a456d77928f594a649e96995f1c872
-  CocoaAsyncSocket: 694058e7c0ed05a9e217d1b3c7ded962f4180845
+  CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   CocoaLibEvent: 2fab71b8bd46dd33ddb959f7928ec5909f838e3f
   DoubleConversion: cde416483dac037923206447da6e1454df403714
   FBLazyVector: 3bb422f41b18121b71783a905c10e58606f7dc3e
   FBReactNativeSpec: f2c97f2529dd79c083355182cc158c9f98f4bd6e
   Flipper: be611d4b742d8c87fbae2ca5f44603a02539e365
   Flipper-DoubleConversion: 38631e41ef4f9b12861c67d17cb5518d06badc41
-  Flipper-Folly: c12092ea368353b58e992843a990a3225d4533c3
+  Flipper-Folly: e4493b013c02d9347d5e0cb4d128680239f6c78a
   Flipper-Glog: 1dfd6abf1e922806c52ceb8701a3599a79a200a6
   Flipper-PeerTalk: 116d8f857dc6ef55c7a5a75ea3ceaafe878aadc9
-  Flipper-RSocket: 64e7431a55835eb953b0bf984ef3b90ae9fdddd7
+  Flipper-RSocket: a3acb8812d6adf127deb0a5edae2793b97e6b641
   FlipperKit: ab353d41aea8aae2ea6daaf813e67496642f3d7d
   Folly: b73c3869541e86821df3c387eb0af5f65addfab4
   glog: 40a13f7840415b9a77023fbcae0f1e6f43192af3
-  OpenSSL-Universal: 8b48cc0d10c1b2923617dfe5c178aa9ed2689355
+  OpenSSL-Universal: ff34003318d5e1163e9529b08470708e389ffcdd
   Permission-Microphone: a94fa6a77b603424a6d4b7b49bbc6107fb027db1
   Permission-SpeechRecognition: 676eb268db3bd998354bee1acaeffc08f6c6488b
   RCTRequired: 082f10cd3f905d6c124597fd1c14f6f2655ff65e
@@ -592,7 +592,7 @@ SPEC CHECKSUMS:
   React-jsi: a0418934cf48f25b485631deb27c64dc40fb4c31
   React-jsiexecutor: 93bd528844ad21dc07aab1c67cb10abae6df6949
   React-jsinspector: 58aef7155bc9a9683f5b60b35eccea8722a4f53a
-  react-native-app-auth: 480fd56b54aa4447bc19a0eac81133add8e75ce5
+  react-native-app-auth: 35682974e299697129d46f798b978787d1fa8d00
   react-native-safe-area-context: 86612d2c9a9e94e288319262d10b5f93f0b395f5
   react-native-segmented-control: e76778d2a724703f110bf2b696826fed98136b87
   react-native-spinkit: da294fd828216ad211fe36a5c14c1e09f09e62db
@@ -610,24 +610,24 @@ SPEC CHECKSUMS:
   ReactCommon: 73d79c7039f473b76db6ff7c6b159c478acbbb3b
   RNCAsyncStorage: cb9a623793918c6699586281f0b51cbc38f046f9
   RNCMaskedView: f5c7d14d6847b7b44853f7acb6284c1da30a3459
-  RNDateTimePicker: aab869a517ecf3095910be81093e3d9b27cd82ed
-  RNDeviceInfo: 57bb2806fb7bd982a1434e9f0b4e6a6ab1f6702e
+  RNDateTimePicker: 8a51a2216c307769e69ef827293d59549ab1ca23
+  RNDeviceInfo: 921a809eaf9de79645a24de1c6ca90db6cb91786
   RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
-  RNGestureHandler: 9b7e605a741412e20e13c512738a31bd1611759b
+  RNGestureHandler: e66feb0fda7da74ea6a3094656b3c1efe05f5c07
   RNPermissions: 350964d19150b183796a88180fb7ec62a1e41422
   RNReactNativeHapticFeedback: 653a8c126a0f5e88ce15ffe280b3ff37e1fbb285
   RNReanimated: e03f7425cb7a38dcf1b644d680d1bfc91c3337ad
-  RNScreens: 45c457af3d2ee9e08fc01e70da87e653d46b1198
-  RNShare: fed99fd743f80ca255903c1da46fc9a6430efab6
+  RNScreens: b6c9607e6fe47c1b6e2f1910d2acd46dd7ecea3a
+  RNShare: d98667ee0277d9cd068041e5f316a5fe67aa8536
   RNStaticSafeAreaInsets: 6103cf09647fa427186d30f67b0f5163c1ae8252
   RNSVG: ce9d996113475209013317e48b05c21ee988d42e
-  RNVectorIcons: bc69e6a278b14842063605de32bec61f0b251a59
-  RNZipArchive: 0c9463e46a56d93b29cd8a306e051f24397f5dfa
-  SSZipArchive: fa16b8cc4cdeceb698e5e5d9f67e9558532fbf23
-  SwiftGen: 3d5024a47ea79e408cded20763d7a17d18a4548c
+  RNVectorIcons: 31cebfcf94e8cf8686eb5303ae0357da64d7a5a4
+  RNZipArchive: 3dd2de5b7f590d79e83270508b78870bf5a54f36
+  SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9
+  SwiftGen: 67860cc7c3cfc2ed25b9b74cfd55495fc89f9108
   Yoga: 4bd86afe9883422a7c4028c00e34790f560923d6
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 2cf53e0a5f93a6c9dd6e37fea3cf78e80374de0d
+PODFILE CHECKSUM: 580743f092a683eda5bb5711b3d11e23c93017f6
 
-COCOAPODS: 1.8.3
+COCOAPODS: 1.10.1
