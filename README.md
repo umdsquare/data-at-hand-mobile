@@ -11,8 +11,9 @@ For more information about this project, please visit [https://data-at-hand.gith
 
 ## Related Research Paper (Describes the design and a user study)
 **Data@Hand: Fostering Visual Exploration of Personal Data on Smartphones Leveraging Speech and Touch Interaction**<br>
+[Best Paper Honorable Mention Award]<br>
 Young-Ho Kim, Bongshin Lee, Arjun Srinivasan, and Eun Kyoung Choe<br>
-ACM CHI 2021 (conditionally accepted)
+ACM CHI 2021 ([PDF](https://data-at-hand.github.io/papers/data-at-hand-chi2021-preprint.pdf))
 
 
 ## How to build & run
