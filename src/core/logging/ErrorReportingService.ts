@@ -1,3 +1,4 @@
+import { Platform } from "react-native"
 
 let bugsnagClient: any = null
 
@@ -14,7 +15,7 @@ export function initErrorReportingService() {
     //if (__DEV__ === false) {
         try {
             const bugsnagInfo = require("@credentials/bugsnag.json")
-            if (bugsnagInfo != null && bugsnagInfo.api_key != null && bugsnagInfo.api_key.length > 0) {
+            if (bugsnagInfo != null && bugsnagInfo.api_key != null && bugsnagInfo.api_key.length > 0 && __DEV__ != true) {
                 bugsnagClient = require('@bugsnag/react-native')
                 bugsnagClient.start()
             }

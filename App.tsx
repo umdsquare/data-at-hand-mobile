@@ -55,6 +55,7 @@ class App extends React.Component {
 
   render() {
     return <NavigationContainer>
+      
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <SafeAreaProvider>

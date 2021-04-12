@@ -2,6 +2,7 @@ package com.dataathand;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 import com.bugsnag.android.Bugsnag;
 import com.bugsnag.android.Configuration;
@@ -49,15 +50,16 @@ public class MainApplication extends Application implements ReactApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        SoLoader.init(this, /* native exopackage */ false);
-
-        initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
-
         //noinspection ConstantConditions
         if(!BuildConfig.DEBUG && BuildConfig.BUGSNAG_API_KEY != null && BuildConfig.BUGSNAG_API_KEY.length() > 0) {
+            Log.d("Main", "Initialize BugSnag");
             Configuration bugsnagConfig = new Configuration(BuildConfig.BUGSNAG_API_KEY);
             Bugsnag.start(this, bugsnagConfig);
         }
+
+        SoLoader.init(this, /* native exopackage */ false);
+
+        initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
     }
 
     /**
