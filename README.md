@@ -107,6 +107,12 @@ Install dependencies
 - [Bugsnag](https://www.bugsnag.com/) (Optional. Error reporting)
 
 
+---
+## Author
+**Young-Ho Kim** ([Website](http://younghokim.net))<br>
+Postdoctoral Associate<br>
+University of Maryland, College Park<br>
+yghokim@umd.edu
 
 ----
 
