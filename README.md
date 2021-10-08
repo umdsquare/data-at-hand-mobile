@@ -106,20 +106,12 @@ Install dependencies
 - [Microsoft Cognitive Service (Speech-to-Text)](https://azure.microsoft.com/en-us/services/cognitive-services/speech-to-text/) (Optional. Android only)
 - [Bugsnag](https://www.bugsnag.com/) (Optional. Error reporting)
 
-
----
-## Code Author
-**Young-Ho Kim** ([Website](http://younghokim.net))<br>
-Postdoctoral Associate<br>
-University of Maryland, College Park<br>
-yghokim@umd.edu
-
-
 ---
 ## Research Team Member
 **Young-Ho Kim** ([Website](https://younghokim.net))<br>
 Postdoctoral Associate<br>
 University of Maryland, College Park<br>
+**Contact for code and implementation*
 
 
 **Bongshin Lee** ([Website](https://bongshiny.com))<br>
