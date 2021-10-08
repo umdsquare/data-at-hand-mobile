@@ -108,11 +108,39 @@ Install dependencies
 
 
 ---
-## Author
+## Code Author
 **Young-Ho Kim** ([Website](http://younghokim.net))<br>
 Postdoctoral Associate<br>
 University of Maryland, College Park<br>
 yghokim@umd.edu
+
+
+---
+## Research Team Member
+**Young-Ho Kim** ([Website](https://younghokim.net))<br>
+Postdoctoral Associate<br>
+University of Maryland, College Park<br>
+
+
+**Bongshin Lee** ([Website](https://bongshiny.com))<br>
+Sr. Principal Researcher<br>
+Microsoft Research<br>
+
+
+**Arjun Srinivasan** ([Website](https://arjun010.github.io/))<br>
+Research Scientist<br>
+Tableau Research<br>
+**Arjun did this work while at Georgia Institute of Technology*
+
+
+**Eun Kyoung Choe** ([Website](https://eunkyoungchoe.com))<br>
+Associate Professor<br>
+University of Maryland, College Park<br>
+
+
+---
+## Acknowledgment
+This work was in part supported by [National Science Foundation award #1753452](https://nsf.gov/awardsearch/showAward?AWD_ID=1753452) (CAREER: Advancing Personal Informatics through Semi-Automated and Collaborative Tracking).
 
 ----
 
